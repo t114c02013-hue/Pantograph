@@ -217,9 +217,17 @@ namespace PantographSim.Editor
                 var ins = Fbx("ENV_RoofEquipment", "Insulator", insP.visual, new Vector3(top.x, roofY + d.insulatorHeight / 2f, top.z), rename: "Insulator_" + (i + 1));
                 var t = new GameObject("InsulatorTop_" + (i + 1)).transform;
                 t.SetParent(ins.transform, false); t.position = top;
-                var b = new Bounds(new Vector3(top.x, roofY + d.insulatorHeight / 2f, top.z), new Vector3(0.17f, d.insulatorHeight, 0.17f));
+                // 增補 7 第 4 點（model-spec §7.7.1b）：collider 貼合視覺頂點、不外擴——頂面＝InsulatorTop_n，側面＝最大傘裙半徑的圓柱（凸 MeshCollider，平頂）
+                var vb = PanGeometry.VertexBounds(ins.GetComponentsInChildren<Renderer>()).Value;
+                float rad = Mathf.Max(vb.extents.x, vb.extents.z), h = top.y - roofY;
+                var b = new Bounds(new Vector3(top.x, roofY + h / 2f, top.z), new Vector3(2f * rad, h, 2f * rad));
                 insulators.Add(b);
-                Col("InsulatorCollision", insP.col, b.min, b.max, SceneLayers.Boundary);
+                var icol = new GameObject("InsulatorCollision");
+                icol.transform.SetParent(insP.col, false);
+                var cyl = Resources.GetBuiltinResource<Mesh>("Cylinder.fbx");
+                icol.transform.position = b.center; icol.transform.localScale = new Vector3(2f * rad / cyl.bounds.size.x, h / cyl.bounds.size.y, 2f * rad / cyl.bounds.size.z);   // 照內建圓柱網格的實際大小縮放
+                icol.layer = L(SceneLayers.Boundary);
+                var mc = icol.AddComponent<MeshCollider>(); mc.sharedMesh = cyl; mc.convex = true;
                 Anchor(insP.anchors, "Anchor_Insulator_" + (i + 1), top, Vector3.zero);
                 d.insulatorPositions[i] = top;
             }
@@ -266,7 +274,7 @@ namespace PantographSim.Editor
             // 不可走範圍（增補 6 第 7 點 A）：會動的臂／弓頭／連桿（升降全程頂點範圍）外擴 movingCarveInflate；不會動的底架、絕緣子只挖自己的頂點範圍（staticCarveInflate）；母線、避雷器外擴 obstacleMargin
             float m = d.obstacleMargin;
             Bounds Grow(Bounds b, float k) { b.Expand(new Vector3(2 * k, 0, 2 * k)); return b; }
-            var insulatorV = insP.visual.Cast<Transform>().Select(t => PanGeometry.VertexBounds(t.GetComponentsInChildren<Renderer>())).Where(b => b.HasValue).Select(b => b.Value).ToList();
+            var insulatorV = insulators;   // 和 InsulatorCollision 同一個範圍（最大傘裙半徑的圓柱），挖除邊才不會和 collider 差幾 mm
             var moving = res.footprints.Select(b => Grow(b, d.movingCarveInflate)).ToList();
             var statics = insulatorV.Append(baseV).Select(b => Grow(b, d.staticCarveInflate)).ToList();
             var obstacles = moving.Concat(new[] { busbar, arrB }.Select(b => Grow(b, m))).Concat(statics).ToList();
@@ -294,7 +302,14 @@ namespace PantographSim.Editor
             Col("EdgeWall_-X_A", roof.col, new Vector3(-walkHalf - 0.05f, roofY, z0), new Vector3(-walkHalf, wh, gz0), SceneLayers.Boundary);
             if (zb0 > gz1) Col("EdgeWall_-X_B", roof.col, new Vector3(-walkHalf - 0.05f, roofY, gz1), new Vector3(-walkHalf, wh, zb0), SceneLayers.Boundary);
             // 放寬帶前端伸進活動欄開口（Z gz0…gz1）時，那一段的車頂邊在 −roofBaseWalkHalfWidth：固定擋牆（GapBlocker 只管 zb0 以前）
-            if (zb0 < gz1) Col("EdgeWall_-X_GateSlice", roof.col, new Vector3(-wide - 0.05f, roofY, zb0), new Vector3(-wide, wh, gz1), SceneLayers.Boundary);
+            if (zb0 < gz1)
+            {
+                var slice = Col("EdgeWall_-X_GateSlice", roof.col, new Vector3(-wide - 0.05f, roofY, zb0), new Vector3(-wide, wh, gz1), SceneLayers.Boundary);
+                // 看得見的擋欄 ENV_GateSliceGuard（model-spec v3.3 §4）：寬度＝擋牆範圍，網格不比 collider 更往開口內伸；沒有 FBX 時用黃黑方塊暫代（高 1.0、厚 0.05）
+                var sb0 = slice.bounds; var at = new Vector3(sb0.center.x, roofY, sb0.center.z);
+                if (AssetDatabase.LoadAssetAtPath<GameObject>($"{GeneratedFolder}/ENV_GateSliceGuard.fbx") != null) Fbx("ENV_GateSliceGuard", null, roof.visual, at);
+                else Box("ENV_GateSliceGuard", roof.visual, at + Vector3.up * 0.5f, new Vector3(0.05f, 1.0f, sb0.size.z), mWarn, collider: false);
+            }
             Col("EdgeWall_-X_Base", roof.col, new Vector3(-wide - 0.05f, roofY, zb0), new Vector3(-wide, wh, zb1), SceneLayers.Boundary);
             Col("EdgeWall_-X_C", roof.col, new Vector3(-walkHalf - 0.05f, roofY, zb1), new Vector3(-walkHalf, wh, z1), SceneLayers.Boundary);
             foreach (int sgn in new[] { -1, 1 })   // 放寬那段前後的轉角牆
@@ -345,8 +360,10 @@ namespace PantographSim.Editor
                 Box("GateBar", gateVis, new Vector3(px1, py + h, (gz0 + gz1) / 2f), new Vector3(0.04f, 0.04f, gz1 - gz0), mWarn, collider: false);
             var gateCol = Col("GateBoundary", gateRoot, new Vector3(px1 - 0.025f, py, gz0), new Vector3(px1 + 0.025f, py + d.guardrailHeight, gz1), SceneLayers.Boundary);
             var bridgeRoot = Child(plat.root, "ENV_GateBridge");
-            var bridgeVis = Box("BridgePlate", bridgeRoot, new Vector3((px1 - walkHalf) / 2f, roofY - 0.02f, (gz0 + gz1) / 2f), new Vector3(-walkHalf - px1, 0.04f, gz1 - gz0), mGrating, collider: false);
-            var bridgeCol = Col("Walkable_Bridge", bridgeRoot, new Vector3(px1, roofY - 0.1f, gz0), new Vector3(-walkHalf, roofY, gz1), SceneLayers.Walkable);
+            // 增補 7 第 8 點（組長）：跨板寬要完全落在車頂側開口內（開口＝gz0 到 EdgeWall_-X_GateSlice），不能壓在擋牆後面
+            float bridgeZ1 = Mathf.Min(gz1, zb0);
+            var bridgeVis = Box("BridgePlate", bridgeRoot, new Vector3((px1 - walkHalf) / 2f, roofY - 0.02f, (gz0 + bridgeZ1) / 2f), new Vector3(-walkHalf - px1, 0.04f, bridgeZ1 - gz0), mGrating, collider: false);
+            var bridgeCol = Col("Walkable_Bridge", bridgeRoot, new Vector3(px1, roofY - 0.1f, gz0), new Vector3(-walkHalf, roofY, bridgeZ1), SceneLayers.Walkable);
             var gapCol = Col("GapBlocker", bridgeRoot, new Vector3(-walkHalf - 0.05f, roofY, gz0), new Vector3(-walkHalf, roofY + d.roofWallHeight, Mathf.Min(gz1, zb0)), SceneLayers.LocomotionBlocker);   // a6：zb0 以後是底架放寬帶，邊在 EdgeWall_-X_GateSlice
             var gate = gateRoot.gameObject.AddComponent<PlatformGate>();
             gate.Setup(gateCol, gateVis.gameObject, bridgeCol, bridgeVis, gapCol);
@@ -580,22 +597,30 @@ namespace PantographSim.Editor
             var boxSupport = Support(d.roofToolbox, new Vector3(0.3f, 0, 1.2f), "ToolBox");
             res.ids[SimIds.RoofToolbox] = box;
             res.layout.Add(("車頂工具箱", box));
-            // 套筒座（TGT_Socket_10／13／17，膠囊半徑 1.5 cm）放在掛位 6 旁
+            // 套筒盒 SocketCase（a6 增補 7 §7.4）：1/2" 區 10、13、17、19、24（5 格），3/8" 區 13_38（1 格），兩區之間隔板＋不同顏色底墊；
+            // 目標節點 TGT_Socket_*（膠囊半徑 1.5 cm），放在掛位 6 旁。套筒是「種類」：裝到扳手上盒裡那顆不消失（R1.5b）
             var slot6 = box.Find("Slot_6");
             if (slot6 != null)
             {
-                var seats = Child(box, "SocketSeats");
+                var seats = Child(box, "SocketCase");
+                var origin = slot6.position + new Vector3(-0.04f, -0.2f, -0.12f);
                 int i = 0;
-                foreach (var size in new[] { "10", "13", "17" })
+                foreach (var (zone, sizes, pad) in new[] { ("1/2\"", new[] { "10", "13", "17", "19", "24" }, mats["steel"]), ("3/8\"", new[] { "13_38" }, mats["checkPoint"]) })
                 {
-                    var cap = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-                    cap.name = "TGT_Socket_" + size;
-                    cap.transform.SetParent(seats, false);
-                    cap.transform.position = slot6.position + new Vector3(-0.04f, -0.2f, -0.06f + 0.06f * i++);
-                    cap.transform.localScale = new Vector3(0.03f, 0.02f, 0.03f);
-                    cap.GetComponent<Renderer>().sharedMaterial = mats["steel"];
-                    var cc = cap.GetComponent<CapsuleCollider>(); cc.isTrigger = true;
-                    cap.AddComponent<InteractionPointMarker>().Configure("env.socket_seat_" + size, size + " mm 套筒座");
+                    float z0 = 0.05f * i;
+                    foreach (var size in sizes)
+                    {
+                        var cap = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                        cap.name = "TGT_Socket_" + size;
+                        cap.transform.SetParent(seats, false);
+                        cap.transform.position = origin + new Vector3(0f, 0f, 0.05f * i++);
+                        cap.transform.localScale = new Vector3(0.03f, 0.02f, 0.03f);
+                        cap.GetComponent<Renderer>().sharedMaterial = mats["steel"];
+                        var cc = cap.GetComponent<CapsuleCollider>(); cc.isTrigger = true;
+                        cap.AddComponent<InteractionPointMarker>().Configure("env.socket_seat_" + size, (size.EndsWith("_38") ? "3/8\" 13" : size) + " mm 套筒座");
+                    }
+                    var padGo = Box("Pad_" + (zone.StartsWith("1") ? "Half" : "ThreeEighths"), seats, origin + new Vector3(0f, -0.025f, z0 + 0.05f * (sizes.Length - 1) / 2f), new Vector3(0.05f, 0.004f, 0.05f * sizes.Length), pad, collider: false);
+                    if (i < 6) Box("Divider", seats, origin + new Vector3(0f, -0.01f, 0.05f * i - 0.025f), new Vector3(0.05f, 0.03f, 0.004f), mats["panel"], collider: false);
                 }
             }
             Wrap(res, "ENV_RoofToolbox", box, boxSupport);

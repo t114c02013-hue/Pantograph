@@ -175,7 +175,7 @@ namespace PantographSim.Editor
                 s.positionXZ = new Vector2(sgn * d.roofBaseStationX, id.EndsWith(".s") ? d.roofBaseSouthZ : s.positionXZ.y);   // base_w／e、.n 的 Z 由建置腳本寫回
                 s.facingTargetId = bolt > 0 ? "part.pan_base.bolt_" + bolt : "";
                 s.facingDirection = bolt > 0 ? Vector3.zero : new Vector3(-sgn, 0f, 0f);
-                s.maxTargetDistance = maxD; s.wrenchStartDir = wrench;
+                s.maxTargetDistance = maxD; s.wrenchStartDir = wrench; s.targetId = bolt > 0 ? "part.pan_base.bolt_" + bolt : "";   // 增補 7 E3(4)
                 s.unlockKey = "roof.open"; s.lockedMessage = roofLock; s.zoneId = ZoneDef.Arrival;
                 EditorUtility.SetDirty(s);
             }
@@ -183,6 +183,10 @@ namespace PantographSim.Editor
             // 增補 4／5 之後第 15、19 項與 D36 的站點都已裁定：待定清單是空的（有新的待定才加，每筆要有 ruleRef、decidedBy、releaseSegment）
             set.pendingRulings = new PendingRuling[0];
             // D37（鐵道）＋增補 6 第 7 點 G：羊角對車頂站點 0.2（身體半徑），其他會動零件 0.4；沒列的零件用 clearRadius
+            // 增補 7（D38、D39）：第 21 項門檻與要算的扳手（底座螺栓 CSV v2.9：RM_04 b、IN_06 d 套筒扳手，IN_07 d 大扭力扳手）
+            set.wrenchSweepMinClearance = 0.02f; set.wrenchRadialStep = 0.05f;
+            set.wrenchSweepTools = new[] { "tool.socket_wrench", "tool.torque_wrench_l" };
+            d.craneHookTopTolerance = 0.02f; d.gateMinWidth = 0.60f; EditorUtility.SetDirty(d);
             set.partClearRadius = new[]
             {
                 new PartClearRadius { partGroup = "PanHead", radius = 0.20f, scope = PartClearScope.RoofOnly },

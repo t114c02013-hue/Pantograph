@@ -72,7 +72,7 @@ namespace PantographSim.Editor
 
             // 判斷
             string verdict;
-            if (worstB >= -0.005f && worstA < worstB - 0.01f) verdict = "C1：(b) 頂點正常、(a) Renderer.bounds 偏低（關節旋轉後網格 AABB 變鬆）。建置改用頂點算的 LoweredTightBounds（pan_lowered_tight_bounds.json）。";
+            if (worstB >= -0.005f && worstA < worstB - 0.01f) verdict = "C1：(b) 頂點正常、(a) Renderer.bounds 偏低（關節旋轉後網格 AABB 變鬆）。建置改用頂點算的 LoweredTightBounds（RoofSceneDef.panLoweredTightBounds）。";
             else if (worstB < -0.005f && Mathf.Abs(ours.min.y - refMin) > 0.02f) verdict = "C3：(b) 頂點也偏低，而且和原始 FBX 降弓差很多 → 先回報，關節角度等建模 B 決定。";
             else verdict = "(a)、(b) 都正常（差 ≤ 1 cm）。";
             sb.AppendLine("\n判斷：" + verdict + "（C2 不適用：EditMode 直接套用端點值，沒有等待幀）");

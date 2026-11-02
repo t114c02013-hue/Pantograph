@@ -99,7 +99,9 @@ namespace PantographSim.Data
         [Tooltip("F6：台架外框（支撐座四周與四角立柱）頂面離地，低於支撐座，懸出的臂和吊帶不會掃到")] public float standFrameTopAboveGround = 0.45f;
         [Tooltip("a6 G2：台架外框＝降弓整組 LoweredTightBounds 兩端各外擴這個值（standSizeXZ 由建置寫入）")] public float standFrameMargin = 0.15f;
         [Tooltip("a6 增補 4：外框中心相對台架中心（＝底架中心）的偏移；LoweredTightBounds 前後不對稱，建置時寫入")] public Vector2 standFrameOffsetXZ;
-        [Tooltip("a6 增補 4（鐵道 D35）：吊鉤最高點 Y 的規格值（實測 5.53 合格，不調模型參數）")] public float craneHookTopSpecY = 5.53f;
+        [Tooltip("a6 增補 4（鐵道 D35）：吊鉤最高點 Y 的規格值（實測 5.53 合格，不調模型參數）與容許差")] public float craneHookTopSpecY = 5.53f, craneHookTopTolerance = 0.02f;
+        [Tooltip("增補 7 E3(1)：降弓整組 LoweredTightBounds（PAN_Root 局部、頂點算法、排除可拆件；建置時寫入）")] public Bounds panLoweredTightBounds;
+        [Tooltip("增補 7 第 8 點（組長）：活動欄開口（車頂側）最小淨寬")] public float gateMinWidth = 0.60f;
         [Tooltip("a6 G2：台架支撐座＝BaseHole 的 X、Z 間距各加這個值")] public Vector2 standSeatMarginXZ = new Vector2(0.13f, 0.18f);
         [Tooltip("台架四周淨空（地面黃色走道線畫在這裡）")] public float standClearance = 1.2f;
         [Tooltip("tp.stand.* 離台架邊")] public float standStationOffset = 0.6f;
@@ -148,6 +150,8 @@ namespace PantographSim.Data
         [Tooltip("增補 3（D34）：車體接地座焊接小平台邊長、接地螺樁高")] public float carBodyGroundPadSize = 0.10f, carBodyGroundStudHeight = 0.03f;
 
         public float StandTopY => groundY + standTopAboveGround;
+        /// <summary>增補 7 第 8 點：底架放寬帶前端伸進活動欄開口的那一段（EdgeWall_-X_GateSlice）的長度；0＝沒有伸進去。</summary>
+        public float GateSliceWidth => Mathf.Max(0f, gateCenterZ + gateWidth / 2f - roofBaseWalkZMin);
         /// <summary>台架外框中心（XZ）：台架中心＋standFrameOffsetXZ。tp.stand.* 和外框的距離都量到這個框。</summary>
         public Vector2 StandFrameCenterXZ => standCenterXZ + standFrameOffsetXZ;
 
@@ -197,6 +201,7 @@ namespace PantographSim.Data
                 $"\"thickness\": {F(roofStripMatThickness)}, \"rimWidth\": {F(roofStripMatRimWidth)}, \"rimHeight\": {F(roofStripMatRimHeight)} }}",
                 $"\"ctrlConnector\": {{ \"bodySize\": [{F(ctrlConnectorBodySize.x)}, {F(ctrlConnectorBodySize.y)}, {F(ctrlConnectorBodySize.z)}], \"socketDiameter\": {F(ctrlSocketDiameter)}, \"socketLength\": {F(ctrlSocketLength)}, " +
                 $"\"capDiameter\": {F(ctrlCapDiameter)}, \"capLength\": {F(ctrlCapLength)} }}",
+                $"\"gateSliceGuard\": {{ \"width\": {F(GateSliceWidth)} }}",
                 $"\"holdDownStrap\": {{ \"strapWidth\": {F(strapWidth)}, \"strapThickness\": {F(strapThickness)}, \"armHalfWidth\": {F(strapArmHalfWidth)}, " +
                 $"\"buckleSize\": [{F(strapBuckleSize.x)}, {F(strapBuckleSize.y)}, {F(strapBuckleSize.z)}], \"rollDiameter\": {F(strapRollDiameter)} }}",
             });

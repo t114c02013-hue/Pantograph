@@ -14,14 +14,14 @@ import bpy  # noqa: E402
 import common  # noqa: E402
 from palette import Palette  # noqa: E402
 import importlib.util  # noqa: E402
-import car_body, roof_equipment, furniture, crane, rigging, stand, pouch  # noqa: E402,E401
+import car_body, roof_equipment, furniture, crane, rigging, stand, pouch, tools  # noqa: E402,E401
 
 # platform.py 和 Python 標準模組 platform 同名，用檔案路徑載入
 _spec = importlib.util.spec_from_file_location("gen_platform", os.path.join(os.path.dirname(os.path.abspath(__file__)), "platform.py"))
 platform = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(platform)
 
-MODULES = [car_body, roof_equipment, platform, furniture, crane, rigging, stand, pouch]
+MODULES = [car_body, roof_equipment, platform, furniture, crane, rigging, stand, pouch, tools]
 
 
 def args():
@@ -55,6 +55,7 @@ def main():
     a = args()
     with open(a["params"], encoding="utf-8") as f:
         params = json.load(f)
+    params["_dir"] = os.path.dirname(os.path.abspath(a["params"]))   # tool_sockets.json 和 car_params.json 放在同一個資料夾
     common.clear_scene()
     tmp = tempfile.mkdtemp(prefix="gen700t_")
     pal = Palette(params)

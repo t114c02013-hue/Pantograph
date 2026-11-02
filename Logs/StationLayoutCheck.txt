@@ -1,4 +1,4 @@
-結果：21 站，188 過／0 待定／0 不合格（全過）
+結果：21 站，202 過／0 待定／0 不合格（全過）
 ・tp.cab：(-0.190, -2.350, -30.000)
 ・tp.platform.lift：(-2.200, 0.000, -0.050)
 ・tp.platform.rack：(-2.410, 0.000, -2.400)
@@ -90,7 +90,7 @@
 ✔ 【第5項】npc.rigging_lead（吊運中）(-5.00, -3.50) 離吊運路徑 ±1 m 2.50 m、不在吊物禁區內
 ✔ 【第5項】npc.guard（吊運中）(-6.00, -4.30) 離吊運路徑 ±1 m 3.30 m、不在吊物禁區內
 ✔ 【第5項】npc.work_leader（吊運中）(-7.00, -4.30) 離吊運路徑 ±1 m 3.30 m、不在吊物禁區內
-✔ 【第5越障項】吊鉤最高點實測 Y 5.530，規格值 5.53（鐵道 D35）
+✔ 【第5越障項】吊鉤最高點實測 Y 5.530，規格值 5.53 ± 0.02（鐵道 D35）
 ✔ 【第5越障項】防墜器門架頂 頂面 Y 2.640，餘裕 0.750 m（≥ 0.5）
 ✔ 【第5越障項】桿架上直立的長桿頂 頂面 Y 1.305，餘裕 2.085 m（≥ 0.5）
 ✔ 【第5越障項】平台護欄 頂面 Y 1.100，餘裕 2.290 m（≥ 0.5）
@@ -172,7 +172,7 @@
 ✔ 【第16項】(c) tp.roof.base_w.n → 吊耳 4 (-0.52, 1.70) 0.329 m、偏 8.7°（≤ 30°）
 ✔ 【第16項】(g) tp.roof.base_w.n 螺栓 4 |X| 0.494 ＜ 站點 |X| 0.850
 ✔ 【第16項】(d) tp.roof.base_e.n → 高壓端子 (0.48, 1.60) 0.375 m（≤ 1.3）、偏 7.7°（≤ 30°）
-✔ 【第16項】(d) tp.roof.base_e 到 HV_Cable_End (0.30, 1.85) 1.152 m（≤ 1.3）
+✔ 【第16項】(d) tp.roof.base_e 到 ip.roof.hv_cable_ground (0.30, 1.85) 1.152 m（≤ 1.3）
 ✔ 【第16項】(e) tp.roof.base_w.s 在 Walkable 上、離 Walkable 邊 ≥ 0.15 m
 ✔ 【第16項】(h) tp.roof.base_w.s 到降弓羊角頂點範圍 X -0.833…0.833、Z -0.187…0.187 0.363 m（≥ 身體半徑 0.2）
 ✔ 【第16項】(i) tp.roof.base_w.s 到不會動零件最近的 底架 0.548 m（≥ 0.25）
@@ -221,10 +221,24 @@
 ✔ 【第16項】(j) tp.roof.base_e.n → 控制線接頭（手） 水平 0.781 m，伸手時頭部 |X| 約 0.747（≤ 1；可及 0.55 m）
 ✔ 【第16項】(j) tp.roof.base_e.n → 降弓固定帶綁點（手） 水平 0.719 m，伸手時頭部 |X| 約 0.718（≤ 1；可及 0.55 m）
 ✔ 【第16項】(j) tp.roof.base_e.n → 高壓電纜接地掛點（短絕緣桿桿頭） 水平 0.585 m，伸手時頭部 |X| 約 0.850（≤ 1；可及 0.8 m）
-✔ 【第21項】tp.roof.base_w.s：螺栓 1 為圓心、半徑 0.45 m、起始 (0.71, -0.71) ±45°、高度 Y 0.305，最小淨空 0.005 m（最近 InsulatorCollision）；到弓頭（含羊角）0.151 m
-✔ 【第21項】tp.roof.base_e.s：螺栓 2 為圓心、半徑 0.45 m、起始 (0.71, 0.71) ±45°、高度 Y 0.305，最小淨空 0.005 m（最近 InsulatorCollision）；到弓頭（含羊角）0.151 m
-✔ 【第21項】tp.roof.base_e.n：螺栓 3 為圓心、半徑 0.45 m、起始 (0.00, 1.00) ±45°、高度 Y 0.305，最小淨空 0.005 m（最近 InsulatorCollision）；到弓頭（含羊角）1.504 m
-✔ 【第21項】tp.roof.base_w.n：螺栓 4 為圓心、半徑 0.45 m、起始 (0.00, -1.00) ±45°、高度 Y 0.305，最小淨空 0.005 m（最近 InsulatorCollision）；到弓頭（含羊角）1.022 m
+✔ 【第21項】tp.roof.base_w.s × 鎖緊 × tool.socket_wrench：螺栓 1（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_w.s × 起鬆 × tool.socket_wrench：螺栓 1（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_e.s × 鎖緊 × tool.socket_wrench：螺栓 2（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_e.s × 起鬆 × tool.socket_wrench：螺栓 2（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_e.n × 鎖緊 × tool.socket_wrench：螺栓 3（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）1.500 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_e.n × 起鬆 × tool.socket_wrench：螺栓 3（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）1.500 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_w.n × 鎖緊 × tool.socket_wrench：螺栓 4（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）1.017 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_w.n × 起鬆 × tool.socket_wrench：螺栓 4（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）1.017 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_w.s × 鎖緊 × tool.torque_wrench_l：螺栓 1（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_w.s × 起鬆 × tool.torque_wrench_l：螺栓 1（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_e.s × 鎖緊 × tool.torque_wrench_l：螺栓 2（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_e.s × 起鬆 × tool.torque_wrench_l：螺栓 2（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_e.n × 鎖緊 × tool.torque_wrench_l：螺栓 3（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）1.500 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_e.n × 起鬆 × tool.torque_wrench_l：螺栓 3（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）1.500 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_w.n × 鎖緊 × tool.torque_wrench_l：螺栓 4（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）1.017 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_w.n × 起鬆 × tool.torque_wrench_l：螺栓 4（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）1.017 m（≥ 0.02）
+✔ 【第22項】活動欄開口 Z -1.400…-0.750 淨寬 0.650 m（≥ 0.6）；跨板 Z -1.400…-0.750 寬 0.650 m，兩邊到開口邊 0.000／0.000 m（跨板 ⊂ 開口）
+✔ 【第22項】擋欄 ENV_GateSliceGuard 高 1.005（1.00 ± 0.01）、Z -0.750…-0.600（擋牆 -0.750…-0.600）
 ✔ 【第17項】暫放墊 X -0.60…0.60、Z -1.25…-0.95 在 |X| ≤ 0.8 內（存檔 inactive）
 ✔ 【第17項】暫放墊到最近的車頂站點 tp.roof.inner 0.30 m（≥ 0.25）
 ✔ 【第17項】活動欄開口 (-1.81, -1.00) 到各車頂站點的直線動線都不經過暫放墊

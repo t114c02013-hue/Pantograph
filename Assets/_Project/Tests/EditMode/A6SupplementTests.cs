@@ -78,19 +78,19 @@ namespace PantographSim.Tests
             });
         }
 
-        /// <summary>增補 4 第 6 點（建模 B H1）：LoweredTightBounds 排除可拆件後 Y 最低點＝0（底架底面），PAN_Root 的 Box 和 json 一致。</summary>
+        /// <summary>增補 4 第 6 點（建模 B H1）＋增補 7 E3(1)：LoweredTightBounds 存在 RoofSceneDef，排除可拆件後 Y 最低點＝0（底架底面），PAN_Root 的 Box 一致；舊的 json 已刪。</summary>
         [Test]
         public void LoweredTightBounds_ExcludesDetachables_MinY0_MatchesBox()
         {
-            var json = JsonUtility.FromJson<TightJson>(System.IO.File.ReadAllText("Assets/_Project/Parts/PantographAssembly/Data/pan_lowered_tight_bounds.json"));
-            Assert.AreEqual(0f, json.center.y - json.size.y / 2f, 0.002f, "排除底座螺栓等可拆件後，最低點是底架底面");
+            var t = Tight();
+            Assert.AreEqual(0f, t.min.y, 0.002f, "排除底座螺栓等可拆件後，最低點是底架底面");
+            Assert.IsFalse(System.IO.File.Exists("Assets/_Project/Parts/PantographAssembly/Data/pan_lowered_tight_bounds.json"), "舊的 json 要刪掉");
             StationTests.WithScene(scene =>
             {
                 var bc = PanAssy.Root(scene).GetComponent<BoxCollider>();
-                Assert.Less(Vector3.Distance(bc.center, json.center), 1e-3f); Assert.Less(Vector3.Distance(bc.size, json.size), 1e-3f);
+                Assert.Less(Vector3.Distance(bc.center, t.center), 1e-3f); Assert.Less(Vector3.Distance(bc.size, t.size), 1e-3f);
             });
         }
-        [System.Serializable] class TightJson { public Vector3 center = Vector3.zero, size = Vector3.zero; }
 
         /// <summary>增補 4 第 4 點：台架外框＝LoweredTightBounds 的 X、Z 範圍兩端各外擴 standFrameMargin（不對稱時外框中心跟著偏）。</summary>
         [Test]
@@ -107,11 +107,7 @@ namespace PantographSim.Tests
                 Assert.AreEqual(Def.StandFrameCenterXZ.x, frame.center.x, 0.002f); Assert.AreEqual(Def.StandFrameCenterXZ.y, frame.center.z, 0.002f);
             });
         }
-        static Bounds Tight()
-        {
-            var j = JsonUtility.FromJson<TightJson>(System.IO.File.ReadAllText("Assets/_Project/Parts/PantographAssembly/Data/pan_lowered_tight_bounds.json"));
-            return new Bounds(j.center, j.size);
-        }
+        static Bounds Tight() => Def.panLoweredTightBounds;
 
         /// <summary>增補 4 第 8 點（建模 B H3、D36）：吊帶長＝資料值 slingLength；每條和垂直線 ≤ 45°，同一端兩條之間 ≤ 90°。</summary>
         [Test]

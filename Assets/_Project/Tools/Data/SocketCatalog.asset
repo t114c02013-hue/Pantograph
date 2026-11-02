@@ -1,0 +1,77 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 054ed9c45ae5ec5439fac83869bfbea2, type: 3}
+  m_Name: SocketCatalog
+  m_EditorClassIdentifier: 
+  sockets:
+  - socketId: socket.10
+    prefab: TL_Socket_10
+    driveIn: 0.5
+    sizeMm: 10
+    heightM: 0.038
+    outerDiaM: 0.022
+    fits: []
+    source: "EX\uFF08v1.3 \xA77.2\uFF0C\u932F\u8AA4\u9078\u9805\uFF09"
+  - socketId: socket.13
+    prefab: TL_Socket_13
+    driveIn: 0.5
+    sizeMm: 13
+    heightM: 0.038
+    outerDiaM: 0.022
+    fits:
+    - ip.carbon_strip_*.bolt_*
+    source: "EX\uFF08v1.3 \xA77.2\uFF09"
+  - socketId: socket.17
+    prefab: TL_Socket_17
+    driveIn: 0.5
+    sizeMm: 17
+    heightM: 0.038
+    outerDiaM: 0.024
+    fits: []
+    source: "EX\uFF08v1.3 \xA77.2\uFF0C\u932F\u8AA4\u9078\u9805\uFF09"
+  - socketId: socket.19
+    prefab: TL_Socket_19
+    driveIn: 0.5
+    sizeMm: 19
+    heightM: 0.035
+    outerDiaM: 0.028
+    fits:
+    - ip.pan_assy.hv_terminal.bolt_*
+    source: D38
+  - socketId: socket.24
+    prefab: TL_Socket_24
+    driveIn: 0.5
+    sizeMm: 24
+    heightM: 0.04
+    outerDiaM: 0.033
+    fits:
+    - part.pan_base.bolt_*
+    source: D38
+  - socketId: socket.13_38
+    prefab: TL_Socket_13_38
+    driveIn: 0.375
+    sizeMm: 13
+    heightM: 0.03
+    outerDiaM: 0.019
+    fits:
+    - ip.carbon_strip_*.bolt_*
+    source: "EX\uFF08D39\uFF09"
+  fasteners:
+  - fastenerPattern: part.pan_base.bolt_*
+    socketId: socket.24
+    estimated: 0
+  - fastenerPattern: ip.pan_assy.hv_terminal.bolt_*
+    socketId: socket.19
+    estimated: 0
+  - fastenerPattern: ip.carbon_strip_*.bolt_*
+    socketId: socket.13
+    estimated: 1

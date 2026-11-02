@@ -208,8 +208,9 @@ namespace PantographSim.Editor.XR
 
             // StationLayoutCheck（B 段 3.5）：不合格就建置失敗
             mech.SetLift(0f);
-            float handle = float.TryParse(StepJsonImporter.LoadTools().FirstOrDefault(t => t.toolId == "tool.socket_wrench")?.Param("handleLength"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var h) ? h : 0f;   // 第21項：把手長讀 ToolDef
-            var check = StationLayoutCheck.CheckScene(stationSet, R1Data.RoofScene, points, T, PanGeometry.SweptFootprints(mech), handle);
+            // 第21項（增補 7）：StationSet.wrenchSweepTools 逐支讀 ToolDefinition（handleLengthM、socketIds）＋套筒目錄
+            var wrench = new StationLayoutCheck.WrenchSweepInput { tools = StepJsonImporter.LoadTools().Append(ToolSocketSetup.LargeWrench).Where(t => t != null).ToList(), catalog = ToolSocketSetup.Catalog };
+            var check = StationLayoutCheck.CheckScene(stationSet, R1Data.RoofScene, points, T, PanGeometry.SweptFootprints(mech), wrench);
             mech.SetLift(lift);
             // 增補 4 第 9 點：摘要「N 過／M 待定／K 不合格」，有待定或不合格就不寫「全過」
             string summary = $"結果：{points.Length} 站，{check.Summary}" + (check.Ok && check.pending.Count == 0 ? "（全過）" : "");

@@ -64,7 +64,9 @@ namespace PantographSim.Data
         [Tooltip("第15項：NPC 平時站位到設備與站點的最低距離、離活動欄開口前方的最低距離、吊運中三人彼此與到工作檯／台架淨空帶／鋼梯的最低距離")]
         public float npcClearance = 0.60f, npcGateFront = 0.40f;
         [Tooltip("吊物禁區（XZ；平台側 Z ±2.25，已從吊物外緣外擴 1.0 m，不要再外推）")] public Vector2 liftZoneMinXZ = new Vector2(-12.0f, -2.25f), liftZoneMaxXZ = new Vector2(1.69f, 2.25f);
-        [Tooltip("第16項：車頂拆裝座到同側最遠底座螺栓的上限、學員頭部 |X| 上限")] public float baseBoltMaxDistance = 1.0f, headMaxAbsX = 1.10f;
+        [Tooltip("第16項：車頂拆裝座到同側最遠底座螺栓的上限")] public float baseBoltMaxDistance = 1.0f;
+        // shortcut: headMaxAbsX 已經沒有檢查用到（伸手估計改用 reachHeadMaxAbsX），留著是為了不動資產序列化, R1.5b 收尾時刪除
+        [Tooltip("未使用，已由 reachHeadMaxAbsX 取代（D36）")] public float headMaxAbsX = 1.10f;
         [Tooltip("第17項：暫放墊要在 |X| ≤ 這個值內、前緣離最近車頂站點的下限")] public float stripMatMaxAbsX = 0.80f, stripMatStationMin = 0.25f;
         [Tooltip("第18項：弓側節點到 tp.roof.base_e 的上限、接頭到 HV_Cable_End 的下限")] public float sideNodeBaseEMax = 0.80f, connectorCableMin = 0.30f;
         [Tooltip("第19項：PendantDock 到 tp.platform.crane 的上限、和工具架 Bounds 的間距下限與浮點容差")] public float pendantCraneMax = 1.0f, pendantRackGap = 0.15f, pendantRackGapTolerance = 0.005f;
@@ -78,6 +80,8 @@ namespace PantographSim.Data
         [Tooltip("第16項 (h)：站點和降弓羊角頂點範圍之間要留的身體半徑")] public float hornBodyRadius = 0.20f;
         [Tooltip("第16項 (j) 等伸手估計：伸手時頭部 |X| 上限、站姿手臂可及的水平距離、短絕緣桿的水平可及（EX，R1.5b 拿到桿長再改）")] public float reachHeadMaxAbsX = 1.0f, armReachHorizontal = 0.55f, shortPoleReachHorizontal = 0.80f;
         [Tooltip("第21項（D36 補充三）：扳手從起始方向往兩邊各擺的角度、取樣步距（度）")] public float wrenchSwingDeg = 45f, wrenchSampleDeg = 5f;
+        [Tooltip("第21項（D38）：扳手把手擺動範圍的最小淨空；半徑方向的取樣步距（m）")] public float wrenchSweepMinClearance = 0.02f, wrenchRadialStep = 0.05f;
+        [Tooltip("第21項（增補 7 第 3 點）：要算擺動淨空的扳手（ToolDefinition.toolId；底座螺栓 CSV v2.9：RM_04 b、IN_06 d 用套筒扳手，IN_07 d 用大扭力扳手）")] public string[] wrenchSweepTools = Array.Empty<string>();
         [Tooltip("第19項：到 tp.platform.crane 的量法＝站點到掛座 Bounds 中心的水平距離（增補 4 第 2 點）")] public bool pendantCraneToCenter = true;
         [Tooltip("第15項：NPC 各階段站位（平時／吊運中）")] public NpcStandPose[] npcPoses = Array.Empty<NpcStandPose>();
 

@@ -18,8 +18,12 @@ namespace PantographSim.Tests
         const string Generated = "Assets/_Project/Worksite/Models/Generated";
         static StationSet Set => AssetDatabase.LoadAssetAtPath<StationSet>(Folder + "/StationSet.asset");
         static RoofSceneDef Def => AssetDatabase.LoadAssetAtPath<RoofSceneDef>(Folder + "/RoofSceneDef.asset");
-        /// <summary>第21項的扳手把手長（ToolDef tool.socket_wrench 的 handleLength）。</summary>
-        public static float WrenchHandle => float.Parse(StepJsonImporterAccess.Tool("tool.socket_wrench").Param("handleLength", "0"), System.Globalization.CultureInfo.InvariantCulture);
+        /// <summary>第21項的扳手資料（所有 ToolDefinition＋套筒目錄），和建置時 XrRigBuilder 傳的一樣。</summary>
+        public static StationLayoutCheck.WrenchSweepInput Wrench => new StationLayoutCheck.WrenchSweepInput
+        {
+            tools = AssetDatabase.FindAssets("t:ToolDefinition").Select(g => AssetDatabase.LoadAssetAtPath<ToolDefinition>(AssetDatabase.GUIDToAssetPath(g))).Where(t => t != null).ToList(),
+            catalog = AssetDatabase.LoadAssetAtPath<SocketCatalog>("Assets/_Project/Tools/Data/SocketCatalog.asset"),
+        };
 
         static int Corner(Vector3 local) => local.z < 0f ? (local.x < 0f ? 1 : 2) : (local.x < 0f ? 4 : 3);
         static Transform Named(UnityEngine.SceneManagement.Scene s, string n) => s.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<Transform>(true)).FirstOrDefault(t => t.name == n);

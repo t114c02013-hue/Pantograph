@@ -34,7 +34,7 @@ namespace PantographSim.XR
                 {
                     var o = set.Find(s.sharedWith);
                     if (o == null) bad.Add($"{s.id}：共用的站點 {s.sharedWith} 不存在");
-                    else if (Vector2.Distance(o.positionXZ, s.positionXZ) > 1e-3f) bad.Add($"{s.id}：和 {s.sharedWith} 共用落點，座標要相同");
+                    else if (Vector2.Distance(o.positionXZ, s.positionXZ) > Eps) bad.Add($"{s.id}：和 {s.sharedWith} 共用落點，座標要相同");
                 }
             }
             if (set.Find(set.startStationId) == null) bad.Add($"起始站點 {set.startStationId} 不存在");
@@ -72,7 +72,7 @@ namespace PantographSim.XR
         /// 場景擺放檢查（B 段 3.5）。points＝場景裡的站點；find＝互動點 ID → 物件；panFootprints＝會動的關節在升降全程的頂點範圍（a6，取代整組 AABB 聯集；null＝不查）。
         /// 「0.4 m 內沒有實體碰撞體」只算障礙物：站點要操作的互動物件（ISimObject）不算，螺栓盤另有 0.30–0.50 m 的規則。
         /// </summary>
-        public static SceneResult CheckScene(StationSet set, RoofSceneDef d, IEnumerable<XrTeleportPoint> points, System.Func<string, Transform> find, IDictionary<string, Bounds> panFootprints, float wrenchHandleLength = 0f)
+        public static SceneResult CheckScene(StationSet set, RoofSceneDef d, IEnumerable<XrTeleportPoint> points, System.Func<string, Transform> find, IDictionary<string, Bounds> panFootprints, WrenchSweepInput wrench = null)
         {
             var r = new SceneResult();
             Physics.SyncTransforms();
@@ -106,7 +106,7 @@ namespace PantographSim.XR
                         else if (kv.Key == "PanHead" && s.id.StartsWith("tp.roof.base")) r.info.Add($"{s.id}：到羊角升降範圍 {dd:0.000} m（≥ {need}，D37）");
                     }
                 float walkLimit = d.RoofWalkLimitAt(p.z);   // 增補 6 第 3 點：在底架兩側放寬帶的 Z 範圍內才用 roofBaseWalkHalfWidth
-                if (s.floor == StationFloor.Roof && Mathf.Abs(p.x) > walkLimit + 1e-3f) r.Fail("core", s.id, $"{s.id}：不在車頂可走範圍 |X| ≤ {walkLimit}");
+                if (s.floor == StationFloor.Roof && Mathf.Abs(p.x) > walkLimit + Eps) r.Fail("core", s.id, $"{s.id}：不在車頂可走範圍 |X| ≤ {walkLimit}");
                 if (string.IsNullOrEmpty(s.facingTargetId)) { if (Vector3.Angle(tp.transform.forward, s.facingDirection) > 1f) r.Fail("core", s.id, $"{s.id}：朝向不是 {s.facingDirection}"); continue; }
                 // 面向目標：眼高看得到、水平 ±30°、距離
                 var target = find(s.facingTargetId);
@@ -117,7 +117,7 @@ namespace PantographSim.XR
                 if (Vector3.Angle(tp.transform.forward, dir) > set.facingToleranceDeg) r.Fail("core", s.id, $"{s.id}：目標不在正前方 ±{set.facingToleranceDeg}°");
                 if (!Visible(eye, to, target)) r.Fail("core", s.id, $"{s.id}：從眼高看 {s.facingTargetId} 被擋住");
                 float dist = Flat(p, to), max = s.maxTargetDistance > 0 ? s.maxTargetDistance : set.targetMaxDistance, min = s.maxTargetDistance > 0 ? 0f : set.targetMinDistance;
-                if (dist < min - 1e-3f || dist > max + 1e-3f) r.Fail("core", s.id, $"{s.id}：到 {s.facingTargetId} 水平 {dist:0.00} m（要 {min:0.0}–{max:0.0} m）");
+                if (dist < min - Eps || dist > max + Eps) r.Fail("core", s.id, $"{s.id}：到 {s.facingTargetId} 水平 {dist:0.00} m（要 {min:0.0}–{max:0.0} m）");
             }
             // 個別站點規則
             Transform T(string id) => find(id);
@@ -131,8 +131,8 @@ namespace PantographSim.XR
             if (pts.TryGetValue("tp.cab", out var cab))   // D27：相鄰車的駕駛室
             {
                 var c = cab.transform.position;
-                if (Mathf.Abs(c.x) > d.RoofEdgeX + 1e-3f) r.bad.Add($"tp.cab：X {c.x:0.00} 超出車寬 ±{d.RoofEdgeX}");
-                if (c.z > set.cabMaxZ + 1e-3f) r.bad.Add($"tp.cab：Z {c.z:0.00} 要 ≤ {set.cabMaxZ}");
+                if (Mathf.Abs(c.x) > d.RoofEdgeX + Eps) r.bad.Add($"tp.cab：X {c.x:0.00} 超出車寬 ±{d.RoofEdgeX}");
+                if (c.z > set.cabMaxZ + Eps) r.bad.Add($"tp.cab：Z {c.z:0.00} 要 ≤ {set.cabMaxZ}");
                 if (c.x >= d.maintMinXZ.x && c.x <= d.maintMaxXZ.x && c.z >= d.maintMinXZ.y && c.z <= d.maintMaxXZ.y) r.bad.Add("tp.cab：落在地面維修區裡");
                 r.info.Add($"tp.cab（相鄰車駕駛室）：{c:F3}");
             }
@@ -148,12 +148,12 @@ namespace PantographSim.XR
                     var tray = T("env.bolt_tray_" + side);
                     if (tray == null) { r.bad.Add($"主場景缺螺栓盤 env.bolt_tray_{side}"); continue; }
                     float dd = Flat(roof.transform.position, Center(tray));
-                    if (dd < set.boltTrayMin - 1e-3f || dd > set.boltTrayMax + 1e-3f) r.bad.Add($"tp.roof.inner：到 env.bolt_tray_{side} {dd:0.00} m（要 {set.boltTrayMin}–{set.boltTrayMax} m）");
+                    if (dd < set.boltTrayMin - Eps || dd > set.boltTrayMax + Eps) r.bad.Add($"tp.roof.inner：到 env.bolt_tray_{side} {dd:0.00} m（要 {set.boltTrayMin}–{set.boltTrayMax} m）");
                 }
             if (set.measuredFarBoltL > set.roofBoltMaxDistance) r.warn.Add($"肘側最遠螺栓 {set.measuredFarBoltL:0.00} m 超過 {set.roofBoltMaxDistance} m：啟用側移提示");
             if (Mathf.Abs(d.platformFloorY - d.roofFloorY) > set.maxFloorStep) r.bad.Add($"平台與車頂高度差 {Mathf.Abs(d.platformFloorY - d.roofFloorY):0.00} m 超過 {set.maxFloorStep} m");
             if (d.platformGap > set.maxPlatformGap) r.bad.Add($"平台到車頂間隙 {d.platformGap:0.00} m 超過 {set.maxPlatformGap} m");
-            CheckA6(set, d, pts, find, r, wrenchHandleLength);
+            CheckA6(set, d, pts, find, r, wrench);
             ApplyPending(set, r);
             return r;
         }
@@ -198,7 +198,7 @@ namespace PantographSim.XR
             {
                 float dc = Flat(gp, clamp.position);   // D24：量到互動點（不是物件中心）
                 info.Add($"弓頭接地掛點互動點：{P(clamp.position)}；(b) 到接地站 {dc:0.00} m（上限 {set.groundClampMaxDistance} m＝絕緣桿長 − 0.5）");
-                if (dc > set.groundClampMaxDistance + 1e-3f) problems.Add($"tp.platform.ground：(b) 到弓頭接地掛點 {dc:0.00} m（上限 {set.groundClampMaxDistance} m）");
+                if (dc > set.groundClampMaxDistance + Eps) problems.Add($"tp.platform.ground：(b) 到弓頭接地掛點 {dc:0.00} m（上限 {set.groundClampMaxDistance} m）");
             }
             foreach (var n in new[] { "Rail_CarSide_A", "Rail_CarSide_B" })
                 if (GameObject.Find(n) is GameObject rail && rail.GetComponent<Collider>() is Collider rc)
@@ -210,13 +210,13 @@ namespace PantographSim.XR
                 var b = gate.bounds;
                 float dz = gp.z >= b.min.z && gp.z <= b.max.z ? 0f : Mathf.Min(Mathf.Abs(gp.z - b.min.z), Mathf.Abs(gp.z - b.max.z));
                 info.Add($"活動欄開口：Z {b.min.z:0.000}–{b.max.z:0.000}（X {b.center.x:0.000}）；(a) 接地站沿 Z 離開口邊緣 {dz:0.00} m（至少 {set.groundGateMinZ} m）");
-                if (dz < set.groundGateMinZ - 1e-3f) problems.Add($"tp.platform.ground：(a) 沿 Z 離活動欄開口邊緣 {dz:0.00} m（至少 {set.groundGateMinZ} m）");
+                if (dz < set.groundGateMinZ - Eps) problems.Add($"tp.platform.ground：(a) 沿 Z 離活動欄開口邊緣 {dz:0.00} m（至少 {set.groundGateMinZ} m）");
             }
             if (anchorStation.HasValue)
             {
                 float da = Flat(gp, anchorStation.Value);
                 info.Add($"(c) 和 tp.platform.anchor {P(anchorStation.Value)} 相距 {da:0.00} m（至少 {set.groundAnchorMinDistance} m）");
-                if (da < set.groundAnchorMinDistance - 1e-3f) problems.Add($"tp.platform.ground：(c) 和 tp.platform.anchor 只相距 {da:0.00} m（至少 {set.groundAnchorMinDistance} m）");
+                if (da < set.groundAnchorMinDistance - Eps) problems.Add($"tp.platform.ground：(c) 和 tp.platform.anchor 只相距 {da:0.00} m（至少 {set.groundAnchorMinDistance} m）");
             }
             return info;
         }

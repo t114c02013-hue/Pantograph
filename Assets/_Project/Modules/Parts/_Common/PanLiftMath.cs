@@ -84,6 +84,31 @@ namespace PantographSim.Parts.Common
         /// <summary>吊帶（吊耳 eye → 吊點 p）和垂直線的夾角（度）。</summary>
         public static float SlingAngleDeg(Vector3 eye, Vector3 p) => Vector3.Angle(Vector3.down, p - eye);
 
+        /// <summary>
+        /// 建置檢查（建模 B H3、D36）：每條吊帶（吊點 1、4 接 −X 吊耳，2、3 接 +X）和垂直線 ≤ maxSlingAngleDeg、同一端兩條之間 ≤ maxSlingPairAngleDeg。
+        /// 回傳各條角度的報告行；有任何一條不合格就丟例外（建置失敗）。liftPoints 依 1..4 排好。
+        /// </summary>
+        public static List<string> AssertSlingAngles(Vector3 cog, IList<Vector3> liftPoints, Table t)
+        {
+            var (ep, em) = BeamEyes(cog, liftPoints, t);
+            var lines = new List<string>(); var bad = new List<string>();
+            for (int i = 0; i < liftPoints.Count; i++)
+            {
+                float a = SlingAngleDeg(liftPoints[i].x >= cog.x ? ep : em, liftPoints[i]);
+                lines.Add($"吊帶 {i + 1}：和垂直線 {a:0.0}°（≤ {t.maxSlingAngleDeg}°）");
+                if (a > t.maxSlingAngleDeg + 1e-3f) bad.Add($"吊帶 {i + 1} 和垂直線 {a:0.0}° 超過 {t.maxSlingAngleDeg}°");
+            }
+            if (liftPoints.Count == 4)
+                foreach (var (eye, a, b) in new[] { (em, 0, 3), (ep, 1, 2) })
+                {
+                    float pair = Vector3.Angle(liftPoints[a] - eye, liftPoints[b] - eye);
+                    lines.Add($"吊帶 {a + 1}–{b + 1}（同一端）夾角 {pair:0.0}°（≤ {t.maxSlingPairAngleDeg}°）");
+                    if (pair > t.maxSlingPairAngleDeg + 1e-3f) bad.Add($"吊帶 {a + 1}–{b + 1} 夾角 {pair:0.0}° 超過 {t.maxSlingPairAngleDeg}°");
+                }
+            if (bad.Count > 0) throw new InvalidOperationException("吊帶角度不合格：" + string.Join("；", bad));
+            return lines;
+        }
+
         /// <summary>吊鉤掛點（F3）：COG 正上方，吊梁上方 hookAboveBeam。</summary>
         public static Vector3 HookPoint(Vector3 cog, IList<Vector3> liftPoints, Table t) => new Vector3(cog.x, AvgY(liftPoints) + BeamAbove(cog, liftPoints, t) + t.hookAboveBeam, cog.z);
 

@@ -1,4 +1,4 @@
-﻿G1 降弓 Bounds 查核（a6 第七節 4／建模 B 12.7，2026-11-02 21:13）　量測座標：PAN_Root 局部（原點＝降弓底架底面中心）
+﻿G1 降弓 Bounds 查核（a6 第七節 4／建模 B 12.7，2026-11-02 21:51）　量測座標：PAN_Root 局部（原點＝降弓底架底面中心）
 
 (1) 姿態：PantographMechanism.SetLift(0)（Lowered 端點值，EditMode 直接套用，等待 0 幀）
     LowerArm.localEulerAngles＝(30.000, 0.000, 0.000)
@@ -17,5 +17,5 @@
     最低點 0.000 m、最高點 0.383 m（相對底架底面；預期高度約 0.38 m，最低點不低於底架底面）
     我們的降弓（機構網格，頂點）：最低 0.000、最高 0.426 m；和原始 FBX 差 最低 +0.000、最高 +0.042 m
 
-判斷：C1：(b) 頂點正常、(a) Renderer.bounds 偏低（關節旋轉後網格 AABB 變鬆）。建置改用頂點算的 LoweredTightBounds（pan_lowered_tight_bounds.json）。（C2 不適用：EditMode 直接套用端點值，沒有等待幀）
+判斷：C1：(b) 頂點正常、(a) Renderer.bounds 偏低（關節旋轉後網格 AABB 變鬆）。建置改用頂點算的 LoweredTightBounds（RoofSceneDef.panLoweredTightBounds）。（C2 不適用：EditMode 直接套用端點值，沒有等待幀）
 (4) 側視截圖：Logs/g1_side.png（正交、從 +X 看；綠＝車頂 Y 0、藍＝底架底面、半透明紅＝原始 FBX 降弓平移到同一個底架）

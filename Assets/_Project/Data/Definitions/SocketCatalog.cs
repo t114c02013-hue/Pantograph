@@ -1,0 +1,55 @@
+using System;
+using System.Linq;
+using UnityEngine;
+
+namespace PantographSim.Data
+{
+    /// <summary>一顆套筒（torque-wrench-sockets.md v1.3 §6.4、§7.2）。數值只寫在這裡；扳手的 ToolDefinition.socketIds 只放 socketId 參照。</summary>
+    [Serializable]
+    public class SocketDef
+    {
+        public string socketId, prefab;
+        [Tooltip("方頭（吋）：0.375＝3/8\"、0.5＝1/2\"")] public float driveIn;
+        public int sizeMm;
+        [Tooltip("套筒高（套筒口到驅動端面）＝第 21 項把手高度的加數")] public float heightM;
+        public float outerDiaM;
+        [Tooltip("對得上的螺栓 ID（* 萬用）")] public string[] fits = Array.Empty<string>();
+        public string source;
+    }
+
+    /// <summary>螺栓用哪一顆套筒（D39 的 FastenerDef.socketId：正確答案，第 21 項也用它查套筒高）。pattern 支援 *。</summary>
+    [Serializable]
+    public class FastenerSocket
+    {
+        public string fastenerPattern, socketId;
+        [Tooltip("尺寸是否推估（EX）")] public bool estimated;
+    }
+
+    /// <summary>a6 增補 7（D39）：套筒目錄。兩支扳手共用的 socket.19／24 數值只寫一次，不會兩邊不一致。</summary>
+    [CreateAssetMenu(menuName = "PantographSim/Socket Catalog")]
+    public class SocketCatalog : ScriptableObject
+    {
+        public SocketDef[] sockets = Array.Empty<SocketDef>();
+        public FastenerSocket[] fasteners = Array.Empty<FastenerSocket>();
+
+        public SocketDef Find(string socketId) => Array.Find(sockets, s => s != null && s.socketId == socketId);
+
+        /// <summary>螺栓的正確套筒（第一筆 pattern 相符的）。</summary>
+        public string SocketFor(string fastenerId) => fasteners?.FirstOrDefault(f => f != null && Match(f.fastenerPattern, fastenerId))?.socketId;
+
+        public static bool Match(string pattern, string id)
+        {
+            if (string.IsNullOrEmpty(pattern) || id == null) return false;
+            var parts = pattern.Split('*');
+            int at = 0;
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (parts[i].Length == 0) continue;
+                int k = id.IndexOf(parts[i], at, StringComparison.Ordinal);
+                if (k < 0 || (i == 0 && k != 0)) return false;
+                at = k + parts[i].Length;
+            }
+            return parts[parts.Length - 1].Length == 0 || id.EndsWith(parts[parts.Length - 1], StringComparison.Ordinal);
+        }
+    }
+}

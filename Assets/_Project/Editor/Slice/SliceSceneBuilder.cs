@@ -48,6 +48,7 @@ namespace PantographSim.Editor
         {
             var sb = new StringBuilder();
             sb.AppendLine(StepJsonImporter.Import());
+            sb.AppendLine(ToolSocketSetup.Apply());   // a6 增補 7（D39）：套筒目錄、扳手 ToolDef、tool_sockets.json
             sb.AppendLine(SliceModelBuilder.Build());
             var mats = SliceModelBuilder.Materials();
 
@@ -191,6 +192,13 @@ namespace PantographSim.Editor
             var tools = StepJsonImporter.LoadTools();
             var site = RoofSiteBuilder.Build(roofDef, stationSet, mats, rig, panHead, clamp.transform, tools, sb);
             CarParamsExport.Export();   // a6：建置時寫回的量測值（固定帶 armHalfWidth、台架外框）一起匯出
+            sb.AppendLine(ToolModelBuilder.Build());   // a6 增補 7：套筒、扭力扳手 prefab
+            {   // a6 增補 7：扳手與套筒建置檢查（§4 第 1–4、§6.6 第 5–8、§7.5 第 9–12 項），寫 Logs/ToolSocketCheck.txt，不合格就建置失敗
+                var tinfo = new List<string>(); var tbad = ToolModelBuilder.Check(tinfo);
+                File.WriteAllText("Logs/ToolSocketCheck.txt", (tbad.Count == 0 ? "結果：全過\n" : $"結果：{tbad.Count} 個問題\n") + string.Join("\n", tbad.Select(x => "✘ " + x).Concat(tinfo.Select(x => "・" + x))) + "\n");
+                sb.AppendLine("扳手與套筒建置檢查：" + (tbad.Count == 0 ? "全過" : string.Join("；", tbad)));
+                if (tbad.Count > 0) throw new Exception("扳手與套筒建置檢查不合格：" + string.Join("；", tbad));
+            }
             var env = site.env;
             PantographAssemblyBuilder.WriteReport(panRoot);   // R1.5a a5：Logs/PantographAssemblyReport.txt
             sb.AppendLine("G1：" + G1BoundsReport.Run(panRoot));   // a6 第七節 4：Logs/G1BoundsReport.txt、Logs/g1_side.png
