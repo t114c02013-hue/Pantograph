@@ -90,7 +90,7 @@ namespace PantographSim.Editor
         public static Dictionary<string, Bounds> SweptFootprints(PantographMechanism mech, int samples = 5, System.Text.StringBuilder log = null)
         {
             float lift = mech.Lift;
-            var list = new Dictionary<string, Bounds>();   // 段名 → 範圍（D37：站點淨空依零件分開，PanHead 用 roofPanHeadClearRadius）
+            var list = new Dictionary<string, Bounds>();   // 段名 → 範圍（D37：站點淨空依零件分開，讀 StationSet.partClearRadius）
             foreach (var seg in Segments(mech.transform).Where(s => s.name != "Base"))
             {
                 Bounds? acc = null;
