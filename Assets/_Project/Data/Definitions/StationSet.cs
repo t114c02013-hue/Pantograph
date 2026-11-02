@@ -33,6 +33,24 @@ namespace PantographSim.Data
         [Tooltip("建置時寫入：肘側最遠一支螺栓超過上限 → 教學模式啟用「往 n 號螺栓那側移一步」提示")] public bool sideStepHintEnabled;
         [Tooltip("建置時寫入的實測距離（m）")] public float measuredFarBoltL, measuredFarBoltR;
 
+        [Header("a6（暫定門檻，等 a6 補充定案）")]
+        [Tooltip("a6 第1項：平台站點兩兩水平距離下限（sharedWith 互連的不算）")] public float platformStationMinSpacing = 0.60f;
+        [Tooltip("a6 第2項：站點離活動欄開口（GateBoundary）的水平距離下限")] public float gateFrontClearance = 0.40f;
+        [Tooltip("a6 第4項(d)（D25）：長桿桿架 env.pole_rack 到 tp.platform.ground 的水平距離上限")] public float poleRackGroundMaxDistance = 1.00f;
+        [Tooltip("a6 第4項(d)：長桿桿架 X 要小於這個值")] public float poleRackMaxX = -3.00f;
+        [Tooltip("a6 第5項：吊運路徑（弓座 (0,0) 到台架中心）兩側各加寬")] public float liftCorridorHalfWidth = 1.00f;
+        [Tooltip("a6 第5項：tp.platform.crane 離吊運路徑的水平距離下限")] public float craneCorridorMinDistance = 2.00f;
+        [Tooltip("a6 第6項：tp.stand.* 的 Y 和地面 groundY 的容許差")] public float standStationYTolerance = 0.02f;
+        [Tooltip("a6 第6項：tp.stand.* 到台架邊距離和 standStationOffset 的容許差")] public float standStationOffsetTolerance = 0.05f;
+        [Tooltip("a6 第8項：車體接地座到 tp.roof.base_w 的水平距離上限")] public float carBodyGroundMaxDistance = 0.80f;
+        [Tooltip("a6 第8、9項：tp.roof.base_w 的規格座標（站點資料建立前用）")] public Vector2 roofBaseWXZ = new Vector2(-0.70f, 0.60f);
+        [Tooltip("a6 第9項：tp.roof.base_e 的規格座標（站點資料建立前用）")] public Vector2 roofBaseEXZ = new Vector2(0.70f, 0.60f);
+        [Tooltip("a6 第9項：tp.roof.base_e 到 HV_Cable_End 的水平距離上限")] public float baseECableMaxDistance = 1.30f;
+        [Tooltip("a6 第9項：超過時沿 +Z 搜尋的步距與 Z 上限（Z 上限規格未給，先用車頂區段 +Z 端）")] public float baseESearchStep = 0.05f, baseESearchMaxZ = 4.0f;
+        [Tooltip("a6 第9項：母線孔帶 X 範圍（base_e 不能落在這裡）")] public float busbarHoleMinX = 0.20f, busbarHoleMaxX = 0.40f;
+        [Tooltip("a6 第10項(b)：平台鋼梯 ENV_PlatformStair 的 Z 範圍")] public float stairMinZ = 4.0f, stairMaxZ = 10.0f;
+        [Tooltip("a6 第11項：降弓整組放上台架後（底架底面除外）到台架外框頂面的垂直距離下限")] public float standFrameMinClearance = 0.30f;
+
         public StationDef Find(string id) => Array.Find(stations, s => s != null && s.id == id);
     }
 }

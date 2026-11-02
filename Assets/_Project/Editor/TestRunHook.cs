@@ -85,6 +85,13 @@ namespace PantographSim.Editor
                 catch (System.Exception e) { Debug.LogException(e); }
                 return;
             }
+            if (File.Exists("Logs/r15a-report.request"))   // R1.5a a6：驗收報告 Logs/R1.5aReport.txt（唯讀）
+            {
+                File.Delete("Logs/r15a-report.request");
+                try { R15aReport.Write(); }
+                catch (System.Exception e) { Debug.LogException(e); }
+                return;
+            }
             if (!File.Exists(RequestPath)) return;
             File.Delete(RequestPath);
             Run();

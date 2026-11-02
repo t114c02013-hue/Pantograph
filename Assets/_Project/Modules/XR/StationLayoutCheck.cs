@@ -10,7 +10,7 @@ namespace PantographSim.XR
     /// 站點建置檢查（R1 3.5）。建置腳本與 EditMode 測試共用；回傳不合格項目（空＝通過），每項寫出站點與原因。
     /// CheckData 只看資料欄位；場景擺放的檢查在 CheckScene。
     /// </summary>
-    public static class StationLayoutCheck
+    public static partial class StationLayoutCheck
     {
         public static List<string> CheckData(StationSet set, string roofKey)
         {
@@ -44,8 +44,10 @@ namespace PantographSim.XR
         public class SceneResult
         {
             public readonly List<string> bad = new List<string>(), warn = new List<string>(), info = new List<string>();
+            /// <summary>a6 規則（暫定門檻）：只回報量測值與判定，EnforceA6 為 true 前不擋建置。</summary>
+            public readonly List<string> pending = new List<string>();
             public bool Ok => bad.Count == 0;
-            public override string ToString() => string.Join("\n", bad.Select(b => "✘ " + b).Concat(warn.Select(w => "⚠ " + w)).Concat(info.Select(i => "・" + i)));
+            public override string ToString() => string.Join("\n", bad.Select(b => "✘ " + b).Concat(warn.Select(w => "⚠ " + w)).Concat(info.Select(i => "・" + i)).Concat(pending.Select(p => "◇ " + p)));
         }
 
         static bool IsTarget(Collider c) => c.GetComponentInParent<Core.ISimObject>() != null;
@@ -137,6 +139,7 @@ namespace PantographSim.XR
             if (set.measuredFarBoltL > set.roofBoltMaxDistance) r.warn.Add($"肘側最遠螺栓 {set.measuredFarBoltL:0.00} m 超過 {set.roofBoltMaxDistance} m：啟用側移提示");
             if (Mathf.Abs(d.platformFloorY - d.roofFloorY) > set.maxFloorStep) r.bad.Add($"平台與車頂高度差 {Mathf.Abs(d.platformFloorY - d.roofFloorY):0.00} m 超過 {set.maxFloorStep} m");
             if (d.platformGap > set.maxPlatformGap) r.bad.Add($"平台到車頂間隙 {d.platformGap:0.00} m 超過 {set.maxPlatformGap} m");
+            CheckA6(set, d, pts, find, r);
             return r;
         }
 

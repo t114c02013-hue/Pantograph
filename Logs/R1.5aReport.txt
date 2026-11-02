@@ -1,0 +1,183 @@
+﻿R1.5a 驗收報告（2026-11-02 16:32）　場景：Assets/_Project/Content/Scenes/SC_CarbonStripSlice.unity
+每項：頭盔檢查／自動證據／自動：✔ 通過、✘ 不通過、— 只能頭盔確認
+
+== 1. 桌機 25 步 SI_01→結算，0 個紅色錯誤 ==
+頭盔檢查：桌機模式從 SI_01 做到結算，Console 沒有紅字
+自動證據：
+  最新紀錄：20261102_161553_驗證學員（11-02 16:16）　session.jsonl 有、report.html 有
+  測試：結果：Passed　通過 230　失敗 0　略過 0　耗時 8.0s
+自動：✔　terry 頭盔驗收：□
+
+== 2. 車輛外觀：白車身＋塗裝、無標誌；3 節車；車頂弧面、絕緣子、母線 ==
+頭盔檢查：車身白色＋橘／深色塗裝、看不到任何標誌；三節車連著；車頂弧面、4 支絕緣子、母線
+自動證據：
+  Car_South：有
+  Car_Middle：有
+  Car_North：有
+  車節：3（RoofSceneDef.carCount 3）
+  ENV_RoofSection：有
+  Insulator_1：有
+  Insulator_2：有
+  Insulator_3：有
+  Insulator_4：有
+  Roof_Busbar：有
+  白車身／塗裝／無標誌、車頂弧面：只能頭盔確認
+自動：✔　terry 頭盔驗收：□
+
+== 3. 平台：工具架靠外側護欄；車側 1.0 m 通道；活動欄、跨板、防墜器門架 ==
+頭盔檢查：工具架在外側護欄旁、車側通道走得過、活動欄／跨板／防墜器門架都在
+自動證據：
+  PlatformInnerX -1.810、PlatformOuterX -3.310、車側通道 platformAisle 1.00 m
+  ENV_InspectionPlatform：有
+  env.tool_rack：(-3.100, 1.350, -2.800)　X − PlatformOuterX +0.210
+  env.pole_rack：(-3.080, 1.250, 0.600)　X − PlatformOuterX +0.230
+  找不到 env.platform_gate
+  ENV_GateBridge：有 (0.000, 0.000, 0.000)
+  BridgePlate：有（未啟用） (-1.305, -0.020, -1.000)
+  FallArrester：有 (-1.810, 2.520, -1.550)
+  FallArrester_Post：有 (-1.860, 1.300, -2.200)
+自動：✘　terry 頭盔驗收：□
+
+== 4. 平台各站眼高與 R1 相同 ==
+頭盔檢查：每個平台站點傳送後視線高度和 R1 一樣
+自動證據：
+  StationSet.eyeHeight 1.60（R1 1.60）　R1 平台地板 Y 0
+  tp.platform.lift       資料 XZ (-2.200, -0.050)　場景 Y 0.000　眼高 Y 1.600
+  tp.platform.rack       資料 XZ (-2.410, -2.800)　場景 Y 0.000　眼高 Y 1.600
+  tp.platform.ground     資料 XZ (-2.200, 0.600)　場景 Y 0.000　眼高 Y 1.600
+  tp.platform.anchor     資料 XZ (-2.200, -1.800)　場景 Y 0.000　眼高 Y 1.600
+  tp.platform.crane      資料 XZ (-2.400, -3.500)　場景 Y 0.000　眼高 Y 1.600
+自動：✔　terry 頭盔驗收：□
+
+== 5. 平台傳送到地面維修區，繞台架走、不穿模、出不了邊界 ==
+頭盔檢查：傳送到 tp.stand.*，繞台架走一圈，不穿過台架，走不出維修區
+自動證據：
+  tp.stand.n：StationSet 有、場景 (-9.500, -3.640, 1.900)
+  tp.stand.e：StationSet 有、場景 (-7.900, -3.640, 0.000)
+  tp.stand.s：StationSet 有、場景 (-9.500, -3.640, -1.900)
+  tp.stand.w：StationSet 有、場景 (-11.100, -3.640, 0.000)
+  ENV_MaintenanceArea：有
+  env.panto_stand：有
+  Edge_W：layer LocomotionBlocker、Collider 啟用
+  Edge_E：layer LocomotionBlocker、Collider 啟用
+  Edge_S：layer LocomotionBlocker、Collider 啟用
+  Edge_N：layer LocomotionBlocker、Collider 啟用
+  繞台架走、不穿模、出不了邊界：只能頭盔確認
+自動：✔　terry 頭盔驗收：□
+
+== 6. 天車、遙控器、吊帶、工具袋看得到但不能操作 ==
+頭盔檢查：天車、遙控器、4 條吊帶、工具袋都看得到，手把抓不起來
+自動證據：
+  env.crane：顯示中、XRGrabInteractable 沒有
+  env.crane_pendant：顯示中、XRGrabInteractable 沒有
+  env.sling_1：顯示中、XRGrabInteractable 沒有
+  env.sling_2：顯示中、XRGrabInteractable 沒有
+  env.sling_3：顯示中、XRGrabInteractable 沒有
+  env.sling_4：顯示中、XRGrabInteractable 沒有
+  env.tool_bag：顯示中、XRGrabInteractable 沒有
+自動：✔　terry 頭盔驗收：□
+
+== 7. PanAssyFrameTests 通過；測試總數與 R1 結束時的差 ==
+頭盔檢查：（不用頭盔）
+自動證據：
+  結果：Passed　通過 230　失敗 0　略過 0　耗時 8.0s
+  總數 230（R1 結束 208，差 +22）
+  [PASS] PantographSim.Tests.PanAssyFrameTests.MoveAndRotatePanRoot_PositionJudgementsUnchanged
+  [PASS] PantographSim.Tests.PanAssyHierarchyTests.AllPantographPartsAndMeshes_UnderPanRoot
+  [PASS] PantographSim.Tests.PanAssyHierarchyTests.PanRootOrigin_IsLoweredBaseUndersideCenter
+  [PASS] PantographSim.Tests.PanAssyIdUnchangedTests.NamesAndIds_SameBeforeAndAfterMove
+自動：✔　terry 頭盔驗收：□
+
+== 附錄 A：StationLayoutCheck ==
+結果：13 站全過
+・tp.cab：(-0.190, -2.350, -30.000)
+・tp.platform.lift：(-2.200, 0.000, -0.050)
+・tp.platform.rack：(-2.410, 0.000, -2.800)
+・tp.platform.ground：(-2.200, 0.000, 0.600)
+・tp.platform.anchor：(-2.200, 0.000, -1.800)
+・tp.roof.inner：(0.000, 0.000, -0.650)
+・tp.roof.outer：(0.000, 0.000, -0.650)
+・tp.roof.shelf：(-0.600, 0.000, -2.500)
+・tp.platform.crane：(-2.400, 0.000, -3.500)
+・tp.stand.n：(-9.500, -3.640, 1.900)
+・tp.stand.e：(-7.900, -3.640, 0.000)
+・tp.stand.s：(-9.500, -3.640, -1.900)
+・tp.stand.w：(-11.100, -3.640, 0.000)
+・tp.platform.ground：(-2.200, 0.000, 0.600)，面向 ip.depot.ground_terminal
+・Anchor_GroundBusbar：(-1.810, 1.000, 0.350)，水平距離 0.46 m
+・Anchor_TesterSelfCheck：(-1.810, 1.100, 0.850)，水平距離 0.46 m
+・ip.depot.ground_terminal（物件中心）：(-1.870, 1.000, 0.350)，水平距離 0.41 m
+・ip.depot.detector_tester（物件中心）：(-1.870, 1.100, 0.850)，水平距離 0.41 m
+・弓頭接地掛點互動點：(-0.533, 0.528, 0.000)；(b) 到接地站 1.77 m（上限 2 m＝絕緣桿長 − 0.5）
+・車側護欄 Rail_CarSide_A：範圍 (-1.835, 0.000, -4.000)–(-1.785, 1.100, -1.400)，到接地站 2.03 m
+・車側護欄 Rail_CarSide_B：範圍 (-1.835, 0.000, -0.600)–(-1.785, 1.100, 4.000)，到接地站 0.37 m
+・活動欄開口：Z -1.400–-0.600（X -1.810）；(a) 接地站沿 Z 離開口邊緣 1.20 m（至少 0.5 m）
+・(c) 和 tp.platform.anchor (-2.200, 0.000, -1.800) 相距 2.40 m（至少 0.6 m）
+・tp.cab（相鄰車駕駛室）：(-0.190, -2.350, -30.000)
+◇ 【第1項】tp.platform.lift–tp.platform.rack 水平 2.76 m（暫定門檻 ≥ 0.6）✔
+◇ 【第1項】tp.platform.lift–tp.platform.ground 水平 0.65 m（暫定門檻 ≥ 0.6）✔
+◇ 【第1項】tp.platform.lift–tp.platform.anchor 水平 1.75 m（暫定門檻 ≥ 0.6）✔
+◇ 【第1項】tp.platform.lift–tp.platform.crane 水平 3.46 m（暫定門檻 ≥ 0.6）✔
+◇ 【第1項】tp.platform.rack–tp.platform.ground 水平 3.41 m（暫定門檻 ≥ 0.6）✔
+◇ 【第1項】tp.platform.rack–tp.platform.anchor 水平 1.02 m（暫定門檻 ≥ 0.6）✔
+◇ 【第1項】tp.platform.rack–tp.platform.crane 水平 0.70 m（暫定門檻 ≥ 0.6）✔
+◇ 【第1項】tp.platform.ground–tp.platform.anchor 水平 2.40 m（暫定門檻 ≥ 0.6）✔
+◇ 【第1項】tp.platform.ground–tp.platform.crane 水平 4.10 m（暫定門檻 ≥ 0.6）✔
+◇ 【第1項】tp.platform.anchor–tp.platform.crane 水平 1.71 m（暫定門檻 ≥ 0.6）✔
+◇ 【第2項】活動欄開口 Z -1.40…-0.60 前 0.4 m 內沒有站點✔
+◇ 【第4d項】env.pole_rack (-3.08, 0.60) 到 tp.platform.ground 水平 0.88 m（暫定門檻 ≤ 1）✔
+◇ 【第4d項】env.pole_rack X -3.08（暫定門檻 < -3）✔
+◇ 【第5項】tp.platform.lift (-2.20, -0.05) 在吊運路徑 (0.00, 0.00)→(-9.50, 0.00) ±1 m 內✘
+◇ 【第5項】tp.platform.ground (-2.20, 0.60) 在吊運路徑 (0.00, 0.00)→(-9.50, 0.00) ±1 m 內✘
+◇ 【第5項】tp.roof.inner (0.00, -0.65) 在吊運路徑 (0.00, 0.00)→(-9.50, 0.00) ±1 m 內✘
+◇ 【第5項】tp.roof.outer (0.00, -0.65) 在吊運路徑 (0.00, 0.00)→(-9.50, 0.00) ±1 m 內✘
+◇ 【第5項】tp.stand.e (-7.90, 0.00) 在吊運路徑 (0.00, 0.00)→(-9.50, 0.00) ±1 m 內✘
+◇ 【第5項】tp.platform.crane 離吊運路徑 2.50 m（暫定門檻 ≥ 2）✔
+◇ 【第6項】tp.stand.n (-9.50, 1.90) 在維修區 X -13.5…-5.5、Z -5…5✔
+◇ 【第6項】tp.stand.n Y -3.640，和地面 -3.65 差 0.010 m（暫定門檻 ≤ 0.02）✔
+◇ 【第6項】tp.stand.n 離台架邊 0.60 m（暫定門檻 0.6 ±0.05）✔
+◇ 【第6項】tp.stand.n 面向台架偏 0.0°（暫定門檻 ≤ 30°）✔
+◇ 【第6項】tp.stand.n 離台架上的降弓整組 水平 0.61 m（暫定門檻 ≥ 0.4）✔
+◇ 【第6項】tp.stand.e (-7.90, 0.00) 在維修區 X -13.5…-5.5、Z -5…5✔
+◇ 【第6項】tp.stand.e Y -3.640，和地面 -3.65 差 0.010 m（暫定門檻 ≤ 0.02）✔
+◇ 【第6項】tp.stand.e 離台架邊 0.60 m（暫定門檻 0.6 ±0.05）✔
+◇ 【第6項】tp.stand.e 面向台架偏 0.0°（暫定門檻 ≤ 30°）✔
+◇ 【第6項】tp.stand.e 離台架上的降弓整組 水平 0.76 m（暫定門檻 ≥ 0.4）✔
+◇ 【第6項】tp.stand.s (-9.50, -1.90) 在維修區 X -13.5…-5.5、Z -5…5✔
+◇ 【第6項】tp.stand.s Y -3.640，和地面 -3.65 差 0.010 m（暫定門檻 ≤ 0.02）✔
+◇ 【第6項】tp.stand.s 離台架邊 0.60 m（暫定門檻 0.6 ±0.05）✔
+◇ 【第6項】tp.stand.s 面向台架偏 0.0°（暫定門檻 ≤ 30°）✔
+◇ 【第6項】tp.stand.s 離台架上的降弓整組 水平 0.88 m（暫定門檻 ≥ 0.4）✔
+◇ 【第6項】tp.stand.w (-11.10, 0.00) 在維修區 X -13.5…-5.5、Z -5…5✔
+◇ 【第6項】tp.stand.w Y -3.640，和地面 -3.65 差 0.010 m（暫定門檻 ≤ 0.02）✔
+◇ 【第6項】tp.stand.w 離台架邊 0.60 m（暫定門檻 0.6 ±0.05）✔
+◇ 【第6項】tp.stand.w 面向台架偏 0.0°（暫定門檻 ≤ 30°）✔
+◇ 【第6項】tp.stand.w 離台架上的降弓整組 水平 0.77 m（暫定門檻 ≥ 0.4）✔
+◇ 【第7b項】tp.roof.inner (0.00, -0.65) 不在母線帶、絕緣子孔、車體接地座上✔
+◇ 【第7b項】tp.roof.outer (0.00, -0.65) 不在母線帶、絕緣子孔、車體接地座上✔
+◇ 【第7b項】tp.roof.shelf (-0.60, -2.50) 不在母線帶、絕緣子孔、車體接地座上✔
+◇ 【第8項】車體接地座 (-0.70, 1.20) 到 tp.roof.base_w (-0.70, 0.60) 0.60 m（暫定門檻 ≤ 0.8）✔
+◇ 【第8項】車體接地座正下方沒有 Walkable✔
+◇ 【第8項】車體接地座 X -0.85…-0.55 和母線帶 X 0.20…0.40不重疊✔
+◇ 【第9項】tp.roof.base_w：站點資料尚未建立
+◇ 【第9項】tp.roof.base_e：站點資料尚未建立
+◇ 【第9項】tp.roof.base_e (0.70, 0.65) 到 HV_Cable_End 1.26 m（從 (0.70, 0.60) 沿 +Z 移到 (0.70, 0.65)）（暫定門檻 ≤ 1.3）✔
+◇ 【第10b項】ENV_PlatformStair Z 3.99…9.01（暫定門檻 4…10）✘
+◇ 【第10b項】ENV_PlatformStair 伸進平台上方（平台 X -3.31…-1.81、Z -4…4）✘
+◇ 【第11項】台架上的降弓整組（底架除外）最低 Y -3.582（UpperArm），到外框頂面 -3.200 垂直 -0.382 m（暫定門檻 ≥ 0.3）✘
+◇ 【第12項】吊帶 1：(-10.02, -2.57, -0.86)→(-9.47, -0.92, 0.00) 不穿過台架外框（頂面 Y -3.200）✔
+◇ 【第12項】吊帶 2：(-8.98, -2.57, -0.86)→(-9.47, -0.92, 0.00) 不穿過台架外框（頂面 Y -3.200）✔
+◇ 【第12項】吊帶 3：(-8.98, -2.57, 0.86)→(-9.47, -0.92, 0.00) 不穿過台架外框（頂面 Y -3.200）✔
+◇ 【第12項】吊帶 4：(-10.02, -2.57, 0.86)→(-9.47, -0.92, 0.00) 不穿過台架外框（頂面 Y -3.200）✔
+
+== 附錄 B：Missing scripts ==
+見 NoMissingScriptTests
+  [PASS] PantographSim.Tests.NoMissingScriptTests.AllPrefabs_HaveNoMissingScripts
+  [PASS] PantographSim.Tests.NoMissingScriptTests.ProjectScenes_HaveNoMissingScripts
+
+== 附錄 C：a6 補充（位置變更）待收到 ==
+  桿架：待收到
+  工具架：待收到
+  去駕駛室光圈：待收到
+  備品架：待收到
+  待報廢箱：待收到

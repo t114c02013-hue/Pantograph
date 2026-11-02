@@ -1,0 +1,8 @@
+段：a6（前半，不受位置影響的部分；未收工）
+改動：
+ - 8.1b：Play 時 missing script 黃字來源＝SC_CarbonStripSlice 的 Recording 物件；VideoCaptureService 寫在 VideoCapture.cs（檔名不符，沒有自己的腳本 GUID）。已拆到 VideoCaptureService.cs，重建場景後解決。新增 NoMissingScriptTests（所有 prefab＋Assets/_Project 場景，數量＝0）。
+ - StationLayoutCheck 第 1–12 項框架（StationLayoutCheck.A6.cs）：新規則只寫 ◇ 待定行，不擋建置（EnforceA6＝false，shortcut 註解）；暫定門檻放在 StationSet 新欄位。
+ - R1.5aReport 架構（Editor/R1/R15aReport.cs，選單 PantographSim/R1.5a/Write Acceptance Report，或 Logs/r15a-report.request）。
+目前 ◇ 不合格（只回報）：第 5 項 5 個站在吊運路徑 ±1 m 內；第 10b 項鋼梯 Z 3.99（差 0.01）且碰到平台；第 11 項最低點是 UpperArm，Y −3.582，比外框頂面低 0.382 m（待查：網格 Bounds 或懸出位置）。
+測試：230/230（+2），StationLayoutCheck 13 站全過，Console 紅字 0
+未做：桌面 25 步、截圖、code-reviewer 審查、新規則的單元測試（test-engineer）、等 a6 補充定案位置與門檻
