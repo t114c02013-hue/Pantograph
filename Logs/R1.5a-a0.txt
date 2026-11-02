@@ -1,0 +1,8 @@
+﻿段：a0 集電弓結構確認（只寫報告）
+改動：新增 Editor/R1/PanRiggingProbe.cs（只讀探查，選單 PantographSim/R1.5/Pantograph Rigging Check，或 Logs/pan-probe.request）；TestRunHook 加 pan-probe.request 與 export-steps.request 兩個觸發。報告：Logs/PantographRiggingCheck.txt。
+略過：無
+風險：無
+ponytail-review Verdict：只新增唯讀探查工具，沒有改行為
+測試：208/208，Console 紅字 0
+功能不變檢查：1 ✔（黃字 missing script 是舊的，a6 8.1b 處理）；2 ✔；3 ✔（沒有改公開簽章、事件、黑板鍵）；4 ✔；5 ✔；6 未重跑（沒有改執行期程式）；7 ✔
+未檢查：沒有 git，無法 commit 與 git diff（第 3、7 項改用檔案清單人工確認）

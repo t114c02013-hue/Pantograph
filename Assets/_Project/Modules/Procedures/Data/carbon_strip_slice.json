@@ -1,0 +1,811 @@
+{
+  "procedureId": "PRC_CarbonStripSlice",
+  "title": "集電弓碳滑板更換（切片）",
+  "goal": "完成安全隔離後，量測兩條碳滑板厚度並判定；需要更換時依序拆下、清潔、檢查新品、安裝、鎖到規定扭力並標記，最後收尾解除接地。",
+  "safetyPoints": [
+    "碰弓體前必須：用升降控制器降到降弓位置並親眼確認、上鎖掛牌、斷升弓電源、驗電（先自檢）、接地（端子 → 拉線確認 → 弓頭）。",
+    "接地拆除順序相反：先拆弓頭端，再拆平台端子。",
+    "任一條三點最小值 ≤ 3.0 mm（保養表值）就兩條一起換，不能只換一條。",
+    "新滑板斜面朝外，扭力 25 N·m（示例值），依 1→2→3→4 順序。"
+  ],
+  "repeatBlock": {
+    "fromStepId": "STP_CSR_06_Loosen",
+    "toStepId": "STP_CSR_14_Mark",
+    "sides": ["L", "R"],
+    "sideLabels": ["肘側滑板", "外側滑板"]
+  },
+  "onPass": [
+    { "stepId": "STP_CSR_05_Decide", "key": "workorder.decision", "value": "pass", "jumpTo": "STP_WC_01_ToolCount" }
+  ],
+  "positionChecks": [
+    { "checkId": "PC_PanHeadLower", "part": "pan_head", "purpose": "lower", "targetName": "降弓位置", "toleranceCm": 1.0 },
+    { "checkId": "PC_StripInstall_L", "part": "carbon_strip_L", "purpose": "install", "targetName": "肘側滑板安裝位置", "toleranceCm": 0.5 },
+    { "checkId": "PC_StripInstall_R", "part": "carbon_strip_R", "purpose": "install", "targetName": "外側滑板安裝位置", "toleranceCm": 0.5 }
+  ],
+  "lift": { "fullTravelSeconds": 15, "accelSeconds": 0.6, "slowZoneCm": 20, "slowSpeedCmPerSec": 5 },
+  "steps": [
+    {
+      "stepId": "STP_SI_01_ConfirmLowered",
+      "refSeconds": [45, 30],
+      "subActions": [
+        { "text": "按住 ▼ 把弓頭降到綠框", "target": "ip.pan_head.lower_check", "done": "part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm", "why": "放開時距離要 ≤ 1 cm", "tool": "", "stand": "tp.platform.lift" },
+        { "text": "點弓頭，確認已降下", "target": "part.pan_head", "done": "part.pan_head.inspected", "why": "親眼看，不只看燈", "tool": "", "stand": "tp.platform.lift" },
+        { "text": "點控制盤的弓位指示燈", "target": "ip.cab.pan_indicator", "done": "ip.cab.pan_indicator.checked", "why": "目視和指示燈交叉確認", "tool": "", "stand": "tp.platform.lift" }
+      ],
+      "title": "降弓並確認",
+      "instruction": "用右側升降控制器按住「▼ 下降」，把弓頭的紅色檢測點降到綠框內（變成綠色）；再點弓頭親眼確認，最後點控制盤查看弓位指示燈。",
+      "toolHint": "",
+      "targetHint": "右側升降控制器 → 弓頭上的檢測點與綠框 → 弓頭本體 → 駕駛室控制盤",
+      "targetIds": ["part.pan_head", "ip.cab.panel", "ip.cab.pan_indicator", "ip.pan_head.lower_check"],
+      "hints": { "text": "按住右側「▼ 下降」（或 PageDown／↓）不放，靠近綠框會自動變慢；檢測點變綠就放開。",
+                 "why": "弓頭沒降到位就碰弓體，可能觸電或被夾傷；指示燈可能故障，所以還要親眼看。",
+                 "checklist": ["用升降控制器把檢測點降到綠框（誤差 ≤ 1 cm）|part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm", "點弓頭，親眼確認降弓|part.pan_head.inspected", "打開控制盤，查看弓位指示燈|ip.cab.pan_indicator.checked"],
+                 "highlightIds": ["ip.pan_head.lower_check", "part.pan_head", "ip.cab.panel"] },
+      "valueTags": ["降弓位置容許誤差 1 cm=示例值", "升降全程 15 秒、綠框前 20 cm 減速到 5 cm/s=示例值"],
+      "completion": { "type": "AllOf", "all": [
+        { "type": "ChecklistAll", "keys": ["part.pan_head.inspected", "ip.cab.pan_indicator.checked"] },
+        { "type": "ValueInRange", "key": "part.pan_head.lower_distance_cm", "min": 0, "max": 1.0 }
+      ] },
+      "errors": [
+        { "errorId": "ERR_SI01_NotInPosition", "severity": "Major", "trigger": "ActionBefore", "key": "ip.cab.pan_indicator.checked", "key2": "part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm",
+          "what": "弓頭還沒到降弓位置（還差 {值:part.pan_head.lower_distance_cm} cm）就做確認。",
+          "why": "弓頭沒降到位，碰弓體可能觸電或被夾傷；確認一定要在弓頭到位之後。",
+          "fix": "按住右側升降控制器的「▼ 下降」（或 PageDown／↓），把紅色檢測點降到綠框內、變成綠色，再點弓頭和指示燈確認。" },
+        { "errorId": "ERR_SI01_NotInPosition", "severity": "Major", "trigger": "ActionBefore", "key": "part.pan_head.inspected", "key2": "part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm",
+          "what": "弓頭還沒到降弓位置（還差 {值:part.pan_head.lower_distance_cm} cm）就做確認。",
+          "why": "弓頭沒降到位，碰弓體可能觸電或被夾傷；確認一定要在弓頭到位之後。",
+          "fix": "按住右側升降控制器的「▼ 下降」（或 PageDown／↓），把紅色檢測點降到綠框內、變成綠色，再點弓頭和指示燈確認。" },
+        { "errorId": "ERR_SI01_LightOnly", "severity": "Major", "trigger": "Incomplete", "key": "ip.cab.pan_indicator.checked", "keys": ["part.pan_head.inspected"],
+          "what": "只看了控制盤的指示燈，沒有親眼確認弓頭。",
+          "why": "指示燈可能故障或接線錯誤；弓頭若其實沒降下，碰到就有觸電與夾傷危險。",
+          "fix": "點弓頭本體，親眼確認弓頭已降到底，再以指示燈交叉確認。" }
+      ]
+    },
+    {
+      "stepId": "STP_SI_02_LockOut",
+      "refSeconds": [50, 30],
+      "title": "上鎖掛牌（預設完成）",
+      "instruction": "主斷路器 OFF，用上鎖掛牌組鎖住主斷路器與升弓開關，鑰匙自己保管。本切片已預先完成。",
+      "toolHint": "上鎖掛牌組",
+      "targetHint": "主斷路器、升弓開關",
+      "requiredToolId": "tool.lockout_tag",
+      "targetIds": ["ip.cab.breaker", "ip.cab.raise_switch"],
+      "presetDone": true,
+      "presetStates": ["lockout.breaker=locked", "lockout.raise_switch=locked", "lockout.key_holder=trainee", "backpack.lockout_key=true", "rack.slot_1=on_rack"],
+      "completion": { "type": "ChecklistAll", "keys": [] },
+      "errors": [
+        { "errorId": "ERR_SI02_TagOnly", "severity": "Critical", "trigger": "ChoiceEquals", "key": "lockout.raise_switch", "value": "open",
+          "what": "只掛牌沒上鎖，或漏鎖升弓開關。", "why": "別人可能在你作業時合閘或升弓，造成觸電或夾傷。", "fix": "主斷路器與升弓開關都要上鎖並掛牌，鑰匙由作業者自己保管。" }
+      ]
+    },
+    {
+      "stepId": "STP_SI_03_CylinderPowerOff",
+      "refSeconds": [35, 20],
+      "title": "切斷升弓氣缸電源（預設完成）",
+      "instruction": "把升弓氣缸電源切 OFF，按一次升弓鈕確認弓體不會動。本切片已預先完成。",
+      "toolHint": "",
+      "targetHint": "控制盤 → 升弓氣缸電源",
+      "targetIds": ["ip.cab.cylinder_power"],
+      "presetDone": true,
+      "presetStates": ["cab.cylinder_power=off", "cab.raise_test_done=true"],
+      "completion": { "type": "ChecklistAll", "keys": [] },
+      "errors": [
+        { "errorId": "ERR_SI03_PowerOn", "severity": "Critical", "trigger": "ChoiceEquals", "key": "cab.cylinder_power", "value": "on",
+          "what": "升弓氣缸電源沒有切斷。", "why": "殘壓或誤操作會讓弓體突然升起，夾傷手或把人頂起。", "fix": "切斷氣缸電源後，按一次升弓鈕確認弓體完全不動。" }
+      ]
+    },
+    {
+      "stepId": "STP_SI_04_VoltageTest",
+      "refSeconds": [45, 25],
+      "subActions": [
+        { "text": "到工具架拿起驗電器", "target": "env.tool_rack.slot_2", "done": "tool.active=tool.voltage_detector", "why": "工具架第 2 格", "tool": "tool.voltage_detector", "stand": "tp.platform.rack" },
+        { "text": "點自檢器，確認亮綠燈", "target": "ip.depot.detector_tester", "done": "tool.voltage_detector.selftest", "why": "先確認驗電器是好的", "tool": "tool.voltage_detector", "stand": "tp.platform.ground" },
+        { "text": "點弓頭接地掛點驗電", "target": "ip.pan_head.ground_clamp", "done": "isolation.voltage_tested", "why": "要顯示「無電」", "tool": "tool.voltage_detector", "stand": "tp.platform.ground" },
+        { "text": "把驗電器放回工具架", "target": "env.tool_rack.slot_2", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.platform.rack" }
+      ],
+      "title": "驗電",
+      "instruction": "拿驗電器，先點「驗電器自檢器」確認綠燈與嗶聲，再點弓頭接地掛點，確認顯示「無電」。",
+      "toolHint": "驗電器（工具架第 2 格）",
+      "targetHint": "工具台上的驗電器自檢器 → 弓頭接地掛點",
+      "requiredToolId": "tool.voltage_detector",
+      "targetIds": ["ip.depot.detector_tester", "ip.pan_head.ground_clamp"],
+      "hints": { "text": "先自檢、後量測。自檢通過會亮綠燈並嗶一聲。",
+                 "why": "驗電器壞了也會顯示「無電」，先自檢才知道它是好的。",
+                 "checklist": ["到工具架第 2 格拿起驗電器|tool.active=tool.voltage_detector", "點自檢器（綠燈＋嗶聲）|tool.voltage_detector.selftest", "點弓頭接地掛點，顯示「無電」|isolation.voltage_tested"],
+                 "highlightIds": ["ip.depot.detector_tester", "ip.pan_head.ground_clamp"] },
+      "completion": { "type": "StateEquals", "key": "isolation.voltage_tested", "value": "true" },
+      "errors": [
+        { "errorId": "ERR_SI04_NoSelfTest", "severity": "Critical", "trigger": "ActionBefore", "key": "isolation.voltage_measured", "key2": "tool.voltage_detector.selftest", "blocks": true,
+          "what": "驗電器沒有先自檢就直接量測。", "why": "驗電器若故障會一直顯示「無電」，你會在帶電狀態下作業。", "fix": "每次驗電前先在自檢器上確認綠燈與嗶聲，再量測弓頭。" }
+      ]
+    },
+    {
+      "stepId": "STP_SI_05_Grounding",
+      "refSeconds": [50, 30],
+      "subActions": [
+        { "text": "到工具架拿起接地棒", "target": "env.tool_rack.slot_3", "done": "tool.active=tool.grounding_rod", "why": "工具架第 3 格", "tool": "tool.grounding_rod", "stand": "tp.platform.rack" },
+        { "text": "接地夾夾上接地端子", "target": "ip.depot.ground_terminal", "done": "isolation.terminal_clamped", "why": "先接大地端", "tool": "tool.grounding_rod", "stand": "tp.platform.ground" },
+        { "text": "按「拉線確認」", "target": "ip.depot.ground_terminal", "done": "isolation.pull_tested", "why": "確定夾牢了", "tool": "tool.grounding_rod", "stand": "tp.platform.ground" },
+        { "text": "掛鉤掛上弓頭接地點", "target": "ip.pan_head.ground_clamp", "done": "isolation.head_clamped", "why": "接地棒會留在場上", "tool": "tool.grounding_rod", "stand": "tp.platform.ground" }
+      ],
+      "title": "掛接地",
+      "instruction": "拿接地棒：先夾平台接地端子（黃綠），按「拉線確認」，最後掛到弓頭接地掛點。",
+      "toolHint": "接地棒",
+      "targetHint": "平台接地端子 → 拉線確認 → 弓頭接地掛點",
+      "requiredToolId": "tool.grounding_rod",
+      "targetIds": ["ip.depot.ground_terminal", "ip.pan_head.ground_clamp"],
+      "hints": { "text": "順序：端子 → 拉線 → 弓頭。先掛弓頭端會被擋下。",
+                 "why": "萬一有電，電流會走接地線而不是你的身體；先接大地端才安全。",
+                 "checklist": ["到工具架第 3 格拿起接地棒|tool.active=tool.grounding_rod", "點平台接地端子（黃綠）夾上|isolation.terminal_clamped", "按下方「拉線確認」|isolation.pull_tested", "點弓頭接地掛點掛上|isolation.head_clamped", "接地完成：端子與弓頭兩端都接上|isolation.grounded", "順序要是 端子 → 拉線確認 → 弓頭（順序錯了請按「從這一步重做」）|isolation.ground_order=terminal,pull,head"],
+                 "highlightIds": ["ip.depot.ground_terminal", "ip.pan_head.ground_clamp"] },
+      "completion": { "type": "AllOf", "all": [
+        { "type": "StateEquals", "key": "isolation.grounded", "value": "true" },
+        { "type": "OrderedSequence", "key": "isolation.ground_order", "expected": "terminal,pull,head" }
+      ] },
+      "errors": [
+        { "errorId": "ERR_SI05_NoPullTest", "severity": "Major", "trigger": "ActionBefore", "key": "isolation.head_clamped", "key2": "isolation.pull_tested",
+          "what": "沒有拉線確認就把接地棒掛到弓頭。", "why": "端子若沒夾牢，接地等於沒接，殘餘電荷或誤送電時保護不到你。", "fix": "按「從這一步重做」，夾好端子後先按「拉線確認」，再掛弓頭。" }
+      ]
+    },
+    {
+      "stepId": "STP_SI_06_RoofEntry",
+      "refSeconds": [75, 45],
+      "title": "上車頂（預設完成）",
+      "instruction": "安全帶改扣到車頂掛點（任何時刻至少一個扣著），勾選鄰線檢查 5 項並在作業單簽名。本切片已預先完成。",
+      "toolHint": "安全帶",
+      "targetHint": "安全帶掛點",
+      "requiredToolId": "tool.safety_harness",
+      "targetIds": ["ip.anchor.roof", "ip.anchor.platform"],
+      "presetDone": true,
+      "presetStates": ["harness.roof=true", "harness.hooks_count=1", "roof.adjacent_check=5", "workorder.si_signed=true", "rack.slot_4=in_use"],
+      "completion": { "type": "ChecklistAll", "keys": [] },
+      "errors": [
+        { "errorId": "ERR_SI06_Unhooked", "severity": "Critical", "trigger": "ChoiceEquals", "key": "harness.unhooked", "value": "true",
+          "what": "改扣安全帶時先解開舊掛點再扣新掛點。", "why": "中間有一段時間完全沒有保護，失足就會墜落。", "fix": "先扣上新掛點，確認扣好後再解開舊的，任何時刻至少一個扣著。" }
+      ]
+    },
+    {
+      "stepId": "STP_CSR_01_CheckIsolation",
+      "refSeconds": [10, 5],
+      "subActions": [
+        { "text": "打開作業單看隔離狀態", "target": "env.work_order", "done": "ui.workorder_open", "why": "六項都打勾才能作業", "tool": "", "stand": "tp.platform.anchor" }
+      ],
+      "title": "確認安全隔離完成",
+      "instruction": "打開作業單，確認「安全隔離」六項都打勾。",
+      "toolHint": "",
+      "targetHint": "右上「打開作業單」",
+      "targetIds": ["env.work_order"],
+      "hints": { "text": "按右上角「作業單」，看安全隔離欄全部是 ✔。",
+                 "why": "六項隔離都完成，才可以開始碰弓體作業。",
+                 "checklist": ["打開作業單|ui.workorder_open"],
+                 "highlightIds": ["env.work_order"] },
+      "completion": { "type": "AllOf", "all": [
+        { "type": "ChecklistAll", "keys": ["step.STP_SI_01_ConfirmLowered.done", "step.STP_SI_02_LockOut.done", "step.STP_SI_03_CylinderPowerOff.done", "step.STP_SI_04_VoltageTest.done", "step.STP_SI_05_Grounding.done", "step.STP_SI_06_RoofEntry.done", "ui.workorder_open"] }
+      ] },
+      "errors": []
+    },
+    {
+      "stepId": "STP_CSR_02_ZeroCaliper",
+      "refSeconds": [30, 15],
+      "subActions": [
+        { "text": "到車頂工具箱拿起游標卡尺", "target": "env.tool_rack.slot_5", "done": "tool.active=tool.caliper", "why": "車頂工具箱第 5 格", "tool": "tool.caliper", "stand": "tp.roof.shelf" },
+        { "text": "把量爪完全合攏", "target": "", "done": "tool.caliper.jaw=0", "why": "按下方「合攏量爪」", "tool": "tool.caliper", "stand": "tp.roof.shelf" },
+        { "text": "按 ZERO 鍵歸零", "target": "", "done": "tool.caliper.zeroed", "why": "要顯示 0.00", "tool": "tool.caliper", "stand": "tp.roof.shelf" }
+      ],
+      "title": "卡尺歸零",
+      "instruction": "拿數位卡尺，按「合攏量爪」（或滾輪轉到 0），確認合攏後按 ZERO，螢幕要顯示 0.00。",
+      "toolHint": "數位卡尺",
+      "targetHint": "下方卡尺面板：合攏量爪 → ZERO",
+      "requiredToolId": "tool.caliper",
+      "targetIds": [],
+      "hints": { "text": "在下方卡尺面板按「合攏」，再按「ZERO」。",
+                 "why": "沒歸零的卡尺每個讀數都會多 0.30 mm（示例值），會讓你判斷錯。",
+                 "checklist": ["到車頂工具箱第 5 格拿起卡尺|tool.active=tool.caliper", "合攏量爪後按 ZERO|tool.caliper.zeroed"] },
+      "valueTags": ["未歸零偏差 +0.30 mm=示例值"],
+      "completion": { "type": "StateEquals", "key": "tool.caliper.zeroed", "value": "true" },
+      "errors": [
+        { "errorId": "ERR_CSR02_MeasureBeforeZero", "severity": "Major", "trigger": "ActionBefore", "key": "tool.caliper.measured_any", "key2": "tool.caliper.zeroed",
+          "what": "卡尺還沒歸零就拿去量。", "why": "沒歸零的讀數全部偏大 0.30 mm，磨耗到極限的滑板會被誤判為合格。", "fix": "先合攏量爪按 ZERO，確認顯示 0.00 後再量。" }
+      ]
+    },
+    {
+      "stepId": "STP_CSR_03_Measure_L",
+      "refSeconds": [60, 35],
+      "subActions": [
+        { "text": "量肘側滑板左側點", "target": "ip.carbon_strip_L.measure_left", "done": "ip.carbon_strip_L.measure_left.measured", "why": "距端 15 cm", "tool": "tool.caliper", "stand": "tp.roof.inner" },
+        { "text": "量肘側滑板中點", "target": "ip.carbon_strip_L.measure_mid", "done": "ip.carbon_strip_L.measure_mid.measured", "why": "", "tool": "tool.caliper", "stand": "tp.roof.inner" },
+        { "text": "量肘側滑板右側點", "target": "ip.carbon_strip_L.measure_right", "done": "ip.carbon_strip_L.measure_right.measured", "why": "距端 15 cm", "tool": "tool.caliper", "stand": "tp.roof.inner" },
+        { "text": "三個讀數填入作業單", "target": "env.work_order", "done": "workorder.reading.L.submitted", "why": "照卡尺讀數抄，誤差 ≤ 0.05", "tool": "", "stand": "tp.roof.inner" }
+      ],
+      "side": "L",
+      "title": "量測肘側滑板",
+      "instruction": "用卡尺依序點肘側滑板的左、中、右三個量測點，把卡尺上的讀數抄到作業單，按「送出這條的讀數」。",
+      "toolHint": "數位卡尺",
+      "targetHint": "肘側滑板頂面三個量測點（左距端 15 cm、中點、右距端 15 cm）",
+      "requiredToolId": "tool.caliper",
+      "targetIds": ["ip.carbon_strip_{side}.measure_*", "env.work_order"],
+      "hints": { "text": "拿卡尺點滑板上三個藍色量測點，把卡尺讀數抄進作業單。",
+                 "why": "滑板常常兩端磨得比較多，三點都量才找得到最薄處。",
+                 "checklist": ["到車頂工具箱第 5 格拿起卡尺|tool.active=tool.caliper", "量左點|ip.carbon_strip_{side}.measure_left.measured", "量中點|ip.carbon_strip_{side}.measure_mid.measured", "量右點|ip.carbon_strip_{side}.measure_right.measured", "讀數抄進作業單並送出|workorder.reading.{side}.submitted"],
+                 "highlightIds": ["ip.carbon_strip_{side}.measure_*"] },
+      "valueTags": ["量測點距端 15 cm=示例值", "抄寫容差 0.05 mm=示例值"],
+      "completion": { "type": "AllOf", "all": [
+        { "type": "ChecklistAll", "keys": ["ip.carbon_strip_{side}.measure_left.measured", "ip.carbon_strip_{side}.measure_mid.measured", "ip.carbon_strip_{side}.measure_right.measured", "workorder.reading.{side}.submitted"] },
+        { "type": "ReadingMatches", "recordKeys": ["workorder.reading.{side}.left", "workorder.reading.{side}.mid", "workorder.reading.{side}.right"],
+          "readingKeys": ["ip.carbon_strip_{side}.measure_left.reading", "ip.carbon_strip_{side}.measure_mid.reading", "ip.carbon_strip_{side}.measure_right.reading"], "tolerance": 0.05 }
+      ] },
+      "errors": [
+        { "errorId": "ERR_CSR03_OnlyMid", "severity": "Major", "trigger": "Incomplete", "key": "workorder.reading.{side}.submitted", "keys": ["ip.carbon_strip_{side}.measure_left.measured", "ip.carbon_strip_{side}.measure_mid.measured", "ip.carbon_strip_{side}.measure_right.measured"],
+          "what": "沒有三點都量就送出讀數（例如只量中間）。", "why": "滑板常常兩端磨得比較多，只量一點會漏掉最薄處，該換的滑板被放過。", "fix": "左、中、右三點都量，三個讀數都抄進作業單再送出。" },
+        { "errorId": "ERR_CSR03_CopyError", "severity": "Minor", "trigger": "ChoiceEquals", "key": "workorder.reading.{side}.left.mismatch", "value": "true",
+          "what": "作業單上的讀數和卡尺量到的不一樣。", "why": "抄錯會讓判定與紀錄失真，日後追蹤磨耗也會錯。", "fix": "對照卡尺螢幕重新填寫（差距要在 0.05 mm 內）。" },
+        { "errorId": "ERR_CSR03_CopyError", "severity": "Minor", "trigger": "ChoiceEquals", "key": "workorder.reading.{side}.mid.mismatch", "value": "true",
+          "what": "作業單上的讀數和卡尺量到的不一樣。", "why": "抄錯會讓判定與紀錄失真，日後追蹤磨耗也會錯。", "fix": "對照卡尺螢幕重新填寫（差距要在 0.05 mm 內）。" },
+        { "errorId": "ERR_CSR03_CopyError", "severity": "Minor", "trigger": "ChoiceEquals", "key": "workorder.reading.{side}.right.mismatch", "value": "true",
+          "what": "作業單上的讀數和卡尺量到的不一樣。", "why": "抄錯會讓判定與紀錄失真，日後追蹤磨耗也會錯。", "fix": "對照卡尺螢幕重新填寫（差距要在 0.05 mm 內）。" }
+      ]
+    },
+    {
+      "stepId": "STP_CSR_04_Measure_R",
+      "refSeconds": [60, 35],
+      "subActions": [
+        { "text": "量外側滑板左側點", "target": "ip.carbon_strip_R.measure_left", "done": "ip.carbon_strip_R.measure_left.measured", "why": "距端 15 cm", "tool": "tool.caliper", "stand": "tp.roof.outer" },
+        { "text": "量外側滑板中點", "target": "ip.carbon_strip_R.measure_mid", "done": "ip.carbon_strip_R.measure_mid.measured", "why": "", "tool": "tool.caliper", "stand": "tp.roof.outer" },
+        { "text": "量外側滑板右側點", "target": "ip.carbon_strip_R.measure_right", "done": "ip.carbon_strip_R.measure_right.measured", "why": "距端 15 cm", "tool": "tool.caliper", "stand": "tp.roof.outer" },
+        { "text": "三個讀數填入作業單", "target": "env.work_order", "done": "workorder.reading.R.submitted", "why": "照卡尺讀數抄，誤差 ≤ 0.05", "tool": "", "stand": "tp.roof.outer" },
+        { "text": "把卡尺放回車頂工具箱", "target": "env.tool_rack.slot_5", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.shelf" }
+      ],
+      "side": "R",
+      "title": "量測外側滑板",
+      "instruction": "用卡尺依序點外側滑板的左、中、右三個量測點，把讀數抄到作業單，按「送出這條的讀數」。",
+      "toolHint": "數位卡尺",
+      "targetHint": "外側滑板頂面三個量測點",
+      "requiredToolId": "tool.caliper",
+      "targetIds": ["ip.carbon_strip_{side}.measure_*", "env.work_order"],
+      "hints": { "text": "同肘側：拿卡尺點三個量測點，照抄讀數到作業單。",
+                 "why": "兩條都要量，才能判斷要不要一起換。",
+                 "checklist": ["到車頂工具箱第 5 格拿起卡尺|tool.active=tool.caliper", "量左點|ip.carbon_strip_{side}.measure_left.measured", "量中點|ip.carbon_strip_{side}.measure_mid.measured", "量右點|ip.carbon_strip_{side}.measure_right.measured", "讀數抄進作業單並送出|workorder.reading.{side}.submitted"],
+                 "highlightIds": ["ip.carbon_strip_{side}.measure_*"] },
+      "valueTags": ["量測點距端 15 cm=示例值", "抄寫容差 0.05 mm=示例值"],
+      "completion": { "type": "AllOf", "all": [
+        { "type": "ChecklistAll", "keys": ["ip.carbon_strip_{side}.measure_left.measured", "ip.carbon_strip_{side}.measure_mid.measured", "ip.carbon_strip_{side}.measure_right.measured", "workorder.reading.{side}.submitted"] },
+        { "type": "ReadingMatches", "recordKeys": ["workorder.reading.{side}.left", "workorder.reading.{side}.mid", "workorder.reading.{side}.right"],
+          "readingKeys": ["ip.carbon_strip_{side}.measure_left.reading", "ip.carbon_strip_{side}.measure_mid.reading", "ip.carbon_strip_{side}.measure_right.reading"], "tolerance": 0.05 }
+      ] },
+      "errors": [
+        { "errorId": "ERR_CSR04_OnlyMid", "severity": "Major", "trigger": "Incomplete", "key": "workorder.reading.{side}.submitted", "keys": ["ip.carbon_strip_{side}.measure_left.measured", "ip.carbon_strip_{side}.measure_mid.measured", "ip.carbon_strip_{side}.measure_right.measured"],
+          "what": "沒有三點都量就送出讀數（例如只量中間）。", "why": "滑板常常兩端磨得比較多，只量一點會漏掉最薄處，該換的滑板被放過。", "fix": "左、中、右三點都量，三個讀數都抄進作業單再送出。" },
+        { "errorId": "ERR_CSR04_CopyError", "severity": "Minor", "trigger": "ChoiceEquals", "key": "workorder.reading.{side}.left.mismatch", "value": "true",
+          "what": "作業單上的讀數和卡尺量到的不一樣。", "why": "抄錯會讓判定與紀錄失真。", "fix": "對照卡尺螢幕重新填寫（差距要在 0.05 mm 內）。" },
+        { "errorId": "ERR_CSR04_CopyError", "severity": "Minor", "trigger": "ChoiceEquals", "key": "workorder.reading.{side}.mid.mismatch", "value": "true",
+          "what": "作業單上的讀數和卡尺量到的不一樣。", "why": "抄錯會讓判定與紀錄失真。", "fix": "對照卡尺螢幕重新填寫（差距要在 0.05 mm 內）。" },
+        { "errorId": "ERR_CSR04_CopyError", "severity": "Minor", "trigger": "ChoiceEquals", "key": "workorder.reading.{side}.right.mismatch", "value": "true",
+          "what": "作業單上的讀數和卡尺量到的不一樣。", "why": "抄錯會讓判定與紀錄失真。", "fix": "對照卡尺螢幕重新填寫（差距要在 0.05 mm 內）。" }
+      ]
+    },
+    {
+      "stepId": "STP_CSR_05_Decide",
+      "refSeconds": [20, 10],
+      "subActions": [
+        { "text": "依最小值選擇判定", "target": "env.work_order", "done": "workorder.decision", "why": "任一點 ≤ 3.0 mm 就兩條都換", "tool": "", "stand": "" }
+      ],
+      "title": "判定是否更換",
+      "instruction": "看兩條滑板各自三點中的最小值。任一條最小值 ≤ 3.0 mm 就選「兩條都換」；兩條都 > 3.0 mm 選「合格」。",
+      "toolHint": "",
+      "targetHint": "作業單 → 判定（四選一）",
+      "targetIds": ["env.work_order"],
+      "hints": { "text": "在作業單「判定」選一個。用每條的最小值判斷，不是平均值。",
+                 "why": "磨到極限的滑板會斷裂、刮傷架空線；兩條一起換才不會高低差。",
+                 "checklist": ["在作業單選擇判定|workorder.decision"],
+                 "highlightIds": ["env.work_order"] },
+      "valueTags": ["更換基準 3.0 mm=保養表值", "兩條一起換=示例政策"],
+      "completion": { "type": "Decision", "choiceKey": "workorder.decision", "threshold": 3.0 },
+      "errors": [
+        { "errorId": "ERR_CSR05_ShouldReplace", "severity": "Critical", "trigger": "ChoiceEquals", "key": "workorder.decision", "value": "pass", "whenAnswer": "both", "blocks": true,
+          "what": "有滑板最薄處已 ≤ 3.0 mm，卻判定合格（或用平均值判斷）。", "why": "磨耗到極限的碳滑板可能斷裂、刮傷架空線，甚至造成弓網事故。", "fix": "看每條三點中的最小值；任一條 ≤ 3.0 mm（保養表值）就選「兩條都換」。" },
+        { "errorId": "ERR_CSR05_OnlyOne", "severity": "Major", "trigger": "ChoiceEquals", "key": "workorder.decision", "value": "L", "whenAnswer": "both",
+          "what": "只換一條滑板。", "why": "保養表 m1-3 要求兩條滑板沒有高低差；只換一條會造成新舊高低差，接觸壓力不均、加速磨耗。", "fix": "選「兩條都換」。" },
+        { "errorId": "ERR_CSR05_OnlyOne", "severity": "Major", "trigger": "ChoiceEquals", "key": "workorder.decision", "value": "R", "whenAnswer": "both",
+          "what": "只換一條滑板。", "why": "保養表 m1-3 要求兩條滑板沒有高低差；只換一條會造成新舊高低差，接觸壓力不均、加速磨耗。", "fix": "選「兩條都換」。" },
+        { "errorId": "ERR_CSR05_Unneeded", "severity": "Minor", "trigger": "ChoiceEquals", "key": "workorder.decision", "value": "both", "whenAnswer": "pass",
+          "what": "兩條都還在標準內，卻判定要換。", "why": "不必要的更換浪費備品與工時。", "fix": "兩條三點最小值都 > 3.0 mm 時選「合格」。" }
+      ]
+    },
+    {
+      "stepId": "STP_CSR_06_Loosen",
+      "refSeconds": [60, 35],
+      "subActions": [
+        { "text": "到車頂工具箱拿起套筒扳手", "target": "env.tool_rack.slot_6", "done": "tool.active=tool.socket_wrench", "why": "車頂工具箱第 6 格", "tool": "tool.socket_wrench", "stand": "tp.roof.shelf" },
+        { "text": "換上 13 mm 套筒", "target": "", "done": "tool.socket_wrench.size=13", "why": "M8 螺栓用 13 mm", "tool": "tool.socket_wrench", "stand": "tp.roof.shelf" },
+        { "text": "方向切到「鬆」", "target": "", "done": "tool.socket_wrench.dir=loosen", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.shelf" },
+        { "text": "把 1 號螺栓鬆半圈", "target": "ip.carbon_strip_{side}.bolt_1", "done": "ip.carbon_strip_{side}.bolt_1.angle_deg>=150", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "把 2 號螺栓鬆半圈", "target": "ip.carbon_strip_{side}.bolt_2", "done": "ip.carbon_strip_{side}.bolt_2.angle_deg>=150", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "把 3 號螺栓鬆半圈", "target": "ip.carbon_strip_{side}.bolt_3", "done": "ip.carbon_strip_{side}.bolt_3.angle_deg>=150", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "把 4 號螺栓鬆半圈", "target": "ip.carbon_strip_{side}.bolt_4", "done": "ip.carbon_strip_{side}.bolt_4.angle_deg>=150", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" }
+      ],
+      "title": "預鬆螺栓",
+      "instruction": "套筒扳手選 13 mm、方向「鬆」，依 1→2→3→4 每支只轉半圈（約 180°）。",
+      "toolHint": "套筒扳手＋13 mm 套筒",
+      "targetHint": "這條滑板上的 4 支螺栓（看編號）",
+      "requiredToolId": "tool.socket_wrench",
+      "targetIds": ["ip.carbon_strip_{side}.bolt_*"],
+      "hints": { "text": "點螺栓套上扳手，滾輪轉 4 格（半圈），依 1→2→3→4。",
+                 "why": "先全部鬆半圈再逐支取下，滑板受力才平均，不會變形。",
+                 "checklist": ["到車頂工具箱第 6 格拿起套筒扳手|tool.active=tool.socket_wrench", "套筒選 13 mm|tool.socket_wrench.size=13", "方向選「鬆」|tool.socket_wrench.dir=loosen", "螺栓 1 鬆半圈|ip.carbon_strip_{side}.bolt_1.angle_deg>=150", "螺栓 2 鬆半圈|ip.carbon_strip_{side}.bolt_2.angle_deg>=150", "螺栓 3 鬆半圈|ip.carbon_strip_{side}.bolt_3.angle_deg>=150", "螺栓 4 鬆半圈|ip.carbon_strip_{side}.bolt_4.angle_deg>=150"],
+                 "highlightIds": ["ip.carbon_strip_{side}.bolt_*"], "showBoltNumbers": true },
+      "valueTags": ["半圈 180°±30°=示例值", "套筒 13 mm（M8）=示例值"],
+      "completion": { "type": "AllOf", "all": [
+        { "type": "ValueInRange", "key": "ip.carbon_strip_{side}.bolt_{n}.angle_deg", "min": 150, "max": 210, "count": 4 },
+        { "type": "OrderedSequence", "key": "ip.carbon_strip_{side}.loosen_order", "expected": "1,2,3,4" }
+      ] },
+      "errors": [
+        { "errorId": "ERR_CSR06_WrongSocket", "severity": "Minor", "trigger": "ChoiceEquals", "key": "ip.carbon_strip_{side}.bolt_{n}.wrong_socket", "value": "true", "count": 4,
+          "what": "套筒尺寸不對，套不上螺栓。", "why": "尺寸不合的套筒會打滑、磨圓螺栓頭。", "fix": "在套筒面板選 13 mm。" },
+        { "errorId": "ERR_CSR06_Order", "severity": "Minor", "trigger": "SequenceMismatch", "key": "ip.carbon_strip_{side}.loosen_order", "expected": "1,2,3,4",
+          "what": "沒有照 1→2→3→4 的順序預鬆。", "why": "不照對角順序鬆，滑板受力不均可能翹起或卡住。", "fix": "按「從這一步重做」，照螺栓編號 1→2→3→4 各鬆半圈。" },
+        { "errorId": "ERR_CSR06_FullTurn", "severity": "Major", "trigger": "ValueOutOfRange", "key": "ip.carbon_strip_{side}.bolt_{n}.angle_deg", "min": 0, "max": 210, "count": 4,
+          "what": "一支螺栓直接轉鬆到底，沒有先全部預鬆半圈。", "why": "其他螺栓還鎖著時單支全鬆，滑板受力集中，可能變形或卡住。", "fix": "每支先只鬆半圈（約 180°），四支都鬆過再進行取出。" }
+      ]
+    },
+    {
+      "stepId": "STP_CSR_07_RemoveBolts",
+      "refSeconds": [70, 40],
+      "subActions": [
+        { "text": "把 1 號螺栓轉到脫出", "target": "ip.carbon_strip_{side}.bolt_1", "done": "ip.carbon_strip_{side}.bolt_1.angle_deg>=720", "why": "滾輪繼續轉約兩圈", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "把 1 號螺栓放進螺栓盤", "target": "env.bolt_tray_{side}", "done": "ip.carbon_strip_{side}.bolt_1.state=InTray", "why": "拆下的螺栓立刻收好", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "把 2 號螺栓轉到脫出", "target": "ip.carbon_strip_{side}.bolt_2", "done": "ip.carbon_strip_{side}.bolt_2.angle_deg>=720", "why": "滾輪繼續轉約兩圈", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "把 2 號螺栓放進螺栓盤", "target": "env.bolt_tray_{side}", "done": "ip.carbon_strip_{side}.bolt_2.state=InTray", "why": "拆下的螺栓立刻收好", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "把 3 號螺栓轉到脫出", "target": "ip.carbon_strip_{side}.bolt_3", "done": "ip.carbon_strip_{side}.bolt_3.angle_deg>=720", "why": "滾輪繼續轉約兩圈", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "把 3 號螺栓放進螺栓盤", "target": "env.bolt_tray_{side}", "done": "ip.carbon_strip_{side}.bolt_3.state=InTray", "why": "拆下的螺栓立刻收好", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "把 4 號螺栓轉到脫出", "target": "ip.carbon_strip_{side}.bolt_4", "done": "ip.carbon_strip_{side}.bolt_4.angle_deg>=720", "why": "滾輪繼續轉約兩圈", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "把 4 號螺栓放進螺栓盤", "target": "env.bolt_tray_{side}", "done": "ip.carbon_strip_{side}.bolt_4.state=InTray", "why": "拆下的螺栓立刻收好", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "把套筒扳手放回車頂工具箱", "target": "env.tool_rack.slot_6", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.shelf" }
+      ],
+      "title": "取出螺栓",
+      "instruction": "繼續用套筒扳手把每支螺栓轉到脫出（約兩圈），再點螺栓把它放進零件盒。",
+      "toolHint": "套筒扳手",
+      "targetHint": "這條滑板上的 4 支螺栓 → 零件盒",
+      "requiredToolId": "tool.socket_wrench",
+      "targetIds": ["ip.carbon_strip_{side}.bolt_*"],
+      "hints": { "text": "繼續轉到螺栓脫出（約兩圈），再點一下螺栓就收進零件盒。",
+                 "why": "拆下的螺栓立刻收好，才不會掉落或遺留在車頂。",
+                 "checklist": ["螺栓 1 收進零件盒|ip.carbon_strip_{side}.bolt_1.state=InTray", "螺栓 2 收進零件盒|ip.carbon_strip_{side}.bolt_2.state=InTray", "螺栓 3 收進零件盒|ip.carbon_strip_{side}.bolt_3.state=InTray", "螺栓 4 收進零件盒|ip.carbon_strip_{side}.bolt_4.state=InTray"],
+                 "highlightIds": ["ip.carbon_strip_{side}.bolt_*", "env.parts_tray"], "showBoltNumbers": true },
+      "completion": { "type": "AllOf", "all": [
+        { "type": "StateEquals", "key": "ip.carbon_strip_{side}.bolt_1.state", "value": "InTray" },
+        { "type": "StateEquals", "key": "ip.carbon_strip_{side}.bolt_2.state", "value": "InTray" },
+        { "type": "StateEquals", "key": "ip.carbon_strip_{side}.bolt_3.state", "value": "InTray" },
+        { "type": "StateEquals", "key": "ip.carbon_strip_{side}.bolt_4.state", "value": "InTray" }
+      ] },
+      "errors": [
+        { "errorId": "ERR_CSR07_NotCollected", "severity": "Major", "trigger": "ChoiceEquals", "key": "part.carbon_strip_{side}.remove_blocked", "value": "bolts",
+          "what": "螺栓沒有全部收進零件盒。", "why": "散落在車頂的螺栓會掉落、遺失，或被遺留在車頂造成異物危險。", "fix": "每支螺栓脫出後立刻點它收進零件盒。" }
+      ]
+    },
+    {
+      "stepId": "STP_CSR_08_RemoveStrip",
+      "refSeconds": [25, 15],
+      "subActions": [
+        { "text": "點舊滑板選「垂直取出」", "target": "part.carbon_strip_{side}", "done": "part.carbon_strip_{side}.state=Removed", "why": "不要用起子撬", "tool": "", "stand": "tp.roof.{side}" },
+        { "text": "把舊滑板放進零件盒", "target": "env.parts_tray", "done": "part.carbon_strip_{side}.state=InTray", "why": "點零件盒", "tool": "", "stand": "tp.roof.shelf" }
+      ],
+      "title": "取出舊滑板",
+      "instruction": "徒手點這條滑板，選「垂直取出」，舊滑板會放進零件盒。",
+      "toolHint": "徒手",
+      "targetHint": "這條碳滑板",
+      "targetIds": ["part.carbon_strip_{side}"],
+      "hints": { "text": "放下工具，點發亮的滑板，選「垂直取出」。",
+                 "why": "用起子撬會讓托架變形，新滑板就貼合不好。",
+                 "checklist": ["放下工具|tool.active=", "點滑板，選「垂直取出」|part.carbon_strip_{side}.state=InTray"],
+                 "highlightIds": ["part.carbon_strip_{side}"] },
+      "completion": { "type": "AllOf", "all": [
+        { "type": "StateEquals", "key": "part.carbon_strip_{side}.state", "value": "InTray" },
+        { "type": "StateEquals", "key": "part.carbon_strip_{side}.removal", "value": "vertical" }
+      ] },
+      "errors": [
+        { "errorId": "ERR_CSR08_Pry", "severity": "Major", "trigger": "ChoiceEquals", "key": "part.carbon_strip_{side}.removal", "value": "pry",
+          "what": "用起子撬起滑板。", "why": "撬的力量會讓鋁製托架變形，新滑板裝上後貼合不良、接觸不均。", "fix": "改選「垂直取出」。" }
+      ]
+    },
+    {
+      "stepId": "STP_CSR_09_CleanBracket",
+      "refSeconds": [45, 30],
+      "subActions": [
+        { "text": "到車頂工具箱拿起清潔布", "target": "env.tool_rack.slot_8", "done": "tool.active=tool.cleaning_cloth", "why": "車頂工具箱第 8 格", "tool": "tool.cleaning_cloth", "stand": "tp.roof.shelf" },
+        { "text": "來回擦拭托架接觸面", "target": "ip.carbon_strip_{side}.bracket", "done": "ip.carbon_strip_{side}.bracket.clean_ratio>=0.95", "why": "清除率要 ≥ 95%", "tool": "tool.cleaning_cloth", "stand": "tp.roof.{side}" },
+        { "text": "把清潔布放回車頂工具箱", "target": "env.tool_rack.slot_8", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.shelf" }
+      ],
+      "title": "清潔托架",
+      "instruction": "拿清潔布，按住左鍵在露出的托架接觸面上來回擦，直到清除率 ≥ 95%。",
+      "toolHint": "清潔布",
+      "targetHint": "托架上黑色的碳粉區域",
+      "requiredToolId": "tool.cleaning_cloth",
+      "targetIds": ["ip.carbon_strip_{side}.bracket"],
+      "hints": { "text": "按住左鍵在黑色碳粉上來回拖，下方會顯示清除率。",
+                 "why": "碳粉沒擦淨，新滑板會墊高、接觸不良、發熱。",
+                 "checklist": ["到車頂工具箱第 8 格拿起清潔布|tool.active=tool.cleaning_cloth", "清除率達 95%|ip.carbon_strip_{side}.bracket.clean_ratio>=0.95"],
+                 "highlightIds": ["ip.carbon_strip_{side}.bracket"] },
+      "valueTags": ["清除率 95%=示例值"],
+      "completion": { "type": "ValueInRange", "key": "ip.carbon_strip_{side}.bracket.clean_ratio", "min": 0.95, "max": 1.0 },
+      "errors": [
+        { "errorId": "ERR_CSR09_Dirty", "severity": "Major", "trigger": "ChoiceEquals", "key": "spare.{side}.picked", "value": "true",
+          "what": "托架還沒擦乾淨就去拿新滑板準備安裝。", "why": "殘留碳粉會讓新滑板墊高、傾斜，接觸電阻變大、發熱。", "fix": "先把托架擦到清除率 95% 以上，再進行下一步。" }
+      ]
+    },
+    {
+      "stepId": "STP_CSR_10_CheckNew",
+      "refSeconds": [75, 45],
+      "subActions": [
+        { "text": "查看備品架三條標籤", "target": "env.spare_shelf.slot_*", "done": "spare.{side}.viewed_count>=3", "why": "型號要 CS-1100-74A", "tool": "", "stand": "tp.roof.shelf" },
+        { "text": "翻面檢查有無裂紋", "target": "env.spare_shelf.slot_2", "done": "env.spare_shelf.slot_2.flipped", "why": "裂紋在背面", "tool": "", "stand": "tp.roof.shelf" },
+        { "text": "到車頂工具箱拿起游標卡尺", "target": "env.tool_rack.slot_5", "done": "tool.active=tool.caliper", "why": "車頂工具箱第 5 格", "tool": "tool.caliper", "stand": "tp.roof.shelf" },
+        { "text": "量選定新滑板的中點", "target": "env.spare_shelf.slot_2", "done": "env.spare_shelf.slot_2.measured", "why": "要 12.0 ± 0.2 mm", "tool": "tool.caliper", "stand": "tp.roof.shelf" },
+        { "text": "把卡尺放回車頂工具箱", "target": "env.tool_rack.slot_5", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.shelf" },
+        { "text": "拿起選定的新滑板", "target": "env.spare_shelf.slot_2", "done": "spare.{side}.picked", "why": "在檢視視窗按「選用此備品」", "tool": "", "stand": "tp.roof.shelf" }
+      ],
+      "title": "檢查新滑板",
+      "instruction": "到備品架看三條備品的標籤，翻面檢查有沒有裂紋，用卡尺量型號相符那條的中點，確認後按「選用此備品」。",
+      "toolHint": "數位卡尺；檢視備品用徒手",
+      "targetHint": "備品架上的三條備品",
+      "requiredToolId": "tool.caliper",
+      "targetIds": ["env.spare_shelf.slot_*"],
+      "hints": { "text": "徒手點備品看標籤、翻面；到車頂工具箱第 5 格拿卡尺點備品量厚度；確認後按「選用此備品」。",
+                 "why": "型號錯或有裂紋的滑板裝上去，行駛中可能斷裂。",
+                 "checklist": ["找到型號 CS-1100-74A 的備品並翻面檢查", "用卡尺量那條的中點（12.0 ± 0.2 mm）", "選用合格備品|spare.{side}.picked", "厚度在範圍內|spare.{side}.measured_ok"],
+                 "highlightIds": ["env.spare_shelf.slot_*"] },
+      "valueTags": ["型號 CS-1100-74A=示例值", "新品 12.0±0.2 mm=示例值"],
+      "completion": { "type": "AllOf", "all": [
+        { "type": "StateEquals", "key": "spare.{side}.picked", "value": "true" },
+        { "type": "StateEquals", "key": "spare.{side}.measured_ok", "value": "true" }
+      ] },
+      "errors": [
+        { "errorId": "ERR_CSR10_WrongType", "severity": "Critical", "trigger": "ChoiceEquals", "key": "spare.{side}.pick_result", "value": "wrong_type", "blocks": true,
+          "what": "選了型號不符的備品。", "why": "型號不同的滑板尺寸、材質或電流容量不同，裝上會接觸不良甚至斷裂。", "fix": "核對標籤型號與作業單（CS-1100-74A）完全一致再選用。" },
+        { "errorId": "ERR_CSR10_Cracked", "severity": "Critical", "trigger": "ChoiceEquals", "key": "spare.{side}.pick_result", "value": "cracked", "blocks": true,
+          "what": "選了有裂紋的備品。", "why": "有裂紋的碳滑板在行駛中可能斷裂，造成弓網事故。", "fix": "選用前一定翻面檢查，有裂紋的不能使用。" },
+        { "errorId": "ERR_CSR10_NotMeasured", "severity": "Minor", "trigger": "ChoiceEquals", "key": "spare.{side}.pick_result", "value": "not_measured",
+          "what": "沒有先量新滑板厚度就要選用。", "why": "新品厚度不對（不良品或拿錯）會造成兩條高低差。", "fix": "先用卡尺量這條備品的中點，確認 12.0 ± 0.2 mm 再選用。" }
+      ]
+    },
+    {
+      "stepId": "STP_CSR_11_Install",
+      "refSeconds": [35, 20],
+      "subActions": [
+        { "text": "把新滑板移到托架上方", "target": "ip.carbon_strip_{side}.bracket", "done": "part.carbon_strip_{side}.over_bracket", "why": "滑鼠移到發亮的托架上", "tool": "", "stand": "tp.roof.{side}" },
+        { "text": "按 R 讓箭頭朝外", "target": "ip.carbon_strip_{side}.install_check", "done": "part.carbon_strip_{side}.new_orientation=out", "why": "斜面要朝弓頭外側", "tool": "", "stand": "tp.roof.{side}" },
+        { "text": "對準螺栓孔點托架放下", "target": "ip.carbon_strip_{side}.bracket", "done": "part.carbon_strip_{side}.state=NewMounted && part.carbon_strip_{side}.install_distance_cm<=0.5", "why": "吸附後誤差 ≤ 0.5 cm", "tool": "", "stand": "tp.roof.{side}" }
+      ],
+      "title": "安裝新滑板",
+      "instruction": "新滑板拿在手上，按 R 轉向讓斜面（箭頭）朝外，然後點托架放下，4 個螺栓孔對齊就會吸附。",
+      "toolHint": "徒手；R 鍵轉向",
+      "targetHint": "這條滑板的托架",
+      "targetIds": ["ip.carbon_strip_{side}.bracket", "part.carbon_strip_{side}"],
+      "hints": { "text": "按 R 轉到箭頭朝外，再徒手點托架放下。",
+                 "why": "斜面是讓架空線平順滑入的導角，裝反會刮線、跳弓。",
+                 "checklist": ["按 R 讓「此側朝外」箭頭朝外|part.carbon_strip_{side}.new_orientation=out", "徒手點托架放下|part.carbon_strip_{side}.state=NewMounted"],
+                 "highlightIds": ["ip.carbon_strip_{side}.bracket"], "showOutwardArrow": true },
+      "completion": { "type": "StateEquals", "key": "part.carbon_strip_{side}.state", "value": "NewMounted" },
+      "errors": [
+        { "errorId": "ERR_CSR11_Reversed", "severity": "Critical", "trigger": "ChoiceEquals", "key": "part.carbon_strip_{side}.install_result", "value": "WrongOrientation", "blocks": true,
+          "what": "新滑板裝反了（斜面朝內）。", "why": "斜面是讓架空線平順滑入的導角，裝反會讓線撞上直角邊，造成刮線、跳弓。", "fix": "按 R 轉 180°，讓「此側朝外」的斜面朝向弓頭外側再放下。" }
+      ]
+    },
+    {
+      "stepId": "STP_CSR_12_PreTighten",
+      "refSeconds": [90, 50],
+      "subActions": [
+        { "text": "到車頂工具箱拿起套筒扳手", "target": "env.tool_rack.slot_6", "done": "tool.active=tool.socket_wrench", "why": "車頂工具箱第 6 格", "tool": "tool.socket_wrench", "stand": "tp.roof.shelf" },
+        { "text": "從螺栓盤拿 1 號螺栓放回孔位", "target": "ip.carbon_strip_{side}.bolt_1", "done": "ip.carbon_strip_{side}.bolt_1.state=Placed", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "從螺栓盤拿 2 號螺栓放回孔位", "target": "ip.carbon_strip_{side}.bolt_2", "done": "ip.carbon_strip_{side}.bolt_2.state=Placed", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "從螺栓盤拿 3 號螺栓放回孔位", "target": "ip.carbon_strip_{side}.bolt_3", "done": "ip.carbon_strip_{side}.bolt_3.state=Placed", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "從螺栓盤拿 4 號螺栓放回孔位", "target": "ip.carbon_strip_{side}.bolt_4", "done": "ip.carbon_strip_{side}.bolt_4.state=Placed", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "方向切到「鎖」", "target": "", "done": "tool.socket_wrench.dir=lock", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "把 1 號螺栓鎖到貼合", "target": "ip.carbon_strip_{side}.bolt_1", "done": "ip.carbon_strip_{side}.bolt_1.state=Snug", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "把 2 號螺栓鎖到貼合", "target": "ip.carbon_strip_{side}.bolt_2", "done": "ip.carbon_strip_{side}.bolt_2.state=Snug", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "把 3 號螺栓鎖到貼合", "target": "ip.carbon_strip_{side}.bolt_3", "done": "ip.carbon_strip_{side}.bolt_3.state=Snug", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "把 4 號螺栓鎖到貼合", "target": "ip.carbon_strip_{side}.bolt_4", "done": "ip.carbon_strip_{side}.bolt_4.state=Snug", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "把套筒扳手放回車頂工具箱", "target": "env.tool_rack.slot_6", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.shelf" }
+      ],
+      "title": "裝回螺栓並預鎖",
+      "instruction": "套筒扳手方向切到「鎖」，依 1→4 點空孔放回螺栓，再依 1→2→3→4 每支鎖到貼合（約一圈）。",
+      "toolHint": "套筒扳手，方向「鎖」",
+      "targetHint": "這條滑板的 4 個螺栓孔",
+      "requiredToolId": "tool.socket_wrench",
+      "targetIds": ["ip.carbon_strip_{side}.bolt_*"],
+      "hints": { "text": "方向切到「鎖」，點空孔放回螺栓，再每支轉約一圈到貼合，依 1→4。",
+                 "why": "先全部貼合再鎖緊，滑板才不會被拉歪。",
+                 "checklist": ["到車頂工具箱第 6 格拿套筒扳手，方向選「鎖」|tool.socket_wrench.dir=lock", "螺栓 1 貼合|ip.carbon_strip_{side}.bolt_1.state=Snug", "螺栓 2 貼合|ip.carbon_strip_{side}.bolt_2.state=Snug", "螺栓 3 貼合|ip.carbon_strip_{side}.bolt_3.state=Snug", "螺栓 4 貼合|ip.carbon_strip_{side}.bolt_4.state=Snug"],
+                 "highlightIds": ["ip.carbon_strip_{side}.bolt_*"], "showBoltNumbers": true },
+      "completion": { "type": "AllOf", "all": [
+        { "type": "StateEquals", "key": "ip.carbon_strip_{side}.bolt_1.state", "value": "Snug" },
+        { "type": "StateEquals", "key": "ip.carbon_strip_{side}.bolt_2.state", "value": "Snug" },
+        { "type": "StateEquals", "key": "ip.carbon_strip_{side}.bolt_3.state", "value": "Snug" },
+        { "type": "StateEquals", "key": "ip.carbon_strip_{side}.bolt_4.state", "value": "Snug" },
+        { "type": "OrderedSequence", "key": "ip.carbon_strip_{side}.pretighten_order", "expected": "1,2,3,4" }
+      ] },
+      "errors": [
+        { "errorId": "ERR_CSR12_Overtight", "severity": "Major", "trigger": "ChoiceEquals", "key": "ip.carbon_strip_{side}.bolt_{n}.overtight_first", "value": "true", "count": 4,
+          "what": "第一支螺栓就直接鎖死，其他螺栓還沒貼合。", "why": "單邊先鎖死會把滑板拉歪，其他孔對不正，滑板受力不均。", "fix": "按「從這一步重做」，每支先鎖到貼合（約一圈）就停，四支都貼合後再用扭力扳手鎖緊。" },
+        { "errorId": "ERR_CSR12_Order", "severity": "Major", "trigger": "SequenceMismatch", "key": "ip.carbon_strip_{side}.pretighten_order", "expected": "1,2,3,4",
+          "what": "沒有照 1→2→3→4 的順序預鎖。", "why": "不照對角順序，滑板會被拉偏、貼合不平。", "fix": "按「從這一步重做」，照編號 1→2→3→4 預鎖。" }
+      ]
+    },
+    {
+      "stepId": "STP_CSR_13_Torque",
+      "refSeconds": [70, 40],
+      "subActions": [
+        { "text": "到車頂工具箱拿起扭力扳手", "target": "env.tool_rack.slot_7", "done": "tool.active=tool.torque_wrench", "why": "車頂工具箱第 7 格", "tool": "tool.torque_wrench", "stand": "tp.roof.shelf" },
+        { "text": "把扭力設定為 25 N·m", "target": "", "done": "tool.torque_wrench.setting=25", "why": "示例值", "tool": "tool.torque_wrench", "stand": "tp.roof.shelf" },
+        { "text": "鎖 1 號螺栓到喀聲", "target": "ip.carbon_strip_{side}.bolt_1", "done": "ip.carbon_strip_{side}.bolt_1.state=Torqued", "why": "", "tool": "tool.torque_wrench", "stand": "tp.roof.{side}" },
+        { "text": "鎖 2 號螺栓到喀聲", "target": "ip.carbon_strip_{side}.bolt_2", "done": "ip.carbon_strip_{side}.bolt_2.state=Torqued", "why": "", "tool": "tool.torque_wrench", "stand": "tp.roof.{side}" },
+        { "text": "鎖 3 號螺栓到喀聲", "target": "ip.carbon_strip_{side}.bolt_3", "done": "ip.carbon_strip_{side}.bolt_3.state=Torqued", "why": "", "tool": "tool.torque_wrench", "stand": "tp.roof.{side}" },
+        { "text": "鎖 4 號螺栓到喀聲", "target": "ip.carbon_strip_{side}.bolt_4", "done": "ip.carbon_strip_{side}.bolt_4.state=Torqued", "why": "", "tool": "tool.torque_wrench", "stand": "tp.roof.{side}" },
+        { "text": "把扭力扳手放回車頂工具箱", "target": "env.tool_rack.slot_7", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.shelf" }
+      ],
+      "title": "鎖到規定扭力",
+      "instruction": "扭力扳手設定 25 N·m，依 1→2→3→4 在螺栓上按住左鍵，聽到喀聲或看到「到達設定值」就放開。",
+      "toolHint": "扭力扳手",
+      "targetHint": "這條滑板的 4 支螺栓",
+      "requiredToolId": "tool.torque_wrench",
+      "targetIds": ["ip.carbon_strip_{side}.bolt_*"],
+      "hints": { "text": "下方面板把設定調到 25.0；在螺栓上按住左鍵，聽到喀聲就放開。",
+                 "why": "太鬆會鬆脫飛出，太緊會拉傷螺紋或壓裂滑板。",
+                 "checklist": ["到車頂工具箱第 7 格拿起扭力扳手|tool.active=tool.torque_wrench", "設定 25.0 N·m|tool.torque_wrench.setting=25", "螺栓 1 鎖到扭力|ip.carbon_strip_{side}.bolt_1.state=Torqued", "螺栓 2 鎖到扭力|ip.carbon_strip_{side}.bolt_2.state=Torqued", "螺栓 3 鎖到扭力|ip.carbon_strip_{side}.bolt_3.state=Torqued", "螺栓 4 鎖到扭力|ip.carbon_strip_{side}.bolt_4.state=Torqued"],
+                 "highlightIds": ["ip.carbon_strip_{side}.bolt_*"], "showBoltNumbers": true },
+      "valueTags": ["設定 25 N·m=示例值", "合格 23–27 N·m=示例值"],
+      "completion": { "type": "AllOf", "all": [
+        { "type": "ValueInRange", "key": "ip.carbon_strip_{side}.bolt_{n}.torque_Nm", "min": 23, "max": 27, "count": 4 },
+        { "type": "OrderedSequence", "key": "ip.carbon_strip_{side}.torque_order", "expected": "1,2,3,4" }
+      ] },
+      "errors": [
+        { "errorId": "ERR_CSR13_Setting", "severity": "Major", "trigger": "ValueOutOfRange", "key": "ip.carbon_strip_{side}.bolt_{n}.torque_setting", "min": 24.75, "max": 25.25, "count": 4,
+          "what": "扭力扳手的設定值不是 25 N·m。", "why": "設定錯，喀聲時的扭力就是錯的，螺栓會太鬆或太緊。", "fix": "在扭力面板把設定調到 25.0 N·m 再鎖。" },
+        { "errorId": "ERR_CSR13_Under", "severity": "Major", "trigger": "ValueOutOfRange", "key": "ip.carbon_strip_{side}.bolt_{n}.torque_Nm", "min": 23, "max": 1000, "count": 4,
+          "what": "扭力不足（低於 23 N·m）。", "why": "鎖不緊的螺栓在振動下會鬆脫，滑板可能飛脫。", "fix": "在這支螺栓上再按住施力，直到到達設定值。" },
+        { "errorId": "ERR_CSR13_Over", "severity": "Major", "trigger": "ValueOutOfRange", "key": "ip.carbon_strip_{side}.bolt_{n}.torque_Nm", "min": 0, "max": 27, "count": 4,
+          "what": "扭力過大（超過 27 N·m）。", "why": "過鎖會拉傷螺紋或壓裂碳滑板。", "fix": "按「從這一步重做」，聽到喀聲就立刻放開。" },
+        { "errorId": "ERR_CSR13_Order", "severity": "Major", "trigger": "SequenceMismatch", "key": "ip.carbon_strip_{side}.torque_order", "expected": "1,2,3,4",
+          "what": "沒有照 1→2→3→4 的順序鎖扭力。", "why": "順序不對會讓滑板受力不均、貼合不平。", "fix": "按「從這一步重做」，照編號順序鎖。" }
+      ]
+    },
+    {
+      "stepId": "STP_CSR_14_Mark",
+      "refSeconds": [40, 25],
+      "subActions": [
+        { "text": "到車頂工具箱拿起標記筆", "target": "env.tool_rack.slot_9", "done": "tool.active=tool.marker", "why": "車頂工具箱第 9 格", "tool": "tool.marker", "stand": "tp.roof.shelf" },
+        { "text": "在 1 號螺栓畫標記", "target": "ip.carbon_strip_{side}.bolt_1", "done": "ip.carbon_strip_{side}.bolt_1.marked", "why": "", "tool": "tool.marker", "stand": "tp.roof.{side}" },
+        { "text": "在 2 號螺栓畫標記", "target": "ip.carbon_strip_{side}.bolt_2", "done": "ip.carbon_strip_{side}.bolt_2.marked", "why": "", "tool": "tool.marker", "stand": "tp.roof.{side}" },
+        { "text": "在 3 號螺栓畫標記", "target": "ip.carbon_strip_{side}.bolt_3", "done": "ip.carbon_strip_{side}.bolt_3.marked", "why": "", "tool": "tool.marker", "stand": "tp.roof.{side}" },
+        { "text": "在 4 號螺栓畫標記", "target": "ip.carbon_strip_{side}.bolt_4", "done": "ip.carbon_strip_{side}.bolt_4.marked", "why": "", "tool": "tool.marker", "stand": "tp.roof.{side}" },
+        { "text": "把標記筆放回車頂工具箱", "target": "env.tool_rack.slot_9", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.shelf" }
+      ],
+      "title": "畫防鬆標記",
+      "instruction": "拿標記筆，依 1→2→3→4 點每支螺栓，畫上跨螺栓頭與托架的標記線。",
+      "toolHint": "標記筆",
+      "targetHint": "這條滑板的 4 支螺栓",
+      "requiredToolId": "tool.marker",
+      "targetIds": ["ip.carbon_strip_{side}.bolt_*"],
+      "hints": { "text": "拿標記筆依 1→4 點每支螺栓。",
+                 "why": "巡檢時看標記線有沒有錯開，就知道螺栓有沒有鬆。",
+                 "checklist": ["到車頂工具箱第 9 格拿起標記筆|tool.active=tool.marker", "螺栓 1 畫線|ip.carbon_strip_{side}.bolt_1.marked", "螺栓 2 畫線|ip.carbon_strip_{side}.bolt_2.marked", "螺栓 3 畫線|ip.carbon_strip_{side}.bolt_3.marked", "螺栓 4 畫線|ip.carbon_strip_{side}.bolt_4.marked"],
+                 "highlightIds": ["ip.carbon_strip_{side}.bolt_*"], "showBoltNumbers": true },
+      "completion": { "type": "ChecklistAll", "keys": ["ip.carbon_strip_{side}.bolt_1.marked", "ip.carbon_strip_{side}.bolt_2.marked", "ip.carbon_strip_{side}.bolt_3.marked", "ip.carbon_strip_{side}.bolt_4.marked"] },
+      "errors": [
+        { "errorId": "ERR_CSR14_Order", "severity": "Minor", "trigger": "SequenceMismatch", "key": "ip.carbon_strip_{side}.mark_order", "expected": "1,2,3,4",
+          "what": "沒有照順序畫標記。", "why": "照順序可以避免漏畫。", "fix": "照 1→2→3→4 依序畫，確認四支都有線。" }
+      ]
+    },
+    {
+      "stepId": "STP_CSR_15_HeightCheck",
+      "refSeconds": [50, 30],
+      "subActions": [
+        { "text": "到車頂工具箱拿起游標卡尺", "target": "env.tool_rack.slot_5", "done": "tool.active=tool.caliper", "why": "車頂工具箱第 5 格", "tool": "tool.caliper", "stand": "tp.roof.shelf" },
+        { "text": "量肘側新滑板中點", "target": "ip.carbon_strip_L.measure_mid", "done": "ip.carbon_strip_L.measure_mid.new_measured", "why": "", "tool": "tool.caliper", "stand": "tp.roof.inner" },
+        { "text": "量外側新滑板中點", "target": "ip.carbon_strip_R.measure_mid", "done": "ip.carbon_strip_R.measure_mid.new_measured", "why": "", "tool": "tool.caliper", "stand": "tp.roof.outer" },
+        { "text": "兩個讀數填入作業單", "target": "env.work_order", "done": "workorder.height_diff", "why": "差值 ≤ 1.0 mm", "tool": "", "stand": "" },
+        { "text": "把卡尺放回車頂工具箱", "target": "env.tool_rack.slot_5", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.shelf" }
+      ],
+      "title": "確認兩條高低差",
+      "instruction": "兩條都裝好後，用卡尺量兩條新滑板的中點，把讀數抄到作業單「新滑板中點」並送出。兩條差要 ≤ 1.0 mm。",
+      "toolHint": "數位卡尺",
+      "targetHint": "兩條新滑板的中點量測點；作業單",
+      "requiredToolId": "tool.caliper",
+      "targetIds": ["ip.carbon_strip_L.measure_mid", "ip.carbon_strip_R.measure_mid", "env.work_order"],
+      "hints": { "text": "拿卡尺量兩條新滑板的中點，抄到作業單「新滑板中點」並送出。",
+                 "why": "保養表 m1-3：兩條滑板不能有高低差，否則接觸壓力不均。",
+                 "checklist": ["量肘側新滑板中點|ip.carbon_strip_L.measure_mid.new_measured", "量外側新滑板中點|ip.carbon_strip_R.measure_mid.new_measured", "填作業單並送出|workorder.height_diff"],
+                 "highlightIds": ["ip.carbon_strip_L.measure_mid", "ip.carbon_strip_R.measure_mid"] },
+      "valueTags": ["高低差 ≤ 1.0 mm=示例值"],
+      "completion": { "type": "AllOf", "all": [
+        { "type": "ChecklistAll", "keys": ["ip.carbon_strip_L.measure_mid.new_measured", "ip.carbon_strip_R.measure_mid.new_measured"] },
+        { "type": "ReadingMatches", "recordKeys": ["workorder.newmid.L", "workorder.newmid.R"], "readingKeys": ["ip.carbon_strip_L.measure_mid.reading", "ip.carbon_strip_R.measure_mid.reading"], "tolerance": 0.05 },
+        { "type": "ValueInRange", "key": "workorder.height_diff", "min": 0, "max": 1.0 }
+      ] },
+      "errors": [
+        { "errorId": "ERR_CSR15_Exceeds", "severity": "Major", "trigger": "ValueOutOfRange", "key": "workorder.height_diff", "min": 0, "max": 1.0,
+          "what": "兩條新滑板的高低差超過 1.0 mm。", "why": "高低差會讓接觸壓力集中在一條，加速磨耗、產生電弧。", "fix": "檢查托架是否擦乾淨、滑板是否貼合，重新安裝後再量。" },
+        { "errorId": "ERR_CSR15_NotCompared", "severity": "Major", "trigger": "Incomplete", "key": "workorder.newmid.R", "keys": ["ip.carbon_strip_L.measure_mid.new_measured", "ip.carbon_strip_R.measure_mid.new_measured"],
+          "what": "沒有實際量兩條新滑板就填寫高低差。", "why": "沒量就填等於沒有比對，高低差問題會被放過。", "fix": "用卡尺量兩條新滑板的中點，照讀數填寫。" }
+      ]
+    },
+    {
+      "stepId": "STP_WC_01_ToolCount",
+      "refSeconds": [40, 25],
+      "subActions": [
+        { "text": "清點平台工具架與車頂工具箱", "target": "env.tool_rack", "done": "ui.rack_viewed", "why": "平台 1、2 號在架，3 號接地棒與 4 號安全帶＝使用中；車頂工具箱 5–9 號全部在架", "tool": "", "stand": "tp.platform.rack" },
+        { "text": "查看零件盒與兩個螺栓盤", "target": "env.parts_tray", "done": "ui.tray_viewed", "why": "零件盒只剩 2 條舊滑板，兩個螺栓盤都是空的", "tool": "", "stand": "tp.roof.shelf" },
+        { "text": "在作業單按「清點完成」", "target": "env.work_order", "done": "workorder.toolcount_confirmed", "why": "", "tool": "", "stand": "tp.roof.shelf" }
+      ],
+      "title": "工具與零件清點",
+      "instruction": "把工具收回（變成徒手），打開作業單，確認零件盒沒有剩下螺栓，按「確認工具與零件清點」。",
+      "toolHint": "徒手",
+      "targetHint": "作業單 → 收尾清點",
+      "targetIds": ["env.parts_tray", "env.work_order"],
+      "hints": { "text": "收回工具，打開作業單按「確認工具與零件清點」。",
+                 "why": "遺留在車頂的工具或螺栓，升弓或行駛時會掉落。",
+                 "checklist": ["收回工具（平台架與車頂工具箱都要放回）|tools.all_returned", "兩個螺栓盤都空、車頂沒有遺留螺栓|tray.no_loose_bolts", "作業單按確認清點|workorder.toolcount_confirmed"],
+                 "highlightIds": ["env.parts_tray", "env.work_order"] },
+      "completion": { "type": "ChecklistAll", "keys": ["tools.all_returned", "tray.no_loose_bolts", "workorder.toolcount_confirmed"] },
+      "errors": [
+        { "errorId": "ERR_WC01_Leftover", "severity": "Critical", "trigger": "Incomplete", "key": "workorder.toolcount_confirmed", "keys": ["tools.all_returned", "tray.no_loose_bolts"], "blocks": true,
+          "what": "還有工具沒收回或零件盒裡還有螺栓，就確認清點。", "why": "遺留在車頂的工具或螺栓，升弓或行駛時會掉落、打到架空線或旁人。", "fix": "收回工具、確認所有螺栓都已裝回，再按確認。" }
+      ]
+    },
+    {
+      "stepId": "STP_WC_02_LeaveRoof",
+      "refSeconds": [30, 20],
+      "title": "下車頂（預設完成）",
+      "instruction": "安全帶改扣回平台掛點後下車頂。本切片已預先完成。",
+      "toolHint": "安全帶",
+      "targetHint": "平台掛點",
+      "requiredToolId": "tool.safety_harness",
+      "targetIds": ["ip.anchor.platform"],
+      "presetDone": true,
+      "presetStates": ["harness.platform=true", "harness.roof=false", "harness.hooks_count=1", "rack.slot_4=on_rack"],
+      "completion": { "type": "ChecklistAll", "keys": [] },
+      "errors": [
+        { "errorId": "ERR_WC02_Unhooked", "severity": "Critical", "trigger": "ChoiceEquals", "key": "harness.unhooked", "value": "true",
+          "what": "改扣時先解後扣。", "why": "中間完全沒有保護，失足就會墜落。", "fix": "先扣新掛點，再解舊掛點。" }
+      ]
+    },
+    {
+      "stepId": "STP_WC_03_RemoveGround",
+      "refSeconds": [30, 20],
+      "subActions": [
+        { "text": "取下弓頭端掛鉤", "target": "ip.pan_head.ground_clamp", "done": "isolation.head_clamped=false", "why": "拆除先拆弓頭端", "tool": "", "stand": "tp.platform.ground" },
+        { "text": "鬆開接地端子的夾子", "target": "ip.depot.ground_terminal", "done": "isolation.terminal_clamped=false", "why": "", "tool": "", "stand": "tp.platform.ground" },
+        { "text": "把接地棒放回工具架", "target": "env.tool_rack.slot_3", "done": "rack.slot_3=on_rack", "why": "工具架第 3 格", "tool": "", "stand": "tp.platform.rack" }
+      ],
+      "title": "拆除接地",
+      "instruction": "拿接地棒，先點弓頭接地掛點取下，再點平台接地端子取下。",
+      "toolHint": "接地棒",
+      "targetHint": "弓頭接地掛點 → 平台接地端子",
+      "requiredToolId": "tool.grounding_rod",
+      "targetIds": ["ip.pan_head.ground_clamp", "ip.depot.ground_terminal"],
+      "hints": { "text": "拿接地棒，先點弓頭接地掛點取下，再點平台端子取下。",
+                 "why": "先拆端子時，接地棒另一端還接在弓頭，若有電會經過你的手。",
+                 "checklist": ["到工具架第 3 格拿起接地棒|tool.active=tool.grounding_rod", "先取下弓頭接地掛點|isolation.head_clamped=false", "再拆平台接地端子|isolation.terminal_clamped=false", "拆除順序要是 先弓頭、再端子（順序錯了請按「從這一步重做」）|isolation.removal_order=head,terminal"],
+                 "highlightIds": ["ip.pan_head.ground_clamp", "ip.depot.ground_terminal"] },
+      "completion": { "type": "AllOf", "all": [
+        { "type": "StateEquals", "key": "isolation.head_clamped", "value": "false" },
+        { "type": "StateEquals", "key": "isolation.terminal_clamped", "value": "false" },
+        { "type": "OrderedSequence", "key": "isolation.removal_order", "expected": "head,terminal" }
+      ] },
+      "errors": []
+    },
+    {
+      "stepId": "STP_WC_04_Unlock",
+      "refSeconds": [60, 35],
+      "title": "解鎖、恢復（預設完成）",
+      "instruction": "由上鎖者本人解鎖、恢復電源，並在作業單簽名。本切片已預先完成。",
+      "toolHint": "上鎖掛牌組",
+      "targetHint": "主斷路器、升弓開關",
+      "requiredToolId": "tool.lockout_tag",
+      "targetIds": ["ip.cab.breaker", "ip.cab.raise_switch"],
+      "presetDone": true,
+      "presetStates": ["lockout.breaker=open", "lockout.raise_switch=open", "lockout.key_holder=", "cab.cylinder_power=on", "workorder.unlock_signed=true"],
+      "completion": { "type": "ChecklistAll", "keys": [] },
+      "errors": [
+        { "errorId": "ERR_WC04_NotSigned", "severity": "Minor", "trigger": "ChoiceEquals", "key": "workorder.unlock_signed", "value": "false",
+          "what": "解鎖後沒有在作業單簽名。", "why": "沒有紀錄就無法追蹤誰在什麼時候恢復送電。", "fix": "解鎖者本人在作業單簽名。" }
+      ]
+    }
+  ],
+  "safetyRules": [
+    { "ruleId": "SR_Global_NotLowered", "errorId": "ERR_Global_NotLowered", "kind": "NotLowered",
+      "what": "弓頭還沒降下（或還沒親眼確認降弓）就碰弓體。",
+      "why": "升起的弓頭連著架空線的高壓電，碰到會觸電；弓體也可能突然動作夾傷你。",
+      "fix": "先完成「確認降弓」：親眼看弓頭已降到底，並查看控制盤指示燈。" },
+    { "ruleId": "SR_Global_NotGrounded", "errorId": "ERR_Global_NotGrounded", "kind": "NotGrounded",
+      "what": "還沒掛好接地就碰弓體。",
+      "why": "即使已斷電，弓體可能殘留電荷或被誤送電；沒有接地，電流會經過你的身體。",
+      "fix": "先驗電，再依「端子 → 拉線確認 → 弓頭」掛好接地棒，才能碰弓體。" },
+    { "ruleId": "SR_Ground_Order", "errorId": "ERR_Ground_Order", "kind": "GroundOrder",
+      "what": "還沒夾平台接地端子，就先把接地棒掛上弓頭。",
+      "why": "先掛弓頭端時，若弓體帶電，電流會經過手上的接地棒與你的身體。",
+      "fix": "一定先夾平台接地端子，拉線確認後，再掛弓頭接地掛點。" },
+    { "ruleId": "SR_Ground_NoVoltageTest", "errorId": "ERR_Ground_NoVoltageTest", "kind": "NoVoltageTest",
+      "what": "還沒驗電就開始掛接地。",
+      "why": "不確定是否無電就接地，帶電時會產生強烈電弧，造成灼傷。",
+      "fix": "先用驗電器（自檢後）確認弓頭無電，再掛接地。" },
+    { "ruleId": "SR_Ground_RemoveOrder", "errorId": "ERR_Ground_RemoveOrder", "kind": "RemoveOrder",
+      "what": "弓頭端還掛著，就先拆平台接地端子。",
+      "why": "先拆端子時，接地棒另一端仍接在弓頭，若此時有電，電流會經過你手上的接地棒。",
+      "fix": "拆除順序和掛接相反：先取下弓頭端，再拆平台端子。" }
+  ],
+  "scenarios": [
+    { "scenarioId": "SCN_Default", "title": "正常（兩條都要換）", "description": "開場弓是升起的，先用升降控制器降弓；肘側最小 2.8 mm，需兩條一起更換。",
+      "initialStates": ["part.carbon_strip_L.true.left=3.4", "part.carbon_strip_L.true.mid=2.8", "part.carbon_strip_L.true.right=3.1",
+                        "part.carbon_strip_R.true.left=4.2", "part.carbon_strip_R.true.mid=3.8", "part.carbon_strip_R.true.right=4.0",
+                        "spare.L.true_mid=12.0", "spare.R.true_mid=12.0"], "randomSeed": 1, "startRaised": true },
+    { "scenarioId": "SCN_NotGrounded", "title": "未接地直接拆（E2）", "description": "試著在掛接地前碰滑板或螺栓，系統會擋下並說明。",
+      "initialStates": ["part.carbon_strip_L.true.left=3.4", "part.carbon_strip_L.true.mid=2.8", "part.carbon_strip_L.true.right=3.1",
+                        "part.carbon_strip_R.true.left=4.2", "part.carbon_strip_R.true.mid=3.8", "part.carbon_strip_R.true.right=4.0",
+                        "spare.L.true_mid=12.0", "spare.R.true_mid=12.0"], "randomSeed": 3, "startRaised": true, "practiceOnly": true },
+    { "scenarioId": "SCN_BothOK", "title": "兩條都合格（E6c）", "description": "兩條都還在標準內，應判定合格、不需更換。",
+      "initialStates": ["part.carbon_strip_L.true.left=4.5", "part.carbon_strip_L.true.mid=4.1", "part.carbon_strip_L.true.right=4.3",
+                        "part.carbon_strip_R.true.left=4.2", "part.carbon_strip_R.true.mid=3.8", "part.carbon_strip_R.true.right=4.0",
+                        "spare.L.true_mid=12.0", "spare.R.true_mid=12.0"], "randomSeed": 4, "startRaised": true, "practiceOnly": true }
+  ],
+  "tools": [
+    { "toolId": "tool.voltage_detector", "displayName": "驗電器", "hotkey": 2, "parameters": ["display=無電/有電"],
+      "pages": [
+        { "title": "用途", "body": "確認弓頭真的沒電。接地前一定要先驗電。" },
+        { "title": "第一步：自檢", "body": "點工具台上的「驗電器自檢器」。看到綠燈、聽到嗶聲，代表驗電器正常。" },
+        { "title": "第二步：量測", "body": "點弓頭接地掛點，畫面會顯示「無電」或「有電」。" },
+        { "title": "注意", "body": "沒自檢就量，結果不可信：壞掉的驗電器也會顯示無電。" }
+      ] },
+    { "toolId": "tool.grounding_rod", "displayName": "接地棒", "hotkey": 3, "parameters": [],
+      "pages": [
+        { "title": "用途", "body": "把弓體接到大地，萬一有電時電流走接地線而不是你。" },
+        { "title": "掛接順序", "body": "① 點平台接地端子（黃綠）夾上 → ② 按下方「拉線確認」→ ③ 點弓頭接地掛點掛上。" },
+        { "title": "拆除順序", "body": "和掛接相反：① 點弓頭掛點取下 → ② 點平台端子取下。" },
+        { "title": "注意", "body": "先掛弓頭、或先拆端子，都會被系統擋下，因為那時電流可能經過你的身體。" }
+      ] },
+    { "toolId": "tool.caliper", "displayName": "數位卡尺", "hotkey": 5, "parameters": ["resolution=0.01", "noise=0.02", "unzeroed_offset=0.30"],
+      "pages": [
+        { "title": "用途", "body": "量碳滑板厚度，解析度 0.01 mm。" },
+        { "title": "歸零", "body": "按「合攏量爪」（或滾輪轉到 0），再按 ZERO，螢幕顯示 0.00。沒歸零的讀數會多 0.30 mm（示例值）。" },
+        { "title": "量測", "body": "拿著卡尺點滑板上的量測點，量爪會自動吸附並顯示讀數。滾輪可以開合量爪。" },
+        { "title": "抄寫", "body": "讀數只顯示在卡尺上，請自己抄到作業單（右上「打開作業單」），差 0.05 mm 以內才算正確。" }
+      ] },
+    { "toolId": "tool.socket_wrench", "displayName": "套筒扳手", "hotkey": 6, "parameters": ["sockets=10,13,17", "correct=13", "deg_per_notch=45"],
+      "pages": [
+        { "title": "用途", "body": "鬆開與預鎖碳滑板固定螺栓（M8，示例值）。" },
+        { "title": "設定", "body": "下方面板選套筒尺寸（10／13／17 mm，正確是 13 mm）與方向（鬆／鎖）。" },
+        { "title": "旋轉", "body": "點螺栓套上後，滾輪每格轉 45°，或按住左鍵左右拖曳。半圈＝180°。" },
+        { "title": "取出與放回", "body": "螺栓轉到脫出後再點一下＝收進零件盒。方向是「鎖」時點空孔＝從零件盒放回螺栓。" }
+      ] },
+    { "toolId": "tool.torque_wrench", "displayName": "扭力扳手", "hotkey": 7, "parameters": ["range=5-50", "step=0.5", "rise_per_second=8"],
+      "pages": [
+        { "title": "用途", "body": "把螺栓鎖到規定扭力（本切片 25 N·m，示例值）。" },
+        { "title": "設定", "body": "下方面板按 −0.5／+0.5 或輸入數值，範圍 5–50 N·m。" },
+        { "title": "施力", "body": "在已預鎖的螺栓上按住左鍵，扭力每秒增加 8 N·m。" },
+        { "title": "喀聲就放", "body": "到達設定值會喀一聲、扳手閃色並顯示「到達設定值」，立刻放開。按太久會繼續上升造成過鎖。" }
+      ] },
+    { "toolId": "tool.cleaning_cloth", "displayName": "清潔布", "hotkey": 8, "parameters": ["required_ratio=0.95"],
+      "pages": [
+        { "title": "用途", "body": "清除托架接觸面上的碳粉。" },
+        { "title": "操作", "body": "按住左鍵在托架上黑色的區域來回拖曳，擦過的格子會變乾淨。" },
+        { "title": "標準", "body": "清除率要達到 95%（示例值），下方面板會顯示目前清除率。" }
+      ] },
+    { "toolId": "tool.marker", "displayName": "標記筆", "hotkey": 9, "parameters": [],
+      "pages": [
+        { "title": "用途", "body": "在鎖好扭力的螺栓上畫防鬆標記線。" },
+        { "title": "操作", "body": "依 1→2→3→4 點每支螺栓，會畫出跨螺栓頭與托架的紅線。" },
+        { "title": "為什麼", "body": "巡檢時只要看標記線有沒有錯開，就知道螺栓有沒有鬆動。" }
+      ] },
+    { "toolId": "tool.lockout_tag", "displayName": "上鎖掛牌組", "hotkey": 1, "parameters": [],
+      "pages": [
+        { "title": "用途", "body": "鎖住主斷路器與升弓開關，防止別人在你作業時送電或升弓。" },
+        { "title": "操作", "body": "拿著上鎖掛牌組點開關，狀態會變成「已上鎖＋掛牌」，鑰匙在你身上。" },
+        { "title": "本切片", "body": "上鎖掛牌已預先完成，可在控制盤面板查看狀態。" }
+      ] },
+    { "toolId": "tool.safety_harness", "displayName": "安全帶", "hotkey": 4, "parameters": [],
+      "pages": [
+        { "title": "用途", "body": "車頂作業的防墜保護，有兩個掛鉤。" },
+        { "title": "改扣原則", "body": "先扣新掛點、再解舊掛點，任何時刻至少一個扣著。" },
+        { "title": "本切片", "body": "上車頂與下車頂的改扣已預先完成。" }
+      ] }
+  ]
+}

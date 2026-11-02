@@ -1,0 +1,15 @@
+﻿段：S9 T3 面板固定在世界、左握把抓把手移動
+改動：新增 Data/Definitions/PanelLayout.cs（可移動面板 board／dialog 的預設位置〔相對站點〕、叫回距離 1.2 m／30°、把手 0.20×0.03×0.03 m 亮橘；資產 Assets/_Project/Modules/XR/Resources/PanelLayout.asset）。
+      新增 Modules/XR/PanelLogic.cs（FaceHead 放開後只留水平轉向並面向頭、Recall 叫回眼前、ToLocal／FromLocal、PanelMemory 各面板各站點記位置）。
+      新增 Modules/XR/XrPanels.cs（面板上緣加 UI_PanelHandle：握紋、hover 發亮、XRGrabInteractable Kinematic／不受重力／throwOnDetach 關、Interaction Layer PanelHandle；背面不透光底板；
+      換站時套用該站存的位置或預設；放開時轉正、記位置、發 PanelMoved；xr.panels.recall＝叫回眼前；重播照 xr.panel.replay.<id> 擺）。
+      Core 新事件 PanelMoved(panelId, standPointId, x, y, z, yaw)。紀錄：SessionRecorder 寫 PanelMoved 行；RecordFiles.SchemaVersion 2 → 3；ReplayTimeline.PanelPosesAt、ReplayPlayer 把面板位置寫給 XrPanels（舊檔沒有 PanelMoved 照樣能重播）。
+      UI XrPanelLayout：把提示板與對話框登記到 SceneRegistry（xr.panel.board／dialog）；XrPanels 接手後不再自動擺提示板、不再讓對話框跟著頭（舊的 35° 跟隨），對話框每次打開時放到頭前 1 m。
+      XrRigBuilder：左手加 PanelGrab（XRDirectInteractor，只抓 PanelHandle）、右手射線排除 PanelHandle、加 XrPanels。
+      ≡ 選單與手腕面板加「面板叫回眼前」；控制器教學加「用左握把抓住面板上緣的橘色把手，移一下再放開」（PanelMoved 算完成），後面各步編號往後移。
+      新增 Tests/EditMode/PanelLayoutTests.cs（5 個）。改寫舊測試：JudgementConsistencyTests 裡「SchemaVersion＝2」的斷言改成「≥ 2」（schema 升到 3）。
+與規格不同：「讀數面板」沒有另外做把手（卡尺讀數在左手腕面板上，跟著手）；規格說的「轉身超過 50° 瞬移回視野」在程式裡是對話框的 35° 跟隨，XrPanels 接手時停用。
+風險：把手位置、抓取手感、底板與面板的前後順序只能戴頭盔驗（terry 驗收第 10 項）。
+測試：207/207，Console 紅字 0（只有測試裡預期的 LogError）；桌面 25 步跑完（Recordings/20261102_145933_驗證學員）
+未檢查：頭盔實機
+補（S10 截圖時發現）：面板底板與把手原本照整塊 Canvas 的大小（提示板 Canvas 高 1000 單位，底板拖到面板下方很長）；改成每幀照面板上顯示中的內容範圍擺把手與底板（XrPanels.ContentBounds）。測試 208/208。

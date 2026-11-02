@@ -1,0 +1,561 @@
+﻿# 碳滑板更換切片 建置報告（SliceBuildReport）
+
+## W00 確認弓頭拆分 — 完成
+- PantographRigReport.txt 有「弓頭拆分」段落；Logs/rig_panhead_top.png、rig_panhead_end.png 存在（2026-10-13 17:43）。
+- 座標為可動模型原始空間（X＝橫向、Y＝上、Z＝行車方向）；場景中整體平移，程式一律以物件實際位置計算，不寫死。
+- 肘側 _L ＝ CarbonStrip_2：中心 (-0.724, 1.096, -0.763)，尺寸 1.102 × 0.016 × 0.074 m。肘關節在 +Z 側（升弓時肘點 z≈+0.77，弓頭鉸接 z≈-0.91，弓頭始終水平），CarbonStrip_2 較靠肘側。
+- 外側 _R ＝ CarbonStrip_1：中心 (-0.724, 1.096, -1.063)，尺寸同上。
+- 「外」（斜面側）定義：遠離弓頭中心線（z = -0.913）的一側。_L 的外 = +Z，_R 的外 = -Z。截面是否不對稱由 W05 從網格量測確認；若對稱，貼「此側朝外」箭頭。
+- StripCarrier_1/2：x 從 -1.558 到 0.110（長 1.667 m，含羊角），中心 y 0.984，頂面 y≈1.092；z 同各自滑板。
+- 碳滑板端點：x -1.275 與 -0.173；量測點（距端 15 cm）x = -1.125 / -0.724 / -0.323。
+- 原 FBX 未變動；羊角不拆。
+## W01 Core — 完成
+- Assets/_Project/Core（PantographSim.Core，無依賴，Auto Referenced 關閉）
+- 介面：ISimObject、IInteractable、IMeasurable、IToolTarget、IActionGuard（ActionRequest→GuardResult）、IStepGate、ISceneLocator
+- 事件 struct（皆含 targetId/pointId/toolId/value/text/time）：ActionRequested、ActionPerformed、ActionBlocked、MeasurementTaken、RecordWritten、StateChanged、StepStarted、StepCompleted、ErrorDetected、ProcedureCompleted、ToolSelected；另加 RestartStepRequested、HighlightRequested
+- 服務：EventBus、SimState（Snapshot/Restore 只對差異發 StateChanged）、ServiceLocator、CompositeActionGuard、CompositeStepGate、PointerState、SimClock
+- 測試 CoreTests 5/5 通過
+
+## W02 Data — 完成
+- Assets/_Project/Data（PantographSim.Data → Core）
+- StepDefinition／ProcedureDefinition／ToolDefinition／ScenarioDefinition／SafetyRuleDefinition（ScriptableObject，各自一檔）
+- CompletionRule（[SerializeReference]）：StateEquals、ChecklistAll、OrderedSequence、ValueInRange（{side}、bolt_{n} 展開）、Decision、ReadingMatches、ProcedureDone、AllOf
+- ErrorRule：errorId、severity、what/why/fix、trigger（7 種）、blocks；HintSet；ValueTag（保養表值／示例值）
+- ProcedureJson + ProcedureJsonConverter（JSON → 資產；W12 匯入器與 W14 測試共用）
+- 測試 DataTests 4/4 通過（含 SerializeReference 序列化後子類別與欄位不遺失）
+- 基礎建設：加入 com.unity.test-framework 1.1.33；Editor 腳本改為 PantographSim.Editor asmdef；TestRunHook（Editor 開著時用 Logs/run-tests.request 觸發 EditMode 測試，結果寫 Logs/slice-tests.xml / .txt）
+## W03 Procedures — 完成
+- Modules/Procedures（PantographSim.Procedures → Core、Data）
+- ProcedureRunner：展開 repeatBlock（CSR_06–14 先 L 後 R，RunId 加 _L/_R）、presetDone 開場寫入 presetStates 並標完成、onPass 跳轉（中間步驟標 skipped）、每步開始存 Snapshot、RestartCurrentStep（也接 RestartStepRequested 事件）、判定前問 IStepGate、發 StepStarted（含第 n/25、側別標籤、目標）、HighlightRequested、StepCompleted、ProcedureCompleted
+- Evaluators：每種 CompletionRule 一個（StateEquals、ChecklistAll、OrderedSequence、ValueInRange、Decision、ReadingMatches、ProcedureDone、AllOf）
+- ErrorDetector：依 ErrorRule 觸發（ValueOutOfRange、SequenceMismatch、ActionBefore、Incomplete、ChoiceEquals＋whenAnswer），每步每個錯誤一次、重做後重置；同時是 IActionGuard：拿錯工具／點錯弓體目標 → Minor 並擋下（不改變零件狀態）
+- 測試 ProcedureTests 7/7 通過（展開順序、預設完成、正常路徑、合格跳轉、錯誤判定不前進、重做還原、Incomplete、拿錯工具/目標）；全部測試 16/16
+## W04 Safety — 完成
+- Modules/Safety（PantographSim.Safety → Core、Data）；SafetyGuard 實作 IActionGuard ＋ IStepGate，規則文字來自 SR_*（SafetyRuleDefinition，W12 匯入產生）
+- SR_Global_NotLowered（E1）：pose≠Lowered 或 SI_01 未完成時碰弓體 → 擋；徒手「查看」弓頭（SI_01 本身）放行
+- SR_Global_NotGrounded（E2）：isolation.grounded≠true 時碰弓體 → 擋
+- SR_Ground_Order（E3）：端子未夾就掛弓頭 → 擋；SR_Ground_NoVoltageTest（E13）：未驗電就夾端子 → 擋；SR_Ground_RemoveOrder（E16）：弓頭端還掛著就拆端子 → 擋
+- 被擋：不執行，發 ActionBlocked ＋ Critical ErrorDetected（blocks=true，含做錯什麼／為什麼／怎麼改）；不評分
+- StepGate：未降弓／未接地時 CSR 步驟不判定完成
+- 共用 ID 常數 Core/Services/SimIds.cs（弓體判定集中一處）
+- 測試 SafetyTests 8/8（每條規則擋下＋放行），全部 24/24
+## W06 Parts — 完成（程式；外觀由 W05/W13 產生後以渲染圖驗證）
+- Parts/_Common（PantographSim.Parts.Common → Core、Data）：InteractionPointMarker（ID、名稱、預設動作、登錄位置）、PartBehaviour（狀態寫 <partId>.*、畫面依黑板更新→重做還原外觀跟著回來；徒手「查看」寫 .inspected）、Highlightable（MaterialPropertyBlock 逐材質調色：滑過淡青、提示黃色脈動）
+- FastenerLogic／FastenerBehaviour：Tight→Loosened(≥150°)→Out(≥720°)→InTray→Placed→Snug(鎖 ≥360°)→Torqued；套筒非 13 mm 記 wrong_socket 且不轉；其他螺栓未貼合前先鎖超過 540° 記 overtight_first；四種順序鍵 loosen/pretighten/torque/mark_order
+- StripLogic／RemovableBehaviour：螺栓未全部取出不能拿滑板；撬起記 removal=pry 不執行；垂直取出→零件盒；備品選定後拿在手上、預設方向反（斜面朝內），R 轉向；InstallSnap：方向不對一律不吸附並記 install_result=WrongOrientation，4 孔偏差 >1 cm 記 NotAligned；吸附後真實厚度改為新品值
+- DirtMask：16×4 格碳粉遮罩，clean:u,v 清除，寫 dirt 與 clean_ratio；只在滑板拆下時顯示
+- Parts/CarbonStrip（→ Core、Data、Parts.Common）：CarbonStripBehaviour 實作 IMeasurable（真實值鏡射到量測點 .true；量完寫 .reading/.measured/.new_measured）、StripLabel（型號、裂紋）
+- Parts/Mechanism：PantographPoseReporter 包裝既有 PantographMechanism，寫 part.pan_head.pose；情境 start_raised 開場升弓；只有 training.allow_pose_toggle=true 時空白鍵可升降弓（教學模式停用）
+- 測試 PartsTests 7/7，全部 31/31
+## W07 Tools — 完成（程式；教學內容於 W12 資料補齊後驗證）
+- Modules/Tools（PantographSim.Tools → Core、Data），每種工具一個子資料夾（Scripts/，TL_ 資產與 primitive 模型由 W12/W05 產生）
+- _Common：ToolBase（改變狀態前先 Ask IActionGuard；結果以 ActionPerformed 交給零件）、ToolBelt（數字鍵 1–9、0/Esc 收回、介面指令轉送、滾輪占用）、ToolTutorialTrigger（第一次拿起顯示 3–5 頁教學）、ToolInventory（tools.all_returned；程式產生嗶聲/喀聲）、ToolLogic（純函式）
+- VoltageDetector（自檢→綠燈＋嗶聲＋時間；量掛點→無電；未自檢量測記 voltage_measured 但不算驗電）
+- GroundingRod（端子→拉線確認→弓頭；拆除反序；沒拉線就掛記 clamped_without_pulltest）
+- Caliper（滾輪開合、合攏才能 ZERO、吸附量測點、0.01 mm、±0.02 雜訊、未歸零 +0.30、發 MeasurementTaken）
+- SocketWrench（10/13/17、鬆/鎖、滾輪 45°/格或拖曳 1.5°/px 累計；脫出點擊＝收進零件盒；鎖方向點空孔＝放回）
+- TorqueWrench（設定 ±0.5、5–50；按住每秒 +8；到值喀聲＋閃色＋「到達設定值」；放開記錄；過了繼續上升）
+- CleaningCloth（拖曳送 clean:u,v）、Marker（已鎖扭力才可畫）、LockoutTag、SafetyHarness（點擊切換）
+- 測試 ToolTests：卡尺讀數、扭力上升與到值、套筒尺寸通過；「每個工具 3–5 頁教學」待 W12 步驟資料（目前預期失敗 1 項）
+## W08 Worksite — 完成（程式）
+- Modules/Worksite（PantographSim.Worksite → Core、Data）：SiteObject（Worksite 自己的可點物件，實作 Core 的 IInteractable，不引用 Parts）
+- ControlPanel（點方塊開 2D 面板；弓位指示燈點過記 ip.cab.indicator.checked）、GroundTerminal（端子／弓頭掛點的接地夾外觀與接地線）、VoltageTesterStand（自檢器綠燈）
+- PartsTray（tray.bolts / tray.old_strips / tray.items，數量標籤與圖示）
+- SpareShelf（3 條：1 型號不符 CS-1100-64B、1 正確 CS-1100-74A、1 正確型號但背面裂紋；先量中點才能選用；型號錯／裂紋／未量都不讓拿並記 pick_result；換外側時補貨）
+- WorkOrder（兩條三點讀數、送出、四選一判定 both/L/R/pass、新品中點、簽名；與卡尺讀數差 >0.05 記 mismatch；自動算高低差；發 RecordWritten）
+- 測試 WorksiteTests 5/5
+
+## W09 Interaction — 完成（最小版）
+- Picker（射線、滑過高亮與名稱 ui.hover_name、左鍵送 ActionRequested；徒手用物件預設動作，弓頭為「查看」；介面上或暫停時不送）
+- DragPlace（R 旋轉 180°，送 carried/rotate180；放下＝點托架，由零件判斷吸附）
+- InspectMode（F 拉近檢視滑鼠下的物件、Esc 返回）
+- OrbitCameraController 沿用：新增「只用右鍵環繞」選項（左鍵留給點選）、介面上不轉、工具占用滾輪時不縮放；PlayerController（WASD）延後
+- 工具收回改為 0 或  鍵（Esc 留給檢視返回）
+
+## W10 Training — 完成
+- ModeController（教學／練習；情境寫入初始讀數、seed、start_raised；只有練習＋升弓情境才允許空白鍵升降弓）
+- HintService（每步寫 hint.*；教學模式才高亮、螺栓編號、朝外箭頭）
+- ErrorFeedback（三段說明寫 ui.error.*；Critical 暫停，只能「從這一步重做」→ RestartStepRequested；較輕錯誤不覆蓋 Critical）
+- Scoring（同步驟同錯誤只計一次；100−2×Minor−5×Major−15×Critical（示例值）；有 Critical 不通過；用時）
+- 測試 TrainingTests 5/5；全部 44 通過，1 項（工具教學）待 W12
+## W11 UI — 完成（IMGUI，字型 Microsoft JhengHei／YaHei／Arial Unicode MS 18）
+- TaskCard（目標、工具、安全重點、操作鍵、數值說明；教學模式／4 個練習情境）、StepPanel（第 n/25 步＋總進度 k/34、大字側別、做什麼／用什麼／點哪裡、提示、數值標籤）、ToolBar＋Readout（9 種工具各自的讀數與設定）、ErrorDialog（三段說明、Critical 只能「從這一步重做」）、WorkOrder、ControlPanel、Tutorial、Result、取出方式／備品檢視／零件盒小視窗、螺栓編號與「此側朝外」疊圖（教學模式）
+- UI 只引用 Core（DataValidator 已檢查）；作業單輸入框打字時數字鍵不切換工具
+
+## W12 步驟資料 — 完成
+- Modules/Procedures/Data/carbon_strip_slice.json：25 步（SI 6、CSR 15、WC 4；CSR_06–14 兩側展開共 34 個執行步驟），41 條錯誤規則皆含 what/why/fix；SI_02/03/06、WC_02/04 預設完成（狀態在流程走到時才寫入）；數值標籤（3.0 mm＝保養表值，其餘＝示例值）
+- 5 條安全規則、4 個情境（正常／升弓未降／未接地／兩條都合格）、9 個工具（各 3–4 頁教學、熱鍵 1–9）
+- StepJsonImporter（PantographSim/Slice/Import Steps）→ STP_*×25、PRC_CarbonStripSlice、SR_*×5、SCN_*×4、TL_*×9（覆寫保留 GUID）
+- DataValidator（PantographSim/Slice/Validate Data）：結果通過（ID 不重複、目標都在場景、教學 3–5 頁、三段說明、UI 只引用 Core、功能層互不引用、Auto Referenced 關閉）
+
+## W05 模型 — 完成
+- SliceModelBuilder（PantographSim/Slice/Build Models）：PF_CarbonStrip_L/_R（軸心中心、+X 長邊、+Z 朝外）、PF_StripBolt（M8×25 六角頭對邊 13 mm＋墊圈＋螺桿＋標記線）、3 量測點、4 螺栓孔、「此側朝外」箭頭
+- 截面量測：頂面兩側同高（7.8 mm）→ 左右對稱，已加貼朝外箭頭
+- 圖：Logs/rig_slice_strip_L.png、rig_slice_bolts.png（俯視含 L1–L4／R1–R4 編號）、rig_slice_shelf.png
+
+## W13 App 與場景 — 完成
+- SliceBootstrap（唯一組裝點）＋ SliceSceneBuilder（PantographSim/Slice/Build Scene）
+- 場景：Assets/_Project/Content/Scenes/SC_CarbonStripSlice.unity（Build Settings 第 0 位），30 個互動物件；預覽 Logs/rig_slice_scene.png
+
+## W14 整體驗證 — 完成
+- SliceDryRunTests 26 項：正常 25 步（34 執行步驟）零錯誤完成、合格跳收尾；E1/E2/E3/E13/E16 擋下且 Critical；E5/E6/E8/E9/E10 有回饋且不能過關；其餘錯誤（指示燈only、未自檢、未拉線、未歸零、抄錯、拿錯工具、套筒錯／順序／一支到底、撬起、沒擦淨、型號錯／裂紋、先鎖死、高低差、清點遺留、扭力設定錯）皆有 ErrorDetected
+- 全部 EditMode 測試 71/71 通過；Unity 編譯 0 錯誤 0 警告；結果 Logs/slice-tests.xml、slice-tests.txt
+- 未驗證：無法按 Play，實際滑鼠操作手感、IMGUI 版面需在 Play 中確認；PlayerController（WASD）延後
+## 場景擺放檢查（2026-10-15 15:45）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.01, 0.78, 0.13)、尺寸 (1.67, 2.93, 2.31)
+✔ 工作桌：不相交，水平間距 1.00 m（需 ≥ 1.0 m）
+✔ 工具架：不相交，水平間距 0.75 m
+✔ 備品架：不相交，水平間距 0.56 m
+✔ 控制盤：不相交，水平間距 0.37 m
+✔ 接地端子：不相交，水平間距 0.44 m
+
+
+## 場景擺放檢查（2026-10-15 15:48）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.01, 0.78, 0.13)、尺寸 (1.67, 2.93, 2.31)
+✔ 工作桌：不相交，水平間距 1.00 m（需 ≥ 1.0 m）
+✔ 工具架：不相交，水平間距 0.75 m
+✔ 備品架：不相交，水平間距 0.56 m
+✔ 控制盤：不相交，水平間距 0.37 m
+✔ 接地端子：不相交，水平間距 0.44 m
+
+
+## W15 v5 小動作＋工程審查修正（2026-10-15）
+- 修復：MarkerView／PanelViews／UiCaptureDriver 三檔重寫（先前被文字取代弄壞）；離線編譯 102 檔 0 錯誤
+- 升降：介面／鍵盤只寫 ctrl.lift.cmd（Up/Down/Stop）；Parts.Mechanism 新增 LiftDriver 讀取並依 LiftSettings 積分；氣缸電源關時忽略 Up；放開、移出按鈕、視窗失焦都 Stop；Interaction 新增 LiftKeys（PageUp/PageDown、↑/↓）；移除 LiftControlUnit
+- 位置檢測：PositionCheck 只寫 _distance_cm 與帶正負號 _delta_cm；容許值單一來源 SR_Global_NotLowered（App 寫 part.pan_head.lower_tolerance_cm）；條件支援「<=」（數字或另一個鍵）；狀態還原後立即寫回實際距離
+- 工具架：掛位發 ToolPickRequested／ToolReturnRequested，工具列訂閱；「帶我過去」改發 FocusRequested
+- 小動作：所有模式都要求（教學模式才顯示）；↶ 上一步改為快照比對，只有工具／工具架／介面／控制器的改變可退回並還原；展開後共 144 個小動作（測試鎖定）
+- 重設卡尺＝回到未歸零；從這一步重做不會抹掉錯誤數（score.* 保留）；頂列顯示錯誤數
+- 情境全部從升弓開始，移除 SCN_RaisedNotLowered；場景存成升弓姿態；開始後等姿態套用完成才開始判定（修正第一個小動作被舊姿態誤判完成）
+- EditMode 測試 92/92 通過；場景重建、擺放檢查通過（升降全程不相交）、資料檢查通過、49 個互動物件
+- 自動 Play 截圖（Logs/ui_*.png）：教學模式從任務卡一路走到 CSR_13 扭力，只出現刻意觸發的 ERR_Ground_Order
+- 作業單改為置中對話框（左右兩欄、背後半透明遮罩，標題列顯示卡尺讀數）；打開時工具面板與升降控制器自動收起，關閉後再出現；Game 視窗放大 >1.2 倍時收起右下操作說明
+- 升降控制器只在降弓步驟、未在降弓位置或升降中顯示
+- 截圖改為場景與介面分兩台攝影機繪製（介面不再被貼近鏡頭的模型穿過）；重截 ui_09（1.5x 扭力）、ui_09b（1.5x 作業單）、ui_13（作業單對話框）：作業單與工具面板不再重疊
+- 小動作 144 個為正確數字：另 22 個屬於 5 個預設完成步驟（SI_02 5、SI_03 2、SI_06 6、WC_02 3、WC_04 6），開場即完成、不顯示，故不列入
+- 維持條件字串（不重構 SubActionGroup，技術債由軟體工程記錄）；版面檢查在建置時做
+- 全部 EditMode 測試 92/92 通過
+- 工具面板（扭力、卡尺、套筒等）固定在底部工具列正上方、置中、最大寬 820；可視寬度 < 1500 時改精簡版（收起標題與說明，只留讀數、設定值、合格區間與按鈕，「喀」併入同一行）；每幀量位置，壓到步驟面板或升降控制器就往空側挪、必要時縮窄（最窄 480）
+- 自動截圖每張都檢查步驟面板／工具面板／升降控制器是否重疊：21 張全部「面板不重疊」，含 ui_08（1x 扭力）與 ui_09（1.5x 扭力，精簡版）
+- 全部 EditMode 測試 92/92 通過
+
+## 場景擺放檢查（2026-10-15 16:28）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.01, 0.78, 0.13)、尺寸 (1.67, 2.93, 2.31)
+✔ 工作桌：不相交，水平間距 1.00 m（需 ≥ 1.0 m）
+✔ 工具架：不相交，水平間距 0.75 m
+✔ 備品架：不相交，水平間距 0.56 m
+✔ 控制盤：不相交，水平間距 0.37 m
+✔ 接地端子：不相交，水平間距 0.44 m
+
+
+## 場景擺放檢查（2026-10-15 16:30）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.01, 0.78, 0.13)、尺寸 (1.67, 2.93, 2.31)
+✔ 工作桌：不相交，水平間距 1.00 m（需 ≥ 1.0 m）
+✔ 工具架：不相交，水平間距 0.75 m
+✔ 備品架：不相交，水平間距 0.56 m
+✔ 控制盤：不相交，水平間距 0.37 m
+✔ 接地端子：不相交，水平間距 0.44 m
+
+- 依 terry 要求取消場景中降弓檢測點旁的紅色距離標籤（「● 距降弓位置 … cm，要往下」），距離與方向只顯示在右側升降控制器；保留檢測點紅／綠小球、綠框與黃色目標標記（MarkerView.cs）
+- CSR_11「對準螺栓孔點托架放下」完成條件改為「已裝上（NewMounted）且安裝距離 ≤ 0.5 cm」，條件支援「&&」（ChecklistEval.cs、carbon_strip_slice.json），避免滑板還在手上就被判完成
+- 修正結束 Play 時 ToolBelt.Update 的 NullReferenceException（ToolBelt.cs）
+- 自動截圖新增腳本射線（PointerState.ScriptedRay）把新滑板移到托架上方，安裝步驟不再受滑鼠位置影響（Picker.cs、UiCaptureDriver.cs）
+- 編譯 0 錯誤；EditMode 測試 92/92 通過；場景重建、擺放檢查通過；重拍截圖 Logs/ui_*.png（21 張皆面板不重疊），教學模式走到 CSR_13 只有刻意觸發的錯誤
+
+## 場景擺放檢查（2026-10-16 03:59）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.01, 0.78, 0.13)、尺寸 (1.67, 2.93, 2.31)
+✔ 工作桌：不相交，水平間距 1.00 m（需 ≥ 1.0 m）
+✔ 工具架：不相交，水平間距 0.75 m
+✔ 備品架：不相交，水平間距 0.56 m
+✔ 控制盤：不相交，水平間距 0.37 m
+✔ 接地端子：不相交，水平間距 0.44 m
+
+
+## 場景擺放檢查（2026-10-16 11:28）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.01, 0.78, 0.13)、尺寸 (1.67, 2.93, 2.31)
+✔ 工作桌：不相交，水平間距 1.00 m（需 ≥ 1.0 m）
+✔ 工具架：不相交，水平間距 0.75 m
+✔ 備品架：不相交，水平間距 0.56 m
+✔ 控制盤：不相交，水平間距 0.37 m
+✔ 接地端子：不相交，水平間距 0.44 m
+
+
+## 場景擺放檢查（2026-10-16 11:29）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.01, 0.78, 0.13)、尺寸 (1.67, 2.93, 2.31)
+✔ 工作桌：不相交，水平間距 1.00 m（需 ≥ 1.0 m）
+✔ 工具架：不相交，水平間距 0.75 m
+✔ 備品架：不相交，水平間距 0.56 m
+✔ 控制盤：不相交，水平間距 0.37 m
+✔ 接地端子：不相交，水平間距 0.44 m
+
+
+## 場景擺放檢查（2026-10-19 20:13）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.01, 0.78, 0.13)、尺寸 (1.67, 2.93, 2.31)
+✔ 工作桌：不相交，水平間距 1.00 m（需 ≥ 1.0 m）
+✔ 工具架：不相交，水平間距 0.75 m
+✔ 備品架：不相交，水平間距 0.56 m
+✔ 控制盤：不相交，水平間距 0.37 m
+✔ 接地端子：不相交，水平間距 0.44 m
+
+
+## 場景擺放檢查（2026-10-28 19:28）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 1.81 m
+✔ 接地母線端子：不相交，水平間距 0.77 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 6.28 m
+
+
+## 場景擺放檢查（2026-10-28 19:33）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 1.81 m
+✔ 接地母線端子：不相交，水平間距 0.77 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 6.28 m
+
+
+## 場景擺放檢查（2026-10-28 19:41）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 1.81 m
+✔ 接地母線端子：不相交，水平間距 0.77 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 6.28 m
+
+
+## 場景擺放檢查（2026-10-28 19:44）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 1.81 m
+✔ 接地母線端子：不相交，水平間距 0.77 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 6.28 m
+
+
+## R1 高度與站點（2026-10-28 19:48）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-10-28 19:48）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 1.81 m
+✔ 接地母線端子：不相交，水平間距 0.77 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 6.28 m
+
+
+## R1 高度與站點（2026-10-28 19:49）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-10-28 19:49）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 1.81 m
+✔ 接地母線端子：不相交，水平間距 0.77 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 6.28 m
+
+
+## R1 高度與站點（2026-10-28 19:56）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-10-28 19:56）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 1.81 m
+✔ 接地母線端子：不相交，水平間距 0.77 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 6.28 m
+
+
+## R1 高度與站點（2026-10-29 17:19）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-10-29 17:19）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 1.81 m
+✔ 接地母線端子：不相交，水平間距 0.77 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 6.28 m
+
+
+## R1 高度與站點（2026-10-29 17:23）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-10-29 17:23）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 1.81 m
+✔ 接地母線端子：不相交，水平間距 0.77 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 6.28 m
+
+
+## R1 高度與站點（2026-10-30 03:30）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-10-30 03:30）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 1.81 m
+✔ 接地母線端子：不相交，水平間距 0.77 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 6.28 m
+
+
+## R1 高度與站點（2026-10-30 03:34）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-10-30 03:34）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 1.81 m
+✔ 接地母線端子：不相交，水平間距 0.77 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 6.28 m
+
+
+## R1 高度與站點（2026-11-02 14:59）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-11-02 14:59）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 1.81 m
+✔ 接地母線端子：不相交，水平間距 0.77 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 6.28 m
+
+
+## R1 高度與站點（2026-11-02 15:04）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-11-02 15:04）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 1.81 m
+✔ 接地母線端子：不相交，水平間距 0.77 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 6.28 m
+
+
+## R1 高度與站點（2026-11-02 15:16）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-11-02 15:16）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 1.81 m
+✔ 接地母線端子：不相交，水平間距 0.77 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 6.28 m
+
+
+## R1 高度與站點（2026-11-02 15:35）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-11-02 15:35）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 3.13 m
+✔ 接地母線端子：不相交，水平間距 0.98 m
+✔ 長桿桿架：不相交，水平間距 2.14 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 5.07 m
+
+
+## R1 高度與站點（2026-11-02 15:35）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-11-02 15:35）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 3.13 m
+✔ 接地母線端子：不相交，水平間距 0.98 m
+✔ 長桿桿架：不相交，水平間距 2.14 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 5.07 m
+
+
+## R1 高度與站點（2026-11-02 15:37）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-11-02 15:37）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 3.13 m
+✔ 接地母線端子：不相交，水平間距 0.98 m
+✔ 長桿桿架：不相交，水平間距 2.14 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 5.07 m
+
+
+## R1 高度與站點（2026-11-02 15:53）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-11-02 15:53）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 3.13 m
+✔ 接地母線端子：不相交，水平間距 0.98 m
+✔ 長桿桿架：不相交，水平間距 2.14 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 13.46 m
+
+
+## R1 高度與站點（2026-11-02 15:53）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-11-02 15:53）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 3.13 m
+✔ 接地母線端子：不相交，水平間距 0.98 m
+✔ 長桿桿架：不相交，水平間距 2.14 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 13.46 m
+
+
+## R1 高度與站點（2026-11-02 15:58）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-11-02 15:58）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 3.13 m
+✔ 接地母線端子：不相交，水平間距 0.98 m
+✔ 長桿桿架：不相交，水平間距 2.14 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 13.46 m
+
+
+## R1 高度與站點（2026-11-02 15:59）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-11-02 15:59）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 3.13 m
+✔ 接地母線端子：不相交，水平間距 0.98 m
+✔ 長桿桿架：不相交，水平間距 2.14 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 13.46 m
+
+
+## R1 高度與站點（2026-11-02 16:09）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-11-02 16:09）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 3.13 m
+✔ 接地母線端子：不相交，水平間距 0.98 m
+✔ 長桿桿架：不相交，水平間距 2.08 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 29.46 m
+
+
+## R1 高度與站點（2026-11-02 16:14）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-11-02 16:14）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 3.13 m
+✔ 接地母線端子：不相交，水平間距 0.98 m
+✔ 長桿桿架：不相交，水平間距 2.08 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 29.46 m
+
+
+## R1 高度與站點（2026-11-02 16:17）
+stripTopAboveRoof=0.693
+共用車頂站點 (0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m
+
+## 場景擺放檢查（2026-11-02 16:17）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 3.13 m
+✔ 接地母線端子：不相交，水平間距 0.98 m
+✔ 長桿桿架：不相交，水平間距 2.08 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 29.46 m
+

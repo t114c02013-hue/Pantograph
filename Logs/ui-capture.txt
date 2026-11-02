@@ -1,0 +1,38 @@
+截圖：Logs/ui_01_taskcard.png　面板不重疊（顯示中：無）
+[開始教學模式（升弓中）] 步驟=STP_SI_01_ConfirmLowered　小動作=0/3「按住 ▼ 把弓頭降到綠框」　手上=　錯誤對話框=無　錯誤數 M0/J0/C0
+截圖：Logs/ui_02_si01_sub_a_raised.png　面板不重疊（顯示中：StepPanel、LiftPanel）
+截圖：Logs/ui_12_overview_raised.png　面板不重疊（顯示中：StepPanel、LiftPanel）
+截圖：Logs/ui_10_scale150_si01.png（模擬 Game 視窗 Scale 1.5x：只保留中央可見區域）　面板不重疊（顯示中：StepPanel、LiftPanel）
+[下降到一半（lift=0.53，距離 100.3 cm，差 100.3 cm）] 步驟=STP_SI_01_ConfirmLowered　小動作=0/3「按住 ▼ 把弓頭降到綠框」　手上=　錯誤對話框=無　錯誤數 M0/J0/C0
+截圖：Logs/ui_02b_si01_lowering.png　面板不重疊（顯示中：StepPanel、LiftPanel）
+[到降弓位置（距離 0.8 cm，容許 1.0 cm）] 步驟=STP_SI_01_ConfirmLowered　小動作=1/3「點弓頭，確認已降下」　手上=　錯誤對話框=無　錯誤數 M0/J0/C0
+截圖：Logs/ui_02c_si01_in_position.png　面板不重疊（顯示中：StepPanel、LiftPanel）
+[SI_01 小動作 b 完成（點弓頭）] 步驟=STP_SI_01_ConfirmLowered　小動作=2/3「點控制盤的弓位指示燈」　手上=　錯誤對話框=無　錯誤數 M0/J0/C0
+截圖：Logs/ui_03_si01_sub_c.png　面板不重疊（顯示中：StepPanel、LiftPanel）
+截圖：Logs/ui_03a_si01_panel.png　面板不重疊（顯示中：StepPanel）
+[SI_01 通過] 步驟=STP_SI_04_VoltageTest　小動作=0/4「到工具架拿起驗電器」　手上=　錯誤對話框=無　錯誤數 M0/J0/C0
+截圖：Logs/ui_03b_si01_passed.png　面板不重疊（顯示中：StepPanel）
+截圖：Logs/ui_12b_overview_lowered.png　面板不重疊（顯示中：StepPanel）
+[SI_04 開始：到工具架拿驗電器] 步驟=STP_SI_04_VoltageTest　小動作=0/4「到工具架拿起驗電器」　手上=　錯誤對話框=無　錯誤數 M0/J0/C0
+截圖：Logs/ui_04_si04_go_to_rack.png　面板不重疊（顯示中：StepPanel）
+截圖：Logs/ui_04a_tool_rack.png　面板不重疊（顯示中：StepPanel）
+截圖：Logs/ui_04b_si04_tutorial.png　面板不重疊（顯示中：StepPanel、ToolPanel）
+截圖：Logs/ui_05_si04_tool.png　面板不重疊（顯示中：StepPanel、ToolPanel）
+[SI_04 驗電完成，驗電器已放回] 步驟=STP_SI_05_Grounding　小動作=0/4「到工具架拿起接地棒」　手上=　錯誤對話框=無　錯誤數 M0/J0/C0
+[故意先掛弓頭（E3）] 步驟=STP_SI_05_Grounding　小動作=1/4「接地夾夾上接地端子」　手上=tool.grounding_rod　錯誤對話框=ERR_Ground_Order　錯誤數 M0/J0/C1
+截圖：Logs/ui_06_error_critical.png　面板不重疊（顯示中：StepPanel、ToolPanel）
+[SI_05 接地完成（接地棒留在場上）] 步驟=STP_CSR_01_CheckIsolation　小動作=0/1「打開作業單看隔離狀態」　手上=　錯誤對話框=無　錯誤數 M0/J0/C1
+[CSR_02 卡尺歸零] 步驟=STP_CSR_03_Measure_L　小動作=0/4「量肘側滑板左側點」　手上=tool.caliper　錯誤對話框=無　錯誤數 M0/J0/C1
+[重設卡尺（應顯示未歸零，錯誤數保留）] 步驟=STP_CSR_03_Measure_L　小動作=0/4「量肘側滑板左側點」　手上=tool.caliper　錯誤對話框=無　錯誤數 M0/J0/C1
+截圖：Logs/ui_11_reset_caliper.png　面板不重疊（顯示中：StepPanel、ToolPanel）
+截圖：Logs/ui_07_csr03_caliper.png　面板不重疊（顯示中：StepPanel、ToolPanel）
+截圖：Logs/ui_13_workorder_dialog.png　面板不重疊（顯示中：StepPanel、ToolPanel）
+截圖：Logs/ui_09b_scale150_workorder.png（模擬 Game 視窗 Scale 1.5x：只保留中央可見區域）　⚠ 重疊：StepPanel×ToolPanel
+[CSR_05 判定兩條都換] 步驟=STP_CSR_06_Loosen_L　小動作=0/7「到工具架拿起套筒扳手」　手上=　錯誤對話框=無　錯誤數 M0/J0/C1
+[CSR_11 安裝肘側新滑板] 步驟=STP_CSR_12_PreTighten_L　小動作=0/11「到工具架拿起套筒扳手」　手上=　錯誤對話框=無　錯誤數 M0/J0/C1
+[CSR_12 預鎖完成] 步驟=STP_CSR_13_Torque_L　小動作=0/7「到工具架拿起扭力扳手」　手上=　錯誤對話框=無　錯誤數 M0/J0/C1
+[CSR_13 扭力（螺栓 1 已鎖到 25.2）] 步驟=STP_CSR_13_Torque_L　小動作=3/7「鎖 2 號螺栓到喀聲」　手上=tool.torque_wrench　錯誤對話框=無　錯誤數 M0/J0/C1
+截圖：Logs/ui_08_csr13_torque.png　面板不重疊（顯示中：StepPanel、ToolPanel）
+截圖：Logs/ui_09_scale150_csr13.png（模擬 Game 視窗 Scale 1.5x：只保留中央可見區域）　面板不重疊（顯示中：StepPanel、ToolPanel）
+錯誤事件：
+STP_SI_05_Grounding：ERR_Ground_Order（Critical）還沒夾平台接地端子，就先把接地棒掛上弓頭。

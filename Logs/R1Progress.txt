@@ -1,0 +1,33 @@
+R1 進度（每段收工時加一行：段號 | 完成 | 測試 N/N | 下一段）
+注意：這個資料夾沒有 git，無法 commit；每段改動改記在 Logs/R1-<段號>.txt。
+
+== S0 盤點（2026-10-28，開工時 157/157）==
+T7 升降        | 已完成   | LiftDriver 聯鎖與原因提示、預設完成步驟流程走到才寫入；LiftTests、ProcedureTests 已有（S5 再逐項核對 B 段 1 的條件）
+T1 高度與場景  | 大部分   | RoofSiteBuilder（車頂／平台／樓梯／駕駛室／背景，0.30 m 絕緣子）、HeightProfile、XrViewHeight 已寫好；場景 10/28 已重建；
+               |          | 缺：XrViewHeight 原本沒接進 XR Rig（本次已接）、L3 蹲姿輸入、≡ 選單的高度切換／蹲姿開關、Camera Y Offset 仍是 1.6、StationHeightTests
+T5 站點        | 大部分   | StationDef／StationSet／8 站資產、XrStations（標記＋B 鍵）、XrTeleport.GoToStation 已寫好；步驟資料已有 stand 欄位；
+               |          | 缺：XR Rig 原本仍建舊 6 點（本次已改成 8 站）、B 鍵原本沒接 XrStations（本次已接）、StationLayoutCheck 只有資料欄位、DataValidator 站點規則、StationTests
+閘門 RoofAccess| 已完成   | RoofAccessRule 資產、RoofAccess、PlatformGate（活動欄＋跨板）；測試待 S5 補
+T2-a 工具用手調| 未開始   | 沒有 Poke／ToolWidget／Attach_Tool
+T6 平滑移動    | 未開始   | 只有 LocomotionSettings 資料；沒有 ContinuousMoveProvider、CharacterController、遮罩
+按鍵表         | 未開始   | 沒有 InputBindingTable；XRInputMapper 仍是寫死的表
+T3 面板        | 未開始   | XrPanelLayout 仍是跟著頭的配置，沒有把手與 PanelLayout
+
+S0 | 完成 | 測試 157/157 | S1
+S1 | 完成 | 測試 160/160 | S2
+S2 | 完成 | 測試 161/161 | S3
+S3 | 完成 | 測試 172/172 | S4
+S4 | 完成 | 測試 174/174 | S5
+S5 | 完成 | 測試 182/182 | S6
+S5b | 完成 | 測試 186/186 | S6
+S6 | 完成 | 測試 192/192 | S7
+S7 | 完成 | 測試 197/197 | S8
+S8 | 完成 | 測試 202/202 | S9
+S9 | 完成 | 測試 207/207 | S10
+S10 | 完成 | 測試 208/208 | R1.5a a0
+R1.5a-a0 | 完成 | 測試 208/208 | a1
+R1.5a-a1 | 完成 | 測試 212/212 | a2
+R1.5a-a2 | 完成 | 測試 217/217 | a3
+R1.5a-a3 | 完成 | 測試 222/222 | a4
+R1.5a-a4 | 完成 | 測試 225/225 | a5
+R1.5a-a5 | 完成 | 測試 228/228 | a6

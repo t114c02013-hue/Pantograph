@@ -1,0 +1,146 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_CSR_15_HeightCheck
+  m_EditorClassIdentifier: 
+  stepId: STP_CSR_15_HeightCheck
+  title: "\u78BA\u8A8D\u5169\u689D\u9AD8\u4F4E\u5DEE"
+  instruction: "\u5169\u689D\u90FD\u88DD\u597D\u5F8C\uFF0C\u7528\u5361\u5C3A\u91CF\u5169\u689D\u65B0\u6ED1\u677F\u7684\u4E2D\u9EDE\uFF0C\u628A\u8B80\u6578\u6284\u5230\u4F5C\u696D\u55AE\u300C\u65B0\u6ED1\u677F\u4E2D\u9EDE\u300D\u4E26\u9001\u51FA\u3002\u5169\u689D\u5DEE\u8981
+    \u2264 1.0 mm\u3002"
+  toolHint: "\u6578\u4F4D\u5361\u5C3A"
+  targetHint: "\u5169\u689D\u65B0\u6ED1\u677F\u7684\u4E2D\u9EDE\u91CF\u6E2C\u9EDE\uFF1B\u4F5C\u696D\u55AE"
+  targetIds:
+  - ip.carbon_strip_L.measure_mid
+  - ip.carbon_strip_R.measure_mid
+  - env.work_order
+  requiredToolId: tool.caliper
+  completion:
+    rid: 2801573864771421574
+  errors:
+  - errorId: ERR_CSR15_Exceeds
+    severity: 1
+    what: "\u5169\u689D\u65B0\u6ED1\u677F\u7684\u9AD8\u4F4E\u5DEE\u8D85\u904E 1.0
+      mm\u3002"
+    why: "\u9AD8\u4F4E\u5DEE\u6703\u8B93\u63A5\u89F8\u58D3\u529B\u96C6\u4E2D\u5728\u4E00\u689D\uFF0C\u52A0\u901F\u78E8\u8017\u3001\u7522\u751F\u96FB\u5F27\u3002"
+    fix: "\u6AA2\u67E5\u6258\u67B6\u662F\u5426\u64E6\u4E7E\u6DE8\u3001\u6ED1\u677F\u662F\u5426\u8CBC\u5408\uFF0C\u91CD\u65B0\u5B89\u88DD\u5F8C\u518D\u91CF\u3002"
+    trigger: 0
+    key: workorder.height_diff
+    key2: 
+    keys: []
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 1
+    expected: 
+    count: 0
+    blocks: 0
+  - errorId: ERR_CSR15_NotCompared
+    severity: 1
+    what: "\u6C92\u6709\u5BE6\u969B\u91CF\u5169\u689D\u65B0\u6ED1\u677F\u5C31\u586B\u5BEB\u9AD8\u4F4E\u5DEE\u3002"
+    why: "\u6C92\u91CF\u5C31\u586B\u7B49\u65BC\u6C92\u6709\u6BD4\u5C0D\uFF0C\u9AD8\u4F4E\u5DEE\u554F\u984C\u6703\u88AB\u653E\u904E\u3002"
+    fix: "\u7528\u5361\u5C3A\u91CF\u5169\u689D\u65B0\u6ED1\u677F\u7684\u4E2D\u9EDE\uFF0C\u7167\u8B80\u6578\u586B\u5BEB\u3002"
+    trigger: 5
+    key: workorder.newmid.R
+    key2: 
+    keys:
+    - ip.carbon_strip_L.measure_mid.new_measured
+    - ip.carbon_strip_R.measure_mid.new_measured
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+  hints:
+    text: "\u62FF\u5361\u5C3A\u91CF\u5169\u689D\u65B0\u6ED1\u677F\u7684\u4E2D\u9EDE\uFF0C\u6284\u5230\u4F5C\u696D\u55AE\u300C\u65B0\u6ED1\u677F\u4E2D\u9EDE\u300D\u4E26\u9001\u51FA\u3002"
+    why: "\u4FDD\u990A\u8868 m1-3\uFF1A\u5169\u689D\u6ED1\u677F\u4E0D\u80FD\u6709\u9AD8\u4F4E\u5DEE\uFF0C\u5426\u5247\u63A5\u89F8\u58D3\u529B\u4E0D\u5747\u3002"
+    checklist:
+    - "\u91CF\u8098\u5074\u65B0\u6ED1\u677F\u4E2D\u9EDE|ip.carbon_strip_L.measure_mid.new_measured"
+    - "\u91CF\u5916\u5074\u65B0\u6ED1\u677F\u4E2D\u9EDE|ip.carbon_strip_R.measure_mid.new_measured"
+    - "\u586B\u4F5C\u696D\u55AE\u4E26\u9001\u51FA|workorder.height_diff"
+    highlightIds:
+    - ip.carbon_strip_L.measure_mid
+    - ip.carbon_strip_R.measure_mid
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u5230\u8ECA\u9802\u5DE5\u5177\u7BB1\u62FF\u8D77\u6E38\u6A19\u5361\u5C3A"
+    why: "\u8ECA\u9802\u5DE5\u5177\u7BB1\u7B2C 5 \u683C"
+    targetId: env.tool_rack.slot_5
+    toolId: tool.caliper
+    condition: tool.active=tool.caliper
+    standPointId: tp.roof.shelf
+  - text: "\u91CF\u8098\u5074\u65B0\u6ED1\u677F\u4E2D\u9EDE"
+    why: 
+    targetId: ip.carbon_strip_L.measure_mid
+    toolId: tool.caliper
+    condition: ip.carbon_strip_L.measure_mid.new_measured
+    standPointId: tp.roof.inner
+  - text: "\u91CF\u5916\u5074\u65B0\u6ED1\u677F\u4E2D\u9EDE"
+    why: 
+    targetId: ip.carbon_strip_R.measure_mid
+    toolId: tool.caliper
+    condition: ip.carbon_strip_R.measure_mid.new_measured
+    standPointId: tp.roof.outer
+  - text: "\u5169\u500B\u8B80\u6578\u586B\u5165\u4F5C\u696D\u55AE"
+    why: "\u5DEE\u503C \u2264 1.0 mm"
+    targetId: env.work_order
+    toolId: 
+    condition: workorder.height_diff
+    standPointId: 
+  - text: "\u628A\u5361\u5C3A\u653E\u56DE\u8ECA\u9802\u5DE5\u5177\u7BB1"
+    why: "\u7528\u5B8C\u5C31\u6B78\u4F4D\uFF0C\u6536\u5C3E\u6E05\u9EDE\u624D\u5C0D\u5F97\u4E0A"
+    targetId: env.tool_rack.slot_5
+    toolId: 
+    condition: tool.active=
+    standPointId: tp.roof.shelf
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags:
+  - "\u9AD8\u4F4E\u5DEE \u2264 1.0 mm=\u793A\u4F8B\u503C"
+  refSecondsTutorial: 50
+  refSecondsExam: 30
+  references:
+    version: 2
+    RefIds:
+    - rid: 2801573864771421574
+      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        rules:
+        - rid: 2801573864771421575
+        - rid: 2801573864771421576
+        - rid: 2801573864771421577
+    - rid: 2801573864771421575
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        keys:
+        - ip.carbon_strip_L.measure_mid.new_measured
+        - ip.carbon_strip_R.measure_mid.new_measured
+    - rid: 2801573864771421576
+      type: {class: ReadingMatches, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        recordKeys:
+        - workorder.newmid.L
+        - workorder.newmid.R
+        readingKeys:
+        - ip.carbon_strip_L.measure_mid.reading
+        - ip.carbon_strip_R.measure_mid.reading
+        tolerance: 0.05
+    - rid: 2801573864771421577
+      type: {class: ValueInRange, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        key: workorder.height_diff
+        min: 0
+        max: 1
+        count: 0

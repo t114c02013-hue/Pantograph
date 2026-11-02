@@ -1,0 +1,25 @@
+﻿段：a2 Blender 產生管線與 RoofSceneDef
+改動：
+ - RoofSceneDef（資料 RoofSceneDef.asset＋類別預設）：carBodyHalfWidth 1.40→1.69、groundY −3.70→−3.65、platformGap 0.20→0.12、platformWidth 1.20→1.50；
+   新欄位 carLength 25、carCount 3、roofEdgeDrop 0.30、floorAboveRail 1.30、bogieCenterDistance 17.5、pantographFromCarEnd 5.0、roofWalkHalfWidth 0.80、insulatorHeight 0.30、
+   platformAisle 1.00、rackBandDepth 0.50、roofFlatWidth 1.6、roofArcRadius 1.2、livery 白 #F4F4F2／橘 #E86A1E／深灰 #2B2B2B、insulatorPositions[4]（a3 回寫）；
+   推導值屬性（相對車頂邊）：RoofEdgeX 1.69、PlatformInnerX −1.81、PlatformOuterX −3.31、RackBand −3.31…−2.81（中心 −3.06）、GateBridge −1.81…−0.80；ToParamsJson()、ParamsHash()。
+ - Editor/R1/CarParamsExport.cs：選單 Tools/Worksite/Export Car Params → Assets/_Project/Worksite/Data/car_params.json＋car_params.hash.txt。
+ - Tools/Blender/gen_700t/：gen_700t.py、common.py、palette.py、car_body.py、bogie.py、roof_equipment.py、platform.py、furniture.py、crane.py、rigging.py、stand.py、pouch.py。
+   產生 16 個 FBX 到 Assets/_Project/Worksite/Models/Generated：ENV_CarBody（車身＋窗帶＋橘色帶＋車端門＋兩個轉向架）、ENV_RoofEquipment（絕緣子、母線、避雷器、車體接地座、高壓電纜端、控制線接頭）、
+   ENV_PlatformKit、ENV_WorkBench、ENV_ToolRack、ENV_PoleRack（D25）、ENV_InsulatedPole（D24：2.5 m 伸縮絕緣桿＋護環）、ENV_PendantDock、ENV_SpareShelf、ENV_PartsTray（紅色「待報廢」）、
+   ENV_OverheadCrane（節點照規格）、ENV_CraneRemote（Btn_*／Label_*／Key_Power）、ENV_Sling、ENV_SlingRack、ENV_PantographStand（StandSeat／StandClamp／AlignLight、ToolTray、BoltTray）、ENV_ToolPouch（Pocket_5..10、SocketCase、BoltBag、Lanyard_Anchor_5..9）；
+   Palette.png（256×256、8×8 格）。總計 3,584 個三角面。報告：Logs/CarModelReport.json。
+ - Tools/Blender/gen_pan_rigging/gen_pan_rigging.py＋Assets/_Project/Parts/PantographAssembly/Data/pan_rigging_params.json → PAN_Rigging.fbx（368 個三角面）、Logs/PanRiggingModelReport.json。
+ - Editor/R1/GeneratedModelPostprocessor.cs：只套用在 Models/Generated 與 PantographAssembly/Models（Scale 1、Convert Units、不產生 collider、Read/Write 關、Normals Import、材質改用 Assets/_Project/Materials/Worksite 的 7 個材質，Base Map＝Palette.png，點取樣）。
+ - Tests/EditMode/GeneratedModelTests.cs（5 個，4.4 的 1–5 項）。
+ - TestRunHook 加 export-car.request、reimport-models.request。
+Blender 版本：5.2.2 LTS（這台電腦只有這個版本；規格寫 3.6 LTS／4.x，腳本只用 bmesh 和 bpy.ops.export_scene.fbx，5.2 照樣能跑）。
+與規格不同：platform.py 和 Python 標準模組 platform 同名，gen_700t.py 改用檔案路徑載入（檔名照規格）。匯出只帶 MESH，所以節點（例 Hook_AttachPoint、Label_*）做成 1 cm 小方塊，讓名稱和階層留得下來。
+      模型是低多邊形的示意（總計 3.6k 面，上限 55k），之後拿到圖面再加細節。
+略過：這段沒有重建場景；新車寬與平台座標在 a3 套用（現在的場景仍是 R1 的，StationLayoutCheck 和 25 步照樣通過）。
+風險：RoofSceneDef 的車寬已經改了；a3 重建場景前，如果有人手動重建場景，平台設備會擺錯位置（a3 會把設備座標改成相對車頂邊）。
+ponytail-review Verdict：新增管線與資料，沒有改判定
+測試：217/217，Console 紅字 0（只有測試裡預期的 LogError）
+功能不變檢查：1 ✔；2 ✔ 212 → 217；3 ✔ RoofSceneDef 只加欄位和改數值（照規格），舊欄位名稱沒改；4 RoofSceneDef 的數值依規格修改，其他資料沒動；5 ✔；6 ✔ 桌面 25 步跑完（Recordings/20261102_152743_驗證學員）；7 ✔
+未檢查：第 3、7 項沒辦法用 git diff（沒有 git，備份 Logs/backup-a2.zip）

@@ -1,0 +1,9 @@
+﻿段：S3 ENV prefab
+改動：RoofSiteBuilder：新增 Wrap()，把平台工具架、車頂工具箱、螺栓盤 L／R 各包成 Visual／Walkable／Collision／Anchors 的場景件，存成 ENV_PlatformToolRack、ENV_RoofToolbox、ENV_BoltTray_L、ENV_BoltTray_R；
+      4 支 0.30 m 絕緣子改放進巢狀 prefab ENV_Insulators（在 ENV_RoofSection 底下）；螺栓盤外形改成 0.25 × 0.18 m、4 格（原本是 Ø0.18 圓盤）。
+      XrRigBuilder：站點標記改成 prefab TP_Marker（r 0.25 m 圓盤、腳印＋方向箭頭、貼地 0.005 m、鎖頭、名稱），每站一個實例；共用點只留一個標記。
+      新增 Tests/EditMode/PrefabStructureTests.cs（11 件 × 四個子物件＋沒有 Missing 腳本）。
+略過：零件盒、備品架沒有另包 prefab（規格的 prefab 清單沒有列它們）。
+風險：螺栓盤外形改變，只影響外觀與點選範圍；ID、元件、判定不變。
+測試：172/172，Console 紅字 0；桌面 25 步跑完（Recordings/20261028_194457_驗證學員）
+未檢查：Inspector 只用 GetMonoBehavioursWithMissingScriptCount 檢查，沒有人工打開每個 prefab 看

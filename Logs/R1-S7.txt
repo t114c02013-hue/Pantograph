@@ -1,0 +1,17 @@
+﻿段：S7 T6 右搖桿平滑移動
+改動：XrRigBuilder：XR Origin 加 CharacterController（r 0.2、step 0.2、高 1.6）、ActionBasedContinuousMoveProvider（只綁右手搖桿、stickDeadzone 0.15、方向跟頭、水平、可橫移、重力、不飛、沒有平滑轉向）、
+      CharacterControllerDriver、攝影機前的遮罩方塊。
+      新增 Modules/XR/XrLocomotion.cs：開關 xr.move.on（預設 LocomotionSettings.smoothMoveDefaultOn）、速度 xr.move.speed 0.6–1.5（車頂上限 1.0）、遮罩強度 xr.vignette、
+      累計平滑移動距離／時間 xr.move.distance／xr.move.seconds（每秒寫一次）、危險區（頭下沒有 Walkable，或車頂沒開放卻在車頂）四周變紅並提示「已進入危險區域，請退回」（只提示不記分）。
+      新增 Modules/XR/XrVignette.cs（徑向貼圖遮罩；移動時開、危險區變紅）。
+      ≡ 選單（UI XrMenuView＋XrPlayer.MenuSetting）：真實高度／抬高、蹲低視角、平滑移動開關、速度 −／＋、遮罩 強／弱／關（設定類按了不關選單）；加上說明「若覺得陷進地板或浮起來，請先在 Quest 重新設定地板」。
+      蹲低視角切換：提示「蹲姿輔助：開／關」＋左手短震（D 段）。
+      控制器教學（XrCoach＋XrTutorialView）：在「左搖桿傳送」之後加「用右搖桿走到地上的圈」（走 0.8 m 算完成），後面各步編號往後移。
+      紀錄：SessionRecorder.StatePrefixes 加 "xr.move."；SummaryBuilder 加 summary.json 的 smoothMove {distanceMeters, seconds}。
+      新增 Tests/EditMode/LocomotionTests.cs（5 個）。
+與規格不同：遮罩不是 XRI Starter Assets 的 TunnelingVignetteController（這個專案的 Starter Assets 沒有 Tunneling Vignette 的 prefab 與 shader），改用自己產生的徑向遮罩（shortcut 註解已寫）。
+      教學「走到地上的圈」以走 0.8 m 判定，沒有另外放一個圈。≡ 選單的高度與蹲低項目是 T1 原本缺的，順便在這段加上（左搖桿按下＝蹲低是 S8 按鍵表的工作）。
+      提示文字沿用現有 toast（顯示時間由 toast 控制，沒有另外定 1.5 s）。
+風險：CharacterController 與傳送同時存在的手感、遮罩強度、車頂邊牆擋人的效果，只能戴頭盔驗（terry 驗收第 7–9 項）。第 8 節第 9 項 PlayMode 推搖桿 3 s 的測試沒有做（batchmode 沒有頭盔／裝置模擬器）。
+測試：197/197，Console 紅字 0（只有測試裡預期的 LogError）；桌面 25 步跑完（Recordings/20261030_033027_驗證學員，summary.json 有 smoothMove）
+未檢查：頭盔實機

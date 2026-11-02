@@ -1,0 +1,9 @@
+﻿段：S2 資料資產 b（步驟資料 v5.4）
+改動：carbon_strip_slice.json：CSR_05 a、CSR_15 d 的 stand 改成空字串（B 段 3.3 寫「原地」）；DataValidator 加 5b「每個站點都在 StationSet」；StationTests 加 StepData_EveryStandPointId_IsAStation_AndInPlaceOnlyWhereSpecSays。
+盤點結果（已是 v5.4，沒改）：每個小動作的 stand、CSR_07 b 目標 env.bolt_tray_{side}＋「放進螺栓盤」、CSR_12 b「從螺栓盤拿」、掛位 5–9 文字＝車頂工具箱、WC_01 a／b 文字、SI_02 50/30、SI_03 35/20。
+略過：SI_02 e→SI_03 c、WC_04 d↔e 對調：切片裡這些預設完成步驟沒有小動作資料（只有 presetStates），沒有可搬的資料；判定與預設狀態不動。
+      總數 166：專案裡只有切片資料，切片展開 144（SubActionRackTests 已斷言 144），166 的完整清單不在這台電腦上，無法驗證。
+      「每一步至少一個小動作填站點」：CSR_05 只有一個小動作且規格寫原地，改成只列出、不算錯；測試斷言只有 CSR_05 全部在原地。
+風險：判定沒改；B 鍵在 CSR_05、CSR_15 d 不會傳送（照規格）。
+測試：161/161，Console 紅字 0
+未檢查：無

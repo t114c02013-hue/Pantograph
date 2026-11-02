@@ -1,0 +1,16 @@
+﻿段：S4 場景重建
+改動：FastenerLogic.TrayFor()：刪掉零件盒退路；場景沒有該側螺栓盤時 Debug.LogError，不改送。
+      StationLayoutCheck.CheckScene（B 段 3.5）：站在 Walkable 上、y 誤差 ≤0.02、0.4 m 內無障礙物、不可見牆 ≥0.15、離升降聯集 ≥0.4、眼高看得到目標且在 ±30° 內、
+      目標距離 0.4–0.9（tp.cab／tp.platform.lift ≤2.5）、接地站到弓頭接地掛點 ≤1.5、tp.platform.lift 看得到弓頭與綠框、車頂站點離車頂邊 ≥0.5、
+      主場景必須有 env.bolt_tray_L／R 且距共用車頂點 0.30–0.50、最遠螺栓 >1.0 只警告、平台與車頂高度差 ≤0.15、間隙 ≤0.30。不合格就讓建置失敗（XrRigBuilder 丟例外，場景不存檔）。
+      RoofSiteBuilder：共用車頂點的移位規則（每次 +0.05 m 到 Z −0.50，檢查身體膠囊和降弓弓頭淨距），寫回 StationSet.measuredFarBoltL／R、sideStepHintEnabled；產生 StationAnchor_<id> 節點，XrRigBuilder 用它當站點位置。
+      SliceSceneBuilder：stripTopAboveRoof 與共用站點、最遠螺栓距離寫進 Logs/SliceBuildReport.txt。
+      測試：PartsTests 改寫 Fastener_HalfTurnLoosens_ThenOut_Tray_Place_Snug_Torque_Mark（事件改看 env.bolt_tray_L），新增 Fastener_NoBoltTrayInScene_LogsError_AndNeverFallsBackToPartsTray；
+      SliceDryRunTests.SliceSim 補上 BoltTray.OnBound 會寫的計數鍵；StationTests 新增 StationLayoutCheck_Scene_8StationsPass。
+結果：共用車頂點 (0.00, −0.65) 不用移位（肘側最遠螺栓 0.976 m、外側 0.740 m，側移提示不啟用）；stripTopAboveRoof 0.693 m；StationLayoutCheck 8 站全過（Logs/StationLayoutCheck.txt）。
+與規格不同：tp.platform.ground 改成 (−1.95, 0.30)（規格 EX (−2.00, 0.60) 到接地端子只有 0.34 m，又離弓頭接地掛點 1.59 m，兩條規則不能同時成立）。
+      「0.4 m 內沒有實體碰撞體」與視線檢查都不算站點要操作的互動物件（端子、工具箱掛位），否則面向目標 0.4 m 的規則不可能成立。
+略過：側移提示的執行期顯示（建置報告顯示不需要啟用，所以沒做）。EditMode 測試的升降聯集規則傳空範圍（要移動弓體才量得到，會弄髒開著的場景）；建置時有完整檢查。
+風險：場景缺螺栓盤時拆螺栓會記 Error（這是規格要的）。
+測試：174/174，Console 紅字 0（只有測試裡預期的 LogError）；桌面 25 步跑完（Recordings/20261028_195044_驗證學員）
+未檢查：進入 Play 時仍有 1 條「The referenced script (Unknown) on this Behaviour is missing!」警告（不是紅字，S10 再查）

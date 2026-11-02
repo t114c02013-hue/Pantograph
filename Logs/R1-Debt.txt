@@ -1,0 +1,11 @@
+﻿R1 技術債清單（ponytail-debt，掃描 Assets/_Project 的 shortcut: 註解，2026-11-02）
+
+Assets/_Project/Modules/XR/XrVignette.cs:7，暈動遮罩用執行時產生的徑向貼圖代替 XRI TunnelingVignetteController。ceiling：專案沒有 Tunneling Vignette 範例的 shader 與 prefab。upgrade：匯入 XRI 的 Tunneling Vignette 範例後，只換這個元件。
+Assets/_Project/Modules/XR/XrToolWidgets.cs:18，工具節點是掛在右手 Attach_Tool 上的小方塊，用距離判定碰觸，沒有經過 XRI 的 poke 互動。ceiling：節點不在工具 prefab 裡、沒有真正的接觸。upgrade：R2 做 ContactRouter 時換掉。
+
+2 個標記，0 個沒有寫升級時機。
+
+另外，報告裡記下、但程式裡沒有用 shortcut: 標記的簡化（見各段 R1-S*.txt）：
+・左撇子模式只做到資料層（S8）。
+・StationLayoutCheck 的 EditMode 測試傳空的升降聯集範圍（S4）。
+・教學「走到地上的圈」用走 0.8 m 判定（S7）。

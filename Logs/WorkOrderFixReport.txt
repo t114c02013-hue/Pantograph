@@ -1,0 +1,133 @@
+作業單修正回報　2026-10-21
+
+【一、工作桌上的作業單按不到、訓練卡住：根因】
+- 按的時候有發出 ActionRequested(env.work_order)。碰撞體、Canvas 的 GraphicRaycaster、Picker 都沒有問題。
+- 問題在 WorkOrder 的判斷。
+  - WorkOrder 把「pointId 是空的」當成「打開／收起」，pointId 有值就當成「填哪一格」。
+  - 場景點擊（桌面 Picker、VR 扳機）會在 pointId 放擊中點座標，例如 "0.412,0.806,-1.25"。
+  - 所以點工作桌上的作業單時，變成寫了一個欄位 workorder.<座標>=click，作業單沒有打開。
+  - CSR_01「打開作業單」就卡住。WC_01 也要先打開作業單，一樣會卡。
+- 另一個問題：拿著工具（例如卡尺）點作業單會被忽略（WorkOrder 只收徒手點擊），所以不能邊量邊打開。
+- 跟批次寫入無關：
+  - 打開、收起的狀態有確實 Commit。
+  - RecordWritten 透過 AfterCommit 照常發出（回歸測試有檢查）。
+  - 錯誤判定都在 Commit 後讀狀態。
+- 修正（Modules/Worksite/WorkOrder.cs）：
+  - 只有 pointId 是已知的欄位名（reading.*、newmid.*、submit.*、decision、toolcount_confirmed、signed、*_signed）才當成填欄位。
+  - 其餘（toggle、click、inspect、座標）一律是打開／收起。
+  - AcceptsAnyTool=true：拿著工具也能點。
+  - 桌面、VR 都走同一段程式。
+
+【二、作業單顯示改回停靠在側邊】
+- 桌面（Modules/UI/Views/PanelViews.cs 的 WorkOrderView）：
+  - 停靠在畫面右側，寬是安全區的 30%（最少 520 px），頂端讓出右上角工具列。
+  - 沒有全畫面遮罩（根節點沒有 Image），不是強制回應視窗，打開時不暫停。
+  - 3D 場景照常可以點；只有點在面板範圍內，Picker 才不送出點選。
+  - 卡尺讀數顯示在作業單標題下方。工具面板（卡尺）不再因為作業單打開而收起，會自動避開作業單（ToolPanelView）。
+  - 右下角的操作說明在作業單打開時收起，讓出位置。
+  - 新增「作業人員簽名」按鈕，寫入 workorder.signed（沒有任何判定規則用到它）。
+  - 點一個數值格＝選中，格子變黃色（黑板 ui.workorder.selected）。
+- VR：
+  - 作業單在左手夾板上，X 鍵開關（和按鍵表一致）。
+  - 夾板從手腕面板上方移到左手的左側（XrPanelLayout），兩塊並排都看得到。
+  - 不是強制回應視窗；右手射線指到場景照常操作，指到夾板才是填寫。
+  - 卡尺的「一按填入」填進選中的格子；沒有選中就填這次量測對應的格子。填完自動選中下一格（XrViews）。
+- 截圖：
+  - 桌面：Logs/ui_13_workorder_dialog.png（右側作業單、正中下方卡尺面板同時顯示）。
+  - VR：Logs/rig_xr_workorder.png（左手夾板與手腕面板並排，選中的格子變黃色）。
+
+【三、確認事項】
+(a) SI_05 a、SI_06 a、WC_01 的「掛位=使用中」：步驟資料裡沒有這種條件。
+    - SI_05 a 是 tool.active=tool.grounding_rod。
+    - SI_06 是預設完成步驟，只有 presetStates（rack.slot_4=in_use）。
+    - WC_01 的小動作是 ui.rack_viewed、ui.tray_viewed、workorder.toolcount_confirmed。
+    資料和判定規則都沒改。「in_hand 與 in_use」的對應只存在於 StateConsistencyTests 的不變條件檢查裡。
+(b) 距離：以前位置檢測把距離四捨五入到 0.1 cm 後才寫進黑板，判定（ValueInRange、SafetyGuard 的降弓、小動作條件）讀的是四捨五入後的值。
+    現在改成黑板存原始距離（到 0.001 cm），判定一律用原始值，四捨五入只用在顯示（升降面板、錯誤說明、報表都是 0.0 格式）。
+    - 每幀的寫入門檻不變：和黑板值差 ≥ 0.05 cm 才寫。放開、吸附時仍會強制寫入當下的值。
+    - 影響：只有在容許值附近才有差別。例如實際 1.04 cm，以前四捨五入成 1.0 會通過，現在不通過（畫面上仍顯示 1.0）。
+      反過來 0.96 cm 兩種做法都通過。容許值、規則本身都沒改。
+    - 檔案：Modules/Parts/_Common/PositionCheck.cs。
+    - 測試：升降測試新增 0.99（舊值 1.03）會通過、1.04（舊值 1.08）不通過的案例。
+
+【四、測試】
+- EditMode 131 個全部通過（上一輪 128 個＋新增 WorkOrderUiTests 3 個）：
+  - TableClick_OpensAndCloses_WithAndWithoutTool_NoJunkField：
+    用擊中點座標模擬工作桌點擊，徒手和拿卡尺都能打開／收起，不會寫出亂碼欄位。
+  - EveryButton_ViaEventSystem_ChangesBlackboard_AndPanelIsDockedRight：
+    經由 EventSystem 按下每一種按鈕（兩側讀數送出、判定四選一、新滑板中點、清點完成、簽名、收起、選格子），
+    黑板值確實改變，RecordWritten 有發出，面板停靠右上、30% 寬、沒有遮罩。
+  - OpeningFromTable_DoesNotBlockSteps_CSR01_And_WC01：
+    從工作桌打開作業單讓 CSR_01 通過、按清點完成讓 WC_01 通過，整個流程完成，0 錯誤，不暫停。
+- 實機：
+  - 桌面 25 步完整跑完，結果和以前一樣（85 分，只有故意的 E1，重播正常）。
+  - 桌面教學截圖流程正常，面板不重疊。
+  - VR 模擬：作業單 open=true、選中 reading.L.mid、沒有暫停。
+- Recordings 沒刪任何紀錄。
+
+【五、改的檔案】
+- 作業單：
+  - Modules/Worksite/WorkOrder.cs
+  - Modules/UI/Views/PanelViews.cs（WorkOrderView、ControlsStripView）
+  - Modules/UI/Views/ToolPanelView.cs
+  - Modules/UI/Views/XrViews.cs
+  - Modules/UI/XrPanelLayout.cs
+- 距離：Modules/Parts/_Common/PositionCheck.cs
+- 測試：
+  - Tests/EditMode/WorkOrderUiTests.cs（新）
+  - Tests/EditMode/StateConsistencyTests.cs（升降案例改成原始距離）
+- 截圖：Editor/XRSetup/XrCaptureDriver.cs（新增作業單截圖）
+
+========== 追加（2026-10-21 下午）==========
+【Console 紅字】
+- 原因：terry 截圖中的 2 個紅字是 StateBatchTests 故意丟的例外（boom、inner），不是遊戲錯誤。
+- 處理：
+  - 用 LogAssert.Expect 測試雖然會通過，但 Unity 仍然把那兩行印成紅字（截圖就是這樣來的）。
+  - 所以 SimState 的錯誤記錄改成可以替換的 SimState.ErrorLog，預設仍是 Debug.LogError，正式執行時批次出錯照樣記 Error。
+  - 那個測試暫時換成測試用的記錄器，並斷言兩次例外都有記錄。
+- 其他測試沒有把預期中的錯誤印到 Console；沒有用 LogAssert.ignoreFailingMessages。
+- 這次跑完測試，LogError／LogException 數量：0。
+
+【審查追加事項】
+1. 原始距離只用在 PositionCheck 的 _distance_cm、_delta_cm。
+   卡尺沒有改動（CaliperLogic：0.01 mm 解析度、讀數就是學員看到的值）。
+   ReadingMatches、新品 12.0±0.2、高低差 ≤1.0 都沒改。
+2. 讀距離的判定清單（全部讀同一個黑板原始值，容差都是 1e-4）：
+   - part.pan_head.lower_distance_cm：
+     - SI_01 小動作 a、checklist（≤ part.pan_head.lower_tolerance_cm，ChecklistEval）
+     - SI_01 完成條件 ValueInRange 0–1.0（RuleEvaluators）
+     - ERR_SI01_NotInPosition ×2 的 key2（ChecklistEval）
+     - SR_Global_NotLowered（SafetyGuard.Lowered，toleranceCm=1）
+     - 升降面板到位燈與控制盤指示燈（SimIds.PanHeadLowered）
+   - part.carbon_strip_{L,R}.install_distance_cm：CSR_11 小動作 b（ChecklistEval ≤0.5）；PC_StripInstall_L/R 的 toleranceCm=0.5 只用在顯示顏色。
+   - 其他 SR 資產（NotGrounded、Ground_Order、NoVoltageTest、RemoveOrder）的 toleranceCm 欄位沒有用在距離判定。
+3. 顯示：
+   - 距離數字往上進位到 0.1 cm（SimIds.CmText：1.04 顯示 1.1，1.0000001 仍顯示 1.0）。
+   - 用在升降面板、錯誤說明的 {值:…_distance_cm}（不會出現「還差 0.0」）、報表的放開距離。
+   - 到位燈直接用判定結果。
+4. 滑板吸附：同一批強制寫入最新距離（上一輪已做：StripLogic.Install 的 onSnapped → Sensors.Flush）。
+5. ValueInRange 加上 1e-4 的比較容差，並寫了註解。ErrorDetector 的 ValueOutOfRange 用同一個函式，門檻值不動。
+6. 錄製：
+   - session.jsonl 的數字改用 "R" 格式（float 用 float 的 R），寫入再讀回不變。
+   - schemaVersion 2。重播只套用記錄的值，所以新舊紀錄都能播。
+   - 報表與 CSV 的通過／未通過本來就從 SessionResult 讀。
+8. 簽名：照負責人確認的做法，依目前步驟寫入。
+   - 目前在 SI_06 ＝ sign_start（也寫原本步驟資料用的 workorder.si_signed）。
+   - 目前在 WC_04 ＝ sign_end（也寫 workorder.unlock_signed）。
+   - 其他時候顯示「現在還不能簽」，不寫入任何格子、不算錯誤。
+   - 沒有做主管覆核簽名。
+   - 注意：這個切片的 SI_06、WC_04 是預設完成的步驟，流程中不會停在這兩步，所以實際操作時按下去都會是「現在還不能簽」。
+9. 拿著工具點作業單：
+   - 不觸發 E1、不被守門者擋、不算成工具使用（沒有 ActionPerformed 或 MeasurementTaken）。
+   - 桌面點在面板上不會穿透到場景：面板本身擋住射線；Picker.ShouldSendClick 在介面上時不送點選。
+
+【測試】142 個全部通過，Error log 0。新增 11 個：
+- JudgementConsistencyTests 10 個：
+  - SI_01 在 0.99、1.00、1.04、1.10 時，小動作、完成條件、到位燈、SR_Global_NotLowered、顯示五者一致。
+  - install 在 0.49、0.51 時一致。
+  - 顯示進位與容差。
+  - 卡尺 3.004 顯示 3.00 且判定為該換。
+  - session.jsonl 寫入讀回不變。
+  - 簽名三種情況。
+- WorkOrderUiTests 新增 1 個：拿著工具點作業單＋點擊不穿透。
+實機：桌面 25 步完整跑完、錄製、重播都和以前一樣。

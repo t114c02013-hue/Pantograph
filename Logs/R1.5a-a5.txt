@@ -1,0 +1,38 @@
+﻿段：a5 靜態模型與集電弓新節點（含 D24、D25 外觀、D28、建模 B F1–F4、建模 A F6）
+改動：
+ - 天車 ENV_OverheadCrane（env.crane）：走行軌道 X +3.0／−16.0、Z −15…+15，軌道頂面 Y 6.3（小車頂低於桁架 8.0）；節點樹照規格（Visual/Crane_Runway_E/W、Crane_Bridge/Crane_Trolley/Crane_Hoist、Crane_RopeAnchor、Crane_WarningLight；
+   Crane_HookBlock（不在 Trolley 底下）/Hook_Latch、Hook_AttachPoint、ENV_LiftingBeam/Beam_SlingEye_L/R；Crane_Rope 單位長 1 m）；橋停在 Z +12，吊鉤在最高點（Y 5.85）。
+ - 遙控器 ENV_CraneRemote（env.crane_pendant）掛在 PendantDock (−3.31, 1.10, −3.50)，不能拿；Btn_Up/Down/East/West/North/South/Speed2/EStop、Key_Power，每顆旁邊有 Label_<名稱>。
+ - 吊帶 ENV_Sling env.sling_1..4（1 t 扁吊帶）掛在維修區吊具架 (−6.5, −3.8)；長度依 F2 分邊（1、2 號 +Z 側，3、4 號 −Z 側）。
+ - 工具袋 ENV_ToolPouch（env.tool_bag，零件袋 env.tool_bag.bolt_pouch）放在工作檯上；Pocket_5..10、SocketCase、BoltBag、Lanyard_Anchor_5..9。
+ - D24：驗電器（掛位 2）、接地棒（掛位 3）的外觀改成 2.5 m 伸縮絕緣桿＋護環（RoofSceneDef.insulatedPoleLength，Blender 讀參數），直立放在長桿桿架上；判定不改。
+ - 集電弓新節點（PAN_Rigging.fbx 實例化到 a1 的空物件）：part.pan_base.bolt_1..4（FastenerBehaviour，Torqued）、ip.pan_assy.lift_point_1..4（吊耳）、
+   ip.pan_assy.hv_terminal（Mounted）＋ip.pan_assy.hv_terminal.bolt_1..2（FastenerBehaviour，Torqued）、ip.pan_assy.ctrl_connector（Mounted，含 CtrlCap）、ip.pan_assy.hold_down（Removed）、Shunt_Visual_1..2（只做外觀）。
+   初始黑板值由新元件 InitialPartState 寫入；都沒有接進步驟。每個新互動點一個 trigger（layer ContactTarget，新圖層）；PAN_Root 整體 Box（layer PanAssembly，新圖層）。
+ - F1：COG 改用 pan_mass_table.json（EX：Base 95、LowerArm 38、UpperArm 22、PanHead 30 kg）對各關節網格中心加權（降弓姿態）。新純函式類 PanLiftMath（Parts.Common）。
+ - F2：吊帶依 COG 分邊算長度；F3：Hook_AttachPoint_Target 在 COG 正上方（另有 BeamEye_PlusZ／MinusZ）；F4：LiftPointTests（吊點在底架上、吊起後傾斜 ≤ 2°、吊帶長度＝計算值 ±1 cm）。
+ - F6：台架外框（四周與四角立柱）頂面降到 0.45 m（Y −3.20），支撐座頂面維持 0.75 m（Y −2.90）；定位銷、夾具、對位燈不動；支撐座加 4 根柱子。
+ - D28：tp.cab 改到 (−0.19, −2.35, −30.0)（相鄰端車車頭；cabCenter (0, −2.35, −30)），StationLayoutCheck 的 tp.cab 規則改 Z ≤ −27；
+   平台鋼梯移到 +Z 端：從平台 Z +4.0 沿 +Z 下到地面，Bounds X −3.05…−2.07、Y −3.67…1.01、Z 3.99…9.01，有斜扶手；−Z 端舊鋼梯已拿掉（場景裡只有 1 組）。鋼梯在平台旁（X −3.05…−2.07），不在車身與連結處（|X| ≤ 1.69）上方。
+ - 報告：Logs/PantographAssemblyReport.txt。
+PAN_Root 局部座標：
+   COG (0.033, 0.216, 0.003)
+   BaseHole_1 (−0.486, 0, −0.812)、BaseHole_2 (0.486, 0, −0.812)、BaseHole_3 (0.486, 0, 0.812)、BaseHole_4 (−0.486, 0, 0.812)
+   lift_point_1 (−0.516, 0.334, −0.862)、lift_point_2 (0.516, 0.334, −0.862)、lift_point_3 (0.516, 0.334, 0.862)、lift_point_4 (−0.516, 0.334, 0.862)
+   Hook_AttachPoint_Target (0.033, 1.984, 0.003)
+降弓整組 Bounds：局部中心 (0.008, 0.269, 0.132)、大小 (1.667, 1.902, 2.309)；世界 (−0.833, −0.382, −0.187)–(0.833, 1.520, 2.122)（含綠框 LowerTarget 與所有零件）。
+升弓那 29 個網格：場景裡沒有另外一組；同一組網格（72 個 Renderer）由關節轉到升弓或降弓，全部顯示中，沒有隱藏。
+吊帶：+Z 側 0.922 m、−Z 側 0.921 m；吊起後傾斜 1.68°（≤ 2°）。絕緣子頂面與 BaseHole 誤差 0.0 mm；新網格 672 個三角面。
+與規格不同：
+ 1. F1／F2：用 EX 質量表算出的 COG 只比底架中心偏 3 mm（PAN_Root 局部 Z 0.003），不是建模 B 預估的 0.3 m，所以兩側吊帶幾乎一樣長（0.92 m），不是 1.17／0.87 m。
+    原因：降弓時臂的網格中心仍在底架上方（LowerArm Z 0.97、UpperArm Z 1.05），只有弓頭在 Z 0；要得到 0.3 m 的偏移，弓頭（含滑板）要比 EX 值重得多。請建模 B 提供實際質量表（只改 pan_mass_table.json，重建即可）。
+ 2. 高壓端子、控制線接頭、降弓固定帶沒有掛 RemovableBehaviour：那個元件是碳滑板專用（StripLogic），Removed 的固定帶會跟著滑鼠走、Mounted 的端子會被隱藏；改掛 InteractionPointMarker＋InitialPartState，加 shortcut 註解，R1.5b 寫通用拆裝元件時換掉。
+ 3. PAN_Root 的 PanAssembly Box 先關閉（enabled＝false）：CleaningClothTool 的射線會打到 trigger，開著會擋住擦托架；shortcut 註解寫明 R1.5b 開啟並把清潔布射線改成忽略 trigger。
+ 4. 高壓端子螺栓 ID 用 ip.pan_assy.hv_terminal.bolt_1..2（規格只寫 HV_Bolt_1..2）。
+略過：無
+風險：吊帶長度與吊點要等實際質量表確認。
+ponytail-review Verdict：靜態模型＋資料；判定與步驟沒改
+測試：228/228，Console 紅字 0（只有測試裡預期的 LogError）
+功能不變檢查：1 ✔；2 ✔ 225 → 228；3 改動都在 a5 範圍（備份 Logs/backup-a5.zip）；4 ✔；5 ✔；6 ✔ 桌面 25 步跑完（Recordings/20261102_161553_驗證學員）；7 ✔
+未檢查：第 3 項用備份人工比對（這個工作階段的 PATH 還沒有 git，重開後改用 git diff）
+另外：Docs/團隊分工規則.md（terry 的分工規則）；子代理這次被 claude-mem 的檢查程式擋下（要 Git Bash＋node，已安裝，重開工作階段後生效），F1–F4 由我自己完成。

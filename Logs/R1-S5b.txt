@@ -1,0 +1,35 @@
+﻿段：S5b（S0–S5 審查意見、D11）
+改動：
+ 1. 新增 Modules/XR/TeleportArc.cs：拋物線取樣從 XrTeleport.TraceArc 搬出成純函式（行為不變），XrTeleport 改呼叫它；
+    新增 Tests/EditMode/TeleportArcTests.cs：Arc_StopsOnWalkableFloor_NotAtOriginFloorHeight（落點在地板頂面、命中後停止取樣）、Arc_NoCollider_FallsToFloorHeight。
+ 2. StationSet 新增 guardrailClearance 0.30、groundGateMinZ 0.50、groundAnchorMinDistance 0.60（新欄位，舊欄位沒動）。
+    StationLayoutCheck：站點離平台護欄（Rail_*、GateBoundary）至少 0.30 m；新增 GroundStationReport（D11 的 (a)(b)(c) 檢查，並把實際座標寫進 Logs/StationLayoutCheck.txt）。
+    StationTests 新增 GroundStation_D11_GateEdge_Clamp_AnchorDistance_AndGuardrail、GroundStation_D11_RulesCatchBadPositions。
+ tp.platform.ground 維持 (−1.95, +0.30)，(a)(b)(c) 三條都符合，所以沒有改回。
+
+當初衝突的兩條規則（S4 第一次跑 StationLayoutCheck，站點在 (−2.00, +0.60)）：
+ ・目標距離 0.4–0.9 m：「✘ tp.platform.ground：到 ip.depot.ground_terminal 水平 0.34 m（要 0.4–0.9 m）」
+ ・接地站到弓頭接地掛點 ≤ 1.5 m：「✘ tp.platform.ground：到弓頭接地掛點 1.59 m（上限 1.5 m）」
+ 距離是量到物件中心，不是量到錨點：接地端子模型放在錨點往 −X 0.06 m（x −1.66），弓頭接地掛點實際在 (−0.533, 0.528, 0.000)。
+ 審查意見裡「原位置到弓頭接地掛點 1.25 m」與實測不符：(−2.00, 0.60) 到 (−0.533, 0.000) 的水平距離是 1.59 m。
+
+場景實際座標（2026-10-29 重建後，Logs/StationLayoutCheck.txt）：
+ tp.platform.ground：(−1.950, 0.000, 0.300)，facingTargetId＝ip.depot.ground_terminal
+ Anchor_GroundBusbar：(−1.600, 1.000, 0.600)，水平距離 0.46 m；接地端子物件中心 (−1.660, 1.000, 0.600)，0.42 m
+ Anchor_TesterSelfCheck：(−1.600, 1.100, 0.300)，水平距離 0.35 m；自檢器物件中心 (−1.660, 1.100, 0.300)，0.29 m（D11：可以接受）
+ 弓頭接地掛點：(−0.533, 0.528, 0.000)
+ 車側護欄 Rail_CarSide_A：(−1.625, 0, −3.500)–(−1.575, 1.1, −1.400)，到接地站 1.73 m
+ 車側護欄 Rail_CarSide_B：(−1.625, 0, −0.600)–(−1.575, 1.1, 2.500)，到接地站 0.33 m（≥ 0.30）
+ 活動欄開口 GateBoundary：Z −1.400…−0.600（X −1.600）
+D11 三條的實際數值：
+ (a) 沿 Z 離活動欄開口邊緣 0.90 m（至少 0.5）✔
+ (b) 到弓頭接地掛點 1.45 m（上限 1.5）✔
+ (c) 和 tp.platform.anchor (−2.000, 0, −1.000) 相距 1.30 m（至少 0.6）✔
+新位置能通過 0.4 m 半徑規則的原因：護欄的碰撞體在 Boundary 圖層、沒有外觀，0.4 m 規則只算實體障礙物；護欄原本適用不可見牆 ≥ 0.15 m，D11 改成 ≥ 0.30 m，實際 0.33 m。
+ 端子與自檢器是站點要操作的互動物件，不算障礙物。
+
+略過：無
+風險：接地站離車側護欄 0.33 m，只比新下限多 3 cm；改平台或站點資料時，StationLayoutCheck 會擋下來。
+測試：186/186，Console 紅字 0（只有測試裡預期的 LogError）；桌面 25 步跑完（Recordings/20261029_172008_驗證學員）
+未檢查：無
+另外（S6 進行中、還沒接上的檔案，不影響這一段）：Modules/XR/ToolWidgetLogic.cs、Modules/XR/XrToolWidgets.cs

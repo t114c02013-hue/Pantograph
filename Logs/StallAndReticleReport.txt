@@ -1,0 +1,82 @@
+﻿步驟卡關與 VR 射線指示　回報　2026-10-21
+
+【A. 指示都完成，步驟卻不跳】
+1. 從紀錄找到的根因
+   - 分析了 7 筆非「驗證學員」的紀錄。其中 6 筆只有約 20 秒（停在 SI_01），是截圖與測試流程產生的。
+   - 真正卡住的只有 20261020_163041_學員1020_1630：
+     - 卡在 STP_CSR_03_Measure_L（量測肘側滑板）。小動作 3/4：左、中、右都量了（t=104.7、155.8、165.1 s）。
+     - 第 4 個小動作「三個讀數填入作業單」（條件 workorder.reading.L.submitted）一直沒有成立。整場沒有任何 RecordWritten，直到 646 s 關閉。
+     - 紀錄裡學員在工作桌的作業單上點了 19 次（拿著卡尺，pointId 是擊中點座標），都沒有反應。
+       這就是昨天修好的作業單 bug：點擊座標被當成欄位名，而拿著工具點又被忽略。
+     - 作業單按鈕開關了 10 次，但沒有送出讀數。作業單是置中的強制回應視窗，擋住了場景。
+     - 結論：那次不是判定程式漏判，而是作業單用不了，學員又看不到「還差什麼」。
+   - 依審查要求逐一排除：
+     (a) checklist 字串和規則不一致：發現一致性缺口（見 3），已補資料。
+     (b) 小動作打勾後狀態又改變：可能發生（例：讀數抄錯、順序錯、拿著工具）。現在會偵測並顯示還差什麼。
+     (c) 距離四捨五入：已改成原始值，勾選與規則讀同一個值，不會再分歧。
+     (d) in_hand／in_use 對應：資料沒有這種條件，無關。
+   - 程式裡另外找到並修好一個「漏判」的可能（ProcedureRunner.Evaluate）：
+     - 判定進行中又收到 StateChanged 時，以前直接略過。
+     - 如果那筆寫入發生在條件檢查之後（例：閘門說明 gate_reason 寫出後，其他模組才補寫條件），之後就沒有人再判定，造成條件都成立但步驟不跳。
+     - 現在會記下來，這一輪結束後再判定一次（最多 20 輪）。
+     - 重現測試：Repro_WriteDuringEvaluation_WasMissed_NowReevaluated。
+   - 另外修正：上一步的閘門說明（procedure.gate_reason）會一直留在下一步，現在換步驟時清空。
+2. 防護網（ProcedureRunner.Poll；App 每幀呼叫，內部每 0.5 s 一次）
+   - 只讀、不推進步驟；批次中略過。步驟仍然只在 Commit 後推進。
+   - missed_commit：小動作與完成條件（含安全閘門）都成立，步驟卻沒推進。記 StepStallDetected，並記一筆 Error（不能蓋掉判定 bug）。
+   - rule_mismatch：小動作全部完成，但完成條件超過 3 秒仍不成立。記 StepStallDetected（步驟、側別、未成立的條件 ID、當時的黑板值、說明）。
+   - 每一步每一種只記一次。不扣分；紀錄 session.jsonl、summary.json 和報告（新增「卡關紀錄」表）都會列出。
+3. 「還差什麼」
+   - 完成條件新增 Explain（RuleExplainer，和判定共用同一套 evaluator 與容差）。
+     規則資料類別只放資料，判定邏輯都在 Procedures 層，所以 Explain 放在判定層。
+   - 說明文字從步驟資料讀，不顯示條件公式。依序找：
+     1. 小動作指令
+     2. 小步驟清單文字
+     3. 同一個鍵的錯誤規則的「怎麼改」
+     4. 前一步的標題（「先完成『…』」）
+     5. 安全閘門說明
+   - 顯示（左上步驟面板，VR 在提示板）：
+     - 教學：「還差：＋第一個缺的小動作指令」。
+     - 練習：通用句「這一步還有條件沒完成，請再檢查」，按「提示：還差什麼？」才顯示缺的那一條。
+       按提示會記 UiCommandIssued(StallHint)，計入報告「提示使用」。目前提示沒有扣分規則，沿用現行。
+     - 考核：只顯示通用句（目前程式只有教學、練習兩種模式；training.mode=exam 時照這個規則）。
+   - 資料一致性檢查（測試）：每一步的每個完成條件都要有從資料來的中文說明，而且側別正確。檢查結果發現缺口，已補資料（只加文字，不改條件）：
+     - SI_05：加清單項「接地完成：端子與弓頭兩端都接上」「順序要是 端子 → 拉線確認 → 弓頭（順序錯了請按『從這一步重做』）」。
+     - WC_03：加清單項「拆除順序要是 先弓頭、再端子（…）」。
+     - 修正舊的工具快捷鍵文字：「按 3 拿起卡尺」等 11 處，改成「到工具架第 5 格拿起卡尺」等（工具架 v5 的掛位）。
+   - 雙向測試：
+     - 「小動作全部完成 ⇒ 完成條件成立」：正常流程每次通知都檢查，0 違反。
+     - 「完成條件的每個條件 ⇒ 有對應的小動作／清單／錯誤說明」：已全部對應，雙側都檢查 side。
+     - SliceDryRun 跑完 25 步（教學、練習兩種模式），StepStallDetected＝0 次。
+   - 實機：桌面 Play 跑完 25 步，紀錄裡 StepStallDetected＝0。
+
+【B. VR 射線指到面板】
+- 新增 Modules/XR/XrUiPointer.cs（XrPlayer 綁定時自動掛在右手射線上，只有右手有）：
+  - 射線打到任何 World Space 介面時，在擊中點顯示白色帶黑邊的圓點。
+    - 依距離縮放、保持固定視角大小：0.5 m 約 1 cm，最小 0.8 cm。
+    - 用 sortingOrder 100 的獨立 Canvas，往射線起點退 3 mm，永遠畫在介面上層。
+  - 射線打到介面時變藍，長度到擊中點為止；沒打到介面就不顯示圓點，射線維持原樣。
+  - 介面優先：沿用 XrPlayer 的規則（介面比場景物件近時，PointerState.OverUi，不送場景點擊、不 hover 場景物件）。
+  - 只在扳機按下且指在介面上時短震動一次（0.35、40 ms），hover 不震動。按鈕的 hover 高亮與按下變暗由 Button 的顏色過渡處理。
+  - 左手沒有 UI 射線（左手只有傳送拋物線），不會打到左手夾板。
+- TrackedDeviceGraphicRaycaster：XrModeSwitch.AddRaycasters 給每個根 Canvas 加上（改成 public 讓測試呼叫）。
+- 測試（XrPointerTests）：
+  - 每個 World Space Canvas 都有 TrackedDeviceGraphicRaycaster。
+  - 每個 Selectable 都有可被射線打到的 Graphic。
+  - 圓點視角大小固定。
+- 截圖：Logs/rig_xr_reticle.png（右手藍色射線停在作業單夾板上，白色圓點指在「兩條都換」旁）。
+  - 注意：Unity UI 不接受從面板背面打來的射線。夾板在左手、面朝上方，從下面往上指會穿過去，要從正面指。
+
+【測試】149 個全部通過（上一輪 142＋新增 7：StallDetectionTests 5、XrPointerTests 2），這次執行的 Error log＝0。
+
+【改的檔案】
+- Core：Events/Events.cs（StepStallDetected）、Events/RecordingEvents.cs（UiCommands.StallHint）
+- Procedures：ProcedureRunner.cs（再判定旗標、Poll、還差什麼、換步驟清空閘門說明）、Evaluators/RuleExplainer.cs（新）
+- App：SliceBootstrap.cs（每幀 Poll）
+- UI：Views/StepPanelView.cs（卡關提示、練習模式的提示按鈕）
+- Recording：SessionRecorder.cs（記 StepStallDetected）、SummaryBuilder.cs（stalls）、ReportBuilder.cs（卡關紀錄表、提示使用多一列）
+- XR：XrUiPointer.cs（新）、XrPlayer.cs（掛上指示）、XrModeSwitch.cs（AddRaycasters 公開）
+- 資料：Procedures/Data/carbon_strip_slice.json（只改提示文字：清單項與工具架掛位文字；沒改任何條件、門檻）
+- 測試：StallDetectionTests.cs、XrPointerTests.cs（新）；EditMode asmdef 加上 Unity.XR.Interaction.Toolkit 參照
+- 截圖：Editor/XRSetup/XrCaptureDriver.cs（新增 rig_xr_reticle）
+- 遊戲執行讀的是從 JSON 匯入的 Steps/*.asset：已重新匯入（新增 Logs/import-steps.request 觸發只匯入步驟、不重建場景，TestRunHook.cs），匯入後 149 個測試與桌面 25 步實機都再跑過一次。

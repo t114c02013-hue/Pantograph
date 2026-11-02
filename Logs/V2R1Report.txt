@@ -1,0 +1,82 @@
+﻿V2 R1 完成報告（2026-11-02）
+==========================
+
+一、總結
+- 編譯：0 個錯誤。
+- EditMode 測試：208/208 通過。R1 開工時是 157 個（FixReport_1028），新增 51 個。
+- Error log：0 個非預期的紅字。只有測試裡預期的 LogError（場景缺螺栓盤時要記 Error），已用 LogAssert 斷言。
+  進入 Play 時有 1 條警告「The referenced script (Unknown) on this Behaviour is missing!」。這是黃字不是紅字；prefab 檢查（PrefabStructureTests）和場景的腳本 GUID 都找不到缺的腳本，還沒查出來源。
+- 桌面版：每段收工都用 RecordingCheckDriver 從 SI_01 跑到結算，25 步都完成。分數 85、未通過，是因為檢查腳本在 SI_01 故意犯一次 E1，屬於預期。最後一次紀錄在 Recordings/20261102_150508_驗證學員。
+- 段落紀錄：Logs/R1Progress.txt、Logs/R1-S1.txt～R1-S9.txt、R1-S5b.txt。技術債：Logs/R1-Debt.txt。站點檢查：Logs/StationLayoutCheck.txt。步驟表：Logs/StepTable.csv（Tools/Export Step Table 匯出，UTF-8 with BOM，144 列）。
+- 這個資料夾沒有 git，所以「每段 commit」改成每段寫一份 R1-<段號>.txt。
+
+二、改寫的舊測試（換了按鍵與資料，沒有刪掉不補）
+- XrTests.SliceScene_HasNoScreenSpaceCanvas_AndHasXrRig：「6 個固定傳送點」改成「8 個站點，而且舊的 6 個點都不在」（S1）。
+- PartsTests.Fastener_HalfTurnLoosens_ThenOut_Tray_Place_Snug_Torque_Mark：事件改成看 env.bolt_tray_L（S4）。
+- XrTests 的 RightStick_Torque_UpDownHalfNm_AndRepeatsWhileHeld、RightStick_Socket_SizeCyclesAndLeftLoosenRightLock、RightStick_CarriedStrip_Flips_CaliperScrolls_EmptyHandNothing：
+  右搖桿讓給平滑移動，三個合併改寫成 RightStick_AnyToolOrCarrying_NoToolAdjust；工具調整改由 ToolWidgetTests 測（S6）。
+- JudgementConsistencyTests：「SchemaVersion＝2」改成「≥ 2」（schema 升到 3，新增 PanelMoved）（S9）。
+
+三、新增的測試檔
+StationTests、StationHeightTests、PrefabStructureTests、TeleportArcTests、ToolWidgetTests、LocomotionTests、InputBindingTableTests、PanelLayoutTests、StepTableExportTests，以及 PartsTests 新增的 1 個測試。
+
+四、T7 查證結論
+- T7 在 R1 前一輪已經修好：預設完成的步驟要等流程走到那一步，才在同一批寫入完成狀態；升弓的聯鎖會送出原因。
+- 本輪用 LiftTests 的 6 個測試逐項核對規格第 1 節的表格，全部通過：
+  開場降、升、再降到綠框；上鎖後 ▲ 無效並說明原因；斷電後 ▲ 無效並說明原因；車頂有人時 ▲ 被擋；WC_04 之後可以升弓；預設步驟的狀態在流程走到之前不存在。
+- 當初的根因是 bug 還是聯鎖，我沒有逐行重查 R1 前一輪的改動，這裡不下結論。
+
+五、8 個站點的實際座標（建置後，y 往下打 Walkable 得到）
+tp.cab (−6.200, −2.500, −3.000)；tp.platform.lift (−2.000, 0, 0.000)；tp.platform.rack (−2.200, 0, −2.500)；tp.platform.ground (−1.950, 0, 0.300)；
+tp.platform.anchor (−2.000, 0, −1.000)；tp.roof.inner／outer (0.000, 0, −0.650)（共用落點，建置腳本不用移位）；tp.roof.shelf (−0.600, 0, −2.500)。
+- 肘側最遠螺栓 0.976 m、外側 0.740 m（≤ 1.0），所以側移提示不啟用。
+- 降弓後滑板頂面在車頂上 0.693 m（stripTopAboveRoof）。
+- 車頂 Raised 時眼高 1.293 m，也就是 1.6 m 往下 0.307 m，滑板頂面看起來在腳下 1.0 m。
+
+六、截圖（Logs/）
+rig_xr_r1_tp.cab.png、rig_xr_r1_tp.platform.lift.png、rig_xr_r1_tp.platform.rack.png、rig_xr_r1_tp.platform.ground.png、rig_xr_r1_tp.platform.anchor.png、rig_xr_r1_tp.roof.inner.png、
+rig_xr_r1_tp.roof.outer.png、rig_xr_r1_tp.roof.shelf.png、rig_xr_r1_roof_locked.png、rig_xr_r1_gate.png、rig_xr_r1_panel_handle.png、rig_xr_r1_toolwidgets.png
+（沒有頭盔，是用模擬模式由 XR 攝影機拍的。三張車頂截圖四周是紅的：截圖腳本在車頂還沒開放時直接傳上車頂，所以出現危險區提示，這是正確行為。）
+
+七、只提示、不記分的項目
+- 危險區：頭下方沒有可走地板，或車頂還沒開放就站上車頂。畫面四周變紅，提示「已進入危險區域，請退回」。
+- 車頂有人時按升弓：只顯示原因並輕震（沿用 T7）。
+- 從車頂離開時安全帶還扣在車頂掛點：沿用 RoofAccessRule.leaveHookedMessage，只提示。
+
+八、和規格不同的地方與原因（細節在各段報告）
+1. tp.platform.ground 在 (−1.95, 0.30)，規格是 (−2.00, 0.60)。原位置量到物件中心的距離，到接地端子 0.34 m（下限 0.4）、到弓頭接地掛點 1.59 m（上限 1.5），兩條同時不合格。
+   D11 確認維持新位置；(a) 離活動欄開口 0.90 m、(b) 到弓頭接地掛點 1.45 m、(c) 和 anchor 站點相距 1.30 m 三條都符合，離護欄 0.33 m（下限 0.30）。（R1-S5b）
+2. 「站點 0.4 m 內沒有碰撞體」和視線檢查，不把站點要操作的互動物件算進去；護欄改用 0.30 m 的下限（D11）。
+3. 資料資產放在 Assets/_Project/Modules/Worksite/Data，規格寫 Worksite/Data。為了不動 .meta 和 GUID，沒有搬。
+4. 切片裡預設完成的步驟（SI_02、SI_03、SI_06、WC_02、WC_04）沒有小動作資料，所以 SI_03 c、WC_04 d↔e 沒有資料可以搬。
+   小動作總數 166 的完整清單不在這台電腦上；切片展開後是 144，步驟表和測試都改成從資料算。
+5. T2-a：沒有用 XRPokeInteractor，改用距離判定；節點掛在右手 Attach_Tool 上，不在工具 prefab 裡；套筒沒有做成獨立 prefab；按到時沒有喀聲，只有震動。
+   另外加了「左手碰量爪＝合攏」，因為右搖桿不再開合量爪。
+6. T6：遮罩是自己產生的徑向貼圖，不是 TunnelingVignetteController（專案裡沒有那個範例）。教學的「走到圈」用走 0.8 m 判定。
+7. 按鍵表：各情境的啟用只有 A、左手尖端碰、右搖桿按下三個會變；左撇子模式只做到資料層。
+8. T3：「讀數面板」沒有把手（卡尺讀數在手腕面板上）；舊的對話框 35° 跟隨，在 XrPanels 接手時停用。
+9. 第 8 節第 9 項的 PlayMode 測試（推搖桿 3 s 位移約 3 m、被活動欄擋下）沒有做：這裡沒有裝置模擬器的 PlayMode 環境，改由 terry 戴頭盔驗收。
+
+九、ponytail 稽核（PantographSim.XR，只報告）
+- 每幀配置記憶體：XrToolWidgets 拿著卡尺時，每幀用 LINQ 掃一次 Registry.Ids；ReplayPlayer 每幀建一次面板位置字典。量都很小（約 60 個 ID、幾行 PanelMoved），目前不需要處理。
+- XrPanels 只在第一次找到面板時建把手。之後如果介面重建 Canvas，就不會再建（目前不會重建）。
+- 危險區、平滑移動、面板把手、工具節點都只在 InputMode.XrActive 時作用，桌面版不受影響。
+
+十、terry 戴頭盔驗收 12 項（我先在桌面模式自測）
+1. 開場先降、再升、再降，最後到綠框判定到位：LiftTests 通過，桌面全程也通過。✔
+2. 上鎖、斷電後 ▲ 無效並說明原因：LiftTests 通過。✔（震動要戴頭盔確認）
+3. 每個站點站在地板上、眼高一致：StationHeightTests 通過，截圖的眼高都是 1.6 m（車頂 Raised 是 1.293 m）。✔
+4. 升降站看得到弓頭、綠框和指示燈；上車頂平視滑板：StationLayoutCheck 視線檢查通過，rig_xr_r1_tp.platform.lift、rig_xr_r1_tp.roof.inner 截圖。✔
+5. B 鍵傳到這一步的站點並面向目標、有箭頭、無關站點不會亂亮：邏輯測試通過（Decide、站點資料）；實際傳送與箭頭要戴頭盔確認。△
+6. 驗電、掛接地、扣安全帶之前上不了車頂：RoofAccess、活動欄測試通過，rig_xr_r1_roof_locked 截圖。✔（平滑移動被擋要戴頭盔確認）
+7. 平滑移動手感、不穿弓體、走不出車頂邊、遮罩：LocomotionTests 測了設定與碰撞體。△ 要戴頭盔驗。
+8. 5 分鐘不適程度 ≤ 3：要戴頭盔驗。✘（桌面無法驗）
+9. ≡ 選單能關平滑移動、調遮罩：選單項目已加，程式有路徑。△ 要戴頭盔按看看。
+10. 左握把抓面板、叫回眼前、升降面板不能移、作業單在左手：PanelLayoutTests 通過，rig_xr_r1_panel_handle 截圖。△ 抓取手感要戴頭盔驗。
+11. 碰套筒換尺寸、撥桿、±、卡尺自動夾住填入、拿工具推右搖桿只會走路：ToolWidgetTests 與 RightStick_AnyToolOrCarrying_NoToolAdjust 通過，rig_xr_r1_toolwidgets 截圖。△ 要戴頭盔驗。
+12. 正常流程 25 步不卡關：桌面全程通過。✔
+
+十一、已知風險與下一步
+- 頭盔實機手感（第 5、7–11 項）是最大的未知數，EX 門檻可能要依實測調整。
+- 進入 Play 時的 missing script 警告還沒查到來源。
+- R1.5a（真實 700T 車廂、檢修庫兩區、天車與台架靜態模型、PAN_Root）接著做。

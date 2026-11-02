@@ -1,0 +1,29 @@
+﻿段：a4 地面維修區（含 D27）
+改動：
+ - 新資料 ZoneDef（Data/Definitions/ZoneDef.cs；資產 Modules/Worksite/Data/Zones/zone.arrival、zone.maintenance）；StationDef 加 zoneId（現有站點全部 zone.arrival）；StationFloor 加 Ground（加在最後，舊值不變）。
+ - RoofSceneDef 加維修區資料：maintMinXZ (−13.5, −5)、maintMaxXZ (−5.5, 5)、standCenterXZ (−9.5, 0)、standSizeXZ (2.0, 2.6)、standTopAboveGround 0.75（頂面 Y −2.90）、standClearance 1.2、standStationOffset 0.6、workbenchCenterXZ (−12.5, 0)、partsTrayMaintXZ (−12.5, −1.4)。
+ - RoofSiteBuilder.BuildMaintenanceArea：ENV_MaintenanceArea（全區 Walkable、四周 LocomotionBlocker 牆、平台到維修區的地面通道只做視覺、台架外 1.2 m 黃色走道線、Anchor_PartsTray_Maint 空物件）；
+   ENV_PantographStand（env.panto_stand，Blender 模型：StandSeat_1..4 間距 X 0.80／Z 1.00、StandClamp_1..2、AlignLight_1..4、工具盤 env.panto_stand.tool_tray、台架用螺栓盤在靠 tp.stand.s 的角落）；
+   ENV_WorkBench（檯面 1.5 × 0.6、高 0.9，沿 Z 擺；作業單夾板、3 條新滑板沿 Z 平放）。都只有模型和節點，沒有邏輯。
+ - 站點 tp.stand.n／e／s／w（台架邊中點外 0.6 m、面向台架、zone.maintenance、樓層 Ground），XrViewHeight 把 ENV_MaintenanceArea 判成 Ground（視點偏移 0）。
+ - D27：tp.cab 改到相鄰車的駕駛室，房間中心 (0, −2.35, −14.0)，站點 (−0.19, −2.35, −14.00)；cabFloorY −2.50 → −2.35（軌面 −3.65 ＋ 1.30）；
+   Blender 車身原本把軌面放在地面上 0.17 m，改成軌面＝地面，車廂地板 −2.35（程式和資料裡沒有 −2.55 的舊值）；平台安全帶掛點改到 (−1.86, 1.20, −2.10)；防墜器柱維持在活動欄開口 −Z 側外面 (−1.86, ·, −2.20)，不擋開口；
+   StationLayoutCheck 加 tp.cab 規則：|X| ≤ 1.69、Z ≤ −12.5（StationSet.cabMaxZ）、不在維修區。
+ - 修 bug：
+   1. StationLayoutCheck.Center() 會量到子物件裡另有 ID 的碰撞體（台架的工具盤），改成只算屬於同一個 ID 的碰撞體。
+   2. Blender 匯出用 bake_space_transform=True 時，子物件的位置沒有轉軸（定位銷、轉向架、絕緣子傘裙的位置都錯了）。
+      改成 bake_space_transform=False，Unity 端 ModelImporter.bakeAxisConversion=true，並讓 Fbx() 保留 FBX 節點本身的旋轉。
+ - 新增 Tests/EditMode/MaintenanceZoneTests.cs（3 個）；改寫 XrTests 的站點數（9 → 跟著站點資料）。
+StationLayoutCheck：13 站全過。tp.stand.n (−9.5, −3.64, 1.9)、e (−7.9, −3.64, 0)、s (−9.5, −3.64, −1.9)、w (−11.1, −3.64, 0)；台架四周 1.2 m 內除了台架沒有碰撞體。
+與規格不同：
+ 1. D27 說「本節車 −Z 車端 −12.5」，但 a2 的 pantographFromCarEnd＝5.0，中間那節的 −Z 車端在 Z −5.0；照 D27 的座標 Z −14.0 放，結果是在相鄰那節車裡、離連結端 8.4 m。
+    若要把集電弓放在車長中點（車端 −12.5），只要把 pantographFromCarEnd 改成 12.5（資料），重跑 Blender 和建置即可。
+ 2. Blender 匯出設定 bake_space_transform 改成 False（理由見上方 bug 2）。
+ 3. 零件盒只放 Anchor_PartsTray_Maint 空物件（照負責人更正）；場景裡仍只有一個 env.parts_tray（R1 的位置）。
+ 4. tp.stand.* 是傳送站點（規格寫「只放 StationAnchor」，但 8.1 第 6 項要檢查站點，所以照站點資料建，教學不會用到）。目標距離上限 2.5 m（台架中心離站點 1.6–1.9 m）。
+略過：無
+風險：tp.cab 的房間在相鄰車廂網格裡面，車身模型從裡面看不到（只顯示房間牆）。
+ponytail-review Verdict：資料推導＋靜態模型；判定沒改
+測試：225/225，Console 紅字 0（只有測試裡預期的 LogError）
+功能不變檢查：1 ✔；2 ✔ 222 → 225；3 改動都在 a4／D27 範圍；4 ✔；5 ✔；6 ✔ 桌面 25 步跑完（Recordings/20261102_160045_驗證學員）；7 ✔
+未檢查：第 3 項用備份 Logs/backup-a4.zip 人工比對（沒有 git）

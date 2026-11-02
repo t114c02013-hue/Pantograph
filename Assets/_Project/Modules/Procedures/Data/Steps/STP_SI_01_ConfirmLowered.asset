@@ -1,0 +1,147 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_SI_01_ConfirmLowered
+  m_EditorClassIdentifier: 
+  stepId: STP_SI_01_ConfirmLowered
+  title: "\u964D\u5F13\u4E26\u78BA\u8A8D"
+  instruction: "\u7528\u53F3\u5074\u5347\u964D\u63A7\u5236\u5668\u6309\u4F4F\u300C\u25BC
+    \u4E0B\u964D\u300D\uFF0C\u628A\u5F13\u982D\u7684\u7D05\u8272\u6AA2\u6E2C\u9EDE\u964D\u5230\u7DA0\u6846\u5167\uFF08\u8B8A\u6210\u7DA0\u8272\uFF09\uFF1B\u518D\u9EDE\u5F13\u982D\u89AA\u773C\u78BA\u8A8D\uFF0C\u6700\u5F8C\u9EDE\u63A7\u5236\u76E4\u67E5\u770B\u5F13\u4F4D\u6307\u793A\u71C8\u3002"
+  toolHint: 
+  targetHint: "\u53F3\u5074\u5347\u964D\u63A7\u5236\u5668 \u2192 \u5F13\u982D\u4E0A\u7684\u6AA2\u6E2C\u9EDE\u8207\u7DA0\u6846
+    \u2192 \u5F13\u982D\u672C\u9AD4 \u2192 \u99D5\u99DB\u5BA4\u63A7\u5236\u76E4"
+  targetIds:
+  - part.pan_head
+  - ip.cab.panel
+  - ip.cab.pan_indicator
+  - ip.pan_head.lower_check
+  requiredToolId: 
+  completion:
+    rid: 2801573864771421528
+  errors:
+  - errorId: ERR_SI01_NotInPosition
+    severity: 1
+    what: "\u5F13\u982D\u9084\u6C92\u5230\u964D\u5F13\u4F4D\u7F6E\uFF08\u9084\u5DEE
+      {\u503C:part.pan_head.lower_distance_cm} cm\uFF09\u5C31\u505A\u78BA\u8A8D\u3002"
+    why: "\u5F13\u982D\u6C92\u964D\u5230\u4F4D\uFF0C\u78B0\u5F13\u9AD4\u53EF\u80FD\u89F8\u96FB\u6216\u88AB\u593E\u50B7\uFF1B\u78BA\u8A8D\u4E00\u5B9A\u8981\u5728\u5F13\u982D\u5230\u4F4D\u4E4B\u5F8C\u3002"
+    fix: "\u6309\u4F4F\u53F3\u5074\u5347\u964D\u63A7\u5236\u5668\u7684\u300C\u25BC
+      \u4E0B\u964D\u300D\uFF08\u6216 PageDown\uFF0F\u2193\uFF09\uFF0C\u628A\u7D05\u8272\u6AA2\u6E2C\u9EDE\u964D\u5230\u7DA0\u6846\u5167\u3001\u8B8A\u6210\u7DA0\u8272\uFF0C\u518D\u9EDE\u5F13\u982D\u548C\u6307\u793A\u71C8\u78BA\u8A8D\u3002"
+    trigger: 2
+    key: ip.cab.pan_indicator.checked
+    key2: part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm
+    keys: []
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+  - errorId: ERR_SI01_NotInPosition
+    severity: 1
+    what: "\u5F13\u982D\u9084\u6C92\u5230\u964D\u5F13\u4F4D\u7F6E\uFF08\u9084\u5DEE
+      {\u503C:part.pan_head.lower_distance_cm} cm\uFF09\u5C31\u505A\u78BA\u8A8D\u3002"
+    why: "\u5F13\u982D\u6C92\u964D\u5230\u4F4D\uFF0C\u78B0\u5F13\u9AD4\u53EF\u80FD\u89F8\u96FB\u6216\u88AB\u593E\u50B7\uFF1B\u78BA\u8A8D\u4E00\u5B9A\u8981\u5728\u5F13\u982D\u5230\u4F4D\u4E4B\u5F8C\u3002"
+    fix: "\u6309\u4F4F\u53F3\u5074\u5347\u964D\u63A7\u5236\u5668\u7684\u300C\u25BC
+      \u4E0B\u964D\u300D\uFF08\u6216 PageDown\uFF0F\u2193\uFF09\uFF0C\u628A\u7D05\u8272\u6AA2\u6E2C\u9EDE\u964D\u5230\u7DA0\u6846\u5167\u3001\u8B8A\u6210\u7DA0\u8272\uFF0C\u518D\u9EDE\u5F13\u982D\u548C\u6307\u793A\u71C8\u78BA\u8A8D\u3002"
+    trigger: 2
+    key: part.pan_head.inspected
+    key2: part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm
+    keys: []
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+  - errorId: ERR_SI01_LightOnly
+    severity: 1
+    what: "\u53EA\u770B\u4E86\u63A7\u5236\u76E4\u7684\u6307\u793A\u71C8\uFF0C\u6C92\u6709\u89AA\u773C\u78BA\u8A8D\u5F13\u982D\u3002"
+    why: "\u6307\u793A\u71C8\u53EF\u80FD\u6545\u969C\u6216\u63A5\u7DDA\u932F\u8AA4\uFF1B\u5F13\u982D\u82E5\u5176\u5BE6\u6C92\u964D\u4E0B\uFF0C\u78B0\u5230\u5C31\u6709\u89F8\u96FB\u8207\u593E\u50B7\u5371\u96AA\u3002"
+    fix: "\u9EDE\u5F13\u982D\u672C\u9AD4\uFF0C\u89AA\u773C\u78BA\u8A8D\u5F13\u982D\u5DF2\u964D\u5230\u5E95\uFF0C\u518D\u4EE5\u6307\u793A\u71C8\u4EA4\u53C9\u78BA\u8A8D\u3002"
+    trigger: 5
+    key: ip.cab.pan_indicator.checked
+    key2: 
+    keys:
+    - part.pan_head.inspected
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+  hints:
+    text: "\u6309\u4F4F\u53F3\u5074\u300C\u25BC \u4E0B\u964D\u300D\uFF08\u6216 PageDown\uFF0F\u2193\uFF09\u4E0D\u653E\uFF0C\u9760\u8FD1\u7DA0\u6846\u6703\u81EA\u52D5\u8B8A\u6162\uFF1B\u6AA2\u6E2C\u9EDE\u8B8A\u7DA0\u5C31\u653E\u958B\u3002"
+    why: "\u5F13\u982D\u6C92\u964D\u5230\u4F4D\u5C31\u78B0\u5F13\u9AD4\uFF0C\u53EF\u80FD\u89F8\u96FB\u6216\u88AB\u593E\u50B7\uFF1B\u6307\u793A\u71C8\u53EF\u80FD\u6545\u969C\uFF0C\u6240\u4EE5\u9084\u8981\u89AA\u773C\u770B\u3002"
+    checklist:
+    - "\u7528\u5347\u964D\u63A7\u5236\u5668\u628A\u6AA2\u6E2C\u9EDE\u964D\u5230\u7DA0\u6846\uFF08\u8AA4\u5DEE
+      \u2264 1 cm\uFF09|part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm"
+    - "\u9EDE\u5F13\u982D\uFF0C\u89AA\u773C\u78BA\u8A8D\u964D\u5F13|part.pan_head.inspected"
+    - "\u6253\u958B\u63A7\u5236\u76E4\uFF0C\u67E5\u770B\u5F13\u4F4D\u6307\u793A\u71C8|ip.cab.pan_indicator.checked"
+    highlightIds:
+    - ip.pan_head.lower_check
+    - part.pan_head
+    - ip.cab.panel
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u6309\u4F4F \u25BC \u628A\u5F13\u982D\u964D\u5230\u7DA0\u6846"
+    why: "\u653E\u958B\u6642\u8DDD\u96E2\u8981 \u2264 1 cm"
+    targetId: ip.pan_head.lower_check
+    toolId: 
+    condition: part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm
+    standPointId: tp.platform.lift
+  - text: "\u9EDE\u5F13\u982D\uFF0C\u78BA\u8A8D\u5DF2\u964D\u4E0B"
+    why: "\u89AA\u773C\u770B\uFF0C\u4E0D\u53EA\u770B\u71C8"
+    targetId: part.pan_head
+    toolId: 
+    condition: part.pan_head.inspected
+    standPointId: tp.platform.lift
+  - text: "\u9EDE\u63A7\u5236\u76E4\u7684\u5F13\u4F4D\u6307\u793A\u71C8"
+    why: "\u76EE\u8996\u548C\u6307\u793A\u71C8\u4EA4\u53C9\u78BA\u8A8D"
+    targetId: ip.cab.pan_indicator
+    toolId: 
+    condition: ip.cab.pan_indicator.checked
+    standPointId: tp.platform.lift
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags:
+  - "\u964D\u5F13\u4F4D\u7F6E\u5BB9\u8A31\u8AA4\u5DEE 1 cm=\u793A\u4F8B\u503C"
+  - "\u5347\u964D\u5168\u7A0B 15 \u79D2\u3001\u7DA0\u6846\u524D 20 cm \u6E1B\u901F\u5230
+    5 cm/s=\u793A\u4F8B\u503C"
+  refSecondsTutorial: 45
+  refSecondsExam: 30
+  references:
+    version: 2
+    RefIds:
+    - rid: 2801573864771421528
+      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        rules:
+        - rid: 2801573864771421529
+        - rid: 2801573864771421530
+    - rid: 2801573864771421529
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        keys:
+        - part.pan_head.inspected
+        - ip.cab.pan_indicator.checked
+    - rid: 2801573864771421530
+      type: {class: ValueInRange, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        key: part.pan_head.lower_distance_cm
+        min: 0
+        max: 1
+        count: 0

@@ -1,0 +1,47 @@
+FixReport 2026-10-28（修到可測試；R1 沒有繼續做）
+=====================================================
+
+一、原因
+1. 編譯錯誤（唯一的一種，共 2 處）：
+   Assets/_Project/Editor/R1/RoofSiteBuilder.cs(421,38)、(494,35)
+   error CS0246: 找不到 'InteractionPointMarker'。
+   R1 新增的 RoofSiteBuilder 用到 PantographSim.Parts.Common 的類別，卻漏了 using。
+   Editor 組件編不過，所以整個 PantographSim.Editor（TestRunHook、場景建置、檢查工具）都沒有載入，外部也觸發不了測試。
+2. 修好編譯後跑測試：156/157，PartsTests.Fastener_HalfTurnLoosens_ThenOut_Tray_Place_Snug_Torque_Mark 失敗（零件盒事件預期 2、實際 0）。
+   R1 改了 FastenerLogic：拆下的螺栓改送「該側螺栓盤」env.bolt_tray_L/R。
+   但 SC_CarbonStripSlice.unity 還是 10/19 R1 之前的版本，場景裡沒有 BoltTray，沒有人接這個事件
+   → tray.bolts 一直是 0 → CSR_12 裝回螺栓（place 需要 tray.bolts ≥ 1）會卡住，桌面版沒辦法玩完。
+   這正是 R1 做一半造成的：程式邏輯改了，場景卻沒重建。
+
+二、改了哪些檔案（2 個，判定規則與數值都沒動）
+1. Assets/_Project/Editor/R1/RoofSiteBuilder.cs
+   + using PantographSim.Parts.Common;（只加這一行）
+2. Assets/_Project/Modules/Parts/_Common/FastenerLogic.cs
+   新增 TrayFor()，當作 R1 功能開關：黑板上有 env.bolt_tray_<側>.bolts（BoltTray.OnBound 會寫）才送螺栓盤，
+   否則照 R1 之前的做法送零件盒 env.parts_tray。take/place 兩處改成呼叫 TrayFor()。
+   → 舊場景照舊能玩；之後 R1 場景重建、放進 BoltTray 時，會自動改走螺栓盤，不用再改程式。
+沒有刪任何程式，也沒有刪 Recordings 裡的檔案（全程檢查新增了一個資料夾 Recordings/20261028_192501_驗證學員）。
+
+三、驗證結果
+- 編譯：0 個 error CS（在開著的 Editor 裡重新編譯，Editor.log 確認過）。
+- EditMode 測試：157/157 通過，0 失敗，0 略過（Logs/slice-tests.txt、slice-tests.xml）。
+- Play 實機（RecordingCheckDriver mode=full，SC_CarbonStripSlice，桌機）：
+  從 SI_01 一路跑到 WC_03 結算 finished=True，25 步全部做完，包含 L/R 的拆裝、扭力、標記（Logs/rec-check.txt）。
+  分數 85、通過 False，是因為檢查腳本在 SI_01「故意」犯一次 E1（ERR_Global_NotLowered，Critical），屬於預期結果。
+- Play 時的 Console 錯誤／警告：
+  * 專案程式的 Exception：0。
+  * OpenXR：xrGetSystem XR_ERROR_FORM_FACTOR_UNAVAILABLE 等訊息，因為沒接頭盔；桌面模式不受影響。
+  * 警告 1 條：「The referenced script (Unknown) on this Behaviour is missing!」（進入 Play 時出現一次）。
+    場景檔裡的 m_Script guid 都找得到對應的腳本，應該是某個 prefab 或套件物件造成的；不影響流程，這次沒有追。
+
+四、R1 目前完成到哪
+- 已寫好程式碼（現在可以編譯）：
+  T1 資料定義 RoofSceneDef／StationSet／StationDef／RoofAccessRule／HeightProfile／LocomotionSettings；
+  R1Data（不存在就建預設資產）、R1Layers（Walkable／Boundary 圖層）、R1Probe（量測，r1_probe.txt 已產生）；
+  RoofSiteBuilder（車頂段、平台、樓梯、駕駛室、背景、零件盒、左右螺栓盤）；
+  SliceSceneBuilder 已接上 R1 環境；執行期 BoltTray、RoofAccess、PlatformGate、XrTeleport／XrTeleportPoint／XrStations（T5 B 鍵）、XrFader、XrViewHeight。
+- 還沒做：
+  R1 資料資產（.asset）還沒產生、Worksite/Prefabs/ENV_* 還不存在、SC_CarbonStripSlice 還沒用 R1 重建（場景仍是 10/19 的版本）；
+  R1 場景的實機驗證與新測試都還沒有。
+  因為 RoofSiteBuilder 編不過，R1 停在「程式寫完、還沒執行建置」這一步。
+- 依指示停在這裡，沒有重建場景，也沒有繼續做 R1。

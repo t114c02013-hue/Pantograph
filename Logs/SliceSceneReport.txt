@@ -1,0 +1,86 @@
+步驟 25 個 → Assets/_Project/Modules/Procedures/Data/Steps
+程序 → Assets/_Project/Modules/Procedures/Data/PRC_CarbonStripSlice.asset
+安全規則 5 條 → Assets/_Project/Modules/Safety/Data
+情境 3 個 → Assets/_Project/Data/Scenarios
+工具 9 個 → Modules/Tools/*/Data
+位置檢測 3 個 → Assets/_Project/Modules/Parts/_Common/Data
+升降參數 → Assets/_Project/Modules/Worksite/Data/LiftSettings.asset
+
+PF_CarbonStrip_L ← CarbonStrip_2：尺寸 1.102 × 0.016 × 0.074 m
+  截面：頂點數 68；頂面高度 −Z 邊 7.8 mm、中央 （中央無頂點）、+Z 邊 7.8 mm → 左右對稱，無法從外形看出斜面，加貼「此側朝外」箭頭
+PF_CarbonStrip_R ← CarbonStrip_1：尺寸 1.102 × 0.016 × 0.074 m
+  截面：頂點數 68；頂面高度 −Z 邊 7.8 mm、中央 （中央無頂點）、+Z 邊 7.8 mm → 左右對稱，無法從外形看出斜面，加貼「此側朝外」箭頭
+PF_StripBolt：M8×25 六角頭 對邊 13 mm、高 5.3 mm；墊圈 Ø16×1.6 mm；螺桿 Ø8×25 mm（示例值）
+螺栓位置：距端 3 cm、距中心線 ±2.5 cm，編號 1 左外、2 右內、3 右外、4 左內（外＝斜面側）
+
+圖層：已存在
+場景：肘側滑板 (0.000, 0.675, 0.150)、4 支螺栓、托架遮罩
+場景：外側滑板 (0.000, 0.675, -0.150)、4 支螺栓、托架遮罩
+降弓位置檢測：檢測點 (0.000, 0.708, 0.000)、容許 1 cm、全程行程 182 cm
+集電弓整組 PAN_Root：原點 (-0.008, 0.300, 0.836)（降弓底架底面中心）；螺栓孔 (-0.494, 0.300, 0.024)、(0.478, 0.300, 0.024)、(0.478, 0.300, 1.648)、(-0.494, 0.300, 1.648)；重心 COG (0.025, 0.516, 0.839)（Base 95 kg @ (-0.01, 0.47, 1.00)；LowerArm 38 kg @ (0.14, 0.54, 0.97)；UpperArm 22 kg @ (0.00, 0.57, 1.05)；PanHead 30 kg @ (0.00, 0.59, 0.00)）
+集電弓新節點：底座螺栓 4、吊耳 4、高壓端子（螺栓 2）、控制線接頭、降弓固定帶（Removed）、分流線外觀 2
+吊運：吊鉤掛點 (0.025, 2.284, 0.839)（COG 正上方）；吊帶 +Z 側 0.922 m、−Z 側 0.921 m；吊起後傾斜 1.68°
+車頂：可走區 5 塊（|X|≤0.80，挖掉弓體聯集、底架、絕緣子、母線外擴 0.15 m）；降弓後滑板頂面在車頂上 0.693 m
+共用車頂站點：(0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m；側移提示 不啟用；stripTopAboveRoof=0.693
+平台：升降操作盒 (-1.81, 1.10, 0.00)、接地端子 (-1.81, 1.00, 0.35)、自檢器 (-1.81, 1.10, 0.85)、平台掛點 (-1.86, 1.20, -2.10)、工具架 (-3.06, 1.00, -2.80)（掛位 1–4）
+平台：長桿桿架 (-3.16, 0.00, 0.60)（掛位 2、3）、防墜器掛鉤 (-1.95, 1.40, -1.55)
+車頂：工具箱 (0.10, 0.90, -2.50)（掛位 5–9＋套筒座）、零件盒 (-0.30, 0.90, -1.90)、備品架 (-0.30, 0.90, -3.10)、螺栓盤 R/L 在 (0.00, 0.00, -0.65) 的 ±0.4 m
+駕駛室：控制盤 (-0.69, -1.30, -30.00)（盤面朝 +X）、指示燈複本、弓頭監視畫面（Assets/_Project/Content/Textures/RT_PanHeadMonitor.renderTexture）
+地面維修區：X -13.5…-5.5、Z -5…5、地面 -3.65；台架中心 (-9.5, 0)、頂面 Y -2.90；工作檯 (-12.5, 0)；零件盒位置 Anchor_PartsTray_Maint (-12.5, -1.4)
+天車：軌道 X 3／-16、Z ±15，停在 Z 12，吊鉤 Y 5.85；遙控器在掛座 (-3.31, 1.10, -3.50)；吊帶 4 條在 (-6.5, -3.8)；工具袋在工作檯上
+場景件 prefab：ENV_Insulators、ENV_RoofSection、ENV_InspectionPlatform、ENV_PlatformStair、ENV_CabFloor、ENV_Backdrop、ENV_CarBody、ENV_PlatformToolRack、ENV_PoleRack、ENV_RoofToolbox、ENV_BoltTray_R、ENV_BoltTray_L、ENV_MaintenanceArea、ENV_PantographStand、ENV_WorkBench、ENV_OverheadCrane（Assets/_Project/Modules/Worksite/Prefabs）
+擺放檢查：通過
+集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
+✔ 平台工具架：不相交，水平間距 3.13 m
+✔ 接地母線端子：不相交，水平間距 0.98 m
+✔ 長桿桿架：不相交，水平間距 2.08 m
+✔ 車頂工具箱：不相交，水平間距 1.51 m
+✔ 零件盒：不相交，水平間距 1.58 m
+✔ 備品架：不相交，水平間距 2.84 m
+✔ 控制盤：不相交，水平間距 29.46 m
+
+紀錄：RecordingService（根目錄 C:\黃泰翔\collector shoes\Recordings）、VideoCaptureService、SpectatorCamera；ReplayTracked 22 個
+按鍵表：182 列（Assets/_Project/Modules/XR/Resources/InputBindingTable.asset）
+VR：XR Origin（Floor）＋頭盔攝影機，控制器使用 XRI Starter Assets 輸入動作 Assets/Samples/XR Interaction Toolkit/2.6.5/Starter Assets/XRI Default Input Actions.inputactions
+VR：右搖桿平滑移動 1 m/s（車頂上限 1）、死區 0.15、CharacterController r 0.2、遮罩 開
+VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、接地端子旁、活動欄與平台掛點、車頂（肘側滑板）（車頂開放才解鎖）、車頂（外側滑板）（車頂開放才解鎖）、車頂工具箱與零件盒（車頂開放才解鎖）、天車遙控器掛座旁、台架北側、台架東側、台架南側、台架西側
+站點檢查：13 站全過
+・tp.cab：(-0.190, -2.350, -30.000)
+・tp.platform.lift：(-2.200, 0.000, -0.050)
+・tp.platform.rack：(-2.410, 0.000, -2.800)
+・tp.platform.ground：(-2.200, 0.000, 0.600)
+・tp.platform.anchor：(-2.200, 0.000, -1.800)
+・tp.roof.inner：(0.000, 0.000, -0.650)
+・tp.roof.outer：(0.000, 0.000, -0.650)
+・tp.roof.shelf：(-0.600, 0.000, -2.500)
+・tp.platform.crane：(-2.400, 0.000, -3.500)
+・tp.stand.n：(-9.500, -3.640, 1.900)
+・tp.stand.e：(-7.900, -3.640, 0.000)
+・tp.stand.s：(-9.500, -3.640, -1.900)
+・tp.stand.w：(-11.100, -3.640, 0.000)
+・tp.platform.ground：(-2.200, 0.000, 0.600)，面向 ip.depot.ground_terminal
+・Anchor_GroundBusbar：(-1.810, 1.000, 0.350)，水平距離 0.46 m
+・Anchor_TesterSelfCheck：(-1.810, 1.100, 0.850)，水平距離 0.46 m
+・ip.depot.ground_terminal（物件中心）：(-1.870, 1.000, 0.350)，水平距離 0.41 m
+・ip.depot.detector_tester（物件中心）：(-1.870, 1.100, 0.850)，水平距離 0.41 m
+・弓頭接地掛點互動點：(-0.533, 0.528, 0.000)；(b) 到接地站 1.77 m（上限 2 m＝絕緣桿長 − 0.5）
+・車側護欄 Rail_CarSide_A：範圍 (-1.835, 0.000, -4.000)–(-1.785, 1.100, -1.400)，到接地站 2.03 m
+・車側護欄 Rail_CarSide_B：範圍 (-1.835, 0.000, -0.600)–(-1.785, 1.100, 4.000)，到接地站 0.37 m
+・活動欄開口：Z -1.400–-0.600（X -1.810）；(a) 接地站沿 Z 離開口邊緣 1.20 m（至少 0.5 m）
+・(c) 和 tp.platform.anchor (-2.200, 0.000, -1.800) 相距 2.40 m（至少 0.6 m）
+・tp.cab（相鄰車駕駛室）：(-0.190, -2.350, -30.000)
+VR：70 個互動點加上 XRInteractableBridge
+場景已存檔：Assets/_Project/Content/Scenes/SC_CarbonStripSlice.unity（Build Settings 第 0 位）
+場景互動物件 87 個：env.bolt_tray_L, env.bolt_tray_R, env.crane, env.crane_pendant, env.panto_stand, env.panto_stand.tool_tray, env.parts_tray, env.pole_rack, env.roof_toolbox, env.sling_1, env.sling_2, env.sling_3, env.sling_4, env.socket_seat_10, env.socket_seat_13, env.socket_seat_17, env.spare_shelf.slot_1, env.spare_shelf.slot_2, env.spare_shelf.slot_3, env.tool_bag, env.tool_bag.bolt_pouch, env.tool_rack, env.tool_rack.slot_1, env.tool_rack.slot_2, env.tool_rack.slot_3, env.tool_rack.slot_4, env.tool_rack.slot_5, env.tool_rack.slot_6, env.tool_rack.slot_7, env.tool_rack.slot_8, env.tool_rack.slot_9, env.work_order, ip.cab.breaker, ip.cab.cylinder_power, ip.cab.pan_indicator, ip.cab.pan_indicator_repeat, ip.cab.panel, ip.cab.raise_button, ip.cab.raise_switch, ip.carbon_strip_L.bolt_1, ip.carbon_strip_L.bolt_2, ip.carbon_strip_L.bolt_3, ip.carbon_strip_L.bolt_4, ip.carbon_strip_L.bracket, ip.carbon_strip_L.install_check, ip.carbon_strip_L.install_target, ip.carbon_strip_L.measure_left, ip.carbon_strip_L.measure_mid, ip.carbon_strip_L.measure_right, ip.carbon_strip_L.outward, ip.carbon_strip_R.bolt_1, ip.carbon_strip_R.bolt_2, ip.carbon_strip_R.bolt_3, ip.carbon_strip_R.bolt_4, ip.carbon_strip_R.bracket, ip.carbon_strip_R.install_check, ip.carbon_strip_R.install_target, ip.carbon_strip_R.measure_left, ip.carbon_strip_R.measure_mid, ip.carbon_strip_R.measure_right, ip.carbon_strip_R.outward, ip.depot.detector_tester, ip.depot.ground_terminal, ip.depot.platform_anchor, ip.pan_assy.ctrl_connector, ip.pan_assy.hold_down, ip.pan_assy.hv_terminal, ip.pan_assy.hv_terminal.bolt_1, ip.pan_assy.hv_terminal.bolt_2, ip.pan_assy.lift_point_1, ip.pan_assy.lift_point_2, ip.pan_assy.lift_point_3, ip.pan_assy.lift_point_4, ip.pan_head.ground_clamp, ip.pan_head.lower_check, ip.pan_head.lower_target, ip.roof.anchor, ip.roof.carbody_ground, ip.roof.hv_cable_ground, part.carbon_strip_L, part.carbon_strip_R, part.pan_assy, part.pan_base.bolt_1, part.pan_base.bolt_2, part.pan_base.bolt_3, part.pan_base.bolt_4, part.pan_head
+資料檢查：
+結果：通過
+✔ 步驟 ID 不重複（25 步）
+✔ 錯誤規則 43 條皆檢查三段說明
+✔ 安全規則 5 條
+✔ 工具 9 個皆有教學
+✔ 所有步驟目標都存在於場景（87 個互動物件）
+・STP_CSR_05_Decide：小動作都在原地（B 鍵不傳送）
+✔ 小動作的站點都在 StationSet（13 站）
+✔ 組件引用檢查完成（UI 只引用 Core；功能層互不引用，CarbonStrip→Parts.Common 為同一零件層）
+
+預覽圖：Logs/rig_slice_scene.png、rig_slice_strip_L.png、rig_slice_bolts.png

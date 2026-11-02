@@ -1,0 +1,17 @@
+﻿段：S6 T2-a 工具數值用手調
+改動：新增 Modules/XR/ToolWidgetLogic.cs（DwellTimer、HoldRepeater、ToggleDir、Nearest；數值 EX：套筒座停留 0.15 s、觸碰半徑 3.5 cm、卡尺吸附 3 cm、穩定 0.5 s、± 按住 0.4 s 後每秒 4 格）；
+      新增 Modules/XR/XrToolWidgets.cs（右手 Attach_Tool 上的 Poke_Ratchet、Poke_Plus／Poke_Minus（間距 4 cm）、Poke_Zero、FX_Jaw（沿 +X 0–150 mm）、Socket_Mount；
+      只啟用手上那件工具的節點；左手 Poke_Tip 碰到就送既有指令：dir:lock|loosen、set:+|-、zero、close；扳手頭碰套筒座停留 → size:n；卡尺 3 cm 內吸附＝點擊量測點；
+      停留 0.5 s 寫 xr.fill.auto；抓著新滑板轉手腕 >90° → carried rotate180；poke 時左手輕震）。
+      XrRigBuilder：HeldTool 改名 Attach_Tool（序列化參照不變）、左手加 Attach_Tool 與 Poke_Tip（SphereCollider r 0.8 cm、trigger）、ray.hideControllerOnSelect＝false、加 XrToolWidgets。
+      XrPlayer：拿著卡尺、沒指著東西按右扳機＝ZERO（和 Poke_Zero 共用 XrToolWidgets.ZeroRequest()）。
+      UI XrWristView：AutoFill（填進量測點對應格子，不看選中哪格；選中移到下一個沒填的格子）、NextEmpty。
+      xr_bindings.json：rightStick 清空（右搖桿讓給 T6）。
+      測試：新增 Tests/EditMode/ToolWidgetTests.cs（8 個）；改寫 XrTests：RightStick_Torque_UpDownHalfNm_AndRepeatsWhileHeld、RightStick_Socket_SizeCyclesAndLeftLoosenRightLock、
+      RightStick_CarriedStrip_Flips_CaliperScrolls_EmptyHandNothing → RightStick_AnyToolOrCarrying_NoToolAdjust。E11（預設尺寸鬆螺栓）沿用 SliceDryRunTests.CSR06_WrongSocket_Order_FullTurn。
+與規格不同：左手 Poke_Tip 沒有掛 XRPokeInteractor，改用距離判定（shortcut 註解已寫：R2 的 ContactRouter 換成真正接觸）；節點掛在 Attach_Tool 上，不在工具 prefab 裡；10／13／17 套筒沒做成獨立 prefab；
+      poke 的「喀聲」沒有做（XR 組件不能引用 Tools 的音效），只有左手震動；A 重設時「套筒放回座上」沒有外觀動畫（尺寸會回預設）。
+      新增：左手碰量爪 FX_Jaw＝合攏（右搖桿不再開合量爪，CSR_02「量爪合攏」需要一個操作方式）。
+風險：手調只能戴頭盔驗；距離門檻是 EX，可能要依實際手感調整。
+測試：192/192，Console 紅字 0（只有測試裡預期的 LogError）；桌面 25 步跑完（Recordings/20261029_172414_驗證學員）
+未檢查：頭盔實機（terry 驗收第 11 項）

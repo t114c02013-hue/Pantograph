@@ -1,0 +1,13 @@
+﻿段：S8 按鍵表 InputBindingTable
+改動：新增 Data/Definitions/InputBindingTable.cs（ScriptableObject：情境 Empty／PanelOpen／ErrorOpen／Tutorial／Tool:<9 種工具>、手、控制項、functionId、中文標示、enabled；
+      預設表＝B 段 6 的 14 個控制項；HandednessMap 左撇子對調左右手與 A/B↔X/Y）。資產由建置產生：Assets/_Project/Modules/XR/Resources/InputBindingTable.asset（R1Data.InputBindings，已存在就照用）。
+      XRInputMapper：功能與啟用改讀按鍵表（XrContext.BindingContext 決定情境：錯誤視窗 → 彈窗 → 控制器教學 → 手上工具 → 空手）；扳機與握把的「放開」一定送出（避免卡住）；
+      刪掉寫死的 Allowed()；新增 HelpText（Y 說明卡的按鍵表由表產生，只列這個情境啟用的鍵）。XrFrame／XrControllerInput 加左搖桿按下；xr_bindings.json 加 LeftStickClick 的實體路徑。
+      XrPlayer：XrContext 填 errorOpen／tutorial；情境改變時把說明文字寫到 xr.help.keys；新指令 Crouch（左搖桿按下＝蹲低視角）。UI XrHelpView：按鍵表改顯示 xr.help.keys（沒有時用舊文字）。
+      新增 Tests/EditMode/InputBindingTableTests.cs（5 個）。
+改寫的舊測試：無（S6 已把右搖桿的 3 個舊測試改寫成 RightStick_AnyToolOrCarrying_NoToolAdjust；其他 XrTests 在新表下照樣通過）。
+與規格不同：各情境的啟用只有 A（拿著工具才有作用）、左手尖端碰（拿著工具才啟用）、右搖桿按下（無功能）三個會變，其他鍵在所有情境都有作用（和 R1 之前的行為相同）。
+      左撇子模式只做到資料層（表與說明文字對調）；實體按鍵還沒有切換開關與左右互換的輸入讀取。手腕面板沒有另外列按鍵說明（Y 說明卡已從表產生）。
+風險：無
+測試：202/202，Console 紅字 0（只有測試裡預期的 LogError）；桌面 25 步跑完（Recordings/20261030_033505_驗證學員）
+未檢查：頭盔實機

@@ -1,0 +1,145 @@
+﻿stepId,subActionId,textXR,completionRule,errorIds,refTimeTeach,refTimeExam,standPointId
+STP_SI_01_ConfirmLowered,STP_SI_01_ConfirmLowered_a,按住 ▼ 把弓頭降到綠框,part.pan_head.lower_distance_cm ≤ part.pan_head.lower_tolerance_cm,ERR_SI01_NotInPosition:Major;ERR_SI01_LightOnly:Major,45,30,tp.platform.lift
+STP_SI_01_ConfirmLowered,STP_SI_01_ConfirmLowered_b,點弓頭，確認已降下,part.pan_head.inspected,ERR_SI01_NotInPosition:Major;ERR_SI01_LightOnly:Major,45,30,tp.platform.lift
+STP_SI_01_ConfirmLowered,STP_SI_01_ConfirmLowered_c,點控制盤的弓位指示燈,ip.cab.pan_indicator.checked,ERR_SI01_NotInPosition:Major;ERR_SI01_LightOnly:Major,45,30,tp.platform.lift
+STP_SI_04_VoltageTest,STP_SI_04_VoltageTest_a,到工具架拿起驗電器,tool.active ＝ tool.voltage_detector,ERR_SI04_NoSelfTest:Critical,45,25,tp.platform.rack
+STP_SI_04_VoltageTest,STP_SI_04_VoltageTest_b,點自檢器，確認亮綠燈,tool.voltage_detector.selftest,ERR_SI04_NoSelfTest:Critical,45,25,tp.platform.ground
+STP_SI_04_VoltageTest,STP_SI_04_VoltageTest_c,點弓頭接地掛點驗電,isolation.voltage_tested,ERR_SI04_NoSelfTest:Critical,45,25,tp.platform.ground
+STP_SI_04_VoltageTest,STP_SI_04_VoltageTest_d,把驗電器放回工具架,tool.active ＝,ERR_SI04_NoSelfTest:Critical,45,25,tp.platform.rack
+STP_SI_05_Grounding,STP_SI_05_Grounding_a,到工具架拿起接地棒,tool.active ＝ tool.grounding_rod,ERR_SI05_NoPullTest:Major,50,30,tp.platform.rack
+STP_SI_05_Grounding,STP_SI_05_Grounding_b,接地夾夾上接地端子,isolation.terminal_clamped,ERR_SI05_NoPullTest:Major,50,30,tp.platform.ground
+STP_SI_05_Grounding,STP_SI_05_Grounding_c,按「拉線確認」,isolation.pull_tested,ERR_SI05_NoPullTest:Major,50,30,tp.platform.ground
+STP_SI_05_Grounding,STP_SI_05_Grounding_d,掛鉤掛上弓頭接地點,isolation.head_clamped,ERR_SI05_NoPullTest:Major,50,30,tp.platform.ground
+STP_CSR_01_CheckIsolation,STP_CSR_01_CheckIsolation_a,打開作業單看隔離狀態,ui.workorder_open,,10,5,tp.platform.anchor
+STP_CSR_02_ZeroCaliper,STP_CSR_02_ZeroCaliper_a,到車頂工具箱拿起游標卡尺,tool.active ＝ tool.caliper,ERR_CSR02_MeasureBeforeZero:Major,30,15,tp.roof.shelf
+STP_CSR_02_ZeroCaliper,STP_CSR_02_ZeroCaliper_b,把量爪完全合攏,tool.caliper.jaw ＝ 0,ERR_CSR02_MeasureBeforeZero:Major,30,15,tp.roof.shelf
+STP_CSR_02_ZeroCaliper,STP_CSR_02_ZeroCaliper_c,按 ZERO 鍵歸零,tool.caliper.zeroed,ERR_CSR02_MeasureBeforeZero:Major,30,15,tp.roof.shelf
+STP_CSR_03_Measure_L,STP_CSR_03_Measure_L_a,量肘側滑板左側點,ip.carbon_strip_L.measure_left.measured,ERR_CSR03_OnlyMid:Major;ERR_CSR03_CopyError:Minor,60,35,tp.roof.inner
+STP_CSR_03_Measure_L,STP_CSR_03_Measure_L_b,量肘側滑板中點,ip.carbon_strip_L.measure_mid.measured,ERR_CSR03_OnlyMid:Major;ERR_CSR03_CopyError:Minor,60,35,tp.roof.inner
+STP_CSR_03_Measure_L,STP_CSR_03_Measure_L_c,量肘側滑板右側點,ip.carbon_strip_L.measure_right.measured,ERR_CSR03_OnlyMid:Major;ERR_CSR03_CopyError:Minor,60,35,tp.roof.inner
+STP_CSR_03_Measure_L,STP_CSR_03_Measure_L_d,三個讀數填入作業單,workorder.reading.L.submitted,ERR_CSR03_OnlyMid:Major;ERR_CSR03_CopyError:Minor,60,35,tp.roof.inner
+STP_CSR_04_Measure_R,STP_CSR_04_Measure_R_a,量外側滑板左側點,ip.carbon_strip_R.measure_left.measured,ERR_CSR04_OnlyMid:Major;ERR_CSR04_CopyError:Minor,60,35,tp.roof.outer
+STP_CSR_04_Measure_R,STP_CSR_04_Measure_R_b,量外側滑板中點,ip.carbon_strip_R.measure_mid.measured,ERR_CSR04_OnlyMid:Major;ERR_CSR04_CopyError:Minor,60,35,tp.roof.outer
+STP_CSR_04_Measure_R,STP_CSR_04_Measure_R_c,量外側滑板右側點,ip.carbon_strip_R.measure_right.measured,ERR_CSR04_OnlyMid:Major;ERR_CSR04_CopyError:Minor,60,35,tp.roof.outer
+STP_CSR_04_Measure_R,STP_CSR_04_Measure_R_d,三個讀數填入作業單,workorder.reading.R.submitted,ERR_CSR04_OnlyMid:Major;ERR_CSR04_CopyError:Minor,60,35,tp.roof.outer
+STP_CSR_04_Measure_R,STP_CSR_04_Measure_R_e,把卡尺放回車頂工具箱,tool.active ＝,ERR_CSR04_OnlyMid:Major;ERR_CSR04_CopyError:Minor,60,35,tp.roof.shelf
+STP_CSR_05_Decide,STP_CSR_05_Decide_a,依最小值選擇判定,workorder.decision,ERR_CSR05_ShouldReplace:Critical;ERR_CSR05_OnlyOne:Major;ERR_CSR05_Unneeded:Minor,20,10,
+STP_CSR_06_Loosen_L,STP_CSR_06_Loosen_L_a,到車頂工具箱拿起套筒扳手,tool.active ＝ tool.socket_wrench,ERR_CSR06_WrongSocket:Minor;ERR_CSR06_Order:Minor;ERR_CSR06_FullTurn:Major,60,35,tp.roof.shelf
+STP_CSR_06_Loosen_L,STP_CSR_06_Loosen_L_b,換上 13 mm 套筒,tool.socket_wrench.size ＝ 13,ERR_CSR06_WrongSocket:Minor;ERR_CSR06_Order:Minor;ERR_CSR06_FullTurn:Major,60,35,tp.roof.shelf
+STP_CSR_06_Loosen_L,STP_CSR_06_Loosen_L_c,方向切到「鬆」,tool.socket_wrench.dir ＝ loosen,ERR_CSR06_WrongSocket:Minor;ERR_CSR06_Order:Minor;ERR_CSR06_FullTurn:Major,60,35,tp.roof.shelf
+STP_CSR_06_Loosen_L,STP_CSR_06_Loosen_L_d,把 1 號螺栓鬆半圈,ip.carbon_strip_L.bolt_1.angle_deg ≥ 150,ERR_CSR06_WrongSocket:Minor;ERR_CSR06_Order:Minor;ERR_CSR06_FullTurn:Major,60,35,tp.roof.inner
+STP_CSR_06_Loosen_L,STP_CSR_06_Loosen_L_e,把 2 號螺栓鬆半圈,ip.carbon_strip_L.bolt_2.angle_deg ≥ 150,ERR_CSR06_WrongSocket:Minor;ERR_CSR06_Order:Minor;ERR_CSR06_FullTurn:Major,60,35,tp.roof.inner
+STP_CSR_06_Loosen_L,STP_CSR_06_Loosen_L_f,把 3 號螺栓鬆半圈,ip.carbon_strip_L.bolt_3.angle_deg ≥ 150,ERR_CSR06_WrongSocket:Minor;ERR_CSR06_Order:Minor;ERR_CSR06_FullTurn:Major,60,35,tp.roof.inner
+STP_CSR_06_Loosen_L,STP_CSR_06_Loosen_L_g,把 4 號螺栓鬆半圈,ip.carbon_strip_L.bolt_4.angle_deg ≥ 150,ERR_CSR06_WrongSocket:Minor;ERR_CSR06_Order:Minor;ERR_CSR06_FullTurn:Major,60,35,tp.roof.inner
+STP_CSR_07_RemoveBolts_L,STP_CSR_07_RemoveBolts_L_a,把 1 號螺栓轉到脫出,ip.carbon_strip_L.bolt_1.angle_deg ≥ 720,ERR_CSR07_NotCollected:Major,70,40,tp.roof.inner
+STP_CSR_07_RemoveBolts_L,STP_CSR_07_RemoveBolts_L_b,把 1 號螺栓放進螺栓盤,ip.carbon_strip_L.bolt_1.state ＝ InTray,ERR_CSR07_NotCollected:Major,70,40,tp.roof.inner
+STP_CSR_07_RemoveBolts_L,STP_CSR_07_RemoveBolts_L_c,把 2 號螺栓轉到脫出,ip.carbon_strip_L.bolt_2.angle_deg ≥ 720,ERR_CSR07_NotCollected:Major,70,40,tp.roof.inner
+STP_CSR_07_RemoveBolts_L,STP_CSR_07_RemoveBolts_L_d,把 2 號螺栓放進螺栓盤,ip.carbon_strip_L.bolt_2.state ＝ InTray,ERR_CSR07_NotCollected:Major,70,40,tp.roof.inner
+STP_CSR_07_RemoveBolts_L,STP_CSR_07_RemoveBolts_L_e,把 3 號螺栓轉到脫出,ip.carbon_strip_L.bolt_3.angle_deg ≥ 720,ERR_CSR07_NotCollected:Major,70,40,tp.roof.inner
+STP_CSR_07_RemoveBolts_L,STP_CSR_07_RemoveBolts_L_f,把 3 號螺栓放進螺栓盤,ip.carbon_strip_L.bolt_3.state ＝ InTray,ERR_CSR07_NotCollected:Major,70,40,tp.roof.inner
+STP_CSR_07_RemoveBolts_L,STP_CSR_07_RemoveBolts_L_g,把 4 號螺栓轉到脫出,ip.carbon_strip_L.bolt_4.angle_deg ≥ 720,ERR_CSR07_NotCollected:Major,70,40,tp.roof.inner
+STP_CSR_07_RemoveBolts_L,STP_CSR_07_RemoveBolts_L_h,把 4 號螺栓放進螺栓盤,ip.carbon_strip_L.bolt_4.state ＝ InTray,ERR_CSR07_NotCollected:Major,70,40,tp.roof.inner
+STP_CSR_07_RemoveBolts_L,STP_CSR_07_RemoveBolts_L_i,把套筒扳手放回車頂工具箱,tool.active ＝,ERR_CSR07_NotCollected:Major,70,40,tp.roof.shelf
+STP_CSR_08_RemoveStrip_L,STP_CSR_08_RemoveStrip_L_a,點舊滑板選「垂直取出」,part.carbon_strip_L.state ＝ Removed,ERR_CSR08_Pry:Major,25,15,tp.roof.inner
+STP_CSR_08_RemoveStrip_L,STP_CSR_08_RemoveStrip_L_b,把舊滑板放進零件盒,part.carbon_strip_L.state ＝ InTray,ERR_CSR08_Pry:Major,25,15,tp.roof.shelf
+STP_CSR_09_CleanBracket_L,STP_CSR_09_CleanBracket_L_a,到車頂工具箱拿起清潔布,tool.active ＝ tool.cleaning_cloth,ERR_CSR09_Dirty:Major,45,30,tp.roof.shelf
+STP_CSR_09_CleanBracket_L,STP_CSR_09_CleanBracket_L_b,來回擦拭托架接觸面,ip.carbon_strip_L.bracket.clean_ratio ≥ 0.95,ERR_CSR09_Dirty:Major,45,30,tp.roof.inner
+STP_CSR_09_CleanBracket_L,STP_CSR_09_CleanBracket_L_c,把清潔布放回車頂工具箱,tool.active ＝,ERR_CSR09_Dirty:Major,45,30,tp.roof.shelf
+STP_CSR_10_CheckNew_L,STP_CSR_10_CheckNew_L_a,查看備品架三條標籤,spare.L.viewed_count ≥ 3,ERR_CSR10_WrongType:Critical;ERR_CSR10_Cracked:Critical;ERR_CSR10_NotMeasured:Minor,75,45,tp.roof.shelf
+STP_CSR_10_CheckNew_L,STP_CSR_10_CheckNew_L_b,翻面檢查有無裂紋,env.spare_shelf.slot_2.flipped,ERR_CSR10_WrongType:Critical;ERR_CSR10_Cracked:Critical;ERR_CSR10_NotMeasured:Minor,75,45,tp.roof.shelf
+STP_CSR_10_CheckNew_L,STP_CSR_10_CheckNew_L_c,到車頂工具箱拿起游標卡尺,tool.active ＝ tool.caliper,ERR_CSR10_WrongType:Critical;ERR_CSR10_Cracked:Critical;ERR_CSR10_NotMeasured:Minor,75,45,tp.roof.shelf
+STP_CSR_10_CheckNew_L,STP_CSR_10_CheckNew_L_d,量選定新滑板的中點,env.spare_shelf.slot_2.measured,ERR_CSR10_WrongType:Critical;ERR_CSR10_Cracked:Critical;ERR_CSR10_NotMeasured:Minor,75,45,tp.roof.shelf
+STP_CSR_10_CheckNew_L,STP_CSR_10_CheckNew_L_e,把卡尺放回車頂工具箱,tool.active ＝,ERR_CSR10_WrongType:Critical;ERR_CSR10_Cracked:Critical;ERR_CSR10_NotMeasured:Minor,75,45,tp.roof.shelf
+STP_CSR_10_CheckNew_L,STP_CSR_10_CheckNew_L_f,拿起選定的新滑板,spare.L.picked,ERR_CSR10_WrongType:Critical;ERR_CSR10_Cracked:Critical;ERR_CSR10_NotMeasured:Minor,75,45,tp.roof.shelf
+STP_CSR_11_Install_L,STP_CSR_11_Install_L_a,把新滑板移到托架上方,part.carbon_strip_L.over_bracket,ERR_CSR11_Reversed:Critical,35,20,tp.roof.inner
+STP_CSR_11_Install_L,STP_CSR_11_Install_L_b,按 R 讓箭頭朝外,part.carbon_strip_L.new_orientation ＝ out,ERR_CSR11_Reversed:Critical,35,20,tp.roof.inner
+STP_CSR_11_Install_L,STP_CSR_11_Install_L_c,對準螺栓孔點托架放下,part.carbon_strip_L.state ＝ NewMounted 且 part.carbon_strip_L.install_distance_cm ≤ 0.5,ERR_CSR11_Reversed:Critical,35,20,tp.roof.inner
+STP_CSR_12_PreTighten_L,STP_CSR_12_PreTighten_L_a,到車頂工具箱拿起套筒扳手,tool.active ＝ tool.socket_wrench,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.shelf
+STP_CSR_12_PreTighten_L,STP_CSR_12_PreTighten_L_b,從螺栓盤拿 1 號螺栓放回孔位,ip.carbon_strip_L.bolt_1.state ＝ Placed,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.inner
+STP_CSR_12_PreTighten_L,STP_CSR_12_PreTighten_L_c,從螺栓盤拿 2 號螺栓放回孔位,ip.carbon_strip_L.bolt_2.state ＝ Placed,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.inner
+STP_CSR_12_PreTighten_L,STP_CSR_12_PreTighten_L_d,從螺栓盤拿 3 號螺栓放回孔位,ip.carbon_strip_L.bolt_3.state ＝ Placed,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.inner
+STP_CSR_12_PreTighten_L,STP_CSR_12_PreTighten_L_e,從螺栓盤拿 4 號螺栓放回孔位,ip.carbon_strip_L.bolt_4.state ＝ Placed,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.inner
+STP_CSR_12_PreTighten_L,STP_CSR_12_PreTighten_L_f,方向切到「鎖」,tool.socket_wrench.dir ＝ lock,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.inner
+STP_CSR_12_PreTighten_L,STP_CSR_12_PreTighten_L_g,把 1 號螺栓鎖到貼合,ip.carbon_strip_L.bolt_1.state ＝ Snug,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.inner
+STP_CSR_12_PreTighten_L,STP_CSR_12_PreTighten_L_h,把 2 號螺栓鎖到貼合,ip.carbon_strip_L.bolt_2.state ＝ Snug,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.inner
+STP_CSR_12_PreTighten_L,STP_CSR_12_PreTighten_L_i,把 3 號螺栓鎖到貼合,ip.carbon_strip_L.bolt_3.state ＝ Snug,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.inner
+STP_CSR_12_PreTighten_L,STP_CSR_12_PreTighten_L_j,把 4 號螺栓鎖到貼合,ip.carbon_strip_L.bolt_4.state ＝ Snug,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.inner
+STP_CSR_12_PreTighten_L,STP_CSR_12_PreTighten_L_k,把套筒扳手放回車頂工具箱,tool.active ＝,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.shelf
+STP_CSR_13_Torque_L,STP_CSR_13_Torque_L_a,到車頂工具箱拿起扭力扳手,tool.active ＝ tool.torque_wrench,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Major;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major,70,40,tp.roof.shelf
+STP_CSR_13_Torque_L,STP_CSR_13_Torque_L_b,把扭力設定為 25 N·m,tool.torque_wrench.setting ＝ 25,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Major;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major,70,40,tp.roof.shelf
+STP_CSR_13_Torque_L,STP_CSR_13_Torque_L_c,鎖 1 號螺栓到喀聲,ip.carbon_strip_L.bolt_1.state ＝ Torqued,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Major;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major,70,40,tp.roof.inner
+STP_CSR_13_Torque_L,STP_CSR_13_Torque_L_d,鎖 2 號螺栓到喀聲,ip.carbon_strip_L.bolt_2.state ＝ Torqued,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Major;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major,70,40,tp.roof.inner
+STP_CSR_13_Torque_L,STP_CSR_13_Torque_L_e,鎖 3 號螺栓到喀聲,ip.carbon_strip_L.bolt_3.state ＝ Torqued,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Major;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major,70,40,tp.roof.inner
+STP_CSR_13_Torque_L,STP_CSR_13_Torque_L_f,鎖 4 號螺栓到喀聲,ip.carbon_strip_L.bolt_4.state ＝ Torqued,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Major;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major,70,40,tp.roof.inner
+STP_CSR_13_Torque_L,STP_CSR_13_Torque_L_g,把扭力扳手放回車頂工具箱,tool.active ＝,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Major;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major,70,40,tp.roof.shelf
+STP_CSR_14_Mark_L,STP_CSR_14_Mark_L_a,到車頂工具箱拿起標記筆,tool.active ＝ tool.marker,ERR_CSR14_Order:Minor,40,25,tp.roof.shelf
+STP_CSR_14_Mark_L,STP_CSR_14_Mark_L_b,在 1 號螺栓畫標記,ip.carbon_strip_L.bolt_1.marked,ERR_CSR14_Order:Minor,40,25,tp.roof.inner
+STP_CSR_14_Mark_L,STP_CSR_14_Mark_L_c,在 2 號螺栓畫標記,ip.carbon_strip_L.bolt_2.marked,ERR_CSR14_Order:Minor,40,25,tp.roof.inner
+STP_CSR_14_Mark_L,STP_CSR_14_Mark_L_d,在 3 號螺栓畫標記,ip.carbon_strip_L.bolt_3.marked,ERR_CSR14_Order:Minor,40,25,tp.roof.inner
+STP_CSR_14_Mark_L,STP_CSR_14_Mark_L_e,在 4 號螺栓畫標記,ip.carbon_strip_L.bolt_4.marked,ERR_CSR14_Order:Minor,40,25,tp.roof.inner
+STP_CSR_14_Mark_L,STP_CSR_14_Mark_L_f,把標記筆放回車頂工具箱,tool.active ＝,ERR_CSR14_Order:Minor,40,25,tp.roof.shelf
+STP_CSR_06_Loosen_R,STP_CSR_06_Loosen_R_a,到車頂工具箱拿起套筒扳手,tool.active ＝ tool.socket_wrench,ERR_CSR06_WrongSocket:Minor;ERR_CSR06_Order:Minor;ERR_CSR06_FullTurn:Major,60,35,tp.roof.shelf
+STP_CSR_06_Loosen_R,STP_CSR_06_Loosen_R_b,換上 13 mm 套筒,tool.socket_wrench.size ＝ 13,ERR_CSR06_WrongSocket:Minor;ERR_CSR06_Order:Minor;ERR_CSR06_FullTurn:Major,60,35,tp.roof.shelf
+STP_CSR_06_Loosen_R,STP_CSR_06_Loosen_R_c,方向切到「鬆」,tool.socket_wrench.dir ＝ loosen,ERR_CSR06_WrongSocket:Minor;ERR_CSR06_Order:Minor;ERR_CSR06_FullTurn:Major,60,35,tp.roof.shelf
+STP_CSR_06_Loosen_R,STP_CSR_06_Loosen_R_d,把 1 號螺栓鬆半圈,ip.carbon_strip_R.bolt_1.angle_deg ≥ 150,ERR_CSR06_WrongSocket:Minor;ERR_CSR06_Order:Minor;ERR_CSR06_FullTurn:Major,60,35,tp.roof.outer
+STP_CSR_06_Loosen_R,STP_CSR_06_Loosen_R_e,把 2 號螺栓鬆半圈,ip.carbon_strip_R.bolt_2.angle_deg ≥ 150,ERR_CSR06_WrongSocket:Minor;ERR_CSR06_Order:Minor;ERR_CSR06_FullTurn:Major,60,35,tp.roof.outer
+STP_CSR_06_Loosen_R,STP_CSR_06_Loosen_R_f,把 3 號螺栓鬆半圈,ip.carbon_strip_R.bolt_3.angle_deg ≥ 150,ERR_CSR06_WrongSocket:Minor;ERR_CSR06_Order:Minor;ERR_CSR06_FullTurn:Major,60,35,tp.roof.outer
+STP_CSR_06_Loosen_R,STP_CSR_06_Loosen_R_g,把 4 號螺栓鬆半圈,ip.carbon_strip_R.bolt_4.angle_deg ≥ 150,ERR_CSR06_WrongSocket:Minor;ERR_CSR06_Order:Minor;ERR_CSR06_FullTurn:Major,60,35,tp.roof.outer
+STP_CSR_07_RemoveBolts_R,STP_CSR_07_RemoveBolts_R_a,把 1 號螺栓轉到脫出,ip.carbon_strip_R.bolt_1.angle_deg ≥ 720,ERR_CSR07_NotCollected:Major,70,40,tp.roof.outer
+STP_CSR_07_RemoveBolts_R,STP_CSR_07_RemoveBolts_R_b,把 1 號螺栓放進螺栓盤,ip.carbon_strip_R.bolt_1.state ＝ InTray,ERR_CSR07_NotCollected:Major,70,40,tp.roof.outer
+STP_CSR_07_RemoveBolts_R,STP_CSR_07_RemoveBolts_R_c,把 2 號螺栓轉到脫出,ip.carbon_strip_R.bolt_2.angle_deg ≥ 720,ERR_CSR07_NotCollected:Major,70,40,tp.roof.outer
+STP_CSR_07_RemoveBolts_R,STP_CSR_07_RemoveBolts_R_d,把 2 號螺栓放進螺栓盤,ip.carbon_strip_R.bolt_2.state ＝ InTray,ERR_CSR07_NotCollected:Major,70,40,tp.roof.outer
+STP_CSR_07_RemoveBolts_R,STP_CSR_07_RemoveBolts_R_e,把 3 號螺栓轉到脫出,ip.carbon_strip_R.bolt_3.angle_deg ≥ 720,ERR_CSR07_NotCollected:Major,70,40,tp.roof.outer
+STP_CSR_07_RemoveBolts_R,STP_CSR_07_RemoveBolts_R_f,把 3 號螺栓放進螺栓盤,ip.carbon_strip_R.bolt_3.state ＝ InTray,ERR_CSR07_NotCollected:Major,70,40,tp.roof.outer
+STP_CSR_07_RemoveBolts_R,STP_CSR_07_RemoveBolts_R_g,把 4 號螺栓轉到脫出,ip.carbon_strip_R.bolt_4.angle_deg ≥ 720,ERR_CSR07_NotCollected:Major,70,40,tp.roof.outer
+STP_CSR_07_RemoveBolts_R,STP_CSR_07_RemoveBolts_R_h,把 4 號螺栓放進螺栓盤,ip.carbon_strip_R.bolt_4.state ＝ InTray,ERR_CSR07_NotCollected:Major,70,40,tp.roof.outer
+STP_CSR_07_RemoveBolts_R,STP_CSR_07_RemoveBolts_R_i,把套筒扳手放回車頂工具箱,tool.active ＝,ERR_CSR07_NotCollected:Major,70,40,tp.roof.shelf
+STP_CSR_08_RemoveStrip_R,STP_CSR_08_RemoveStrip_R_a,點舊滑板選「垂直取出」,part.carbon_strip_R.state ＝ Removed,ERR_CSR08_Pry:Major,25,15,tp.roof.outer
+STP_CSR_08_RemoveStrip_R,STP_CSR_08_RemoveStrip_R_b,把舊滑板放進零件盒,part.carbon_strip_R.state ＝ InTray,ERR_CSR08_Pry:Major,25,15,tp.roof.shelf
+STP_CSR_09_CleanBracket_R,STP_CSR_09_CleanBracket_R_a,到車頂工具箱拿起清潔布,tool.active ＝ tool.cleaning_cloth,ERR_CSR09_Dirty:Major,45,30,tp.roof.shelf
+STP_CSR_09_CleanBracket_R,STP_CSR_09_CleanBracket_R_b,來回擦拭托架接觸面,ip.carbon_strip_R.bracket.clean_ratio ≥ 0.95,ERR_CSR09_Dirty:Major,45,30,tp.roof.outer
+STP_CSR_09_CleanBracket_R,STP_CSR_09_CleanBracket_R_c,把清潔布放回車頂工具箱,tool.active ＝,ERR_CSR09_Dirty:Major,45,30,tp.roof.shelf
+STP_CSR_10_CheckNew_R,STP_CSR_10_CheckNew_R_a,查看備品架三條標籤,spare.R.viewed_count ≥ 3,ERR_CSR10_WrongType:Critical;ERR_CSR10_Cracked:Critical;ERR_CSR10_NotMeasured:Minor,75,45,tp.roof.shelf
+STP_CSR_10_CheckNew_R,STP_CSR_10_CheckNew_R_b,翻面檢查有無裂紋,env.spare_shelf.slot_2.flipped,ERR_CSR10_WrongType:Critical;ERR_CSR10_Cracked:Critical;ERR_CSR10_NotMeasured:Minor,75,45,tp.roof.shelf
+STP_CSR_10_CheckNew_R,STP_CSR_10_CheckNew_R_c,到車頂工具箱拿起游標卡尺,tool.active ＝ tool.caliper,ERR_CSR10_WrongType:Critical;ERR_CSR10_Cracked:Critical;ERR_CSR10_NotMeasured:Minor,75,45,tp.roof.shelf
+STP_CSR_10_CheckNew_R,STP_CSR_10_CheckNew_R_d,量選定新滑板的中點,env.spare_shelf.slot_2.measured,ERR_CSR10_WrongType:Critical;ERR_CSR10_Cracked:Critical;ERR_CSR10_NotMeasured:Minor,75,45,tp.roof.shelf
+STP_CSR_10_CheckNew_R,STP_CSR_10_CheckNew_R_e,把卡尺放回車頂工具箱,tool.active ＝,ERR_CSR10_WrongType:Critical;ERR_CSR10_Cracked:Critical;ERR_CSR10_NotMeasured:Minor,75,45,tp.roof.shelf
+STP_CSR_10_CheckNew_R,STP_CSR_10_CheckNew_R_f,拿起選定的新滑板,spare.R.picked,ERR_CSR10_WrongType:Critical;ERR_CSR10_Cracked:Critical;ERR_CSR10_NotMeasured:Minor,75,45,tp.roof.shelf
+STP_CSR_11_Install_R,STP_CSR_11_Install_R_a,把新滑板移到托架上方,part.carbon_strip_R.over_bracket,ERR_CSR11_Reversed:Critical,35,20,tp.roof.outer
+STP_CSR_11_Install_R,STP_CSR_11_Install_R_b,按 R 讓箭頭朝外,part.carbon_strip_R.new_orientation ＝ out,ERR_CSR11_Reversed:Critical,35,20,tp.roof.outer
+STP_CSR_11_Install_R,STP_CSR_11_Install_R_c,對準螺栓孔點托架放下,part.carbon_strip_R.state ＝ NewMounted 且 part.carbon_strip_R.install_distance_cm ≤ 0.5,ERR_CSR11_Reversed:Critical,35,20,tp.roof.outer
+STP_CSR_12_PreTighten_R,STP_CSR_12_PreTighten_R_a,到車頂工具箱拿起套筒扳手,tool.active ＝ tool.socket_wrench,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.shelf
+STP_CSR_12_PreTighten_R,STP_CSR_12_PreTighten_R_b,從螺栓盤拿 1 號螺栓放回孔位,ip.carbon_strip_R.bolt_1.state ＝ Placed,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.outer
+STP_CSR_12_PreTighten_R,STP_CSR_12_PreTighten_R_c,從螺栓盤拿 2 號螺栓放回孔位,ip.carbon_strip_R.bolt_2.state ＝ Placed,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.outer
+STP_CSR_12_PreTighten_R,STP_CSR_12_PreTighten_R_d,從螺栓盤拿 3 號螺栓放回孔位,ip.carbon_strip_R.bolt_3.state ＝ Placed,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.outer
+STP_CSR_12_PreTighten_R,STP_CSR_12_PreTighten_R_e,從螺栓盤拿 4 號螺栓放回孔位,ip.carbon_strip_R.bolt_4.state ＝ Placed,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.outer
+STP_CSR_12_PreTighten_R,STP_CSR_12_PreTighten_R_f,方向切到「鎖」,tool.socket_wrench.dir ＝ lock,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.outer
+STP_CSR_12_PreTighten_R,STP_CSR_12_PreTighten_R_g,把 1 號螺栓鎖到貼合,ip.carbon_strip_R.bolt_1.state ＝ Snug,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.outer
+STP_CSR_12_PreTighten_R,STP_CSR_12_PreTighten_R_h,把 2 號螺栓鎖到貼合,ip.carbon_strip_R.bolt_2.state ＝ Snug,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.outer
+STP_CSR_12_PreTighten_R,STP_CSR_12_PreTighten_R_i,把 3 號螺栓鎖到貼合,ip.carbon_strip_R.bolt_3.state ＝ Snug,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.outer
+STP_CSR_12_PreTighten_R,STP_CSR_12_PreTighten_R_j,把 4 號螺栓鎖到貼合,ip.carbon_strip_R.bolt_4.state ＝ Snug,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.outer
+STP_CSR_12_PreTighten_R,STP_CSR_12_PreTighten_R_k,把套筒扳手放回車頂工具箱,tool.active ＝,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,90,50,tp.roof.shelf
+STP_CSR_13_Torque_R,STP_CSR_13_Torque_R_a,到車頂工具箱拿起扭力扳手,tool.active ＝ tool.torque_wrench,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Major;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major,70,40,tp.roof.shelf
+STP_CSR_13_Torque_R,STP_CSR_13_Torque_R_b,把扭力設定為 25 N·m,tool.torque_wrench.setting ＝ 25,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Major;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major,70,40,tp.roof.shelf
+STP_CSR_13_Torque_R,STP_CSR_13_Torque_R_c,鎖 1 號螺栓到喀聲,ip.carbon_strip_R.bolt_1.state ＝ Torqued,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Major;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major,70,40,tp.roof.outer
+STP_CSR_13_Torque_R,STP_CSR_13_Torque_R_d,鎖 2 號螺栓到喀聲,ip.carbon_strip_R.bolt_2.state ＝ Torqued,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Major;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major,70,40,tp.roof.outer
+STP_CSR_13_Torque_R,STP_CSR_13_Torque_R_e,鎖 3 號螺栓到喀聲,ip.carbon_strip_R.bolt_3.state ＝ Torqued,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Major;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major,70,40,tp.roof.outer
+STP_CSR_13_Torque_R,STP_CSR_13_Torque_R_f,鎖 4 號螺栓到喀聲,ip.carbon_strip_R.bolt_4.state ＝ Torqued,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Major;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major,70,40,tp.roof.outer
+STP_CSR_13_Torque_R,STP_CSR_13_Torque_R_g,把扭力扳手放回車頂工具箱,tool.active ＝,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Major;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major,70,40,tp.roof.shelf
+STP_CSR_14_Mark_R,STP_CSR_14_Mark_R_a,到車頂工具箱拿起標記筆,tool.active ＝ tool.marker,ERR_CSR14_Order:Minor,40,25,tp.roof.shelf
+STP_CSR_14_Mark_R,STP_CSR_14_Mark_R_b,在 1 號螺栓畫標記,ip.carbon_strip_R.bolt_1.marked,ERR_CSR14_Order:Minor,40,25,tp.roof.outer
+STP_CSR_14_Mark_R,STP_CSR_14_Mark_R_c,在 2 號螺栓畫標記,ip.carbon_strip_R.bolt_2.marked,ERR_CSR14_Order:Minor,40,25,tp.roof.outer
+STP_CSR_14_Mark_R,STP_CSR_14_Mark_R_d,在 3 號螺栓畫標記,ip.carbon_strip_R.bolt_3.marked,ERR_CSR14_Order:Minor,40,25,tp.roof.outer
+STP_CSR_14_Mark_R,STP_CSR_14_Mark_R_e,在 4 號螺栓畫標記,ip.carbon_strip_R.bolt_4.marked,ERR_CSR14_Order:Minor,40,25,tp.roof.outer
+STP_CSR_14_Mark_R,STP_CSR_14_Mark_R_f,把標記筆放回車頂工具箱,tool.active ＝,ERR_CSR14_Order:Minor,40,25,tp.roof.shelf
+STP_CSR_15_HeightCheck,STP_CSR_15_HeightCheck_a,到車頂工具箱拿起游標卡尺,tool.active ＝ tool.caliper,ERR_CSR15_Exceeds:Major;ERR_CSR15_NotCompared:Major,50,30,tp.roof.shelf
+STP_CSR_15_HeightCheck,STP_CSR_15_HeightCheck_b,量肘側新滑板中點,ip.carbon_strip_L.measure_mid.new_measured,ERR_CSR15_Exceeds:Major;ERR_CSR15_NotCompared:Major,50,30,tp.roof.inner
+STP_CSR_15_HeightCheck,STP_CSR_15_HeightCheck_c,量外側新滑板中點,ip.carbon_strip_R.measure_mid.new_measured,ERR_CSR15_Exceeds:Major;ERR_CSR15_NotCompared:Major,50,30,tp.roof.outer
+STP_CSR_15_HeightCheck,STP_CSR_15_HeightCheck_d,兩個讀數填入作業單,workorder.height_diff,ERR_CSR15_Exceeds:Major;ERR_CSR15_NotCompared:Major,50,30,
+STP_CSR_15_HeightCheck,STP_CSR_15_HeightCheck_e,把卡尺放回車頂工具箱,tool.active ＝,ERR_CSR15_Exceeds:Major;ERR_CSR15_NotCompared:Major,50,30,tp.roof.shelf
+STP_WC_01_ToolCount,STP_WC_01_ToolCount_a,清點平台工具架與車頂工具箱,ui.rack_viewed,ERR_WC01_Leftover:Critical,40,25,tp.platform.rack
+STP_WC_01_ToolCount,STP_WC_01_ToolCount_b,查看零件盒與兩個螺栓盤,ui.tray_viewed,ERR_WC01_Leftover:Critical,40,25,tp.roof.shelf
+STP_WC_01_ToolCount,STP_WC_01_ToolCount_c,在作業單按「清點完成」,workorder.toolcount_confirmed,ERR_WC01_Leftover:Critical,40,25,tp.roof.shelf
+STP_WC_03_RemoveGround,STP_WC_03_RemoveGround_a,取下弓頭端掛鉤,isolation.head_clamped ＝ false,,30,20,tp.platform.ground
+STP_WC_03_RemoveGround,STP_WC_03_RemoveGround_b,鬆開接地端子的夾子,isolation.terminal_clamped ＝ false,,30,20,tp.platform.ground
+STP_WC_03_RemoveGround,STP_WC_03_RemoveGround_c,把接地棒放回工具架,rack.slot_3 ＝ on_rack,,30,20,tp.platform.rack

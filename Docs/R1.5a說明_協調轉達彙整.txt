@@ -1,0 +1,723 @@
+
+
+######## 2026-10-28T11:15:23.454Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-10-28T11:15:19Z" reason="spawn">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人：terry 說「現在這個專案的程式碼有問題」，要能測試。最優先處理這件事。
+      
+      1. 檢查 Unity 編譯錯誤：
+         - 用 batchmode 打開專案，讀 Editor.log 裡的 CompilerError、Console 紅字，以及場景缺失的參考。
+         - 上一輪 R1 做到一半就中斷了，請確認是不是半套的改動造成的。
+      2. 用最小的改動修到可以測試：
+         - 0 個編譯錯誤；
+         - SC_CarbonStripSlice 按 Play 不報錯，桌面版能從 SI_01 玩下去；
+         - 原有的測試要全部通過。
+         R1 裡沒做完、又會擋住編譯的部分，可以先用功能開關關掉，或改回原狀。只要可以，不要刪掉已完成的程式。
+      3. 規則：
+         - 動手改程式之前，先套用 ponytail 技能（在不影響功能的前提下，用最小的改動）。
+         - 不刪 Recordings 裡的檔案。
+         - 判定規則與數值都不改。
+      4. 回報一段簡短說明：
+         - 原因是什麼；
+         - 改了哪些檔案；
+         - 測試數和 Error log 數；
+         - R1 目前完成到哪一項。
+         完整內容寫到 Logs/FixReport_1028.txt。
+      修好之後先停下來，等 terry 測完，不要自己繼續做 R1。
+  </note>
+</relay>
+
+######## 2026-10-28T11:32:22.055Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-10-28T11:32:23Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人：terry 要你「直接做完第一輪（R1）」。請照下面的分段計畫，從目前狀態一路做完 S0 到 S10。不要停下來問問題；遇到規格沒寫的細節就選合理預設，寫進回報。
+      專案資料夾：C:\黃泰翔\collector shoes。此資料夾和裡面的軟體都可以自由使用。絕對不要刪 Recordings（「驗證學員」的測試紀錄也不要動，terry 會自己刪）。
+      你讀不到 /mnt/project-files，需要的規格全文都附在下面：A 分段計畫、B R1 規格全文、C 補充、D 負責人補充。
+      目前狀態（Logs/FixReport_1028.txt）：0 編譯錯誤，157/157 測試通過，25 步可玩完（B 段寫的 149 以現在的 157 為準）。FastenerLogic.TrayFor() 的退路依 A 段 S4 處理。
+      高度預設為 Raised（站在車頂時平視），Real 是 ≡ 選單裡的選項。B 段已經是這個版本。
+      全部做完後：Logs/V2R1Report.txt 寫完整報告（每段改動、測試數、略過、風險，以及 B 段最後的 terry 驗收 12 項在桌面模式的自測結果），並回報摘要。
+      
+      ======================== A. 分段計畫（軟體工程 2026-10-28） ========================
+      # R1 剩餘工作拆段
+      
+      起點：裝置 157/157 通過，桌面 25 步可跑完（Logs/FixReport_1028.txt）。
+      已完成：資料定義、R1Data、Layers、Probe、RoofSiteBuilder、BoltTray、RoofAccess、PlatformGate，以及 XR 傳送、站點、視高程式。
+      未完成：資料資產、ENV prefab、場景重建、驗證；T2-a、T6、按鍵表、T3 的狀態要在 S0 盤點。
+      
+      ## 每一段都遵守的規則
+      
+      1. 開工：先讀 Logs/R1Progress.txt，再看 git status（沒有 git 就看最近修改的檔案）。上一段如果留下沒提交的改動，先讓它編譯、測試通過再提交，不要另開新段。看不懂就保留不刪，在回報裡寫出來。
+      2. 一段只做一件事，段內不碰下一段的檔案。
+      3. 收工條件：Console 0 紅字、全部 EditMode 測試通過（數量不少於開工時）、提交一次 commit（訊息寫段號），然後在 Logs/R1Progress.txt 加一行：「段號 | 完成 | 測試 N/N | 下一段」。沒有達到這三項就不算完成，那一行寫「未完成」並說明卡在哪裡。
+      4. 中途中斷也安全：只有在段落收工時才寫 R1Progress，所以中斷後重來的人只要從最後一行的「下一段」繼續。
+      5. 改程式前跑 /ponytail，改完跑 /ponytail-review（沒有這些指令就照下面的紅線手動檢查）。紅線：asmdef 分層、公開介面、事件名稱與黑板鍵、門檻值與 ScriptableObject 資料、[SerializeField] 名稱（改名要加 FormerlySerializedAs）、.meta 與 GUID 都不動；驗證、安全規則、硬體校正不刪。刻意的簡單做法加 // shortcut: &lt;上限&gt;, &lt;何時升級&gt;。
+      6. 每段回報格式（寫進 R1Progress 下方或另存 Logs/R1-&lt;段號&gt;.txt）：
+         段：&lt;段號&gt;
+         改動：&lt;檔案與一句話&gt;
+         略過：&lt;沒做的&gt;
+         風險：&lt;沒有寫「無」&gt;
+         測試：N/N，Console 紅字 0
+         未檢查：&lt;項目與原因&gt;
+      
+      ## 段落
+      | 段 | 內容 | 對應 B 段 | 收工時的檢查 |
+      | S0 | 盤點，不寫程式：逐項列出 T7、T1、T5、閘門、T2-a、T6、按鍵表、T3 哪些做完、哪些沒做，建立 Logs/R1Progress.txt | 全文目錄 | R1Progress 有 8 行狀態 |
+      | S1 | 資料資產 a：RoofSceneDef、8 個 StationDef＋StationSet、RoofAccessRule 資產 | 2.1、3.1、3.2 | StationLayoutCheck 對資料跑過（只檢查資料欄位） |
+      | S2 | 資料資產 b：步驟資料 v5.4（每個子動作的 standPointId、工具架→車頂工具箱文字、CSR_07 b／12 b 計數、WC_01、WC_04 d/e） | 3.3、C 段 | 總數 166（切片 144）；每個 standPointId 都找得到站點 |
+      | S3 | ENV prefab：車頂工具箱、平台工具架、螺栓盤 L/R、0.30 m 絕緣子、共用站點標記；每件有 Visual／Walkable／Collision／Anchors | 2.2、C 段 | prefab 結構測試；Inspector 沒有 Missing |
+      | S4 | 場景重建：跑 RoofSiteBuilder、存場景；有螺栓盤之後拿掉 TrayFor() 的零件盒退路（見下） | 2、3.5 | StationLayoutCheck 8 站全過；桌面 25 步跑完 |
+      | S5 | 驗證 T1/T5：第 8 節的 StationHeightTests、StationTests、間隙測試、HeightProfile 測試；terry 檢查 1–6 用桌面先跑一次 | 8 的 2–4 | 新測試全過 |
+      | S6 | T2-a（S0 顯示沒做才做） | 5 | ToolWidgetTests |
+      | S7 | T6（S0 顯示沒做才做）。S6、S7 各自提交 | 4 | LocomotionTests |
+      | S8 | 按鍵表 InputBindingTable | 6 | InputBindingTableTests；改寫的舊測試列名 |
+      | S9 | T3 面板（時間不夠可延到 R2） | 7 | PanelLayoutTests |
+      | S10 | 收尾：Logs/V2R1Report.txt、/ponytail-audit（PantographSim.XR）、/ponytail-debt | 9 | 報告與技術債清單 |
+      S1、S2、S3 互不依賴，順序可以換；S4 要等 S1–S3。S6 以後如果 S0 盤點出已經做完，就只跑該段的測試確認，然後跳過。
+      
+      ## TrayFor() 退路的處理（S4）
+      這個退路是因為場景還是舊版才加的。它會在沒有螺栓盤時靜默把螺栓送進零件盒，讓 CSR_07 b／CSR_12 b 的計數和 v5.4 不一致，也會把「場景缺螺栓盤」這種錯誤藏起來。S4 重建場景後：
+      - 刪掉零件盒退路，沒有螺栓盤就記一筆 Error（不靜默改送）。
+      - StationLayoutCheck 加一條：主場景必須有 env.bolt_tray_L 和 env.bolt_tray_R，否則建置失敗。
+      - 如果 S4 沒做完，退路先留著，加上 // shortcut: 舊場景沒有螺栓盤時改送零件盒, S4 場景重建後刪除。
+      
+      ======================== B. R1 規格全文 ========================
+      專案 C:\黃泰翔\collector shoes（Unity 2022.3.62f3，Built-in RP，OpenXR＋XRI 2.6.5）。教授改良第 1 輪（R1）。數值標 EX 的是示例值，一律寫在資料裡，不寫死在程式裡。
+      
+      本輪要做的事：T7 升降能升能降、被擋住時說明原因；T1 高度與平視；T5 依步驟設計的站點；T6 右搖桿平滑移動；T2-a 工具數值改成用手調；新按鍵表；T3 面板固定在世界中、可抓著移動。工具的「使用」本身，本輪仍沿用右扳機。改成碰到目標才作用是 R2、R3 的工作。
+      
+      ==== 0. 不能做的事與共通規則 ====
+      - Procedures、Safety、Parts、Tools 的判定、CompletionRule、ErrorRule、門檻值都不改。新輸入只發既有的 Core 事件（ActionRequested、ToolPick/ReturnRequested、FocusRequested、ctrl.lift.cmd），也只寫既有的黑板鍵。T7 是唯一例外，可以動 Mechanism 的升弓條件與提示。
+      - 新程式放在 PantographSim.XR（只引用 Core、Data、XRI、Input System、XR CoreUtils）、Data 和 Editor 建置腳本。場景物件一律由建置腳本產生，不手動拖拉。
+      - 測試：現有 EditMode 測試要全部通過。因為按鍵改變而失效的測試，要改寫成新映射的測試，不能刪掉不補，回報時列出改了哪些測試名稱。預期中的 Error、Warning 一律導到測試記錄器，並斷言確實有收到。收到預期以外的 Error，測試就算失敗。測試跑完後 Console 要是 0 個紅字。
+      - 桌面模式必須照舊能從 SI_01 玩到結算。
+      - 每做完一項就跑一次全部測試，再做下一項。T2-a 和 T6 要一起交付；T3 如果時間不夠，可以延到 R2。
+      
+      ==== 1. T7 升降：能升能降，被擋時說明原因 ====
+      如果已經修好，就用下面的條件逐項核對，並補上沒有的測試。
+      應有的行為：
+      | 情況 | ▲ 升 | ▼ 降 |
+      | 開場（升弓、有電）到 SI_02 上鎖之前 | 可以，升到頂就停 | 可以 |
+      | SI_02 升弓開關上鎖後，或 SI_03 電動缸電源 OFF 後 | 不動，面板顯示「升弓開關已上鎖，不能升弓」或「電動缸電源已關閉，不能升弓」，並輕震 | 照現行規則 |
+      | 有人在車頂（RoofOpen 期間，見 3.2） | 不動，顯示「車頂有人作業，不能升弓」 | 照現行規則 |
+      | WC_04 解鎖、恢復電源後 | 可以 | 可以 |
+      先查這兩個可能原因：
+      (a) 預設完成的步驟（SI_02、SI_03、SI_06、WC_02、WC_04）在開場就把完成狀態寫進黑板。正確做法：流程走到該步時，才在同一批（Batch）裡寫入它的完成狀態。SI_06 的完成狀態要在流程走到 SI_06 時才寫入，車頂才會開放。
+      (b) ip.cab.cylinder_power 開場沒有寫入初值，bool 預設 false，被當成 OFF。
+      其他：升降面板一直留在場上，不在 SI_01 後收起。「車頂有人時按 ▲ 記 Critical」現行沒有的話不要自己加，只做提示。
+      測試 LiftTests：開場後降一半、再升回頂、再降到綠框，三段都照指令動，最後判定到位；上鎖後 Up 無效並送出原因；斷電後 Up 無效並送出原因；預設完成步驟的狀態在流程走到該步之前不存在；桌面模式也能先降、再升、再降。
+      
+      ==== 2. T1 高度與場景（場景由建置腳本產生，之後只換模型） ====
+      座標系：原點 O 是弓頭中心正下方的車頂地板點；+Y 朝上；+Z 朝肘側滑板；平台在 −X 側；單位 m。
+      
+      2.1 資料 RoofSceneDef（ScriptableObject，放在 Assets/_Project/Worksite/Data/）。建置腳本只讀這份資料。預設值（EX）：
+      - carBodyHalfWidth 1.40；roofEdgeNoWalk 0.50；roofSectionZ −4.0…+4.0；roofFloorY 0.00
+      - platformGap 0.20（平台靠車側邊在 X = −1.60）；platformWidth 1.20（外側邊 X = −2.80）；platformZ −3.5…+2.5
+      - platformFloorY 0.00（容許 ±0.15）；guardrailHeight 1.10；gateCenterZ −1.00；gateWidth 0.80（活動欄 Z −1.4…−0.6）
+      - cabFloorY −2.50；groundY −3.70；liftPanelHeight 1.10；toolRackHookHeight 0.9…1.6
+      
+      2.2 場景件：每件都是獨立 prefab，放在 Assets/_Project/Worksite/Prefabs/，底下有 Visual、Walkable、Collision、Anchors 四個子物件。換正式模型時只換 Visual。
+      - ENV_RoofSection
+        - Visual：車頂弧面（中央平、兩側往下彎 0.15 m）、防滑走道板、離車頂邊 0.5 m 處的黃色警示線。
+        - Walkable（layer Walkable，多塊 BoxCollider，頂面 y = 0）：只涵蓋 |X| ≤ 0.90、Z −4…+4。挖掉：絕緣子、母線、底架投影再往外擴 0.15 m；弓體升降聯集 Bounds 的投影（沿用 W18）。
+        - Collision（layer Boundary）：X = ±0.90 各一道不可見薄牆，高 1.2 m；絕緣子、底架各一個 BoxCollider，擋身體不擋工具。
+      - ENV_InspectionPlatform
+        - 平台面 y = 0，X −2.80…−1.60、Z −3.5…+2.5，整面 Walkable。
+        - 護欄高 1.1 m，layer Boundary，在 X = −2.80、Z = −3.5、Z = +2.5 與靠車側 X = −1.60。
+        - 靠車側護欄 Z −1.4…−0.6 改成活動欄 ENV_PlatformGate：關＝Boundary 啟用；開＝停用。
+        - 跨板 ENV_GateBridge：X −1.60…−0.90、Z −1.4…−0.6，layer Walkable，和活動欄同時開關，由 RoofAccessRule 切換（3.2）。
+        - Anchors：Anchor_LiftPanel (−1.60, 1.10, 0.00) 面板朝 −X，升降操作盒有 ▲▼ 和可點的弓位指示燈（SI_01 c 點的燈，ID 不變）；Anchor_GroundBusbar (−1.60, 1.00, +0.60) 接地母線端子，ID ip.depot.ground_terminal；Anchor_TesterSelfCheck (−1.60, 1.10, +0.30)；Anchor_HarnessPoint (−1.60, 1.50, −1.55)；Anchor_ToolRack 在靠車側護欄 (−1.60, 0.9–1.6, −2.50)，朝 −X，只放掛位 1–4：上鎖掛牌組、驗電器、接地棒、安全帶。
+        - 車頂工具箱 ENV_RoofToolbox（ID env.roof_toolbox）：車頂走道 (+0.10, 0.9, −2.50)，朝 −X，支架 layer Boundary。放掛位 5–9：卡尺、套筒扳手、扭力扳手、清潔布、標記筆；套筒座在掛位 6 旁。掛位 ID（env.tool_rack.slot_n）、黑板鍵、判定都不變。「在架」＝在它所屬的存放處：1–4 在平台架，5–9 在車頂工具箱；WC_01 的 9／9 兩處合計。工具箱開場就在車頂，不新增小動作。理由：現場不允許從車頂伸手越過縫隙拿平台上的工具。
+      - ENV_PlatformStair：平台 Z = −3.5 端往下到地面，只有外觀和碰撞，不能走；樓梯口放 Boundary。
+      - ENV_CabFloor：駕駛室，另一個樓層。(−6.0, −2.50, −3.0) 附近獨立小房間，四面牆，只能傳送進出，地板 Walkable 1.5 × 1.5 m。現有控制盤移到這裡，盤面朝 +X，高 0.9–1.2 m；有主斷路器、升弓開關、升弓鈕、電動缸電源，互動點 ID 不變。另加兩樣只看的東西：弓位指示燈複本；弓頭監視畫面（RenderTexture，固定相機拍弓頭，SI_03 按升弓鈕時看弓頭不動）。
+      - 螺栓盤 ENV_BoltTray（0.25 × 0.18 m，4 格，高 0.9 m）：env.bolt_tray_R 在 (+0.40, 0.9, −0.65)，env.bolt_tray_L 在 (−0.40, 0.9, −0.65)。不擋站點面向滑板的視線和手的路徑。支架 layer Boundary。沿用 PartsTray 元件，各自計數。CSR_07 b（放下螺栓）和 CSR_12 b（拿起螺栓）的目標改成該側的螺栓盤。
+      - 零件盒只收舊滑板，放在 (−0.30, 0.9, −1.90)；備品架 (−0.30, 0.9, −3.10)；都在車頂支架上，支架 layer Boundary。站在 tp.roof.shelf 時，工具箱約 0.70 m，零件盒和備品架各約 0.67 m。
+      - ENV_Backdrop：機廠屋頂、地面與相鄰軌道（y −3.7）、電車線。只做外觀，不投影，最多 2 個材質、5k 三角面。
+      - TP_Marker：站點地面圓盤 r = 0.25，加腳印方向箭頭，貼在 Walkable 上方 0.005 m。可用＝藍；目前步驟＝綠色脈動；鎖住＝灰色加鎖頭。
+      - 刪除舊的浮空平台與舒適高度用的墊高物件。
+      Layer 碰撞矩陣：Walkable 和 CharacterController、傳送射線、站點落點射線碰撞；Boundary 和 CharacterController、傳送射線碰撞，不和工具、手碰撞；LocomotionBlocker（新增）只擋 CharacterController。
+      
+      2.3 XR Origin 與高度
+      - Tracking Origin Mode = Floor，Camera Y Offset = 0，不加固定身高偏移。
+      - 真實高度：底架下方加 4 支 0.30 m 絕緣子，底架整體抬高 0.30 m。實際滑板頂面高度由建置腳本量測，寫進 Logs/SliceBuildReport.txt 的 stripTopAboveRoof。
+      - 新增資料 HeightProfile：mode（Real／Raised，預設 Raised）；raisedStripTop 0.9–1.1 m，預設 1.0；allowToggleInMenu 預設 true。
+      - Raised 用調整視點實作，不移動場景、不改站點資料：在 Roof 樓層時，把 XR Origin 的 Camera Floor Offset 加上 (stripTopAboveRoof − raisedStripTop)，讓學員感覺滑板頂面在腳下 raisedStripTop 高度。平台和駕駛室偏移 0。切換樓層時 0.2 s 淡黑轉場。偏移正負號與數值都從資料算。
+      - ≡ 選單提供「真實高度／抬高」切換。改預設只改資料。
+      - 蹲姿輔助 CrouchAssist：按左搖桿（L3）切換，≡ 選單也有開關；開啟時 Camera Y Offset = −0.5 m（EX），人仍站在原地板；只在車頂有效，離開車頂自動恢復。
+      - 頭盔實際蹲下時，碰撞與手部判定照常。
+      - ≡ 選單保留「重設高度與視角置中」，附說明：「若覺得陷進地板或浮起來，請先在 Quest 重新設定地板」。
+      
+      ==== 3. T5 依步驟的站點 ====
+      3.1 資料 StationDef：每站一個資產，StationSet 收集全部。欄位：id、floor（Cab／Platform／Roof）、場景節點 StationAnchor_&lt;id&gt;（決定 x、z）、facingTargetId（建置時算朝向）、unlockRule（空＝隨時開放）、lockedMessage、panelOffset（T3 用）。站點 y 不手填：建置腳本從 (x, 5, z) 往下打只打 Walkable 的射線，命中點就是 y；打不到就建置失敗並列出站點。
+      8 個站點（EX）：
+      | id | 樓層 | (X, Z) | 面向 | 開放 |
+      | tp.cab | Cab | 控制盤前 0.5 m（約 (−6.5, −3.0)） | 控制盤 | 隨時 |
+      | tp.platform.lift | Platform | (−2.00, 0.00) | 弓頭（升降操作盒在前方 0.4 m） | 隨時；開場起始點 |
+      | tp.platform.rack | Platform | (−2.20, −2.50) | 平台工具架（往 +X 0.6 m） | 隨時 |
+      | tp.platform.ground | Platform | (−2.00, +0.60) | 接地母線端子、自檢器、弓頭接地掛點 | 隨時 |
+      | tp.platform.anchor | Platform | (−2.00, −1.00) | 活動欄與平台掛點 | 隨時 |
+      | tp.roof.inner | Roof | (0.00, −0.65)，和 outer 共用 | 弓頭中心（兩條滑板） | RoofOpen |
+      | tp.roof.outer | Roof | (0.00, −0.65)，和 inner 共用 | 同上 | RoofOpen |
+      | tp.roof.shelf | Roof | (−0.60, −2.50) | 車頂工具箱（往 +X 0.7 m） | RoofOpen |
+      單臂弓的底架佔住肘側，兩條滑板只相距 0.30 m，所以兩條都從外側操作。tp.roof.inner 和 tp.roof.outer 保留兩個 ID（步驟資料的 {side} 對照不用改），但共用同一落點，地上只放一個 TP_Marker。
+      落點檢查與移位（建置腳本）：
+      1. 落點 (0, −0.65) 投影必須在 Walkable 上，且不在絕緣子（含 0.30 m 絕緣子）、車頂電纜或母線往外擴 0.15 m 的範圍內。
+      2. 肘側滑板最遠一支螺栓到站點距離超過 1.0 m，就沿 +Z 每次移 0.05 m，最多到 Z = −0.50；每移一次檢查身體膠囊（半徑 0.25 m）和降弓後弓頭（含羊角）淨距至少 0.15 m。
+      3. 移到 −0.50 仍超過 1.0 m，就停在最後合格位置，不算建置失敗，並啟用站位提示，讓學員用平滑移動沿 X 側移最多 0.3 m。適用小動作（只限 _L）：CSR_06 d、CSR_07 a、CSR_12 b、CSR_12 d、CSR_13 c、CSR_14 b。只在教學模式；學員拿著工具 5 秒內沒對目標螺栓完成一次有效操作才顯示。文字「往 {n} 號螺栓那側移一步」；地上箭頭方向依那支螺栓的 X 座標決定，不寫死。textXR 不改。建置報告顯示最遠螺栓沒超過 1.0 m 就不啟用。
+      4. 最後的站點 Z 值和最遠螺栓距離寫進 SliceBuildReport。
+      舊的 6 個傳送點全部刪除。
+      
+      3.2 車頂開放規則 RoofAccessRule（只寫在這一個資產裡，傳送、閘門、升降提示都讀它）
+      - 開放：SI_04 完成、SI_05 完成、SI_06 小動作 d（安全帶扣上車頂掛點）完成。
+      - 關閉：WC_02 小動作 b（解開車頂掛點）完成之後。
+      - 鎖住時：傳送拋物線指到車頂站點變紅，顯示 lockedMessage「先完成驗電、掛接地，並扣好安全帶」，放開也不傳送；活動欄關閉，平滑移動走不上車頂；走到活動欄前 0.3 m 顯示同一句並輕震。
+      - 安全帶還扣在車頂掛點時從車頂傳送或走回平台，R1 只顯示「先解開車頂掛點」，不擋。
+      - 「車頂有人時升弓」（ERR_Global_RaiseWithPersonOnRoof）和「走進墜落區」R1 都只提示不記錯。危險區提示只涵蓋車頂邊 0.5 m 內的墜落區。
+      - 只擋進入，不擋離開：車頂關閉時學員若還在車頂，活動欄等學員回到平台後才關；傳送回平台的站點一直可用。
+      
+      3.3 站點與步驟資料
+      (1) 步驟資料調整：
+      - SI_02 小動作 e「把掛牌組放回工具架」移到 SI_03 最後，成為 SI_03 c。
+      - WC_04 小動作 d「把掛牌組放回工具架」和 e「恢復電動缸電源」對調。
+      - 小動作總數 166，切片內展開 144。完成條件、錯誤規則內容不變，只換位置。SubActionTests 期望值照新順序更新。
+      - 新的 SI_03 c：目標 env.tool_rack.slot_1，工具 tool.lockout_tag，完成條件「掛位 1 = 在架」。
+      - 新的 WC_04 e：完成條件「掛位 1 = 在架，且工具架 9／9」。
+      - 參考時間（教學／考核，秒）：SI_02 改 50/30，SI_03 改 35/20，其他不變。
+      - WC_01 a textXR 改「清點平台工具架與車頂工具箱」；完成條件說明文字改「平台 1、2 號在架，3 號接地棒與 4 號安全帶＝使用中；車頂工具箱 5–9 號全部在架」，判定值不變。
+      - WC_01 b 完成條件改「零件盒只剩 2 條舊滑板，兩個螺栓盤都空，車頂沒有遺留螺栓」。
+      - CSR_07 b：目標 env.bolt_tray_{side}，完成條件「螺栓盤螺栓數 +1」，textXR「把 {n} 號螺栓放進螺栓盤」。
+      - CSR_12 b：目標維持 bolt_{n}，完成條件「已放入，且螺栓盤螺栓數 −1」，textXR「從螺栓盤拿 {n} 號螺栓放回孔位」。
+      - 拿取或歸還掛位 5–9 的小動作，文字裡的「工具架」改「車頂工具箱」。範本 16 列，展開 28 條（含 CSR_02 a、CSR_04 e、CSR_15 a、CSR_15 e 與兩側 CSR_06–14）；ID 不變。
+      (2) SubActionDef 新增欄位 standPointId（小動作層級，可留空；空＝原地，B 鍵不傳送）。{side} 在 _L 時是 tp.roof.inner，在 _R 時是 tp.roof.outer；P. 代表 tp.platform.，R. 代表 tp.roof.：
+      SI_01 a–c P.lift
+      SI_02 a P.rack；b–d tp.cab
+      SI_03 a–b tp.cab；c P.rack
+      SI_04 a P.rack；b–c P.ground；d P.rack
+      SI_05 a P.rack；b–d P.ground
+      SI_06 a P.rack；b–f P.anchor
+      CSR_01 a P.anchor
+      CSR_02 a–c R.shelf
+      CSR_03 a–d R.inner
+      CSR_04 a–d R.outer；e R.shelf
+      CSR_05 a 原地
+      CSR_06_{side} a–c R.shelf；d {side}
+      CSR_07_{side} a–b {side}；c R.shelf
+      CSR_08_{side} a {side}；b R.shelf
+      CSR_09_{side} a R.shelf；b {side}；c R.shelf
+      CSR_10_{side} a–f R.shelf
+      CSR_11_{side} a–c {side}
+      CSR_12_{side} a R.shelf；b–d {side}；e R.shelf
+      CSR_13_{side} a–b R.shelf；c {side}；d R.shelf
+      CSR_14_{side} a R.shelf；b {side}；c R.shelf
+      CSR_15 a R.shelf；b R.inner；c R.outer；d 原地；e R.shelf
+      WC_01 a–c R.shelf
+      WC_02 a–b P.anchor；c P.rack
+      WC_03 a–b P.ground；c P.rack
+      WC_04 a P.rack；b–d tp.cab（d 是對調後的「恢復電源」）；e P.rack；f 原地
+      步驟層級的站點清單由該步所有小動作的 standPointId 算出。
+      (3) DataValidator：每個 standPointId 必須存在於 StationSet；每一步至少一個小動作填了站點。
+      
+      3.4 顯示與 B 鍵「帶我到目標」
+      - 目前步驟用到的站點光圈變綠，教學模式加地面箭頭指向下一站；其他已開放站點暗藍，仍可傳送。練習與考核模式所有站點都用一般外觀。
+      - B 鍵：傳送到目前小動作的 standPointId，並面向該小動作目標；空（原地）就不傳送；淡黑轉場 0.2 s 淡出、傳送、0.2 s 淡入；該站未開放就不傳送，只顯示 lockedMessage。
+      - 傳送只能落在站點上（TeleportationAnchor），不開放任意地面。傳送時手上物件跟著走。
+      
+      3.5 建置檢查 StationLayoutCheck（建置時執行，EditMode 測試也呼叫）。不合格就建置失敗，列出站點與原因：
+      - 站點中心 0.4 m 半徑內沒有升降聯集 Bounds 或其他實體碰撞體。不可見 Boundary 牆只要求間距 ≥ 0.15 m。站點和自己那一側的螺栓盤相距 0.30–0.50 m，不受 0.4 m 規則限制。
+      - 從站點以眼高 1.6 m 看 facingTargetId，視線不被擋，目標在水平 ±30° 內。
+      - 目標水平距離 0.4–0.9 m；例外：tp.cab、tp.platform.lift ≤ 2.5 m；tp.platform.ground 到弓頭接地掛點 ≤ 1.5 m。
+      - tp.platform.lift 的相機視錐同時看到弓頭和綠框，不被扶手或面板 collider 擋。
+      - 共用車頂站點照 3.1 移位規則；最遠螺栓超過 1.0 m 只記警告。
+      - 車頂站點離車頂邊至少 0.5 m，不在絕緣子或母線正上方。
+      - 平台面和車頂走道高度差 ≤ 0.15 m；平台靠車側邊到車頂邊間隙 ≤ 0.30 m。
+      
+      ==== 4. T6 右搖桿平滑移動 ====
+      - XRI ActionBasedContinuousMoveProvider 綁右手搖桿；方向跟頭部朝向，只在水平面，可以橫移；死區 0.15，沒有加速度，放開立刻停；不做平滑轉向。
+      - 速度預設 1.0 m/s（EX），≡ 選單可調 0.6–1.5；人在車頂上限一律 1.0。≡ 選單可關閉平滑移動。預設開關寫成資料 SmoothMoveDefaultOn = true。
+      - 暈動遮罩：XRI Starter Assets 的 TunnelingVignetteController，移動時開啟，預設開，強度可在 ≡ 選單調整或關閉。
+      - XR Origin 加 CharacterController：半徑 0.2、step offset 0.2、有重力，腳貼地。
+      - 只有 Walkable 可走。不可走處放 LocomotionBlocker 或 Boundary：車頂邊 0.5 m 內、絕緣子、母線、底架、弓體升降聯集 Bounds、護欄、樓梯口、活動欄（依 3.2）。
+      - 房間規模實際走路會繞過 CharacterController，所以每幀檢查頭部位置：進入不可走區，或車頂鎖住時進入車頂區，畫面四周變紅並顯示「已進入危險區域，請退回」。只提示不記分。
+      - 開場控制器教學在「左搖桿傳送」之後加兩步：「用右搖桿走到地上的圈」「用左握把抓住面板把手移一下」。
+      - 錄製：summary.json 加入平滑移動總距離和總時間。
+      
+      ==== 5. T2-a 工具數值改成用手調（右搖桿讓給 T6） ====
+      共用機制（簡版接觸，只用在按鈕與撥桿；完整 ContactRouter 是 R2）：
+      - 左右控制器各加子節點 Attach_Tool（工具握持點對齊這裡，在握把前下方，不擋扳機和按鍵）與 Poke_Tip（控制器前端，SphereCollider 半徑 0.8 cm，layer ToolTip）。
+      - 左手 Poke_Tip 掛 XRPokeInteractor，不用手部追蹤。
+      - 拿起工具時控制器維持顯示：關掉 XRI「拿東西時隱藏手部模型」。
+      - 可 poke 的節點放在 Interaction Layer ToolWidget，只有右手正拿著的那件工具上的節點會啟用。
+      - poke 到時左手輕震並播喀聲。
+      - 工具 prefab 節點名稱（模型沒有就先用小方塊代替）：套筒扳手 Poke_Ratchet（2 × 1 × 1 cm）、Socket_Mount；10／13／17 三顆套筒做成獨立 prefab；扭力扳手 Poke_Plus、Poke_Minus（各 1.5 × 1.5 × 1 cm，間距 ≥ 3 cm）、數字窗；卡尺 FX_Jaw（沿 +X 平移 0–150 mm）、Poke_Zero（1 × 1 × 0.5 cm）；套筒座 TGT_Socket_10／13／17（Capsule 半徑 1.5 cm）。
+      | 項目 | 做法 | 寫入（沿用現有黑板鍵與事件） | 備援 |
+      | 套筒尺寸 | 拿著套筒扳手，扳手頭碰到套筒座某一顆停留 0.15 s 就換成那一顆，原本那顆自動放回座上（trigger 加停留時間，不需 ContactRouter）。拿起扳手時尺寸維持現行預設，E11 照樣判定 | 套筒尺寸 | 手腕面板尺寸鈕 |
+      | 鬆／鎖方向 | 左手 poke Poke_Ratchet，一次切換一次，扳手上 ←鬆／鎖→ 箭頭跟著變 | 方向 | 手腕面板方向鈕 |
+      | 扭力設定值 | 左手 poke Poke_Plus 或 Poke_Minus，一下 ±0.5 N·m；按住超過 0.4 s 連續變化每秒 4 格；範圍 5–50；顯示在扳手數字窗和手腕面板 | 扭力設定 | 手腕面板 ± |
+      | 卡尺開合 | 量測區靠近量測點 3 cm 內自動吸附，FX_Jaw 夾到該點厚度並顯示讀數；離開後自動合攏。讀數穩定 0.5 s 後自動填入作業單中對應這個量測點 ID 的格子（不是看目前選中哪格），並把選中格移到下一個沒填的格子 | 讀數公式照舊（厚度＋未歸零偏移＋雜訊）、RecordWritten | — |
+      | 卡尺 ZERO | 量爪合攏時，左手 poke Poke_Zero，或按右扳機；兩種方式送同一事件 | ZERO 判定照舊 | — |
+      | 新滑板翻面 | 用握把抓著直接轉手腕；右搖桿翻面取消 | 吸附條件照舊：≤ 3 cm，方向差 ≤ 30° | — |
+      - A（重設工具）把套筒尺寸、方向、扭力設定值全部恢復預設，套筒放回套筒座。
+      
+      ==== 6. 新按鍵表與 InputBindingTable（唯一來源） ====
+      新增 InputBindingTable（ScriptableObject，放在 Data）。每列：context、hand、control、functionId、labelKey、enabled。context：Empty、Tool:&lt;toolId&gt;、PanelOpen、ErrorOpen、Tutorial。左撇子模式用 HandednessMap 對調，不複製整張表。XRInputMapper 依這張表送事件，不寫死。Y 說明卡和手腕面板的按鍵說明都從這張表產生。
+      同一顆鍵在所有情境下意義都相同，只有啟用與否依情境改變：
+      | 右扳機 | 點／使用：空手點零件＝Inspect（不受 E1 阻擋）；指著面板或升降 ▲▼＝按下或按住；拿著工具＝使用工具（本輪照舊） |
+      | 右握把 | 抓／放工具、滑板、螺栓 |
+      | 右搖桿 | 平滑移動（任何情境都只有移動） |
+      | 右搖桿按下 | 無 |
+      | A | 重設手上的工具（彈窗開著或空手時沒作用） |
+      | B | 帶我到目標（3.4） |
+      | 左搖桿 | 往前推＝傳送；左右撥＝45° 分段轉向 |
+      | 左搖桿按下 | 蹲低視角（只在車頂有效） |
+      | 左握把 | 抓面板把手（T3） |
+      | 左手尖端 poke | 按工具上的撥桿、± 鈕、ZERO 鍵 |
+      | X | 開關作業單（左手夾板） |
+      | Y | 說明 |
+      | ≡ | 暫停選單：重做本步、面板叫回眼前、重設高度、真實高度／抬高切換、平滑移動開關、速度、遮罩強弱、蹲低視角、離開 |
+      | 左手腕面板 | ↶ 上一步（只在教學模式）、提示開關、面板叫回眼前、工具數值備援鈕 |
+      
+      ==== 7. T3 面板固定在世界、用左握把抓把手移動 ====
+      - 適用：步驟提示面板、讀數面板、錯誤視窗。升降操作盒是設備，不加把手。作業單維持左手夾板，用 X 開關。錯誤視窗一定出現在頭前 1 m，開著時也能抓著移動。
+      - 面板固定在世界中，不再跟著頭；移除「轉身超過 50° 就把面板瞬移回視野」。
+      - 預設位置寫在 PanelLayout（Data），以目前站點為基準：步驟提示面板在站點左前方約 1.2 m，上緣略低於視線，不擋弓頭、綠框和正在操作的零件。
+      - 把手 UI_PanelHandle：面板上緣 0.20 × 0.03 × 0.03 m，亮橘色有握紋，hover 發亮；面板背面加不透光底板。只有把手掛 XRGrabInteractable：Kinematic、不受重力、throwOnDetach 關。用 Interaction Layer PanelHandle 限定只有左手 XRDirectInteractor 抓得到。放開後只保留水平轉向，自動轉正面向頭部。面板本體只接受 UI 射線。
+      - 記住位置：每塊面板各自記錄相對於每個站點的偏移；到另一站套用那一站存的位置，沒存過用預設。整場保留，重做本步也不重設。
+      - 「面板叫回眼前」：所有可移動面板放到頭前 1.2 m、視線 30° 內。
+      - 錄製：新增事件 PanelMoved(panelId, standPointId, localPose)，重播還原面板位置。session.jsonl schema 升到 3，舊檔照舊能重播。
+      
+      ==== 8. 新增測試（全部 EditMode） ====
+      1. LiftTests：見 1。
+      2. StationHeightTests：每站 y 和 Walkable 命中點差 ≤ 0.02 m；Floor 追蹤、Camera Y Offset = 0；平台與車頂高度差 ≤ 0.15 m；降弓後滑板頂面在車頂面上方 0.4–0.8 m，實際值寫進 SliceBuildReport；HeightProfile 預設 Raised；在車頂時滑板頂面相對視點高度 = raisedStripTop ± 0.05 m；切到 Real 或離開車頂後偏移歸 0；CrouchAssist 預設關；共用車頂站點和弓頭（含羊角）淨距 ≥ 0.15 m；場景沒有舊浮空平台。
+      3. StationTests：3.2 開放與關閉邏輯逐項；車頂關閉時人在車頂活動欄不關；B 鍵傳到目前小動作站點，原地或未開放時不移動；SI_03 c 和 WC_04 新順序能完成；SubActionTests 總數 166、切片 144；舊傳送點不存在；DataValidator standPointIds 規則。
+      4. StationLayoutCheck：8 站全過。
+      5. LocomotionTests：預設速度 1.0、遮罩開、SmoothMoveDefaultOn = true；車頂速度上限 1.0；不可走區都有碰撞體；Walkable 不和車頂邊 0.5 m 內、絕緣子、底架、升降聯集投影重疊。
+      6. ToolWidgetTests：扳手頭碰 TGT_Socket_13 停留 0.15 s 尺寸變 13，0.1 s 不換；用預設尺寸鬆螺栓照樣 E11；poke 撥桿兩次方向回原本；＋ 按一下 +0.5，按住 1.4 s 約 +2.5（±0.5），到 50 停住；沒拿工具時 ToolWidget 全停用；卡尺 3 cm 內吸附、讀數公式不變、穩定 0.5 s 後填入量測點 ID 對應格子（即使選的是別格）；poke ZERO 和右扳機 ZERO 送同一事件；按 A 全部恢復預設。
+      7. InputBindingTableTests：每個情境每顆有功能的鍵都有中文標示；同一 control 所有情境 functionId 相同；右搖桿所有情境只有 Move；XRInputMapper 送出的事件和表一致（抽樣：空手按右扳機、拿套筒時按 A、錯誤視窗開著時按 A）；左撇子對調後仍成立。
+      8. PanelLayoutTests：放開後面板直立面向玩家誤差 5° 內；站點 A 存的位置切到 B 再回 A 仍在；叫回眼前後距頭 0.8–1.5 m、視線 30° 內；右手抓不到把手；升降操作盒和作業單沒有把手。
+      9. 若 batchmode 能跑 PlayMode：XR Device Simulator 推右搖桿 3 s，位移約 3 m 且 y 不變；推向關閉的活動欄會停在欄前。跑不了就在回報寫明，改由 terry 戴頭盔驗收。
+      
+      ==== 9. 回報（Logs/V2R1Report.txt） ====
+      - 編譯結果、測試數（原本加新增）、Error log 數；改寫了哪些舊測試。
+      - T7 查證結論：聯鎖、bug 或兩者；根因。
+      - 8 個站點實際 (x, y, z)；tp.roof.inner／outer 建置腳本算出的落點；降弓後滑板頂面實際高度。
+      - 截圖：各站眼高 1.6 m 的 rig_xr_r1_&lt;站點id&gt;.png 共 8 張；rig_xr_r1_roof_locked.png；rig_xr_r1_gate.png；rig_xr_r1_panel_handle.png；rig_xr_r1_toolwidgets.png。
+      - 哪些項目只做提示沒記分（危險區域、車頂有人時升弓）。
+      - 和本規格不同的地方及原因。
+      
+      terry 戴頭盔驗收的 12 項（請先在桌面自己對一遍）：
+      1. 開場還沒上鎖時，先降、再升、再降，最後降到綠框並判定到位。
+      2. 上鎖、斷電後按 ▲：弓頭不動，畫面寫出原因。
+      3. 每個站點都站在地板上，眼睛高度一致。
+      4. 從升降面板前同時看得到弓頭、綠框和指示燈；上車頂後平視滑板。
+      5. 按 B 會傳到這一步的站點並面向目標；下一站有箭頭；無關站點不會到處都是。
+      6. 驗電、掛接地、扣安全帶之前，傳送和走路都上不了車頂，並說明還差什麼。
+      7. 平滑移動往哪推就往哪走，放開就停；左右推只平移不轉向；穿不過弓體，也走不出車頂邊；移動時有遮罩。
+      8. 開著平滑移動操作 5 分鐘，不舒服程度不超過 3 分（0 到 10 分）。
+      9. 從 ≡ 選單可以關掉平滑移動、調整遮罩強弱。
+      10. 左握把抓得動面板，放開就停住；叫回眼前有作用；升降面板不能移動，作業單在左手。
+      11. 碰套筒換尺寸；左手撥撥桿；左手按 ±；卡尺碰到量測點就自動夾住並自動填入；拿著工具推右搖桿只會走路。
+      12. 正常流程 25 步一路做完不卡關。
+      
+      ======================== C. 補充（D8、D9；與 B 衝突時以 B 為準） ========================
+      - 平台工具架 (−1.60, 0.9–1.6, −2.50) 朝 −X，只放掛位 1–4；掛位 5–9 實體移到車頂工具箱 env.roof_toolbox (+0.10, 0.9, −2.50)，ID 與黑板鍵不變；env.parts_tray 只收舊滑板；tp.roof.shelf 在 (−0.60, −2.50) 面向工具箱。
+      - 測試：螺栓盤計數 CSR_07 b 放入 +1、CSR_12 b 拿起 −1，兩側各自計數不互相影響；舊滑板放進零件盒照常計數，螺栓放進零件盒不能讓 CSR_07 b 完成；「在架」1–4 在平台架、5–9 在車頂工具箱都算在架，放錯存放處不算，WC_01 9／9 照常可完成；WC_01 b 任一螺栓盤還有螺栓時不成立；SubActionTests 總數 166、切片 144；StationLayoutCheck 照常通過（tp.roof.shelf 和工具箱相距 0.70 m；車頂站點和自己那側螺栓盤相距 0.30–0.50 m；站點和不可見 Boundary 牆 ≥ 0.15 m）。
+      
+      ======================== D. 負責人補充 ========================
+      - 切換蹲姿輔助時，顯示 1.5 s 提示「蹲姿輔助：開」或「蹲姿輔助：關」，並讓左手控制器短震一下。
+      - 每段收工前跑 ponytail 的 7 項無行為改變檢查：可編譯、測試數不少於開工時、公開契約 diff、資料沒變、場景參照沒有 Missing、實際能玩、重構和功能分開提交。
+  </note>
+</relay>
+
+######## 2026-10-28T11:59:21.761Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-10-28T11:59:23Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人補充（S0–S5 審查意見，不要中斷目前的段落，在下一段收工前一起處理）：
+      1. 補一個測試：傳送拋物線碰到地板（Walkable）就停止。理由：被註解蓋掉的程式要有測試擋住，以後才不會再犯。
+      2. tp.platform.ground 改到 (−1.95, +0.30) 這件事先維持現狀，不用回退。但照規格錨點算，原位置 (−2.00, +0.60) 三條距離都符合：母線端子 0.40 m、自檢器 0.50 m、弓頭接地掛點 1.25 m。新位置反而讓自檢器只剩 0.35 m（低於 0.4–0.9），離 X −1.60 的護欄也只剩 0.35 m（違反 0.4 m 半徑規則）。請在 Logs/R1-S5.txt 或 V2R1Report 補上：
+         (a) 是哪兩條規則衝突，以及 StationLayoutCheck 的原始錯誤訊息；
+         (b) 場景裡 Anchor_GroundBusbar、Anchor_TesterSelfCheck、弓頭接地掛點、平台靠車側護欄的實際座標；
+         (c) tp.platform.ground 的 facingTargetId；
+         (d) 新位置為什麼能通過 0.4 m 半徑規則（例如護欄是 Boundary，只要求 ≥ 0.15 m）。
+         這是站位安全問題，最終位置等鐵道工程確認後再定。
+      S6–S9 照常做。
+  </note>
+</relay>
+
+######## 2026-10-29T09:17:22.601Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-10-29T09:17:24Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人：terry 說「繼續」。先讀 Logs/R1Progress.txt，從最後一行的「下一段」接著做（應該是 S6），一路做到 S10。分段規則、紅線、收工條件都和之前一樣。另外有兩件事，排在 S6 開工之前，當成獨立的一段「S5b」做完並提交：
+      1. 補一個測試：傳送拋物線碰到地板（Walkable）就停止。理由：之前有一行註解把這段程式蓋掉，要有測試擋住才不會再犯。
+      2. D11（鐵道工程已確認）tp.platform.ground 維持在 (−1.95, +0.30)，但要同時符合三個條件；任一條不符合，就改回 (−2.00, +0.60)：
+         (a) 沿 Z 量，離活動欄開口邊緣至少 0.5 m；
+         (b) 到弓頭接地掛點 ≤ 1.5 m；
+         (c) 和 tp.platform.anchor 至少相距 0.6 m。
+         StationLayoutCheck 一起修改：站點離護欄的最低距離改為 0.30 m（身體膠囊 0.25 m 加 0.05 m，護欄是封閉的 1.1 m 高護欄）；把 (a) 和 (c) 加成建置規則，並補上測試。自檢器離站點 0.35 m 可以接受。
+         在 Logs/R1-S5b.txt 寫出以下內容：當初是哪兩條規則衝突，以及 StationLayoutCheck 的原始錯誤訊息；場景裡 Anchor_GroundBusbar、Anchor_TesterSelfCheck、弓頭接地掛點、車側護欄、活動欄開口的實際座標；tp.platform.ground 的 facingTargetId；(a)(b)(c) 三條的實際數值。
+      全部做完後，照原規格寫 Logs/V2R1Report.txt，並回報摘要。不要刪 Recordings。
+  </note>
+</relay>
+
+######## 2026-10-29T09:27:09.073Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-10-29T09:27:11Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人回覆你的三個問題（我已經代 terry 裁定，不用再問他）：
+      1. 選 A：先把 R1 的 S7–S10 做完，最後寫 Logs/V2R1Report.txt。起重機這一輪不要動。
+      2. 要加新的拆裝流程，完整順序是：隔離 → 拆電纜、分流線和底座螺栓 → 掛吊具 → 天車起吊、移動 → 放上台架 → 在台架上換碳滑板（沿用現有的量測和更換判定）→ 吊回 → 鎖固、接線 → 復電試驗。
+      3. 學員要親手操作：場景裡放一個懸吊按鈕盒或遙控器，用右扳機或 poke 按，不佔用現有的控制器按鍵。
+      真實程序、模型和場景配置由團隊另外整理成 R1.5 規格，R1 做完後我再交給你。你現在不要先做任何起重機的東西。
+  </note>
+</relay>
+
+######## 2026-10-29T19:25:30.493Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-10-29T19:25:30Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人：terry 說「繼續」。請先讀 Logs/R1Progress.txt，從最後一行寫的「下一段」接著做，應該是 S7 平滑移動。做完 S7 後依序做 S8 按鍵表、S9 面板、S10 報告，最後寫 Logs/V2R1Report.txt 並回報摘要。分段規則和紅線都跟之前一樣。起重機和新場景這一輪先不要做，不要刪 Recordings。
+  </note>
+</relay>
+
+######## 2026-11-02T06:56:24.594Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-11-02T06:56:23Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人：terry 說「繼續」。
+      第一步：先讀 Logs/R1Progress.txt。R1 還沒做完的話，從最後一行的「下一段」接著做完 S7–S10，寫好 Logs/V2R1Report.txt，然後先回報一次摘要。
+      第二步：R1 全部完成後，直接接著做下面的 R1.5a（a0–a6）。每段收工後都要回報一行。不要刪 Recordings。
+      
+      === R1.5a 規格全文 ===
+      專案 C:\黃泰翔\collector shoes（Unity 2022.3.62f3，OpenXR＋XRI 2.6.5）。教授改良 R1.5a：真實 700T 車廂、檢修庫兩區場景、天車與台架的「靜態」模型，以及集電弓整組可移動的父子結構。
+      你讀不到 /mnt/project-files，所以規格全文都寫在這裡。標 EX 的數值是示例值，一律寫在資料裡，不寫死在程式裡。
+      前提：R1（S0–S10）已收尾。R1.5a 開工前先讀 Logs/R1Progress.txt，確認 S10 已經完成。
+      本輪只做場景與模型。流程、判定、事件、黑板鍵都不改。R1 的 25 步在本輪結束時必須照樣能從 SI_01 跑到結算。天車操作、吊運、工具袋、新步驟是 R1.5b 的工作，本輪不做。
+      
+      0. 共通規則
+      0.1 ponytail（每段都照做）
+      - 動手前輸入 /ponytail，改完輸入 /ponytail-review。沒有這些指令就照下面手動做。
+      - 選做法的順序：不需要就不做 → 專案已有的就沿用 → Unity／C# 標準功能 → 已裝的套件 → 一行寫得完就寫一行 → 都不行才寫新程式。
+      - 紅線，不准動：asmdef 分層與引用方向；公開介面與簽章（只有一個實作的介面是擴充點，要保留）；Core 事件名稱、黑板鍵、物件 ID；CompletionRule、ErrorRule、門檻值、ScriptableObject 資料（除非本文要求改）；[SerializeField] 欄位名稱（真要改名一定加 [FormerlySerializedAs]）；.meta 與 GUID（要搬檔就在 Unity 裡搬）；輸入驗證、安全規則、硬體校正。
+      - 看起來沒人呼叫的方法不要刪，除非 grep 過整個 Assets（包含 .unity、.prefab、.asset）都沒有用到。
+      - 刻意的簡化要加註解：// shortcut: &lt;上限&gt;, &lt;何時升級&gt;
+      0.2 分段規則（和 R1 相同）
+      - 開工時先讀 Logs/R1Progress.txt 和 git status。上一段如果有沒提交的改動，先修到綠燈再提交，不另開新段。
+      - 一段只做一件事。收工要同時符合三件事：Console 0 紅字、EditMode 測試全部通過（數量不少於開工時）、提交一次 commit（訊息寫段號）。三件都做到，才在 R1Progress 加一行「段號 | 完成 | 測試 N/N | 下一段」。
+      - 每段收工前逐項做 7 項功能不變檢查：1. 0 紅字、沒有新的 warning；2. 測試數量不減少，沒有停用或跳過測試；3. 用 git diff 確認公開簽章、事件、黑板鍵、SerializeField、asmdef 都沒變；4. 資料檔沒有被改到（除非本文要求）；5. 用到的場景和 prefab 沒有 Missing；6. 桌面版實際跑一次受影響的步驟；7. 純精簡的改動和功能改動分開提交，commit 訊息寫「refactor: 不改行為」。
+      - 做不到的檢查寫成「未檢查：第 N 項，原因」，不可以假設通過。
+      - 每段回報寫進 Logs/R1.5a-&lt;段號&gt;.txt，格式：段／改動／略過／風險（沒有就寫「無」）／ponytail-review Verdict／測試：N/N，Console 紅字 0／功能不變檢查：1–7 的結果／未檢查。
+      0.3 測試規範：預期中的 Error／Warning 導到測試記錄器並斷言確實收到；預期以外的 Error 讓測試失敗；跑完 Console 要是 0 紅字。
+      0.4 座標：原點 O 在弓頭中心正下方的車頂面。+Y 朝上；+Z 沿車長方向、朝肘側；平台在 −X 側；單位 m。地面高度一律 Y −3.65。平台面和車頂都在 Y 0。
+      
+      1. 段落順序
+      a0 確認，不改程式 → a1 PAN_Root → a2 Blender 管線與 RoofSceneDef → a3 進站區 → a4 維修工作區 → a5 天車、吊具、工具袋、集電弓新節點的靜態模型 → a6 建置檢查與驗收。
+      a1 一定要最先完成，後面每段都依賴它。a3、a4、a5 彼此不依賴，但都要等 a2。
+      
+      2. a0 集電弓結構確認（只寫報告，不改程式）
+      把 5 項結果寫進 Logs/PantographRiggingCheck.txt：
+      1. 原始 FBX EXT_3d66_JJI54552119072_v01.fbx 的降弓姿態有 29 個網格。檢查有沒有絕緣子：底架底面以下還有沒有網格，有的話列出來。
+      2. 場景裡集電弓的父子結構：降弓、升弓兩組網格的父物件是誰；所有 ip.*、part.*、PF_StripBolt、量測點、TGT_* 各掛在哪裡。
+      3. 底架底面中心和四角的世界座標。底面中心就是 PAN_Root 的原點，四角是 4 個螺栓孔。
+      4. PantographMechanism 用什麼方式升降：切換網格、內插位置，還是旋轉臂。程式裡有沒有直接寫世界座標 transform.position。
+      5. 升弓姿態那組網格現在還在不在場景裡，在的話位置在哪裡。
+      如果第 1 項發現 FBX 裡有絕緣子：把那幾個網格的 Renderer 關掉，以車廂模型的絕緣子為準。FBX 本身不要改。
+      
+      3. a1 PAN_Root：集電弓整組可以移動、判定結果不變
+      3.1 父子結構（由建置腳本 PantographAssemblyBuilder 產生，擴充現有的 PantographRigBuilder；可以重跑，結果相同）
+      PAN_Root：新空物件，原點在底架底面中心（a0 第 3 項），+Z 朝肘側，+Y 朝上。part.pan_assy 的 ISimObject 掛這裡。
+      ├─ PAN_Visual：原本的降弓與升弓網格整組移進來
+      ├─ PAN_Mechanism：原本 PantographMechanism 所在的物件
+      ├─ PAN_Parts：原本所有 Parts 子物件（滑板、螺栓、量測點、ip.pan_head.*、弓頭接地掛點、TGT_*），名稱和 ID 一律不改
+      ├─ PAN_Base：BaseHole_1..4（底架與絕緣子之間的螺栓孔中心，空物件）、LocatingHole_1..4（和 BaseHole 同位置）、COG（重心標記）
+      ├─ PAN_LiftPoints/ip.pan_assy.lift_point_1..4（a5 才放網格；本段只建空物件）
+      ├─ PAN_Connections（a5）
+      └─ PAN_HoldDown（a5）
+      3.2 規則
+      - 一律用 SetParent(PAN_Root, worldPositionStays: true)。原始 FBX 不改 pivot、不重新匯出。
+      - 如果 a0 第 5 項顯示升弓網格還在場景裡，也移進 PAN_Visual，否則吊走時會留在原地。不需要的話關掉 Renderer，不要刪除。
+      - 所有判定、量測點、吸附目標、part.pan_head.pose 都改用 PAN_Root 的局部座標計算。程式裡凡是用世界原點當作「弓頭下方」的地方都要改。用 grep 找 transform.position、Vector3.zero 和寫死的座標，列在回報裡。
+      - 錄製、黑板值、所有數值都必須和改之前完全相同。
+      3.3 測試
+      - PanAssyFrameTests：把 PAN_Root 平移 (+3, −2, +1)、繞 Y 旋轉 90°，然後跑 CSR 的測試流程。所有 part.* 黑板值都要和沒移動時相同（容差沿用現有的，例如 1e-4）。
+      - PanAssyHierarchyTests：所有 part.*、ip.pan_*、量測點、TGT_* 都在 PAN_Root 底下；場景裡沒有集電弓網格留在 PAN_Root 外面。
+      - PanAssyIdUnchangedTests：移動前後所有物件的名稱與 ID 清單完全相同。
+      - R1 的全部測試照樣通過。
+      
+      4. a2 Blender 產生管線與 RoofSceneDef
+      4.1 RoofSceneDef 新數值（推估值，拿到圖面後只改資料）
+      carBodyHalfWidth 1.69（車寬 3.38）；carLength 25.0；groundY −3.65；roofEdgeDrop 0.30；floorAboveRail 1.30；bogieCenterDistance 17.5；pantographFromCarEnd 5.0；roofWalkHalfWidth 0.80；insulatorHeight 0.30；platformGap 0.12；platformWidth 1.50；platformAisle 1.00；rackBandDepth 0.50；guardrailHeight 1.10；gate Z −1.4 … −0.6；roofProfile：中央平段寬 1.6，兩側圓弧 R 1.2；livery：白 #F4F4F2、橘 #E86A1E、深灰 #2B2B2B。
+      推導值由建置腳本計算，不手填：車頂邊 X ±1.69；平台靠車邊 X −1.81；外護欄 X −3.31；工具架帶 X −3.31 … −2.81，中心 −3.06；GateBridge 從 X −1.81 鋪到 −0.80，Z −1.4 … −0.6，Y 0。
+      平台和站點座標全部寫成「相對車頂邊」的資料（例如 platformInnerX = −carBodyHalfWidth − platformGap），車寬改了位置就自動跟著變。
+      4.2 單一數據來源
+      - 新增 Unity 選單 Tools/Worksite/Export Car Params：把 RoofSceneDef 匯出到 Assets/_Project/Worksite/Data/car_params.json。Blender 只讀這份檔案。
+      - 執行方式："&lt;Blender 路徑&gt;\blender.exe" -b --factory-startup -P Tools/Blender/gen_700t/gen_700t.py -- --params "Assets/_Project/Worksite/Data/car_params.json" --out "Assets/_Project/Worksite/Models/Generated"
+        先跑 blender --version，把版本寫進報告。支援 3.6 LTS 和 4.x，只用 bmesh 和 bpy.ops.export_scene.fbx。腳本開頭先清空場景；任何一步失敗就停止，不輸出不完整的檔案。
+      - 檔案：Tools/Blender/gen_700t/ 底下有 gen_700t.py、car_body.py、bogie.py、roof_equipment.py、furniture.py、crane.py、rigging.py、stand.py、pouch.py、platform.py、palette.py、common.py。
+      - 集電弓的小網格另用 Tools/Blender/gen_pan_rigging/gen_pan_rigging.py，讀 Assets/_Project/Parts/PantographAssembly/Data/pan_rigging_params.json，輸出 PAN_Rigging.fbx 和 Logs/PanRiggingModelReport.json。網格：M16 底座螺栓、吊耳、降弓固定帶、高壓端子座、端子、控制線接頭與防塵蓋、Parked 電纜段，合計 ≤ 3k 三角面。
+      - FBX 匯出設定：apply_unit_scale=True、apply_scale_options='FBX_SCALE_UNITS'、axis_forward='-Z'、axis_up='Y'、bake_space_transform=True、object_types={'MESH'}、mesh_smooth_type='FACE'；不匯出相機和燈光；保留節點階層，不合併物件。
+      - Blender 軸向：車長沿 +Y，車寬沿 X，上方是 Z。匯入 Unity 後車長必須落在 Z 軸上。
+      - 材質最多 7 個：Paint、Roof、Walkway、Glass、Dark、Metal、Insulator。色帶用程式產生的 256×256 Palette.png，每格一個顏色，UV 指到對應色格。不放任何商標、字樣、車號。
+      - 每個 prefab 對應一個 FBX，放進該 prefab 的 Visual 子物件。Walkable、Collision、Anchors 照舊由建置腳本用 primitive 產生，FBX 不帶 collider。
+      4.3 AssetPostprocessor（只套用在 Models/Generated 和 PantographAssembly/Models）：Scale Factor 1、Convert Units 開、不產生 collider、Read/Write 關、Normals 用 Import、材質用外部 Materials/Worksite/（Base Map＝Palette.png）。
+      4.4 檢查（EditMode）
+      1. ENV_CarBody 的 Bounds：寬＝3.38 ± 0.02、長＝25.0 ± 0.05、車長方向是 Z。
+      2. 總三角面 ≤ 55k（車廂 ≤ 35k，天車、台架等 ≤ 18k）；材質 ≤ 7。
+      3. Generated 的 FBX 都沒有 collider，Transform 縮放都是 1。
+      4. car_params.json 的雜湊和 RoofSceneDef 現值一致，避免改了資料卻忘了重跑 Blender。
+      5. Blender 報告 Logs/CarModelReport.json 存在，內容包含版本、每個物件的三角面數和 Bounds。
+      
+      5. a3 進站區
+      - 股道中心 X 0。700T 共三節，中間那節有集電弓，弓在 Z 0。三節共用同一個 ENV_CarBody 網格；前後兩節用簡化車頂、沒有集電弓。
+      - 車頂可走範圍 |X| ≤ 0.80。Walkable 要挖洞：母線（沿 X +0.30 往 +Z，寬 0.20）；底座絕緣子與避雷器（各外擴 0.15）；車體接地座 Roof_CarBodyGround（ID ip.roof.carbody_ground，互動點 Clamp_Point，暫放 (−0.70, 0.05, +1.20)，挖 0.30 × 0.30，不加 Boundary）；R1 的車頂螺栓盤（沿用 R1 的位置）。
+      - 絕緣子位置以底架實測為準：PantographAssemblyBuilder 量到 BaseHole_n 後，回寫到 RoofSceneDef.insulatorPositions[4]。車頂要有 Roof_Insulators/Insulator_1..4/InsulatorTop_1..4，InsulatorTop_n 和 BaseHole_n 距離 ≤ 2 mm。車頂還要有 Roof_Busbar/HV_Cable_End（底下 HV_Cable_Connected、HV_Cable_Parked；接地掛點 ID ip.roof.hv_cable_ground）和 Car_Roof_Work/CtrlCable_End（底下 Connected、Parked）。本輪只顯示 Connected。
+      - 平台：X −3.31 … −1.81、Z −4.0 … +4.0、Y 0。靠車側有活動欄開口（Z −1.4 … −0.6）和 GateBridge。外護欄高 1.1 m。−Z 端有鋼梯下到地面，只做視覺，不是 Walkable。
+      - 平台設備與站點 (x, z)：
+        - ENV_ToolRack（env.tool_rack，掛位 1–4）在 (−3.06, 1.0–1.6, −2.80)，靠外護欄；站點 tp.platform.rack (−2.41, −2.80)。
+        - 升降面板 (−1.81, 1.10, 0)；站點 tp.platform.lift (−2.20, −0.05)。
+        - 接地端子、自檢器 (−1.81, ·, +0.60)，一左一右；站點 tp.platform.ground (−2.20, +0.60)。
+        - 防墜器門架：防墜器在門架頂 (−1.81, 2.60, −1.55)，掛鉤（ip.roof.anchor 的互動點）在 (−1.95, 1.40, −1.55)；站點 tp.platform.anchor (−2.20, −1.80)。
+        - PendantDock（遙控器掛座）(−3.31, 1.10, −3.50)；站點 tp.platform.crane (−2.40, −3.50)，面向 +X。
+        - 站點 tp.platform.bench、tp.platform.parts 不要建。
+      - 暫時保留 R1 的車頂物件：車頂工具箱 env.roof_toolbox（掛位 5–9）、tp.roof.shelf、R1 的螺栓盤 env.bolt_tray_L/R、零件盒、備品架，都留在 R1 的位置，讓 25 步照樣能跑。加註解：// shortcut: R1 車頂物件暫留給現有 25 步使用, R1.5b 移除（b3 工具袋、b4 課程覆寫完成後）
+      - 廠房：屋頂桁架下緣 Y +8.0、牆、地面、股道。沒有架空線。
+      
+      6. a4 地面維修工作區
+      - 範圍 X −5.5 … −13.5、Z −5 … +5，地面 Y −3.65，全區 Walkable，可以用平滑移動自由走動。平台和工作區之間的地面通道（X −3.31 … −5.5）只做視覺地面，兩區之間用傳送移動。
+      - 台架 ENV_PantographStand（env.panto_stand）：中心 (−9.5, ·, 0)，外形 2.6 m（Z）× 2.0 m（X），頂面 Y −2.90（離地 0.75 m）。底架支撐座 1.0（X）× 1.2（Z），臂和弓頭沿 Z 懸出的那一側下方只有外框。定位銷 StandSeat_1..4，間距 X 0.80、Z 1.00。夾具 StandClamp_1..2 是獨立節點，可轉 0–90°。對位燈 AlignLight_1..4。本輪只放模型和節點，沒有邏輯。
+      - 四周每邊淨空 ≥ 1.2 m；地面在台架外 1.2 m 處畫黃色走道線。
+      - 站點 tp.stand.n / e / s / w：在台架四邊中點外 0.6 m，面向台架，只放 StationAnchor。
+      - 工作檯 ENV_WorkBench：中心 (−12.5, ·, 0 EX)，檯面 1.5 × 0.6 m、高 0.9 m。放作業單夾板、備品架（3 條新滑板沿 Z 平放）、零件盒、台架用螺栓盤。本輪只放模型。
+      - 新資料 ZoneDef：zone.arrival 和 zone.maintenance。StationDef 新增 zoneId 欄位（加欄位，不改名），現有站點全部填 zone.arrival。
+      
+      7. a5 靜態模型（有節點，沒有邏輯）
+      - ENV_OverheadCrane（env.crane）：走行軌道 X +3.0 和 −16.0，沿 Z −15 … +15。節點樹：Visual/Crane_Runway_E、Crane_Runway_W；Visual/Crane_Bridge（只沿 Z 移動）/Crane_Trolley（只沿 X 移動）/Crane_Hoist、Crane_RopeAnchor、Crane_WarningLight；Crane_HookBlock（不放在 Trolley 底下）/Hook_Latch、Hook_AttachPoint、ENV_LiftingBeam/Beam_SlingEye_L、Beam_SlingEye_R；Crane_Rope（單位長 1 m）。本輪讓天車停在 Z +12、吊鉤停在最高點，避免擋到任何站點的視線。
+      - ENV_CraneRemote（ID env.crane_pendant）：按鈕節點 Btn_Up、Btn_Down、Btn_East、Btn_West、Btn_North、Btn_South、Btn_Speed2、Btn_EStop、Key_Power，每顆旁邊有 Label_&lt;名稱&gt; 錨點。本輪掛在 PendantDock，不能拿。
+      - ENV_Sling（env.sling_1..4）：單位長 1 m，放在工作區地面的吊具架上。
+      - ENV_ToolPouch（ID env.tool_bag，零件袋 env.tool_bag.bolt_pouch）：節點 Pocket_5..9、SocketCase、BoltBag、Lanyard_Anchor_5..9；另補一個 Pocket_10，給 R1.5b 的降弓固定帶用。本輪只放在工作檯上，不掛在身上。
+      - 集電弓新節點，用 PAN_Rigging.fbx 實例化到 a1 的空物件上：part.pan_base.bolt_1..4 掛 FastenerBehaviour，狀態 Torqued；ip.pan_assy.hv_terminal 掛 RemovableBehaviour，狀態 Mounted，底下 HV_Bolt_1..2 掛 FastenerBehaviour；ip.pan_assy.ctrl_connector 掛 RemovableBehaviour，狀態 Mounted，加 CtrlCap；ip.pan_assy.hold_down 掛 RemovableBehaviour，狀態 Removed；ip.pan_assy.lift_point_1..4；Shunt_Visual_* 只做視覺。以上元件本輪都不接進任何步驟，只寫各自的初始黑板值。
+      - 碰撞：每個新互動點加一個簡單形狀的 trigger，layer 用 ContactTarget。PAN_Root 加一個整體 Box，layer 用 PanAssembly，給 R1.5b 的天車碰撞檢查用。
+      - 寫 Logs/PantographAssemblyReport.txt：所有節點的局部座標、和絕緣子頂面的對齊誤差、新網格的三角面數。
+      
+      8. a6 StationLayoutCheck 與驗收
+      8.1 StationLayoutCheck 新增或修改（不合格就建置失敗，並列出站點和原因）
+      1. 平台站點兩兩之間 ≥ 0.6 m，用 ≥ 0.6 − 1e-4 比較。車頂共用站點除外。
+      2. 活動欄開口（Z −1.4 … −0.6）前方 0.4 m 內不可設站點。
+      3. 站點和靠車側護欄的距離 ≥ 0.30 m（取代原本「0.4 m 半徑內不可有碰撞體」對護欄的要求；其他碰撞體仍是 0.4 m）。
+      4. tp.platform.ground：(a) 沿 Z 離開口邊 ≥ 0.5 m；(b) 到弓頭接地掛點的水平距離 ≤ 1.5 m，用模型實測，目前估計約 1.43 m，超過就把 ground 往 +X 移，最多到 X −2.11；(c) 和 tp.platform.anchor 相距 ≥ 0.6 m。
+      5. 吊運路徑：從弓位 (0, 0) 沿 −X 到台架 (−9.5, 0)，兩側各外擴 1.0 m，範圍內不可有站點。tp.platform.crane 離路徑 ≥ 2 m。
+      6. tp.stand.* 在 zone.maintenance 裡，Y 為 −3.65，離台架邊 0.6 m，面向台架。用「降弓整組 Bounds」檢查站點和集電弓之間的淨空，不能只看台架頂面。
+      7. 車頂站點要落在 |X| ≤ 0.80 的範圍內，不在母線、絕緣子、接地座的洞上。
+      8. 車體接地座：離 tp.roof.base_w (−0.70, +0.60) ≤ 0.8 m；不在 Walkable 上；不壓到母線。
+      9. 車頂兩個作業點（本輪建站點資料，R1 的 25 步不會用到）：tp.roof.base_w (−0.70, +0.60) 面向 +X，夾車體接地座；tp.roof.base_e (+0.70, +0.60) 面向 −X，用短桿掛電纜端子。base_e 到 HV_Cable_End 的水平距離要 ≤ 1.3 m；超過就把 base_e 往 +Z 一次移 0.05 直到合格，移動時不可超出 |X| ≤ 0.80，也不可落在母線洞帶 X +0.20 … +0.40；移到底仍不合格就建置失敗，並列出最後試到的位置。
+      10. 其他既有規則在新車寬下重跑：視線、0.4–0.9 m 距離、lift 站的視錐、平台和車頂高度差 ≤ 0.15、間隙 ≤ 0.30（platformGap 0.12）。
+      8.2 其他測試：StationHeightTests（D2 Raised 等）在新車頂高度下重跑，沒有門檻改動，只能改測試裡的期望座標，判定不改；第 3.3 節和第 4.4 節的全部測試。
+      8.3 驗收（寫進 Logs/R1.5aReport.txt，給 terry 戴頭盔看）
+      1. 桌面版從 SI_01 到結算的 25 步照樣能跑完，0 紅字。
+      2. 車廂外觀：白色車身加色帶，沒有標誌；三節車；車頂弧面、絕緣子、母線都在。
+      3. 平台：工具架靠外護欄；車側留 1.0 m 通道；活動欄、跨板、防墜器門架都在。
+      4. 站在平台各站點，眼睛高度和 R1 相同。
+      5. 從平台傳送到地面維修區，可以繞台架走一圈，不會穿模，也走不出邊界。
+      6. 天車、遙控器、吊具、工具袋都看得到，但還不能操作。
+      7. PanAssyFrameTests 通過；寫出測試總數，以及比 R1 收尾時多出幾個。
+      
+      9. 開工前要知道的未定項（不影響本輪，照預設做）
+      - tp.roof.base_e／base_w 是鐵道定的座標，量到底架實際尺寸後可能還要微調。
+      - 天車操作、吊具、工具袋、步驟 v6（53 步）都是 R1.5b 的工作，本輪不要做。
+  </note>
+</relay>
+
+######## 2026-11-02T07:01:38.635Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-11-02T07:01:37Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人補一件事，排在 R1 的 S10 收尾時一起做，不要中斷現在的段落：
+      新增 Editor 選單 Tools/Export Step Table，把目前的步驟資料匯出成 Logs/StepTable.csv，編碼用 UTF-8 with BOM，讓 Excel 打開中文不會亂碼。
+      - 每列是一個小動作。
+      - 欄位：stepId、subActionId（小動作代號）、textXR（文字）、completionRule（完成條件，用人看得懂的描述）、errorIds（錯誤 ID 與嚴重度，例如 E11:Major，多個用分號分隔）、refTimeTeach、refTimeExam、standPointId。
+      - 這是唯讀匯出，不能改動任何資料。
+      - 補一個 EditMode 測試，檢查匯出的列數等於小動作總數 166。
+      R1 收尾時跑一次匯出，並在 V2R1Report 裡註明檔案路徑。
+  </note>
+</relay>
+
+######## 2026-11-02T07:02:09.191Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-11-02T07:02:08Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人更正剛才 StepTable 匯出的測試：列數不要寫死 166，改成從步驟資料算出小動作總數，再檢查 CSV 列數等於這個值。之後步驟換版、小動作數量改變時，測試才不必跟著改。
+  </note>
+</relay>
+
+######## 2026-11-02T07:09:46.349Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-11-02T07:09:45Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人：有兩件事。在目前這段收工時處理就好，不要中斷正在做的段落。
+      
+      1. 把下面幾份檔案的全文用 send_message 傳給我，團隊的審查和驗收要用：
+         - Logs/V2R1Report.txt
+         - Logs/R1Progress.txt
+         - Logs/StepTable.csv：超過 60 KB 就分幾則訊息傳。
+         另外補答 6 項，報告裡已經寫了的就指出在哪一節：
+         (a) 工具碰觸的簡化內容：停留時間是不是 0.15 s；換套筒是不是靠碰 TGT_Socket；左手 poke 的三個鈕（棘輪撥桿、扭力 ±、卡尺 ZERO）能不能用；卡尺是否在 3 cm 內自動夾住，穩定 0.5 s 後依量測點 ID 填入；哪些沒做。
+         (b) 遮罩簡化成什麼樣子，≡ 選單能不能調整強弱。
+         (c) 因為按鍵改變而改寫的測試名稱清單。
+         (d) 全部 shortcut 註解，以及各自的升級條件，也就是 ponytail-debt 的清單。
+         (e) StationLayoutCheck 8 個站點的輸出。
+         (f) terry 驗收 12 項裡，你自己跑過的結果，以及未檢查的項目。
+      
+      2. R1.5a 的 a6 新增一項 8.1b：
+         - 查出 Play 時那條 missing script 黃字的來源。用 GameObjectUtility.GetMonoBehavioursWithMissingScriptCount 掃所有場景和 prefab。
+         - 如果是腳本改名造成的，修好參照。確定不需要的才移除，移除前先 grep，確認沒有其他地方用到。
+         - 新增 NoMissingScriptTests，掃到的數量必須是 0。
+      
+      另外提醒：a3 會依 D15，把接地站點從 R1 的 (−1.95, 0.30) 改成 (−2.20, +0.60)，取代 R1 的值，StationLayoutCheck 要照新值通過。
+  </note>
+</relay>
+
+######## 2026-11-02T07:11:36.374Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-11-02T07:11:35Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人補充 R1.5a 的 a4（做到 a4 時一併處理）：
+      - 台架加一個工具盤 env.panto_stand.tool_tray。
+      - 零件盒沿用 ID env.parts_tray，外觀改成紅色並標「待報廢」，放在工作檯旁的地上，不要和備品架疊在一起。
+      - 台架用的螺栓盤放在架體靠 tp.stand.s 的那個角落。
+      R1 原本車頂上的零件盒先照 a3 保留不動；這一條只是地面維修區要多放一個實體。如果同一個 ID 不能同時出現在兩處，地面這個先改用 env.parts_tray.maint，並寫進回報。
+  </note>
+</relay>
+
+######## 2026-11-02T07:12:29.306Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-11-02T07:12:28Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人更正 a4 的零件盒：不要建第二個零件盒實體，也不要建 env.parts_tray.maint。場景裡只能有一個 env.parts_tray，否則判定會讀錯物件。R1.5a 期間，零件盒留在 R1 的位置，讓 25 步照樣能跑；地面工作檯旁邊只放一個空物件 Anchor_PartsTray_Maint，標示紅色「待報廢」的位置。等到 R1.5b，再依課程把零件盒移到這個位置。台架工具盤和螺栓盤的補充照舊。
+  </note>
+</relay>
+
+######## 2026-11-02T07:17:08.984Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-11-02T07:17:08Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人：R1.5a 補充（鐵道裁定 D24，請併入目前進度，做完的段落不用重做，除了下面第 3、4 點）。
+      
+      1. a6 檢查 4(b) 改為：tp.platform.ground 到「弓頭接地掛點互動點」（不是物件中心）的水平距離 ≤ 2.0 m，用模型實測。門檻值寫在資料裡，＝絕緣桿長 − 0.5 m。ground 站點維持 (−2.20, +0.60) 不動，預估約 1.77 m。
+      2. a5：接地棒（掛位 3）和驗電器（掛位 2）的 Visual 改成 EX 2.5 m 伸縮絕緣桿，加護環。這段只換外觀和長度資料，判定不改；雙手握持留到 R1.5b b3。
+      3. 請在下一段回報裡貼出弓頭接地掛點互動點的世界座標，以及從 (−2.20, +0.60) 量到的實際距離。
+      4. 版本控管：在 C:\黃泰翔\collector shoes 執行 git init，用 Unity 標準 .gitignore（Library、Temp、Obj、Build、Logs、UserSettings 排除），第一次 commit 現狀，之後每段完成就 commit 一次，7 項檢查第 3 項用 git diff 比對。**Recordings 資料夾不可刪除、不可移動**；若 .gitignore 排除它也只是不追蹤，不要動檔案。若 git 不在 PATH，改成每段開工前把 Assets 和 ProjectSettings 壓縮備份到 Logs/backup-&lt;段&gt;.zip。
+      5. 在已完成的第一段之後補三處 shortcut 註解（格式 `// shortcut: &lt;上限&gt;, &lt;何時升級&gt;`）：左撇子模式、升降聯集傳空範圍、開場走 0.8 m。
+      6. 剛才驗收在你的電腦上用了截圖，Unity 視窗可能被隱藏或最小化了。請確認 Unity 編輯器正常、沒有中斷的匯入或 PlayMode，再繼續。
+      
+      其他規則照舊：0 紅字、測試數不減、每段寫 Logs/R1-&lt;段&gt;.txt 和 R1Progress 一行、ponytail 7 項檢查。每段完成照常回報給我。
+  </note>
+</relay>
+
+######## 2026-11-02T07:19:24.574Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-11-02T07:19:23Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人：a0、a1 收到，掛點座標 1.77 m 符合，壓縮備份可以，PAN_Visual／PAN_Parts 留在關節下的做法同意。
+      
+      R1.5a 補充（鐵道裁定 D25，在 a4／a5 擺放時一起做）：
+      1. 新增長桿桿架 env.pole_rack，放在平台外側護欄 (−3.16, 平台面, +0.60)，離 tp.platform.ground 0.96 m。驗電器（slot_2）和接地棒（slot_3）的 2.5 m 絕緣桿直立放在桿架上，ID 不變，只把歸位處從工具架改成桿架。不要放在靠車側。
+      2. 工具架 env.tool_rack 只留 1（上鎖掛牌組）、4（安全帶），以及 R1.5b 才加的 11、12。
+      3. 桿架不是傳送站點，不加進站點清單，也不套用站點間距檢查。a6 請加一項檢查：桿架到 ground 站水平距離 ≤ 1.0 m，且在外側護欄（X &lt; −3.0）。
+      4. 收尾步驟的順序調整留到 R1.5b，R1.5a 不改步驟。
+      
+      其餘照舊，繼續 a2。
+  </note>
+</relay>
+
+######## 2026-11-02T07:47:40.441Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-11-02T07:47:39Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人：上一個工作階段在 R1.5a a3（進站區）中途因連線錯誤中斷，請接著做。
+      
+      1. 先讀 Logs/R1Progress.txt、Logs/R1.5a-a2.txt，以及先前存下的 R1.5a 說明（若有存在 Docs/ 或 Logs/ 下）。確認 a0–a2 已完成（217/217 測試）。
+      2. 檢查 a3 中斷時的狀態：Unity 是否正常、有沒有未存的場景或半成品。如有疑慮，先和 Logs/backup-a3.zip 比對（若還沒建立，先建立 a3 前的備份再繼續）。
+      3. 從 a3 繼續，接著做 a4、a5、a6。已補充過、需一併做到的事項：
+         - D24：驗電器（slot_2）和接地棒（slot_3）外觀改成 EX 2.5 m 伸縮絕緣桿加護環；a6 檢查 4(b) 為 tp.platform.ground (−2.20, +0.60) 到弓頭接地掛點互動點 (−0.533, 0.528, 0.000) 的水平距離 ≤ 2.0 m（門檻寫在資料裡＝桿長 − 0.5 m）。
+         - D25：新增長桿桿架 env.pole_rack 在外側護欄 (−3.16, 平台面, +0.60)，slot_2、slot_3 歸位改到桿架；工具架只留 1、4（11、12 由 R1.5b 加）。桿架不是站點。a6 加檢查：桿架到 ground ≤ 1.0 m 且 X &lt; −3.0。
+         - 零件盤只用 Anchor_PartsTray_Maint 標示位置，不新增第二個 env.parts_tray。
+         - a6 8.1b：用 GameObjectUtility.GetMonoBehavioursWithMissingScriptCount 找出缺腳本的警告，並加 NoMissingScriptTests＝0。
+         - 收尾步驟順序不在 R1.5a 改。
+      4. 規則照舊：Console 0 紅字、測試數不減少、每段寫 Logs/R1.5a-&lt;段&gt;.txt 並在 R1Progress 加一行、每段開工前壓縮備份到 Logs/backup-&lt;段&gt;.zip。Recordings 不可刪除或移動。
+      5. ponytail（不改行為的簡化）：動手前先看能否刪減或重用既有程式；紅線是不改判定結果、不刪測試、不改資料 GUID。每段完成檢查 7 項：(1) 測試全綠且數量不減 (2) 桌面 25 步照樣跑完 (3) 和備份比對差異只在本段範圍 (4) 判定結果不變 (5) 沒有新增未用的程式 (6) 簡化處都有 `// shortcut: &lt;上限&gt;, &lt;何時升級&gt;` 註解 (7) Console 0 紅字。
+      6. 每段完成回報給我：測試數、紅字、主要改動、和規格不同之處。a6 完成後我會分 8 份送 R1.5b。
+  </note>
+</relay>
+
+######## 2026-11-02T07:50:27.452Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-11-02T07:50:26Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人：a3 收到，做得好。鐵道對 a3 的差異裁定（D27），請在 a4 一起修正，並在 a4 回報列出：
+      1. 駕駛室 tp.cab 不放在股道 +X 側。改成相鄰端車的駕駛室：股道中心 X 0、Z −14.0（本節車 −Z 車端 −12.5 之外），地板 Y −2.35（軌面 −3.65 + 車廂地板 1.30 m；若程式或資料裡有 −2.55 的舊值，一併更正）。房間寬在 ±1.69 以內，外觀接在車端，像前一節車的車頭內部。學員照舊用傳送進入，不必做走道。
+      2. 平台安全帶掛點 ip.depot.platform_anchor 固定在 (−1.86, 1.20, −2.10)（車側護欄立柱）。
+      3. 防墜器柱：本體在門架頂 (−1.81, 2.60, −1.55)，掛鉤垂到 (−1.95, 1.40, −1.55)；門架在活動欄開口（Z −1.4…−0.6）的 −Z 側外面，不擋開口。
+      4. StationLayoutCheck 加上 tp.cab 的新位置檢查：X 在 ±1.69 內、Z ≤ −12.5、不落在地面維修區。
+      5. SI_04、SI_05 站點留給 R1.5b，照你的判斷不改。
+      其餘規則照舊，繼續 a4。
+  </note>
+</relay>
+
+######## 2026-11-02T08:03:31.789Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-11-02T08:03:31Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人：a4 收到，兩個 bug 修得好。你問的車端問題，鐵道裁定（D28，取代 D27 的 Z）：
+      1. pantographFromCarEnd 維持 5.0，不重建車體。本節車範圍 Z −5.0…+20.0。
+      2. tp.cab 改到 Z −30.0（相鄰端車車頭），X 保留 −0.19，Y −2.35。只做駕駛室房間，傳送進入，不必建整節端車。StationLayoutCheck 的 tp.cab 檢查改成 Z ≤ −27。
+      3. 電桿、接地器、平台 Z ±4.0、天車走行範圍都不變。
+      4. 平台 −Z 端（−4.0）離連結端只有 1.0 m：確認平台鋼梯不會伸到連結處上方；若會，把鋼梯改到 +Z 端（+4.0）。
+      請在 a5 一起修，a5 回報時列出 tp.cab 新座標和鋼梯位置。其餘照舊。
+  </note>
+</relay>
+
+######## 2026-11-02T08:05:53.457Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-11-02T08:05:52Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人：建模 B 對照 a0／a1 實測後，a5 需要加四項修正（pantograph-rigging 第 12 節）：
+      F1：COG 用質量表對各關節網格加權平均計算，不要用 Bounds 中心。降弓時臂往弓頭折，預估 COG 比底架中心往弓頭側偏約 0.3 m。
+      F2：吊帶分邊設長度，由建置腳本依 COG 計算（預估 +Z 側約 1.17 m、−Z 側約 0.87 m）。原本「吊帶 1.00 ± 0.01 m」的檢查改成「長度＝腳本計算值 ± 0.01 m」。吊帶規格仍是 1 t 扁吊帶。
+      F3：吊梁的 Hook_AttachPoint 放在 COG 正上方。
+      F4：LiftPointTests 改成兩條：「4 個吊點都在底架上」和「吊起後傾斜 ≤ 2°」。原本「吊點中心距 COG ≤ 5 cm」那條是錯的，換掉（測試數不減）。
+      另外 PAN_Root 底下保留整個 Pantograph prefab，網格留在關節下，這個做法是對的。
+      a5 回報時請附上：COG、BaseHole_1–4、lift_point_1–4 的 PAN_Root 局部座標；降弓整組 Bounds；升弓那 29 個網格目前的狀態（是否還在場景、是否隱藏）。連同上一則 D28（tp.cab Z −30、鋼梯位置）一起回報。
+  </note>
+</relay>
+
+######## 2026-11-02T08:12:07.274Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-11-02T08:12:06Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人：a5 補充（軟體工程寫、我已審過）。terry 已選擇安裝 Git for Windows 和 Node.js；裝好前照現在的方式繼續，不要自己安裝。「第 0 節」指 R1.5a 說明的第 0 節（紅線、收工規則）。
+      
+      R1.5a 補充：a5／a6（建模 A model-spec v2.2 的 F6 和 D28 鋼梯）
+      一、台架外框降低（F6，a5）
+      - 台架外框（支撐座四周與四角立柱）頂面降到地面上 0.45 m，即 Y −3.20。支撐座頂面維持 0.75 m（Y −2.90），定位銷 StandSeat_1..4、夾具、對位燈不動。
+      - 原因：底架中心對準台架中心後，臂和弓頭往 −Z 懸出約 0.8–1.05 m，外框太高會被懸出部分或吊帶掃到。
+      - 外框只在支撐座四周和四角，不可放在吊帶路徑上（吊帶在吊耳正上方、底架範圍內）。
+      - 只改建置參數（RoofSceneDef 或台架建置資料）和 Blender 腳本的高度參數，不改判定。
+      二、平台鋼梯移到 +Z 端（D28，a5）
+      - ENV_PlatformStair 從平台 +Z 端（Z +4.0）沿 +Z 下到地面 Y −3.65，水平長約 5 m，到 Z ≈ +9，扶手照舊。只做外觀，不是 Walkable，兩區照舊用傳送。
+      - PendantDock 和 tp.platform.crane 仍在 −Z 端護欄不動。−Z 端舊鋼梯刪掉，不要留兩組。
+      三、StationLayoutCheck 新增兩項（a6，接在第 10 項後，不合格就建置失敗並列出物件和數值）
+      11. 台架淨空：降弓整組 Bounds 扣掉底架後的底面，到台架外框頂面的垂直距離 ≥ 0.30 m（吊物放在台架上、PAN_Root 原點對準台架中心時量）。門檻寫在資料裡。
+      12. 吊帶不碰外框：4 條吊帶（吊耳到 Hook_AttachPoint 的線段）和台架外框 collider 都不相交，用 Physics.Linecast 或 Bounds 線段相交檢查。
+      - 鋼梯不加門檻，只在第 10 項回報 Bounds 的 Z 範圍在 +4.0…+10.0 內、不伸到平台上方。
+      四、回報（a5、a6）：外框頂面與支撐座頂面的實際 Y；第 11 項淨空值；第 12 項 4 條吊帶結果；鋼梯 Bounds Z 範圍與舊鋼梯已刪除；測試數不少於開工時。連同 F1–F4 要求的 COG、BaseHole、lift_point 局部座標、降弓 Bounds、升弓 29 個網格狀態一起回報。
+  </note>
+</relay>
+
+######## 2026-11-02T08:13:44.109Z
+<relay from="coordinator" session="session_011G9WLLbZWp8bYfc9ZZk5Wt" current-time="2026-11-02T08:13:42Z">
+  The note below was written by the coordinator session, a Claude session, not by your user.
+  <note>
+      專案負責人：terry 問 Git 和 Node.js 是否裝好了。請不中斷 a5 的前提下，馬上在 PowerShell 跑：`git --version`、`node --version`、`where.exe git`、`where.exe bash`、`where.exe node`，並確認 Git Bash 是否存在（C:\Program Files\Git\bin\bash.exe）。如果新裝的程式在目前工作階段的 PATH 裡找不到，也試著直接用完整路徑執行。立刻回報結果，然後繼續 a5。不要自己安裝任何東西。
+  </note>
+</relay>

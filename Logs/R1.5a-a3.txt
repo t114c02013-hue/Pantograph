@@ -1,0 +1,32 @@
+﻿段：a3 進站區（新車寬重建場景）
+改動：
+ - RoofSiteBuilder：
+   ・ENV_CarBody：三節 700T（Blender 產生的 ENV_CarBody.fbx 共用），中間那節中點 Z＝MiddleCarCenterZ 7.5（集電弓在 Z 0、離 −Z 車端 5.0 m），三節間隙 0.6 m；取代 R1 的方塊車頂與車體。
+   ・車頂可走 |X| ≤ roofWalkHalfWidth 0.80（原本是車寬 − 0.5）；挖洞：弓體升降聯集、底架、母線（X 0.30、寬 0.20）、絕緣子、避雷器（各外擴 0.15）、車體接地座 0.30 × 0.30（不加牆）。
+   ・Roof_Insulators/Insulator_1..4/InsulatorTop_1..4：位置＝PAN_Base 的 BaseHole_n（同一套算法，誤差 0），回寫 RoofSceneDef.insulatorPositions。
+   ・Roof_Busbar（母線＋HV_Cable_End，接地掛點 ID ip.roof.hv_cable_ground；只顯示 Connected）、避雷器、Roof_CarBodyGround（ID ip.roof.carbody_ground，互動點 Clamp_Point，(−0.70, 0.05, +1.20)）、Car_Roof_Work/CtrlCable_End（只顯示 Connected）。
+   ・平台 X −3.31…−1.81、Z −4.0…+4.0（PlatformInnerX／OuterX 推導），活動欄 Z −1.4…−0.6、跨板 −1.81…−0.80，外護欄 1.1 m，−Z 端鋼梯只做外觀。
+   ・平台設備改成相對平台邊的資料（RoofSceneDef.*FromInner／*FromOuter）：升降面板 (−1.81, 1.10, 0)、接地端子 (−1.81, 1.00, +0.35)、自檢器 (−1.81, 1.10, +0.85)（一左一右）、
+     平台安全帶掛點 (−1.81, 1.50, −2.05)、防墜器門架（柱 (−1.86, ·, −2.20)、防墜器 (−1.81, 2.60, −1.55)、掛鉤 (−1.95, 1.40, −1.55)＝ip.roof.anchor 的互動點）、
+     工具架 env.tool_rack (−3.06, 1.0–1.6, −2.80) 靠外護欄、只放掛位 1、4（D25）、長桿桿架 env.pole_rack (−3.16, 0, +0.60)（掛位 2、3，D25；不是站點）、遙控器掛座 PendantDock (−3.31, 1.10, −3.50)。
+   ・駕駛室移到股道 +X 側（cabCenter (6.0, −2.5, −3.0)），因為 −X 側是 a4 的地面維修區。
+   ・廠房：屋頂桁架下緣 Y +8.0、兩側牆與柱、地面 Y −3.65、股道；拿掉架空線和相鄰車。
+   ・R1 車頂物件（車頂工具箱、tp.roof.shelf、螺栓盤 L/R、零件盒、備品架）留在 R1 的位置，加 // shortcut: R1 車頂物件暫留給現有 25 步使用, R1.5b 移除（b3 工具袋、b4 課程覆寫完成後）。
+ - 資料：RoofSceneDef（platformZ ±4.0、busbarX 0.30／寬 0.20、cabCenter、平台設備相對座標）；StationDef 新欄位 relativeToPlatformInner、facingDirection、WorldXZ()；
+   R1Data.ApplyR15a()：tp.platform.rack (−2.41, −2.80)、lift (−2.20, −0.05)、ground (−2.20, +0.60)（D15）、anchor (−2.20, −1.80)、新增 tp.platform.crane (−2.40, −3.50) 面向 +X，tp.cab 改到 (5.81, −3.00)；
+   StationSet.groundClampMaxDistance 1.5 → 2.0（D24：絕緣桿 2.5 m − 0.5）。car_params.json 重新匯出、Blender 重跑。
+ - StationLayoutCheck：站點數改成「R1 的 8 站都在」；車頂站點改用 |X| ≤ roofWalkHalfWidth；接地站 (b) 量到弓頭接地掛點互動點（D24）；固定朝向的站點（tp.platform.crane）不做目標距離檢查。
+ - 改寫的測試：PrefabStructureTests（清單：ENV_Insulators → Roof_Insulators，新增 Roof_Busbar、Roof_CarBodyGround、Car_Roof_Work、ENV_CarBody、ENV_PoleRack）、
+   StationHeightTests（站點數 8 → 跟資料）、StationTests.GroundStation_D11_*（(−1.95, 0.30) → (−2.20, 0.60)，D15）、XrTests（8 → 9 個站點）。
+StationLayoutCheck（9 站全過）：tp.cab (5.810, −2.500, −3.000)、tp.platform.lift (−2.200, 0, −0.050)、rack (−2.410, 0, −2.800)、ground (−2.200, 0, 0.600)、anchor (−2.200, 0, −1.800)、
+   roof.inner／outer (0, 0, −0.650)、roof.shelf (−0.600, 0, −2.500)、platform.crane (−2.400, 0, −3.500)。
+   接地站：到端子 0.41 m、到弓頭接地掛點互動點 (−0.533, 0.528, 0.000) 1.77 m（上限 2.0）、離開口邊 1.20 m、和 anchor 站 2.40 m、離車側護欄 0.37 m。
+與規格不同：駕駛室移到 +X 側（規格沒寫，原位置會擋到地面維修區）；平台安全帶掛點與防墜器柱的位置規格沒寫，照「站點 0.4 m 內沒有障礙物」選；
+   tp.roof.base_w／base_e 這段沒有建（a6 的 8.1 第 9 項）；D25 的長桿桿架在這段一起做（屬於平台設備）。
+   SI_04／SI_05 拿驗電器、接地棒的小動作站點仍是 tp.platform.rack（步驟資料這輪不改），桿架離 rack 站 3.4 m；桌面不受影響，VR 要走過去或從 ground 站拿（R1.5b 改課程）。
+略過：無
+風險：tp.cab 改位置後，駕駛室旁邊目前沒有東西，看起來浮在空中（只能傳送進出，和 R1 相同）。
+ponytail-review Verdict：版面改成資料推導；判定程式沒改
+測試：222/222，Console 紅字 0（只有測試裡預期的 LogError；黃字 missing script 是舊的，a6 處理）
+功能不變檢查：1 ✔；2 ✔ 217 → 222；3 改動都在 a3 範圍（和 Logs/backup-a3.zip 比對）；4 ✔ 判定沒改；5 ✔ 場景與 prefab 沒有 Missing（PrefabStructureTests）；6 ✔ 桌面 25 步跑完（Recordings/20261102_154752_驗證學員）；7 ✔
+未檢查：第 3 項沒有 git diff，用備份人工比對

@@ -1,0 +1,8 @@
+﻿段：S1 資料資產 a
+改動：RoofSceneDef.asset／RoofSceneDef.cs 預設：接地母線端子 z 0.75→0.60、自檢器 z 1.05→0.30（照 B 段 2.2）；tp.platform.ground 落點 (-1.95,0.45)→(-2.00,0.60)（B 段 3.1，R1Data 預設同步）；
+      新增 Modules/XR/StationLayoutCheck.cs（CheckData：8 站、ID、名稱、面向、車頂開放鍵與鎖住原因、共用落點、起始站點、距離範圍）；新增 Tests/EditMode/StationTests.cs（3 個測試）。
+      另外（開工前已在進行的 S4 改動，在 S1 前先收尾，讓它可編譯、測試通過）：XrRigBuilder 改用 StationSet 建 8 站並加 XrFader／XrStations／XrViewHeight，移除舊扶手與重複的升降面板掛點；XrPlayer B 鍵改走 XrStations.Focus；XrTests 舊 6 點斷言改成 8 站＋舊點不存在。
+略過：資料資產路徑沿用 Assets/_Project/Modules/Worksite/Data（規格寫 Assets/_Project/Worksite/Data），因為 .meta／GUID 不動。tp.cab 保留 (-6.20,-3.00)（控制盤前 0.5 m；規格括號寫約 -6.5，兩者衝突時以「控制盤前 0.5 m」為準）。RoofAccessRule 沿用：開放＝SI_04、SI_05 完成且 harness.roof（SI_06 d 扣上車頂掛點）；WC_02 b 解開車頂掛點時 harness.roof 變 false，車頂就關閉。
+風險：無
+測試：160/160，Console 紅字 0
+未檢查：場景擺放（S4 的 CheckScene）

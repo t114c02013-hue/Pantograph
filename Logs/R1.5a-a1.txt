@@ -1,0 +1,22 @@
+﻿段：a1 PAN_Root（集電弓整組可移動、判定結果不變）
+改動：新增 Editor/R1/PantographAssemblyBuilder.cs（SliceSceneBuilder 在建車頂場景前呼叫，可以重跑）：
+      PAN_Root 原點＝降弓時底架底面中心，世界 (−0.008, 0.300, 0.836)，旋轉 0（+Z 朝肘側、+Y 朝上），掛 InteractionPointMarker part.pan_assy；
+      PAN_Mechanism/Pantograph＝原本的集電弓整組（用 SetParent(worldPositionStays: true) 搬進來，世界位置不變）；
+      PAN_Base/BaseHole_1..4、LocatingHole_1..4（底架底面四角往內 0.08／0.10，和車頂絕緣子同一套算法）、COG；PAN_LiftPoints/ip.pan_assy.lift_point_1..4（空物件）；PAN_Visual、PAN_Parts、PAN_Connections、PAN_HoldDown（空容器）。
+      新增 Tests/EditMode/PanAssyTests.cs：PanAssyFrameTests（平移 (+3, −2, +1)、繞 Y 轉 90° 後，所有 PositionCheck 在降弓、半升、升弓三種姿態的距離都相同，容差 1e-3 cm）、
+      PanAssyHierarchyTests（2 個）、PanAssyIdUnchangedTests。
+      D24 第 5 點：補 3 處 shortcut 註解（InputBindingTable.HandednessMap 左撇子、StationTests 升降聯集傳空範圍、XrCoach 走 0.8 m）。
+grep 結果（世界座標相依）：PositionCheck.TargetWorld 在 reference 為 null 時會把 targetLocal 當世界座標，但場景裡兩個 PositionCheck 的 reference 都有設（集電弓根與 PanHead），所以已經是局部座標；
+      RemovableBehaviour 的 MountWorld 用父物件的 TransformPoint（局部座標）；「只比水平位置」用世界 Y 軸，整組只繞 Y 旋轉時不受影響。Parts 裡沒有用世界原點當作「弓頭下方」的程式。不需要改判定程式。
+與規格不同：網格與零件一定要留在關節（Base／LowerArm／UpperArm／PanHead）底下才會跟著升降，所以沒有拆到 PAN_Visual／PAN_Parts，整組放在 PAN_Mechanism 裡（shortcut 註解已寫在 PantographAssemblyBuilder）。
+      「擴充現有的 PantographRigBuilder」改成另寫 PantographAssemblyBuilder，由場景建置呼叫（PantographRigBuilder 是重建可動模型的選單，和場景無關）。
+D24 第 3 點：弓頭接地掛點互動點 ip.pan_head.ground_clamp（GroundClampPoint）世界座標 (−0.533, 0.528, 0.000)（場景存檔時的姿態，碰撞體中心），
+      從 (−2.20, +0.60) 量到的水平距離 1.77 m（√(1.667²＋0.600²)）。a3 改站點後由 StationLayoutCheck 實測並寫進建置報告。
+D24 第 4 點：這台電腦沒有 git（不在 PATH），改成每段開工前把 Assets 與 ProjectSettings 壓縮備份到 Logs/backup-<段>.zip；a1 收工的基準是 Logs/backup-a1.zip（14.1 MB）。Recordings 沒有動。
+D24 第 6 點：Unity 編輯器正常回應、沒有在 PlayMode、沒有中斷的匯入（最後一次 Asset Pipeline Refresh 正常結束）。
+略過：無
+風險：PAN_Root 的原點依「降弓時底架網格的範圍」算，換正式模型後原點會跟著變（重跑建置即可）。
+ponytail-review Verdict：只多一層父物件與空節點；判定程式沒改。
+測試：212/212，Console 紅字 0（只有測試裡預期的 LogError）
+功能不變檢查：1 ✔（黃字 missing script 是舊的，a6 的 8.1b 處理）；2 ✔ 208 → 212；3 ✔ 沒有改公開簽章、事件、黑板鍵、SerializeField、asmdef（沒有 git，用檔案清單人工比對）；4 ✔ 資料檔沒改；5 ✔ PrefabStructureTests 通過；6 ✔ 桌面 25 步跑完（Recordings/20261102_151626_驗證學員）；7 ✔ 這段沒有純精簡的改動
+未檢查：第 3、7 項沒辦法用 git diff（沒有 git）

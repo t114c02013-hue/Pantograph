@@ -1,0 +1,25 @@
+{
+    "note": "VR 按鍵對照表（Meta Quest Touch / Touch Plus，OpenXR）。button 名稱見 XrFrame；功能與各情境是否啟用以 Resources/InputBindingTable（按鍵表）為準，這裡只放實體按鍵路徑。改按鍵只要改這個檔。R1：右搖桿只做平滑移動（T6），工具數值改用手調（T2-a），所以 rightStick 是空的。",
+    "buttons": [
+        { "button": "RightTrigger", "command": "Use",             "paths": ["<XRController>{RightHand}/{TriggerButton}", "<XRController>{RightHand}/triggerPressed"] },
+        { "button": "RightGrip",    "command": "Grab",            "paths": ["<XRController>{RightHand}/{GripButton}", "<XRController>{RightHand}/gripPressed"] },
+        { "button": "A",            "command": "ResetTool",       "paths": ["<XRController>{RightHand}/{PrimaryButton}", "<XRController>{RightHand}/primaryButton"] },
+        { "button": "B",            "command": "FocusTarget",     "paths": ["<XRController>{RightHand}/{SecondaryButton}", "<XRController>{RightHand}/secondaryButton"] },
+        { "button": "X",            "command": "ToggleWorkOrder", "paths": ["<XRController>{LeftHand}/{PrimaryButton}", "<XRController>{LeftHand}/primaryButton"] },
+        { "button": "Y",            "command": "ToggleHelp",      "paths": ["<XRController>{LeftHand}/{SecondaryButton}", "<XRController>{LeftHand}/secondaryButton"] },
+        { "button": "Menu",         "command": "Menu",            "paths": ["<XRController>{LeftHand}/{MenuButton}", "<XRController>{LeftHand}/menu", "<XRController>{LeftHand}/{Menu}"] },
+        { "button": "LeftStickClick", "command": "Crouch",        "paths": ["<XRController>{LeftHand}/{Primary2DAxisClick}", "<XRController>{LeftHand}/thumbstickClicked"] }
+    ],
+    "leftStickPaths":  ["<XRController>{LeftHand}/{Primary2DAxis}", "<XRController>{LeftHand}/thumbstick"],
+    "rightStickPaths": ["<XRController>{RightHand}/{Primary2DAxis}", "<XRController>{RightHand}/thumbstick"],
+    "leftStickLeft": "TurnLeft",
+    "leftStickRight": "TurnRight",
+    "leftStickForward": "TeleportAim",
+    "rightStick": [],
+    "socketSizes": "10,13,17",
+    "turnDegrees": 45,
+    "deadzone": 0.6,
+    "release": 0.3,
+    "repeatDelay": 0.45,
+    "repeatInterval": 0.15
+}

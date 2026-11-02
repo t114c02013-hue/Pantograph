@@ -1,0 +1,13 @@
+﻿段：S5 驗證 T1／T5
+改動：新增 Tests/EditMode/StationHeightTests.cs（站點 y 與 Walkable 差 ≤0.02、XR Origin Floor＋Camera Y Offset 0、沒有舊浮空平台、平台與車頂高度差 ≤0.15、滑板頂面 0.4–0.8 m、
+      HeightProfile 預設 Raised、車頂時滑板相對視點＝raisedStripTop±0.05、Real／離開車頂偏移 0、蹲姿預設關、共用車頂點和弓頭淨距 ≥0.15）；
+      StationTests 加 RoofAccess 開關、活動欄只擋進入、B 鍵（原地／鎖住／共用落點）、螺栓盤兩側各自計數與 WC_01 b。
+      XrRigBuilder：Camera Y Offset 1.6 → 0（B 段 2.3）。
+      修 bug：XrTeleport.TraceArc 的 // 只打地板與護欄 註解把 { return hit.point; } 一起註解掉，拋物線不會停在地板或護欄上；已修正。
+      XrTeleport.GoToStation 的判斷抽成 XrTeleportPoint.Decide（純函式，測試組件不必引用 XR CoreUtils），行為不變。
+terry 檢查 1–6（桌面自測）：1 升降三段＋到位：LiftTests＋桌面全程通過；2 上鎖／斷電後 ▲ 無效並說明：LiftTests；3 站點在地板上、眼高一致：StationHeightTests；
+      4 升降站看得到弓頭與綠框：StationLayoutCheck（視線檢查），車頂平視：HeightProfile 測試；5 B 鍵：Decide 與站點資料測試（實際傳送要頭盔）；6 車頂開放規則與活動欄：StationTests。
+略過：SI_03 c／WC_04 新順序能完成（切片沒有這些預設步驟的小動作，見 S2）；166 總數（見 S2）。
+風險：B 鍵的實際傳送、淡黑、地上箭頭只能戴頭盔驗。
+測試：182/182，Console 紅字 0（只有測試裡預期的 LogError）
+未檢查：頭盔實機

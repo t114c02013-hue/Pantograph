@@ -1,0 +1,98 @@
+黑板批次寫入（ISimState.BeginBatch / Batch）回報　2026-10-20
+
+【編譯與測試】
+- 編譯：通過（Unity 2022.3.62f3，Editor 開著重新編譯，沒有 error CS）。
+- EditMode 測試：128 個全部通過（原本 113 個 + 新增 15 個；失敗 0、略過 0）。結果在 Logs/slice-tests.txt。
+  新增 StateBatchTests 9 個、StateConsistencyTests 6 個。
+- 不變條件測試（StateConsistencyTests）：全部通過，正常流程兩側、練習與教學兩種模式，每次 StateChanged 都檢查，違反 0 次。
+- 實機（Play）檢查：
+  - 桌面：RecordingCheckDriver 跑完 25 步（中途故意犯 E1），結果和改之前一樣：分數 85、只有故意的 E1，重播沒有發出 isReplay=false 的錯誤。
+  - VR（模擬，沒有頭盔）：XrCaptureDriver 的升降面板、工具架拿取、手勢小卡、指到資訊卡都正常。
+  - Editor.log 裡唯一的「整批放棄」是測試故意丟的例外（boom / inner），執行中沒有其他例外。
+- Recordings：沒有刪除任何紀錄（實機檢查又新增了 3 筆「驗證學員」的紀錄）。
+
+【Core 的改動】
+- Core/Services/SimState.cs
+  - ISimState 新增 BeginBatch()、Batch(Action)、InBatch、AfterCommit(Action)，Set 多一個 force 參數；
+    另有擴充方法 BatchResult<T>(Func<T>) 和 SetFloat(key, v, force)。
+  - 批次中的 Set 只寫進暫存區；批次內 Get、Has、Keys 讀得到剛寫的值；Snapshot 只含已生效的值。
+  - 最外層 Commit 時一次寫入，只發一次 StateChanged，帶全部的 (key, old, new)；沒有變更就不發。
+  - 可巢狀。Batch() 裡拋出例外時整批放棄（外層批次也一起放棄），記 Error log 後再把例外往外拋。
+  - force：值沒變也記成一筆變更，用在放開升降時的距離。
+  - AfterCommit：Commit 並發出 StateChanged 之後才執行，用來發 RecordWritten、RestartStepRequested 這類事件。
+  - Restore 照舊：先全部寫入，再逐鍵通知（事件標 restored=true）。批次中呼叫 Restore 會併入那一批。
+- Core/Events/Events.cs：新增 StateChange；StateChanged 新增 Changes（IReadOnlyList<StateChange>）、Has、TryGet、Any、restored。
+  舊的 targetId、text、value 欄位保留，等於第一筆變更；手動建立而沒有 Changes 的事件，會用 targetId／text 組成一筆。
+- Core/Services/Sensors.cs（新檔）：
+  - IStateSensor 和 Sensors 登記處：動作在同一批裡叫感測器立刻量一次、強制寫入。
+  - LiftControl：ctrl.lift.cmd 的唯一寫入口。放開（Stop）是一批：先強制寫入最新的 lower_distance_cm、lower_delta_cm，再寫 Stop。
+- 只在 Commit 後的 StateChanged 才判定或存檔的模組：
+  - ProcedureRunner：OnStateChanged 只在 Commit 後判定；Evaluate 在批次中直接略過。
+    步驟開始的 procedure.* 各鍵一批寫入，Commit 之後才拍開始快照。Start 的開場狀態一批寫入。↶ 上一步的還原一批寫入。
+  - ErrorDetector：收到一批時逐筆比對錯誤規則；比對時黑板已經是完整狀態。
+  - SafetyGuard：程式沒改。它是在動作前被詢問的守門者，詢問時讀到的是同一批內已經寫的值。
+  - SessionRecorder：同一批的所有行（StateChanged、ToolRackState、Judgement、LiftReleased…）共用同一個時間點和 seq；
+    同一批裡的連續感測值不節流，和同批的其他鍵一起寫。
+  - ReplayTimeline：同一個 seq 的行一起套成一批。RecordFormats 讀檔改成穩定排序，保留同一批的先後。
+- 其他訂閱者改成看 Changes：PartBehaviour、SiteObject、ToolBelt、CarbonStripBehaviour、XrPlayer、XrCoach、HintService、PromptViews(DialogViews)。
+
+【8 處各改了哪些檔案】
+1. 升降放開：Core/Services/Sensors.cs（LiftControl）、Parts/_Common/PositionCheck.cs（實作 IStateSensor.WriteNow，不受每幀寫入門檻限制）、
+   Interaction/LiftKeys.cs、UI/Views/LiftPanelView.cs、XR/XrPlayer.cs（失去追蹤時停止）、Parts/Mechanism/LiftDriver.cs（初始化、失焦）、
+   Editor 的 RecordingCheckDriver.cs、UiCaptureDriver.cs、XrCaptureDriver.cs（全部改走 LiftControl）。
+2. 工具拿起與歸還：Data/Logic/RackLogic.cs（TryPick、TryReturn、Deploy 各一批）、
+   Tools/_Common/Scripts/ToolBelt.cs（點掛位、deploy、重設各一批；轉給工具的每個點擊、指令、每幀 Tick 也各一批）、
+   ToolLogic.cs（ToolResetLogic）。
+   ToolInventory 的 tools.all_returned 是在 ToolSelected 時寫的，而 ToolSelected 在批次裡發出，所以它的寫入也併進同一批。
+3. 滑板安裝與取下：Parts/_Common/StripLogic.cs（Remove、ToTray、Carry、Install 各一批；Install 多一個 onSnapped 參數）、
+   RemovableBehaviour.cs（吸附成功時在同一批把滑板放到托架，並讓 install 位置檢測立刻寫入 install_distance_cm）、
+   Worksite/SpareShelf.cs（選用和「拿到手上」同一批，見下方另外發現的第 1 點）。
+4. 螺栓：Parts/_Common/FastenerLogic.cs（Apply 一批：state、angle_deg、lock_deg、torque_Nm、marked、順序鍵）。
+5. 接地棒：Data/Logic/IsolationLogic.cs（SelfTest、MeasureHead、ToggleTerminal、PullTest、ToggleHead 各一批）。
+   GroundingRodTool 掛上弓頭後發的 deploy 也在 ToolBelt 的同一批裡，所以已接地、手上變空、掛位變成使用中，三者同時生效。
+6. 上鎖掛牌與解鎖：Tools/LockoutTag/Scripts/LockoutTagTool.cs（上鎖狀態和鑰匙持有者一批）、
+   Data/Definitions/Definitions.cs（KeyValueList.Apply 一批：SI_02、WC_04 的預設狀態一起生效）、ProcedureRunner.Start。
+7. 卡尺量測：Tools/Caliper/Scripts/CaliperTool.cs（量測、歸零各一批；MeasurementTaken 在批次裡發出，量測點的讀數也併進同一批）、
+   Parts/CarbonStrip/CarbonStripBehaviour.cs（StripMeasureLogic.Record 一批）、SpareShelf.RecordMeasurement、
+   Worksite/WorkOrder.cs（欄位、mismatch、送出、高低差一批；RecordWritten 用 AfterCommit 在 Commit 後才發）。
+8. 安全帶與車頂傳送點：Tools/SafetyHarness/Scripts/SafetyHarnessTool.cs（扣環、扣著的數量、unhooked 一批）；
+   SI_06、WC_02 的預設狀態由 KeyValueList.Apply 一批寫入。車頂傳送點的解鎖鍵就是 harness.roof。
+
+【另外發現並改成批次的多 key 寫入】
+1. 備品選用 → 拿到手上：以前 SpareShelf.Pick 和 RemovableBehaviour 下一幀的 Carry 是分開寫的。
+   CSR_10 的開始快照會停在「已選用、滑板還在零件盒、手上空」，重做 CSR_11 時拿不到滑板。是新加的「每一步重做」測試抓到的。
+   改法：SpareShelf 選用成功時，在同一批發 ActionPerformed(carry)，由 RemovableBehaviour 處理。原本 LateUpdate 的補救保留。
+2. 量測點鏡射（CarbonStripBehaviour 把 part.carbon_strip_X.true.* 鏡射到量測點）：三個點以前分開寫，
+   步驟切換的快照會只鏡射到一半（mid、right 還是舊厚度），重做後 CSR_15 會誤判高低差超過。改成一批。
+3. 徒手點擊現場物件和零件（SiteObject、PartBehaviour）：一次點擊＝一批。
+4. 錯誤視窗（ErrorFeedback）：ui.error.* 和 training.paused 一批；「從這一步重做」的 RestartStepRequested 用 AfterCommit 在 Commit 後才發。
+5. 結算與計錯（Scoring）：score.* 一批；SessionResult 在 Commit 之後才發。
+6. 提示（HintService.UpdateSub）：hint.* 一批；HighlightRequested 在 Commit 之後才發。
+7. 零件盒（PartsTray.Apply）、清潔（DirtMask.Clean）、備品補貨（SpareShelf.Stock）、工具重設（ToolResetLogic.Reset）。
+8. ProcedureRunner：步驟開始的 procedure.* 各鍵、流程結束的兩個鍵、↶ 上一步的還原。
+
+【測試相關的說明】
+- SliceDryRunTests 的模擬器 SliceSim 跟著元件一起改：
+  - 鏡射的訂閱改用 e.Has，而且一批寫入。
+  - Install 用 onSnapped 在同一批寫入安裝距離。
+  - Pick 和 Carry 同一批。
+  沒有改任何斷言。
+- 升降測試的 0.9 cm／1.1 cm：
+  - 1.1 cm：黑板上一筆是 1.2，放開那一刻實際 1.14（移動不到 0.1 cm，位置檢測還沒寫下一筆）→ 強制寫入 1.1 → a 不通過。
+  - 0.9 cm：黑板上一筆是 1.1，放開那一刻實際 0.94 → 強制寫入 0.9 → a 通過。
+    這裡移動了 0.16 cm，因為黑板的距離本來就四捨五入到 0.1 cm，移動不到 0.1 cm 不可能讓 1.0 cm 門檻的結果反過來。
+  - 另外驗證：距離完全沒變時，放開的那一批也一定帶著距離（forced）。
+- 不變條件的對應：
+  - 規格說的「InUse」對應到現有的掛位狀態：手上拿著＝in_hand。
+  - 留在場上（接地棒、安全帶）＝in_use，只有這兩件可以是 in_use。
+  - 「滑板 Mounted」＝NewMounted。
+- WC_01 重現：跑到 WC_01（上一步最後一個動作是把卡尺放回工具架），重做後「已收回」和「手上空」一致，清點可以通過。
+  另外測了「先手上變空、再寫已收回」（上一輪出問題的順序）包在一批裡，下一步的開始快照和重做後都正確。
+
+【確認沒有改判定規則與數值】
+- 下列檔案這次都沒有修改（修改時間都在 10/13–10/19）：
+  carbon_strip_slice.json（CompletionRule、ErrorRule、預設狀態、門檻）、Rules.cs、RuleEvaluators.cs、SafetyGuard.cs、SafetyRuleDefinition.cs、
+  LiftSettings.cs、PositionCheckDefinition.cs。
+- 位置檢測每幀的寫入門檻（四捨五入到 0.1 cm、差 ≥ 0.05 才寫）沒改，只有放開、吸附時多了強制寫入。
+- 事件的意義沒改：StateChanged 的單筆欄位照舊，只是多了 Changes。
+  新增的 ActionPerformed(carry) 只用來在同一批裡讓零件接手，紀錄裡會多一行 ActionPerformed。
