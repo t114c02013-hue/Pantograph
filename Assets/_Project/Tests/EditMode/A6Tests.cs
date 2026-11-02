@@ -18,6 +18,8 @@ namespace PantographSim.Tests
         const string Generated = "Assets/_Project/Worksite/Models/Generated";
         static StationSet Set => AssetDatabase.LoadAssetAtPath<StationSet>(Folder + "/StationSet.asset");
         static RoofSceneDef Def => AssetDatabase.LoadAssetAtPath<RoofSceneDef>(Folder + "/RoofSceneDef.asset");
+        /// <summary>第21項的扳手把手長（ToolDef tool.socket_wrench 的 handleLength）。</summary>
+        public static float WrenchHandle => float.Parse(StepJsonImporterAccess.Tool("tool.socket_wrench").Param("handleLength", "0"), System.Globalization.CultureInfo.InvariantCulture);
 
         static int Corner(Vector3 local) => local.z < 0f ? (local.x < 0f ? 1 : 2) : (local.x < 0f ? 4 : 3);
         static Transform Named(UnityEngine.SceneManagement.Scene s, string n) => s.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<Transform>(true)).FirstOrDefault(t => t.name == n);
@@ -138,7 +140,7 @@ namespace PantographSim.Tests
                     Assert.IsTrue(pts.ContainsKey(id), id);
                     var p = pts[id].transform.position;
                     bool on = Physics.Raycast(p + Vector3.up, Vector3.down, 1.5f, SceneLayers.WalkableMask, QueryTriggerInteraction.Ignore);
-                    if (Set.awaitingRuling.Contains(id)) { if (!on) Debug.LogWarning($"{id} 不在 Walkable 上（等裁定：弓頭羊角範圍）"); continue; }
+                    if (Set.pendingRulings.Any(r => r.Matches("core", id))) { Assert.IsFalse(on, id + " 已經在 Walkable 上：請把這筆從 PendingRuling 刪掉"); continue; }
                     Assert.IsTrue(on, id + " 要在 Walkable 上");
                     Assert.LessOrEqual(Mathf.Abs(p.x), Def.roofBaseWalkHalfWidth - Set.invisibleWallClearance + 1e-3f, id + " 離放寬邊界 ≥ 0.15 m");
                 }

@@ -119,7 +119,8 @@ namespace PantographSim.Editor
         public static void StandStations(StationSet set)
         {
             var d = RoofScene;
-            var c = d.standCenterXZ; float hx = d.standSizeXZ.x / 2f + d.standStationOffset, hz = d.standSizeXZ.y / 2f + d.standStationOffset;
+            var c = d.StandFrameCenterXZ;   // a6 增補 4：量到外框（外框中心可能偏離台架中心）
+            float hx = d.standSizeXZ.x / 2f + d.standStationOffset, hz = d.standSizeXZ.y / 2f + d.standStationOffset;
             foreach (var (id, label, xz) in new[] { ("tp.stand.n", "台架北側", new Vector2(c.x, c.y + hz)), ("tp.stand.e", "台架東側", new Vector2(c.x + hx, c.y)),
                                                     ("tp.stand.s", "台架南側", new Vector2(c.x, c.y - hz)), ("tp.stand.w", "台架西側", new Vector2(c.x - hx, c.y)) })
             {
@@ -143,6 +144,9 @@ namespace PantographSim.Editor
             d.toolRackFromOuter = new Vector3(d.toolRackFromOuter.x, d.toolRackFromOuter.y, -2.40f);
             d.pendantDockFromOuter = new Vector3(-3.06f - d.PlatformOuterX, 1.20f, -2.95f);   // D32
             d.carBodyGround = new Vector3(-1.15f, d.carBodyGround.y, 0.43f);   // D34：外肩（Y 由車頂斷面算）
+            // D36（增補 5）＋增補 6 第 7 點 A：底架兩側 Walkable 改回 1.00、前端到 −0.75；底架站點 |X| 0.85；不會動的零件不外擴
+            d.roofBaseWalkHalfWidth = 1.00f; d.roofBaseWarningX = 1.00f; d.roofBaseWalkZMin = -0.75f; d.roofBaseStationX = 0.85f; d.roofBaseSouthZ = -0.55f;
+            d.staticCarveInflate = 0f; d.movingCarveInflate = 0.15f;
             EditorUtility.SetDirty(d);
 
             float inner = d.PlatformInnerX;
@@ -160,24 +164,36 @@ namespace PantographSim.Editor
                 s.relativeToPlatformInner = true; s.positionXZ = new Vector2(-2.41f - inner, z); s.facingTargetId = ""; s.facingDirection = Vector3.left; s.zoneId = ZoneDef.Arrival;
                 EditorUtility.SetDirty(s);
             }
-            // D33：base_w／base_e（吊耳、控制線接頭、固定帶扣座）＋四個子站點（各對一支底座螺栓，Z 建置時取螺栓實測世界 Z）
-            foreach (var (id, label, sgn) in new[] { ("tp.roof.base_w", "車頂拆裝座（−X 側）", -1f), ("tp.roof.base_e", "車頂拆裝座（+X 側）", 1f),
-                ("tp.roof.base_w.s", "底座螺栓 1 前", -1f), ("tp.roof.base_e.s", "底座螺栓 2 前", 1f), ("tp.roof.base_e.n", "底座螺栓 3 前", 1f), ("tp.roof.base_w.n", "底座螺栓 4 前", -1f) })
+            // D33／D36：base_w／base_e（面向 ±X；接地座、吊梁類／控制線接頭、固定帶扣座）＋四個子站點（面向自己那支底座螺栓；.n 的 Z 建置時取螺栓實測 Z，.s 固定 roofBaseSouthZ）
+            // 子站點的螺栓距離上限寫在 maxTargetDistance（.s 斜向 0.70、.n 0.60）；扳手起始方向 wrenchStartDir（D36 補充三）
+            foreach (var (id, label, sgn, bolt, maxD, wrench) in new[] {
+                ("tp.roof.base_w", "車頂拆裝座（−X 側）", -1f, 0, 0f, Vector2.zero), ("tp.roof.base_e", "車頂拆裝座（+X 側）", 1f, 0, 0f, Vector2.zero),
+                ("tp.roof.base_w.s", "底座螺栓 1 前", -1f, 1, 0.70f, new Vector2(1f, -1f).normalized), ("tp.roof.base_e.s", "底座螺栓 2 前", 1f, 2, 0.70f, new Vector2(1f, 1f).normalized),
+                ("tp.roof.base_e.n", "底座螺栓 3 前", 1f, 3, 0.60f, new Vector2(0f, 1f)), ("tp.roof.base_w.n", "底座螺栓 4 前", -1f, 4, 0.60f, new Vector2(0f, -1f)) })
             {
                 var s = Add(id, label, StationFloor.Roof);
-                s.positionXZ = new Vector2(sgn * d.roofBaseStationX, s.positionXZ.y);   // Z 由建置腳本寫回（底架中心）
-                s.facingTargetId = ""; s.facingDirection = new Vector3(-sgn, 0f, 0f);   // 面向同側的底座螺栓（往車中心）
+                s.positionXZ = new Vector2(sgn * d.roofBaseStationX, id.EndsWith(".s") ? d.roofBaseSouthZ : s.positionXZ.y);   // base_w／e、.n 的 Z 由建置腳本寫回
+                s.facingTargetId = bolt > 0 ? "part.pan_base.bolt_" + bolt : "";
+                s.facingDirection = bolt > 0 ? Vector3.zero : new Vector3(-sgn, 0f, 0f);
+                s.maxTargetDistance = maxD; s.wrenchStartDir = wrench;
                 s.unlockKey = "roof.open"; s.lockedMessage = roofLock; s.zoneId = ZoneDef.Arrival;
                 EditorUtility.SetDirty(s);
             }
             set.poleRackGroundMaxDistance = 0.70f;
-            // 2026-11-02 回報給組長／鐵道、等裁定（規格說不合格照實回報、不自己改座標）：
-            // 弓頭羊角（降弓 X ±0.83、Z −0.19…+0.19）外擴後蓋住 base_w.s／base_e.s；工作負責人平時站位離桿架、去駕駛室光圈不到 0.6；掛座和工具架（板寬 0.70）間距 0.10
-            set.awaitingRuling = new[] { "tp.roof.base_w.s", "tp.roof.base_e.s", "【第15項】npc.work_leader（平時）", "【第19項】PendantDock 和工具架" };
+            // 增補 4／5 之後第 15、19 項與 D36 的站點都已裁定：待定清單是空的（有新的待定才加，每筆要有 ruleRef、decidedBy、releaseSegment）
+            set.pendingRulings = new PendingRuling[0];
+            // D37（鐵道）＋增補 6 第 7 點 G：羊角對車頂站點 0.2（身體半徑），其他會動零件 0.4；沒列的零件用 clearRadius
+            set.partClearRadius = new[]
+            {
+                new PartClearRadius { partGroup = "PanHead", radius = 0.20f, scope = PartClearScope.RoofOnly },
+                new PartClearRadius { partGroup = "LowerArm", radius = 0.40f, scope = PartClearScope.AllStations },
+                new PartClearRadius { partGroup = "UpperArm", radius = 0.40f, scope = PartClearScope.AllStations },
+                new PartClearRadius { partGroup = "Rod", radius = 0.40f, scope = PartClearScope.AllStations },
+            };
             set.npcPoses = new[]
             {
                 new NpcStandPose { npcId = "npc.guard", phase = NpcPhase.Normal, position = new Vector3(-3.00f, 0f, -1.00f) },
-                new NpcStandPose { npcId = "npc.work_leader", phase = NpcPhase.Normal, position = new Vector3(-3.00f, 0f, -0.30f) },
+                new NpcStandPose { npcId = "npc.work_leader", phase = NpcPhase.Normal, position = new Vector3(-3.10f, 0f, -0.30f) },   // D36
                 new NpcStandPose { npcId = "npc.rigging_lead", phase = NpcPhase.Lifting, position = new Vector3(-5.0f, d.groundY, -3.5f) },
                 new NpcStandPose { npcId = "npc.guard", phase = NpcPhase.Lifting, position = new Vector3(-6.0f, d.groundY, -4.3f) },
                 new NpcStandPose { npcId = "npc.work_leader", phase = NpcPhase.Lifting, position = new Vector3(-7.0f, d.groundY, -4.3f) },

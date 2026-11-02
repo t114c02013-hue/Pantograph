@@ -52,7 +52,7 @@ namespace PantographSim.Tests
                 float lift = mech.Lift;
                 mech.SetLift(0f);
                 StationLayoutCheck.SceneResult r;
-                try { r = StationLayoutCheck.CheckScene(Set, def, pts, id => ids.TryGetValue(id ?? "", out var t) ? t : null, null); }
+                try { r = StationLayoutCheck.CheckScene(Set, def, pts, id => ids.TryGetValue(id ?? "", out var t) ? t : null, null, A6Tests.WrenchHandle); }
                 finally { mech.SetLift(lift); }
                 Assert.IsTrue(r.Ok, r.ToString());
                 Assert.IsTrue(ids.ContainsKey("env.bolt_tray_L") && ids.ContainsKey("env.bolt_tray_R"), "主場景要有兩個螺栓盤");

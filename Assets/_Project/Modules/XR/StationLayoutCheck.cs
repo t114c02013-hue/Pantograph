@@ -45,10 +45,15 @@ namespace PantographSim.XR
         public class SceneResult
         {
             public readonly List<string> bad = new List<string>(), warn = new List<string>(), info = new List<string>();
-            /// <summary>a6 規則（暫定門檻）：只回報量測值與判定，EnforceA6 為 true 前不擋建置。</summary>
-            public readonly List<string> pending = new List<string>();
+            /// <summary>合格的規則行（✔）、◇ 待定（有裁定紀錄的已知不合格，不擋建置）。</summary>
+            public readonly List<string> passed = new List<string>(), pending = new List<string>();
+            /// <summary>不合格項目的（檢查項, 物件 ID, 文字）：待定比對用（增補 6 第 1 點：檢查項＋物件 ID 完全相等）。</summary>
+            public readonly List<(string item, string obj, string text)> failures = new List<(string, string, string)>();
             public bool Ok => bad.Count == 0;
-            public override string ToString() => string.Join("\n", bad.Select(b => "✘ " + b).Concat(warn.Select(w => "⚠ " + w)).Concat(info.Select(i => "・" + i)).Concat(pending.Select(p => "◇ " + p)));
+            public void Fail(string item, string obj, string text) { bad.Add(text); failures.Add((item, obj, text)); }
+            /// <summary>摘要「N 過／M 待定／K 不合格」；有待定或不合格就不寫「全過」。</summary>
+            public string Summary => $"{passed.Count} 過／{pending.Count} 待定／{bad.Count} 不合格";
+            public override string ToString() => string.Join("\n", bad.Select(b => "✘ " + b).Concat(pending.Select(p => "◇ 待定 " + p)).Concat(warn.Select(w => "⚠ " + w)).Concat(info.Select(i => "・" + i)).Concat(passed.Select(p => "✔ " + p)));
         }
 
         static bool IsTarget(Collider c) => c.GetComponentInParent<Core.ISimObject>() != null;
@@ -67,7 +72,7 @@ namespace PantographSim.XR
         /// 場景擺放檢查（B 段 3.5）。points＝場景裡的站點；find＝互動點 ID → 物件；panFootprints＝會動的關節在升降全程的頂點範圍（a6，取代整組 AABB 聯集；null＝不查）。
         /// 「0.4 m 內沒有實體碰撞體」只算障礙物：站點要操作的互動物件（ISimObject）不算，螺栓盤另有 0.30–0.50 m 的規則。
         /// </summary>
-        public static SceneResult CheckScene(StationSet set, RoofSceneDef d, IEnumerable<XrTeleportPoint> points, System.Func<string, Transform> find, IList<Bounds> panFootprints)
+        public static SceneResult CheckScene(StationSet set, RoofSceneDef d, IEnumerable<XrTeleportPoint> points, System.Func<string, Transform> find, IDictionary<string, Bounds> panFootprints, float wrenchHandleLength = 0f)
         {
             var r = new SceneResult();
             Physics.SyncTransforms();
@@ -77,36 +82,42 @@ namespace PantographSim.XR
             var pts = points.ToDictionary(p => p.PointId);
             foreach (var s in set.stations.Where(x => x != null))
             {
-                if (!pts.TryGetValue(s.id, out var tp)) { r.bad.Add($"{s.id}：場景裡沒有這個站點"); continue; }
+                if (!pts.TryGetValue(s.id, out var tp)) { r.Fail("core", s.id, $"{s.id}：場景裡沒有這個站點"); continue; }
                 var p = tp.transform.position;
                 // 站在 Walkable 上
-                if (!Physics.Raycast(new Vector3(p.x, 5f, p.z), Vector3.down, out var hit, 20f, walk, QueryTriggerInteraction.Ignore)) { r.bad.Add($"{s.id}：({p.x:0.00}, {p.z:0.00}) 下方沒有 Walkable"); continue; }
-                if (Mathf.Abs(hit.point.y - p.y) > 0.02f) r.bad.Add($"{s.id}：y {p.y:0.000} 和地板 {hit.point.y:0.000} 差超過 0.02 m");
+                if (!Physics.Raycast(new Vector3(p.x, 5f, p.z), Vector3.down, out var hit, 20f, walk, QueryTriggerInteraction.Ignore)) { r.Fail("core", s.id, $"{s.id}：({p.x:0.00}, {p.z:0.00}) 下方沒有 Walkable"); continue; }
+                if (Mathf.Abs(hit.point.y - p.y) > 0.02f) r.Fail("core", s.id, $"{s.id}：y {p.y:0.000} 和地板 {hit.point.y:0.000} 差超過 0.02 m");
                 r.info.Add($"{s.id}：({p.x:0.000}, {p.y:0.000}, {p.z:0.000})");
                 // 0.4 m 內沒有障礙物（身體高度 0.1–1.8 m）；不可見牆至少 0.15 m
                 foreach (var c in Physics.OverlapCapsule(p + Vector3.up * 0.1f, p + Vector3.up * 1.8f, set.clearRadius, solid, QueryTriggerInteraction.Ignore))
-                    if (!IsTarget(c)) r.bad.Add($"{s.id}：{set.clearRadius} m 內有障礙物 {c.name}");
-                foreach (var c in Physics.OverlapCapsule(p + Vector3.up * 0.1f, p + Vector3.up * 1.8f, set.invisibleWallClearance - 1e-3f, invisible, QueryTriggerInteraction.Ignore))   // 剛好 0.15 m 算合格（接觸也算重疊，扣 1 mm 量測容差）
-                    if (c.GetComponent<Renderer>() == null) r.bad.Add($"{s.id}：離不可見牆 {c.name} 不到 {set.invisibleWallClearance} m");
+                    if (!IsTarget(c)) r.Fail("core", s.id, $"{s.id}：{set.clearRadius} m 內有障礙物 {c.name}");
+                // 不可見牆只查外側邊界與會動零件的挖除邊（Blocker_Static＝不會動的底架、絕緣子，改由第16項 (i) 保證，增補 6 第 7 點 B）；剛好等於門檻算合格（wallClearanceTolerance）
+                foreach (var c in Physics.OverlapCapsule(p + Vector3.up * 0.1f, p + Vector3.up * 1.8f, set.invisibleWallClearance - set.wallClearanceTolerance, invisible, QueryTriggerInteraction.Ignore))
+                    if (c.GetComponent<Renderer>() == null && c.name != "Blocker_Static") r.Fail("core", s.id, $"{s.id}：離不可見牆 {c.name} 不到 {set.invisibleWallClearance} m");
                 // D11：平台護欄（封閉 1.1 m 護欄、活動欄）至少 guardrailClearance（身體膠囊 0.25＋0.05）
                 foreach (var c in Physics.OverlapCapsule(p + Vector3.up * 0.1f, p + Vector3.up * 1.8f, set.guardrailClearance, invisible, QueryTriggerInteraction.Ignore))
-                    if (IsGuardrail(c)) r.bad.Add($"{s.id}：離護欄 {c.name} {Flat(p, c.ClosestPoint(p + Vector3.up * 0.5f)):0.00} m，不到 {set.guardrailClearance} m");
+                    if (IsGuardrail(c)) r.Fail("core", s.id, $"{s.id}：離護欄 {c.name} {Flat(p, c.ClosestPoint(p + Vector3.up * 0.5f)):0.00} m，不到 {set.guardrailClearance} m");
                 if (s.floor == StationFloor.Roof && panFootprints != null)
-                    foreach (var fp in panFootprints)
-                        if (Flat(p, fp.ClosestPoint(new Vector3(p.x, fp.center.y, p.z))) < set.clearRadius) { r.bad.Add($"{s.id}：離集電弓升降範圍 X {fp.min.x:0.00}…{fp.max.x:0.00}、Z {fp.min.z:0.00}…{fp.max.z:0.00} 不到 {set.clearRadius} m"); break; }
-                float walkLimit = s.id.StartsWith("tp.roof.base") ? d.roofBaseWalkHalfWidth : d.roofWalkHalfWidth;   // a6：底架兩側局部放寬
-                if (s.floor == StationFloor.Roof && Mathf.Abs(p.x) > walkLimit + 1e-3f) r.bad.Add($"{s.id}：不在車頂可走範圍 |X| ≤ {walkLimit}");
-                if (string.IsNullOrEmpty(s.facingTargetId)) { if (Vector3.Angle(tp.transform.forward, s.facingDirection) > 1f) r.bad.Add($"{s.id}：朝向不是 {s.facingDirection}"); continue; }
+                    foreach (var kv in panFootprints)
+                    {
+                        var fp = kv.Value; float need = PanClearRadius(set, kv.Key, s.floor);   // D37＋增補 6 第 7 點 G：依零件與站點樓層（StationSet.partClearRadius）
+                        float dd = Flat(p, fp.ClosestPoint(new Vector3(p.x, fp.center.y, p.z)));
+                        if (dd < need) r.Fail("core", s.id, $"{s.id}：離集電弓升降範圍（{kv.Key}）X {fp.min.x:0.00}…{fp.max.x:0.00}、Z {fp.min.z:0.00}…{fp.max.z:0.00} {dd:0.000} m，不到 {need} m");
+                        else if (kv.Key == "PanHead" && s.id.StartsWith("tp.roof.base")) r.info.Add($"{s.id}：到羊角升降範圍 {dd:0.000} m（≥ {need}，D37）");
+                    }
+                float walkLimit = d.RoofWalkLimitAt(p.z);   // 增補 6 第 3 點：在底架兩側放寬帶的 Z 範圍內才用 roofBaseWalkHalfWidth
+                if (s.floor == StationFloor.Roof && Mathf.Abs(p.x) > walkLimit + 1e-3f) r.Fail("core", s.id, $"{s.id}：不在車頂可走範圍 |X| ≤ {walkLimit}");
+                if (string.IsNullOrEmpty(s.facingTargetId)) { if (Vector3.Angle(tp.transform.forward, s.facingDirection) > 1f) r.Fail("core", s.id, $"{s.id}：朝向不是 {s.facingDirection}"); continue; }
                 // 面向目標：眼高看得到、水平 ±30°、距離
                 var target = find(s.facingTargetId);
-                if (target == null) { r.bad.Add($"{s.id}：找不到面向目標 {s.facingTargetId}"); continue; }
+                if (target == null) { r.Fail("core", s.id, $"{s.id}：找不到面向目標 {s.facingTargetId}"); continue; }
                 var eye = p + Vector3.up * set.eyeHeight;
                 var to = Center(target);
                 var dir = to - p; dir.y = 0f;
-                if (Vector3.Angle(tp.transform.forward, dir) > set.facingToleranceDeg) r.bad.Add($"{s.id}：目標不在正前方 ±{set.facingToleranceDeg}°");
-                if (!Visible(eye, to, target)) r.bad.Add($"{s.id}：從眼高看 {s.facingTargetId} 被擋住");
+                if (Vector3.Angle(tp.transform.forward, dir) > set.facingToleranceDeg) r.Fail("core", s.id, $"{s.id}：目標不在正前方 ±{set.facingToleranceDeg}°");
+                if (!Visible(eye, to, target)) r.Fail("core", s.id, $"{s.id}：從眼高看 {s.facingTargetId} 被擋住");
                 float dist = Flat(p, to), max = s.maxTargetDistance > 0 ? s.maxTargetDistance : set.targetMaxDistance, min = s.maxTargetDistance > 0 ? 0f : set.targetMinDistance;
-                if (dist < min - 1e-3f || dist > max + 1e-3f) r.bad.Add($"{s.id}：到 {s.facingTargetId} 水平 {dist:0.00} m（要 {min:0.0}–{max:0.0} m）");
+                if (dist < min - 1e-3f || dist > max + 1e-3f) r.Fail("core", s.id, $"{s.id}：到 {s.facingTargetId} 水平 {dist:0.00} m（要 {min:0.0}–{max:0.0} m）");
             }
             // 個別站點規則
             Transform T(string id) => find(id);
@@ -142,12 +153,28 @@ namespace PantographSim.XR
             if (set.measuredFarBoltL > set.roofBoltMaxDistance) r.warn.Add($"肘側最遠螺栓 {set.measuredFarBoltL:0.00} m 超過 {set.roofBoltMaxDistance} m：啟用側移提示");
             if (Mathf.Abs(d.platformFloorY - d.roofFloorY) > set.maxFloorStep) r.bad.Add($"平台與車頂高度差 {Mathf.Abs(d.platformFloorY - d.roofFloorY):0.00} m 超過 {set.maxFloorStep} m");
             if (d.platformGap > set.maxPlatformGap) r.bad.Add($"平台到車頂間隙 {d.platformGap:0.00} m 超過 {set.maxPlatformGap} m");
-            CheckA6(set, d, pts, find, r);
-            // 等裁定的已知衝突：照實列出，不擋建置（StationSet.awaitingRuling）
-            var waiting = (set.awaitingRuling ?? new string[0]).Where(w => !string.IsNullOrEmpty(w)).ToList();
-            foreach (var b in r.bad.Where(b => waiting.Any(w => b.Contains(w))).ToList()) { r.bad.Remove(b); r.pending.Add("待裁定 ✘ " + b); }
+            CheckA6(set, d, pts, find, r, wrenchHandleLength);
+            ApplyPending(set, r);
             return r;
         }
+
+        /// <summary>◇ 待定（增補 6 第 1 點）：不合格項目的（檢查項, 物件 ID）和 PendingRuling 完全相等才改列待定；缺裁定紀錄的那筆本身就算不合格。</summary>
+        public static void ApplyPending(StationSet set, SceneResult r)
+        {
+            foreach (var rule in set.pendingRulings ?? new PendingRuling[0])
+            {
+                if (rule == null) continue;
+                if (!rule.HasRecord) { r.Fail("pending", rule.objectId ?? "", $"待定 第{rule.checkItem}項 {rule.objectId} 缺裁定紀錄（ruleRef／decidedBy／releaseSegment）"); continue; }
+                foreach (var f in r.failures.Where(f => rule.Matches(f.item, f.obj)).ToList())
+                {
+                    r.bad.Remove(f.text); r.failures.Remove(f);
+                    r.pending.Add($"{f.text}　←{rule}");
+                }
+            }
+        }
+
+        /// <summary>D37（鐵道）＋增補 6 第 7 點 G：站點離各段升降範圍的淨空，讀 StationSet.partClearRadius（沒列的零件用 clearRadius）。</summary>
+        public static float PanClearRadius(StationSet set, string segment, StationFloor floor) => set.ClearRadiusFor(segment, floor);
 
         static bool IsGuardrail(Collider c) => c.name.StartsWith("Rail_") || c.name == "GateBoundary";
 

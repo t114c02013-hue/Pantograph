@@ -26,9 +26,10 @@ namespace PantographSim.Parts.Common
             [NonSerialized] public Group[] groups = Array.Empty<Group>();
             [NonSerialized] public float total;
             [Tooltip("吊梁長＝吊耳間距＋這個值（a6 G2）")] public float beamExtraLength = 0.20f;
-            [Tooltip("吊梁比吊點高多少")] public float beamAboveLiftPoints = 0.75f;
+            [Tooltip("a6 增補 4（建模 B H3、D36）：4 條吊帶的長度；吊梁高度由這個長度推導")] public float slingLength = 1.25f;
             [Tooltip("吊鉤掛點比吊梁高多少")] public float hookAboveBeam = 0.9f;
             public float maxTiltDeg = 2f;
+            [Tooltip("每條吊帶和垂直線的夾角上限、同一端兩條之間的夾角上限")] public float maxSlingAngleDeg = 45f, maxSlingPairAngleDeg = 90f;
         }
 
         /// <summary>讀兩個資料檔。質量表的 joints 是物件（JsonUtility 讀不了字典），只取「"名稱": 數字」。</summary>
@@ -67,12 +68,24 @@ namespace PantographSim.Parts.Common
         /// <summary>吊梁兩端吊耳的位置（+X 側、−X 側）：梁中點在 COG 正上方。</summary>
         public static (Vector3 plusX, Vector3 minusX) BeamEyes(Vector3 cog, IList<Vector3> liftPoints, Table t)
         {
-            float y = AvgY(liftPoints) + t.beamAboveLiftPoints, h = BeamHalfSpan(liftPoints);
+            float y = AvgY(liftPoints) + BeamAbove(cog, liftPoints, t), h = BeamHalfSpan(liftPoints);
             return (new Vector3(cog.x + h, y, cog.z), new Vector3(cog.x - h, y, cog.z));
         }
 
-        /// <summary>吊鉤掛點（F3）：COG 正上方。</summary>
-        public static Vector3 HookPoint(Vector3 cog, float liftPointY, Table t) => new Vector3(cog.x, liftPointY + t.beamAboveLiftPoints + t.hookAboveBeam, cog.z);
+        /// <summary>吊梁比吊點高多少：吊帶長 slingLength 拉直時的垂直高度（吊耳到各吊點的水平距離取平均）。</summary>
+        public static float BeamAbove(Vector3 cog, IList<Vector3> liftPoints, Table t)
+        {
+            float h = BeamHalfSpan(liftPoints), d = 0f;
+            foreach (var p in liftPoints) d += new Vector2(p.x - (p.x >= cog.x ? cog.x + h : cog.x - h), p.z - cog.z).magnitude;
+            d /= Mathf.Max(1, liftPoints.Count);
+            return Mathf.Sqrt(Mathf.Max(t.slingLength * t.slingLength - d * d, 0f));
+        }
+
+        /// <summary>吊帶（吊耳 eye → 吊點 p）和垂直線的夾角（度）。</summary>
+        public static float SlingAngleDeg(Vector3 eye, Vector3 p) => Vector3.Angle(Vector3.down, p - eye);
+
+        /// <summary>吊鉤掛點（F3）：COG 正上方，吊梁上方 hookAboveBeam。</summary>
+        public static Vector3 HookPoint(Vector3 cog, IList<Vector3> liftPoints, Table t) => new Vector3(cog.x, AvgY(liftPoints) + BeamAbove(cog, liftPoints, t) + t.hookAboveBeam, cog.z);
 
         /// <summary>每個 X 側的吊帶長度（F2）：吊耳到該側吊點的距離（兩個吊點取平均）。x 大於 COG 的是 +X 側。</summary>
         public static (float plusX, float minusX) SlingLengths(Vector3 cog, IList<Vector3> liftPoints, Table t)

@@ -28,6 +28,7 @@ namespace PantographSim.Data
         [Tooltip("R1.5a：固定朝向（不為 0 時取代 facingTargetId，例 tp.platform.crane 面向 +X）")] public Vector3 facingDirection;
         [Tooltip("R1.5a a4：所屬作業區（zone.arrival／zone.maintenance）")] public string zoneId = ZoneDef.Arrival;
         [Tooltip("a6：吊物懸空（Lifted）時仍可傳送到這站（目前只有 tp.platform.crane）")] public bool allowedWhileLifted;
+        [Tooltip("a6 第21項（D36 補充三）：扳手的鎖緊起始方向（XZ），從這裡往兩邊各擺 wrenchSwingDeg；只有底座螺栓子站點用")] public Vector2 wrenchStartDir;
 
         /// <summary>a6 第七節 1：吊物懸空時只開放 allowedWhileLifted 的站點（吊運路徑下方不會有人）。
         /// shortcut: 只有規則本身與測試，XrTeleport 還沒讀吊物狀態, R1.5b 天車上線時接上黑板的吊物狀態。</summary>

@@ -98,6 +98,8 @@ namespace PantographSim.Data
         [Tooltip("台架頂面（支撐座、定位銷）離地")] public float standTopAboveGround = 0.75f;
         [Tooltip("F6：台架外框（支撐座四周與四角立柱）頂面離地，低於支撐座，懸出的臂和吊帶不會掃到")] public float standFrameTopAboveGround = 0.45f;
         [Tooltip("a6 G2：台架外框＝降弓整組 LoweredTightBounds 兩端各外擴這個值（standSizeXZ 由建置寫入）")] public float standFrameMargin = 0.15f;
+        [Tooltip("a6 增補 4：外框中心相對台架中心（＝底架中心）的偏移；LoweredTightBounds 前後不對稱，建置時寫入")] public Vector2 standFrameOffsetXZ;
+        [Tooltip("a6 增補 4（鐵道 D35）：吊鉤最高點 Y 的規格值（實測 5.53 合格，不調模型參數）")] public float craneHookTopSpecY = 5.53f;
         [Tooltip("a6 G2：台架支撐座＝BaseHole 的 X、Z 間距各加這個值")] public Vector2 standSeatMarginXZ = new Vector2(0.13f, 0.18f);
         [Tooltip("台架四周淨空（地面黃色走道線畫在這裡）")] public float standClearance = 1.2f;
         [Tooltip("tp.stand.* 離台架邊")] public float standStationOffset = 0.6f;
@@ -119,9 +121,14 @@ namespace PantographSim.Data
         [Tooltip("日常課程備品架擺放點 Anchor_SpareShelf_Daily（中心；沿 Z 長 dailyRackLength）")] public Vector3 spareShelfDaily = new Vector3(-3.06f, 1.0f, 1.45f);
         [Tooltip("日常課程待報廢箱擺放點 Anchor_ScrapBox_Daily")] public Vector3 scrapBoxDaily = new Vector3(-3.06f, 0.5f, 2.85f);
         public float dailyRackLength = 1.3f;
-        [Tooltip("車頂拆裝座：底架兩側局部放寬的可走範圍 |X| ≤ 這個值，Z＝底架前後緣各外擴 roofBaseWalkZMargin")] public float roofBaseWalkHalfWidth = 1.10f, roofBaseWalkZMargin = 0.15f;
-        [Tooltip("底架兩側的警示紅線 |X|（鐵道規定，和 Walkable 寬度分開）；裁定前 Walkable 暫用 1.10（方案 A）")] public float roofBaseWarningX = 1.0f;
-        [Tooltip("tp.roof.base_w／base_e 的 |X|（Z＝底架中心，建置時從模型推導）")] public float roofBaseStationX = 0.95f;
+        [Tooltip("車頂拆裝座：底架兩側局部放寬的可走範圍 |X| ≤ 這個值（D36：1.00）；Z 從 roofBaseWalkZMin 到底架後緣外擴 roofBaseWalkZMargin")] public float roofBaseWalkHalfWidth = 1.00f, roofBaseWalkZMargin = 0.15f;
+        [Tooltip("D36：放寬帶前端 Z（往 −Z 延伸，讓 base_*.s 避開降弓羊角）")] public float roofBaseWalkZMin = -0.75f;
+        [Tooltip("放寬帶後端 Z（底架後緣＋roofBaseWalkZMargin，建置時寫入）")] public float roofBaseWalkZMax = 1.9f;
+        /// <summary>增補 6 第 3 點：站點在底架兩側放寬帶的 Z 範圍內就用 roofBaseWalkHalfWidth，否則 roofWalkHalfWidth。</summary>
+        public float RoofWalkLimitAt(float z) => z >= roofBaseWalkZMin - 1e-4f && z <= roofBaseWalkZMax + 1e-4f ? roofBaseWalkHalfWidth : roofWalkHalfWidth;
+        [Tooltip("底架兩側的警示紅線 |X|（鐵道規定，和 Walkable 寬度分開）")] public float roofBaseWarningX = 1.0f;
+        [Tooltip("D36：底架站點的 |X|（離 Walkable 邊 invisibleWallClearance）；base_w／base_e 的 Z＝底架中心、.n 的 Z＝螺栓 3／4 實測 Z（建置時推導）、.s 的 Z＝roofBaseSouthZ")] public float roofBaseStationX = 0.85f, roofBaseSouthZ = -0.55f;
+        [Tooltip("增補 6 第 7 點 A：Walkable 內側挖除的外擴量——不會動的底架與絕緣子（只挖自己的頂點範圍）、會動的臂／弓頭／連桿（升降全程）")] public float staticCarveInflate = 0f, movingCarveInflate = 0.15f;
         [Tooltip("車頂暫放墊 env.roof_strip_mat（model-spec v2.3 §8.6）：中心、長（X）× 寬（Z）、墊厚、邊框寬、邊框高出墊面、上方判定 trigger 高")]
         public Vector3 roofStripMatCenter = new Vector3(0f, 0f, -1.10f);   // 底面中心（FBX 原點），墊面在 Y＝thickness
         public Vector2 roofStripMatSize = new Vector2(1.20f, 0.30f);
@@ -141,6 +148,8 @@ namespace PantographSim.Data
         [Tooltip("增補 3（D34）：車體接地座焊接小平台邊長、接地螺樁高")] public float carBodyGroundPadSize = 0.10f, carBodyGroundStudHeight = 0.03f;
 
         public float StandTopY => groundY + standTopAboveGround;
+        /// <summary>台架外框中心（XZ）：台架中心＋standFrameOffsetXZ。tp.stand.* 和外框的距離都量到這個框。</summary>
+        public Vector2 StandFrameCenterXZ => standCenterXZ + standFrameOffsetXZ;
 
         /// <summary>車頂斷面在 x 的高度（和 Tools/Blender/gen_700t/car_body.py 的 profile 同一條式子：中央平段，兩側圓弧縮放到車頂邊下降 roofEdgeDrop）。</summary>
         public float RoofSurfaceY(float x)

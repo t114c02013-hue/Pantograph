@@ -19,8 +19,14 @@ PF_StripBolt：M8×25 六角頭 對邊 13 mm、高 5.3 mm；墊圈 Ø16×1.6 mm�
 降弓位置檢測：檢測點 (0.000, 0.708, 0.000)、容許 1 cm、全程行程 182 cm
 集電弓整組 PAN_Root：原點 (-0.008, 0.300, 0.836)（降弓底架底面中心）；螺栓孔 (-0.494, 0.300, 0.024)、(0.478, 0.300, 0.024)、(0.478, 0.300, 1.648)、(-0.494, 0.300, 1.648)；重心 COG (-0.018, 0.542, 0.835)（Base 56 kg @ (-0.041, 0.457, 0.722)；LowerArm 29 kg @ (0.004, 0.598, 1.448)；UpperArm 13 kg @ (-0.012, 0.598, 1.366)；PanHead 22 kg @ (0.009, 0.653, 0.000)（合計 120 kg，表列總重 120 kg））
 集電弓新節點：底座螺栓 4、吊耳 4、高壓端子（螺栓 2）、控制線接頭 (0.500, 0.634, 0.950)（DustCap_Off）、降弓固定帶綁點 (0.288, 0.628, 1.200)（上臂半寬 0.030、腳長 A 0.215／B 0.800 m；Installed／Removed 都隱藏）、分流線外觀 2
-吊運：吊鉤掛點 (-0.018, 2.284, 0.835)（COG 正上方）；吊梁吊耳間距 1.033 m、梁長 1.233 m；吊帶 +X 側 1.143 m、−X 側 1.143 m；吊起後傾斜 0.02°
-LoweredTightBounds（PAN_Root 局部）：(-0.825, -0.070, -1.023)–(0.841, 0.426, 1.243)
+吊運：吊鉤掛點 (-0.018, 2.440, 0.835)（COG 正上方）；吊梁高出吊點 0.905 m（吊帶長 1.25 m 推導）；吊梁吊耳間距 1.033 m、梁長 1.233 m；吊帶 +X 側 1.250 m、−X 側 1.250 m；吊起後傾斜 0.03°
+  吊帶 1：和垂直線 43.6°（≤ 45°）
+  吊帶 2：和垂直線 43.6°（≤ 45°）
+  吊帶 3：和垂直線 43.6°（≤ 45°）
+  吊帶 4：和垂直線 43.6°（≤ 45°）
+  吊帶 1–4（同一端）夾角 87.2°（≤ 90°）
+  吊帶 2–3（同一端）夾角 87.2°（≤ 90°）
+LoweredTightBounds（PAN_Root 局部，排除可拆件）：(-0.825, 0.000, -1.023)–(0.841, 0.426, 1.243)；Y 最高點 0.426（LowerCheckPoint，父 PanHead）
 車頂升降範圍（各剛體段自己的頂點範圍，5 個姿態）：
   升降 0.00 LowerArm  X -0.116…0.118、Y 0.552…0.644、Z 0.199…1.960
   升降 0.25 LowerArm  X -0.116…0.118、Y 0.549…0.858、Z 0.199…1.945
@@ -47,8 +53,8 @@ LoweredTightBounds（PAN_Root 局部）：(-0.825, -0.070, -1.023)–(0.841, 0.4
   升降 0.50 Rod2      X 0.102…0.400、Y 1.000…1.445、Z -0.034…1.801
   升降 0.75 Rod2      X 0.102…0.400、Y 1.198…1.898、Z -0.022…1.734
   升降 1.00 Rod2      X 0.102…0.400、Y 1.386…2.323、Z -0.001…1.641
-台架外框（G2）：LoweredTightBounds X -0.825…0.841、Z -1.023…1.243，外擴 0.15 → 1.983 × 2.785 m（對稱）
-車頂：可走區 21 塊（|X|≤0.80，底架兩側 Z -0.226…1.898 放寬到 |X|≤1.10、紅線 1.00；挖掉 LowerArm／UpperArm／PanHead 升降全程頂點範圍、絕緣子、母線外擴 0.15 m，底架頂點範圍外擴 0.15 m）；降弓後滑板頂面在車頂上 0.693 m
+台架外框（G2／增補 4）：LoweredTightBounds X -0.825…0.841、Z -1.023…1.243，兩端各外擴 0.15、不加擺動餘裕 → 1.967 × 2.565 m，外框中心偏 (0.01, 0.11)
+車頂：可走區 23 塊（|X|≤0.80，底架兩側 Z -0.750…1.898 放寬到 |X|≤1.00、紅線 1.00；挖掉會動的段升降全程頂點範圍外擴 0.15 m、母線與避雷器外擴 0.15 m、底架與絕緣子頂點範圍外擴 0 m）；降弓後滑板頂面在車頂上 0.693 m
   挖除 0：X -0.266…0.268、Z 0.041…2.110
   挖除 1：X -0.532…0.532、Z -0.172…2.228
   挖除 2：X -0.983…0.983、Z -0.337…0.370
@@ -56,18 +62,18 @@ LoweredTightBounds（PAN_Root 局部）：(-0.825, -0.070, -1.023)–(0.841, 0.4
   挖除 4：X -0.048…0.550、Z -0.185…2.006
   挖除 5：X 0.050…0.550、Z 1.598…4.150
   挖除 6：X 0.330…0.770、Z 2.380…2.820
-  挖除 7：X -0.729…-0.259、Z -0.211…0.259
-  挖除 8：X 0.243…0.713、Z -0.211…0.259
-  挖除 9：X 0.243…0.713、Z 1.413…1.883
-  挖除 10：X -0.729…-0.259、Z 1.413…1.883
-  挖除 11：X -0.724…0.708、Z -0.226…1.898
+  挖除 7：X -0.579…-0.409、Z -0.061…0.109
+  挖除 8：X 0.393…0.563、Z -0.061…0.109
+  挖除 9：X 0.393…0.563、Z 1.563…1.733
+  挖除 10：X -0.579…-0.409、Z 1.563…1.733
+  挖除 11：X -0.574…0.558、Z -0.076…1.748
 共用車頂站點：(0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m；側移提示 不啟用；stripTopAboveRoof=0.693
 平台：升降操作盒 (-1.81, 1.10, 0.00)、接地端子 (-1.81, 1.00, 0.35)、自檢器 (-1.81, 1.10, 0.85)、平台掛點 (-1.86, 1.20, -2.10)、工具架 (-3.06, 1.00, -2.40)（掛位 1–4）
 平台：長桿桿架 (-2.85, 0.00, 0.60)（掛位 2、3）、防墜器掛鉤 (-1.95, 1.40, -1.55)
 車頂：工具箱 (0.10, 0.90, -2.50)（掛位 5–9＋套筒座）、零件盒 (-0.30, 0.90, -1.90)、備品架 (-0.30, 0.90, -3.10)、螺栓盤 R/L 在 (0.00, 0.00, -0.65) 的 ±0.4 m
 車頂暫放墊：中心 (0.000, 0.000, -1.100)、1.2 × 0.3 m（存檔 inactive，日常課程打開）
 駕駛室：控制盤 (-0.69, -1.30, -30.00)（盤面朝 +X）、指示燈複本、弓頭監視畫面（Assets/_Project/Content/Textures/RT_PanHeadMonitor.renderTexture）
-台架（G2）：支撐座 1.103 × 1.804 m（BaseHole 間距 0.973 × 1.624 ＋ (0.13, 0.18)）；外框 1.983 × 2.785 m（FBX 原本 2.00 × 2.60）
+台架（G2）：支撐座 1.103 × 1.804 m（BaseHole 間距 0.973 × 1.624 ＋ (0.13, 0.18)）；外框 1.967 × 2.565 m（FBX 原本 2.00 × 2.60）
 地面維修區：X -13.5…-5.5、Z -5…5、地面 -3.65；台架中心 (-9.5, 0)、頂面 Y -2.90；工作檯 (-12.5, 0)；零件盒位置 Anchor_PartsTray_Maint (-12.5, -1.4)
 吊梁 ENV_LiftingBeam（G2）：梁長 1.233 m（沿 X）、吊耳間距 1.033 m
 天車：軌道 X 3／-16、Z ±15，停在 Z 12，吊鉤 Y 5.85；遙控器在掛座 (-3.06, 1.20, -2.95)；吊帶 4 條在 (-6.5, -3.8)；工具袋在工作檯上
@@ -90,7 +96,7 @@ VR：右搖桿平滑移動 1 m/s（車頂上限 1）、死區 0.15、CharacterCo
 VR：腰包 env.waist_pouch 在 XR Origin 局部 (0.18, 0.95, 0.05)（右腰）
 平台：去駕駛室光圈 mk.platform.to_cab (-2.200, 0.000, -0.450)（r 0.25）
 VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、接地端子旁、活動欄與平台掛點、車頂（肘側滑板）（車頂開放才解鎖）、車頂（外側滑板）（車頂開放才解鎖）、車頂工具箱與零件盒（車頂開放才解鎖）、天車遙控器掛座旁、台架北側、台架東側、台架南側、台架西側、備品架前（日常）、待報廢箱前（日常）、車頂拆裝座（−X 側）（車頂開放才解鎖）、車頂拆裝座（+X 側）（車頂開放才解鎖）、底座螺栓 1 前（車頂開放才解鎖）、底座螺栓 2 前（車頂開放才解鎖）、底座螺栓 3 前（車頂開放才解鎖）、底座螺栓 4 前（車頂開放才解鎖）
-站點檢查：21 站全過
+站點檢查：結果：21 站，188 過／0 待定／0 不合格（全過）
 ・tp.cab：(-0.190, -2.350, -30.000)
 ・tp.platform.lift：(-2.200, 0.000, -0.050)
 ・tp.platform.rack：(-2.410, 0.000, -2.400)
@@ -100,16 +106,24 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ・tp.roof.outer：(0.000, 0.000, -0.650)
 ・tp.roof.shelf：(-0.600, 0.000, -2.500)
 ・tp.platform.crane：(-2.400, 0.000, -3.500)
-・tp.stand.n：(-9.500, -3.640, 1.993)
-・tp.stand.e：(-7.909, -3.640, 0.000)
-・tp.stand.s：(-9.500, -3.640, -1.993)
-・tp.stand.w：(-11.092, -3.640, 0.000)
+・tp.stand.n：(-9.492, -3.640, 1.993)
+・tp.stand.e：(-7.909, -3.640, 0.110)
+・tp.stand.s：(-9.492, -3.640, -1.773)
+・tp.stand.w：(-11.076, -3.640, 0.110)
 ・tp.platform.parts：(-2.410, 0.000, 1.600)
 ・tp.platform.scrap：(-2.410, 0.000, 2.850)
-・tp.roof.base_w：(-0.950, 0.000, 0.836)
-・tp.roof.base_e：(0.950, 0.000, 0.836)
-・tp.roof.base_e.n：(0.950, 0.000, 1.648)
-・tp.roof.base_w.n：(-0.950, 0.000, 1.648)
+・tp.roof.base_w：(-0.850, 0.000, 0.836)
+・tp.roof.base_w：到羊角升降範圍 0.616 m（≥ 0.2，D37）
+・tp.roof.base_e：(0.850, 0.000, 0.836)
+・tp.roof.base_e：到羊角升降範圍 0.616 m（≥ 0.2，D37）
+・tp.roof.base_w.s：(-0.850, 0.000, -0.550)
+・tp.roof.base_w.s：到羊角升降範圍 0.363 m（≥ 0.2，D37）
+・tp.roof.base_e.s：(0.850, 0.000, -0.550)
+・tp.roof.base_e.s：到羊角升降範圍 0.363 m（≥ 0.2，D37）
+・tp.roof.base_e.n：(0.850, 0.000, 1.648)
+・tp.roof.base_e.n：到羊角升降範圍 1.428 m（≥ 0.2，D37）
+・tp.roof.base_w.n：(-0.850, 0.000, 1.648)
+・tp.roof.base_w.n：到羊角升降範圍 1.428 m（≥ 0.2，D37）
 ・tp.platform.ground：(-2.200, 0.000, 0.600)，面向 ip.depot.ground_terminal
 ・Anchor_GroundBusbar：(-1.810, 1.000, 0.350)，水平距離 0.46 m
 ・Anchor_TesterSelfCheck：(-1.810, 1.100, 0.850)，水平距離 0.46 m
@@ -121,189 +135,220 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ・活動欄開口：Z -1.400–-0.600（X -1.810）；(a) 接地站沿 Z 離開口邊緣 1.20 m（至少 0.5 m）
 ・(c) 和 tp.platform.anchor (-2.200, 0.000, -1.800) 相距 2.40 m（至少 0.6 m）
 ・tp.cab（相鄰車駕駛室）：(-0.190, -2.350, -30.000)
-◇ 【第1項】tp.platform.lift–tp.platform.rack 水平 2.36 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.lift–tp.platform.ground 水平 0.65 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.lift–tp.platform.anchor 水平 1.75 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.lift–tp.platform.crane 水平 3.46 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.lift–tp.platform.parts 水平 1.66 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.lift–tp.platform.scrap 水平 2.91 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.rack–tp.platform.ground 水平 3.01 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.rack–tp.platform.anchor 水平 0.64 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.rack–tp.platform.crane 水平 1.10 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.rack–tp.platform.parts 水平 4.00 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.rack–tp.platform.scrap 水平 5.25 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.ground–tp.platform.anchor 水平 2.40 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.ground–tp.platform.crane 水平 4.10 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.ground–tp.platform.parts 水平 1.02 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.ground–tp.platform.scrap 水平 2.26 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.anchor–tp.platform.crane 水平 1.71 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.anchor–tp.platform.parts 水平 3.41 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.anchor–tp.platform.scrap 水平 4.65 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.crane–tp.platform.parts 水平 5.10 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.crane–tp.platform.scrap 水平 6.35 m（≥ 0.6）✔
-◇ 【第1項】tp.platform.parts–tp.platform.scrap 水平 1.25 m（≥ 0.6）✔
-◇ 【第2項】活動欄開口 Z -1.40…-0.60 前 0.4 m 內沒有站點✔
-◇ 【第4d項】env.pole_rack 中心 (-2.77, 0.60)（錨點 Anchor_PoleRack (-2.85, 0.60)）到 tp.platform.ground 水平 0.57 m（≤ 0.7）✔
-◇ 【第5項】tp.platform.lift (-2.20, -0.05) 在吊運路徑內，吊運時封閉（吊物懸空時擋傳送）
-◇ 【第5項】tp.platform.ground (-2.20, 0.60) 在吊運路徑內，吊運時封閉（吊物懸空時擋傳送）
-◇ 【第5項】tp.roof.inner (0.00, -0.65) 在吊運路徑內，吊運時封閉（吊物懸空時擋傳送）
-◇ 【第5項】tp.roof.outer (0.00, -0.65) 在吊運路徑內，吊運時封閉（吊物懸空時擋傳送）
-◇ 【第5項】tp.platform.crane (-2.40, -3.50)（吊運時可到）離吊運路徑 ±1 m 2.50 m、不在吊物禁區內✔
-◇ 【第5項】tp.stand.e (-7.91, 0.00) 在吊運路徑內，吊運時封閉（吊物懸空時擋傳送）
-◇ 【第5項】tp.roof.base_w (-0.95, 0.84) 在吊運路徑內，吊運時封閉（吊物懸空時擋傳送）
-◇ 【第5項】tp.roof.base_w.s (-0.95, 0.02) 在吊運路徑內，吊運時封閉（吊物懸空時擋傳送）
-◇ 【第5項】npc.rigging_lead（吊運中）(-5.00, -3.50) 離吊運路徑 ±1 m 2.50 m、不在吊物禁區內✔
-◇ 【第5項】npc.guard（吊運中）(-6.00, -4.30) 離吊運路徑 ±1 m 3.30 m、不在吊物禁區內✔
-◇ 【第5項】npc.work_leader（吊運中）(-7.00, -4.30) 離吊運路徑 ±1 m 3.30 m、不在吊物禁區內✔
-◇ 【第5越障項】吊鉤最高點 Y 5.530 → 吊物底面 Y 3.476（掛點在 LoweredTightBounds 底面上 2.054 m）
-◇ 【第5越障項】防墜器門架頂 頂面 Y 2.640，餘裕 0.836 m（≥ 0.5）✔
-◇ 【第5越障項】桿架上直立的長桿頂 頂面 Y 1.305，餘裕 2.171 m（≥ 0.5）✔
-◇ 【第5越障項】平台護欄 頂面 Y 1.100，餘裕 2.376 m（≥ 0.5）✔
-◇ 【第5越障項】PendantDock 頂面 Y 1.230，餘裕 2.246 m（≥ 0.5）✔
-◇ 【第6項】tp.stand.n (-9.50, 1.99) 在維修區 X -13.5…-5.5、Z -5…5✔
-◇ 【第6項】tp.stand.n Y -3.640，和地面 -3.65 差 0.010 m（≤ 0.02）✔
-◇ 【第6項】tp.stand.n 離台架邊 0.60 m（0.6 ±0.05）✔
-◇ 【第6項】tp.stand.n 面向台架偏 0.0°（≤ 30°）✔
-◇ 【第6項】tp.stand.n 離台架上的降弓整組 水平 0.75 m（≥ 0.4）✔
-◇ 【第6項】tp.stand.e (-7.91, 0.00) 在維修區 X -13.5…-5.5、Z -5…5✔
-◇ 【第6項】tp.stand.e Y -3.640，和地面 -3.65 差 0.010 m（≤ 0.02）✔
-◇ 【第6項】tp.stand.e 離台架邊 0.60 m（0.6 ±0.05）✔
-◇ 【第6項】tp.stand.e 面向台架偏 0.0°（≤ 30°）✔
-◇ 【第6項】tp.stand.e 離台架上的降弓整組 水平 0.75 m（≥ 0.4）✔
-◇ 【第6項】tp.stand.s (-9.50, -1.99) 在維修區 X -13.5…-5.5、Z -5…5✔
-◇ 【第6項】tp.stand.s Y -3.640，和地面 -3.65 差 0.010 m（≤ 0.02）✔
-◇ 【第6項】tp.stand.s 離台架邊 0.60 m（0.6 ±0.05）✔
-◇ 【第6項】tp.stand.s 面向台架偏 0.0°（≤ 30°）✔
-◇ 【第6項】tp.stand.s 離台架上的降弓整組 水平 0.97 m（≥ 0.4）✔
-◇ 【第6項】tp.stand.w (-11.09, 0.00) 在維修區 X -13.5…-5.5、Z -5…5✔
-◇ 【第6項】tp.stand.w Y -3.640，和地面 -3.65 差 0.010 m（≤ 0.02）✔
-◇ 【第6項】tp.stand.w 離台架邊 0.60 m（0.6 ±0.05）✔
-◇ 【第6項】tp.stand.w 面向台架偏 0.0°（≤ 30°）✔
-◇ 【第6項】tp.stand.w 離台架上的降弓整組 水平 0.77 m（≥ 0.4）✔
-◇ 【第7b項】tp.roof.inner (0.00, -0.65) 不在母線帶、絕緣子孔上✔
-◇ 【第7b項】tp.roof.outer (0.00, -0.65) 不在母線帶、絕緣子孔上✔
-◇ 【第7b項】tp.roof.shelf (-0.60, -2.50) 不在母線帶、絕緣子孔上✔
-◇ 【第7b項】tp.roof.base_w (-0.95, 0.84) 不在母線帶、絕緣子孔上✔
-◇ 【第7b項】tp.roof.base_e (0.95, 0.84) 不在母線帶、絕緣子孔上✔
-◇ 【第7b項】tp.roof.base_w.s (-0.95, 0.02) 不在母線帶、絕緣子孔上✔
-◇ 【第7b項】tp.roof.base_e.s (0.95, 0.02) 不在母線帶、絕緣子孔上✔
-◇ 【第7b項】tp.roof.base_e.n (0.95, 1.65) 不在母線帶、絕緣子孔上✔
-◇ 【第7b項】tp.roof.base_w.n (-0.95, 1.65) 不在母線帶、絕緣子孔上✔
-◇ 【第8項】車體接地座 Clamp_Point (-1.150, 0.010, 0.430)（車頂斷面在 X -1.15 的高度 -0.040）
-◇ 【第8項】車體接地座到 tp.roof.base_w (-0.95, 0.84) 0.45 m（≤ 0.8）✔
-◇ 【第8項】車體接地座 X -1.150（≤ -1.05）✔
-◇ 【第8項】車體接地座正下方沒有 Walkable✔
-◇ 【第9項】tp.roof.base_w (-0.950, 0.000, 0.836) 朝向偏 +X 0.0°（≤ 1°）✔
-◇ 【第9項】tp.roof.base_w → 吊耳 1 (-0.52, -0.03)：0.96 m、偏 63.7°（同側，不在 ±30° 內）
-◇ 【第9項】tp.roof.base_w → 吊耳 2 (0.51, -0.03)：1.69 m、偏 30.6°（對側）
-◇ 【第9項】tp.roof.base_w → 吊耳 3 (0.51, 1.70)：1.69 m、偏 30.6°（對側）
-◇ 【第9項】tp.roof.base_w → 吊耳 4 (-0.52, 1.70)：0.96 m、偏 63.7°（同側，不在 ±30° 內）
-◇ 【第9項】tp.roof.base_w → ip.pan_assy.ctrl_connector：1.45 m、偏 4.5°
-◇ 【第9項】tp.roof.base_w → HoldDown_BuckleBase_A：1.52 m、偏 13.8°
-◇ 【第9項】tp.roof.base_w → HoldDown_BuckleBase_B：0.54 m、偏 41.9°
-◇ 【第9項】tp.roof.base_e (0.950, 0.000, 0.836) 朝向偏 −X 0.0°（≤ 1°）✔
-◇ 【第9項】tp.roof.base_e → 吊耳 1 (-0.52, -0.03)：1.71 m、偏 30.3°（對側）
-◇ 【第9項】tp.roof.base_e → 吊耳 2 (0.51, -0.03)：0.97 m、偏 62.9°（同側，不在 ±30° 內）
-◇ 【第9項】tp.roof.base_e → 吊耳 3 (0.51, 1.70)：0.97 m、偏 62.9°（同側，不在 ±30° 內）
-◇ 【第9項】tp.roof.base_e → 吊耳 4 (-0.52, 1.70)：1.71 m、偏 30.3°（對側）
-◇ 【第9項】tp.roof.base_e → ip.pan_assy.ctrl_connector：0.46 m、偏 14.2°
-◇ 【第9項】tp.roof.base_e → HoldDown_BuckleBase_A：0.56 m、偏 40.8°
-◇ 【第9項】tp.roof.base_e → HoldDown_BuckleBase_B：1.54 m、偏 13.7°
-◇ 【第10b項】ENV_PlatformStair Z 3.988…9.012（3.98…10）✔
-◇ 【第10b項】ENV_PlatformStair 伸進平台上方 0.012 m（≤ 0.02）✔
-◇ 【第11項】台架上的降弓整組（底架除外，頂點算法）最低 Y -2.797（Rod1），到外框頂面 -3.200 垂直 0.403 m（≥ 0.3）✔
-◇ 【第12項】吊帶 1：(-10.02, -2.57, -0.86)→(-9.51, -0.92, 0.00) 不穿過台架外框（頂面 Y -3.200）✔
-◇ 【第12項】吊帶 2：(-8.98, -2.57, -0.86)→(-9.51, -0.92, 0.00) 不穿過台架外框（頂面 Y -3.200）✔
-◇ 【第12項】吊帶 3：(-8.98, -2.57, 0.86)→(-9.51, -0.92, 0.00) 不穿過台架外框（頂面 Y -3.200）✔
-◇ 【第12項】吊帶 4：(-10.02, -2.57, 0.86)→(-9.51, -0.92, 0.00) 不穿過台架外框（頂面 Y -3.200）✔
-◇ 【第13項】活動欄開口中心 (-1.81, -1.00) 到防墜器掛鉤 (-1.95, -1.55) 0.57 m（≤ 2）✔
-◇ 【第13項】活動欄開口中心 (-1.81, -1.00) 到桿架 (-2.77, 0.60) 1.87 m（≤ 2）✔
-◇ 【第13項】活動欄開口中心 (-1.81, -1.00) 到工具架 (-3.10, -2.40) 1.90 m（≤ 2）✔
-◇ 【第14項】mk.platform.to_cab (-2.200, 0.000, -0.450) 到 tp.platform.lift 0.40 m（≤ 0.5）✔
-◇ 【第14項】mk.platform.to_cab 正下方有 Walkable✔
-◇ 【第15項】npc.guard（平時）(-3.00, -1.00) 最近的設備 去駕駛室光圈 0.63 m（≥ 0.6）✔
-◇ 【第15項】npc.guard（平時）最近的平台站點 tp.platform.anchor 1.13 m（≥ 0.6）✔
-◇ 【第15項】npc.guard（平時）離活動欄開口 1.19 m（≥ 0.4）✔
-◇ 【第15項】npc.work_leader（平時）(-3.00, -0.30) 最近的設備 去駕駛室光圈 0.55 m（≥ 0.6）✘
-◇ 【第15項】npc.work_leader（平時）到 桿架 0.59 m（≥ 0.6）✘
-◇ 【第15項】npc.work_leader（平時）最近的平台站點 tp.platform.lift 0.84 m（≥ 0.6）✔
-◇ 【第15項】npc.work_leader（平時）離活動欄開口 1.23 m（≥ 0.4）✔
-◇ 【第15項】npc.rigging_lead–npc.guard（吊運中）相距 1.28 m（≥ 0.6）✔
-◇ 【第15項】npc.rigging_lead–npc.work_leader（吊運中）相距 2.15 m（≥ 0.6）✔
-◇ 【第15項】npc.guard–npc.work_leader（吊運中）相距 1.00 m（≥ 0.6）✔
-◇ 【第15項】npc.rigging_lead（吊運中）(-5.00, -3.50) 到工作檯 7.71 m（≥ 0.6）✔
-◇ 【第15項】npc.rigging_lead（吊運中）(-5.00, -3.50) 到台架四周淨空帶 2.48 m（≥ 0.6）✔
-◇ 【第15項】npc.rigging_lead（吊運中）(-5.00, -3.50) 到鋼梯 7.74 m（≥ 0.6）✔
-◇ 【第15項】npc.guard（吊運中）(-6.00, -4.30) 到工作檯 7.14 m（≥ 0.6）✔
-◇ 【第15項】npc.guard（吊運中）(-6.00, -4.30) 到台架四周淨空帶 2.15 m（≥ 0.6）✔
-◇ 【第15項】npc.guard（吊運中）(-6.00, -4.30) 到鋼梯 8.80 m（≥ 0.6）✔
-◇ 【第15項】npc.work_leader（吊運中）(-7.00, -4.30) 到工作檯 6.30 m（≥ 0.6）✔
-◇ 【第15項】npc.work_leader（吊運中）(-7.00, -4.30) 到台架四周淨空帶 1.74 m（≥ 0.6）✔
-◇ 【第15項】npc.work_leader（吊運中）(-7.00, -4.30) 到鋼梯 9.18 m（≥ 0.6）✔
-◇ 【第16項】(a) tp.roof.base_w.s (-0.950, 0.000, 0.024) → 螺栓 1 (-0.49, 0.02) 0.46 m（≤ 0.6）、偏 0.1°（≤ 30°）✔
-◇ 【第16項】(e) tp.roof.base_w.s 螺栓 1 |X| 0.494 ＜ 站點 |X| 0.950✔
-◇ 【第16項】(a) tp.roof.base_e.s (0.950, 0.000, 0.024) → 螺栓 2 (0.48, 0.02) 0.47 m（≤ 0.6）、偏 0.1°（≤ 30°）✔
-◇ 【第16項】(e) tp.roof.base_e.s 螺栓 2 |X| 0.478 ＜ 站點 |X| 0.950✔
-◇ 【第16項】(a) tp.roof.base_e.n (0.950, 0.000, 1.648) → 螺栓 3 (0.48, 1.65) 0.47 m（≤ 0.6）、偏 0.0°（≤ 30°）✔
-◇ 【第16項】(e) tp.roof.base_e.n 螺栓 3 |X| 0.478 ＜ 站點 |X| 0.950✔
-◇ 【第16項】(a) tp.roof.base_w.n (-0.950, 0.000, 1.648) → 螺栓 4 (-0.49, 1.65) 0.46 m（≤ 0.6）、偏 0.0°（≤ 30°）✔
-◇ 【第16項】(e) tp.roof.base_w.n 螺栓 4 |X| 0.494 ＜ 站點 |X| 0.950✔
-◇ 【第16項】(b) tp.roof.base_w.s 在 Walkable 上、離 Walkable 邊 ≥ 0.15 m✘
-◇ 【第16項】(b) tp.roof.base_e.s 在 Walkable 上、離 Walkable 邊 ≥ 0.15 m✘
-◇ 【第16項】(b) tp.roof.base_e.n 在 Walkable 上、離 Walkable 邊 ≥ 0.15 m✔
-◇ 【第16項】(b) tp.roof.base_w.n 在 Walkable 上、離 Walkable 邊 ≥ 0.15 m✔
-◇ 【第16項】(b) tp.roof.base_w 在 Walkable 上、離 Walkable 邊 ≥ 0.15 m✔
-◇ 【第16項】(b) tp.roof.base_e 在 Walkable 上、離 Walkable 邊 ≥ 0.15 m✔
-◇ 【第16項】(c) tp.roof.base_w.s–tp.roof.base_e.s 1.90 m（≥ 0.6）✔
-◇ 【第16項】(c) tp.roof.base_w.s–tp.roof.base_e.n 2.50 m（≥ 0.6）✔
-◇ 【第16項】(c) tp.roof.base_w.s–tp.roof.base_w.n 1.62 m（≥ 0.6）✔
-◇ 【第16項】(c) tp.roof.base_w.s–tp.roof.base_w 0.81 m（≥ 0.6）✔
-◇ 【第16項】(c) tp.roof.base_w.s–tp.roof.base_e 2.07 m（≥ 0.6）✔
-◇ 【第16項】(c) tp.roof.base_e.s–tp.roof.base_e.n 1.62 m（≥ 0.6）✔
-◇ 【第16項】(c) tp.roof.base_e.s–tp.roof.base_w.n 2.50 m（≥ 0.6）✔
-◇ 【第16項】(c) tp.roof.base_e.s–tp.roof.base_w 2.07 m（≥ 0.6）✔
-◇ 【第16項】(c) tp.roof.base_e.s–tp.roof.base_e 0.81 m（≥ 0.6）✔
-◇ 【第16項】(c) tp.roof.base_e.n–tp.roof.base_w.n 1.90 m（≥ 0.6）✔
-◇ 【第16項】(c) tp.roof.base_e.n–tp.roof.base_w 2.07 m（≥ 0.6）✔
-◇ 【第16項】(c) tp.roof.base_e.n–tp.roof.base_e 0.81 m（≥ 0.6）✔
-◇ 【第16項】(c) tp.roof.base_w.n–tp.roof.base_w 0.81 m（≥ 0.6）✔
-◇ 【第16項】(c) tp.roof.base_w.n–tp.roof.base_e 2.07 m（≥ 0.6）✔
-◇ 【第16項】(c) tp.roof.base_w–tp.roof.base_e 1.90 m（≥ 0.6）✔
-◇ 【第16項】(d) tp.roof.base_e 到 HV_Cable_End (0.30, 1.85) 1.20 m（≤ 1.3）✔
-◇ 【第17項】暫放墊 X -0.60…0.60、Z -1.25…-0.95 在 |X| ≤ 0.8 內（存檔 inactive）✔
-◇ 【第17項】暫放墊到最近的車頂站點 tp.roof.inner 0.30 m（≥ 0.25）✔
-◇ 【第17項】活動欄開口 (-1.81, -1.00) 到各車頂站點的直線動線都不經過暫放墊✔
-◇ 【第18項】控制線接頭 (0.500, 0.634, 0.950)（PAN_Root 局部 X 0.508 ＞ 0）✔
-◇ 【第18項】控制線接頭到 tp.roof.base_e 0.46 m（≤ 0.8）✔
-◇ 【第18項】降弓固定帶綁點 (0.288, 0.628, 1.200)（PAN_Root 局部 X 0.296 ＞ 0）✔
-◇ 【第18項】降弓固定帶綁點到 tp.roof.base_e 0.76 m（≤ 0.8）✔
-◇ 【第18項】控制線接頭到 HV_Cable_End 水平 0.92 m（≥ 0.3）✔
-◇ 【第18項】HoldDown_Saddle 頂點範圍 (0.250, 0.590, 1.175)–(0.326, 0.628, 1.225) 和上臂頂點範圍相交✔
-◇ 【第18項】HoldDown_Leg_A 長 0.216 m（0.05–1.00）✔
-◇ 【第18項】HoldDown_Leg_B 長 0.801 m（0.05–1.00）✔
-◇ 【第19項】PendantDock Bounds (-3.080, 0.930, -3.050)–(-2.990, 1.230, -2.850)
-◇ 【第19項】PendantDock 不在吊物禁區 Z -2.25…2.25 內（離禁區 0.60 m）✔
-◇ 【第19項】PendantDock 到 tp.platform.crane 0.74 m（≤ 1）✔
-◇ 【第19項】PendantDock 和工具架 Bounds Z -2.750…-2.050 間距 0.100 m（≥ 0.15 − 容差 0.005）✘
-◇ 【第19項】PendantDock 和掛位 1 間距 0.470 m（不重疊且 ≥ 0.15 − 0.005）✔
-◇ 【第19項】PendantDock 和掛位 4 間距 0.170 m（不重疊且 ≥ 0.15 − 0.005）✔
-◇ 【第19項】工具架掛位 11 還沒建（R1.5b b3）
-◇ 【第19項】工具架掛位 12 還沒建（R1.5b b3）
-◇ 【第20項】防墜器 → tp.roof.base_w.s D 環（跪姿 0.9 m）不碰集電弓與絕緣子✔
-◇ 【第20項】防墜器 → tp.roof.base_w.s D 環（站姿 1.35 m）不碰集電弓與絕緣子✔
-◇ 【第20項】防墜器 → tp.roof.base_e.s D 環（跪姿 0.9 m）不碰集電弓與絕緣子✔
-◇ 【第20項】防墜器 → tp.roof.base_e.s D 環（站姿 1.35 m）不碰集電弓與絕緣子✔
-◇ 【第20項】防墜器 → tp.roof.base_e.n D 環（跪姿 0.9 m）不碰集電弓與絕緣子✔
-◇ 【第20項】防墜器 → tp.roof.base_e.n D 環（站姿 1.35 m）不碰集電弓與絕緣子✔
-◇ 【第20項】防墜器 → tp.roof.base_w.n D 環（跪姿 0.9 m）不碰集電弓與絕緣子✔
-◇ 【第20項】防墜器 → tp.roof.base_w.n D 環（站姿 1.35 m）不碰集電弓與絕緣子✔
-◇ 待裁定 ✘ tp.roof.base_w.s：(-0.95, 0.02) 下方沒有 Walkable
-◇ 待裁定 ✘ tp.roof.base_e.s：(0.95, 0.02) 下方沒有 Walkable
-◇ 待裁定 ✘ 【第15項】npc.work_leader（平時）(-3.00, -0.30) 最近的設備 去駕駛室光圈 0.55 m（≥ 0.6）
-◇ 待裁定 ✘ 【第15項】npc.work_leader（平時）到 桿架 0.59 m（≥ 0.6）
-◇ 待裁定 ✘ 【第16項】(b) tp.roof.base_w.s 在 Walkable 上、離 Walkable 邊 ≥ 0.15 m
-◇ 待裁定 ✘ 【第16項】(b) tp.roof.base_e.s 在 Walkable 上、離 Walkable 邊 ≥ 0.15 m
-◇ 待裁定 ✘ 【第19項】PendantDock 和工具架 Bounds Z -2.750…-2.050 間距 0.100 m（≥ 0.15 − 容差 0.005）
+・【第5項】tp.platform.lift (-2.20, -0.05) 在吊運路徑內，吊運時封閉（吊物懸空時擋傳送）
+・【第5項】tp.platform.ground (-2.20, 0.60) 在吊運路徑內，吊運時封閉（吊物懸空時擋傳送）
+・【第5項】tp.roof.inner (0.00, -0.65) 在吊運路徑內，吊運時封閉（吊物懸空時擋傳送）
+・【第5項】tp.roof.outer (0.00, -0.65) 在吊運路徑內，吊運時封閉（吊物懸空時擋傳送）
+・【第5項】tp.stand.e (-7.91, 0.11) 在吊運路徑內，吊運時封閉（吊物懸空時擋傳送）
+・【第5項】tp.roof.base_w (-0.85, 0.84) 在吊運路徑內，吊運時封閉（吊物懸空時擋傳送）
+・【第5項】tp.roof.base_w.s (-0.85, -0.55) 在吊運路徑內，吊運時封閉（吊物懸空時擋傳送）
+・【第5越障項】吊鉤最高點 Y 5.530 → 吊物底面 Y 3.390（掛點在 LoweredTightBounds 底面上 2.140 m）
+・【第8項】車體接地座 Clamp_Point (-1.150, 0.010, 0.430)（車頂斷面在 X -1.15 的高度 -0.040）
+・【第9項】tp.roof.base_w → 吊耳 1 (-0.52, -0.03)：0.92 m、偏 69.3°（同側，不在 ±30° 內）
+・【第9項】tp.roof.base_w → 吊耳 2 (0.51, -0.03)：1.61 m、偏 32.4°（對側）
+・【第9項】tp.roof.base_w → 吊耳 3 (0.51, 1.70)：1.61 m、偏 32.4°（對側）
+・【第9項】tp.roof.base_w → 吊耳 4 (-0.52, 1.70)：0.92 m、偏 69.3°（同側，不在 ±30° 內）
+・【第9項】tp.roof.base_w → ip.pan_assy.ctrl_connector：1.35 m、偏 4.8°
+・【第9項】tp.roof.base_w → HoldDown_BuckleBase_A：1.43 m、偏 14.8°
+・【第9項】tp.roof.base_w → HoldDown_BuckleBase_B：0.48 m、偏 50.0°
+・【第9項】tp.roof.base_e → 吊耳 1 (-0.52, -0.03)：1.62 m、偏 32.1°（對側）
+・【第9項】tp.roof.base_e → 吊耳 2 (0.51, -0.03)：0.93 m、偏 68.4°（同側，不在 ±30° 內）
+・【第9項】tp.roof.base_e → 吊耳 3 (0.51, 1.70)：0.93 m、偏 68.4°（同側，不在 ±30° 內）
+・【第9項】tp.roof.base_e → 吊耳 4 (-0.52, 1.70)：1.62 m、偏 32.1°（對側）
+・【第9項】tp.roof.base_e → ip.pan_assy.ctrl_connector：0.37 m、偏 18.0°
+・【第9項】tp.roof.base_e → HoldDown_BuckleBase_A：0.49 m、偏 48.5°
+・【第9項】tp.roof.base_e → HoldDown_BuckleBase_B：1.44 m、偏 14.6°
+・【第19項】PendantDock Bounds (-3.080, 0.930, -3.000)–(-2.990, 1.230, -2.900)
+・【第19項】工具架掛位 11 還沒建（R1.5b b3）
+・【第19項】工具架掛位 12 還沒建（R1.5b b3）
+✔ 【第1項】tp.platform.lift–tp.platform.rack 水平 2.36 m（≥ 0.6）
+✔ 【第1項】tp.platform.lift–tp.platform.ground 水平 0.65 m（≥ 0.6）
+✔ 【第1項】tp.platform.lift–tp.platform.anchor 水平 1.75 m（≥ 0.6）
+✔ 【第1項】tp.platform.lift–tp.platform.crane 水平 3.46 m（≥ 0.6）
+✔ 【第1項】tp.platform.lift–tp.platform.parts 水平 1.66 m（≥ 0.6）
+✔ 【第1項】tp.platform.lift–tp.platform.scrap 水平 2.91 m（≥ 0.6）
+✔ 【第1項】tp.platform.rack–tp.platform.ground 水平 3.01 m（≥ 0.6）
+✔ 【第1項】tp.platform.rack–tp.platform.anchor 水平 0.64 m（≥ 0.6）
+✔ 【第1項】tp.platform.rack–tp.platform.crane 水平 1.10 m（≥ 0.6）
+✔ 【第1項】tp.platform.rack–tp.platform.parts 水平 4.00 m（≥ 0.6）
+✔ 【第1項】tp.platform.rack–tp.platform.scrap 水平 5.25 m（≥ 0.6）
+✔ 【第1項】tp.platform.ground–tp.platform.anchor 水平 2.40 m（≥ 0.6）
+✔ 【第1項】tp.platform.ground–tp.platform.crane 水平 4.10 m（≥ 0.6）
+✔ 【第1項】tp.platform.ground–tp.platform.parts 水平 1.02 m（≥ 0.6）
+✔ 【第1項】tp.platform.ground–tp.platform.scrap 水平 2.26 m（≥ 0.6）
+✔ 【第1項】tp.platform.anchor–tp.platform.crane 水平 1.71 m（≥ 0.6）
+✔ 【第1項】tp.platform.anchor–tp.platform.parts 水平 3.41 m（≥ 0.6）
+✔ 【第1項】tp.platform.anchor–tp.platform.scrap 水平 4.65 m（≥ 0.6）
+✔ 【第1項】tp.platform.crane–tp.platform.parts 水平 5.10 m（≥ 0.6）
+✔ 【第1項】tp.platform.crane–tp.platform.scrap 水平 6.35 m（≥ 0.6）
+✔ 【第1項】tp.platform.parts–tp.platform.scrap 水平 1.25 m（≥ 0.6）
+✔ 【第2項】活動欄開口 Z -1.40…-0.60 前 0.4 m 內沒有站點
+✔ 【第4d項】env.pole_rack 中心 (-2.77, 0.60)（錨點 Anchor_PoleRack (-2.85, 0.60)）到 tp.platform.ground 水平 0.57 m（≤ 0.7）
+✔ 【第5項】tp.platform.crane (-2.40, -3.50)（吊運時可到）離吊運路徑 ±1 m 2.50 m、不在吊物禁區內
+✔ 【第5項】npc.rigging_lead（吊運中）(-5.00, -3.50) 離吊運路徑 ±1 m 2.50 m、不在吊物禁區內
+✔ 【第5項】npc.guard（吊運中）(-6.00, -4.30) 離吊運路徑 ±1 m 3.30 m、不在吊物禁區內
+✔ 【第5項】npc.work_leader（吊運中）(-7.00, -4.30) 離吊運路徑 ±1 m 3.30 m、不在吊物禁區內
+✔ 【第5越障項】吊鉤最高點實測 Y 5.530，規格值 5.53（鐵道 D35）
+✔ 【第5越障項】防墜器門架頂 頂面 Y 2.640，餘裕 0.750 m（≥ 0.5）
+✔ 【第5越障項】桿架上直立的長桿頂 頂面 Y 1.305，餘裕 2.085 m（≥ 0.5）
+✔ 【第5越障項】平台護欄 頂面 Y 1.100，餘裕 2.290 m（≥ 0.5）
+✔ 【第5越障項】PendantDock 頂面 Y 1.230，餘裕 2.160 m（≥ 0.5）
+✔ 【第6項】tp.stand.n (-9.49, 1.99) 在維修區 X -13.5…-5.5、Z -5…5
+✔ 【第6項】tp.stand.n Y -3.640，和地面 -3.65 差 0.010 m（≤ 0.02）
+✔ 【第6項】tp.stand.n 離台架邊 0.60 m（0.6 ±0.05）
+✔ 【第6項】tp.stand.n 面向台架偏 0.2°（≤ 30°）
+✔ 【第6項】tp.stand.n 離台架上的降弓整組 水平 0.75 m（≥ 0.4）
+✔ 【第6項】tp.stand.e (-7.91, 0.11) 在維修區 X -13.5…-5.5、Z -5…5
+✔ 【第6項】tp.stand.e Y -3.640，和地面 -3.65 差 0.010 m（≤ 0.02）
+✔ 【第6項】tp.stand.e 離台架邊 0.60 m（0.6 ±0.05）
+✔ 【第6項】tp.stand.e 面向台架偏 4.0°（≤ 30°）
+✔ 【第6項】tp.stand.e 離台架上的降弓整組 水平 0.75 m（≥ 0.4）
+✔ 【第6項】tp.stand.s (-9.49, -1.77) 在維修區 X -13.5…-5.5、Z -5…5
+✔ 【第6項】tp.stand.s Y -3.640，和地面 -3.65 差 0.010 m（≤ 0.02）
+✔ 【第6項】tp.stand.s 離台架邊 0.60 m（0.6 ±0.05）
+✔ 【第6項】tp.stand.s 面向台架偏 0.3°（≤ 30°）
+✔ 【第6項】tp.stand.s 離台架上的降弓整組 水平 0.75 m（≥ 0.4）
+✔ 【第6項】tp.stand.w (-11.08, 0.11) 在維修區 X -13.5…-5.5、Z -5…5
+✔ 【第6項】tp.stand.w Y -3.640，和地面 -3.65 差 0.010 m（≤ 0.02）
+✔ 【第6項】tp.stand.w 離台架邊 0.60 m（0.6 ±0.05）
+✔ 【第6項】tp.stand.w 面向台架偏 4.0°（≤ 30°）
+✔ 【第6項】tp.stand.w 離台架上的降弓整組 水平 0.75 m（≥ 0.4）
+✔ 【第7b項】tp.roof.inner (0.00, -0.65) 不在母線帶、絕緣子孔上
+✔ 【第7b項】tp.roof.outer (0.00, -0.65) 不在母線帶、絕緣子孔上
+✔ 【第7b項】tp.roof.shelf (-0.60, -2.50) 不在母線帶、絕緣子孔上
+✔ 【第7b項】tp.roof.base_w (-0.85, 0.84) 不在母線帶、絕緣子孔上
+✔ 【第7b項】tp.roof.base_e (0.85, 0.84) 不在母線帶、絕緣子孔上
+✔ 【第7b項】tp.roof.base_w.s (-0.85, -0.55) 不在母線帶、絕緣子孔上
+✔ 【第7b項】tp.roof.base_e.s (0.85, -0.55) 不在母線帶、絕緣子孔上
+✔ 【第7b項】tp.roof.base_e.n (0.85, 1.65) 不在母線帶、絕緣子孔上
+✔ 【第7b項】tp.roof.base_w.n (-0.85, 1.65) 不在母線帶、絕緣子孔上
+✔ 【第8項】車體接地座到 tp.roof.base_w (-0.85, 0.84) 0.50 m（≤ 0.8）
+✔ 【第8項】車體接地座 X -1.150（≤ -1.05）
+✔ 【第8項】車體接地座正下方沒有 Walkable
+✔ 【第9項】tp.roof.base_w (-0.850, 0.000, 0.836) 朝向偏 +X 0.0°（≤ 1°）
+✔ 【第9項】tp.roof.base_e (0.850, 0.000, 0.836) 朝向偏 −X 0.0°（≤ 1°）
+✔ 【第10b項】ENV_PlatformStair Z 3.988…9.012（3.98…10）
+✔ 【第10b項】ENV_PlatformStair 伸進平台上方 0.012 m（≤ 0.02）
+✔ 【第11項】台架上的降弓整組（底架除外，頂點算法）最低 Y -2.797（Rod1），到外框頂面 -3.200 垂直 0.403 m（≥ 0.3）
+✔ 【第12項】吊帶 1：(-10.02, -2.57, -0.86)→(-9.51, -0.76, 0.00) 不穿過台架外框（頂面 Y -3.200）
+✔ 【第12項】吊帶 2：(-8.98, -2.57, -0.86)→(-9.51, -0.76, 0.00) 不穿過台架外框（頂面 Y -3.200）
+✔ 【第12項】吊帶 3：(-8.98, -2.57, 0.86)→(-9.51, -0.76, 0.00) 不穿過台架外框（頂面 Y -3.200）
+✔ 【第12項】吊帶 4：(-10.02, -2.57, 0.86)→(-9.51, -0.76, 0.00) 不穿過台架外框（頂面 Y -3.200）
+✔ 【第13項】活動欄開口中心 (-1.81, -1.00) 到防墜器掛鉤 (-1.95, -1.55) 0.57 m（≤ 2）
+✔ 【第13項】活動欄開口中心 (-1.81, -1.00) 到桿架 (-2.77, 0.60) 1.87 m（≤ 2）
+✔ 【第13項】活動欄開口中心 (-1.81, -1.00) 到工具架 (-3.10, -2.40) 1.90 m（≤ 2）
+✔ 【第14項】mk.platform.to_cab (-2.200, 0.000, -0.450) 到 tp.platform.lift 0.40 m（≤ 0.5）
+✔ 【第14項】mk.platform.to_cab 正下方有 Walkable
+✔ 【第15項】npc.guard（平時）(-3.00, -1.00) 最近的設備 去駕駛室光圈 0.63 m（≥ 0.6）
+✔ 【第15項】npc.guard（平時）最近的平台站點 tp.platform.anchor 1.13 m（≥ 0.6）
+✔ 【第15項】npc.guard（平時）離活動欄開口 1.19 m（≥ 0.4）
+✔ 【第15項】npc.work_leader（平時）(-3.10, -0.30) 最近的設備 桿架 0.63 m（≥ 0.6）
+✔ 【第15項】npc.work_leader（平時）最近的平台站點 tp.platform.lift 0.93 m（≥ 0.6）
+✔ 【第15項】npc.work_leader（平時）離活動欄開口 1.32 m（≥ 0.4）
+✔ 【第15項】npc.rigging_lead–npc.guard（吊運中）相距 1.28 m（≥ 0.6）
+✔ 【第15項】npc.rigging_lead–npc.work_leader（吊運中）相距 2.15 m（≥ 0.6）
+✔ 【第15項】npc.guard–npc.work_leader（吊運中）相距 1.00 m（≥ 0.6）
+✔ 【第15項】npc.rigging_lead（吊運中）(-5.00, -3.50) 到工作檯 7.71 m（≥ 0.6）
+✔ 【第15項】npc.rigging_lead（吊運中）(-5.00, -3.50) 到台架四周淨空帶 2.57 m（≥ 0.6）
+✔ 【第15項】npc.rigging_lead（吊運中）(-5.00, -3.50) 到鋼梯 7.74 m（≥ 0.6）
+✔ 【第15項】npc.guard（吊運中）(-6.00, -4.30) 到工作檯 7.14 m（≥ 0.6）
+✔ 【第15項】npc.guard（吊運中）(-6.00, -4.30) 到台架四周淨空帶 2.33 m（≥ 0.6）
+✔ 【第15項】npc.guard（吊運中）(-6.00, -4.30) 到鋼梯 8.80 m（≥ 0.6）
+✔ 【第15項】npc.work_leader（吊運中）(-7.00, -4.30) 到工作檯 6.30 m（≥ 0.6）
+✔ 【第15項】npc.work_leader（吊運中）(-7.00, -4.30) 到台架四周淨空帶 1.95 m（≥ 0.6）
+✔ 【第15項】npc.work_leader（吊運中）(-7.00, -4.30) 到鋼梯 9.18 m（≥ 0.6）
+✔ 【第16項】(b) tp.roof.base_w.s (-0.850, 0.000, -0.550) 面向 (0.53, 0.85) → 螺栓 1 (-0.49, 0.02) 0.675 m（≤ 0.7）、偏 0.0°（≤ 30°）
+✔ 【第16項】(c) tp.roof.base_w.s → 吊耳 1 (-0.52, -0.03) 0.616 m、偏 0.1°（≤ 30°）
+✔ 【第16項】(g) tp.roof.base_w.s 螺栓 1 |X| 0.494 ＜ 站點 |X| 0.850
+✔ 【第16項】(b) tp.roof.base_e.s (0.850, 0.000, -0.550) 面向 (-0.54, 0.84) → 螺栓 2 (0.48, 0.02) 0.684 m（≤ 0.7）、偏 0.0°（≤ 30°）
+✔ 【第16項】(c) tp.roof.base_e.s → 吊耳 2 (0.51, -0.03) 0.625 m、偏 0.2°（≤ 30°）
+✔ 【第16項】(g) tp.roof.base_e.s 螺栓 2 |X| 0.478 ＜ 站點 |X| 0.850
+✔ 【第16項】(a) tp.roof.base_e.n (0.850, 0.000, 1.648) 面向 (-1.00, 0.00) → 螺栓 3 (0.48, 1.65) 0.372 m（≤ 0.6）、偏 0.0°（≤ 30°）
+✔ 【第16項】(c) tp.roof.base_e.n → 吊耳 3 (0.51, 1.70) 0.345 m、偏 8.3°（≤ 30°）
+✔ 【第16項】(g) tp.roof.base_e.n 螺栓 3 |X| 0.478 ＜ 站點 |X| 0.850
+✔ 【第16項】(a) tp.roof.base_w.n (-0.850, 0.000, 1.648) 面向 (1.00, 0.00) → 螺栓 4 (-0.49, 1.65) 0.356 m（≤ 0.6）、偏 0.0°（≤ 30°）
+✔ 【第16項】(c) tp.roof.base_w.n → 吊耳 4 (-0.52, 1.70) 0.329 m、偏 8.7°（≤ 30°）
+✔ 【第16項】(g) tp.roof.base_w.n 螺栓 4 |X| 0.494 ＜ 站點 |X| 0.850
+✔ 【第16項】(d) tp.roof.base_e.n → 高壓端子 (0.48, 1.60) 0.375 m（≤ 1.3）、偏 7.7°（≤ 30°）
+✔ 【第16項】(d) tp.roof.base_e 到 HV_Cable_End (0.30, 1.85) 1.152 m（≤ 1.3）
+✔ 【第16項】(e) tp.roof.base_w.s 在 Walkable 上、離 Walkable 邊 ≥ 0.15 m
+✔ 【第16項】(h) tp.roof.base_w.s 到降弓羊角頂點範圍 X -0.833…0.833、Z -0.187…0.187 0.363 m（≥ 身體半徑 0.2）
+✔ 【第16項】(i) tp.roof.base_w.s 到不會動零件最近的 底架 0.548 m（≥ 0.25）
+✔ 【第16項】(e) tp.roof.base_e.s 在 Walkable 上、離 Walkable 邊 ≥ 0.15 m
+✔ 【第16項】(h) tp.roof.base_e.s 到降弓羊角頂點範圍 X -0.833…0.833、Z -0.187…0.187 0.363 m（≥ 身體半徑 0.2）
+✔ 【第16項】(i) tp.roof.base_e.s 到不會動零件最近的 底架 0.556 m（≥ 0.25）
+✔ 【第16項】(e) tp.roof.base_e.n 在 Walkable 上、離 Walkable 邊 ≥ 0.15 m
+✔ 【第16項】(h) tp.roof.base_e.n 到降弓羊角頂點範圍 X -0.833…0.833、Z -0.187…0.187 1.461 m（≥ 身體半徑 0.2）
+✔ 【第16項】(i) tp.roof.base_e.n 到不會動零件最近的 絕緣子 2 0.287 m（≥ 0.25）
+✔ 【第16項】(e) tp.roof.base_w.n 在 Walkable 上、離 Walkable 邊 ≥ 0.15 m
+✔ 【第16項】(h) tp.roof.base_w.n 到降弓羊角頂點範圍 X -0.833…0.833、Z -0.187…0.187 1.461 m（≥ 身體半徑 0.2）
+✔ 【第16項】(i) tp.roof.base_w.n 到不會動零件最近的 絕緣子 1 0.271 m（≥ 0.25）
+✔ 【第16項】(e) tp.roof.base_w 在 Walkable 上、離 Walkable 邊 ≥ 0.15 m
+✔ 【第16項】(h) tp.roof.base_w 到降弓羊角頂點範圍 X -0.833…0.833、Z -0.187…0.187 0.649 m（≥ 身體半徑 0.2）
+✔ 【第16項】(i) tp.roof.base_w 到不會動零件最近的 底架 0.276 m（≥ 0.25）
+✔ 【第16項】(e) tp.roof.base_e 在 Walkable 上、離 Walkable 邊 ≥ 0.15 m
+✔ 【第16項】(h) tp.roof.base_e 到降弓羊角頂點範圍 X -0.833…0.833、Z -0.187…0.187 0.649 m（≥ 身體半徑 0.2）
+✔ 【第16項】(i) tp.roof.base_e 到不會動零件最近的 底架 0.292 m（≥ 0.25）
+✔ 【第16項】(f) tp.roof.base_w.s–tp.roof.inner 0.856 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_w.s–tp.roof.shelf 1.966 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_e.s–tp.roof.inner 0.856 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_e.s–tp.roof.shelf 2.430 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_e.s–tp.roof.base_w 2.193 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_e.s–tp.roof.base_w.s 1.700 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_e.s–tp.roof.base_w.n 2.779 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_e.n–tp.roof.inner 2.450 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_e.n–tp.roof.shelf 4.394 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_e.n–tp.roof.base_w 1.884 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_e.n–tp.roof.base_w.s 2.779 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_e.n–tp.roof.base_e.s 2.198 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_e.n–tp.roof.base_w.n 1.700 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_w.n–tp.roof.inner 2.450 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_w.n–tp.roof.shelf 4.156 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_w.n–tp.roof.base_w.s 2.198 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_w–tp.roof.inner 1.712 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_w–tp.roof.shelf 3.345 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_w–tp.roof.base_w.s 1.386 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_w–tp.roof.base_w.n 0.812 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_e–tp.roof.inner 1.712 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_e–tp.roof.shelf 3.637 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_e–tp.roof.base_w 1.700 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_e–tp.roof.base_w.s 2.193 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_e–tp.roof.base_e.s 1.386 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_e–tp.roof.base_e.n 0.812 m（≥ 0.6）
+✔ 【第16項】(f) tp.roof.base_e–tp.roof.base_w.n 1.884 m（≥ 0.6）
+✔ 【第16項】(j) tp.roof.base_e.n → 控制線接頭（手） 水平 0.781 m，伸手時頭部 |X| 約 0.747（≤ 1；可及 0.55 m）
+✔ 【第16項】(j) tp.roof.base_e.n → 降弓固定帶綁點（手） 水平 0.719 m，伸手時頭部 |X| 約 0.718（≤ 1；可及 0.55 m）
+✔ 【第16項】(j) tp.roof.base_e.n → 高壓電纜接地掛點（短絕緣桿桿頭） 水平 0.585 m，伸手時頭部 |X| 約 0.850（≤ 1；可及 0.8 m）
+✔ 【第21項】tp.roof.base_w.s：螺栓 1 為圓心、半徑 0.45 m、起始 (0.71, -0.71) ±45°、高度 Y 0.305，最小淨空 0.005 m（最近 InsulatorCollision）；到弓頭（含羊角）0.151 m
+✔ 【第21項】tp.roof.base_e.s：螺栓 2 為圓心、半徑 0.45 m、起始 (0.71, 0.71) ±45°、高度 Y 0.305，最小淨空 0.005 m（最近 InsulatorCollision）；到弓頭（含羊角）0.151 m
+✔ 【第21項】tp.roof.base_e.n：螺栓 3 為圓心、半徑 0.45 m、起始 (0.00, 1.00) ±45°、高度 Y 0.305，最小淨空 0.005 m（最近 InsulatorCollision）；到弓頭（含羊角）1.504 m
+✔ 【第21項】tp.roof.base_w.n：螺栓 4 為圓心、半徑 0.45 m、起始 (0.00, -1.00) ±45°、高度 Y 0.305，最小淨空 0.005 m（最近 InsulatorCollision）；到弓頭（含羊角）1.022 m
+✔ 【第17項】暫放墊 X -0.60…0.60、Z -1.25…-0.95 在 |X| ≤ 0.8 內（存檔 inactive）
+✔ 【第17項】暫放墊到最近的車頂站點 tp.roof.inner 0.30 m（≥ 0.25）
+✔ 【第17項】活動欄開口 (-1.81, -1.00) 到各車頂站點的直線動線都不經過暫放墊
+✔ 【第18項】控制線接頭 (0.500, 0.634, 0.950)（PAN_Root 局部 X 0.508 ＞ 0）
+✔ 【第18項】控制線接頭到 tp.roof.base_e 0.37 m（≤ 0.8）
+✔ 【第18項】降弓固定帶綁點 (0.288, 0.628, 1.200)（PAN_Root 局部 X 0.296 ＞ 0）
+✔ 【第18項】降弓固定帶綁點到 tp.roof.base_e 0.67 m（≤ 0.8）
+✔ 【第18項】控制線接頭到 HV_Cable_End 水平 0.92 m（≥ 0.3）
+✔ 【第18項】HoldDown_Saddle 頂點範圍 (0.250, 0.590, 1.175)–(0.326, 0.628, 1.225) 和上臂頂點範圍相交
+✔ 【第18項】HoldDown_Leg_A 長 0.216 m（0.05–1.00）
+✔ 【第18項】HoldDown_Leg_B 長 0.801 m（0.05–1.00）
+✔ 【第19項】PendantDock 不在吊物禁區 Z -2.25…2.25 內（離禁區 0.65 m）
+✔ 【第19項】PendantDock 中心 (-3.04, -2.95) 到 tp.platform.crane 0.840 m（量站點到掛座中心，≤ 1；a6 回報的 0.74 是量到掛座 Bounds 最近的邊）
+✔ 【第19項】PendantDock 和工具架 Bounds Z -2.750…-2.050 間距 0.150 m（≥ 0.15 − 容差 0.005）
+✔ 【第19項】遙控器 Bounds (-3.045, 0.970, -2.989)–(-2.953, 1.250, -2.920)：Z 在掛座 -3.000…-2.900 內
+✔ 【第19項】遙控器和工具架間距 0.170 m（≥ 0.15 − 0.005）
+✔ 【第19項】PendantDock 和掛位 1 間距 0.520 m（不重疊且 ≥ 0.15 − 0.005）
+✔ 【第19項】PendantDock 和掛位 4 間距 0.220 m（不重疊且 ≥ 0.15 − 0.005）
+✔ 【第20項】防墜器 → tp.roof.base_w.s D 環（跪姿 0.9 m）不碰集電弓與絕緣子
+✔ 【第20項】防墜器 → tp.roof.base_w.s D 環（站姿 1.35 m）不碰集電弓與絕緣子
+✔ 【第20項】防墜器 → tp.roof.base_e.s D 環（跪姿 0.9 m）不碰集電弓與絕緣子
+✔ 【第20項】防墜器 → tp.roof.base_e.s D 環（站姿 1.35 m）不碰集電弓與絕緣子
+✔ 【第20項】防墜器 → tp.roof.base_e.n D 環（跪姿 0.9 m）不碰集電弓與絕緣子
+✔ 【第20項】防墜器 → tp.roof.base_e.n D 環（站姿 1.35 m）不碰集電弓與絕緣子
+✔ 【第20項】防墜器 → tp.roof.base_w.n D 環（跪姿 0.9 m）不碰集電弓與絕緣子
+✔ 【第20項】防墜器 → tp.roof.base_w.n D 環（站姿 1.35 m）不碰集電弓與絕緣子
 VR：70 個互動點加上 XRInteractableBridge
 場景已存檔：Assets/_Project/Content/Scenes/SC_CarbonStripSlice.unity（Build Settings 第 0 位）
 場景互動物件 89 個：env.bolt_tray_L, env.bolt_tray_R, env.crane, env.crane_pendant, env.panto_stand, env.panto_stand.tool_tray, env.parts_tray, env.pole_rack, env.roof_strip_mat, env.roof_toolbox, env.sling_1, env.sling_2, env.sling_3, env.sling_4, env.socket_seat_10, env.socket_seat_13, env.socket_seat_17, env.spare_shelf.slot_1, env.spare_shelf.slot_2, env.spare_shelf.slot_3, env.tool_bag, env.tool_bag.bolt_pouch, env.tool_rack, env.tool_rack.slot_1, env.tool_rack.slot_2, env.tool_rack.slot_3, env.tool_rack.slot_4, env.tool_rack.slot_5, env.tool_rack.slot_6, env.tool_rack.slot_7, env.tool_rack.slot_8, env.tool_rack.slot_9, env.waist_pouch, env.work_order, ip.cab.breaker, ip.cab.cylinder_power, ip.cab.pan_indicator, ip.cab.pan_indicator_repeat, ip.cab.panel, ip.cab.raise_button, ip.cab.raise_switch, ip.carbon_strip_L.bolt_1, ip.carbon_strip_L.bolt_2, ip.carbon_strip_L.bolt_3, ip.carbon_strip_L.bolt_4, ip.carbon_strip_L.bracket, ip.carbon_strip_L.install_check, ip.carbon_strip_L.install_target, ip.carbon_strip_L.measure_left, ip.carbon_strip_L.measure_mid, ip.carbon_strip_L.measure_right, ip.carbon_strip_L.outward, ip.carbon_strip_R.bolt_1, ip.carbon_strip_R.bolt_2, ip.carbon_strip_R.bolt_3, ip.carbon_strip_R.bolt_4, ip.carbon_strip_R.bracket, ip.carbon_strip_R.install_check, ip.carbon_strip_R.install_target, ip.carbon_strip_R.measure_left, ip.carbon_strip_R.measure_mid, ip.carbon_strip_R.measure_right, ip.carbon_strip_R.outward, ip.depot.detector_tester, ip.depot.ground_terminal, ip.depot.platform_anchor, ip.pan_assy.ctrl_connector, ip.pan_assy.hold_down, ip.pan_assy.hv_terminal, ip.pan_assy.hv_terminal.bolt_1, ip.pan_assy.hv_terminal.bolt_2, ip.pan_assy.lift_point_1, ip.pan_assy.lift_point_2, ip.pan_assy.lift_point_3, ip.pan_assy.lift_point_4, ip.pan_head.ground_clamp, ip.pan_head.lower_check, ip.pan_head.lower_target, ip.roof.anchor, ip.roof.carbody_ground, ip.roof.hv_cable_ground, part.carbon_strip_L, part.carbon_strip_R, part.pan_assy, part.pan_base.bolt_1, part.pan_base.bolt_2, part.pan_base.bolt_3, part.pan_base.bolt_4, part.pan_head

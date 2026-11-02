@@ -7,8 +7,8 @@ using UnityEngine;
 namespace PantographSim.XR
 {
     /// <summary>
-    /// a6（補充 v4.3、增補 1–3）的站點規則：量測值與判定寫進 SceneResult.pending（"◇ "），EnforceA6 為 true 時不合格也加進 bad（建置失敗）。
-    /// 門檻都在 StationSet／RoofSceneDef；缺物件只寫「缺 xxx，無法檢查」，不丟例外。純報告（不判定）的行用 Note。
+    /// a6（補充 v4.3、增補 1–6）的站點規則：合格寫進 SceneResult.passed（✔），不合格用 Fail(檢查項, 物件 ID, 文字)（建置失敗，除非 PendingRuling 有同一筆＝◇ 待定）。
+    /// 門檻都在 StationSet／RoofSceneDef；缺物件寫「缺 xxx」並算不合格，不丟例外。純報告（不判定）的行用 Note（・）。
     /// </summary>
     public static partial class StationLayoutCheck
     {
@@ -19,20 +19,21 @@ namespace PantographSim.XR
         const float InsulatorHalf = 0.085f;
         static readonly string[] JointNames = { "Base", "LowerArm", "UpperArm", "PanHead" };
 
-        static void Pend(SceneResult r, string item, string text, bool ok)
+        static void Pend(SceneResult r, string item, string text, bool ok, string obj = "")
         {
             string line = $"【第{item}項】{text}";
-            r.pending.Add(line + (ok ? "✔" : "✘"));
-            if (!ok && EnforceA6) r.bad.Add(line);
+            if (ok) r.passed.Add(line);
+            else if (EnforceA6) r.Fail(item, obj, line);
+            else r.warn.Add(line);
         }
-        static void Note(SceneResult r, string item, string text) => r.pending.Add($"【第{item}項】{text}");
-        static void Miss(SceneResult r, string item, string what) { r.pending.Add($"【第{item}項】缺 {what}，無法檢查"); if (EnforceA6) r.bad.Add($"【第{item}項】缺 {what}"); }
+        static void Note(SceneResult r, string item, string text) => r.info.Add($"【第{item}項】{text}");
+        static void Miss(SceneResult r, string item, string what) => r.Fail(item, what, $"【第{item}項】缺 {what}，無法檢查");
         static Vector2 XZ(Vector3 v) => new Vector2(v.x, v.z);
         static string P2(Vector2 v) => $"({v.x:0.00}, {v.y:0.00})";
         static string P3(Vector3 v) => $"({v.x:0.000}, {v.y:0.000}, {v.z:0.000})";
 
         /// <summary>a6 全部規則（CheckScene 最後呼叫）。pts＝場景站點（ID → 傳送點）。</summary>
-        public static void CheckA6(StationSet set, RoofSceneDef d, IDictionary<string, XrTeleportPoint> pts, System.Func<string, Transform> find, SceneResult r)
+        public static void CheckA6(StationSet set, RoofSceneDef d, IDictionary<string, XrTeleportPoint> pts, System.Func<string, Transform> find, SceneResult r, float wrenchHandleLength = 0f)
         {
             Transform F(string id) => (find != null ? find(id) : null) ?? GameObject.Find(id)?.transform;
             var stations = (set.stations ?? new StationDef[0]).Where(s => s != null && pts.ContainsKey(s.id)).ToList();
@@ -56,7 +57,8 @@ namespace PantographSim.XR
             A6RoofEntry(set, d, F, r);
             A6ToCab(set, d, pts, r);
             A6Npc(set, d, stations, Pos, F, r);
-            A6SubStations(set, pts, F, r);
+            A6SubStations(set, d, pts, root, F, r);
+            A6Wrench(set, pts, root, F, wrenchHandleLength, r);
             A6StripMat(set, d, stations, Pos, F("env.roof_strip_mat"), r);
             A6SideNodes(set, pts, root, F, r);
             A6PendantDock(set, pts, F, r);
@@ -221,6 +223,7 @@ namespace PantographSim.XR
             if (hookTarget == null || hook == null) { Miss(r, "5越障", "Hook_AttachPoint_Target／天車吊鉤 Anchor_Hook_AttachPoint"); return; }
             float bottom = hook.transform.position.y - (root.InverseTransformPoint(hookTarget.position).y - tight.Value.min.y);
             Note(r, "5越障", $"吊鉤最高點 Y {hook.transform.position.y:0.000} → 吊物底面 Y {bottom:0.000}（掛點在 LoweredTightBounds 底面上 {root.InverseTransformPoint(hookTarget.position).y - tight.Value.min.y:0.000} m）");
+            Pend(r, "5越障", $"吊鉤最高點實測 Y {hook.transform.position.y:0.000}，規格值 {d.craneHookTopSpecY}（鐵道 D35）", Mathf.Abs(hook.transform.position.y - d.craneHookTopSpecY) <= 0.02f, "env.crane");
             var tops = new List<(string, float)>();
             void Top(string label, IEnumerable<Transform> ts)
             {
@@ -243,7 +246,7 @@ namespace PantographSim.XR
         {
             var stands = st.Where(s => s.id.StartsWith("tp.stand.")).ToList();
             if (stands.Count == 0) { Miss(r, "6", "tp.stand.* 站點"); return; }
-            var c = d.standCenterXZ; var half = d.standSizeXZ / 2f;
+            var c = d.StandFrameCenterXZ; var half = d.standSizeXZ / 2f;
             if (onStand == null) Miss(r, "6", "LoweredTightBounds（PAN_Root 的 BoxCollider）");
             foreach (var s in stands)
             {
@@ -432,68 +435,157 @@ namespace PantographSim.XR
             {
                 var p = XZ(n.position);
                 var near = normalItems.Select(x => (x.Item1, dd: RectDistance(x.Item2, p))).OrderBy(x => x.dd).First();
-                Pend(r, "15", $"{n.npcId}（平時）{P2(p)} 最近的設備 {near.Item1} {near.dd:0.00} m（≥ {c}）", near.dd >= c - 1e-4f);
-                foreach (var x in normalItems.Where(x => RectDistance(x.Item2, p) < c - 1e-4f && x.Item1 != near.Item1)) Pend(r, "15", $"{n.npcId}（平時）到 {x.Item1} {RectDistance(x.Item2, p):0.00} m（≥ {c}）", false);
+                Pend(r, "15", $"{n.npcId}（平時）{P2(p)} 最近的設備 {near.Item1} {near.dd:0.00} m（≥ {c}）", near.dd >= c - 1e-4f, n.npcId);
+                foreach (var x in normalItems.Where(x => RectDistance(x.Item2, p) < c - 1e-4f && x.Item1 != near.Item1)) Pend(r, "15", $"{n.npcId}（平時）到 {x.Item1} {RectDistance(x.Item2, p):0.00} m（≥ {c}）", false, n.npcId);
                 var ps = st.Where(s => s.floor == StationFloor.Platform).Select(s => (s.id, dd: Vector2.Distance(p, XZ(pos(s))))).OrderBy(x => x.dd).First();
-                Pend(r, "15", $"{n.npcId}（平時）最近的平台站點 {ps.id} {ps.dd:0.00} m（≥ {c}）", ps.dd >= c - 1e-4f);
+                Pend(r, "15", $"{n.npcId}（平時）最近的平台站點 {ps.id} {ps.dd:0.00} m（≥ {c}）", ps.dd >= c - 1e-4f, n.npcId);
                 float gd = CorridorDistance(g0, g1, 0f, p);
-                Pend(r, "15", $"{n.npcId}（平時）離活動欄開口 {gd:0.00} m（≥ {set.npcGateFront}）", gd >= set.npcGateFront - 1e-4f);
+                Pend(r, "15", $"{n.npcId}（平時）離活動欄開口 {gd:0.00} m（≥ {set.npcGateFront}）", gd >= set.npcGateFront - 1e-4f, n.npcId);
             }
             var lifting = poses.Where(x => x.phase == NpcPhase.Lifting).ToList();
             for (int i = 0; i < lifting.Count; i++)
                 for (int j = i + 1; j < lifting.Count; j++)
                 {
                     float dd = Vector2.Distance(XZ(lifting[i].position), XZ(lifting[j].position));
-                    Pend(r, "15", $"{lifting[i].npcId}–{lifting[j].npcId}（吊運中）相距 {dd:0.00} m（≥ {c}）", dd >= c - 1e-4f);
+                    Pend(r, "15", $"{lifting[i].npcId}–{lifting[j].npcId}（吊運中）相距 {dd:0.00} m（≥ {c}）", dd >= c - 1e-4f, lifting[i].npcId);
                 }
             var liftItems = new List<(string, Rect)>();
             if (GameObject.Find("BenchBody")?.GetComponent<Collider>() is Collider bench) liftItems.Add(("工作檯", RectXZ(bench.bounds))); else Miss(r, "15", "工作檯 BenchBody");
-            var sc = d.standCenterXZ; var band = d.standSizeXZ / 2f + Vector2.one * d.standClearance;
+            var sc = d.StandFrameCenterXZ; var band = d.standSizeXZ / 2f + Vector2.one * d.standClearance;
             liftItems.Add(("台架四周淨空帶", Rect.MinMaxRect(sc.x - band.x, sc.y - band.y, sc.x + band.x, sc.y + band.y)));
             if (RenderBounds(GameObject.Find("ENV_PlatformStair")?.transform) is Bounds sb) liftItems.Add(("鋼梯", RectXZ(sb))); else Miss(r, "15", "鋼梯");
             foreach (var n in lifting)
                 foreach (var (label, rc) in liftItems)
                 {
                     float dd = RectDistance(rc, XZ(n.position));
-                    Pend(r, "15", $"{n.npcId}（吊運中）{P2(XZ(n.position))} 到{label} {dd:0.00} m（≥ {c}）", dd >= c - 1e-4f);
+                    Pend(r, "15", $"{n.npcId}（吊運中）{P2(XZ(n.position))} 到{label} {dd:0.00} m（≥ {c}）", dd >= c - 1e-4f, n.npcId);
+                }
+        }
+
+        static readonly (string id, int bolt)[] SubStations = { ("tp.roof.base_w.s", 1), ("tp.roof.base_e.s", 2), ("tp.roof.base_e.n", 3), ("tp.roof.base_w.n", 4) };
+
+        /// <summary>伸手估計：頭部水平位置從站點往目標移動「超出可及距離」的那一段（reach＝手臂或短絕緣桿的水平可及），回傳頭部 |X| 與水平距離。</summary>
+        public static (float headAbsX, float dist) HeadReach(Vector3 station, Vector3 target, float reach)
+        {
+            var a = XZ(station); var d = XZ(target) - a; float dist = d.magnitude;
+            var head = dist > reach ? a + d / dist * (dist - reach) : a;
+            return (Mathf.Abs(head.x), dist);
+        }
+
+        /// <summary>
+        /// 第16項（D33／D36 改寫，增補 6 第 7 點）：(a) .n 螺栓在正前方 ≤ maxTargetDistance（0.60）、±30°；(b) .s 斜向 ≤ maxTargetDistance（0.70）、±30°；(c) 吊耳 1、2 對 .s、3、4 對 .n 在 ±30° 內；
+        /// (d) 高壓端子在 base_e.n 的 ±30° 內、≤ baseECableMaxDistance，base_e 到 HV_Cable_End ≤ baseECableMaxDistance；(e) 六個底架站點都在 Walkable 上、離 Walkable 邊 ≥ invisibleWallClearance；
+        /// (f) 車頂站點兩兩 ≥ platformStationMinSpacing；(g) 螺栓 |X| ＜ 站點 |X|；(h) 站點不在降弓羊角頂點範圍外擴 hornBodyRadius 內；(i) 站點到底架、絕緣子頂點範圍 ≥ staticPartClearance；
+        /// (j) 從 base_e.n 伸手到控制線接頭、固定帶綁點（手）、高壓電纜接地掛點（短絕緣桿），頭部 |X| ≤ reachHeadMaxAbsX（只報告，超過由鐵道決定）。
+        /// </summary>
+        static void A6SubStations(StationSet set, RoofSceneDef d, IDictionary<string, XrTeleportPoint> pts, Transform root, System.Func<string, Transform> F, SceneResult r)
+        {
+            float tol = set.facingToleranceDeg;
+            foreach (var (id, n) in SubStations)
+            {
+                if (!pts.TryGetValue(id, out var tp)) { Miss(r, "16", id); continue; }
+                var bolt = F("part.pan_base.bolt_" + n);
+                var lug = F("ip.pan_assy.lift_point_" + n);
+                if (bolt == null || lug == null) { Miss(r, "16", $"part.pan_base.bolt_{n}／ip.pan_assy.lift_point_{n}"); continue; }
+                var p = tp.transform.position; var def = set.Find(id);
+                float max = def != null && def.maxTargetDistance > 0 ? def.maxTargetDistance : set.subStationBoltMax;
+                float dist = Flat(p, bolt.position), ang = FacingAngle(tp.transform, bolt.position);
+                string k = id.EndsWith(".s") ? "(b)" : "(a)";
+                Pend(r, "16", $"{k} {id} {P3(p)} 面向 {P2(XZ(tp.transform.forward))} → 螺栓 {n} {P2(XZ(bolt.position))} {dist:0.000} m（≤ {max}）、偏 {ang:0.0}°（≤ {tol}°）", dist <= max + 1e-4f && ang <= tol, id);
+                float la = FacingAngle(tp.transform, lug.position);
+                Pend(r, "16", $"(c) {id} → 吊耳 {n} {P2(XZ(lug.position))} {Flat(p, lug.position):0.000} m、偏 {la:0.0}°（≤ {tol}°）", la <= tol, id);
+                Pend(r, "16", $"(g) {id} 螺栓 {n} |X| {Mathf.Abs(bolt.position.x):0.000} ＜ 站點 |X| {Mathf.Abs(p.x):0.000}", Mathf.Abs(bolt.position.x) < Mathf.Abs(p.x), id);
+            }
+            if (pts.TryGetValue("tp.roof.base_e.n", out var en) && F("ip.pan_assy.hv_terminal") is Transform hv)
+            {
+                float dd = Flat(en.transform.position, hv.position), a = FacingAngle(en.transform, hv.position);
+                Pend(r, "16", $"(d) tp.roof.base_e.n → 高壓端子 {P2(XZ(hv.position))} {dd:0.000} m（≤ {set.baseECableMaxDistance}）、偏 {a:0.0}°（≤ {tol}°）", dd <= set.baseECableMaxDistance + 1e-4f && a <= tol, "tp.roof.base_e.n");
+            }
+            else Miss(r, "16", "tp.roof.base_e.n／ip.pan_assy.hv_terminal");
+            var cable = F("ip.roof.hv_cable_ground") ?? F("HV_Cable_End");
+            if (cable != null && pts.TryGetValue("tp.roof.base_e", out var be))
+            {
+                float dd = Flat(be.transform.position, cable.position);
+                Pend(r, "16", $"(d) tp.roof.base_e 到 HV_Cable_End {P2(XZ(cable.position))} {dd:0.000} m（≤ {set.baseECableMaxDistance}）", dd <= set.baseECableMaxDistance + 1e-4f, "tp.roof.base_e");
+            }
+            else Miss(r, "16", "HV_Cable_End／tp.roof.base_e");
+
+            var bases = SubStations.Select(x => x.id).Concat(new[] { "tp.roof.base_w", "tp.roof.base_e" }).Where(pts.ContainsKey).ToList();
+            var baseV = root != null ? VertexBounds(JointRenderers(root, "Base")) : null;
+            var horn = root != null ? VertexBounds(JointRenderers(root, "PanHead")) : null;
+            var insulators = Object.FindObjectsOfType<Transform>(true).Where(t => t.name.StartsWith("Insulator_") && t.parent != null && t.parent.name == "Visual")
+                .Select(t => VertexBounds(t.GetComponentsInChildren<Renderer>(true))).Where(b => b.HasValue).Select(b => b.Value).ToList();
+            if (baseV == null || horn == null) Miss(r, "16", "底架／弓頭網格");
+            foreach (var id in bases)
+            {
+                var p = pts[id].transform.position;
+                Pend(r, "16", $"(e) {id} 在 Walkable 上、離 Walkable 邊 ≥ {set.invisibleWallClearance} m", WalkableAround(p, set.invisibleWallClearance - set.wallClearanceTolerance), id);
+                if (horn.HasValue)
+                {
+                    float hd = RectDistance(RectXZ(horn.Value), XZ(p));
+                    Pend(r, "16", $"(h) {id} 到降弓羊角頂點範圍 X {horn.Value.min.x:0.000}…{horn.Value.max.x:0.000}、Z {horn.Value.min.z:0.000}…{horn.Value.max.z:0.000} {hd:0.000} m（≥ 身體半徑 {set.hornBodyRadius}）", hd >= set.hornBodyRadius - 1e-4f, id);
+                }
+                if (baseV.HasValue)
+                {
+                    var near = insulators.Select((b, i) => ($"絕緣子 {i + 1}", RectDistance(RectXZ(b), XZ(p)))).Append(("底架", RectDistance(RectXZ(baseV.Value), XZ(p)))).OrderBy(x => x.Item2).First();
+                    Pend(r, "16", $"(i) {id} 到不會動零件最近的 {near.Item1} {near.Item2:0.000} m（≥ {set.staticPartClearance}）", near.Item2 >= set.staticPartClearance - 1e-4f, id);
+                }
+            }
+            var roof = (set.stations ?? new StationDef[0]).Where(s => s != null && s.floor == StationFloor.Roof && pts.ContainsKey(s.id) && string.IsNullOrEmpty(s.sharedWith)).ToList();
+            foreach (var id in bases)
+                foreach (var o in roof.Where(o => o.id != id && (!bases.Contains(o.id) || string.CompareOrdinal(o.id, id) > 0)))
+                {
+                    float dd = Flat(pts[id].transform.position, pts[o.id].transform.position);
+                    Pend(r, "16", $"(f) {id}–{o.id} {dd:0.000} m（≥ {set.platformStationMinSpacing}）", dd >= set.platformStationMinSpacing - 1e-4f, id);
+                }
+            // (j)：從 base_e.n 伸手（RM_01、RM_02、IN_10、IN_11、WC_03a a，鐵道 D36 補充四、五）
+            if (pts.TryGetValue("tp.roof.base_e.n", out var n3))
+                foreach (var (target, label, reach) in new[] { ("ip.pan_assy.ctrl_connector", "控制線接頭（手）", set.armReachHorizontal), ("HoldDown_TiePoint", "降弓固定帶綁點（手）", set.armReachHorizontal),
+                                                               ("ip.roof.hv_cable_ground", "高壓電纜接地掛點（短絕緣桿桿頭）", set.shortPoleReachHorizontal) })
+                {
+                    var t = F(target);
+                    if (t == null) { Miss(r, "16", target); continue; }
+                    var (hx, dd) = HeadReach(n3.transform.position, t.position, reach);
+                    Pend(r, "16", $"(j) tp.roof.base_e.n → {label} 水平 {dd:0.000} m，伸手時頭部 |X| 約 {hx:0.000}（≤ {set.reachHeadMaxAbsX}；可及 {reach} m）", hx <= set.reachHeadMaxAbsX + 1e-4f, "tp.roof.base_e.n");
                 }
         }
 
         /// <summary>
-        /// 第16項（D33 改寫）：(a) 四個子站點各對一支底座螺栓，水平 ≤ subStationBoltMax 且在面向 ±facingToleranceDeg 內；(b) 子站點與 base_w／base_e 都在 Walkable 上，離 Walkable 邊 ≥ invisibleWallClearance；
-        /// (c) 子站點彼此、子站點和 base_w／base_e ≥ platformStationMinSpacing；(d) base_e 到 HV_Cable_End ≤ baseECableMaxDistance；(e) 螺栓 |X| ＜ 站點 |X|（往車中心伸手）。
+        /// 第21項（鐵道 D36 補充三）：四個子站點以對應螺栓為圓心、半徑＝扳手把手長（ToolDef），從 wrenchStartDir 往兩邊各擺 wrenchSwingDeg 的扇形（把手高度＝螺栓頭頂），
+        /// 不碰 PAN_Root 底下的 collider（該螺栓本身除外）、絕緣子 collider、會動的段（臂、弓頭、連桿）降弓頂點範圍。回報最小淨空。
+        /// shortcut: 「LoweredTightBounds」用各段自己的頂點範圍判（整組 AABB 包住底架四周，扇形一定在裡面）；底架本身不算（螺栓就鎖在底架上）, 要更準時改成三角面距離
         /// </summary>
-        static void A6SubStations(StationSet set, IDictionary<string, XrTeleportPoint> pts, System.Func<string, Transform> F, SceneResult r)
+        static void A6Wrench(StationSet set, IDictionary<string, XrTeleportPoint> pts, Transform root, System.Func<string, Transform> F, float handle, SceneResult r)
         {
-            var subs = new[] { ("tp.roof.base_w.s", 1), ("tp.roof.base_e.s", 2), ("tp.roof.base_e.n", 3), ("tp.roof.base_w.n", 4) };
-            var group = new List<(string id, Vector3 p)>();
-            foreach (var (id, n) in subs)
+            if (handle <= 0f) { Miss(r, "21", "扳手把手長（ToolDef handleLength）"); return; }
+            if (root == null) { Miss(r, "21", PanRootName); return; }
+            var all = root.GetComponentsInChildren<Transform>(true);
+            var segs = JointNames.Skip(1).Concat(all.Where(t => t.name.StartsWith("Rod")).Select(t => t.name)).Distinct()
+                .Select(n => (n, b: VertexBounds(JointRenderers(root, n)))).Where(x => x.b.HasValue).ToList();
+            // 只算實體 collider（互動點的 trigger 不算）；非凸 MeshCollider 不能 ClosestPoint，弓頭本體由 segs 的頂點範圍涵蓋
+            var cols = root.GetComponentsInChildren<Collider>(true).Where(c => c.enabled && !c.isTrigger && !(c is MeshCollider mc && !mc.convex)).Concat(Object.FindObjectsOfType<Collider>(true).Where(c => c.name == "InsulatorCollision")).ToList();
+            foreach (var (id, n) in SubStations)
             {
-                if (!pts.TryGetValue(id, out var tp)) { Miss(r, "16", id); continue; }
-                var bolt = F("part.pan_base.bolt_" + n);
-                if (bolt == null) { Miss(r, "16", "part.pan_base.bolt_" + n); continue; }
-                var p = tp.transform.position;
-                float dist = Flat(p, bolt.position), ang = FacingAngle(tp.transform, bolt.position);
-                Pend(r, "16", $"(a) {id} {P3(p)} → 螺栓 {n} {P2(XZ(bolt.position))} {dist:0.00} m（≤ {set.subStationBoltMax}）、偏 {ang:0.0}°（≤ {set.facingToleranceDeg}°）", dist <= set.subStationBoltMax + 1e-4f && ang <= set.facingToleranceDeg);
-                Pend(r, "16", $"(e) {id} 螺栓 {n} |X| {Mathf.Abs(bolt.position.x):0.000} ＜ 站點 |X| {Mathf.Abs(p.x):0.000}", Mathf.Abs(bolt.position.x) < Mathf.Abs(p.x));
-                group.Add((id, p));
-            }
-            foreach (var id in new[] { "tp.roof.base_w", "tp.roof.base_e" })
-                if (pts.TryGetValue(id, out var tp)) group.Add((id, tp.transform.position)); else Miss(r, "16", id);
-            foreach (var (id, p) in group)
-                Pend(r, "16", $"(b) {id} 在 Walkable 上、離 Walkable 邊 ≥ {set.invisibleWallClearance} m", WalkableAround(p, set.invisibleWallClearance - 1e-3f));
-            for (int i = 0; i < group.Count; i++)
-                for (int j = i + 1; j < group.Count; j++)
-                {
-                    float dd = Flat(group[i].p, group[j].p);
-                    Pend(r, "16", $"(c) {group[i].id}–{group[j].id} {dd:0.00} m（≥ {set.platformStationMinSpacing}）", dd >= set.platformStationMinSpacing - 1e-4f);
-                }
-            var cable = F("ip.roof.hv_cable_ground") ?? F("HV_Cable_End");
-            if (cable == null) Miss(r, "16", "HV_Cable_End");
-            else if (pts.TryGetValue("tp.roof.base_e", out var be))
-            {
-                float dd = Flat(be.transform.position, cable.position);
-                Pend(r, "16", $"(d) tp.roof.base_e 到 HV_Cable_End {P2(XZ(cable.position))} {dd:0.00} m（≤ {set.baseECableMaxDistance}）", dd <= set.baseECableMaxDistance + 1e-4f);
+                var def = set.Find(id); var bolt = F("part.pan_base.bolt_" + n);
+                if (def == null || bolt == null || def.wrenchStartDir.sqrMagnitude < 1e-6f) { Miss(r, "21", id + " 的螺栓或 wrenchStartDir"); continue; }
+                var head = RenderBounds(bolt, true);
+                float y = head.HasValue ? head.Value.max.y : bolt.position.y;
+                float baseAng = Mathf.Atan2(def.wrenchStartDir.y, def.wrenchStartDir.x) * Mathf.Rad2Deg;
+                float best = float.PositiveInfinity, toHead = float.PositiveInfinity; string what = "";
+                for (float a = -set.wrenchSwingDeg; a <= set.wrenchSwingDeg + 1e-3f; a += set.wrenchSampleDeg)
+                    for (float rr = 0.05f; rr <= handle + 1e-3f; rr += 0.05f)
+                    {
+                        float rad = (baseAng + a) * Mathf.Deg2Rad;
+                        var q = new Vector3(bolt.position.x + Mathf.Cos(rad) * rr, y, bolt.position.z + Mathf.Sin(rad) * rr);
+                        foreach (var (name, b) in segs) { float dd = Mathf.Sqrt(b.Value.SqrDistance(q)); if (name == "PanHead") toHead = Mathf.Min(toHead, dd); if (dd < best) { best = dd; what = name; } }
+                        foreach (var c in cols)
+                        {
+                            if (c.transform.IsChildOf(bolt) || bolt.IsChildOf(c.transform)) continue;
+                            float dd = Vector3.Distance(c.ClosestPoint(q), q);
+                            if (dd < best) { best = dd; what = c.name; }
+                        }
+                    }
+                Pend(r, "21", $"{id}：螺栓 {n} 為圓心、半徑 {handle} m、起始 {P2(def.wrenchStartDir)} ±{set.wrenchSwingDeg}°、高度 Y {y:0.000}，最小淨空 {best:0.000} m（最近 {what}）；到弓頭（含羊角）{toHead:0.000} m", best > 0f, id);
             }
         }
 
@@ -566,13 +658,23 @@ namespace PantographSim.XR
             Note(r, "19", $"PendantDock Bounds {P3(db.Value.min)}–{P3(db.Value.max)}");
             var zone = Rect.MinMaxRect(set.liftZoneMinXZ.x, set.liftZoneMinXZ.y, set.liftZoneMaxXZ.x, set.liftZoneMaxXZ.y);
             Pend(r, "19", $"PendantDock {(rc.Overlaps(zone) ? "在" : "不在")}吊物禁區 Z {zone.yMin}…{zone.yMax} 內（離禁區 {Mathf.Max(0f, zone.yMin - rc.yMax, rc.yMin - zone.yMax):0.00} m）", !rc.Overlaps(zone));
-            if (pts.TryGetValue("tp.platform.crane", out var cr)) { float dd = RectDistance(rc, XZ(cr.transform.position)); Pend(r, "19", $"PendantDock 到 tp.platform.crane {dd:0.00} m（≤ {set.pendantCraneMax}）", dd <= set.pendantCraneMax + 1e-4f); }
+            if (pts.TryGetValue("tp.platform.crane", out var cr)) { float dd = set.pendantCraneToCenter ? Vector2.Distance(rc.center, XZ(cr.transform.position)) : RectDistance(rc, XZ(cr.transform.position)); Pend(r, "19", $"PendantDock 中心 {P2(rc.center)} 到 tp.platform.crane {dd:0.000} m（量站點到掛座中心，≤ {set.pendantCraneMax}；a6 回報的 0.74 是量到掛座 Bounds 最近的邊）", dd <= set.pendantCraneMax + 1e-4f, "PendantDock"); }
             else Miss(r, "19", "tp.platform.crane");
             var rack = F("env.tool_rack");
             var rb = rack != null ? RenderBounds(rack.parent != null && rack.name == "Board" ? rack.parent : rack) : null;
             if (rb == null) { Miss(r, "19", "工具架"); return; }
             float gap = RectGap(rc, RectXZ(rb.Value));
-            Pend(r, "19", $"PendantDock 和工具架 Bounds Z {rb.Value.min.z:0.000}…{rb.Value.max.z:0.000} 間距 {gap:0.000} m（≥ {set.pendantRackGap} − 容差 {set.pendantRackGapTolerance}）", gap >= set.pendantRackGap - set.pendantRackGapTolerance - 1e-5f);
+            Pend(r, "19", $"PendantDock 和工具架 Bounds Z {rb.Value.min.z:0.000}…{rb.Value.max.z:0.000} 間距 {gap:0.000} m（≥ {set.pendantRackGap} − 容差 {set.pendantRackGapTolerance}）", gap >= set.pendantRackGap - set.pendantRackGapTolerance - 1e-5f, "PendantDock");
+            // 2b（增補 4）：遙控器掛在掛座上時，本體 Bounds 的 Z 也要在掛座的 Z 範圍內，和工具架間距同樣 ≥ pendantRackGap
+            var remote = RenderBounds(F("env.crane_pendant"));
+            if (remote == null) Miss(r, "19", "env.crane_pendant");
+            else
+            {
+                var rr = remote.Value;
+                Pend(r, "19", $"遙控器 Bounds {P3(rr.min)}–{P3(rr.max)}：Z 在掛座 {rc.yMin:0.000}…{rc.yMax:0.000} 內", rr.min.z >= rc.yMin - set.pendantRackGapTolerance && rr.max.z <= rc.yMax + set.pendantRackGapTolerance, "env.crane_pendant");
+                float rg = RectGap(RectXZ(rr), RectXZ(rb.Value));
+                Pend(r, "19", $"遙控器和工具架間距 {rg:0.000} m（≥ {set.pendantRackGap} − {set.pendantRackGapTolerance}）", rg >= set.pendantRackGap - set.pendantRackGapTolerance - 1e-5f, "env.crane_pendant");
+            }
             foreach (int k in new[] { 1, 4, 11, 12 })
             {
                 var slot = rack.parent != null ? rack.parent.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "Slot_" + k) : null;
@@ -597,7 +699,7 @@ namespace PantographSim.XR
                     var b = tp.transform.position + Vector3.up * hgt;
                     var hits = Physics.RaycastAll(a, (b - a).normalized, Vector3.Distance(a, b), ~0, QueryTriggerInteraction.Collide)
                         .Select(h => h.collider).Where(c => (root != null && c.transform.IsChildOf(root)) || c.name == "InsulatorCollision").Select(c => c.name).Distinct().ToList();
-                    Pend(r, "20", $"防墜器 → {id} D 環（{pose} {hgt} m）" + (hits.Count == 0 ? "不碰集電弓與絕緣子" : "碰到 " + string.Join("、", hits)), hits.Count == 0);
+                    Pend(r, "20", $"防墜器 → {id} D 環（{pose} {hgt} m）" + (hits.Count == 0 ? "不碰集電弓與絕緣子" : "碰到 " + string.Join("、", hits)), hits.Count == 0, id);
                 }
             }
         }

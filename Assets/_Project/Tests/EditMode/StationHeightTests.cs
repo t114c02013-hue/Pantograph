@@ -23,12 +23,14 @@ namespace PantographSim.Tests
                 Physics.SyncTransforms();
                 var pts = Object.FindObjectsOfType<XrTeleportPoint>(true).Where(p => p.gameObject.scene == scene).ToList();
                 Assert.AreEqual(AssetDatabase.LoadAssetAtPath<StationSet>(Folder + "/StationSet.asset").stations.Length, pts.Count, "每個站點資料都有場景站點");   // R1.5a：8 → 9（新增 tp.platform.crane）
-                var waiting = AssetDatabase.LoadAssetAtPath<StationSet>(Folder + "/StationSet.asset").awaitingRuling;
+                var pending = AssetDatabase.LoadAssetAtPath<StationSet>(Folder + "/StationSet.asset").pendingRulings;
                 foreach (var p in pts)
                 {
                     var pos = p.transform.position;
-                    if (waiting.Contains(p.PointId)) { Debug.LogWarning(p.PointId + "：等裁定（a6 弓頭羊角範圍），不查 Walkable"); continue; }
-                    Assert.IsTrue(Physics.Raycast(new Vector3(pos.x, 5f, pos.z), Vector3.down, out var hit, 20f, SceneLayers.WalkableMask, QueryTriggerInteraction.Ignore), p.PointId + " 下方沒有 Walkable");
+                    bool onWalk = Physics.Raycast(new Vector3(pos.x, 5f, pos.z), Vector3.down, out var hit, 20f, SceneLayers.WalkableMask, QueryTriggerInteraction.Ignore);
+                    // 增補 6 第 1 點：待定的站點不跳過，要斷言它「仍然不合格」；已經合格就請把那筆刪掉
+                    if (pending.Any(r => r.Matches("core", p.PointId))) { Assert.IsFalse(onWalk, p.PointId + " 已經在 Walkable 上：請把這筆從 PendingRuling 刪掉"); continue; }
+                    Assert.IsTrue(onWalk, p.PointId + " 下方沒有 Walkable");
                     Assert.AreEqual(hit.point.y, pos.y, 0.02f, p.PointId);
                 }
                 var origin = Object.FindObjectsOfType<MonoBehaviour>(true).First(o => o.gameObject.scene == scene && o.GetType().Name == "XROrigin");

@@ -55,7 +55,7 @@ namespace PantographSim.Tests
                 var top = seats[0].y;
                 Assert.AreEqual(Def.StandTopY, top, 0.08f, "台架頂面 Y −2.90");
                 // 四周 1.2 m 淨空：除了台架自己，沒有其他碰撞體
-                var c = new Vector3(Def.standCenterXZ.x, Def.groundY + 0.6f, Def.standCenterXZ.y);
+                var c = new Vector3(Def.StandFrameCenterXZ.x, Def.groundY + 0.6f, Def.StandFrameCenterXZ.y);
                 var half = new Vector3(Def.standSizeXZ.x / 2f + Def.standClearance, 0.5f, Def.standSizeXZ.y / 2f + Def.standClearance);
                 foreach (var col in Physics.OverlapBox(c, half, Quaternion.identity, ~0, QueryTriggerInteraction.Ignore))
                     Assert.IsTrue(col.transform.IsChildOf(stand), "台架四周 1.2 m 內不能有 " + col.name);
@@ -67,7 +67,7 @@ namespace PantographSim.Tests
                     Assert.AreEqual(Def.groundY, p.transform.position.y, 0.02f, p.PointId);
                     var to = stand.position - p.transform.position; to.y = 0f;
                     Assert.Less(Vector3.Angle(p.transform.forward, to), 30f, p.PointId + " 面向台架");
-                    float dx = Mathf.Abs(p.transform.position.x - Def.standCenterXZ.x) - Def.standSizeXZ.x / 2f, dz = Mathf.Abs(p.transform.position.z - Def.standCenterXZ.y) - Def.standSizeXZ.y / 2f;
+                    float dx = Mathf.Abs(p.transform.position.x - Def.StandFrameCenterXZ.x) - Def.standSizeXZ.x / 2f, dz = Mathf.Abs(p.transform.position.z - Def.StandFrameCenterXZ.y) - Def.standSizeXZ.y / 2f;
                     Assert.AreEqual(Def.standStationOffset, Mathf.Max(dx, dz), 0.01f, p.PointId + " 離台架邊 0.6 m");
                 }
                 // 零件盒：場景裡只有一個 env.parts_tray（R1 位置），維修區只有空物件

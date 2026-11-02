@@ -208,10 +208,13 @@ namespace PantographSim.Editor.XR
 
             // StationLayoutCheck（B 段 3.5）：不合格就建置失敗
             mech.SetLift(0f);
-            var check = StationLayoutCheck.CheckScene(stationSet, R1Data.RoofScene, points, T, PanGeometry.SweptFootprints(mech));
+            float handle = float.TryParse(StepJsonImporter.LoadTools().FirstOrDefault(t => t.toolId == "tool.socket_wrench")?.Param("handleLength"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var h) ? h : 0f;   // 第21項：把手長讀 ToolDef
+            var check = StationLayoutCheck.CheckScene(stationSet, R1Data.RoofScene, points, T, PanGeometry.SweptFootprints(mech), handle);
             mech.SetLift(lift);
-            System.IO.File.WriteAllText("Logs/StationLayoutCheck.txt", (check.Ok ? $"結果：{points.Length} 站全過\n" : $"結果：{check.bad.Count} 個問題\n") + check + "\n");
-            sb.AppendLine("站點檢查：" + (check.Ok ? $"{points.Length} 站全過" : $"{check.bad.Count} 個問題") + "\n" + check);
+            // 增補 4 第 9 點：摘要「N 過／M 待定／K 不合格」，有待定或不合格就不寫「全過」
+            string summary = $"結果：{points.Length} 站，{check.Summary}" + (check.Ok && check.pending.Count == 0 ? "（全過）" : "");
+            System.IO.File.WriteAllText("Logs/StationLayoutCheck.txt", summary + "\n" + check + "\n");
+            sb.AppendLine("站點檢查：" + summary + "\n" + check);
             if (!check.Ok) throw new System.Exception("StationLayoutCheck 不合格：\n" + string.Join("\n", check.bad));
 
             // ---- 每個互動點加 XRInteractableBridge（只收自己的 Collider）----

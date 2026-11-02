@@ -151,15 +151,31 @@ namespace PantographSim.Editor
             return new Bounds(d.center, d.size);
         }
 
-        /// <summary>C1（G1）：降弓姿態整組頂點範圍（PAN_Root 局部），存成資料 pan_lowered_tight_bounds.json。只算顯示中的網格（固定帶、防塵蓋的另一個狀態不算）。</summary>
+        /// <summary>
+        /// C1（G1）：降弓姿態整組頂點範圍（PAN_Root 局部），存成資料 pan_lowered_tight_bounds.json。只算顯示中的網格（固定帶、防塵蓋的另一個狀態不算）；
+        /// 增補 4（建模 B H1）：排除可拆件——掛 FastenerBehaviour 的節點（底座螺栓、高壓端子螺栓、滑板螺栓）、高壓端子、防塵蓋（DetachablePart 是 R1.5b，到時加進 IsDetachable）。
+        /// </summary>
         static Bounds SaveLoweredTightBounds(Transform root, StringBuilder sb)
         {
-            var b = PanGeometry.VertexBounds(root.GetComponentsInChildren<Renderer>(false).Where(r => !(r is LineRenderer)), root).Value;
-            var data = new TightBoundsData { center = b.center, size = b.size, note = "PAN_Root 局部、降弓、頂點算法（a6 G1 C1）；建置時自動寫入" };
+            var rs = root.GetComponentsInChildren<Renderer>(false).Where(r => !(r is LineRenderer) && !IsDetachable(r.transform, root)).ToList();
+            var b = PanGeometry.VertexBounds(rs, root).Value;
+            var top = rs.Select(r => (r, y: PanGeometry.VertexBounds(new[] { r }, root)?.max.y ?? float.MinValue)).OrderByDescending(x => x.y).First();
+            var data = new TightBoundsData { center = b.center, size = b.size, note = "PAN_Root 局部、降弓、頂點算法（a6 G1 C1），排除可拆件；建置時自動寫入" };
             System.IO.File.WriteAllText(TightBoundsPath, JsonUtility.ToJson(data, true));
             UnityEditor.AssetDatabase.ImportAsset(TightBoundsPath);
-            sb.AppendLine($"LoweredTightBounds（PAN_Root 局部）：{b.min:F3}–{b.max:F3}");
+            sb.AppendLine($"LoweredTightBounds（PAN_Root 局部，排除可拆件）：{b.min:F3}–{b.max:F3}；Y 最高點 {top.y:0.000}（{top.r.name}，父 {top.r.transform.parent?.name}）");
+            TightTopMesh = top.r.name;
             return b;
+        }
+
+        /// <summary>這次 LoweredTightBounds 的 Y 最高點網格名稱（報告用）。</summary>
+        public static string TightTopMesh { get; private set; }
+
+        static bool IsDetachable(Transform t, Transform root)
+        {
+            for (var p = t; p != null && p != root; p = p.parent)
+                if (p.GetComponent<FastenerBehaviour>() != null || p.name == "ip.pan_assy.hv_terminal" || p.name.StartsWith("DustCap_")) return true;
+            return false;
         }
 
         /// <summary>F2／F3（a6 G2）：吊鉤掛點目標 Hook_AttachPoint_Target 在 COG 正上方；吊梁沿 X，兩端吊耳 BeamEye_PlusX／MinusX 間距＝吊點 X 間距；分邊吊帶長度。</summary>
@@ -168,14 +184,29 @@ namespace PantographSim.Editor
             var t = MassTable();
             var lp = root.Find("PAN_LiftPoints");
             var pts = Enumerable.Range(1, 4).Select(i => lp.Find("ip.pan_assy.lift_point_" + i).position).ToList();
-            float y = pts.Average(p => p.y);
-            var hook = new GameObject("Hook_AttachPoint_Target").transform; hook.SetParent(lp, false); hook.position = PanLiftMath.HookPoint(cog, y, t);
+            var hook = new GameObject("Hook_AttachPoint_Target").transform; hook.SetParent(lp, false); hook.position = PanLiftMath.HookPoint(cog, pts, t);
             var (ep, em) = PanLiftMath.BeamEyes(cog, pts, t);
             var e1 = new GameObject("BeamEye_PlusX").transform; e1.SetParent(lp, false); e1.position = ep;
             var e2 = new GameObject("BeamEye_MinusX").transform; e2.SetParent(lp, false); e2.position = em;
             SlingLengths = PanLiftMath.SlingLengths(cog, pts, t);
             BeamSpan = 2f * PanLiftMath.BeamHalfSpan(pts);
-            sb.AppendLine($"吊運：吊鉤掛點 {hook.position:F3}（COG 正上方）；吊梁吊耳間距 {BeamSpan:0.000} m、梁長 {BeamSpan + t.beamExtraLength:0.000} m；吊帶 +X 側 {SlingLengths.plusX:0.000} m、−X 側 {SlingLengths.minusX:0.000} m；吊起後傾斜 {PanLiftMath.HangPlaneTiltDeg(cog, pts, SlingLengths, t):0.00}°");
+            sb.AppendLine($"吊運：吊鉤掛點 {hook.position:F3}（COG 正上方）；吊梁高出吊點 {PanLiftMath.BeamAbove(cog, pts, t):0.000} m（吊帶長 {t.slingLength} m 推導）；吊梁吊耳間距 {BeamSpan:0.000} m、梁長 {BeamSpan + t.beamExtraLength:0.000} m；吊帶 +X 側 {SlingLengths.plusX:0.000} m、−X 側 {SlingLengths.minusX:0.000} m；吊起後傾斜 {PanLiftMath.HangPlaneTiltDeg(cog, pts, SlingLengths, t):0.00}°");
+            // 建置檢查（建模 B H3、D36）：每條吊帶和垂直線 ≤ maxSlingAngleDeg；同一端（同一個吊耳）兩條之間 ≤ maxSlingPairAngleDeg
+            var bad = new List<string>();
+            for (int i = 0; i < 4; i++)
+            {
+                var eye = pts[i].x >= cog.x ? ep : em;
+                float a = PanLiftMath.SlingAngleDeg(eye, pts[i]);
+                sb.AppendLine($"  吊帶 {i + 1}：和垂直線 {a:0.0}°（≤ {t.maxSlingAngleDeg}°）");
+                if (a > t.maxSlingAngleDeg + 1e-3f) bad.Add($"吊帶 {i + 1} 和垂直線 {a:0.0}° 超過 {t.maxSlingAngleDeg}°");
+            }
+            foreach (var (eye, a, b) in new[] { (em, 0, 3), (ep, 1, 2) })
+            {
+                float pair = Vector3.Angle(pts[a] - eye, pts[b] - eye);
+                sb.AppendLine($"  吊帶 {a + 1}–{b + 1}（同一端）夾角 {pair:0.0}°（≤ {t.maxSlingPairAngleDeg}°）");
+                if (pair > t.maxSlingPairAngleDeg + 1e-3f) bad.Add($"吊帶 {a + 1}–{b + 1} 夾角 {pair:0.0}° 超過 {t.maxSlingPairAngleDeg}°");
+            }
+            if (bad.Count > 0) throw new System.Exception("吊帶角度不合格：" + string.Join("；", bad));
         }
 
         public const string RiggingFolder = "Assets/_Project/Parts/PantographAssembly/Models";

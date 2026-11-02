@@ -41,7 +41,7 @@ def insulated_pole(ctx, length=2.5):
 
 
 def pendant_dock(ctx):
-    plate = box(ctx, "ENV_PendantDock", (0.04, 0.20, 0.30), (0, 0, 1.10), "Paint", "craneyellow")
+    plate = box(ctx, "ENV_PendantDock", (0.04, 0.10, 0.30), (0, 0, 1.10), "Paint", "craneyellow")   # a6 增補 4（model-spec v2.9）：0.10 (Z) × 0.09 (X，含掛鉤) × 0.30 (Y)
     box(ctx, "Hook", (0.06, 0.03, 0.03), (0.04, 0, 0.12), "Metal", "metal", parent=plate)
     return plate
 

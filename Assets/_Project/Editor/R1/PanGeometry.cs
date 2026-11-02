@@ -87,10 +87,10 @@ namespace PantographSim.Editor
         /// 取代整組 AABB 聯集（X ±0.83 × Z −0.19…+2.12，連底架兩側都蓋掉）。最後會把姿態設回原值。
         /// shortcut: 只取 5 個姿態的 AABB, 弓頭在兩個取樣姿態之間掃到更遠的地方時加密取樣
         /// </summary>
-        public static List<Bounds> SweptFootprints(PantographMechanism mech, int samples = 5, System.Text.StringBuilder log = null)
+        public static Dictionary<string, Bounds> SweptFootprints(PantographMechanism mech, int samples = 5, System.Text.StringBuilder log = null)
         {
             float lift = mech.Lift;
-            var list = new List<Bounds>();
+            var list = new Dictionary<string, Bounds>();   // 段名 → 範圍（D37：站點淨空依零件分開，PanHead 用 roofPanHeadClearRadius）
             foreach (var seg in Segments(mech.transform).Where(s => s.name != "Base"))
             {
                 Bounds? acc = null;
@@ -102,7 +102,7 @@ namespace PantographSim.Editor
                     log?.AppendLine($"  升降 {mech.Lift:0.00} {seg.name,-9} X {b.Value.min.x:0.000}…{b.Value.max.x:0.000}、Y {b.Value.min.y:0.000}…{b.Value.max.y:0.000}、Z {b.Value.min.z:0.000}…{b.Value.max.z:0.000}");
                     if (acc == null) acc = b; else { var x = acc.Value; x.Encapsulate(b.Value); acc = x; }
                 }
-                if (acc != null) list.Add(acc.Value);
+                if (acc != null) list[seg.name] = acc.Value;
             }
             mech.SetLift(lift);
             return list;

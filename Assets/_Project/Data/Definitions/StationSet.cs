@@ -14,6 +14,17 @@ namespace PantographSim.Data
 
         [Header("建置檢查（StationLayoutCheck）")]
         public float clearRadius = 0.40f, invisibleWallClearance = 0.15f;
+        [Tooltip("D37＋增補 6 第 7 點 G：站點離各會動零件升降範圍的淨空（partGroup＝段名或名稱開頭，例 PanHead、Rod）；清單沒列的零件用 clearRadius")]
+        public PartClearRadius[] partClearRadius = Array.Empty<PartClearRadius>();
+
+        /// <summary>站點（樓層 floor）離會動零件 segment 升降範圍要留的淨空：清單裡第一筆名稱相符、範圍適用的；沒有就用 clearRadius。</summary>
+        public float ClearRadiusFor(string segment, StationFloor floor)
+        {
+            foreach (var p in partClearRadius ?? Array.Empty<PartClearRadius>())
+                if (p != null && !string.IsNullOrEmpty(p.partGroup) && (segment == p.partGroup || segment.StartsWith(p.partGroup)) && (p.scope != PartClearScope.RoofOnly || floor == StationFloor.Roof))
+                    return p.radius;
+            return clearRadius;
+        }
         public float eyeHeight = 1.60f, facingToleranceDeg = 30f;
         public float targetMinDistance = 0.40f, targetMaxDistance = 0.90f;
         [Tooltip("接地站到弓頭接地掛點互動點的水平距離上限＝絕緣桿長 − 0.5 m（D24：2.5 m 桿 → 2.0）")] public float groundClampMaxDistance = 2.0f;
@@ -60,11 +71,38 @@ namespace PantographSim.Data
         [Tooltip("第16項（D33）：子站點到自己那支螺栓的水平距離上限")] public float subStationBoltMax = 0.60f;
         [Tooltip("D34：車體接地座 X 上限、站點立足圓半徑、跪姿區（站點面向方向往前的深度與半寬）")] public float carBodyGroundMaxX = -1.05f, stationFootRadius = 0.25f, kneelZoneDepth = 0.60f, kneelZoneHalfWidth = 0.25f;
         [Tooltip("第七節 1：吊物底面到路徑下方固定物頂面的最低餘裕")] public float liftObstacleMargin = 0.50f;
-        [Tooltip("等組長／鐵道裁定的已知衝突：不合格行含這些字串（站點 ID 或「【第n項】」）時只列在報告（◇ 待裁定），不讓建置失敗。裁定後刪掉該字串")]
-        public string[] awaitingRuling = Array.Empty<string>();
+        [Tooltip("◇ 待定（增補 4 第 9 點、增補 6 第 1 點）：不合格的（檢查項＋物件 ID）完全相等時改列「待定」，不讓建置失敗；每一筆都要有 ruleRef、decidedBy、releaseSegment，缺一項就建置失敗")]
+        public PendingRuling[] pendingRulings = Array.Empty<PendingRuling>();
+        [Tooltip("增補 6 第 2 點：離不可見牆的量測容差（剛好等於門檻算合格；OverlapCapsule 接觸也算重疊）")] public float wallClearanceTolerance = 0.001f;
+        [Tooltip("增補 6 第 7 點 B：站點中心到不會動的底架、絕緣子頂點範圍的水平距離下限（身體半徑 0.2＋0.05）")] public float staticPartClearance = 0.25f;
+        [Tooltip("第16項 (h)：站點和降弓羊角頂點範圍之間要留的身體半徑")] public float hornBodyRadius = 0.20f;
+        [Tooltip("第16項 (j) 等伸手估計：伸手時頭部 |X| 上限、站姿手臂可及的水平距離、短絕緣桿的水平可及（EX，R1.5b 拿到桿長再改）")] public float reachHeadMaxAbsX = 1.0f, armReachHorizontal = 0.55f, shortPoleReachHorizontal = 0.80f;
+        [Tooltip("第21項（D36 補充三）：扳手從起始方向往兩邊各擺的角度、取樣步距（度）")] public float wrenchSwingDeg = 45f, wrenchSampleDeg = 5f;
+        [Tooltip("第19項：到 tp.platform.crane 的量法＝站點到掛座 Bounds 中心的水平距離（增補 4 第 2 點）")] public bool pendantCraneToCenter = true;
         [Tooltip("第15項：NPC 各階段站位（平時／吊運中）")] public NpcStandPose[] npcPoses = Array.Empty<NpcStandPose>();
 
         public StationDef Find(string id) => Array.Find(stations, s => s != null && s.id == id);
+    }
+
+    /// <summary>◇ 待定的裁定紀錄（增補 6 第 1 點）：checkItem（例 "15"）＋objectId（例 "tp.roof.base_w.s"）和不合格項目完全相等才算。</summary>
+    [Serializable]
+    public class PendingRuling
+    {
+        public string checkItem, objectId, ruleRef, decidedBy, releaseSegment;
+        public bool HasRecord => !string.IsNullOrWhiteSpace(checkItem) && !string.IsNullOrWhiteSpace(objectId) && !string.IsNullOrWhiteSpace(ruleRef) && !string.IsNullOrWhiteSpace(decidedBy) && !string.IsNullOrWhiteSpace(releaseSegment);
+        public bool Matches(string item, string obj) => checkItem == item && objectId == obj;
+        public override string ToString() => $"第{checkItem}項 {objectId}（{ruleRef}，{decidedBy}，預計 {releaseSegment} 解除）";
+    }
+
+    public enum PartClearScope { AllStations, RoofOnly }
+
+    /// <summary>D37：零件別的站點淨空（例 羊角 0.2 只限車頂站點）。</summary>
+    [Serializable]
+    public class PartClearRadius
+    {
+        public string partGroup;
+        public float radius;
+        public PartClearScope scope;
     }
 
     public static class NpcPhase { public const string Normal = "平時", Lifting = "吊運中"; }

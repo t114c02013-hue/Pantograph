@@ -37,6 +37,19 @@ MonoBehaviour:
   startStationId: tp.platform.lift
   clearRadius: 0.4
   invisibleWallClearance: 0.15
+  partClearRadius:
+  - partGroup: PanHead
+    radius: 0.2
+    scope: 1
+  - partGroup: LowerArm
+    radius: 0.4
+    scope: 0
+  - partGroup: UpperArm
+    radius: 0.4
+    scope: 0
+  - partGroup: Rod
+    radius: 0.4
+    scope: 0
   eyeHeight: 1.6
   facingToleranceDeg: 30
   targetMinDistance: 0.4
@@ -93,18 +106,23 @@ MonoBehaviour:
   kneelZoneDepth: 0.6
   kneelZoneHalfWidth: 0.25
   liftObstacleMargin: 0.5
-  awaitingRuling:
-  - tp.roof.base_w.s
-  - tp.roof.base_e.s
-  - "\u3010\u7B2C15\u9805\u3011npc.work_leader\uFF08\u5E73\u6642\uFF09"
-  - "\u3010\u7B2C19\u9805\u3011PendantDock \u548C\u5DE5\u5177\u67B6"
+  pendingRulings: []
+  wallClearanceTolerance: 0.001
+  staticPartClearance: 0.25
+  hornBodyRadius: 0.2
+  reachHeadMaxAbsX: 1
+  armReachHorizontal: 0.55
+  shortPoleReachHorizontal: 0.8
+  wrenchSwingDeg: 45
+  wrenchSampleDeg: 5
+  pendantCraneToCenter: 1
   npcPoses:
   - npcId: npc.guard
     phase: "\u5E73\u6642"
     position: {x: -3, y: 0, z: -1}
   - npcId: npc.work_leader
     phase: "\u5E73\u6642"
-    position: {x: -3, y: 0, z: -0.3}
+    position: {x: -3.1, y: 0, z: -0.3}
   - npcId: npc.rigging_lead
     phase: "\u540A\u904B\u4E2D"
     position: {x: -5, y: -3.65, z: -3.5}

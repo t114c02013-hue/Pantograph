@@ -178,7 +178,7 @@ namespace PantographSim.Editor
             var baseR = rig.transform.Find("Base").GetComponent<Renderer>().bounds;
             // a6：不可走範圍改用各關節自己的頂點範圍（LowerArm／UpperArm／PanHead 在 5 個升降姿態的聯集）；底架不動，用自己的頂點範圍
             sb.AppendLine("車頂升降範圍（各剛體段自己的頂點範圍，5 個姿態）：");
-            res.footprints.AddRange(PanGeometry.SweptFootprints(mech, 5, sb));
+            res.footprints.AddRange(PanGeometry.SweptFootprints(mech, 5, sb).Values);
             var baseV = PanGeometry.VertexBounds(PanGeometry.OwnRenderers(rig.transform, "Base")).Value;
             DeriveStand(d, sb);   // G2：台架外框依 LoweredTightBounds 推導，tp.stand.* 跟著更新（要在站點錨點之前）
 
@@ -188,7 +188,8 @@ namespace PantographSim.Editor
             // R1.5a：車頂可走 |X| ≤ roofWalkHalfWidth（車寬 3.38 時 0.80）
             float hw = d.carBodyHalfWidth, walkHalf = d.roofWalkHalfWidth, z0 = d.roofSectionZMin, z1 = d.roofSectionZMax;
             // a6 第一節 8（方案 A，鐵道裁定）：底架兩側（底架前後緣各外擴 roofBaseWalkZMargin）Walkable 放寬到 roofBaseWalkHalfWidth；警示紅線在 roofBaseWarningX
-            float zb0 = baseV.min.z - d.roofBaseWalkZMargin, zb1 = baseV.max.z + d.roofBaseWalkZMargin, wide = d.roofBaseWalkHalfWidth;
+            float zb0 = d.roofBaseWalkZMin, zb1 = baseV.max.z + d.roofBaseWalkZMargin, wide = d.roofBaseWalkHalfWidth;   // D36：前端到 roofBaseWalkZMin（避開降弓羊角）
+            d.roofBaseWalkZMax = Mathf.Round(zb1 * 1000f) / 1000f; EditorUtility.SetDirty(d);
             foreach (int sgn in new[] { -1, 1 })
                 foreach (var (x, a, b) in new[] { (walkHalf, z0, zb0), (d.roofBaseWarningX, zb0, zb1), (walkHalf, zb1, z1) })
                     Box("WarningLine", roof.visual, new Vector3(sgn * x, roofY + 0.002f, (a + b) / 2f), new Vector3(0.05f, 0.004f, b - a), mWarn, collider: false);
@@ -262,10 +263,13 @@ namespace PantographSim.Editor
             ctrl.transform.Find("CtrlCable_Parked")?.gameObject.SetActive(false);
             SavePrefab(workP.root);
 
-            // 不可走範圍：會動的關節（升降全程頂點範圍）、絕緣子、母線、避雷器外擴 obstacleMargin；底架用自己的頂點範圍外擴 invisibleWallClearance（站不上底架）
-            float m = d.obstacleMargin, mb = stations.invisibleWallClearance;
+            // 不可走範圍（增補 6 第 7 點 A）：會動的臂／弓頭／連桿（升降全程頂點範圍）外擴 movingCarveInflate；不會動的底架、絕緣子只挖自己的頂點範圍（staticCarveInflate）；母線、避雷器外擴 obstacleMargin
+            float m = d.obstacleMargin;
             Bounds Grow(Bounds b, float k) { b.Expand(new Vector3(2 * k, 0, 2 * k)); return b; }
-            var obstacles = res.footprints.Concat(new[] { busbar, arrB }).Concat(insulators).Select(b => Grow(b, m)).Append(Grow(baseV, mb)).ToList();
+            var insulatorV = insP.visual.Cast<Transform>().Select(t => PanGeometry.VertexBounds(t.GetComponentsInChildren<Renderer>())).Where(b => b.HasValue).Select(b => b.Value).ToList();
+            var moving = res.footprints.Select(b => Grow(b, d.movingCarveInflate)).ToList();
+            var statics = insulatorV.Append(baseV).Select(b => Grow(b, d.staticCarveInflate)).ToList();
+            var obstacles = moving.Concat(new[] { busbar, arrB }.Select(b => Grow(b, m))).Concat(statics).ToList();
             res.obstacles.AddRange(obstacles);
             var walk = new List<Rect> { Rect.MinMaxRect(-walkHalf, z0, walkHalf, z1), Rect.MinMaxRect(walkHalf, zb0, wide, zb1), Rect.MinMaxRect(-wide, zb0, -walkHalf, zb1) };
             foreach (var o in obstacles) walk = walk.SelectMany(r => Subtract(r, XZ(o))).ToList();
@@ -280,25 +284,28 @@ namespace PantographSim.Editor
             {
                 var r = XZ(o);
                 r = Rect.MinMaxRect(Mathf.Max(r.xMin, -wide), Mathf.Max(r.yMin, z0), Mathf.Min(r.xMax, wide), Mathf.Min(r.yMax, z1));
-                if (r.width > 0.01f && r.height > 0.01f) Col("Blocker", roof.col, new Vector3(r.xMin, roofY, r.yMin), new Vector3(r.xMax, roofY + d.roofWallHeight, r.yMax), SceneLayers.LocomotionBlocker);
+                // 不會動零件的擋牆叫 Blocker_Static：「離不可見牆」不查它，改由第16項 (i) 的 staticPartClearance 保證
+                if (r.width > 0.01f && r.height > 0.01f) Col(statics.Contains(o) ? "Blocker_Static" : "Blocker", roof.col, new Vector3(r.xMin, roofY, r.yMin), new Vector3(r.xMax, roofY + d.roofWallHeight, r.yMax), SceneLayers.LocomotionBlocker);
             }
             float gz0 = d.gateCenterZ - d.gateWidth / 2f, gz1 = d.gateCenterZ + d.gateWidth / 2f, wh = roofY + d.roofWallHeight;
             Col("EdgeWall_+X", roof.col, new Vector3(walkHalf, roofY, z0), new Vector3(walkHalf + 0.05f, wh, zb0), SceneLayers.Boundary);
             Col("EdgeWall_+X_Base", roof.col, new Vector3(wide, roofY, zb0), new Vector3(wide + 0.05f, wh, zb1), SceneLayers.Boundary);
             Col("EdgeWall_+X_C", roof.col, new Vector3(walkHalf, roofY, zb1), new Vector3(walkHalf + 0.05f, wh, z1), SceneLayers.Boundary);
             Col("EdgeWall_-X_A", roof.col, new Vector3(-walkHalf - 0.05f, roofY, z0), new Vector3(-walkHalf, wh, gz0), SceneLayers.Boundary);
-            Col("EdgeWall_-X_B", roof.col, new Vector3(-walkHalf - 0.05f, roofY, gz1), new Vector3(-walkHalf, wh, zb0), SceneLayers.Boundary);
+            if (zb0 > gz1) Col("EdgeWall_-X_B", roof.col, new Vector3(-walkHalf - 0.05f, roofY, gz1), new Vector3(-walkHalf, wh, zb0), SceneLayers.Boundary);
+            // 放寬帶前端伸進活動欄開口（Z gz0…gz1）時，那一段的車頂邊在 −roofBaseWalkHalfWidth：固定擋牆（GapBlocker 只管 zb0 以前）
+            if (zb0 < gz1) Col("EdgeWall_-X_GateSlice", roof.col, new Vector3(-wide - 0.05f, roofY, zb0), new Vector3(-wide, wh, gz1), SceneLayers.Boundary);
             Col("EdgeWall_-X_Base", roof.col, new Vector3(-wide - 0.05f, roofY, zb0), new Vector3(-wide, wh, zb1), SceneLayers.Boundary);
             Col("EdgeWall_-X_C", roof.col, new Vector3(-walkHalf - 0.05f, roofY, zb1), new Vector3(-walkHalf, wh, z1), SceneLayers.Boundary);
             foreach (int sgn in new[] { -1, 1 })   // 放寬那段前後的轉角牆
             {
                 float xa = sgn > 0 ? walkHalf : -wide - 0.05f, xb = sgn > 0 ? wide + 0.05f : -walkHalf;
-                Col(sgn > 0 ? "EdgeWall_+X_Step0" : "EdgeWall_-X_Step0", roof.col, new Vector3(xa, roofY, zb0 - 0.05f), new Vector3(xb, wh, zb0), SceneLayers.Boundary);
+                if (sgn > 0 || zb0 >= gz1) Col(sgn > 0 ? "EdgeWall_+X_Step0" : "EdgeWall_-X_Step0", roof.col, new Vector3(xa, roofY, zb0 - 0.05f), new Vector3(xb, wh, zb0), SceneLayers.Boundary);   // −X 側前端在活動欄開口內：由 GapBlocker 擋
                 Col(sgn > 0 ? "EdgeWall_+X_Step1" : "EdgeWall_-X_Step1", roof.col, new Vector3(xa, roofY, zb1), new Vector3(xb, wh, zb1 + 0.05f), SceneLayers.Boundary);
             }
             Col("EndWall_-Z", roof.col, new Vector3(-walkHalf, roofY, z0 - 0.05f), new Vector3(walkHalf, wh, z0), SceneLayers.LocomotionBlocker);
             Col("EndWall_+Z", roof.col, new Vector3(-walkHalf, roofY, z1), new Vector3(walkHalf, wh, z1 + 0.05f), SceneLayers.LocomotionBlocker);
-            sb.AppendLine($"車頂：可走區 {walk.Count} 塊（|X|≤{walkHalf:0.00}，底架兩側 Z {zb0:0.000}…{zb1:0.000} 放寬到 |X|≤{wide:0.00}、紅線 {d.roofBaseWarningX:0.00}；挖掉 LowerArm／UpperArm／PanHead 升降全程頂點範圍、絕緣子、母線外擴 {m} m，底架頂點範圍外擴 {mb} m）；降弓後滑板頂面在車頂上 {res.stripTop:0.000} m");
+            sb.AppendLine($"車頂：可走區 {walk.Count} 塊（|X|≤{walkHalf:0.00}，底架兩側 Z {zb0:0.000}…{zb1:0.000} 放寬到 |X|≤{wide:0.00}、紅線 {d.roofBaseWarningX:0.00}；挖掉會動的段升降全程頂點範圍外擴 {d.movingCarveInflate} m、母線與避雷器外擴 {m} m、底架與絕緣子頂點範圍外擴 {d.staticCarveInflate} m）；降弓後滑板頂面在車頂上 {res.stripTop:0.000} m");
             foreach (var (o, i) in obstacles.Select((o, i) => (o, i))) sb.AppendLine($"  挖除 {i}：X {o.min.x:0.000}…{o.max.x:0.000}、Z {o.min.z:0.000}…{o.max.z:0.000}");
 
             // ---------- ENV_InspectionPlatform（活動欄、跨板） ----------
@@ -340,7 +347,7 @@ namespace PantographSim.Editor
             var bridgeRoot = Child(plat.root, "ENV_GateBridge");
             var bridgeVis = Box("BridgePlate", bridgeRoot, new Vector3((px1 - walkHalf) / 2f, roofY - 0.02f, (gz0 + gz1) / 2f), new Vector3(-walkHalf - px1, 0.04f, gz1 - gz0), mGrating, collider: false);
             var bridgeCol = Col("Walkable_Bridge", bridgeRoot, new Vector3(px1, roofY - 0.1f, gz0), new Vector3(-walkHalf, roofY, gz1), SceneLayers.Walkable);
-            var gapCol = Col("GapBlocker", bridgeRoot, new Vector3(-walkHalf - 0.05f, roofY, gz0), new Vector3(-walkHalf, roofY + d.roofWallHeight, gz1), SceneLayers.LocomotionBlocker);
+            var gapCol = Col("GapBlocker", bridgeRoot, new Vector3(-walkHalf - 0.05f, roofY, gz0), new Vector3(-walkHalf, roofY + d.roofWallHeight, Mathf.Min(gz1, zb0)), SceneLayers.LocomotionBlocker);   // a6：zb0 以後是底架放寬帶，邊在 EdgeWall_-X_GateSlice
             var gate = gateRoot.gameObject.AddComponent<PlatformGate>();
             gate.Setup(gateCol, gateVis.gameObject, bridgeCol, bridgeVis, gapCol);
             res.ids["env.platform_gate"] = gateRoot;
@@ -465,7 +472,7 @@ namespace PantographSim.Editor
             var anchorRoot = Child(env, "StationAnchors");
             // D33：base_w／base_e 的 Z＝底架中心、子站點的 Z＝那支底座螺栓的實測世界 Z（從模型推導，寫回站點資料）
             var holesByN = PantographAssemblyBuilder.BaseHoles(baseR);
-            foreach (var (id, z) in new[] { ("tp.roof.base_w", baseV.center.z), ("tp.roof.base_e", baseV.center.z), ("tp.roof.base_w.s", holesByN[0].z), ("tp.roof.base_e.s", holesByN[1].z), ("tp.roof.base_e.n", holesByN[2].z), ("tp.roof.base_w.n", holesByN[3].z) })
+            foreach (var (id, z) in new[] { ("tp.roof.base_w", baseV.center.z), ("tp.roof.base_e", baseV.center.z), ("tp.roof.base_e.n", holesByN[2].z), ("tp.roof.base_w.n", holesByN[3].z) })   // .s 固定 roofBaseSouthZ（資料）
                 if (stations.Find(id) is StationDef bs) { bs.positionXZ = new Vector2(bs.positionXZ.x, Mathf.Round(z * 1000f) / 1000f); EditorUtility.SetDirty(bs); }
             foreach (var s in stations.stations.Where(x => x != null))
             {
@@ -692,9 +699,10 @@ namespace PantographSim.Editor
             Box("Aisle", area.visual, new Vector3((d.PlatformOuterX + b.x) / 2f, gy + 0.004f, (a.y + b.y) / 2f), new Vector3(b.x - d.PlatformOuterX, 0.008f, b.y - a.y), Mat("aisle", new Color(0.46f, 0.48f, 0.50f)), collider: false);
             // 台架外 standClearance 的黃色走道線
             var sc = new Vector3(d.standCenterXZ.x, gy, d.standCenterXZ.y);
+            var fc = new Vector3(d.StandFrameCenterXZ.x, gy, d.StandFrameCenterXZ.y);   // 外框中心（增補 4：可能偏離台架中心）
             float lx = d.standSizeXZ.x / 2f + d.standClearance, lz = d.standSizeXZ.y / 2f + d.standClearance;
-            foreach (var (pos, size) in new[] { (new Vector3(sc.x, gy + 0.012f, sc.z + lz), new Vector3(2 * lx, 0.004f, 0.06f)), (new Vector3(sc.x, gy + 0.012f, sc.z - lz), new Vector3(2 * lx, 0.004f, 0.06f)),
-                                                (new Vector3(sc.x + lx, gy + 0.012f, sc.z), new Vector3(0.06f, 0.004f, 2 * lz)), (new Vector3(sc.x - lx, gy + 0.012f, sc.z), new Vector3(0.06f, 0.004f, 2 * lz)) })
+            foreach (var (pos, size) in new[] { (new Vector3(fc.x, gy + 0.012f, fc.z + lz), new Vector3(2 * lx, 0.004f, 0.06f)), (new Vector3(fc.x, gy + 0.012f, fc.z - lz), new Vector3(2 * lx, 0.004f, 0.06f)),
+                                                (new Vector3(fc.x + lx, gy + 0.012f, fc.z), new Vector3(0.06f, 0.004f, 2 * lz)), (new Vector3(fc.x - lx, gy + 0.012f, fc.z), new Vector3(0.06f, 0.004f, 2 * lz)) })
                 Box("WalkwayLine", area.visual, pos, size, mWarn, collider: false);
             Anchor(area.anchors, "Anchor_PartsTray_Maint", new Vector3(d.partsTrayMaintXZ.x, gy, d.partsTrayMaintXZ.y), Vector3.zero);   // 紅色「待報廢」零件盒的位置（R1.5b）
             res.equipment.Add(area.root);
@@ -705,7 +713,7 @@ namespace PantographSim.Editor
             var standVis = Fbx("ENV_PantographStand", null, standP.visual, sc);
             // F6：外框（四周與四角立柱）頂面 standFrameTopAboveGround；G2：支撐座、定位銷、外框尺寸由建置從實測推導（FitStand）
             var seatSize = FitStand(standVis.transform, d, sc, sb);
-            Col("StandFrame", standP.col, sc - new Vector3(d.standSizeXZ.x / 2f, 0f, d.standSizeXZ.y / 2f), sc + new Vector3(d.standSizeXZ.x / 2f, d.standFrameTopAboveGround, d.standSizeXZ.y / 2f), "Default");
+            Col("StandFrame", standP.col, fc - new Vector3(d.standSizeXZ.x / 2f, 0f, d.standSizeXZ.y / 2f), fc + new Vector3(d.standSizeXZ.x / 2f, d.standFrameTopAboveGround, d.standSizeXZ.y / 2f), "Default");
             Col("StandSeatBlock", standP.col, new Vector3(sc.x - seatSize.x / 2f, gy, sc.z - seatSize.y / 2f), new Vector3(sc.x + seatSize.x / 2f, gy + d.standTopAboveGround, sc.z + seatSize.y / 2f), "Default");
             standP.root.gameObject.AddComponent<InteractionPointMarker>().Configure("env.panto_stand", "集電弓台架");
             res.ids["env.panto_stand"] = standP.root;
@@ -757,11 +765,13 @@ namespace PantographSim.Editor
                 else if (k.name.StartsWith("SeatPost")) k.position = new Vector3(sc.x + S(o.x) * (seatSize.x / 2f - 0.08f), k.position.y, sc.z + S(o.z) * (seatSize.y / 2f - 0.08f));
                 else if (k.name.StartsWith("StandClamp_")) k.position = new Vector3(sc.x + S(o.x) * (seatSize.x / 2f + 0.05f), k.position.y, sc.z);
             }
-            float dW = (d.standSizeXZ.x - oldW) / 2f, dL = (d.standSizeXZ.y - oldL) / 2f;
+            // 外框四邊從 FBX 原本的邊（台架中心 ± 原尺寸/2）移到新的邊（外框中心 ± standSizeXZ/2），每一側各自的位移
+            var fc = new Vector3(d.StandFrameCenterXZ.x, sc.y, d.StandFrameCenterXZ.y);
+            float Shift(float o, float c0, float c1, float oldHalf, float newHalf) => Mathf.Abs(o) <= 0.05f ? c1 - c0 : (c1 + S(o) * newHalf) - (c0 + S(o) * oldHalf);
             foreach (var t in all.Where(x => x.name.StartsWith("Frame_") || x.name == "Leg" || x.name.StartsWith("AlignLight_") || x.name == "ToolTray" || x.name == "BoltTray"))
             {
                 var o = t.position - sc;
-                t.position += new Vector3(Mathf.Abs(o.x) > 0.05f ? S(o.x) * dW : 0f, 0f, Mathf.Abs(o.z) > 0.05f ? S(o.z) * dL : 0f);
+                t.position += new Vector3(Shift(o.x, sc.x, fc.x, oldW / 2f, d.standSizeXZ.x / 2f), 0f, Shift(o.z, sc.z, fc.z, oldL / 2f, d.standSizeXZ.y / 2f));
                 if (t.name.StartsWith("Frame_Long_")) ResizeWorld(t, Vector3.forward, d.standSizeXZ.y);
                 if (t.name.StartsWith("Frame_Short_")) ResizeWorld(t, Vector3.right, d.standSizeXZ.x);
             }
@@ -785,17 +795,18 @@ namespace PantographSim.Editor
         }
 
         /// <summary>
-        /// a6 G2：台架外框 standSizeXZ＝降弓整組 LoweredTightBounds（PAN_Root 局部，原點＝底架中心）兩端各外擴 standFrameMargin，
-        /// 底架中心對準台架中心，所以取兩端較大的一側對稱（tp.stand.* 離框邊一樣遠）。寫回 RoofSceneDef，再重算 tp.stand.*。
+        /// a6 G2＋增補 4：台架外框＝降弓整組 LoweredTightBounds（PAN_Root 局部，原點＝底架中心＝台架中心）的 X、Z 範圍兩端各外擴 standFrameMargin（不加擺動餘裕）；
+        /// 範圍前後不對稱，外框中心跟著偏（standFrameOffsetXZ）。寫回 RoofSceneDef，再重算 tp.stand.*。
         /// </summary>
         static void DeriveStand(RoofSceneDef d, StringBuilder sb)
         {
             var t = PantographAssemblyBuilder.Tight;
-            float hx = Mathf.Max(-t.min.x, t.max.x) + d.standFrameMargin, hz = Mathf.Max(-t.min.z, t.max.z) + d.standFrameMargin;
-            d.standSizeXZ = new Vector2(Mathf.Round(2f * hx * 1000f) / 1000f, Mathf.Round(2f * hz * 1000f) / 1000f);
+            float R(float v) => Mathf.Round(v * 1000f) / 1000f;
+            d.standSizeXZ = new Vector2(R(t.size.x + 2f * d.standFrameMargin), R(t.size.z + 2f * d.standFrameMargin));
+            d.standFrameOffsetXZ = new Vector2(R(t.center.x), R(t.center.z));
             EditorUtility.SetDirty(d);
             R1Data.StandStations(R1Data.Stations);
-            sb.AppendLine($"台架外框（G2）：LoweredTightBounds X {t.min.x:0.000}…{t.max.x:0.000}、Z {t.min.z:0.000}…{t.max.z:0.000}，外擴 {d.standFrameMargin} → {d.standSizeXZ.x:0.000} × {d.standSizeXZ.y:0.000} m（對稱）");
+            sb.AppendLine($"台架外框（G2／增補 4）：LoweredTightBounds X {t.min.x:0.000}…{t.max.x:0.000}、Z {t.min.z:0.000}…{t.max.z:0.000}，兩端各外擴 {d.standFrameMargin}、不加擺動餘裕 → {d.standSizeXZ.x:0.000} × {d.standSizeXZ.y:0.000} m，外框中心偏 {d.standFrameOffsetXZ}");
         }
 
         /// <summary>把 t 沿世界軸 worldAxis 的長度設成 length（FBX 節點帶著軸向轉換的旋轉，要找對應的局部軸）。單位長 1 m 的網格用。</summary>
