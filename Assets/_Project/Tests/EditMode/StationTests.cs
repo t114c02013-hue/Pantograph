@@ -47,7 +47,13 @@ namespace PantographSim.Tests
                 var def = AssetDatabase.LoadAssetAtPath<RoofSceneDef>(Folder + "/RoofSceneDef.asset");
                 // 升降聯集要移動弓體才量得到（會弄髒場景），只在建置時檢查；這裡傳空範圍
                 // shortcut: EditMode 測試不檢查「站點離升降聯集 ≥ 0.4 m」（建置時有完整檢查）, 要在測試裡檢查時改用預覽場景複製集電弓再量
-                var r = StationLayoutCheck.CheckScene(Set, def, pts, id => ids.TryGetValue(id ?? "", out var t) ? t : null, default);
+                // a6：第11、18 項量降弓姿態（和建置時相同），量完設回存檔的姿態
+                var mech = UnityEngine.Object.FindObjectOfType<Parts.Mechanism.PantographMechanism>(true);
+                float lift = mech.Lift;
+                mech.SetLift(0f);
+                StationLayoutCheck.SceneResult r;
+                try { r = StationLayoutCheck.CheckScene(Set, def, pts, id => ids.TryGetValue(id ?? "", out var t) ? t : null, null); }
+                finally { mech.SetLift(lift); }
                 Assert.IsTrue(r.Ok, r.ToString());
                 Assert.IsTrue(ids.ContainsKey("env.bolt_tray_L") && ids.ContainsKey("env.bolt_tray_R"), "主場景要有兩個螺栓盤");
             });

@@ -26,6 +26,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1b72ad74751a0ae40921c5baf64eb964, type: 2}
   - {fileID: 11400000, guid: 0d51f483c2a5f254e821857444726a99, type: 2}
   - {fileID: 11400000, guid: a6698b1c622f25043aa3f68bf065cb43, type: 2}
+  - {fileID: 11400000, guid: 4a32e69b9a85ef74daa8bcee87ee6fc4, type: 2}
+  - {fileID: 11400000, guid: 9799c4f1e31dc01489378f86a771caef, type: 2}
+  - {fileID: 11400000, guid: 423f3819adc2ed44fb38f9e095727751, type: 2}
+  - {fileID: 11400000, guid: d2b307337325db646af607ecf0354b68, type: 2}
+  - {fileID: 11400000, guid: f4d605c9d89b75c45b2c7b537b2181e2, type: 2}
+  - {fileID: 11400000, guid: 2eb305b2f7f26aa4e831121ba60c21ee, type: 2}
+  - {fileID: 11400000, guid: 35b2a6fdd750f7646a30b0e87d269ef5, type: 2}
+  - {fileID: 11400000, guid: b90fb4522e3859c44a80b7afeca9d490, type: 2}
   startStationId: tp.platform.lift
   clearRadius: 0.4
   invisibleWallClearance: 0.15
@@ -53,20 +61,56 @@ MonoBehaviour:
   measuredFarBoltR: 0.7397538
   platformStationMinSpacing: 0.6
   gateFrontClearance: 0.4
-  poleRackGroundMaxDistance: 1
-  poleRackMaxX: -3
+  poleRackGroundMaxDistance: 0.7
   liftCorridorHalfWidth: 1
   craneCorridorMinDistance: 2
   standStationYTolerance: 0.02
   standStationOffsetTolerance: 0.05
   carBodyGroundMaxDistance: 0.8
-  roofBaseWXZ: {x: -0.7, y: 0.6}
-  roofBaseEXZ: {x: 0.7, y: 0.6}
   baseECableMaxDistance: 1.3
-  baseESearchStep: 0.05
-  baseESearchMaxZ: 4
-  busbarHoleMinX: 0.2
-  busbarHoleMaxX: 0.4
   stairMinZ: 4
   stairMaxZ: 10
   standFrameMinClearance: 0.3
+  stairOverlapTolerance: 0.02
+  roofEntryMaxDistance: 2
+  toCabLiftMaxDistance: 0.5
+  npcClearance: 0.6
+  npcGateFront: 0.4
+  liftZoneMinXZ: {x: -12, y: -2.25}
+  liftZoneMaxXZ: {x: 1.69, y: 2.25}
+  baseBoltMaxDistance: 1
+  headMaxAbsX: 1.1
+  stripMatMaxAbsX: 0.8
+  stripMatStationMin: 0.25
+  sideNodeBaseEMax: 0.8
+  connectorCableMin: 0.3
+  pendantCraneMax: 1
+  pendantRackGap: 0.15
+  pendantRackGapTolerance: 0.005
+  subStationBoltMax: 0.6
+  carBodyGroundMaxX: -1.05
+  stationFootRadius: 0.25
+  kneelZoneDepth: 0.6
+  kneelZoneHalfWidth: 0.25
+  liftObstacleMargin: 0.5
+  awaitingRuling:
+  - tp.roof.base_w.s
+  - tp.roof.base_e.s
+  - "\u3010\u7B2C15\u9805\u3011npc.work_leader\uFF08\u5E73\u6642\uFF09"
+  - "\u3010\u7B2C19\u9805\u3011PendantDock \u548C\u5DE5\u5177\u67B6"
+  npcPoses:
+  - npcId: npc.guard
+    phase: "\u5E73\u6642"
+    position: {x: -3, y: 0, z: -1}
+  - npcId: npc.work_leader
+    phase: "\u5E73\u6642"
+    position: {x: -3, y: 0, z: -0.3}
+  - npcId: npc.rigging_lead
+    phase: "\u540A\u904B\u4E2D"
+    position: {x: -5, y: -3.65, z: -3.5}
+  - npcId: npc.guard
+    phase: "\u540A\u904B\u4E2D"
+    position: {x: -6, y: -3.65, z: -4.3}
+  - npcId: npc.work_leader
+    phase: "\u540A\u904B\u4E2D"
+    position: {x: -7, y: -3.65, z: -4.3}

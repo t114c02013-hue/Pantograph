@@ -107,7 +107,17 @@ namespace PantographSim.Editor
             cr.relativeToPlatformInner = true; cr.positionXZ = new Vector2(-2.40f - inner, -3.50f); cr.facingDirection = Vector3.right; cr.facingTargetId = "";
             EditorUtility.SetDirty(cr);
 
-            // a4：地面維修區的台架四邊站點（台架邊中點外 standStationOffset，面向台架；teleport 進出維修區）
+            StandStations(set);
+            foreach (var s in set.stations.Where(x => x != null && x.zoneId != ZoneDef.Maintenance)) { s.zoneId = ZoneDef.Arrival; EditorUtility.SetDirty(s); }
+            Zones();
+            EditorUtility.SetDirty(set);
+            AssetDatabase.SaveAssets();
+            return set;
+        }
+
+        /// <summary>a4：地面維修區的台架四邊站點（台架邊中點外 standStationOffset，面向台架；teleport 進出維修區）。a6 G2 台架外框改由建置推導後重跑。</summary>
+        public static void StandStations(StationSet set)
+        {
             var d = RoofScene;
             var c = d.standCenterXZ; float hx = d.standSizeXZ.x / 2f + d.standStationOffset, hz = d.standSizeXZ.y / 2f + d.standStationOffset;
             foreach (var (id, label, xz) in new[] { ("tp.stand.n", "台架北側", new Vector2(c.x, c.y + hz)), ("tp.stand.e", "台架東側", new Vector2(c.x + hx, c.y)),
@@ -118,8 +128,60 @@ namespace PantographSim.Editor
                 s.floor = StationFloor.Ground; s.positionXZ = xz; s.facingTargetId = "env.panto_stand"; s.maxTargetDistance = 2.5f; s.zoneId = ZoneDef.Maintenance;
                 EditorUtility.SetDirty(s);
             }
-            foreach (var s in set.stations.Where(x => x != null && x.zoneId != ZoneDef.Maintenance)) { s.zoneId = ZoneDef.Arrival; EditorUtility.SetDirty(s); }
-            Zones();
+            EditorUtility.SetDirty(set);
+        }
+
+        /// <summary>
+        /// R1.5a a6（補充 v4.3、增補 1）：平台擺放（桿架、工具架、遙控器掛座）、車體接地座、新站點（tp.platform.parts／scrap、tp.roof.base_w／base_e）、
+        /// 定案門檻、NPC 站位。可以重跑（每次寫同樣的值）。base_w／base_e 的 Z 在建置時由 RoofSiteBuilder 從底架模型推導後寫回。
+        /// </summary>
+        public static StationSet ApplyA6()
+        {
+            var set = ApplyR15a();
+            var d = RoofScene;
+            d.poleRackFromOuter = new Vector3(-2.85f - d.PlatformOuterX, d.poleRackFromOuter.y, 0.60f);
+            d.toolRackFromOuter = new Vector3(d.toolRackFromOuter.x, d.toolRackFromOuter.y, -2.40f);
+            d.pendantDockFromOuter = new Vector3(-3.06f - d.PlatformOuterX, 1.20f, -2.95f);   // D32
+            d.carBodyGround = new Vector3(-1.15f, d.carBodyGround.y, 0.43f);   // D34：外肩（Y 由車頂斷面算）
+            EditorUtility.SetDirty(d);
+
+            float inner = d.PlatformInnerX;
+            var rack = set.Find("tp.platform.rack"); rack.positionXZ = new Vector2(-2.41f - inner, -2.40f); EditorUtility.SetDirty(rack);
+            var crane = set.Find("tp.platform.crane"); crane.allowedWhileLifted = true; EditorUtility.SetDirty(crane);
+            string roofLock = set.Find("tp.roof.inner").lockedMessage;
+            StationDef Add(string id, string label, StationFloor floor)
+            {
+                if (set.Find(id) == null) set.stations = set.stations.Concat(new[] { Station(id, label, floor, Vector2.zero, "") }).ToArray();
+                return set.Find(id);
+            }
+            foreach (var (id, label, z) in new[] { ("tp.platform.parts", "備品架前（日常）", 1.60f), ("tp.platform.scrap", "待報廢箱前（日常）", 2.85f) })
+            {
+                var s = Add(id, label, StationFloor.Platform);
+                s.relativeToPlatformInner = true; s.positionXZ = new Vector2(-2.41f - inner, z); s.facingTargetId = ""; s.facingDirection = Vector3.left; s.zoneId = ZoneDef.Arrival;
+                EditorUtility.SetDirty(s);
+            }
+            // D33：base_w／base_e（吊耳、控制線接頭、固定帶扣座）＋四個子站點（各對一支底座螺栓，Z 建置時取螺栓實測世界 Z）
+            foreach (var (id, label, sgn) in new[] { ("tp.roof.base_w", "車頂拆裝座（−X 側）", -1f), ("tp.roof.base_e", "車頂拆裝座（+X 側）", 1f),
+                ("tp.roof.base_w.s", "底座螺栓 1 前", -1f), ("tp.roof.base_e.s", "底座螺栓 2 前", 1f), ("tp.roof.base_e.n", "底座螺栓 3 前", 1f), ("tp.roof.base_w.n", "底座螺栓 4 前", -1f) })
+            {
+                var s = Add(id, label, StationFloor.Roof);
+                s.positionXZ = new Vector2(sgn * d.roofBaseStationX, s.positionXZ.y);   // Z 由建置腳本寫回（底架中心）
+                s.facingTargetId = ""; s.facingDirection = new Vector3(-sgn, 0f, 0f);   // 面向同側的底座螺栓（往車中心）
+                s.unlockKey = "roof.open"; s.lockedMessage = roofLock; s.zoneId = ZoneDef.Arrival;
+                EditorUtility.SetDirty(s);
+            }
+            set.poleRackGroundMaxDistance = 0.70f;
+            // 2026-11-02 回報給組長／鐵道、等裁定（規格說不合格照實回報、不自己改座標）：
+            // 弓頭羊角（降弓 X ±0.83、Z −0.19…+0.19）外擴後蓋住 base_w.s／base_e.s；工作負責人平時站位離桿架、去駕駛室光圈不到 0.6；掛座和工具架（板寬 0.70）間距 0.10
+            set.awaitingRuling = new[] { "tp.roof.base_w.s", "tp.roof.base_e.s", "【第15項】npc.work_leader（平時）", "【第19項】PendantDock 和工具架" };
+            set.npcPoses = new[]
+            {
+                new NpcStandPose { npcId = "npc.guard", phase = NpcPhase.Normal, position = new Vector3(-3.00f, 0f, -1.00f) },
+                new NpcStandPose { npcId = "npc.work_leader", phase = NpcPhase.Normal, position = new Vector3(-3.00f, 0f, -0.30f) },
+                new NpcStandPose { npcId = "npc.rigging_lead", phase = NpcPhase.Lifting, position = new Vector3(-5.0f, d.groundY, -3.5f) },
+                new NpcStandPose { npcId = "npc.guard", phase = NpcPhase.Lifting, position = new Vector3(-6.0f, d.groundY, -4.3f) },
+                new NpcStandPose { npcId = "npc.work_leader", phase = NpcPhase.Lifting, position = new Vector3(-7.0f, d.groundY, -4.3f) },
+            };
             EditorUtility.SetDirty(set);
             AssetDatabase.SaveAssets();
             return set;

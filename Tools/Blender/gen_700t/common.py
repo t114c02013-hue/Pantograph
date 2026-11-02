@@ -126,3 +126,34 @@ def world_bounds(objs):
             for k in range(3):
                 lo[k] = min(lo[k], w[k]); hi[k] = max(hi[k], w[k])
     return lo, hi
+
+
+def add_box(bm, size, center=(0, 0, 0), bevel=0.0):
+    """在既有 bmesh 裡加一個方塊（size 全長、center 中心，直接寫進頂點，不動物件原點）；bevel＞0 時倒角（1 段）。"""
+    r = bmesh.ops.create_cube(bm, size=1.0)
+    vs = r["verts"]
+    bmesh.ops.scale(bm, vec=Vector(size), verts=vs)
+    bmesh.ops.translate(bm, vec=Vector(center), verts=vs)
+    if bevel > 0:
+        edges = list({e for v in vs for e in v.link_edges})
+        bmesh.ops.bevel(bm, geom=edges, offset=bevel, segments=1, affect="EDGES")
+    return vs
+
+
+def add_cylinder(bm, radius, depth, center=(0, 0, 0), axis="Z", segments=12):
+    """在既有 bmesh 裡加一個圓柱（軸 axis，中心 center）。"""
+    from mathutils import Matrix
+    r = bmesh.ops.create_cone(bm, cap_ends=True, segments=segments, radius1=radius, radius2=radius, depth=depth)
+    vs = r["verts"]
+    if axis == "X":
+        bmesh.ops.rotate(bm, verts=vs, cent=(0, 0, 0), matrix=Matrix.Rotation(1.5707963, 3, "Y"))
+    elif axis == "Y":
+        bmesh.ops.rotate(bm, verts=vs, cent=(0, 0, 0), matrix=Matrix.Rotation(1.5707963, 3, "X"))
+    bmesh.ops.translate(bm, vec=Vector(center), verts=vs)
+    return vs
+
+
+def mesh_object(ctx, name, bm, mat, color, parent=None, loc=(0, 0, 0)):
+    """把組好的 bmesh 變成物件（原點＝物件位置 loc，頂點已含偏移）。"""
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return _finish(ctx, name, bm, mat, color, parent, loc)

@@ -18,6 +18,7 @@ class Palette:
             "insulator": (0.55, 0.32, 0.20), "yellow": (0.98, 0.80, 0.05), "red": (0.80, 0.12, 0.10), "green": (0.20, 0.75, 0.30),
             "craneyellow": (0.95, 0.70, 0.08), "rail": (0.25, 0.24, 0.22), "concrete": (0.60, 0.62, 0.64), "blue": (0.15, 0.35, 0.75),
             "steel": (0.40, 0.42, 0.45), "rubber": (0.08, 0.08, 0.08), "copper": (0.72, 0.45, 0.20), "orangesafety": (1.0, 0.45, 0.05),
+            "strapyellow": _hex("#F2C200"), "rubberdarkgrey": _hex("#3A3A3A"),   # a6 增補 2：Strap_Yellow、Rubber_DarkGrey
         }
         self.index = {name: i for i, name in enumerate(self.colors)}
         assert len(self.colors) <= GRID * GRID

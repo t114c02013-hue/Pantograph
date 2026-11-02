@@ -31,7 +31,8 @@ namespace PantographSim.Tests
                 Assert.AreEqual(ZoneDef.Maintenance, s.zoneId);
                 Assert.AreEqual("env.panto_stand", s.facingTargetId);
             }
-            Assert.IsNull(Set.Find("tp.platform.bench")); Assert.IsNull(Set.Find("tp.platform.parts"));
+            Assert.IsNull(Set.Find("tp.platform.bench"));   // a6 第一節 7：tp.platform.parts（日常課程備品架前）是平台站點，不在維修區
+            Assert.AreEqual(ZoneDef.Arrival, Set.Find("tp.platform.parts")?.zoneId);
         }
 
         [Test]
@@ -47,8 +48,10 @@ namespace PantographSim.Tests
                 foreach (var n in new[] { "StandSeat_1", "StandSeat_2", "StandSeat_3", "StandSeat_4", "StandClamp_1", "StandClamp_2", "AlignLight_1", "AlignLight_4", "BoltTray" })
                     Assert.Contains(n, names);
                 var seats = Enumerable.Range(1, 4).Select(i => stand.GetComponentsInChildren<Transform>(true).First(t => t.name == "StandSeat_" + i).position).ToList();
-                Assert.AreEqual(0.80f, seats.Max(p => p.x) - seats.Min(p => p.x), 0.01f, "定位銷 X 間距");
-                Assert.AreEqual(1.00f, seats.Max(p => p.z) - seats.Min(p => p.z), 0.01f, "定位銷 Z 間距：" + string.Join(" ", seats.Select(s => s.ToString("F3"))));
+                // a6 G2：定位銷間距＝底架 BaseHole 的實測間距（a5 以前是 0.80 × 1.00）
+                var holes = Enumerable.Range(1, 4).Select(i => PanAssy.Root(scene).Find("PAN_Base/BaseHole_" + i).position).ToList();
+                Assert.AreEqual(holes.Max(p => p.x) - holes.Min(p => p.x), seats.Max(p => p.x) - seats.Min(p => p.x), 0.01f, "定位銷 X 間距");
+                Assert.AreEqual(holes.Max(p => p.z) - holes.Min(p => p.z), seats.Max(p => p.z) - seats.Min(p => p.z), 0.01f, "定位銷 Z 間距：" + string.Join(" ", seats.Select(s => s.ToString("F3"))));
                 var top = seats[0].y;
                 Assert.AreEqual(Def.StandTopY, top, 0.08f, "台架頂面 Y −2.90");
                 // 四周 1.2 m 淨空：除了台架自己，沒有其他碰撞體

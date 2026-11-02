@@ -97,6 +97,8 @@ namespace PantographSim.Data
         [Tooltip("台架外形：X、Z")] public Vector2 standSizeXZ = new Vector2(2.0f, 2.6f);
         [Tooltip("台架頂面（支撐座、定位銷）離地")] public float standTopAboveGround = 0.75f;
         [Tooltip("F6：台架外框（支撐座四周與四角立柱）頂面離地，低於支撐座，懸出的臂和吊帶不會掃到")] public float standFrameTopAboveGround = 0.45f;
+        [Tooltip("a6 G2：台架外框＝降弓整組 LoweredTightBounds 兩端各外擴這個值（standSizeXZ 由建置寫入）")] public float standFrameMargin = 0.15f;
+        [Tooltip("a6 G2：台架支撐座＝BaseHole 的 X、Z 間距各加這個值")] public Vector2 standSeatMarginXZ = new Vector2(0.13f, 0.18f);
         [Tooltip("台架四周淨空（地面黃色走道線畫在這裡）")] public float standClearance = 1.2f;
         [Tooltip("tp.stand.* 離台架邊")] public float standStationOffset = 0.6f;
         [Tooltip("工作檯中心（XZ），檯面沿 Z 擺")] public Vector2 workbenchCenterXZ = new Vector2(-12.5f, 0f);
@@ -111,7 +113,44 @@ namespace PantographSim.Data
         [Tooltip("吊鉤最高點（離吊車橋的距離）")] public float hookTopBelowBridge = 1.2f;
         [Tooltip("吊具架（維修區地面）")] public Vector2 slingRackXZ = new Vector2(-6.5f, -3.8f);
 
+        [Header("R1.5a a6（試玩回饋、D30、D32、日常滑板、車頂拆裝座）")]
+        [Tooltip("「去駕駛室」地面光圈 mk.platform.to_cab（XZ、半徑）；標記，不是站點")] public Vector2 toCabMarkerXZ = new Vector2(-2.20f, -0.45f);
+        public float toCabMarkerRadius = 0.25f;
+        [Tooltip("日常課程備品架擺放點 Anchor_SpareShelf_Daily（中心；沿 Z 長 dailyRackLength）")] public Vector3 spareShelfDaily = new Vector3(-3.06f, 1.0f, 1.45f);
+        [Tooltip("日常課程待報廢箱擺放點 Anchor_ScrapBox_Daily")] public Vector3 scrapBoxDaily = new Vector3(-3.06f, 0.5f, 2.85f);
+        public float dailyRackLength = 1.3f;
+        [Tooltip("車頂拆裝座：底架兩側局部放寬的可走範圍 |X| ≤ 這個值，Z＝底架前後緣各外擴 roofBaseWalkZMargin")] public float roofBaseWalkHalfWidth = 1.10f, roofBaseWalkZMargin = 0.15f;
+        [Tooltip("底架兩側的警示紅線 |X|（鐵道規定，和 Walkable 寬度分開）；裁定前 Walkable 暫用 1.10（方案 A）")] public float roofBaseWarningX = 1.0f;
+        [Tooltip("tp.roof.base_w／base_e 的 |X|（Z＝底架中心，建置時從模型推導）")] public float roofBaseStationX = 0.95f;
+        [Tooltip("車頂暫放墊 env.roof_strip_mat（model-spec v2.3 §8.6）：中心、長（X）× 寬（Z）、墊厚、邊框寬、邊框高出墊面、上方判定 trigger 高")]
+        public Vector3 roofStripMatCenter = new Vector3(0f, 0f, -1.10f);   // 底面中心（FBX 原點），墊面在 Y＝thickness
+        public Vector2 roofStripMatSize = new Vector2(1.20f, 0.30f);
+        public float roofStripMatThickness = 0.01f, roofStripMatRimWidth = 0.02f, roofStripMatRimHeight = 0.02f, roofStripMatTriggerHeight = 0.10f;
+        [Tooltip("a6 v4.3 第 11 點（車頂座標，鐵道修正）：控制線接頭 ip.pan_assy.ctrl_connector 的 XZ（Y＝底架頂面）、降弓固定帶綁點 HoldDown_TiePoint 的 XZ（Y＝下臂頂面）")]
+        public Vector2 ctrlConnectorXZ = new Vector2(0.50f, 0.95f), holdDownTieXZ = new Vector2(0.30f, 1.20f);
+        [Tooltip("增補 2：PAN_CtrlConnector 參數（座 X×Y×Z、插座直徑／長、蓋直徑／長）")] public Vector3 ctrlConnectorBodySize = new Vector3(0.10f, 0.08f, 0.08f);
+        public float ctrlSocketDiameter = 0.040f, ctrlSocketLength = 0.050f, ctrlCapDiameter = 0.046f, ctrlCapLength = 0.020f;
+        [Tooltip("增補 2：PAN_HoldDownStrap 參數；armHalfWidth＝實測下臂在綁點 Z 的 X 半寬＋0.005（建置時寫入）")] public float strapWidth = 0.050f, strapThickness = 0.003f, strapArmHalfWidth = 0.035f, strapRollDiameter = 0.07f;
+        public Vector3 strapBuckleSize = new Vector3(0.06f, 0.02f, 0.08f);
+        [Tooltip("D30：腰包 env.waist_pouch（相對 XR Origin；x＞0＝右腰）")] public Vector3 waistPouchLocal = new Vector3(0.18f, 0.95f, 0.05f);
+        [Tooltip("D30：防墜器繩子的視覺長度（不改判定）")] public float fallArresterLineLength = 6.0f;   // 增補 3：捲收器標示 6 m；單位長 1 m 的 Ø10 mm 細圓柱縮放到 D 環
+        public float fallArresterLineDiameter = 0.010f;
+        [Tooltip("D32：遙控器掛座固定在外護欄立柱的橫臂長度")] public float pendantDockArmLength = 0.25f;
+
+        [Tooltip("增補 3（D33）：車頂防墜器背部 D 環離車頂面的高度（跪姿、站姿）")] public float dRingKneelHeight = 0.90f, dRingStandHeight = 1.35f;
+        [Tooltip("增補 3（D34）：車體接地座焊接小平台邊長、接地螺樁高")] public float carBodyGroundPadSize = 0.10f, carBodyGroundStudHeight = 0.03f;
+
         public float StandTopY => groundY + standTopAboveGround;
+
+        /// <summary>車頂斷面在 x 的高度（和 Tools/Blender/gen_700t/car_body.py 的 profile 同一條式子：中央平段，兩側圓弧縮放到車頂邊下降 roofEdgeDrop）。</summary>
+        public float RoofSurfaceY(float x)
+        {
+            float flat = roofFlatWidth / 2f, ax = Mathf.Abs(x);
+            if (ax <= flat) return roofFloorY;
+            float Raw(float v) => -roofArcRadius + Mathf.Sqrt(Mathf.Max(roofArcRadius * roofArcRadius - (v - flat) * (v - flat), 0f));
+            float edge = Raw(carBodyHalfWidth) < 0f ? Raw(carBodyHalfWidth) : -1e-3f;
+            return roofFloorY + roofEdgeDrop * Raw(Mathf.Min(ax, carBodyHalfWidth)) / -edge;
+        }
 
         public Vector3 FromInner(Vector3 v) => new Vector3(PlatformInnerX + v.x, v.y, v.z);
         public Vector3 FromOuter(Vector3 v) => new Vector3(PlatformOuterX + v.x, v.y, v.z);
@@ -145,6 +184,12 @@ namespace PantographSim.Data
                 $"\"insulatedPoleLength\": {F(insulatedPoleLength)}",
                 $"\"standTopAboveGround\": {F(standTopAboveGround)}", $"\"standFrameTopAboveGround\": {F(standFrameTopAboveGround)}",
                 $"\"liveryWhite\": {C(liveryWhite)}", $"\"liveryOrange\": {C(liveryOrange)}", $"\"liveryDark\": {C(liveryDark)}",
+                $"\"roofStripMat\": {{ \"center\": [{F(roofStripMatCenter.x)}, {F(roofStripMatCenter.y)}, {F(roofStripMatCenter.z)}], \"size\": [{F(roofStripMatSize.x)}, {F(roofStripMatSize.y)}], " +
+                $"\"thickness\": {F(roofStripMatThickness)}, \"rimWidth\": {F(roofStripMatRimWidth)}, \"rimHeight\": {F(roofStripMatRimHeight)} }}",
+                $"\"ctrlConnector\": {{ \"bodySize\": [{F(ctrlConnectorBodySize.x)}, {F(ctrlConnectorBodySize.y)}, {F(ctrlConnectorBodySize.z)}], \"socketDiameter\": {F(ctrlSocketDiameter)}, \"socketLength\": {F(ctrlSocketLength)}, " +
+                $"\"capDiameter\": {F(ctrlCapDiameter)}, \"capLength\": {F(ctrlCapLength)} }}",
+                $"\"holdDownStrap\": {{ \"strapWidth\": {F(strapWidth)}, \"strapThickness\": {F(strapThickness)}, \"armHalfWidth\": {F(strapArmHalfWidth)}, " +
+                $"\"buckleSize\": [{F(strapBuckleSize.x)}, {F(strapBuckleSize.y)}, {F(strapBuckleSize.z)}], \"rollDiameter\": {F(strapRollDiameter)} }}",
             });
             return "{\n  " + body + "\n}";
         }

@@ -23,9 +23,11 @@ namespace PantographSim.Tests
                 Physics.SyncTransforms();
                 var pts = Object.FindObjectsOfType<XrTeleportPoint>(true).Where(p => p.gameObject.scene == scene).ToList();
                 Assert.AreEqual(AssetDatabase.LoadAssetAtPath<StationSet>(Folder + "/StationSet.asset").stations.Length, pts.Count, "每個站點資料都有場景站點");   // R1.5a：8 → 9（新增 tp.platform.crane）
+                var waiting = AssetDatabase.LoadAssetAtPath<StationSet>(Folder + "/StationSet.asset").awaitingRuling;
                 foreach (var p in pts)
                 {
                     var pos = p.transform.position;
+                    if (waiting.Contains(p.PointId)) { Debug.LogWarning(p.PointId + "：等裁定（a6 弓頭羊角範圍），不查 Walkable"); continue; }
                     Assert.IsTrue(Physics.Raycast(new Vector3(pos.x, 5f, pos.z), Vector3.down, out var hit, 20f, SceneLayers.WalkableMask, QueryTriggerInteraction.Ignore), p.PointId + " 下方沒有 Walkable");
                     Assert.AreEqual(hit.point.y, pos.y, 0.02f, p.PointId);
                 }

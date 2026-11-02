@@ -197,12 +197,18 @@ namespace PantographSim.Editor.XR
             player.Setup(rig, origin, ray, rightCtrl, teleport, coach);
             var sw = xrRoot.AddComponent<XrModeSwitch>();
             sw.Setup(rigGo, rig, teleport, coach);
+            // D30：上鎖掛牌組的隨身腰包 env.waist_pouch（右腰；工具袋在左腰，選單可對調是 R1.5b）。不是站點；抓取與收納的程式是 R1.5b
+            var pouch = SliceModelBuilder.Prim(PrimitiveType.Cube, "WaistPouch", rigGo.transform, R1Data.RoofScene.waistPouchLocal, new Vector3(0.12f, 0.14f, 0.06f), mats["panel"]);
+            pouch.GetComponent<BoxCollider>().isTrigger = true;
+            pouch.AddComponent<PantographSim.Parts.Common.InteractionPointMarker>().Configure("env.waist_pouch", "腰包（上鎖掛牌組）");
+            sb.AppendLine($"VR：腰包 env.waist_pouch 在 XR Origin 局部 {R1Data.RoofScene.waistPouchLocal:F2}（右腰）");
             rigGo.SetActive(false);
+            BuildToCabMarker(xrRoot.transform, mats, lineMat, sb);
             sb.AppendLine("VR：站點 " + string.Join("、", points.Select(p => p.Label + (string.IsNullOrEmpty(p.LockKey) ? "" : "（車頂開放才解鎖）"))));
 
             // StationLayoutCheck（B 段 3.5）：不合格就建置失敗
             mech.SetLift(0f);
-            var check = StationLayoutCheck.CheckScene(stationSet, R1Data.RoofScene, points, T, b);
+            var check = StationLayoutCheck.CheckScene(stationSet, R1Data.RoofScene, points, T, PanGeometry.SweptFootprints(mech));
             mech.SetLift(lift);
             System.IO.File.WriteAllText("Logs/StationLayoutCheck.txt", (check.Ok ? $"結果：{points.Length} 站全過\n" : $"結果：{check.bad.Count} 個問題\n") + check + "\n");
             sb.AppendLine("站點檢查：" + (check.Ok ? $"{points.Length} 站全過" : $"{check.bad.Count} 個問題") + "\n" + check);
@@ -220,6 +226,23 @@ namespace PantographSim.Editor.XR
                 bridges++;
             }
             sb.AppendLine($"VR：{bridges} 個互動點加上 XRInteractableBridge");
+        }
+
+        /// <summary>a6 第一節 4：「去駕駛室」地面光圈 mk.platform.to_cab（外觀沿用 TP_Marker、藍色）。標記，不是站點；按鈕和傳送是 R1.5b。</summary>
+        static void BuildToCabMarker(Transform parent, Dictionary<string, Material> mats, Material lineMat, StringBuilder sb)
+        {
+            var d = R1Data.RoofScene;
+            var pos = new Vector3(d.toCabMarkerXZ.x, d.platformFloorY, d.toCabMarkerXZ.y);
+            if (Physics.Raycast(pos + Vector3.up * 10f, Vector3.down, out var hit, 30f, SceneLayers.WalkableMask, QueryTriggerInteraction.Ignore)) pos.y = hit.point.y;
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(RoofSiteBuilder.PrefabFolder + "/TP_Marker.prefab");
+            var mk = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
+            mk.name = "mk.platform.to_cab";
+            mk.transform.position = pos;
+            mk.transform.localScale = Vector3.one * (d.toCabMarkerRadius / 0.25f);
+            mk.GetComponentInChildren<Text>(true).text = "去駕駛室";
+            var disc = mk.transform.Find("Visual/Disc").GetComponent<Renderer>();
+            var block = new MaterialPropertyBlock(); block.SetColor("_Color", XrTeleportPoint.ColorOf(XrTeleportPoint.Look.Available, 0f)); disc.SetPropertyBlock(block);
+            sb.AppendLine($"平台：去駕駛室光圈 mk.platform.to_cab {pos:F3}（r {d.toCabMarkerRadius}）");
         }
 
         static Vector3 Flat(Vector3 v) { v.y = 0f; return v; }

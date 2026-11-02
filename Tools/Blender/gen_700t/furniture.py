@@ -63,3 +63,26 @@ def build(ctx, p):
     return [("ENV_WorkBench", workbench(ctx)), ("ENV_ToolRack", tool_rack(ctx)), ("ENV_PoleRack", pole_rack(ctx)),
             ("ENV_InsulatedPole", insulated_pole(ctx, p.get("insulatedPoleLength", 2.5))), ("ENV_PendantDock", pendant_dock(ctx)), ("ENV_SpareShelf", spare_shelf(ctx)),
             ("ENV_PartsTray", parts_tray(ctx))]
+
+
+def build_roof_strip_mat(ctx, p):
+    """a6 增補 2：車頂暫放墊 ENV_RoofStripMat（一個網格；墊體倒角 3 mm＋四邊邊框）。尺寸讀 car_params.json 的 roofStripMat；原點在底面中心。"""
+    import bmesh
+    from common import add_box, mesh_object
+    q = p.get("roofStripMat", {})
+    sx, sz = q.get("size", [1.20, 0.30])                 # Unity X × Z
+    th, rw, rh = q.get("thickness", 0.01), q.get("rimWidth", 0.02), q.get("rimHeight", 0.02)
+    bm = bmesh.new()
+    add_box(bm, (sx - 2 * rw, sz - 2 * rw, th), (0, 0, th / 2), bevel=0.003)
+    top = th + rh
+    for s in (-1, 1):
+        add_box(bm, (sx, rw, top), (0, s * (sz / 2 - rw / 2), top / 2))
+        add_box(bm, (rw, sz - 2 * rw, top), (s * (sx / 2 - rw / 2), 0, top / 2))
+    return mesh_object(ctx, "ENV_RoofStripMat", bm, "Dark", "rubberdarkgrey")
+
+
+_build_furniture = build
+
+
+def build(ctx, p):   # noqa: F811
+    return _build_furniture(ctx, p) + [("ENV_RoofStripMat", build_roof_strip_mat(ctx, p))]

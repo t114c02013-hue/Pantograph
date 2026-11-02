@@ -9,7 +9,7 @@ namespace PantographSim.Tests
     /// <summary>R1.5a a5（建模 B 第 12 節 F4）：吊點在底架上；吊起後傾斜 ≤ 2°；吊帶長度＝建置腳本依 COG 算的值。</summary>
     public class LiftPointTests
     {
-        static PanLiftMath.Table Table => JsonUtility.FromJson<PanLiftMath.Table>(System.IO.File.ReadAllText("Assets/_Project/Parts/PantographAssembly/Data/pan_mass_table.json"));
+        static PanLiftMath.Table Table => PanLiftMath.LoadDefault();
 
         static Vector3[] LiftPoints(Transform root) => Enumerable.Range(1, 4).Select(i => root.Find("PAN_LiftPoints/ip.pan_assy.lift_point_" + i).position).ToArray();
 
@@ -61,7 +61,7 @@ namespace PantographSim.Tests
                 {
                     var s = ids["env.sling_" + i];
                     float actual = s.GetComponent<Renderer>().bounds.size.y;
-                    Assert.AreEqual(i <= 2 ? len.plusZ : len.minusZ, actual, 0.01f, "env.sling_" + i);
+                    Assert.AreEqual(i == 2 || i == 3 ? len.plusX : len.minusX, actual, 0.01f, "env.sling_" + i);   // a6：吊梁沿 X，2、3 號接 +X 側
                 }
             });
         }

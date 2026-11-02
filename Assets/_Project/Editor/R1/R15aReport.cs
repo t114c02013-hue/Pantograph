@@ -49,6 +49,13 @@ namespace PantographSim.Editor
             new Item("PanAssyFrameTests 通過；測試總數與 R1 結束時的差", "（不用頭盔）", TestResult),
         };
 
+        /// <summary>batchmode 用（-executeMethod）：開切片場景再寫報告。</summary>
+        public static void BatchWrite()
+        {
+            UnityEditor.SceneManagement.EditorSceneManager.OpenScene(SliceSceneBuilder.ScenePath);
+            Write();
+        }
+
         [MenuItem("PantographSim/R1.5a/Write Acceptance Report")]
         public static void Write()
         {
@@ -85,8 +92,10 @@ namespace PantographSim.Editor
             var nm = TestLines().Where(l => l.Contains("NoMissingScriptTests")).ToArray();
             foreach (var l in nm) sb.AppendLine("  " + l);
             if (nm.Length == 0) sb.AppendLine("  " + TestsPath + " 裡沒有 NoMissingScriptTests（還沒加入或還沒重跑測試）");
-            sb.AppendLine().AppendLine("== 附錄 C：a6 補充（位置變更）待收到 ==");
-            foreach (var n in new[] { "桿架", "工具架", "去駕駛室光圈", "備品架", "待報廢箱" }) sb.AppendLine($"  {n}：待收到");
+            sb.AppendLine().AppendLine("== 附錄 C：a6 補充（位置變更）＝場景實際座標 ==");
+            foreach (var (label, key) in new[] { ("桿架錨點", "Anchor_PoleRack"), ("工具架錨點", "Anchor_ToolRack"), ("遙控器掛座 PendantDock", "PendantDock"), ("去駕駛室光圈", "mk.platform.to_cab"),
+                ("備品架（日常擺放點）", "Anchor_SpareShelf_Daily"), ("待報廢箱（日常擺放點）", "Anchor_ScrapBox_Daily"), ("車體接地座 Clamp_Point", "Clamp_Point"), ("車頂暫放墊", "ENV_RoofStripMat"), ("腰包", "WaistPouch") })
+                Exists(sb, key, true, label);
 
             Directory.CreateDirectory("Logs");
             File.WriteAllText(OutPath, sb.ToString(), new UTF8Encoding(true));
@@ -223,10 +232,10 @@ namespace PantographSim.Editor
         /// <summary>先找 ISimObject.Id，再找物件名稱。</summary>
         static Transform Get(string key) => ids != null && ids.TryGetValue(key, out var t) && t != null ? t : Find(key);
 
-        static bool Exists(StringBuilder sb, string key, bool withPos = false)
+        static bool Exists(StringBuilder sb, string key, bool withPos = false, string label = null)
         {
             var t = Get(key);
-            sb.AppendLine(t == null ? "  找不到 " + key : $"  {key}：有{(t.gameObject.activeInHierarchy ? "" : "（未啟用）")}{(withPos ? " " + t.position.ToString("F3") : "")}");
+            sb.AppendLine(t == null ? "  找不到 " + key : $"  {(label != null ? label + " " : "")}{key}：有{(t.gameObject.activeInHierarchy ? "" : "（未啟用）")}{(withPos ? " " + t.position.ToString("F3") : "")}");
             return t != null;
         }
 

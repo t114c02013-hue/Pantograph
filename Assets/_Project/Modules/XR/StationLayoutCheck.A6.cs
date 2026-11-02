@@ -7,17 +7,17 @@ using UnityEngine;
 namespace PantographSim.XR
 {
     /// <summary>
-    /// a6（規格 8.1 第 1–12 項）的站點規則：門檻暫定，量測值與判定寫進 SceneResult.pending（"◇ "）。
-    /// EnforceA6 為 false 時不加進 bad，建置結果和以前相同。缺物件只寫「缺 xxx，無法檢查」，不丟例外。
+    /// a6（補充 v4.3、增補 1–3）的站點規則：量測值與判定寫進 SceneResult.pending（"◇ "），EnforceA6 為 true 時不合格也加進 bad（建置失敗）。
+    /// 門檻都在 StationSet／RoofSceneDef；缺物件只寫「缺 xxx，無法檢查」，不丟例外。純報告（不判定）的行用 Note。
     /// </summary>
     public static partial class StationLayoutCheck
     {
-        // shortcut: a6 規則先只回報不擋建置, 收到 a6 補充（位置與門檻定案）後改 EnforceA6=true
-        public static bool EnforceA6 = false;
+        public static bool EnforceA6 = true;
 
         const string PanRootName = "PAN_Root";
-        // shortcut: 絕緣子半寬 0.085、接地座挖孔半寬 0.15 抄 RoofSiteBuilder 的常數（RoofSceneDef 沒有這兩個欄位）, a6 補充給尺寸時改成資料欄位
-        const float InsulatorHalf = 0.085f, CarBodyGroundHalf = 0.15f;
+        // shortcut: 絕緣子半寬 0.085 抄 RoofSiteBuilder 的常數（RoofSceneDef 沒有這個欄位）, 絕緣子改尺寸時改成資料欄位
+        const float InsulatorHalf = 0.085f;
+        static readonly string[] JointNames = { "Base", "LowerArm", "UpperArm", "PanHead" };
 
         static void Pend(SceneResult r, string item, string text, bool ok)
         {
@@ -25,39 +25,121 @@ namespace PantographSim.XR
             r.pending.Add(line + (ok ? "✔" : "✘"));
             if (!ok && EnforceA6) r.bad.Add(line);
         }
-        static void Miss(SceneResult r, string item, string what) => r.pending.Add($"【第{item}項】缺 {what}，無法檢查");
+        static void Note(SceneResult r, string item, string text) => r.pending.Add($"【第{item}項】{text}");
+        static void Miss(SceneResult r, string item, string what) { r.pending.Add($"【第{item}項】缺 {what}，無法檢查"); if (EnforceA6) r.bad.Add($"【第{item}項】缺 {what}"); }
         static Vector2 XZ(Vector3 v) => new Vector2(v.x, v.z);
         static string P2(Vector2 v) => $"({v.x:0.00}, {v.y:0.00})";
+        static string P3(Vector3 v) => $"({v.x:0.000}, {v.y:0.000}, {v.z:0.000})";
 
-        /// <summary>
-        /// a6 全部規則（CheckScene 最後呼叫）。pts＝場景站點（ID → 傳送點）；loweredLocal＝降弓整組 Bounds（PAN_Root 局部，原點＝底架底面中心），
-        /// null 時讀 PAN_Root 的 BoxCollider（PantographAssemblyBuilder 建的降弓範圍）。
-        /// </summary>
-        public static void CheckA6(StationSet set, RoofSceneDef d, IDictionary<string, XrTeleportPoint> pts, System.Func<string, Transform> find, SceneResult r, Bounds? loweredLocal = null)
+        /// <summary>a6 全部規則（CheckScene 最後呼叫）。pts＝場景站點（ID → 傳送點）。</summary>
+        public static void CheckA6(StationSet set, RoofSceneDef d, IDictionary<string, XrTeleportPoint> pts, System.Func<string, Transform> find, SceneResult r)
         {
             Transform F(string id) => (find != null ? find(id) : null) ?? GameObject.Find(id)?.transform;
             var stations = (set.stations ?? new StationDef[0]).Where(s => s != null && pts.ContainsKey(s.id)).ToList();
             Vector3 Pos(StationDef s) => pts[s.id].transform.position;
+            var root = GameObject.Find(PanRootName)?.transform;
+            Bounds? tight = root != null && root.TryGetComponent<BoxCollider>(out var bc) ? new Bounds(bc.center, bc.size) : (Bounds?)null;   // LoweredTightBounds（PAN_Root 局部）
+            var standOrigin = new Vector3(d.standCenterXZ.x, d.StandTopY, d.standCenterXZ.y);   // PAN_Root 原點放在台架中心的支撐座頂面
 
             A6PlatformSpacing(set, stations, Pos, r);
             A6GateFront(set, d, stations, Pos, r);
             A6PoleRack(set, pts, F("env.pole_rack"), r);
             A6LiftCorridor(set, d, stations, Pos, r);
-
-            var root = GameObject.Find(PanRootName)?.transform;
-            if (loweredLocal == null && root != null && root.GetComponent<BoxCollider>() is BoxCollider bc) loweredLocal = new Bounds(bc.center, bc.size);
-            var standOrigin = new Vector3(d.standCenterXZ.x, d.StandTopY, d.standCenterXZ.y);   // PAN_Root 原點放在台架中心的支撐座頂面
-            Bounds? onStand = loweredLocal.HasValue ? new Bounds(loweredLocal.Value.center + standOrigin, loweredLocal.Value.size) : (Bounds?)null;
-            A6StandStations(set, d, stations, s => pts[s.id].transform, onStand, r);
-
-            Vector2 baseW = pts.TryGetValue("tp.roof.base_w", out var bw) ? XZ(bw.transform.position) : set.roofBaseWXZ;
-            A6RoofObstacles(d, stations, Pos, F("ip.roof.carbody_ground"), r);
-            A6CarBodyGround(set, d, F("ip.roof.carbody_ground") ?? F("Roof_CarBodyGround"), baseW, r);
-            A6RoofBase(set, pts, F("ip.roof.hv_cable_ground") ?? F("HV_Cable_End"), r);
+            A6LiftObstacles(set, d, root, tight, r);
+            A6StandStations(set, d, stations, s => pts[s.id].transform, tight.HasValue ? new Bounds(tight.Value.center + standOrigin, tight.Value.size) : (Bounds?)null, r);
+            A6RoofObstacles(d, stations, Pos, r);
+            A6CarBodyGround(set, d, stations, s => pts[s.id].transform, F("ip.roof.carbody_ground"), r);
+            A6RoofBase(set, pts, F, r);
             A6Stair(set, d, GameObject.Find("ENV_PlatformStair"), r);
             A6StandClearance(set, d, root, standOrigin, r);
             A6Slings(root, standOrigin, F, r);
+            A6RoofEntry(set, d, F, r);
+            A6ToCab(set, d, pts, r);
+            A6Npc(set, d, stations, Pos, F, r);
+            A6SubStations(set, pts, F, r);
+            A6StripMat(set, d, stations, Pos, F("env.roof_strip_mat"), r);
+            A6SideNodes(set, pts, root, F, r);
+            A6PendantDock(set, pts, F, r);
+            A6Lanyard(set, d, pts, root, r);
         }
+
+        // ---------- 共用量測 ----------
+
+        static Bounds? RenderBounds(Transform t, bool includeInactive = false)
+        {
+            if (t == null) return null;
+            var rs = t.GetComponentsInChildren<Renderer>(includeInactive).Where(x => !(x is LineRenderer)).ToList();
+            if (rs.Count == 0) return null;
+            var b = rs[0].bounds; foreach (var x in rs) b.Encapsulate(x.bounds);
+            return b;
+        }
+
+        /// <summary>網格頂點範圍（世界；space 不為 null 時換到 space 局部）。Renderer.bounds 在網格旋轉後會變鬆（G1 C1），淨空與相交一律用這個。</summary>
+        public static Bounds? VertexBounds(IEnumerable<Renderer> rs, Transform space = null)
+        {
+            Bounds? b = null;
+            foreach (var x in rs)
+            {
+                Mesh mesh = null; var m = x.transform.localToWorldMatrix;
+                if (x is SkinnedMeshRenderer sk) { mesh = new Mesh(); sk.BakeMesh(mesh); m = Matrix4x4.TRS(x.transform.position, x.transform.rotation, Vector3.one); }
+                else if (x.TryGetComponent<MeshFilter>(out var mf)) mesh = mf.sharedMesh;
+                if (mesh == null) continue;
+                foreach (var v in mesh.vertices)
+                {
+                    var w = m.MultiplyPoint3x4(v); var p = space != null ? space.InverseTransformPoint(w) : w;
+                    if (b == null) b = new Bounds(p, Vector3.zero); else { var e = b.Value; e.Encapsulate(p); b = e; }
+                }
+            }
+            return b;
+        }
+
+        /// <summary>只屬於這個剛體段（Base／LowerArm／UpperArm／PanHead／Rod*）的網格（不屬於更深一層的段）。和 Editor 的 PanGeometry.OwnRenderers 同一套規則（XR 模組不引用 Editor）。</summary>
+        public static List<Renderer> JointRenderers(Transform root, string joint)
+        {
+            var all = root.GetComponentsInChildren<Transform>(true);
+            var j = all.FirstOrDefault(t => t.name == joint);
+            if (j == null) return new List<Renderer>();
+            var deeper = JointNames.Select(n => all.FirstOrDefault(t => t.name == n)).Concat(all.Where(t => t.name.StartsWith("Rod"))).Where(o => o != null && o != j && o.IsChildOf(j)).ToList();
+            return j.GetComponentsInChildren<Renderer>(true).Where(x => !(x is LineRenderer) && deeper.All(o => !x.transform.IsChildOf(o))).ToList();
+        }
+
+        /// <summary>點到矩形（XZ）的水平距離（在裡面＝0）。</summary>
+        static float RectDistance(Rect rc, Vector2 p) => new Vector2(Mathf.Max(rc.xMin - p.x, 0f, p.x - rc.xMax), Mathf.Max(rc.yMin - p.y, 0f, p.y - rc.yMax)).magnitude;
+        static Rect RectXZ(Bounds b) => Rect.MinMaxRect(b.min.x, b.min.z, b.max.x, b.max.z);
+        static float RectGap(Rect a, Rect b) => new Vector2(Mathf.Max(a.xMin - b.xMax, 0f, b.xMin - a.xMax), Mathf.Max(a.yMin - b.yMax, 0f, b.yMin - a.yMax)).magnitude;
+
+        /// <summary>線段 a→b（XZ）有沒有穿過矩形。</summary>
+        static bool SegmentHitsRect(Vector2 a, Vector2 b, Rect rc)
+        {
+            float t0 = 0f, t1 = 1f; var dir = b - a;
+            for (int k = 0; k < 2; k++)
+            {
+                float p = k == 0 ? a.x : a.y, dv = k == 0 ? dir.x : dir.y, lo = k == 0 ? rc.xMin : rc.yMin, hi = k == 0 ? rc.xMax : rc.yMax;
+                if (Mathf.Abs(dv) < 1e-6f) { if (p < lo || p > hi) return false; continue; }
+                float ta = (lo - p) / dv, tb = (hi - p) / dv;
+                if (ta > tb) (ta, tb) = (tb, ta);
+                t0 = Mathf.Max(t0, ta); t1 = Mathf.Min(t1, tb);
+                if (t0 > t1) return false;
+            }
+            return true;
+        }
+
+        static bool OnWalkable(Vector3 p) => Physics.Raycast(new Vector3(p.x, p.y + 1f, p.z), Vector3.down, 1.5f, SceneLayers.WalkableMask, QueryTriggerInteraction.Ignore);
+
+        /// <summary>站點到 Walkable 邊的距離是否 ≥ r：半徑 r 的圓周上 16 個點都有 Walkable。</summary>
+        static bool WalkableAround(Vector3 p, float r)
+        {
+            for (int i = 0; i < 16; i++)
+            {
+                float a = i * Mathf.PI / 8f;
+                if (!OnWalkable(p + new Vector3(Mathf.Cos(a) * r, 0f, Mathf.Sin(a) * r))) return false;
+            }
+            return OnWalkable(p);
+        }
+
+        static float FacingAngle(Transform station, Vector3 target) { var dir = target - station.position; dir.y = 0f; return Vector3.Angle(station.forward, dir); }
+
+        // ---------- 規則 ----------
 
         /// <summary>第1項：平台站點兩兩水平距離 ≥ platformStationMinSpacing（sharedWith 互連的不算）。</summary>
         static void A6PlatformSpacing(StationSet set, List<StationDef> st, System.Func<StationDef, Vector3> pos, SceneResult r)
@@ -69,85 +151,125 @@ namespace PantographSim.XR
                     var a = plat[i]; var b = plat[j];
                     if (a.sharedWith == b.id || b.sharedWith == a.id || (!string.IsNullOrEmpty(a.sharedWith) && a.sharedWith == b.sharedWith)) continue;
                     float dist = Flat(pos(a), pos(b));
-                    Pend(r, "1", $"{a.id}–{b.id} 水平 {dist:0.00} m（暫定門檻 ≥ {set.platformStationMinSpacing}）", dist >= set.platformStationMinSpacing - 1e-4f);
+                    Pend(r, "1", $"{a.id}–{b.id} 水平 {dist:0.00} m（≥ {set.platformStationMinSpacing}）", dist >= set.platformStationMinSpacing - 1e-4f);
                 }
         }
 
-        /// <summary>第2項：站點離活動欄開口（GateBoundary 的 Z 範圍，在開口 X 上的線段）水平 ≥ gateFrontClearance。</summary>
-        static void A6GateFront(StationSet set, RoofSceneDef d, List<StationDef> st, System.Func<StationDef, Vector3> pos, SceneResult r)
+        static (Vector2 a, Vector2 b) GateSegment(RoofSceneDef d)
         {
             var gate = GameObject.Find("GateBoundary")?.GetComponent<Collider>();
-            Vector2 g0, g1;
-            if (gate != null && gate.enabled) { var b = gate.bounds; g0 = new Vector2(b.center.x, b.min.z); g1 = new Vector2(b.center.x, b.max.z); }
-            else { g0 = new Vector2(d.PlatformInnerX, d.gateCenterZ - d.gateWidth / 2f); g1 = new Vector2(d.PlatformInnerX, d.gateCenterZ + d.gateWidth / 2f); }   // 欄開著（collider 停用）時用資料
+            if (gate != null && gate.enabled) { var b = gate.bounds; return (new Vector2(b.center.x, b.min.z), new Vector2(b.center.x, b.max.z)); }
+            return (new Vector2(d.PlatformInnerX, d.gateCenterZ - d.gateWidth / 2f), new Vector2(d.PlatformInnerX, d.gateCenterZ + d.gateWidth / 2f));   // 欄開著（collider 停用）時用資料
+        }
+
+        /// <summary>第2項：站點離活動欄開口水平 ≥ gateFrontClearance。</summary>
+        static void A6GateFront(StationSet set, RoofSceneDef d, List<StationDef> st, System.Func<StationDef, Vector3> pos, SceneResult r)
+        {
+            var (g0, g1) = GateSegment(d);
             int n = 0;
             foreach (var s in st)
             {
                 float dist = CorridorDistance(g0, g1, 0f, XZ(pos(s)));
-                if (dist < set.gateFrontClearance - 1e-4f) { n++; Pend(r, "2", $"{s.id} 離活動欄開口 Z {g0.y:0.00}…{g1.y:0.00} 水平 {dist:0.00} m（暫定門檻 ≥ {set.gateFrontClearance}）", false); }
+                if (dist < set.gateFrontClearance - 1e-4f) { n++; Pend(r, "2", $"{s.id} 離活動欄開口 Z {g0.y:0.00}…{g1.y:0.00} 水平 {dist:0.00} m（≥ {set.gateFrontClearance}）", false); }
             }
             if (n == 0) Pend(r, "2", $"活動欄開口 Z {g0.y:0.00}…{g1.y:0.00} 前 {set.gateFrontClearance} m 內沒有站點", true);
         }
 
-        /// <summary>第4項(d)（D25）：env.pole_rack 到 tp.platform.ground 水平 ≤ poleRackGroundMaxDistance，且 X &lt; poleRackMaxX。桿架不是站點。</summary>
+        /// <summary>第4項(d)（D25）：env.pole_rack 到 tp.platform.ground 水平 ≤ poleRackGroundMaxDistance。桿架不是站點。</summary>
         static void A6PoleRack(StationSet set, IDictionary<string, XrTeleportPoint> pts, Transform rack, SceneResult r)
         {
             if (rack == null) { Miss(r, "4d", "env.pole_rack"); return; }
             if (!pts.TryGetValue("tp.platform.ground", out var g)) { Miss(r, "4d", "tp.platform.ground"); return; }
             var c = Center(rack);
             float dist = Flat(c, g.transform.position);
-            Pend(r, "4d", $"env.pole_rack {P2(XZ(c))} 到 tp.platform.ground 水平 {dist:0.00} m（暫定門檻 ≤ {set.poleRackGroundMaxDistance}）", dist <= set.poleRackGroundMaxDistance + 1e-4f);
-            Pend(r, "4d", $"env.pole_rack X {c.x:0.00}（暫定門檻 < {set.poleRackMaxX}）", c.x < set.poleRackMaxX);
+            var anchor = GameObject.Find("Anchor_PoleRack")?.transform ?? rack;
+            Pend(r, "4d", $"env.pole_rack 中心 {P2(XZ(c))}（錨點 Anchor_PoleRack {P2(XZ(anchor.position))}）到 tp.platform.ground 水平 {dist:0.00} m（≤ {set.poleRackGroundMaxDistance}）", dist <= set.poleRackGroundMaxDistance + 1e-4f);
         }
 
-        /// <summary>第5項：吊運路徑（弓座 (0,0) 到台架中心，兩側各加寬 liftCorridorHalfWidth）內沒有站點；tp.platform.crane 離路徑 ≥ craneCorridorMinDistance。</summary>
+        static (Vector2 a, Vector2 b) LiftPath(RoofSceneDef d) => (Vector2.zero, d.standCenterXZ);
+
+        /// <summary>
+        /// 第5項（第七節 1，鐵道 2026-11-02 確認）：吊運路徑 ±liftCorridorHalfWidth 只查吊物懸空時到得了的站點（allowedWhileLifted）與 NPC 吊運中站位；
+        /// 其他站點在路徑內只列出「吊運時封閉」（TeleportRule：吊物懸空時擋傳送），不算不合格。
+        /// </summary>
         static void A6LiftCorridor(StationSet set, RoofSceneDef d, List<StationDef> st, System.Func<StationDef, Vector3> pos, SceneResult r)
         {
-            var a = Vector2.zero; var b = d.standCenterXZ; float w = set.liftCorridorHalfWidth;
-            int n = 0;
+            var (a, b) = LiftPath(d); float w = set.liftCorridorHalfWidth;
+            var zone = Rect.MinMaxRect(set.liftZoneMinXZ.x, set.liftZoneMinXZ.y, set.liftZoneMaxXZ.x, set.liftZoneMaxXZ.y);
             foreach (var s in st)
-                if (CorridorDistance(a, b, w, XZ(pos(s))) <= 0f) { n++; Pend(r, "5", $"{s.id} {P2(XZ(pos(s)))} 在吊運路徑 {P2(a)}→{P2(b)} ±{w} m 內", false); }
-            if (n == 0) Pend(r, "5", $"吊運路徑 {P2(a)}→{P2(b)} ±{w} m 內沒有站點", true);
-            var crane = st.FirstOrDefault(s => s.id == "tp.platform.crane");
-            if (crane == null) { Miss(r, "5", "tp.platform.crane"); return; }
-            float dist = CorridorDistance(a, b, w, XZ(pos(crane)));
-            Pend(r, "5", $"tp.platform.crane 離吊運路徑 {dist:0.00} m（暫定門檻 ≥ {set.craneCorridorMinDistance}）", dist >= set.craneCorridorMinDistance - 1e-4f);
+            {
+                var p = XZ(pos(s));
+                float dist = CorridorDistance(a, b, w, p);
+                if (s.allowedWhileLifted)
+                    Pend(r, "5", $"{s.id} {P2(p)}（吊運時可到）離吊運路徑 ±{w} m {dist:0.00} m、{(zone.Contains(p) ? "在" : "不在")}吊物禁區內", dist > 0f && !zone.Contains(p));
+                else if (dist <= 0f) Note(r, "5", $"{s.id} {P2(p)} 在吊運路徑內，吊運時封閉（吊物懸空時擋傳送）");
+            }
+            foreach (var n in (set.npcPoses ?? new NpcStandPose[0]).Where(x => x.phase == NpcPhase.Lifting))
+            {
+                var p = XZ(n.position);
+                float dist = CorridorDistance(a, b, w, p);
+                Pend(r, "5", $"{n.npcId}（吊運中）{P2(p)} 離吊運路徑 ±{w} m {dist:0.00} m、{(zone.Contains(p) ? "在" : "不在")}吊物禁區內", dist > 0f && !zone.Contains(p));
+            }
         }
 
-        /// <summary>第6項：tp.stand.* 在維修區內、Y＝groundY ±容差、離台架邊 standStationOffset ±容差、面向台架、身體膠囊不碰放上台架的降弓整組。</summary>
+        /// <summary>第七節 1（越障驗算，鐵道）：吊鉤在最高點時，吊物底面（LoweredTightBounds 的底）≥ 路徑下方各固定物頂面＋liftObstacleMargin。</summary>
+        static void A6LiftObstacles(StationSet set, RoofSceneDef d, Transform root, Bounds? tight, SceneResult r)
+        {
+            if (root == null || tight == null) { Miss(r, "5越障", "PAN_Root／LoweredTightBounds"); return; }
+            var hookTarget = root.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "Hook_AttachPoint_Target");
+            var hook = GameObject.Find("Anchor_Hook_AttachPoint");
+            if (hookTarget == null || hook == null) { Miss(r, "5越障", "Hook_AttachPoint_Target／天車吊鉤 Anchor_Hook_AttachPoint"); return; }
+            float bottom = hook.transform.position.y - (root.InverseTransformPoint(hookTarget.position).y - tight.Value.min.y);
+            Note(r, "5越障", $"吊鉤最高點 Y {hook.transform.position.y:0.000} → 吊物底面 Y {bottom:0.000}（掛點在 LoweredTightBounds 底面上 {root.InverseTransformPoint(hookTarget.position).y - tight.Value.min.y:0.000} m）");
+            var tops = new List<(string, float)>();
+            void Top(string label, IEnumerable<Transform> ts)
+            {
+                var list = ts.Where(t => t != null).ToList();
+                if (list.Count == 0) { Miss(r, "5越障", label); return; }
+                float y = list.Select(t => RenderBounds(t, true) ?? (t.TryGetComponent<Collider>(out var c) ? c.bounds : new Bounds(t.position, Vector3.zero))).Max(b => b.max.y);
+                tops.Add((label, y));
+            }
+            var all = Object.FindObjectsOfType<Transform>(true);
+            Top("防墜器門架頂", all.Where(t => t.name == "FallArrester_Post" || t.name == "FallArrester_Arm" || t.name == "FallArrester"));
+            Top("桿架上直立的長桿頂", all.Where(t => t.name == "InsulatedPole"));
+            Top("平台護欄", all.Where(t => t.name.StartsWith("Rail_") && t.TryGetComponent<Collider>(out _)));
+            Top("PendantDock", all.Where(t => t.name == "PendantDock"));
+            foreach (var (label, y) in tops)
+                Pend(r, "5越障", $"{label} 頂面 Y {y:0.000}，餘裕 {bottom - y:0.000} m（≥ {set.liftObstacleMargin}）", bottom - y >= set.liftObstacleMargin - 1e-4f);
+        }
+
+        /// <summary>第6項：tp.stand.* 在維修區內、Y＝groundY ±容差、離台架邊 standStationOffset ±容差、面向台架、身體膠囊不碰放上台架的降弓整組（LoweredTightBounds）。</summary>
         static void A6StandStations(StationSet set, RoofSceneDef d, List<StationDef> st, System.Func<StationDef, Transform> tf, Bounds? onStand, SceneResult r)
         {
             var stands = st.Where(s => s.id.StartsWith("tp.stand.")).ToList();
             if (stands.Count == 0) { Miss(r, "6", "tp.stand.* 站點"); return; }
             var c = d.standCenterXZ; var half = d.standSizeXZ / 2f;
-            if (onStand == null) r.pending.Add("【第6項】未提供降弓 Bounds（找不到 PAN_Root 的 BoxCollider），站點和降弓整組的淨空無法檢查");
+            if (onStand == null) Miss(r, "6", "LoweredTightBounds（PAN_Root 的 BoxCollider）");
             foreach (var s in stands)
             {
                 var t = tf(s); var p = t.position;
                 bool inZone = p.x >= d.maintMinXZ.x && p.x <= d.maintMaxXZ.x && p.z >= d.maintMinXZ.y && p.z <= d.maintMaxXZ.y;
                 Pend(r, "6", $"{s.id} {P2(XZ(p))} 在維修區 X {d.maintMinXZ.x}…{d.maintMaxXZ.x}、Z {d.maintMinXZ.y}…{d.maintMaxXZ.y}", inZone);
                 float dy = Mathf.Abs(p.y - d.groundY);
-                Pend(r, "6", $"{s.id} Y {p.y:0.000}，和地面 {d.groundY} 差 {dy:0.000} m（暫定門檻 ≤ {set.standStationYTolerance}）", dy <= set.standStationYTolerance + 1e-4f);
+                Pend(r, "6", $"{s.id} Y {p.y:0.000}，和地面 {d.groundY} 差 {dy:0.000} m（≤ {set.standStationYTolerance}）", dy <= set.standStationYTolerance + 1e-4f);
                 float edge = new Vector2(Mathf.Max(Mathf.Abs(p.x - c.x) - half.x, 0f), Mathf.Max(Mathf.Abs(p.z - c.y) - half.y, 0f)).magnitude;
-                Pend(r, "6", $"{s.id} 離台架邊 {edge:0.00} m（暫定門檻 {d.standStationOffset} ±{set.standStationOffsetTolerance}）", Mathf.Abs(edge - d.standStationOffset) <= set.standStationOffsetTolerance + 1e-4f);
-                var dir = new Vector3(c.x - p.x, 0f, c.y - p.z);
-                float ang = Vector3.Angle(t.forward, dir);
-                Pend(r, "6", $"{s.id} 面向台架偏 {ang:0.0}°（暫定門檻 ≤ {set.facingToleranceDeg}°）", ang <= set.facingToleranceDeg);
+                Pend(r, "6", $"{s.id} 離台架邊 {edge:0.00} m（{d.standStationOffset} ±{set.standStationOffsetTolerance}）", Mathf.Abs(edge - d.standStationOffset) <= set.standStationOffsetTolerance + 1e-4f);
+                float ang = Vector3.Angle(t.forward, new Vector3(c.x - p.x, 0f, c.y - p.z));
+                Pend(r, "6", $"{s.id} 面向台架偏 {ang:0.0}°（≤ {set.facingToleranceDeg}°）", ang <= set.facingToleranceDeg);
                 if (onStand == null) continue;
                 var ob = onStand.Value;
                 bool vOverlap = ob.min.y < p.y + 1.8f && ob.max.y > p.y + 0.1f;   // 身體膠囊 0.1–1.8 m，和 CheckScene 相同
                 float hd = Flat(p, ob.ClosestPoint(new Vector3(p.x, ob.center.y, p.z)));
-                Pend(r, "6", $"{s.id} 離台架上的降弓整組 水平 {hd:0.00} m（暫定門檻 ≥ {set.clearRadius}）", !vOverlap || hd >= set.clearRadius - 1e-4f);
+                Pend(r, "6", $"{s.id} 離台架上的降弓整組 水平 {hd:0.00} m（≥ {set.clearRadius}）", !vOverlap || hd >= set.clearRadius - 1e-4f);
             }
         }
 
-        /// <summary>第7項(b)：車頂站點不在母線帶（外擴 obstacleMargin）、絕緣子孔、車體接地座上。</summary>
-        static void A6RoofObstacles(RoofSceneDef d, List<StationDef> st, System.Func<StationDef, Vector3> pos, Transform seat, SceneResult r)
+        /// <summary>第7項(b)：車頂站點不在母線帶（外擴 obstacleMargin）、絕緣子孔上。</summary>
+        static void A6RoofObstacles(RoofSceneDef d, List<StationDef> st, System.Func<StationDef, Vector3> pos, SceneResult r)
         {
             var roof = st.Where(s => s.floor == StationFloor.Roof).ToList();
             if (roof.Count == 0) { Miss(r, "7b", "車頂站點"); return; }
             var bus = BusbarRect(d, d.obstacleMargin);
-            var seatXZ = seat != null ? XZ(seat.position) : new Vector2(d.carBodyGround.x, d.carBodyGround.z);
             var ins = d.insulatorPositions ?? new Vector3[0];
             float insR = InsulatorHalf + d.obstacleMargin;
             foreach (var s in roof)
@@ -157,88 +279,87 @@ namespace PantographSim.XR
                 if (bus.Contains(p)) hits.Add($"母線帶 X {bus.xMin:0.00}…{bus.xMax:0.00}");
                 for (int i = 0; i < ins.Length; i++)
                     if (Vector2.Distance(p, XZ(ins[i])) < insR) hits.Add($"絕緣子 {i + 1}（{Vector2.Distance(p, XZ(ins[i])):0.00} m < {insR:0.00}）");
-                if (Mathf.Abs(p.x - seatXZ.x) <= CarBodyGroundHalf && Mathf.Abs(p.y - seatXZ.y) <= CarBodyGroundHalf) hits.Add("車體接地座");
-                Pend(r, "7b", $"{s.id} {P2(p)} " + (hits.Count == 0 ? "不在母線帶、絕緣子孔、車體接地座上" : "落在 " + string.Join("、", hits)), hits.Count == 0);
+                Pend(r, "7b", $"{s.id} {P2(p)} " + (hits.Count == 0 ? "不在母線帶、絕緣子孔上" : "落在 " + string.Join("、", hits)), hits.Count == 0);
             }
         }
 
-        /// <summary>第8項：車體接地座離 tp.roof.base_w ≤ carBodyGroundMaxDistance、不在 Walkable 上、不和母線帶重疊。</summary>
-        static void A6CarBodyGround(StationSet set, RoofSceneDef d, Transform seat, Vector2 baseW, SceneResult r)
+        /// <summary>第8項（增補 3，D34）：車體接地座在外肩：到 tp.roof.base_w ≤ carBodyGroundMaxDistance、X ≤ carBodyGroundMaxX、不在 Walkable 上、座面不碰任何站點的立足圓與跪姿區。</summary>
+        static void A6CarBodyGround(StationSet set, RoofSceneDef d, List<StationDef> st, System.Func<StationDef, Transform> tf, Transform clamp, SceneResult r)
         {
-            if (seat == null) { Miss(r, "8", "車體接地座 Roof_CarBodyGround"); return; }
-            var p = seat.position;
-            float dist = Vector2.Distance(XZ(p), baseW);
-            Pend(r, "8", $"車體接地座 {P2(XZ(p))} 到 tp.roof.base_w {P2(baseW)} {dist:0.00} m（暫定門檻 ≤ {set.carBodyGroundMaxDistance}）", dist <= set.carBodyGroundMaxDistance + 1e-4f);
-            bool onWalk = Physics.Raycast(new Vector3(p.x, p.y + 1f, p.z), Vector3.down, 1.5f, SceneLayers.WalkableMask, QueryTriggerInteraction.Ignore);
-            Pend(r, "8", $"車體接地座正下方{(onWalk ? "有" : "沒有")} Walkable", !onWalk);
-            var bus = BusbarRect(d, 0f);
-            var seatR = new Rect(p.x - CarBodyGroundHalf, p.z - CarBodyGroundHalf, 2 * CarBodyGroundHalf, 2 * CarBodyGroundHalf);
-            Pend(r, "8", $"車體接地座 X {seatR.xMin:0.00}…{seatR.xMax:0.00} 和母線帶 X {bus.xMin:0.00}…{bus.xMax:0.00}{(seatR.Overlaps(bus) ? "重疊" : "不重疊")}", !seatR.Overlaps(bus));
+            if (clamp == null) { Miss(r, "8", "車體接地座 ip.roof.carbody_ground"); return; }
+            var p = clamp.position;
+            Note(r, "8", $"車體接地座 Clamp_Point {P3(p)}（車頂斷面在 X {p.x:0.00} 的高度 {d.RoofSurfaceY(p.x):0.000}）");
+            var bw = st.FirstOrDefault(s => s.id == "tp.roof.base_w");
+            if (bw == null) Miss(r, "8", "tp.roof.base_w");
+            else
+            {
+                float dist = Vector2.Distance(XZ(p), XZ(tf(bw).position));
+                Pend(r, "8", $"車體接地座到 tp.roof.base_w {P2(XZ(tf(bw).position))} {dist:0.00} m（≤ {set.carBodyGroundMaxDistance}）", dist <= set.carBodyGroundMaxDistance + 1e-4f);
+            }
+            Pend(r, "8", $"車體接地座 X {p.x:0.000}（≤ {set.carBodyGroundMaxX}）", p.x <= set.carBodyGroundMaxX + 1e-4f);
+            Pend(r, "8", $"車體接地座正下方{(OnWalkable(p) ? "有" : "沒有")} Walkable", !OnWalkable(p));
+            float h = d.carBodyGroundPadSize / 2f;
+            var pad = Rect.MinMaxRect(p.x - h, p.z - h, p.x + h, p.z + h);
+            foreach (var s in st.Where(x => x.floor == StationFloor.Roof))
+            {
+                var t = tf(s).position; var fw = tf(s).forward; var f = new Vector2(fw.x, fw.z).normalized;   // 傳送點的實際朝向（面向目標的站點沒有 facingDirection）
+                float foot = RectDistance(pad, XZ(t));
+                // 跪姿區：站點面向方向往前 kneelZoneDepth、半寬 kneelZoneHalfWidth 的長方形（用中線距離近似）
+                var a = XZ(t); var b = a + f * set.kneelZoneDepth;
+                bool kneel = SegmentHitsRect(a, b, Rect.MinMaxRect(pad.xMin - set.kneelZoneHalfWidth, pad.yMin - set.kneelZoneHalfWidth, pad.xMax + set.kneelZoneHalfWidth, pad.yMax + set.kneelZoneHalfWidth));
+                if (foot < set.stationFootRadius || kneel) Pend(r, "8", $"車體接地座碰到 {s.id} 的{(foot < set.stationFootRadius ? $"立足圓（{foot:0.00} m < {set.stationFootRadius}）" : "跪姿區")}", false);
+            }
         }
 
-        /// <summary>第9項：base_w 面向 +X、base_e 面向 −X；base_e 到 HV_Cable_End ≤ baseECableMaxDistance，超過就沿 +Z 搜尋。</summary>
-        static void A6RoofBase(StationSet set, IDictionary<string, XrTeleportPoint> pts, Transform cable, SceneResult r)
+        /// <summary>第9項：base_w 面向 +X、base_e 面向 −X；回報兩站到同側吊耳、控制線接頭、固定帶扣座的角度（不在 ±30° 內的只列出，鐵道裁定）。</summary>
+        static void A6RoofBase(StationSet set, IDictionary<string, XrTeleportPoint> pts, System.Func<string, Transform> F, SceneResult r)
         {
-            foreach (var (id, face) in new[] { ("tp.roof.base_w", Vector3.right), ("tp.roof.base_e", Vector3.left) })
+            foreach (var (id, face, lugs) in new[] { ("tp.roof.base_w", Vector3.right, new[] { 1, 4 }), ("tp.roof.base_e", Vector3.left, new[] { 2, 3 }) })
             {
-                if (set.Find(id) == null || !pts.TryGetValue(id, out var tp)) { r.pending.Add($"【第9項】{id}：站點資料尚未建立"); continue; }
+                if (!pts.TryGetValue(id, out var tp)) { Miss(r, "9", id); continue; }
                 float ang = Vector3.Angle(tp.transform.forward, face);
-                Pend(r, "9", $"{id} 朝向偏 {(face.x > 0 ? "+X" : "−X")} {ang:0.0}°（暫定門檻 ≤ 1°）", ang <= 1f);
+                Pend(r, "9", $"{id} {P3(tp.transform.position)} 朝向偏 {(face.x > 0 ? "+X" : "−X")} {ang:0.0}°（≤ 1°）", ang <= 1f);
+                foreach (int n in new[] { 1, 2, 3, 4 })
+                    if (F("ip.pan_assy.lift_point_" + n) is Transform lp)
+                    {
+                        float a = FacingAngle(tp.transform, lp.position);
+                        Note(r, "9", $"{id} → 吊耳 {n} {P2(XZ(lp.position))}：{Flat(tp.transform.position, lp.position):0.00} m、偏 {a:0.0}°{(lugs.Contains(n) ? (a <= set.facingToleranceDeg ? "（同側，在 ±30° 內）" : "（同側，不在 ±30° 內）") : "（對側）")}");
+                    }
+                foreach (var other in new[] { "ip.pan_assy.ctrl_connector", "HoldDown_BuckleBase_A", "HoldDown_BuckleBase_B" })
+                    if (F(other) is Transform o) Note(r, "9", $"{id} → {other}：{Flat(tp.transform.position, o.position):0.00} m、偏 {FacingAngle(tp.transform, o.position):0.0}°");
             }
-            if (cable == null) { Miss(r, "9", "HV_Cable_End"); return; }
-            var start = pts.TryGetValue("tp.roof.base_e", out var be) ? XZ(be.transform.position) : set.roofBaseEXZ;
-            var (ok, pos, dist) = SearchBaseE(start, XZ(cable.position), set.baseECableMaxDistance, set.baseESearchStep, set.baseESearchMaxZ, 0.80f, set.busbarHoleMinX, set.busbarHoleMaxX);
-            string moved = pos == start ? "" : $"（從 {P2(start)} 沿 +Z 移到 {P2(pos)}）";
-            Pend(r, "9", ok ? $"tp.roof.base_e {P2(pos)} 到 HV_Cable_End {dist:0.00} m{moved}（暫定門檻 ≤ {set.baseECableMaxDistance}）"
-                            : $"tp.roof.base_e 搜尋到 Z {set.baseESearchMaxZ} 仍不合格，最後試 {P2(pos)} 到 HV_Cable_End {dist:0.00} m（暫定門檻 ≤ {set.baseECableMaxDistance}）", ok);
         }
 
-        /// <summary>
-        /// 第9項的純計算：從 start 沿 +Z 每次 step，找第一個到 cableEnd 水平 ≤ maxDist 的位置（Z 不超過 maxZ；X 不變，要在 |X| ≤ maxAbsX 且不在母線孔帶 holeMinX…holeMaxX）。
-        /// 找不到時 ok＝false，pos/dist＝最後試的位置與距離。
-        /// </summary>
-        public static (bool ok, Vector2 pos, float dist) SearchBaseE(Vector2 start, Vector2 cableEnd, float maxDist, float step, float maxZ, float maxAbsX, float holeMinX, float holeMaxX)
-        {
-            bool xOk = Mathf.Abs(start.x) <= maxAbsX + 1e-4f && (start.x < holeMinX - 1e-4f || start.x > holeMaxX + 1e-4f);
-            var last = start; float lastD = Vector2.Distance(start, cableEnd);
-            if (!xOk) return (false, last, lastD);
-            for (int i = 0; i < 10000; i++)
-            {
-                var p = new Vector2(start.x, start.y + i * step);
-                if (i > 0 && p.y > maxZ + 1e-4f) break;
-                last = p; lastD = Vector2.Distance(p, cableEnd);
-                if (lastD <= maxDist + 1e-4f) return (true, p, lastD);
-                if (step <= 0f) break;
-            }
-            return (false, last, lastD);
-        }
-
-        /// <summary>第10項(b)：ENV_PlatformStair 的 Renderer Bounds Z 在 stairMinZ…stairMaxZ，且不在平台地板以上的平台範圍內。</summary>
+        /// <summary>第10項(b)：鋼梯 Z 下限 ≥ stairMinZ − stairOverlapTolerance；鋼梯和扶手伸進平台上方的深度 ≤ stairOverlapTolerance（接口碰到平台護欄是正常的）。</summary>
         static void A6Stair(StationSet set, RoofSceneDef d, GameObject stair, SceneResult r)
         {
             var rs = stair != null ? stair.GetComponentsInChildren<Renderer>() : new Renderer[0];
             if (rs.Length == 0) { Miss(r, "10b", "ENV_PlatformStair（或它的 Renderer）"); return; }
             var b = rs[0].bounds; foreach (var x in rs) b.Encapsulate(x.bounds);
-            Pend(r, "10b", $"ENV_PlatformStair Z {b.min.z:0.00}…{b.max.z:0.00}（暫定門檻 {set.stairMinZ}…{set.stairMaxZ}）", b.min.z >= set.stairMinZ - 1e-3f && b.max.z <= set.stairMaxZ + 1e-3f);
-            const float e = 1e-3f;
-            bool over = b.max.y > d.platformFloorY + e && b.min.x < d.PlatformInnerX - e && b.max.x > d.PlatformOuterX + e && b.min.z < d.platformZMax - e && b.max.z > d.platformZMin + e;
-            Pend(r, "10b", $"ENV_PlatformStair {(over ? "伸進" : "沒有伸進")}平台上方（平台 X {d.PlatformOuterX:0.00}…{d.PlatformInnerX:0.00}、Z {d.platformZMin}…{d.platformZMax}）", !over);
+            float tol = set.stairOverlapTolerance;
+            Pend(r, "10b", $"ENV_PlatformStair Z {b.min.z:0.000}…{b.max.z:0.000}（{set.stairMinZ - tol:0.00}…{set.stairMaxZ}）", b.min.z >= set.stairMinZ - tol - 1e-4f && b.max.z <= set.stairMaxZ + 1e-3f);
+            float depth = 0f;
+            foreach (var x in rs)
+            {
+                var e = x.bounds;
+                if (e.max.y <= d.platformFloorY || e.min.x >= d.PlatformInnerX || e.max.x <= d.PlatformOuterX) continue;
+                depth = Mathf.Max(depth, d.platformZMax - e.min.z);
+            }
+            Pend(r, "10b", $"ENV_PlatformStair 伸進平台上方 {Mathf.Max(0f, depth):0.000} m（≤ {tol}）", depth <= tol + 1e-4f);
         }
 
-        /// <summary>
-        /// 第11項：降弓整組放上台架（PAN_Root 原點在台架中心支撐座頂面）後，除了底架（Base 網格與 PAN_Base 底下）以外最低點到台架外框頂面 ≥ standFrameMinClearance。
-        /// shortcut: 用目前場景姿態的 Renderer（XrRigBuilder 呼叫 CheckScene 前已 SetLift(0)）、不看水平是否在外框上方, 要精確時改成降弓姿態網格逐一投影到外框
-        /// </summary>
+        /// <summary>第11項（G1 C1）：降弓整組放上台架（PAN_Root 原點在台架中心支撐座頂面）後，底架以外的頂點最低點到台架外框頂面 ≥ standFrameMinClearance。</summary>
         static void A6StandClearance(StationSet set, RoofSceneDef d, Transform root, Vector3 standOrigin, SceneResult r)
         {
             if (root == null) { Miss(r, "11", PanRootName); return; }
+            var baseOwn = new HashSet<Renderer>(JointRenderers(root, "Base"));
             var pBase = root.Find("PAN_Base");
-            var rs = root.GetComponentsInChildren<Renderer>().Where(x => x.enabled && x.name != "Base" && (pBase == null || !x.transform.IsChildOf(pBase))).ToList();
+            var rs = root.GetComponentsInChildren<Renderer>().Where(x => !(x is LineRenderer) && !baseOwn.Contains(x) && (pBase == null || !x.transform.IsChildOf(pBase))).ToList();
             if (rs.Count == 0) { Miss(r, "11", "PAN_Root 底下的 Renderer"); return; }
-            var low = rs.OrderBy(x => x.bounds.min.y).First();
-            float lowest = low.bounds.min.y + (standOrigin.y - root.position.y);
+            var low = rs.Select(x => (x, b: VertexBounds(new[] { x }, root))).Where(x => x.b.HasValue).OrderBy(x => x.b.Value.min.y).First();
+            float lowest = standOrigin.y + low.b.Value.min.y;
             float frameTop = d.groundY + d.standFrameTopAboveGround, gap = lowest - frameTop;
-            Pend(r, "11", $"台架上的降弓整組（底架除外）最低 Y {lowest:0.000}（{low.name}），到外框頂面 {frameTop:0.000} 垂直 {gap:0.000} m（暫定門檻 ≥ {set.standFrameMinClearance}）", gap >= set.standFrameMinClearance - 1e-4f);
+            Pend(r, "11", $"台架上的降弓整組（底架除外，頂點算法）最低 Y {lowest:0.000}（{low.x.name}），到外框頂面 {frameTop:0.000} 垂直 {gap:0.000} m（≥ {set.standFrameMinClearance}）", gap >= set.standFrameMinClearance - 1e-4f);
         }
 
         /// <summary>第12項：4 條吊帶（吊耳 → Hook_AttachPoint_Target，換到放上台架的姿態）不穿過台架外框 StandFrame。</summary>
@@ -260,6 +381,224 @@ namespace PantographSim.XR
                 float len = Vector3.Distance(a, h);
                 bool hit = fb.Contains(a) || fb.Contains(h) || (fb.IntersectRay(new Ray(a, h - a), out float t) && t <= len);
                 Pend(r, "12", $"吊帶 {i}：{a:F2}→{h:F2} {(hit ? "穿過" : "不穿過")}台架外框（頂面 Y {fb.max.y:0.000}）", !hit);
+            }
+        }
+
+        /// <summary>第13項：活動欄開口中心到防墜器掛鉤、桿架、工具架的水平距離都 ≤ roofEntryMaxDistance。</summary>
+        static void A6RoofEntry(StationSet set, RoofSceneDef d, System.Func<string, Transform> F, SceneResult r)
+        {
+            var (g0, g1) = GateSegment(d); var gc = (g0 + g1) / 2f;
+            foreach (var (id, label) in new[] { ("ip.roof.anchor", "防墜器掛鉤"), ("env.pole_rack", "桿架"), ("env.tool_rack", "工具架") })
+            {
+                var t = F(id);
+                if (t == null) { Miss(r, "13", id); continue; }
+                var c = id == "ip.roof.anchor" ? t.position : Center(t);
+                float dist = Vector2.Distance(gc, XZ(c));
+                Pend(r, "13", $"活動欄開口中心 {P2(gc)} 到{label} {P2(XZ(c))} {dist:0.00} m（≤ {set.roofEntryMaxDistance}）", dist <= set.roofEntryMaxDistance + 1e-4f);
+            }
+        }
+
+        static Vector3? ToCabMarker() => (GameObject.Find("mk.platform.to_cab") ?? GameObject.Find("Anchor_ToCabMarker"))?.transform.position;
+
+        /// <summary>第14項：去駕駛室光圈離 tp.platform.lift ≤ toCabLiftMaxDistance，而且在 Walkable 上（不受第1項站點間距限制）。</summary>
+        static void A6ToCab(StationSet set, RoofSceneDef d, IDictionary<string, XrTeleportPoint> pts, SceneResult r)
+        {
+            var mk = ToCabMarker();
+            if (mk == null) { Miss(r, "14", "mk.platform.to_cab"); return; }
+            if (!pts.TryGetValue("tp.platform.lift", out var lift)) { Miss(r, "14", "tp.platform.lift"); return; }
+            float dist = Flat(mk.Value, lift.transform.position);
+            Pend(r, "14", $"mk.platform.to_cab {P3(mk.Value)} 到 tp.platform.lift {dist:0.00} m（≤ {set.toCabLiftMaxDistance}）", dist <= set.toCabLiftMaxDistance + 1e-4f);
+            Pend(r, "14", $"mk.platform.to_cab 正下方{(OnWalkable(mk.Value) ? "有" : "沒有")} Walkable", OnWalkable(mk.Value));
+        }
+
+        /// <summary>
+        /// 第15項：NPC 站位依階段檢查（NPC 本身 R1.5b 才建）。平時：到平台設備與所有平台站點 ≥ npcClearance、不在活動欄開口前 npcGateFront 內。
+        /// 吊運中：不在吊物禁區與吊運路徑兩側 liftCorridorHalfWidth 內（第5項已查），三人彼此、到工作檯、台架四周淨空帶、鋼梯都 ≥ npcClearance。不合格照實列出，不改座標。
+        /// </summary>
+        static void A6Npc(StationSet set, RoofSceneDef d, List<StationDef> st, System.Func<StationDef, Vector3> pos, System.Func<string, Transform> F, SceneResult r)
+        {
+            var poses = set.npcPoses ?? new NpcStandPose[0];
+            if (poses.Length == 0) { Miss(r, "15", "NPC 站位資料（StationSet.npcPoses）"); return; }
+            float c = set.npcClearance;
+            var normalItems = new List<(string, Rect)>();
+            void Item(string label, Transform t) { var b = t != null ? RenderBounds(t, true) : null; if (b == null) Miss(r, "15", label); else normalItems.Add((label, RectXZ(b.Value))); }
+            Item("工具架", F("env.tool_rack")); Item("桿架", F("env.pole_rack")); Item("升降盒", GameObject.Find("LiftControlBox")?.transform); Item("PendantDock", GameObject.Find("PendantDock")?.transform);
+            if (ToCabMarker() is Vector3 mk) normalItems.Add(("去駕駛室光圈", new Rect(mk.x - d.toCabMarkerRadius, mk.z - d.toCabMarkerRadius, 2 * d.toCabMarkerRadius, 2 * d.toCabMarkerRadius)));
+            float hl = d.dailyRackLength / 2f;
+            normalItems.Add(("備品架（日常擺放點）", Rect.MinMaxRect(d.spareShelfDaily.x - 0.2f, d.spareShelfDaily.z - hl, d.spareShelfDaily.x + 0.2f, d.spareShelfDaily.z + hl)));
+            normalItems.Add(("待報廢箱（日常擺放點）", Rect.MinMaxRect(d.scrapBoxDaily.x - 0.2f, d.scrapBoxDaily.z - hl, d.scrapBoxDaily.x + 0.2f, d.scrapBoxDaily.z + hl)));
+            var (g0, g1) = GateSegment(d);
+            foreach (var n in poses.Where(x => x.phase == NpcPhase.Normal))
+            {
+                var p = XZ(n.position);
+                var near = normalItems.Select(x => (x.Item1, dd: RectDistance(x.Item2, p))).OrderBy(x => x.dd).First();
+                Pend(r, "15", $"{n.npcId}（平時）{P2(p)} 最近的設備 {near.Item1} {near.dd:0.00} m（≥ {c}）", near.dd >= c - 1e-4f);
+                foreach (var x in normalItems.Where(x => RectDistance(x.Item2, p) < c - 1e-4f && x.Item1 != near.Item1)) Pend(r, "15", $"{n.npcId}（平時）到 {x.Item1} {RectDistance(x.Item2, p):0.00} m（≥ {c}）", false);
+                var ps = st.Where(s => s.floor == StationFloor.Platform).Select(s => (s.id, dd: Vector2.Distance(p, XZ(pos(s))))).OrderBy(x => x.dd).First();
+                Pend(r, "15", $"{n.npcId}（平時）最近的平台站點 {ps.id} {ps.dd:0.00} m（≥ {c}）", ps.dd >= c - 1e-4f);
+                float gd = CorridorDistance(g0, g1, 0f, p);
+                Pend(r, "15", $"{n.npcId}（平時）離活動欄開口 {gd:0.00} m（≥ {set.npcGateFront}）", gd >= set.npcGateFront - 1e-4f);
+            }
+            var lifting = poses.Where(x => x.phase == NpcPhase.Lifting).ToList();
+            for (int i = 0; i < lifting.Count; i++)
+                for (int j = i + 1; j < lifting.Count; j++)
+                {
+                    float dd = Vector2.Distance(XZ(lifting[i].position), XZ(lifting[j].position));
+                    Pend(r, "15", $"{lifting[i].npcId}–{lifting[j].npcId}（吊運中）相距 {dd:0.00} m（≥ {c}）", dd >= c - 1e-4f);
+                }
+            var liftItems = new List<(string, Rect)>();
+            if (GameObject.Find("BenchBody")?.GetComponent<Collider>() is Collider bench) liftItems.Add(("工作檯", RectXZ(bench.bounds))); else Miss(r, "15", "工作檯 BenchBody");
+            var sc = d.standCenterXZ; var band = d.standSizeXZ / 2f + Vector2.one * d.standClearance;
+            liftItems.Add(("台架四周淨空帶", Rect.MinMaxRect(sc.x - band.x, sc.y - band.y, sc.x + band.x, sc.y + band.y)));
+            if (RenderBounds(GameObject.Find("ENV_PlatformStair")?.transform) is Bounds sb) liftItems.Add(("鋼梯", RectXZ(sb))); else Miss(r, "15", "鋼梯");
+            foreach (var n in lifting)
+                foreach (var (label, rc) in liftItems)
+                {
+                    float dd = RectDistance(rc, XZ(n.position));
+                    Pend(r, "15", $"{n.npcId}（吊運中）{P2(XZ(n.position))} 到{label} {dd:0.00} m（≥ {c}）", dd >= c - 1e-4f);
+                }
+        }
+
+        /// <summary>
+        /// 第16項（D33 改寫）：(a) 四個子站點各對一支底座螺栓，水平 ≤ subStationBoltMax 且在面向 ±facingToleranceDeg 內；(b) 子站點與 base_w／base_e 都在 Walkable 上，離 Walkable 邊 ≥ invisibleWallClearance；
+        /// (c) 子站點彼此、子站點和 base_w／base_e ≥ platformStationMinSpacing；(d) base_e 到 HV_Cable_End ≤ baseECableMaxDistance；(e) 螺栓 |X| ＜ 站點 |X|（往車中心伸手）。
+        /// </summary>
+        static void A6SubStations(StationSet set, IDictionary<string, XrTeleportPoint> pts, System.Func<string, Transform> F, SceneResult r)
+        {
+            var subs = new[] { ("tp.roof.base_w.s", 1), ("tp.roof.base_e.s", 2), ("tp.roof.base_e.n", 3), ("tp.roof.base_w.n", 4) };
+            var group = new List<(string id, Vector3 p)>();
+            foreach (var (id, n) in subs)
+            {
+                if (!pts.TryGetValue(id, out var tp)) { Miss(r, "16", id); continue; }
+                var bolt = F("part.pan_base.bolt_" + n);
+                if (bolt == null) { Miss(r, "16", "part.pan_base.bolt_" + n); continue; }
+                var p = tp.transform.position;
+                float dist = Flat(p, bolt.position), ang = FacingAngle(tp.transform, bolt.position);
+                Pend(r, "16", $"(a) {id} {P3(p)} → 螺栓 {n} {P2(XZ(bolt.position))} {dist:0.00} m（≤ {set.subStationBoltMax}）、偏 {ang:0.0}°（≤ {set.facingToleranceDeg}°）", dist <= set.subStationBoltMax + 1e-4f && ang <= set.facingToleranceDeg);
+                Pend(r, "16", $"(e) {id} 螺栓 {n} |X| {Mathf.Abs(bolt.position.x):0.000} ＜ 站點 |X| {Mathf.Abs(p.x):0.000}", Mathf.Abs(bolt.position.x) < Mathf.Abs(p.x));
+                group.Add((id, p));
+            }
+            foreach (var id in new[] { "tp.roof.base_w", "tp.roof.base_e" })
+                if (pts.TryGetValue(id, out var tp)) group.Add((id, tp.transform.position)); else Miss(r, "16", id);
+            foreach (var (id, p) in group)
+                Pend(r, "16", $"(b) {id} 在 Walkable 上、離 Walkable 邊 ≥ {set.invisibleWallClearance} m", WalkableAround(p, set.invisibleWallClearance - 1e-3f));
+            for (int i = 0; i < group.Count; i++)
+                for (int j = i + 1; j < group.Count; j++)
+                {
+                    float dd = Flat(group[i].p, group[j].p);
+                    Pend(r, "16", $"(c) {group[i].id}–{group[j].id} {dd:0.00} m（≥ {set.platformStationMinSpacing}）", dd >= set.platformStationMinSpacing - 1e-4f);
+                }
+            var cable = F("ip.roof.hv_cable_ground") ?? F("HV_Cable_End");
+            if (cable == null) Miss(r, "16", "HV_Cable_End");
+            else if (pts.TryGetValue("tp.roof.base_e", out var be))
+            {
+                float dd = Flat(be.transform.position, cable.position);
+                Pend(r, "16", $"(d) tp.roof.base_e 到 HV_Cable_End {P2(XZ(cable.position))} {dd:0.00} m（≤ {set.baseECableMaxDistance}）", dd <= set.baseECableMaxDistance + 1e-4f);
+            }
+        }
+
+        /// <summary>第17項：暫放墊整塊在 |X| ≤ stripMatMaxAbsX、離最近車頂站點 ≥ stripMatStationMin、不在活動欄開口到各車頂站點的直線動線上（範圍讀資料：物件存檔時是 inactive）。</summary>
+        static void A6StripMat(StationSet set, RoofSceneDef d, List<StationDef> st, System.Func<StationDef, Vector3> pos, Transform mat, SceneResult r)
+        {
+            if (mat == null) { Miss(r, "17", "env.roof_strip_mat"); return; }
+            var c = d.roofStripMatCenter; var h = d.roofStripMatSize / 2f;
+            var rc = Rect.MinMaxRect(c.x - h.x, c.z - h.y, c.x + h.x, c.z + h.y);
+            Pend(r, "17", $"暫放墊 X {rc.xMin:0.00}…{rc.xMax:0.00}、Z {rc.yMin:0.00}…{rc.yMax:0.00} 在 |X| ≤ {set.stripMatMaxAbsX} 內（存檔 {(mat.gameObject.activeSelf ? "active" : "inactive")}）", Mathf.Max(-rc.xMin, rc.xMax) <= set.stripMatMaxAbsX + 1e-4f);
+            var roof = st.Where(s => s.floor == StationFloor.Roof).ToList();
+            if (roof.Count == 0) { Miss(r, "17", "車頂站點"); return; }
+            var near = roof.Select(s => (s.id, dd: RectDistance(rc, XZ(pos(s))))).OrderBy(x => x.dd).First();
+            Pend(r, "17", $"暫放墊到最近的車頂站點 {near.id} {near.dd:0.00} m（≥ {set.stripMatStationMin}）", near.dd >= set.stripMatStationMin - 1e-4f);
+            var (g0, g1) = GateSegment(d); var gc = (g0 + g1) / 2f;
+            var hit = roof.Where(s => SegmentHitsRect(gc, XZ(pos(s)), rc)).Select(s => s.id).ToList();
+            Pend(r, "17", hit.Count == 0 ? $"活動欄開口 {P2(gc)} 到各車頂站點的直線動線都不經過暫放墊" : "暫放墊在動線上：" + string.Join("、", hit), hit.Count == 0);
+        }
+
+        /// <summary>
+        /// 第18項（v4.3、增補 3）：ctrl_connector、hold_down 到 tp.roof.base_e ≤ sideNodeBaseEMax；接頭到 HV_Cable_End ≥ connectorCableMin；兩個節點 PAN_Root 局部 X ＞ 0；
+        /// 固定帶的鞍（HoldDown_Saddle）和上臂的頂點範圍相交；兩支腳長 0.05–1.00 m。
+        /// </summary>
+        static void A6SideNodes(StationSet set, IDictionary<string, XrTeleportPoint> pts, Transform root, System.Func<string, Transform> F, SceneResult r)
+        {
+            if (root == null) { Miss(r, "18", PanRootName); return; }
+            pts.TryGetValue("tp.roof.base_e", out var be);
+            if (be == null) Miss(r, "18", "tp.roof.base_e");
+            var all = root.GetComponentsInChildren<Transform>(true);
+            Transform Node(string n) => all.FirstOrDefault(t => t.name == n);
+            foreach (var (id, label) in new[] { ("ip.pan_assy.ctrl_connector", "控制線接頭"), ("ip.pan_assy.hold_down", "降弓固定帶綁點") })
+            {
+                var t = id == "ip.pan_assy.hold_down" ? Node("HoldDown_TiePoint") : Node(id);
+                if (t == null) { Miss(r, "18", id); continue; }
+                var local = root.InverseTransformPoint(t.position);
+                Pend(r, "18", $"{label} {P3(t.position)}（PAN_Root 局部 X {local.x:0.000} ＞ 0）", local.x > 0f);
+                if (be != null) { float dd = Flat(t.position, be.transform.position); Pend(r, "18", $"{label}到 tp.roof.base_e {dd:0.00} m（≤ {set.sideNodeBaseEMax}）", dd <= set.sideNodeBaseEMax + 1e-4f); }
+            }
+            var cable = F("ip.roof.hv_cable_ground") ?? F("HV_Cable_End");
+            if (Node("ip.pan_assy.ctrl_connector") is Transform cc && cable != null)
+            {
+                float dd = Flat(cc.position, cable.position);
+                Pend(r, "18", $"控制線接頭到 HV_Cable_End 水平 {dd:0.00} m（≥ {set.connectorCableMin}）", dd >= set.connectorCableMin - 1e-4f);
+            }
+            var saddle = Node("HoldDown_Saddle");
+            var arm = VertexBounds(JointRenderers(root, "UpperArm"));
+            var sb = saddle != null ? VertexBounds(saddle.GetComponentsInChildren<Renderer>(true)) : null;
+            if (sb == null || arm == null) Miss(r, "18", "HoldDown_Saddle 或 UpperArm 的網格");
+            else Pend(r, "18", $"HoldDown_Saddle 頂點範圍 {P3(sb.Value.min)}–{P3(sb.Value.max)} 和上臂頂點範圍{(sb.Value.Intersects(arm.Value) ? "相交" : "不相交")}", sb.Value.Intersects(arm.Value));
+            foreach (var leg in new[] { "HoldDown_Leg_A", "HoldDown_Leg_B" })
+            {
+                var t = Node(leg);
+                var vb = t != null ? t.GetComponentsInChildren<Renderer>(true).FirstOrDefault() : null;
+                if (vb == null || !vb.TryGetComponent<MeshFilter>(out var mf) || mf.sharedMesh == null) { Miss(r, "18", leg); continue; }
+                float len = mf.sharedMesh.vertices.Max(v => Vector3.Distance(t.position, vb.transform.TransformPoint(v)));
+                Pend(r, "18", $"{leg} 長 {len:0.000} m（0.05–1.00）", len >= 0.05f - 1e-4f && len <= 1.00f + 0.01f);
+            }
+        }
+
+        /// <summary>
+        /// 第19項（增補 1，D32）：PendantDock 的 Bounds 不在吊物禁區內；到 tp.platform.crane ≤ pendantCraneMax；和工具架 Bounds 間距 ≥ pendantRackGap（容差 pendantRackGapTolerance），
+        /// 不和掛位 1、4（以及 R1.5b b3 才建的 11、12）的掛位重疊。
+        /// </summary>
+        static void A6PendantDock(StationSet set, IDictionary<string, XrTeleportPoint> pts, System.Func<string, Transform> F, SceneResult r)
+        {
+            var dock = GameObject.Find("PendantDock")?.transform;
+            var db = RenderBounds(dock);
+            if (db == null) { Miss(r, "19", "PendantDock"); return; }
+            var rc = RectXZ(db.Value);
+            Note(r, "19", $"PendantDock Bounds {P3(db.Value.min)}–{P3(db.Value.max)}");
+            var zone = Rect.MinMaxRect(set.liftZoneMinXZ.x, set.liftZoneMinXZ.y, set.liftZoneMaxXZ.x, set.liftZoneMaxXZ.y);
+            Pend(r, "19", $"PendantDock {(rc.Overlaps(zone) ? "在" : "不在")}吊物禁區 Z {zone.yMin}…{zone.yMax} 內（離禁區 {Mathf.Max(0f, zone.yMin - rc.yMax, rc.yMin - zone.yMax):0.00} m）", !rc.Overlaps(zone));
+            if (pts.TryGetValue("tp.platform.crane", out var cr)) { float dd = RectDistance(rc, XZ(cr.transform.position)); Pend(r, "19", $"PendantDock 到 tp.platform.crane {dd:0.00} m（≤ {set.pendantCraneMax}）", dd <= set.pendantCraneMax + 1e-4f); }
+            else Miss(r, "19", "tp.platform.crane");
+            var rack = F("env.tool_rack");
+            var rb = rack != null ? RenderBounds(rack.parent != null && rack.name == "Board" ? rack.parent : rack) : null;
+            if (rb == null) { Miss(r, "19", "工具架"); return; }
+            float gap = RectGap(rc, RectXZ(rb.Value));
+            Pend(r, "19", $"PendantDock 和工具架 Bounds Z {rb.Value.min.z:0.000}…{rb.Value.max.z:0.000} 間距 {gap:0.000} m（≥ {set.pendantRackGap} − 容差 {set.pendantRackGapTolerance}）", gap >= set.pendantRackGap - set.pendantRackGapTolerance - 1e-5f);
+            foreach (int k in new[] { 1, 4, 11, 12 })
+            {
+                var slot = rack.parent != null ? rack.parent.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "Slot_" + k) : null;
+                if (slot == null) { Note(r, "19", $"工具架掛位 {k} 還沒建（{(k > 4 ? "R1.5b b3" : "找不到")}）"); continue; }
+                var sb = RenderBounds(slot);
+                float sg = sb.HasValue ? RectGap(rc, RectXZ(sb.Value)) : float.PositiveInfinity;
+                Pend(r, "19", $"PendantDock 和掛位 {k} 間距 {sg:0.000} m（不重疊且 ≥ {set.pendantRackGap} − {set.pendantRackGapTolerance}）", sg >= set.pendantRackGap - set.pendantRackGapTolerance - 1e-5f);
+            }
+        }
+
+        /// <summary>第20項（增補 3，D33）：防墜器本體到四個子站點的 D 環（跪姿、站姿）8 條線段，不和 PAN_Root 底下的 collider、絕緣子的 collider 相交。</summary>
+        static void A6Lanyard(StationSet set, RoofSceneDef d, IDictionary<string, XrTeleportPoint> pts, Transform root, SceneResult r)
+        {
+            var body = GameObject.Find("FallArrester");
+            if (body == null) { Miss(r, "20", "防墜器本體 FallArrester"); return; }
+            var a = body.transform.position;
+            foreach (var id in new[] { "tp.roof.base_w.s", "tp.roof.base_e.s", "tp.roof.base_e.n", "tp.roof.base_w.n" })
+            {
+                if (!pts.TryGetValue(id, out var tp)) { Miss(r, "20", id); continue; }
+                foreach (var (pose, hgt) in new[] { ("跪姿", d.dRingKneelHeight), ("站姿", d.dRingStandHeight) })
+                {
+                    var b = tp.transform.position + Vector3.up * hgt;
+                    var hits = Physics.RaycastAll(a, (b - a).normalized, Vector3.Distance(a, b), ~0, QueryTriggerInteraction.Collide)
+                        .Select(h => h.collider).Where(c => (root != null && c.transform.IsChildOf(root)) || c.name == "InsulatorCollision").Select(c => c.name).Distinct().ToList();
+                    Pend(r, "20", $"防墜器 → {id} D 環（{pose} {hgt} m）" + (hits.Count == 0 ? "不碰集電弓與絕緣子" : "碰到 " + string.Join("、", hits)), hits.Count == 0);
+                }
             }
         }
 

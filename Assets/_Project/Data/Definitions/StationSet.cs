@@ -33,24 +33,48 @@ namespace PantographSim.Data
         [Tooltip("建置時寫入：肘側最遠一支螺栓超過上限 → 教學模式啟用「往 n 號螺栓那側移一步」提示")] public bool sideStepHintEnabled;
         [Tooltip("建置時寫入的實測距離（m）")] public float measuredFarBoltL, measuredFarBoltR;
 
-        [Header("a6（暫定門檻，等 a6 補充定案）")]
+        [Header("a6（a6 補充定案後的門檻）")]
         [Tooltip("a6 第1項：平台站點兩兩水平距離下限（sharedWith 互連的不算）")] public float platformStationMinSpacing = 0.60f;
         [Tooltip("a6 第2項：站點離活動欄開口（GateBoundary）的水平距離下限")] public float gateFrontClearance = 0.40f;
         [Tooltip("a6 第4項(d)（D25）：長桿桿架 env.pole_rack 到 tp.platform.ground 的水平距離上限")] public float poleRackGroundMaxDistance = 1.00f;
-        [Tooltip("a6 第4項(d)：長桿桿架 X 要小於這個值")] public float poleRackMaxX = -3.00f;
         [Tooltip("a6 第5項：吊運路徑（弓座 (0,0) 到台架中心）兩側各加寬")] public float liftCorridorHalfWidth = 1.00f;
         [Tooltip("a6 第5項：tp.platform.crane 離吊運路徑的水平距離下限")] public float craneCorridorMinDistance = 2.00f;
         [Tooltip("a6 第6項：tp.stand.* 的 Y 和地面 groundY 的容許差")] public float standStationYTolerance = 0.02f;
         [Tooltip("a6 第6項：tp.stand.* 到台架邊距離和 standStationOffset 的容許差")] public float standStationOffsetTolerance = 0.05f;
         [Tooltip("a6 第8項：車體接地座到 tp.roof.base_w 的水平距離上限")] public float carBodyGroundMaxDistance = 0.80f;
-        [Tooltip("a6 第8、9項：tp.roof.base_w 的規格座標（站點資料建立前用）")] public Vector2 roofBaseWXZ = new Vector2(-0.70f, 0.60f);
-        [Tooltip("a6 第9項：tp.roof.base_e 的規格座標（站點資料建立前用）")] public Vector2 roofBaseEXZ = new Vector2(0.70f, 0.60f);
         [Tooltip("a6 第9項：tp.roof.base_e 到 HV_Cable_End 的水平距離上限")] public float baseECableMaxDistance = 1.30f;
-        [Tooltip("a6 第9項：超過時沿 +Z 搜尋的步距與 Z 上限（Z 上限規格未給，先用車頂區段 +Z 端）")] public float baseESearchStep = 0.05f, baseESearchMaxZ = 4.0f;
-        [Tooltip("a6 第9項：母線孔帶 X 範圍（base_e 不能落在這裡）")] public float busbarHoleMinX = 0.20f, busbarHoleMaxX = 0.40f;
         [Tooltip("a6 第10項(b)：平台鋼梯 ENV_PlatformStair 的 Z 範圍")] public float stairMinZ = 4.0f, stairMaxZ = 10.0f;
         [Tooltip("a6 第11項：降弓整組放上台架後（底架底面除外）到台架外框頂面的垂直距離下限")] public float standFrameMinClearance = 0.30f;
 
+        [Header("a6 補充 v4.3／增補 1（定案門檻）")]
+        [Tooltip("第10b項：鋼梯和扶手可以伸進平台上方的容差（接口碰到平台護欄是正常的）")] public float stairOverlapTolerance = 0.02f;
+        [Tooltip("第13項：活動欄開口中心到防墜器掛鉤、桿架、工具架的水平距離上限")] public float roofEntryMaxDistance = 2.0f;
+        [Tooltip("第14項：去駕駛室光圈到 tp.platform.lift 的水平距離上限")] public float toCabLiftMaxDistance = 0.50f;
+        [Tooltip("第15項：NPC 平時站位到設備與站點的最低距離、離活動欄開口前方的最低距離、吊運中三人彼此與到工作檯／台架淨空帶／鋼梯的最低距離")]
+        public float npcClearance = 0.60f, npcGateFront = 0.40f;
+        [Tooltip("吊物禁區（XZ；平台側 Z ±2.25，已從吊物外緣外擴 1.0 m，不要再外推）")] public Vector2 liftZoneMinXZ = new Vector2(-12.0f, -2.25f), liftZoneMaxXZ = new Vector2(1.69f, 2.25f);
+        [Tooltip("第16項：車頂拆裝座到同側最遠底座螺栓的上限、學員頭部 |X| 上限")] public float baseBoltMaxDistance = 1.0f, headMaxAbsX = 1.10f;
+        [Tooltip("第17項：暫放墊要在 |X| ≤ 這個值內、前緣離最近車頂站點的下限")] public float stripMatMaxAbsX = 0.80f, stripMatStationMin = 0.25f;
+        [Tooltip("第18項：弓側節點到 tp.roof.base_e 的上限、接頭到 HV_Cable_End 的下限")] public float sideNodeBaseEMax = 0.80f, connectorCableMin = 0.30f;
+        [Tooltip("第19項：PendantDock 到 tp.platform.crane 的上限、和工具架 Bounds 的間距下限與浮點容差")] public float pendantCraneMax = 1.0f, pendantRackGap = 0.15f, pendantRackGapTolerance = 0.005f;
+        [Tooltip("第16項（D33）：子站點到自己那支螺栓的水平距離上限")] public float subStationBoltMax = 0.60f;
+        [Tooltip("D34：車體接地座 X 上限、站點立足圓半徑、跪姿區（站點面向方向往前的深度與半寬）")] public float carBodyGroundMaxX = -1.05f, stationFootRadius = 0.25f, kneelZoneDepth = 0.60f, kneelZoneHalfWidth = 0.25f;
+        [Tooltip("第七節 1：吊物底面到路徑下方固定物頂面的最低餘裕")] public float liftObstacleMargin = 0.50f;
+        [Tooltip("等組長／鐵道裁定的已知衝突：不合格行含這些字串（站點 ID 或「【第n項】」）時只列在報告（◇ 待裁定），不讓建置失敗。裁定後刪掉該字串")]
+        public string[] awaitingRuling = Array.Empty<string>();
+        [Tooltip("第15項：NPC 各階段站位（平時／吊運中）")] public NpcStandPose[] npcPoses = Array.Empty<NpcStandPose>();
+
         public StationDef Find(string id) => Array.Find(stations, s => s != null && s.id == id);
+    }
+
+    public static class NpcPhase { public const string Normal = "平時", Lifting = "吊運中"; }
+
+    /// <summary>a6 第15項：NPC 站位預留（NPC 本身 R1.5b 才建）。phase＝NpcPhase；吊運中＝停留點 2 放行到 LF_06、停留點 3 放行到 IN_04（只有定期課程）。
+    /// shortcut: 規格寫在 HoldPointDef 的 NPC 資料，專案還沒有 HoldPointDef, R1.5b 建停留點資料時搬過去。</summary>
+    [Serializable]
+    public class NpcStandPose
+    {
+        public string npcId, phase;
+        public Vector3 position;
     }
 }

@@ -62,7 +62,8 @@ namespace PantographSim.Editor
             RenderSettings.ambientLight = new Color(0.55f, 0.57f, 0.6f);
             sb.AppendLine(R1Layers.Ensure());
             var roofDef = R1Data.RoofScene;
-            var stationSet = R1Data.ApplyR15a();   // R1.5a a3：站點相對平台邊、駕駛室移位、tp.platform.crane
+            var stationSet = R1Data.ApplyA6();   // R1.5a a3＋a6：站點相對平台邊、駕駛室移位、tp.platform.crane、a6 擺放與新站點
+            CarParamsExport.Export();   // a6：RoofSceneDef → car_params.json（新的參數區塊）
 
             // ---- 可動集電弓 ----
             var rigPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(PantographRigBuilder.PrefabPath);
@@ -189,8 +190,10 @@ namespace PantographSim.Editor
             var panRoot = PantographAssemblyBuilder.Build(rig, sb);   // R1.5a a1：集電弓整組 PAN_Root（世界位置不變）
             var tools = StepJsonImporter.LoadTools();
             var site = RoofSiteBuilder.Build(roofDef, stationSet, mats, rig, panHead, clamp.transform, tools, sb);
+            CarParamsExport.Export();   // a6：建置時寫回的量測值（固定帶 armHalfWidth、台架外框）一起匯出
             var env = site.env;
             PantographAssemblyBuilder.WriteReport(panRoot);   // R1.5a a5：Logs/PantographAssemblyReport.txt
+            sb.AppendLine("G1：" + G1BoundsReport.Run(panRoot));   // a6 第七節 4：Logs/G1BoundsReport.txt、Logs/g1_side.png
             var heightProfile = R1Data.Height;
             heightProfile.measuredStripTop = Mathf.Round(site.stripTop * 1000f) / 1000f;
             EditorUtility.SetDirty(heightProfile);
