@@ -86,6 +86,9 @@ namespace PantographSim.Editor
             var existing = AssetDatabase.LoadAssetAtPath<T>(path);
             if (existing != null)
             {
+                // a6 增補 6 第 6 點：內容沒變就不寫（SerializeReference 的 rid 每次新建都不同，比對時拿掉；不然每次重建 25 個 STP_*.asset 都會變）
+                string Norm(Object o) => System.Text.RegularExpressions.Regex.Replace(EditorJsonUtility.ToJson(o), "\"(rid|m_Name)\":\\s*(-?\\d+|\"[^\"]*\")", "");
+                if (Norm(obj) == Norm(existing)) { Object.DestroyImmediate(obj); return existing; }
                 EditorUtility.CopySerialized(obj, existing);
                 existing.name = Path.GetFileNameWithoutExtension(path);
                 EditorUtility.SetDirty(existing);
