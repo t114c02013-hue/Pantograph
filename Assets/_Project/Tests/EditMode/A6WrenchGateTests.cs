@@ -21,19 +21,20 @@ namespace PantographSim.Tests
         static Transform Named(UnityEngine.SceneManagement.Scene s, string n) => s.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<Transform>(true)).FirstOrDefault(t => t.name == n);
 
         /// <summary>在降弓姿態跑一次 CheckScene（mutate 可以先改場景，量完一律還原）。</summary>
-        static StationLayoutCheck.SceneResult Run(UnityEngine.SceneManagement.Scene scene, Action<System.Collections.Generic.Dictionary<string, XrTeleportPoint>> mutate = null)
+        static StationLayoutCheck.SceneResult Run(UnityEngine.SceneManagement.Scene scene, Action<System.Collections.Generic.Dictionary<string, XrTeleportPoint>> mutate = null, StationSet set = null)
         {
             var ids = StationTests.SceneIds(scene);
             var pts = Object.FindObjectsOfType<XrTeleportPoint>(true).Where(p => p.gameObject.scene == scene).ToDictionary(p => p.PointId);
             var saved = pts.ToDictionary(kv => kv.Key, kv => (kv.Value.transform.position, kv.Value.transform.rotation));
             var mech = Object.FindObjectOfType<PantographMechanism>(true);
             float lift = mech.Lift;
+            var footprints = PantographSim.Editor.PanGeometry.SweptFootprints(mech);   // R1.5b F2：和建置時一樣跑到 panFootprints 那一段
             mech.SetLift(0f);
             try
             {
                 mutate?.Invoke(pts);
                 Physics.SyncTransforms();
-                return StationLayoutCheck.CheckScene(Set, Def, pts.Values, id => ids.TryGetValue(id ?? "", out var t) ? t : null, null, A6Tests.Wrench);
+                return StationLayoutCheck.CheckScene(set ?? Set, Def, pts.Values, id => ids.TryGetValue(id ?? "", out var t) ? t : null, footprints, A6Tests.Wrench);
             }
             finally
             {
@@ -60,20 +61,21 @@ namespace PantographSim.Tests
         [Test]
         public void WrenchSweepThresholdTest_005Fails_002Passes()
         {
-            var set = Set; float keep = set.wrenchSweepMinClearance;
+            float keep = Set.wrenchSweepMinClearance;
+            var set = Object.Instantiate(Set);   // R1.5b 建議項：改副本，不動資產
             try
             {
                 StationTests.WithScene(scene =>
                 {
                     set.wrenchSweepMinClearance = 0.05f;
-                    Assert.IsTrue(Run(scene).failures.Any(f => f.item == "21"), "門檻 0.05 時第 21 項要不合格");
+                    Assert.IsTrue(Run(scene, null, set).failures.Any(f => f.item == "21"), "門檻 0.05 時第 21 項要不合格");
                     set.wrenchSweepMinClearance = 0.02f;
-                    var r = Run(scene);
+                    var r = Run(scene, null, set);
                     Assert.IsFalse(r.failures.Any(f => f.item == "21"), "門檻 0.02 時第 21 項要合格：" + string.Join("\n", r.failures.Where(f => f.item == "21").Select(f => f.text)));
                 });
             }
-            finally { set.wrenchSweepMinClearance = keep; }
-            Assert.AreEqual(keep, Set.wrenchSweepMinClearance, "測完要還原資料");
+            finally { Object.DestroyImmediate(set); }
+            Assert.AreEqual(keep, Set.wrenchSweepMinClearance, "資產的門檻沒被改到");
         }
 
         [Test]
@@ -201,6 +203,24 @@ namespace PantographSim.Tests
                 Assert.IsTrue(Fails(Run(scene, p => p["tp.roof.base_w.s"].transform.position = new Vector3(-0.85f, 0, -0.25f)), "16", "(h) tp.roof.base_w.s"), "(h) 羊角反例");
                 // (j) base_e.n 移到 X 1.9：伸手時頭部 |X| 超過 1.0
                 Assert.IsTrue(Fails(Run(scene, p => p["tp.roof.base_e.n"].transform.position += new Vector3(1.05f, 0, 0)), "16", "(j) tp.roof.base_e.n"), "(j) 頭部反例");
+            });
+        }
+
+        /// <summary>
+        /// R1.5b F2：把 tp.roof.base_w.s 往羊角移，停在羊角升降範圍外 0.17 m（比羊角淨空 0.2 小、比 Walkable 挖除的 movingCarveInflate 0.15 大，腳下仍是 Walkable），
+        /// panFootprints 那一段（core）和第 16 項 (h) 都要判不合格。站點再往裡移就沒有 Walkable，core 會先報「下方沒有 Walkable」。
+        /// </summary>
+        [Test]
+        public void Item16_StationInsideHornSweep_Fails()
+        {
+            StationTests.WithScene(scene =>
+            {
+                var mech = Object.FindObjectOfType<PantographMechanism>(true);
+                var fp = PantographSim.Editor.PanGeometry.SweptFootprints(mech)["PanHead"];
+                float gap = (Def.movingCarveInflate + Set.ClearRadiusFor("PanHead", StationFloor.Roof)) / 2f;
+                var r = Run(scene, p => { var q = p["tp.roof.base_w.s"].transform; q.position = new Vector3(q.position.x, q.position.y, fp.min.z - gap); });
+                Assert.IsTrue(r.failures.Any(f => f.item == "core" && f.text.Contains("tp.roof.base_w.s") && f.text.Contains("升降範圍（PanHead）")), "panFootprints：站點離羊角升降範圍不到淨空要不合格：" + string.Join("\n", r.failures.Select(f => f.text)));
+                Assert.IsTrue(Fails(r, "16", "(h) tp.roof.base_w.s"), "第 16 項 (h) 要不合格");
             });
         }
 
