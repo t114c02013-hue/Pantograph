@@ -43,8 +43,7 @@ namespace PantographSim.UI
             var img = Ui.Panel(safe, "ToolPanel");
             root = Ui.Place(img.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, Bottom), new Vector2(FullWidth, 0));
             Ui.VStack(img.gameObject, 16, 8);
-            BuildVoltage(); BuildGrounding(); BuildLead(); BuildMegger(); BuildCaliper(); BuildSocket(); BuildTorque(); BuildCloth(); BuildSimple(SimIds.ToolMarker, "標記筆", "依 1→2→3→4 點已鎖到扭力的螺栓，畫上跨螺栓頭與托架的紅色標記線。");
-            BuildSimple(SimIds.ToolLockout, "上鎖掛牌組", "本切片已預先完成上鎖掛牌，可在控制盤面板查看狀態。");
+            BuildVoltage(); BuildGrounding(); BuildLead(); BuildMegger(); BuildLockout(); BuildCaliper(); BuildSocket(); BuildTorque(); BuildCloth(); BuildSimple(SimIds.ToolMarker, "標記筆", "依 1→2→3→4 點已鎖到扭力的螺栓，畫上跨螺栓頭與托架的紅色標記線。");
             BuildSimple(SimIds.ToolHarness, "安全帶", "本切片已預先完成安全帶改扣。");
             message = Ui.Text(root, "", 21, Ui.Accent);
             var resetRow = Ui.Rect(root, "ResetRow"); var rh = Ui.HStack(resetRow.gameObject, 10); rh.childAlignment = TextAnchor.MiddleRight;
@@ -105,6 +104,23 @@ namespace PantographSim.UI
         }
 
         /// <summary>R1.5b b4：高阻計（RT_02）：兩條測試線接上後按測試鍵（DC 1000 V），讀值抄到作業單。</summary>
+        /// <summary>v3.10（SI_02 c／c2、d／d2）：上鎖掛牌組——先選「鎖」點開關上鎖，再選「牌」點同一個開關掛牌。</summary>
+        void BuildLockout()
+        {
+            var p = Panel(SimIds.ToolLockout, "上鎖掛牌組");
+            var row = Row(p);
+            Ui.Text(row, "手上拿", 22, Ui.Muted);
+            var lockB = Btn(row, "鎖", () => Ui.Send(SimIds.ToolLockout, "part:lock"), 80);
+            var tagB = Btn(row, "牌", () => Ui.Send(SimIds.ToolLockout, "part:tag"), 80);
+            Help(p, "先上鎖、再掛牌：選「鎖」點主斷路器或升弓開關上鎖，再選「牌」點同一個開關掛牌。已上鎖時選「鎖」再點一次＝解鎖（牌一起取下）。");
+            refreshers.Add(s =>
+            {
+                bool tag = s.Get("tool.lockout_tag.part", "lock") == "tag";
+                lockB.GetComponent<Image>().color = tag ? Ui.ButtonBg : Ui.ButtonOn;
+                tagB.GetComponent<Image>().color = tag ? Ui.ButtonOn : Ui.ButtonBg;
+            });
+        }
+
         void BuildMegger()
         {
             const string id = "tool.megger";

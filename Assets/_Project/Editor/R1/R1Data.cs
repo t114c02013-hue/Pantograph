@@ -185,6 +185,20 @@ namespace PantographSim.Editor
                 if (set.Find(id) == null) set.stations = set.stations.Concat(new[] { Station(id, label, floor, Vector2.zero, "") }).ToArray();
                 return set.Find(id);
             }
+            // v3.10（D44）：天車站搬到 (−2.15, −2.95) 面向 +Z；平台吊帶西側站 tp.platform.rigging_w；台架旁空吊梁查看站 tp.stand.rig_e／rig_w（面向查看位置）
+            crane.positionXZ = new Vector2(-2.15f - inner, -2.95f); crane.facingDirection = Vector3.forward; crane.facingTargetId = ""; EditorUtility.SetDirty(crane);
+            foreach (var (id, label, floor, xz, face) in new[] {
+                ("tp.platform.rigging_w", "平台吊帶查看（西側）", StationFloor.Platform, new Vector2(-2.80f, -3.15f), Vector3.back),
+                ("tp.stand.rig_e", "台架旁吊帶查看（東側）", StationFloor.Ground, new Vector2(-8.60f, -2.85f), Vector3.left),
+                ("tp.stand.rig_w", "台架旁吊帶查看（西側）", StationFloor.Ground, new Vector2(-10.40f, -2.85f), Vector3.right) })
+            {
+                var s = Add(id, label, floor);
+                s.relativeToPlatformInner = floor == StationFloor.Platform;
+                s.positionXZ = floor == StationFloor.Platform ? new Vector2(xz.x - inner, xz.y) : xz;
+                s.facingTargetId = ""; s.facingDirection = face; s.allowedWhileLifted = false;
+                s.zoneId = floor == StationFloor.Ground ? ZoneDef.Maintenance : ZoneDef.Arrival;
+                EditorUtility.SetDirty(s);
+            }
             foreach (var (id, label, z) in new[] { ("tp.platform.parts", "備品架前（日常）", 1.60f), ("tp.platform.scrap", "待報廢箱前（日常）", 2.85f) })
             {
                 var s = Add(id, label, StationFloor.Platform);

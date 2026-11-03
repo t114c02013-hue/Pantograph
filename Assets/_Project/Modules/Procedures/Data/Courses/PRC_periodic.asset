@@ -101,6 +101,27 @@ MonoBehaviour:
   requireFreshWrite: 1
   autoCompleteAllowed: []
   globalErrors:
+  - errorId: ERR_Crane_EmptyRigLowTravel
+    severity: 1
+    what: "\u7A7A\u540A\u5177\u6C92\u5347\u5230\u4E0A\u9650\u5C31\u6C34\u5E73\u79FB\u52D5\u3002"
+    why: "\u7A7A\u540A\u6881\u592A\u4F4E\u5C31\u6C34\u5E73\u79FB\u52D5\uFF0C\u540A\u5E36\u4E0B\u7AEF\u6703\u52FE\u5230\u9632\u589C\u9580\u67B6\u6216\u78B0\u5230\u4EBA\u3002"
+    fix: "\u5148\u628A\u7A7A\u540A\u6881\u5347\u5230\u4E0A\u9650\uFF08\u540A\u9264
+      pivot \u2265 4.92 m\uFF09\uFF0C\u518D\u6C34\u5E73\u79FB\u52D5\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - part.crane.empty_low_travel
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   - errorId: ERR_Crane_FastLowerEmptyHook
     severity: 0
     what: "\u7A7A\u9264\u9760\u8FD1\u8ECA\u9802\u6216\u53F0\u67B6\u6642\u6C92\u6709\u5207\u5230\u5FAE\u52D5\uFF08\u540A\u6881\u5E95\u9762\u96E2\u4F5C\u696D\u9762

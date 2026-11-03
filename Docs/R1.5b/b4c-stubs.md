@@ -20,14 +20,23 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | b4c:spare_target | 選定備品／手上新滑板的目標 ID（b4c） |
 | b4d | 車頂邊兩級判定與移動限制（b4d） |
 | b4:p5 | 兩門課跑到結算（b4 第 5 部分；v3.10 做完時結案） |
+| v310 | steps-v6 v3.10（吊帶割傷故障、D44 平台查看；這一段做完時清空） |
 
-## 小動作（共 43 列）
+## 小動作（共 71 列）
 
 | 步驟 | 小動作 | 課程 | 完成條件 | owner |
 |---|---|---|---|---|
+| STP_SI_06_RoofEntry | s2i1 | periodic | `rigging.cut_reported` | b4c:holdpoint |
+| STP_SI_06_RoofEntry | s2i2 | periodic | `rigging.cut_reported` | b4c:holdpoint |
+| STP_SI_06_RoofEntry | s2i3 | periodic | `rigging.cut_reported` | b4c:holdpoint |
+| STP_SI_06_RoofEntry | s2i4 | periodic | `rigging.cut_reported` | b4c:holdpoint |
 | STP_SI_06_RoofEntry | c | daily | `env.work_order.roof_entry_check.checked_count>=9&&hold.1.released&&workorder.sign_start` | b4c:holdpoint |
 | STP_SI_06_RoofEntry | c | periodic | `env.work_order.roof_entry_check.checked_count>=11&&hold.1.released&&workorder.sign_start` | b4c:holdpoint |
 | STP_LF_01_PreLift | e | periodic | `hold.2.checklist_done&&hold.2.released` | b4c:holdpoint |
+| STP_IN_01_RigOnStand | s2i1 | periodic | `rigging.cut_reported` | b4c:holdpoint |
+| STP_IN_01_RigOnStand | s2i2 | periodic | `rigging.cut_reported` | b4c:holdpoint |
+| STP_IN_01_RigOnStand | s2i3 | periodic | `rigging.cut_reported` | b4c:holdpoint |
+| STP_IN_01_RigOnStand | s2i4 | periodic | `rigging.cut_reported` | b4c:holdpoint |
 | STP_IN_01_RigOnStand | d | periodic | `hold.3.checklist_done&&hold.3.released` | b4c:holdpoint |
 | STP_RT_02_InsulationTest | r1 | periodic | `workorder.ir_reported` | b4c:holdpoint |
 | STP_RT_02_InsulationTest | r3b | periodic | `hold.1.checklist_done&&hold.1.released` | b4c:holdpoint |
@@ -68,11 +77,47 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_WC_02_LeaveRoof | c | daily | `player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use` | b4d |
 | STP_WC_02_LeaveRoof | c | periodic | `player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use` | b4d |
 | STP_RT_02_InsulationTest | r3h | periodic | `player.zone=platform&&harness.hooks_stowed` | b4d |
+| STP_SI_06_RoofEntry | a6 | periodic | `part.crane.inspect_pose=platform&&part.crane.under_hook_clear` | v310 |
+| STP_SI_06_RoofEntry | s1i1 | periodic | `env.sling_rejected.tagged&&env.sling_rejected.state=in_bin` | v310 |
+| STP_SI_06_RoofEntry | s1i2 | periodic | `env.sling_rejected.tagged&&env.sling_rejected.state=in_bin` | v310 |
+| STP_SI_06_RoofEntry | s1i3 | periodic | `env.sling_rejected.tagged&&env.sling_rejected.state=in_bin` | v310 |
+| STP_SI_06_RoofEntry | s1i4 | periodic | `env.sling_rejected.tagged&&env.sling_rejected.state=in_bin` | v310 |
+| STP_SI_06_RoofEntry | s3 | periodic | `env.sling_spare.inspected&&env.sling_spare.verdict=ok` | v310 |
+| STP_SI_06_RoofEntry | s4i1 | periodic | `env.sling_1.replaced` | v310 |
+| STP_SI_06_RoofEntry | s4i2 | periodic | `env.sling_2.replaced` | v310 |
+| STP_SI_06_RoofEntry | s4i3 | periodic | `env.sling_3.replaced` | v310 |
+| STP_SI_06_RoofEntry | s4i4 | periodic | `env.sling_4.replaced` | v310 |
+| STP_IN_01_RigOnStand | a0 | periodic | `part.crane.inspect_pose=ground&&part.crane.under_hook_clear` | v310 |
+| STP_IN_01_RigOnStand | s1i1 | periodic | `env.sling_rejected.tagged&&env.sling_rejected.state=in_bin` | v310 |
+| STP_IN_01_RigOnStand | s1i2 | periodic | `env.sling_rejected.tagged&&env.sling_rejected.state=in_bin` | v310 |
+| STP_IN_01_RigOnStand | s1i3 | periodic | `env.sling_rejected.tagged&&env.sling_rejected.state=in_bin` | v310 |
+| STP_IN_01_RigOnStand | s1i4 | periodic | `env.sling_rejected.tagged&&env.sling_rejected.state=in_bin` | v310 |
+| STP_IN_01_RigOnStand | s3 | periodic | `env.sling_spare.inspected&&env.sling_spare.verdict=ok` | v310 |
+| STP_IN_01_RigOnStand | s4i1 | periodic | `env.sling_1.replaced` | v310 |
+| STP_IN_01_RigOnStand | s4i2 | periodic | `env.sling_2.replaced` | v310 |
+| STP_IN_01_RigOnStand | s4i3 | periodic | `env.sling_3.replaced` | v310 |
+| STP_IN_01_RigOnStand | s4i4 | periodic | `env.sling_4.replaced` | v310 |
 
 ## 場景裡還沒有的目標（ConditionTables.json 的 pendingTargets）
 
 | 目標 | owner |
 |---|---|
+| ip.sling_1.top_eye | v310 |
+| ip.sling_1.tag | v310 |
+| ip.lifting_beam.eye_1 | v310 |
+| ip.sling_2.top_eye | v310 |
+| ip.sling_2.tag | v310 |
+| ip.lifting_beam.eye_2 | v310 |
+| ip.sling_3.top_eye | v310 |
+| ip.sling_3.tag | v310 |
+| ip.lifting_beam.eye_3 | v310 |
+| ip.sling_4.top_eye | v310 |
+| ip.sling_4.tag | v310 |
+| ip.lifting_beam.eye_4 | v310 |
+| env.sling_reject_bin | v310 |
+| env.rigging_rack | v310 |
+| env.sling_spare | v310 |
+| env.tag_out_of_service | v310 |
 | npc.work_leader | b4c:holdpoint |
 | npc.guard | b4c:holdpoint |
 | npc.rigging_lead | b4c:holdpoint |
@@ -82,13 +127,12 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | consumable.carbon_strip | b4c:spare_target |
 | consumable.carbon_strip.measure_mid | b4c:spare_target |
 
-## 錯誤規則的觸發條件還沒做（Assets/_Project/Data/Source/ErrorRules.json 的 owner，共 23 條）
+## 錯誤規則的觸發條件還沒做（Assets/_Project/Data/Source/ErrorRules.json 的 owner，共 27 條）
 
 ErrorRuleTests.PendingTriggers_ListedInStubsDoc 檢查兩邊一致。觸發做好時把 owner 清空，再刪掉這裡那一列。
 
 | 錯誤 | owner | 嚴重度 |
 |---|---|---|
-| ERR_SI02_TagWithoutLock | b4:p5 | Critical |
 | ERR_Global_GroundNotCleared | b4c:ground_register | Critical |
 | ERR_Global_GroundNotRegistered | b4c:ground_register | Major |
 | ERR_Global_HoldPointRejected | b4c:holdpoint | Major |
@@ -111,6 +155,11 @@ ErrorRuleTests.PendingTriggers_ListedInStubsDoc 檢查兩邊一致。觸發做�
 | ERR_SI02_RaiseSwitchUnlocked | n/a | Critical |
 | ERR_Crane_RiggedOnArm | R2 | Critical |
 | ERR_IN09_Misaligned | R2 | Major |
+| ERR_Sling_CutJudgedUsable | v310 | Critical |
+| ERR_Sling_CutReturnedToRack | v310 | Major |
+| ERR_Sling_FalseReject | v310 | Minor |
+| ERR_Sling_NoReport | v310 | Major |
+| ERR_Sling_TouchWithoutEStop | v310 | Major |
 
 ## 扭力扳手選套筒（b4c:torque_socket，軟體工程裁定 2026-11-03）
 
@@ -145,3 +194,6 @@ ErrorRuleTests.PendingTriggers_ListedInStubsDoc 檢查兩邊一致。觸發做�
 - SimState 刪除不存在的鍵時不加 version。
 - 常數搬到設定（軟體工程已裁定 BlackboardKeyDef 加 Constant 種類）。
 - 每幀寫的量測鍵會讓 FreshWriteGate 失效（Event 鍵每幀被寫就永遠算「啟用後寫過」）：列出這些鍵，改成值變才寫或改 LiveState。
+- PanelViews 作業單「抄自備品 n 的標籤」按鈕寫死 1、2、3，改讀備品架資料（SpareArrangementDef／場景格數）。
+- MarkerView 每幀重新解析 rack.slots，改成值變了才重新解析（快取）。
+- 提醒：吊鉤開場就在停放區時，RT_01 a 一啟用就完成（part.crane.hook.parked 是 LiveState，照規則可以）。

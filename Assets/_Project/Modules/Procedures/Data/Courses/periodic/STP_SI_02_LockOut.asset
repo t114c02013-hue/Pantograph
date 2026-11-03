@@ -40,14 +40,40 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
+  - errorId: ERR_SI02_TagWithoutLock
+    severity: 2
+    what: "\u6C92\u4E0A\u9396\u5C31\u639B\u724C\u3002"
+    why: "\u6C92\u4E0A\u9396\u53EA\u639B\u724C\uFF0C\u5225\u4EBA\u9084\u662F\u5408\u5F97\u4E0A\u9598\u3001\u5347\u5F97\u4E86\u5F13\uFF0C\u724C\u5B50\u64CB\u4E0D\u4F4F\u3002"
+    fix: "\u5148\u4E0A\u9396\uFF0C\u518D\u5728\u540C\u4E00\u500B\u958B\u95DC\u639B\u724C\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - lockout.breaker.tag_without_lock
+    - lockout.raise_switch.tag_without_lock
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: 
     why: 
     checklist:
     - "\u5F9E\u8170\u5305\u62FF\u51FA\u4E0A\u9396\u639B\u724C\u7D44|tool.active=tool.lockout_tag"
     - "\u628A\u4E3B\u65B7\u8DEF\u5668\u5207\u5230 OFF|cab.breaker=off"
-    - "\u4E3B\u65B7\u8DEF\u5668\u4E0A\u9396\u4E26\u639B\u724C|lockout.breaker=locked"
-    - "\u5347\u5F13\u958B\u95DC\u4E0A\u9396\u4E26\u639B\u724C|lockout.raise_switch=locked&&lockout.key_holder=trainee"
+    - "\u4E3B\u65B7\u8DEF\u5668\u4E0A\u9396|lockout.breaker=locked"
+    - "\u4E3B\u65B7\u8DEF\u5668\u639B\u724C|lockout.breaker=locked&&lockout.breaker.tagged"
+    - "\u5347\u5F13\u958B\u95DC\u4E0A\u9396|lockout.raise_switch=locked&&lockout.key_holder=trainee"
+    - "\u5347\u5F13\u958B\u95DC\u639B\u724C|lockout.raise_switch=locked&&lockout.raise_switch.tagged"
     highlightIds: []
     showBoltNumbers: 0
     showOutwardArrow: 0
@@ -59,6 +85,8 @@ MonoBehaviour:
     condition: tool.active=tool.lockout_tag
     standPointId: tp.cab
     subId: a
+    textDesktop: 
+    when: 
   - text: "\u628A\u4E3B\u65B7\u8DEF\u5668\u5207\u5230 OFF"
     why: 
     targetId: ip.cab.breaker
@@ -66,26 +94,50 @@ MonoBehaviour:
     condition: cab.breaker=off
     standPointId: tp.cab
     subId: b
-  - text: "\u4E3B\u65B7\u8DEF\u5668\u4E0A\u9396\u4E26\u639B\u724C"
+    textDesktop: 
+    when: 
+  - text: "\u4E3B\u65B7\u8DEF\u5668\u4E0A\u9396"
     why: 
     targetId: ip.cab.breaker
     toolId: tool.lockout_tag
     condition: lockout.breaker=locked
     standPointId: tp.cab
     subId: c
-  - text: "\u5347\u5F13\u958B\u95DC\u4E0A\u9396\u4E26\u639B\u724C"
+    textDesktop: 
+    when: 
+  - text: "\u4E3B\u65B7\u8DEF\u5668\u639B\u724C"
+    why: 
+    targetId: ip.cab.breaker
+    toolId: tool.lockout_tag
+    condition: lockout.breaker=locked&&lockout.breaker.tagged
+    standPointId: tp.cab
+    subId: c2
+    textDesktop: 
+    when: 
+  - text: "\u5347\u5F13\u958B\u95DC\u4E0A\u9396"
     why: 
     targetId: ip.cab.raise_switch
     toolId: tool.lockout_tag
     condition: lockout.raise_switch=locked&&lockout.key_holder=trainee
     standPointId: tp.cab
     subId: d
+    textDesktop: 
+    when: 
+  - text: "\u5347\u5F13\u958B\u95DC\u639B\u724C"
+    why: 
+    targetId: ip.cab.raise_switch
+    toolId: tool.lockout_tag
+    condition: lockout.raise_switch=locked&&lockout.raise_switch.tagged
+    standPointId: tp.cab
+    subId: d2
+    textDesktop: 
+    when: 
   presetDone: 0
   side: 
   presetStates: []
   valueTags: []
-  refSecondsTutorial: 55
-  refSecondsExam: 35
+  refSecondsTutorial: 58
+  refSecondsExam: 37
   references:
     version: 2
     RefIds:

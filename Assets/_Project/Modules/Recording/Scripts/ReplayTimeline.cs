@@ -20,7 +20,8 @@ namespace PantographSim.Recording
         /// </summary>
         public static bool ViewerOwnedKey(string key) =>
             key.StartsWith("replay.") || key.StartsWith("rec.") || key.StartsWith("xr.") || key == "ui.hover_name" || key == "ui.hover_id" || key == "ui.toast"
-            || key == "score.finished" || key == "score.total" || key == "score.elapsed" || key == "score.passed" || key == "score.start_time";
+            || key == "score.finished" || key == "score.total" || key == "score.elapsed" || key == "score.passed" || key == "score.start_time"
+            || key == SimIds.RackSlots;   // 審查建議：掛位清單是這個版本的 ToolSlotTable（觀看者的 ToolBelt 開場寫），舊錄影沒有這個鍵也照常顯示標籤、清點
 
         public readonly Dictionary<string, object> meta;
         public readonly List<RecordLine> lines;

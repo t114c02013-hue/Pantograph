@@ -7,8 +7,8 @@
 升降參數 → Assets/_Project/Modules/Worksite/Data/LiftSettings.asset
 
 套筒目錄 6 顆、螺栓對照 3 筆；扳手 tool.torque_wrench（3/8"、10–60、0.28）、tool.torque_wrench_l（1/2"、40–200、0.45）、tool.socket_wrench（1/2"、把手 0.19）
-R1.5b 步驟資料（SubActions.csv／Steps.csv 展開）：periodic：步驟 67、小動作 345、參考時間 教學 3559 s／考核 2321 s
-daily：步驟 37、小動作 181、參考時間 教學 1834 s／考核 1161 s
+R1.5b 步驟資料（SubActions.csv／Steps.csv 展開）：periodic：步驟 67、小動作 385、參考時間 教學 3638 s／考核 2372 s
+daily：步驟 37、小動作 183、參考時間 教學 1837 s／考核 1163 s
 
 PF_CarbonStrip_L ← CarbonStrip_2：尺寸 1.102 × 0.016 × 0.074 m
   截面：頂點數 68；頂面高度 −Z 邊 7.8 mm、中央 （中央無頂點）、+Z 邊 7.8 mm → 左右對稱，無法從外形看出斜面，加貼「此側朝外」箭頭
@@ -118,8 +118,8 @@ VR：腰包 env.waist_pouch 在 XR Origin 局部 (0.18, 0.95, 0.05)（右腰）
 VR：胸前收納扣環（安全帶掛鉤） tool.safety_harness.chest_ring：頭部偏移 (0.00, -0.35, 0.15)、邊長 0.05、握把半徑 0.08
 VR：安全帶工具環（短接地線） tool.safety_harness.tool_ring：頭部偏移 (0.12, -0.50, 0.15)、邊長 0.05、握把半徑 0.08
 平台：去駕駛室光圈 mk.platform.to_cab (-2.200, 0.000, -0.450)（r 0.25）
-VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、接地端子旁、活動欄與平台掛點、車頂（肘側滑板）（車頂開放才解鎖）、車頂（外側滑板）（車頂開放才解鎖）、天車遙控器掛座旁、台架北側、台架東側、台架南側、台架西側、備品架前（日常）、待報廢箱前（日常）、車頂拆裝座（−X 側）（車頂開放才解鎖）、車頂拆裝座（+X 側）（車頂開放才解鎖）、底座螺栓 1 前（車頂開放才解鎖）、底座螺栓 2 前（車頂開放才解鎖）、底座螺栓 3 前（車頂開放才解鎖）、底座螺栓 4 前（車頂開放才解鎖）
-站點檢查：結果：20 站，198 過／0 待定／0 不合格（全過）
+VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、接地端子旁、活動欄與平台掛點、車頂（肘側滑板）（車頂開放才解鎖）、車頂（外側滑板）（車頂開放才解鎖）、天車遙控器掛座旁、台架北側、台架東側、台架南側、台架西側、備品架前（日常）、待報廢箱前（日常）、車頂拆裝座（−X 側）（車頂開放才解鎖）、車頂拆裝座（+X 側）（車頂開放才解鎖）、底座螺栓 1 前（車頂開放才解鎖）、底座螺栓 2 前（車頂開放才解鎖）、底座螺栓 3 前（車頂開放才解鎖）、底座螺栓 4 前（車頂開放才解鎖）、平台吊帶查看（西側）、台架旁吊帶查看（東側）、台架旁吊帶查看（西側）
+站點檢查：結果：23 站，205 過／0 待定／0 不合格（全過）
 ・tp.cab：(-0.190, -2.350, -30.000)
 ・tp.platform.lift：(-2.200, 0.000, -0.050)
 ・tp.platform.rack：(-2.410, 0.000, -2.400)
@@ -127,7 +127,7 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ・tp.platform.anchor：(-2.200, 0.000, -1.800)
 ・tp.roof.inner：(0.000, 0.000, -0.650)
 ・tp.roof.outer：(0.000, 0.000, -0.650)
-・tp.platform.crane：(-2.400, 0.000, -3.500)
+・tp.platform.crane：(-2.150, 0.000, -2.950)
 ・tp.stand.n：(-9.492, -3.640, 1.993)
 ・tp.stand.e：(-7.909, -3.640, 0.110)
 ・tp.stand.s：(-9.492, -3.640, -1.773)
@@ -146,6 +146,9 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ・tp.roof.base_e.n：(0.850, 0.000, 1.648)
 ・tp.roof.base_w.n：到羊角升降範圍 1.428 m（≥ 0.2，D37）
 ・tp.roof.base_w.n：(-0.850, 0.000, 1.648)
+・tp.platform.rigging_w：(-2.800, 0.000, -3.150)
+・tp.stand.rig_e：(-8.600, -3.640, -2.850)
+・tp.stand.rig_w：(-10.400, -3.640, -2.850)
 ・tp.platform.ground：(-2.200, 0.000, 0.600)，面向 ip.depot.ground_terminal
 ・Anchor_GroundBusbar：(-1.810, 1.000, 0.350)，水平距離 0.46 m
 ・Anchor_TesterSelfCheck：(-1.810, 1.100, 0.850)，水平距離 0.46 m
@@ -184,27 +187,34 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ✔ 【第1項】tp.platform.lift–tp.platform.rack 水平 2.36 m（≥ 0.6）
 ✔ 【第1項】tp.platform.lift–tp.platform.ground 水平 0.65 m（≥ 0.6）
 ✔ 【第1項】tp.platform.lift–tp.platform.anchor 水平 1.75 m（≥ 0.6）
-✔ 【第1項】tp.platform.lift–tp.platform.crane 水平 3.46 m（≥ 0.6）
+✔ 【第1項】tp.platform.lift–tp.platform.crane 水平 2.90 m（≥ 0.6）
 ✔ 【第1項】tp.platform.lift–tp.platform.parts 水平 1.66 m（≥ 0.6）
 ✔ 【第1項】tp.platform.lift–tp.platform.scrap 水平 2.91 m（≥ 0.6）
+✔ 【第1項】tp.platform.lift–tp.platform.rigging_w 水平 3.16 m（≥ 0.6）
 ✔ 【第1項】tp.platform.rack–tp.platform.ground 水平 3.01 m（≥ 0.6）
 ✔ 【第1項】tp.platform.rack–tp.platform.anchor 水平 0.64 m（≥ 0.6）
-✔ 【第1項】tp.platform.rack–tp.platform.crane 水平 1.10 m（≥ 0.6）
+✔ 【第1項】tp.platform.rack–tp.platform.crane 水平 0.61 m（≥ 0.6）
 ✔ 【第1項】tp.platform.rack–tp.platform.parts 水平 4.00 m（≥ 0.6）
 ✔ 【第1項】tp.platform.rack–tp.platform.scrap 水平 5.25 m（≥ 0.6）
+✔ 【第1項】tp.platform.rack–tp.platform.rigging_w 水平 0.85 m（≥ 0.6）
 ✔ 【第1項】tp.platform.ground–tp.platform.anchor 水平 2.40 m（≥ 0.6）
-✔ 【第1項】tp.platform.ground–tp.platform.crane 水平 4.10 m（≥ 0.6）
+✔ 【第1項】tp.platform.ground–tp.platform.crane 水平 3.55 m（≥ 0.6）
 ✔ 【第1項】tp.platform.ground–tp.platform.parts 水平 1.02 m（≥ 0.6）
 ✔ 【第1項】tp.platform.ground–tp.platform.scrap 水平 2.26 m（≥ 0.6）
-✔ 【第1項】tp.platform.anchor–tp.platform.crane 水平 1.71 m（≥ 0.6）
+✔ 【第1項】tp.platform.ground–tp.platform.rigging_w 水平 3.80 m（≥ 0.6）
+✔ 【第1項】tp.platform.anchor–tp.platform.crane 水平 1.15 m（≥ 0.6）
 ✔ 【第1項】tp.platform.anchor–tp.platform.parts 水平 3.41 m（≥ 0.6）
 ✔ 【第1項】tp.platform.anchor–tp.platform.scrap 水平 4.65 m（≥ 0.6）
-✔ 【第1項】tp.platform.crane–tp.platform.parts 水平 5.10 m（≥ 0.6）
-✔ 【第1項】tp.platform.crane–tp.platform.scrap 水平 6.35 m（≥ 0.6）
+✔ 【第1項】tp.platform.anchor–tp.platform.rigging_w 水平 1.48 m（≥ 0.6）
+✔ 【第1項】tp.platform.crane–tp.platform.parts 水平 4.56 m（≥ 0.6）
+✔ 【第1項】tp.platform.crane–tp.platform.scrap 水平 5.81 m（≥ 0.6）
+✔ 【第1項】tp.platform.crane–tp.platform.rigging_w 水平 0.68 m（≥ 0.6）
 ✔ 【第1項】tp.platform.parts–tp.platform.scrap 水平 1.25 m（≥ 0.6）
+✔ 【第1項】tp.platform.parts–tp.platform.rigging_w 水平 4.77 m（≥ 0.6）
+✔ 【第1項】tp.platform.scrap–tp.platform.rigging_w 水平 6.01 m（≥ 0.6）
 ✔ 【第2項】活動欄開口 Z -1.40…-0.60 前 0.4 m 內沒有站點
 ✔ 【第4d項】env.pole_rack 中心 (-2.77, 0.60)（錨點 Anchor_PoleRack (-2.85, 0.60)）到 tp.platform.ground 水平 0.57 m（≤ 0.7）
-✔ 【第5項】tp.platform.crane (-2.40, -3.50)（吊運時可到）離吊運路徑 ±1 m 2.50 m、不在吊物禁區內
+✔ 【第5項】tp.platform.crane (-2.15, -2.95)（吊運時可到）離吊運路徑 ±1 m 1.95 m、不在吊物禁區內
 ✔ 【第5項】npc.rigging_lead（吊運中）(-5.00, -3.50) 離吊運路徑 ±1 m 2.50 m、不在吊物禁區內
 ✔ 【第5項】npc.guard（吊運中）(-6.00, -4.30) 離吊運路徑 ±1 m 3.30 m、不在吊物禁區內
 ✔ 【第5項】npc.work_leader（吊運中）(-7.00, -4.30) 離吊運路徑 ±1 m 3.30 m、不在吊物禁區內
@@ -362,7 +372,7 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ✔ 【第18項】HoldDown_Leg_A 長 0.216 m（0.05–1.00）
 ✔ 【第18項】HoldDown_Leg_B 長 0.801 m（0.05–1.00）
 ✔ 【第19項】PendantDock 不在吊物禁區 Z -2.25…2.25 內（離禁區 0.65 m）
-✔ 【第19項】PendantDock 中心 (-3.04, -2.95) 到 tp.platform.crane 0.840 m（量站點到掛座中心，≤ 1；a6 回報的 0.74 是量到掛座 Bounds 最近的邊）
+✔ 【第19項】PendantDock 中心 (-3.04, -2.95) 到 tp.platform.crane 0.885 m（量站點到掛座中心，≤ 1；a6 回報的 0.74 是量到掛座 Bounds 最近的邊）
 ✔ 【第19項】PendantDock 和工具架 Bounds Z -2.750…-1.650 間距 0.150 m（≥ 0.15 − 容差 0.005）
 ✔ 【第19項】遙控器 Bounds (-3.045, 0.970, -2.989)–(-2.953, 1.250, -2.920)：Z 在掛座 -3.000…-2.900 內
 ✔ 【第19項】遙控器和工具架間距 0.170 m（≥ 0.15 − 0.005）
@@ -390,7 +400,7 @@ VR：86 個互動點加上 XRInteractableBridge
 ✔ 工具 12 個皆有教學
 ✔ 所有步驟目標都存在於場景（113 個互動物件）
 ・STP_CSR_05_Decide：小動作都在原地（B 鍵不傳送）
-✔ 小動作的站點都在 StationSet（20 站）
+✔ 小動作的站點都在 StationSet（23 站）
 ✔ 兩門課的 VR 指令都沒有鍵盤字樣
 ✔ 組件引用檢查完成（UI 只引用 Core；功能層互不引用，CarbonStrip→Parts.Common 為同一零件層）
 

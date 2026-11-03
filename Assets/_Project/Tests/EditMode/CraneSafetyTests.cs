@@ -35,6 +35,7 @@ namespace PantographSim.Tests
             { "ERR_Crane_UnrigBeforeClamp", (new[] { "part.pan_assy.state=OnStand", "ip.pan_assy.lift_point_1.state=Free" },
                 new[] { "env.panto_stand.clamp_1.state=Locked", "env.panto_stand.clamp_2.state=Locked", "part.pan_assy.state=OnStand", "ip.pan_assy.lift_point_1.state=Free" }) },
             { "ERR_Crane_UnderMovingHook", (new[] { "part.crane.head_to_hook_m=0.3", "part.crane.empty_hook_moving" }, new[] { "part.crane.head_to_hook_m=0.8", "part.crane.empty_hook_moving" }) },
+            { "ERR_Crane_EmptyRigLowTravel", (new[] { "part.crane.empty_low_travel" }, new[] { "part.crane.hook_y=5.5" }) },
             { "ERR_Crane_FastLowerEmptyHook", (new[] { "part.crane.beam_above_surface_m=1.5", "ctrl.crane.fast", "ctrl.crane.cmd=Down", "part.crane.empty_hook_moving" },
                 new[] { "part.crane.beam_above_surface_m=3", "ctrl.crane.fast", "ctrl.crane.cmd=Down", "part.crane.empty_hook_moving" }) },
         };
@@ -111,6 +112,41 @@ namespace PantographSim.Tests
             Assert.AreEqual(Mathf.Sqrt(2f), CraneLogic.HorizontalDistance(b, new Vector3(2f, 0f, 2f)), 1e-5f);
         }
     }
+    /// <summary>v3.10（model-spec v3.17）：空吊具吊鉤沒升到 emptyTravelMinHookY 就水平移動——教學擋下不動、練習照動並寫 part.crane.empty_low_travel；升到上限後不算。</summary>
+    public class CraneEmptyTravelTests
+    {
+        [Test]
+        public void LowTravel_TutorialBlocks_PracticeFlags_HighOk()
+        {
+            using (var c = new CraneRig(false))
+            {
+                c.profile.emptyTravelMinHookY = 5f;   // 測試天車 hookYMax 6，吊鉤從 4 開始
+                c.state.Set("training.mode", "practice");
+                c.state.SetBool(SimIds.CranePower, false);
+                c.Cmd("E"); c.Run(0.5f); c.Cmd("None"); c.Run(0.1f);
+                Assert.IsFalse(c.state.GetBool(CraneMechanism.EmptyLowTravelKey), "電源關著按移動鍵：天車不動，不算");
+                c.state.SetBool(SimIds.CranePower, true);
+                c.state.Set("training.mode", "tutorial");
+                var x0 = c.Hook.x;
+                c.Cmd("E"); c.Run(1f);
+                Assert.AreEqual(x0, c.Hook.x, 1e-5f, "教學：沒升到上限不能水平移動");
+                Assert.IsFalse(c.state.GetBool(CraneMechanism.EmptyLowTravelKey), "教學擋下，不記錯");
+                Assert.AreEqual(5f, c.state.GetFloat(CraneMechanism.EmptyTravelMinKey), 1e-5f, "最低高度讀資料");
+                c.Cmd("None"); c.Run(0.5f);
+                c.state.Set("training.mode", "practice");
+                c.Cmd("E"); c.Run(1f);
+                Assert.Greater(c.Hook.x, x0 + 0.001f, "練習：照動");
+                Assert.IsTrue(c.state.GetBool(CraneMechanism.EmptyLowTravelKey), "練習：記錯");
+                c.Cmd("None"); c.Run(0.5f);
+                Assert.IsFalse(c.state.GetBool(CraneMechanism.EmptyLowTravelKey), "放開就回 false（下一次移動再記）");
+                c.Cmd("Up", true); c.Run(15f); c.Cmd("None"); c.Run(0.5f);
+                Assert.GreaterOrEqual(c.state.GetFloat(CraneMechanism.HookYKey), 5f);
+                c.Cmd("E"); c.Run(0.5f);
+                Assert.IsFalse(c.state.GetBool(CraneMechanism.EmptyLowTravelKey), "升到上限後水平移動不算");
+            }
+        }
+    }
+
     /// <summary>軟體工程裁定（13 個狀態鍵 1）：part.crane.hook.parked 由 CraneMechanism 每 tick 判（停放區在 CraneProfile），RT_01 a 讀這個鍵。</summary>
     public class CraneHookParkedTests
     {

@@ -283,10 +283,13 @@ namespace PantographSim.XR
                 Pend(r, "5越障", $"{label} 頂面 Y {y:0.000}，餘裕 {bottom - y:0.000} m（≥ {set.liftObstacleMargin}）", bottom - y >= set.liftObstacleMargin - Eps);
         }
 
+        /// <summary>台架四邊的站點 tp.stand.n／e／s／w（v3.10 的 tp.stand.rig_e／rig_w 是空吊梁查看站，面向查看位置，不算）。</summary>
+        public static bool IsStandEdge(string id) => id.StartsWith("tp.stand.") && !id.StartsWith("tp.stand.rig_");
+
         /// <summary>第6項：tp.stand.* 在維修區內、Y＝groundY ±容差、離台架邊 standStationOffset ±容差、面向台架、身體膠囊不碰放上台架的降弓整組（LoweredTightBounds）。</summary>
         static void A6StandStations(StationSet set, RoofSceneDef d, List<StationDef> st, System.Func<StationDef, Transform> tf, Bounds? onStand, SceneResult r)
         {
-            var stands = st.Where(s => s.id.StartsWith("tp.stand.")).ToList();
+            var stands = st.Where(s => IsStandEdge(s.id)).ToList();
             if (stands.Count == 0) { Miss(r, "6", "tp.stand.* 站點"); return; }
             var c = d.StandFrameCenterXZ; var half = d.standSizeXZ / 2f;
             if (onStand == null) Miss(r, "6", "LoweredTightBounds（PAN_Root 的 BoxCollider）");

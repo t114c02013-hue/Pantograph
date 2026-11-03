@@ -1,20 +1,20 @@
 stepId,title,phase,courses,orderPeriodic,orderDaily,refTeachS_periodic,refExamS_periodic,refTeachS_daily,refExamS_daily,errorIds,source
 STP_SI_00_PreWork,開工準備,SI,both,1,1,98,58,98,58,ERR_Global_StartWithoutPermit:Critical,A §9.2; B §2 + §2.6; D30 +1 小動作
 STP_SI_01_ConfirmLowered,降弓並確認,SI,both,2,2,45,30,45,30,ERR_SI01_NotInPosition:Major;ERR_SI01_LightOnly:Major,A §9.2; B §2 + §2.6
-STP_SI_02_LockOut,主斷路器與升弓開關上鎖掛牌,SI,both,3,3,55,35,50,30,ERR_SI02_TagWithoutLock:Critical;ERR_SI02_RaiseSwitchUnlocked:Critical;ERR_Global_KeyLeftUnattended:Minor,A §9.2; B §2 + §2.6
+STP_SI_02_LockOut,主斷路器與升弓開關上鎖掛牌,SI,both,3,3,58,37,53,32,ERR_SI02_TagWithoutLock:Critical;ERR_Global_KeyLeftUnattended:Minor,A §9.2; B §2 + §2.6; v3.9 上鎖、掛牌拆開 +3／+2 s
 STP_SI_03_CylinderPowerOff,斷開電動缸控制電源,SI,both,4,4,40,25,35,20,ERR_SI03_CylinderPowerOn:Critical,A §9.2; B §2 + §2.6
 STP_SI_04_VoltageTest,驗電,SI,both,5,5,50,30,45,25,ERR_SI04_NoSelfTest:Critical;ERR_Global_NoInsulatingGloves:Critical,A §9.2; B §2 + §2.6
 STP_SI_05_Grounding,掛接地棒,SI,both,6,6,62,40,57,35,ERR_SI05_NoPullTest:Major;ERR_Global_NoInsulatingGloves:Critical;ERR_Global_GroundHangOrder:Critical;ERR_Global_GroundNotRegistered:Major,A §9.2; B §2 + §2.6
-STP_SI_06_RoofEntry,上車頂前確認,SI,both,7,7,85,54,85,52,ERR_Global_HoldPointRejected:Major;ERR_Global_HoldPointSkipped:Critical;ERR_Global_HarnessUnclipped:Critical,A §9.2; B §2 + §2.6
+STP_SI_06_RoofEntry,上車頂前確認,SI,both,7,7,181,113,85,52,ERR_Global_HoldPointRejected:Major;ERR_Global_HoldPointSkipped:Critical;ERR_Global_HarnessUnclipped:Critical;ERR_Crane_UnderMovingHook:Major;ERR_Crane_FastLowerEmptyHook:Minor;ERR_Sling_CutJudgedUsable:Critical;ERR_Sling_FalseReject:Minor;ERR_Sling_NoReport:Major;ERR_Sling_CutReturnedToRack:Major;ERR_Sling_TouchWithoutEStop:Major;ERR_Crane_EmptyRigLowTravel:Major,A §9.2; B §2 + §2.6; D44 吊帶平台查看移入（RM_05 轉入 70／42 s，新增 a6、a7、a10、a11 +24／+15 s，教學／考核同比）；故障處理時間（s1 啟用 → s4 完成）不計入 1.5 倍時間判定，報表另列; v3.10 P7 例外：吊帶查看換位 1 × 2 s（組長）
 STP_RM_00_SecondGround,掛短接地線,RM,periodic,8,,50,34,,,ERR_Global_NoInsulatingGloves:Critical;ERR_Global_GroundHangOrder:Critical;ERR_Global_GroundNotRegistered:Major,A §9.2
 STP_RM_01_HoldDown,裝降弓固定帶,RM,periodic,9,,40,25,,,,A §9.2
 STP_RM_02_CtrlDisconnect,拆升弓控制線,RM,periodic,10,,25,15,,,,A §9.2
 STP_RM_03_HVDisconnect,拆高壓電纜端子,RM,periodic,11,,100,60,,,ERR_Global_HVDisconnectWithoutSecondGround:Critical;ERR_RM03_WrongSocket:Minor,A §9.2
 STP_RM_04_BaseUnbolt,拆底座螺栓，絕緣子留在車頂,RM,periodic,12,,96,61,,,ERR_RM04_WrongSocket:Minor,A §9.2; P7 例外：子站點換位 3 × 2 s
-STP_RM_05_CraneRiggingCheck,天車與吊具作業前檢查,RM,periodic,13,,90,54,,,ERR_Crane_UnderMovingHook:Major;ERR_Crane_FastLowerEmptyHook:Minor,A §9.2
-STP_RM_06_Rig,掛吊帶,RM,periodic,14,,51,34,,,ERR_Crane_RiggedOnArm:Critical,A §9.2; P7 例外：吊耳子站點換位 3 × 2 s
+STP_RM_05_CraneRiggingCheck,吊鉤移到弓上方,RM,periodic,13,,20,12,,,ERR_Crane_UnderMovingHook:Major;ERR_Crane_FastLowerEmptyHook:Minor;ERR_Crane_EmptyRigLowTravel:Major,A §9.2; v3.7 吊帶判定；故障分支另加 EX 90／60 s（含上下車頂，不計入參考時間）; D44 只留 c，其餘移到 SI_06
+STP_RM_06_Rig,掛吊帶,RM,periodic,14,,51,34,,,,A §9.2; P7 例外：吊耳子站點換位 3 × 2 s
 STP_RM_07_LeaveRoof,所有人離開車頂,RM,periodic,15,,30,20,,,ERR_Global_HarnessUnclipped:Critical,A §9.2
-STP_LF_01_PreLift,起吊前,LF,periodic,16,,70,48,,,ERR_WC03_RemoveOrder:Critical;ERR_Global_NoInsulatingGloves:Critical;ERR_Global_GroundNotRegistered:Major;ERR_Global_HoldPointRejected:Major,A §9.2
+STP_LF_01_PreLift,起吊前,LF,periodic,16,,70,48,,,ERR_WC03_RemoveOrder:Critical;ERR_Global_NoInsulatingGloves:Critical;ERR_Global_GroundNotRegistered:Major;ERR_Global_HoldPointRejected:Major;ERR_Sling_CutJudgedUsable:Critical,A §9.2
 STP_LF_02_TrialLift,試吊,LF,periodic,17,,25,18,,,ERR_Global_HoldPointSkipped:Critical;ERR_Crane_PersonOnRoofDuringLift:Critical;ERR_Crane_RiggingNotInspected:Critical;ERR_Crane_HoldDownMissing:Critical;ERR_Crane_SideLoad:Major;ERR_Crane_LiftWhileFixed:Major;ERR_Crane_PersonUnderLoad:Critical;ERR_Crane_OperatorTooClose:Major;ERR_Crane_Collision:Critical,A §9.2
 STP_LF_03_Clearance,升到越障高度,LF,periodic,18,,40,30,,,ERR_Crane_NoTrialLift:Major;ERR_Crane_PersonUnderLoad:Critical;ERR_Crane_OperatorTooClose:Major;ERR_Crane_Collision:Critical,A §9.2
 STP_LF_04_Traverse,橫移到台架上方,LF,periodic,19,,50,40,,,ERR_Crane_NoTrialLift:Major;ERR_Crane_LowClearance:Major;ERR_Crane_PersonUnderLoad:Critical;ERR_Crane_OperatorTooClose:Major;ERR_Crane_Collision:Critical,A §9.2
@@ -44,7 +44,7 @@ STP_CSR_12_PreTighten_R,螺栓預鎖（外側）,CSR,both,42,28,66,55,69,50,ERR_
 STP_CSR_13_Torque_R,扭力鎖緊（外側）,CSR,both,43,29,58,50,57,43,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Critical;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major;ERR_CSR13_WrongSocket:Minor;ERR_CSR13_WrenchRange:Minor,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）; D38 選套筒 +3 s
 STP_CSR_14_Mark_R,畫防鬆標記（外側）,CSR,both,44,30,28,25,31,25,ERR_CSR14_Order:Minor,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）
 STP_CSR_15_HeightCheck,量兩條高低差,CSR,both,45,31,60,37,50,30,ERR_CSR15_Exceeds:Major;ERR_CSR15_NotCompared:Major,A §9.2; B §2 + §2.6
-STP_IN_01_RigOnStand,台架上掛吊帶,IN,periodic,46,,82,48,,,ERR_Crane_UnderMovingHook:Major;ERR_Crane_FastLowerEmptyHook:Minor;ERR_Crane_RiggedOnArm:Critical;ERR_Global_HoldPointRejected:Major,A §9.2
+STP_IN_01_RigOnStand,台架上掛吊帶,IN,periodic,46,,132,80,,,ERR_Crane_UnderMovingHook:Major;ERR_Crane_FastLowerEmptyHook:Minor;ERR_Global_HoldPointRejected:Major;ERR_Sling_CutJudgedUsable:Critical;ERR_Sling_FalseReject:Minor;ERR_Sling_NoReport:Major;ERR_Sling_CutReturnedToRack:Major;ERR_Sling_TouchWithoutEStop:Major;ERR_Crane_EmptyRigLowTravel:Major,A §9.2; v3.7 加 a2 查看吊帶 4 條 +16／+10 s；故障分支另加 EX 50／35 s（不計入參考時間）; D44 加 a0、a1、a3 +24／+15 s；故障處理時間（s1 啟用 → s4 完成）不計入 1.5 倍時間判定，報表另列; v3.8 加 a4 升到上限 +8／+5 s; v3.10 P7 例外：吊帶查看換位 1 × 2 s（組長）
 STP_IN_02_TrialLift,試吊,IN,periodic,47,,25,18,,,ERR_Global_HoldPointSkipped:Critical;ERR_Crane_PersonOnRoofDuringLift:Critical;ERR_Crane_SideLoad:Major;ERR_Crane_PersonUnderLoad:Critical;ERR_Crane_OperatorTooClose:Major;ERR_Crane_Collision:Critical,A §9.2
 STP_IN_03_Transfer,吊運到車頂上方,IN,periodic,48,,80,55,,,ERR_Crane_NoTrialLift:Major;ERR_Crane_PersonUnderLoad:Critical;ERR_Crane_OperatorTooClose:Major;ERR_Crane_Collision:Critical;ERR_Crane_LowClearance:Major,A §9.2
 STP_IN_04_LowerToRoof,放到車頂底座,IN,periodic,49,,40,28,,,ERR_Crane_PersonUnderLoad:Critical;ERR_Crane_OperatorTooClose:Major;ERR_Crane_Collision:Critical,A §9.2
@@ -53,7 +53,7 @@ STP_IN_05_RoofEntry,上車頂,IN,periodic,51,,40,25,,,ERR_Global_HarnessUnclippe
 STP_IN_06_BasePreTighten,底座螺栓預鎖,IN,periodic,52,,100,60,,,ERR_IN06_WrongSocket:Minor;ERR_IN06_TightenBeforeAllThreaded:Major,A §9.2; b4 3a 補錯誤 ID
 STP_IN_07_BaseTorque,底座螺栓扭力,IN,periodic,53,,94,59,,,ERR_IN07_Setting:Major;ERR_IN07_Under:Critical;ERR_IN07_Over:Major;ERR_IN07_Order:Major;ERR_IN07_MarkMissing:Major;ERR_IN07_WrongSocket:Minor;ERR_IN07_WrenchRange:Minor,A §9.2; v2.4 補錯誤 ID; P7 例外：子站點換位 3 × 2 s; D38 選套筒 +3 s
 STP_IN_08_Unrig,卸吊帶,IN,periodic,54,,41,26,,,,A §9.2; P7 例外：吊耳子站點換位 3 × 2 s
-STP_IN_09_HVReconnect,接回高壓端子,IN,periodic,55,,78,48,,,ERR_IN09_Misaligned:Major;ERR_IN09_Setting:Major;ERR_IN09_Under:Critical;ERR_IN09_Over:Major;ERR_IN09_WrongSocket:Minor;ERR_IN09_WrenchRange:Minor,A §9.2; D38 選套筒 +3 s
+STP_IN_09_HVReconnect,接回高壓端子,IN,periodic,55,,78,48,,,ERR_IN09_Setting:Major;ERR_IN09_Under:Critical;ERR_IN09_Over:Major;ERR_IN09_WrongSocket:Minor;ERR_IN09_WrenchRange:Minor,A §9.2; D38 選套筒 +3 s
 STP_IN_10_CtrlReconnect,接回升弓控制線,IN,periodic,56,,25,15,,,ERR_IN10_NotConnected:Major,A §9.2
 STP_IN_11_RemoveHoldDown,拆降弓固定帶,IN,periodic,57,,25,15,,,ERR_IN11_StrapLeft:Major,A §9.2
 STP_WC_03a_RemoveGroundRoof,車頂拆 #2 短接地線,WC,periodic,58,,35,23,,,ERR_WC03_RemoveOrder:Critical;ERR_Global_NoInsulatingGloves:Critical;ERR_Global_GroundNotRegistered:Major,A §9.2; D25
@@ -63,7 +63,7 @@ STP_RT_01_CraneStow,天車歸位,WC,periodic,61,,35,25,,,ERR_Crane_UnderMovingHo
 STP_WC_03_RemoveGround,拆接地棒,WC,daily,,34,,,35,23,ERR_WC03_RemoveOrder:Critical;ERR_Global_GroundRemovedWhileOnRoof:Critical;ERR_Global_NoInsulatingGloves:Critical;ERR_Global_GroundNotRegistered:Major,B §2 + §2.6
 STP_WC_03b_RemoveGroundPlatform,平台拆 #1 接地桿,WC,periodic,62,,35,22,,,ERR_WC03_RemoveOrder:Critical;ERR_Global_GroundRemovedWhileOnRoof:Critical;ERR_Global_NoInsulatingGloves:Critical;ERR_Global_GroundNotRegistered:Major,A §9.2; D25
 STP_WC_01b_ToolCountPlatform,平台清點,WC,both,63,35,25,15,25,15,ERR_Global_GroundNotCleared:Critical,A §9.2; B §2 + §2.6; D25
-STP_RT_02_InsulationTest,絕緣電阻測試,WC,periodic,64,,96,59,,,ERR_Global_NoInsulatingGloves:Critical;ERR_RT02_IRFail:Critical;ERR_Global_NoDischargeAfterIR:Major;ERR_RT02_WrongJudgement:Critical;ERR_RT02_ReadingMismatch:Major;ERR_RT02_LeadRemovedBeforeDischarge:Major;ERR_RT02_NoReport:Major;ERR_Global_HarnessUnclipped:Critical;ERR_Global_GroundRemovedWhileOnRoof:Critical;ERR_Global_GroundNotRegistered:Major;ERR_SI04_NoSelfTest:Critical;ERR_Global_GroundWithoutVoltageTest:Critical;ERR_Global_GroundHangOrder:Critical;ERR_SI05_NoPullTest:Major;ERR_Global_HoldPointRejected:Major;ERR_Global_HoldPointSkipped:Critical;ERR_WC03_RemoveOrder:Critical;ERR_WC01_Leftover:Critical,A §9.2; D43 加 c2、c3、e2 共 +26／+17 s（故障分支不計入參考時間）; v3.5 故障分支開啟時另加 EX 340／215 s（不計入參考時間）
+STP_RT_02_InsulationTest,絕緣電阻測試,WC,periodic,64,,96,59,,,ERR_Global_NoInsulatingGloves:Critical;ERR_RT02_IRFail:Critical;ERR_Global_NoDischargeAfterIR:Major;ERR_RT02_WrongJudgement:Critical;ERR_RT02_ReadingMismatch:Major;ERR_RT02_LeadRemovedBeforeDischarge:Major;ERR_RT02_NoReport:Major;ERR_Global_HarnessUnclipped:Critical;ERR_Global_GroundRemovedWhileOnRoof:Critical;ERR_Global_GroundNotRegistered:Major;ERR_SI04_NoSelfTest:Critical;ERR_Global_GroundWithoutVoltageTest:Critical;ERR_Global_GroundHangOrder:Critical;ERR_SI05_NoPullTest:Major;ERR_Global_HoldPointRejected:Major;ERR_Global_HoldPointSkipped:Critical;ERR_WC03_RemoveOrder:Critical;ERR_WC01_Leftover:Critical,A §9.2; D43 加 c2、c3、e2 共 +26／+17 s（故障分支不計入參考時間）; v3.5 故障分支開啟時另加 EX 340／215 s（不計入參考時間）; 故障處理時間（r1 啟用 → r6d 完成）不計入 1.5 倍時間判定，報表另列
 STP_WC_04_Unlock,解鎖並記錄,WC,both,65,36,70,42,75,45,ERR_Global_HoldPointRejected:Major;ERR_Global_HoldPointSkipped:Critical;ERR_Global_GroundNotCleared:Critical,A §9.2; B §2 + §2.6
-STP_WC_05_RaiseTest,升弓試驗,WC,periodic,66,,60,40,,,ERR_Global_RaiseWithHoldDown:Critical;ERR_Global_RaiseUnderHook:Critical,A §9.2
+STP_WC_05_RaiseTest,升弓試驗,WC,periodic,66,,60,40,,,ERR_Global_RaiseUnderHook:Critical;ERR_IN11_StrapLeft:Major,A §9.2
 STP_WC_06_Handover,完工交接,WC,both,67,37,43,27,43,27,,A §9.2; B §2 + §2.6; D30 +1 小動作

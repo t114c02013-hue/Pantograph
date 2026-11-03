@@ -37,6 +37,7 @@ namespace PantographSim.Parts.Mechanism
         bool? wasAirborne;
         Vector3? liftOffHook;   // 3c：吊物離座時吊鉤的位置（算離座後水平移動了多少）
         string lastCmd = CraneLogic.None;
+        string lastLowTravelCmd;
 
         public CraneProfile Profile => profile;
         /// <summary>上一次碰撞停止撞到的 collider 名稱（寫進 ErrorDetected.text，回放和報表看得到撞到什麼）。</summary>
@@ -94,6 +95,8 @@ namespace PantographSim.Parts.Mechanism
 
         /// <summary>RT_01 a：吊鉤在停放區（CraneProfile.parkZoneRadius／parkZoneBelowY，以 Crane_ParkPose 為中心）。和 D23 的 course.crane_parked（課程設定）不同。</summary>
         public const string HookParkedKey = "part.crane.hook.parked";
+        /// <summary>v3.10：吊鉤 pivot 高度、空吊具水平移動的最低高度（資料 CraneProfile.emptyTravelMinHookY）、沒升到就水平移動（ERR_Crane_EmptyRigLowTravel）。</summary>
+        public const string HookYKey = "part.crane.hook_y", EmptyTravelMinKey = "crane.empty_travel_min_y", EmptyLowTravelKey = "part.crane.empty_low_travel";
 
         public bool InParkZone(Vector3 hookPos) => parkPose != null && profile != null
             && new Vector2(hookPos.x - parkPose.position.x, hookPos.z - parkPose.position.z).magnitude <= profile.parkZoneRadius
@@ -133,6 +136,16 @@ namespace PantographSim.Parts.Mechanism
             var (axis, dir) = CraneLogic.Parse(cmd);
             bool allowed = power && !estop && !needPowerCycle && !red && !collided;
             if (!allowed) { axis = CraneAxis.None; dir = 0; }
+            if (!s.Has(EmptyTravelMinKey)) s.SetFloat(EmptyTravelMinKey, profile.emptyTravelMinHookY);
+            // v3.10：空吊具（沒掛吊物）吊鉤沒升到 emptyTravelMinHookY 就水平移動——教學擋下並提示，練習／考核照動並記錯（每按一次移動鍵算一次；電源關、急停時本來就不會動，不算）
+            bool lowTravel = load == null && (axis == CraneAxis.Traverse || axis == CraneAxis.Travel) && hookBlock.position.y < profile.emptyTravelMinHookY - 1e-4f;
+            if (lowTravel && s.Get("training.mode") == "tutorial")
+            {
+                if (cmd != lastLowTravelCmd) s.Set("ui.toast", "空吊梁先升到上限再水平移動，吊帶才不會勾到防墜門架");
+                axis = CraneAxis.None; dir = 0; lowTravel = false;
+            }
+            lastLowTravelCmd = cmd;
+            if (s.GetBool(EmptyLowTravelKey) != lowTravel) s.SetBool(EmptyLowTravelKey, lowTravel);
             // b2：吊運條件不足（吊帶繃緊、集電弓不動）或定位銷頂住時，捲揚不動（PanAssyRigging 寫黑板，天車不引用它）
             bool hoistHeld = axis == CraneAxis.Hoist && (dir > 0 ? s.GetBool("part.crane.hoist_up_blocked") : s.GetBool("part.crane.hoist_down_blocked"));
             if (hoistHeld) { axis = CraneAxis.None; dir = 0; }
@@ -178,6 +191,8 @@ namespace PantographSim.Parts.Mechanism
                 }
                 if (lb.HasValue) s.SetFloat(SimIds.CraneLoadBottomY, Mathf.Round(LoadWorldBounds().Value.min.y * 1000f) / 1000f);
                 WriteSafetyMeasures(s, airborne, moving, lb, head);
+                float hy3 = Mathf.Round(hp.y * 1000f) / 1000f;
+                if (!s.Has(HookYKey) || Mathf.Abs(s.GetFloat(HookYKey) - hy3) > 0.005f || released) s.SetFloat(HookYKey, hy3);
                 bool parked = InParkZone(hp);
                 if (s.GetBool(HookParkedKey) != parked || !s.Has(HookParkedKey)) s.SetBool(HookParkedKey, parked);   // 每 tick 判，值變了才寫
                 stillSeconds = moving ? 0f : stillSeconds + dt;   // R1.5b b4：試吊、放下時停住幾秒（LF_02 a、LF_05 a、IN_02 a、IN_04 a）

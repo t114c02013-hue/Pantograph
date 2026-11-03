@@ -190,6 +190,7 @@ namespace PantographSim.Editor
             var metas = Steps(stepRows, errors);
             var defs = LoadErrorRules();
             CheckErrorRefs(subRows, stepRows, defs, errors);
+            CheckErrorStatus(subRows, stepRows, defs, errors);   // v3.10
             UnityEngine.Object.DestroyImmediate(LoadKeyDefSource(errors));   // 鍵的種類只能是 Event／LiveState
             var t = LoadTables(); var r1 = LoadR1();
             resolved = Resolve(ex, r1, t, errors);

@@ -126,9 +126,10 @@ namespace PantographSim.Tests
         {
             Load();
             var table = AssetDatabase.LoadAssetAtPath<ToolSlotTable>("Assets/_Project/Modules/Worksite/Data/ToolSlotTable.asset");
+            var pending = new HashSet<string>(StepsCsvImporter.LoadTables().pendingTargets.Select(p => p.id));   // 還沒做的手持物（例 v3.10 停用牌）列在 pendingTargets，有 owner
             foreach (var e in expanded)
                 foreach (var t in e.toolId.Split(';').Select(x => x.Trim()).Where(x => x.Length > 0))
-                    Assert.IsNotNull(table.FindTool(t), $"{e}：工具 {t} 不存在");
+                    Assert.IsTrue(table.FindTool(t) != null || pending.Contains(t), $"{e}：工具 {t} 不存在");
         }
 
         // ---------- 第 2 部分：完成條件對應、目標、產生的資產 ----------
@@ -275,7 +276,7 @@ namespace PantographSim.Tests
             {
                 { "b4c:holdpoint", "HoldPointDef 停留點與 NPC" }, { "b4c:ppe", "個人防護具與手套模式" }, { "b4c:ground_register", "接地登記欄" },
                 { "b4c:lockout", "一人一鎖" }, { "b4c:si00", "SI_00 限制" }, { "b4c:strip_carry", "日常滑板上下車頂" },
-                { "b4c:spare_target", "選定備品／手上新滑板的目標 ID" },
+                { "b4c:spare_target", "選定備品／手上新滑板的目標 ID" }, { "v310", "steps-v6 v3.10（吊帶割傷故障、D44 平台查看）" },
                 { "b4d", "車頂邊兩級判定與移動限制" }, { "b4:p5", "b4 第 5 部分 兩門課跑到結算（v3.10 做完時結案）" },   // b4:p3、b4:p4 已結案（審查 F2），不再收 stub
             };
             var doc = System.IO.File.ReadAllLines("Docs/R1.5b/b4c-stubs.md").Where(l => l.StartsWith("| STP_")).Select(l => l.Split('|').Select(x => x.Trim()).ToArray()).ToList();

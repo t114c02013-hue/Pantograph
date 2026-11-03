@@ -101,7 +101,7 @@ namespace PantographSim.Tests
         public void PendingTriggers_ListedInStubsDoc()
         {
             var defs = StepsCsvImporter.LoadErrorRules();
-            var owners = new HashSet<string> { "b4c:holdpoint", "b4c:ppe", "b4c:ground_register", "b4c:lockout", "b4c:si00", "b4c:strip_carry", "b4c:torque_socket", "b4d", "b4:p3b", "b4:p3c", "b4:p3d", "b4:p4", "b4:p5", "R2", "n/a" };
+            var owners = new HashSet<string> { "b4c:holdpoint", "b4c:ppe", "b4c:ground_register", "b4c:lockout", "b4c:si00", "b4c:strip_carry", "b4c:torque_socket", "b4d", "b4:p5", "v310", "R2", "n/a" };   // b4:p3*、b4:p4 已結案（審查 F2）
             foreach (var d in defs.Values.Where(d => !string.IsNullOrEmpty(d.owner))) Assert.IsTrue(owners.Contains(d.owner), $"{d.errorId}：{d.owner} 不是項目");
             var doc = System.IO.File.ReadAllLines("Docs/R1.5b/b4c-stubs.md").Where(l => l.StartsWith("| ERR_")).Select(l => l.Split('|').Select(x => x.Trim()).ToArray()).Select(c => c[1] + "|" + c[2]).ToList();
             var expected = defs.Values.Where(d => !string.IsNullOrEmpty(d.owner)).Select(d => d.errorId + "|" + d.owner).ToList();

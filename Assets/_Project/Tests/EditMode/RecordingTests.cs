@@ -143,6 +143,19 @@ namespace PantographSim.Tests
         static readonly string[] ExpectedErrors = { "ERR_Global_NotLowered", "ERR_Ground_Order", "ERR_CSR03_OnlyMid", "ERR_CSR13_Under", "ERR_WC01_Leftover" };
 
         // ---------- 1. 寫入後讀回一致；截斷在一行中間仍能重建並標成中斷 ----------
+        /// <summary>審查建議：舊錄影沒有 rack.slots（掛位清單），回放套快照時保留觀看者自己的（ToolBelt 從 ToolSlotTable 寫），掛位標籤和清點不會空白。</summary>
+        [Test]
+        public void OldRecording_WithoutRackSlots_KeepsViewerSlotList()
+        {
+            Assert.IsTrue(ReplayTimeline.ViewerOwnedKey(SimIds.RackSlots));
+            var s = new SimState(new EventBus());
+            s.Set(SimIds.RackSlots, "1,2,3,10,13");
+            var merged = new System.Collections.Generic.Dictionary<string, string> { { "rack.slot_1", "on_rack" } };   // 舊錄影的快照：沒有 rack.slots
+            foreach (var key in s.Keys.ToList()) if (ReplayTimeline.ViewerOwnedKey(key)) merged[key] = s.Get(key);
+            s.Restore(merged);
+            CollectionAssert.AreEqual(new[] { 1, 2, 3, 10, 13 }, SimIds.RackSlotNumbers(s));
+        }
+
         [Test]
         public void WriteThenRead_RoundTrip_AndTruncatedLine_RebuildsAsInterrupted()
         {

@@ -101,8 +101,10 @@ namespace PantographSim.Editor
 
         static string Sub(string s, string side, int n) => (s ?? "").Replace("{side}", side ?? "").Replace("{n}", n > 0 ? n.ToString() : "{n}");
 
-        /// <summary>站點欄：單一站點、依 n 的對照表（n1:站點;n2:…）、依側別的對照表（L:站點;R:…）。回傳這個小動作的站點，或錯誤。</summary>
-        public static string ResolveStand(string field, Template t, string side, int n, out string error)
+        /// <summary>站點欄：單一站點、依 n 的對照表（n1:站點;n2:…）、依側別的對照表（L:站點;R:…）、依故障序號的對照表（idx1:站點;idx2:…，v3.10）。回傳這個小動作的站點，或錯誤。</summary>
+        public static string ResolveStand(string field, Template t, string side, int n, out string error) => ResolveStand(field, t, side, n, 0, out error);
+
+        public static string ResolveStand(string field, Template t, string side, int n, int idx, out string error)
         {
             error = null;
             var f = (field ?? "").Trim();
@@ -115,6 +117,11 @@ namespace PantographSim.Editor
                 if (missing.Count > 0) { error = "站點對照表沒有涵蓋 n＝" + string.Join(",", missing); return ""; }
                 return map["n" + n];
             }
+            if (map.Keys.All(k => k.StartsWith("idx")))
+            {
+                if (idx == 0 || !map.TryGetValue("idx" + idx, out var v)) { error = "依故障序號的站點對照表要配 when=故障鍵，且涵蓋每個序號"; return ""; }
+                return v;
+            }
             if (map.Keys.All(k => k == "L" || k == "R"))
             {
                 if (t.sides.Count == 0) { error = "沒有 side=L,R 卻寫了依側別的站點對照表"; return ""; }
@@ -124,6 +131,24 @@ namespace PantographSim.Editor
             error = "站點對照表的鍵要全是 n1…或全是 L／R：" + f;
             return "";
         }
+
+        /// <summary>
+        /// v3.10 故障分支：站點欄是 idx1…（或目標寫 {故障鍵.index}）的列，依故障序號展開成每個序號一列（subId 加 i序號，when 加「故障鍵.index=序號」），
+        /// 執行時只有開場抽到的那個序號會做、其餘跳過。故障鍵＝when 的第一項。回傳序號清單（不是故障分支＝{ 0 }）。
+        /// </summary>
+        public static List<int> FaultIndexes(string standField, string target, string when, out string indexKey)
+        {
+            indexKey = (when ?? "").Split('&').Select(x => x.Trim()).FirstOrDefault(x => x.Length > 0) + ".index";
+            var keys = (standField ?? "").Split(';').Select(x => x.Trim()).Where(x => x.StartsWith("idx") && x.Contains(":")).Select(x => int.Parse(x.Substring(3, x.IndexOf(':') - 3))).ToList();
+            if (keys.Count > 0) return keys;
+            return (target ?? "").Contains("{" + indexKey + "}") ? Enumerable.Range(1, FaultIndexCount).ToList() : new List<int> { 0 };
+        }
+
+        /// <summary>沒寫站點對照表時故障序號的範圍（吊帶 1–4）。</summary>
+        public const int FaultIndexCount = 4;
+
+        /// <summary>CSV 的 when 用「&」連接（v3.10），條件判斷用「&&」。</summary>
+        public static string NormalizeWhen(string w) => string.Join("&&", (w ?? "").Split('&').Select(x => x.Trim()).Where(x => x.Length > 0));
 
         public static bool InCourse(string courses, string course) => courses == "both" || courses == course;
 
@@ -165,18 +190,22 @@ namespace PantographSim.Editor
                                     bool daily = course == "daily";
                                     string Pick(string col) => daily && src[col + "_daily"].Length > 0 ? src[col + "_daily"] : src[col];
                                     var standField = daily ? src["standPointId_daily"] : src["standPointId_periodic"];
-                                    var stand = Sub(ResolveStand(standField, tmpl[src], side, n, out var se), side, n);
-                                    if (se != null) errors.Add($"{src}（{course}）：{se}");
-                                    var e = new Expanded
+                                    foreach (int idx in FaultIndexes(standField, Pick("targetId"), tmpl[src].when, out var indexKey))
                                     {
-                                        row = src, course = course, stepId = stepId, side = side, n = n, order = ++order, fullOrder = order + skipped,
-                                        subId = src["subId"] + (n > 0 ? n.ToString() : ""),
-                                        text = Sub(Pick("instruction"), side, n), textDesktop = Sub(src["instructionDesktop"], side, n),
-                                        targetId = Sub(Pick("targetId"), side, n), toolId = Sub(src["toolId"], side, n), condition = Sub(Pick("condition"), side, n),
-                                        standPointId = stand, errorIds = src["errorIds"], when = tmpl[src].when,
-                                    };
-                                    if (string.IsNullOrEmpty(e.textDesktop)) e.textDesktop = e.text;
-                                    list.Add(e);
+                                        string Idx(string x) => idx > 0 ? x.Replace("{" + indexKey + "}", idx.ToString()) : x;
+                                        var stand = Sub(ResolveStand(standField, tmpl[src], side, n, idx, out var se), side, n);
+                                        if (se != null) errors.Add($"{src}（{course}）：{se}");
+                                        var e = new Expanded
+                                        {
+                                            row = src, course = course, stepId = stepId, side = side, n = n, order = ++order, fullOrder = order + skipped,
+                                            subId = src["subId"] + (n > 0 ? n.ToString() : "") + (idx > 0 ? "i" + idx : ""),
+                                            text = Idx(Sub(Pick("instruction"), side, n)), textDesktop = Idx(Sub(src["instructionDesktop"], side, n)),
+                                            targetId = Idx(Sub(Pick("targetId"), side, n)), toolId = Sub(src["toolId"], side, n), condition = Idx(Sub(Pick("condition"), side, n)),
+                                            standPointId = stand, errorIds = src["errorIds"], when = NormalizeWhen(tmpl[src].when) + (idx > 0 ? "&&" + indexKey + "=" + idx : ""),
+                                        };
+                                        if (string.IsNullOrEmpty(e.textDesktop)) e.textDesktop = e.text;
+                                        list.Add(e);
+                                    }
                                 }
                         }
                     }

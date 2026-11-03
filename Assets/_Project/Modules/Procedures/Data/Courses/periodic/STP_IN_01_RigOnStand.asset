@@ -19,6 +19,26 @@ MonoBehaviour:
   targetHint: 
   targetIds:
   - env.crane_pendant
+  - env.sling_1
+  - env.sling_4
+  - env.sling_2
+  - env.sling_3
+  - ip.sling_1.top_eye
+  - ip.sling_1.tag
+  - env.sling_reject_bin
+  - ip.sling_2.top_eye
+  - ip.sling_2.tag
+  - ip.sling_3.top_eye
+  - ip.sling_3.tag
+  - ip.sling_4.top_eye
+  - ip.sling_4.tag
+  - npc.work_leader
+  - env.rigging_rack
+  - env.sling_spare
+  - ip.lifting_beam.eye_1
+  - ip.lifting_beam.eye_2
+  - ip.lifting_beam.eye_3
+  - ip.lifting_beam.eye_4
   - ip.pan_assy.lift_point_1
   - ip.pan_assy.lift_point_2
   - ip.pan_assy.lift_point_3
@@ -34,6 +54,27 @@ MonoBehaviour:
     text: 
     why: 
     checklist:
+    - "\u7528\u5FAE\u52D5\u628A\u7A7A\u540A\u6881\u964D\u5230\u53F0\u67B6\u65C1\u7684\u67E5\u770B\u4F4D\u7F6E|part.crane.inspect_pose=ground&&part.crane.under_hook_clear"
+    - "\u6309\u4E0B\u9059\u63A7\u5668\u7684\u7DCA\u6025\u505C\u6B62|ctrl.crane.estop"
+    - "\u67E5\u770B\u540A\u5E36 1\uFF0C\u5224\u53EF\u7528\u6216\u4E0D\u53EF\u7528|env.sling_1.inspected&&env.sling_1.verdict"
+    - "\u67E5\u770B\u540A\u5E36 4\uFF0C\u5224\u53EF\u7528\u6216\u4E0D\u53EF\u7528|env.sling_4.inspected&&env.sling_4.verdict"
+    - "\u67E5\u770B\u540A\u5E36 2\uFF0C\u5224\u53EF\u7528\u6216\u4E0D\u53EF\u7528|env.sling_2.inspected&&env.sling_2.verdict"
+    - "\u67E5\u770B\u540A\u5E36 3\uFF0C\u5224\u53EF\u7528\u6216\u4E0D\u53EF\u7528|env.sling_3.inspected&&env.sling_3.verdict"
+    - "\u5F9E\u540A\u6881\u53D6\u4E0B\u5272\u50B7\u540A\u5E36\uFF0C\u639B\u4E0A\u505C\u7528\u724C\uFF0C\u653E\u9032\u505C\u7528\u7BB1|env.sling_rejected.tagged&&env.sling_rejected.state=in_bin"
+    - "\u5F9E\u540A\u6881\u53D6\u4E0B\u5272\u50B7\u540A\u5E36\uFF0C\u639B\u4E0A\u505C\u7528\u724C\uFF0C\u653E\u9032\u505C\u7528\u7BB1|env.sling_rejected.tagged&&env.sling_rejected.state=in_bin"
+    - "\u5F9E\u540A\u6881\u53D6\u4E0B\u5272\u50B7\u540A\u5E36\uFF0C\u639B\u4E0A\u505C\u7528\u724C\uFF0C\u653E\u9032\u505C\u7528\u7BB1|env.sling_rejected.tagged&&env.sling_rejected.state=in_bin"
+    - "\u5F9E\u540A\u6881\u53D6\u4E0B\u5272\u50B7\u540A\u5E36\uFF0C\u639B\u4E0A\u505C\u7528\u724C\uFF0C\u653E\u9032\u505C\u7528\u7BB1|env.sling_rejected.tagged&&env.sling_rejected.state=in_bin"
+    - "\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\uFF1A\u540A\u5E36\u5272\u50B7\u505C\u7528|rigging.cut_reported"
+    - "\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\uFF1A\u540A\u5E36\u5272\u50B7\u505C\u7528|rigging.cut_reported"
+    - "\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\uFF1A\u540A\u5E36\u5272\u50B7\u505C\u7528|rigging.cut_reported"
+    - "\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\uFF1A\u540A\u5E36\u5272\u50B7\u505C\u7528|rigging.cut_reported"
+    - "\u5230\u540A\u5177\u67B6\u62FF\u5099\u7528\u540A\u5E36\uFF0C\u67E5\u770B\u6A19\u7C64\u548C\u7834\u640D|env.sling_spare.inspected&&env.sling_spare.verdict=ok"
+    - "\u628A\u5099\u7528\u540A\u5E36\u639B\u5230\u540A\u6881\u539F\u672C\u90A3\u4E00\u865F\u7684\u4F4D\u7F6E|env.sling_1.replaced"
+    - "\u628A\u5099\u7528\u540A\u5E36\u639B\u5230\u540A\u6881\u539F\u672C\u90A3\u4E00\u865F\u7684\u4F4D\u7F6E|env.sling_2.replaced"
+    - "\u628A\u5099\u7528\u540A\u5E36\u639B\u5230\u540A\u6881\u539F\u672C\u90A3\u4E00\u865F\u7684\u4F4D\u7F6E|env.sling_3.replaced"
+    - "\u628A\u5099\u7528\u540A\u5E36\u639B\u5230\u540A\u6881\u539F\u672C\u90A3\u4E00\u865F\u7684\u4F4D\u7F6E|env.sling_4.replaced"
+    - "\u89E3\u9664\u7DCA\u6025\u505C\u6B62|ctrl.crane.estop=false"
+    - "\u628A\u540A\u6881\u5347\u5230\u4E0A\u9650|part.crane.hook_y>=crane.empty_travel_min_y"
     - "\u6309\u4F4F\u6309\u9375\uFF0C\u628A\u540A\u9264\u79FB\u5230\u53F0\u67B6\u4E0A\u65B9\u4E26\u964D\u4E0B|part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=crane.rig_height_lower_m&&part.crane.beam_above_pan_m<=crane.rig_height_upper_m"
     - "\u628A\u540A\u5E36 1 \u639B\u4E0A\u540A\u8033 1|ip.pan_assy.lift_point_1.state=Rigged"
     - "\u628A\u540A\u5E36 2 \u639B\u4E0A\u540A\u8033 2|ip.pan_assy.lift_point_2.state=Rigged"
@@ -46,6 +87,199 @@ MonoBehaviour:
     showBoltNumbers: 0
     showOutwardArrow: 0
   subActions:
+  - text: "\u7528\u5FAE\u52D5\u628A\u7A7A\u540A\u6881\u964D\u5230\u53F0\u67B6\u65C1\u7684\u67E5\u770B\u4F4D\u7F6E"
+    why: 
+    targetId: env.crane_pendant
+    toolId: 
+    condition: part.crane.inspect_pose=ground&&part.crane.under_hook_clear
+    standPointId: tp.stand.rig_w
+    subId: a0
+    textDesktop: 
+    when: 
+  - text: "\u6309\u4E0B\u9059\u63A7\u5668\u7684\u7DCA\u6025\u505C\u6B62"
+    why: 
+    targetId: "env.crane_pendant\uFF08Btn_EStop\uFF09"
+    toolId: 
+    condition: ctrl.crane.estop
+    standPointId: tp.stand.rig_w
+    subId: a1
+    textDesktop: 
+    when: 
+  - text: "\u67E5\u770B\u540A\u5E36 1\uFF0C\u5224\u53EF\u7528\u6216\u4E0D\u53EF\u7528"
+    why: 
+    targetId: env.sling_1
+    toolId: 
+    condition: env.sling_1.inspected&&env.sling_1.verdict
+    standPointId: tp.stand.rig_w
+    subId: a21
+    textDesktop: 
+    when: 
+  - text: "\u67E5\u770B\u540A\u5E36 4\uFF0C\u5224\u53EF\u7528\u6216\u4E0D\u53EF\u7528"
+    why: 
+    targetId: env.sling_4
+    toolId: 
+    condition: env.sling_4.inspected&&env.sling_4.verdict
+    standPointId: tp.stand.rig_w
+    subId: a24
+    textDesktop: 
+    when: 
+  - text: "\u67E5\u770B\u540A\u5E36 2\uFF0C\u5224\u53EF\u7528\u6216\u4E0D\u53EF\u7528"
+    why: 
+    targetId: env.sling_2
+    toolId: 
+    condition: env.sling_2.inspected&&env.sling_2.verdict
+    standPointId: tp.stand.rig_e
+    subId: a22
+    textDesktop: 
+    when: 
+  - text: "\u67E5\u770B\u540A\u5E36 3\uFF0C\u5224\u53EF\u7528\u6216\u4E0D\u53EF\u7528"
+    why: 
+    targetId: env.sling_3
+    toolId: 
+    condition: env.sling_3.inspected&&env.sling_3.verdict
+    standPointId: tp.stand.rig_e
+    subId: a23
+    textDesktop: 
+    when: 
+  - text: "\u5F9E\u540A\u6881\u53D6\u4E0B\u5272\u50B7\u540A\u5E36\uFF0C\u639B\u4E0A\u505C\u7528\u724C\uFF0C\u653E\u9032\u505C\u7528\u7BB1"
+    why: 
+    targetId: "ip.sling_1.top_eye;ip.sling_1.tag;env.sling_reject_bin\uFF08\u7BB1\u53E3
+      trigger\uFF09"
+    toolId: env.tag_out_of_service
+    condition: env.sling_rejected.tagged&&env.sling_rejected.state=in_bin
+    standPointId: tp.stand.rig_w
+    subId: s1i1
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=IN&&fault.sling_cut.index=1
+  - text: "\u5F9E\u540A\u6881\u53D6\u4E0B\u5272\u50B7\u540A\u5E36\uFF0C\u639B\u4E0A\u505C\u7528\u724C\uFF0C\u653E\u9032\u505C\u7528\u7BB1"
+    why: 
+    targetId: "ip.sling_2.top_eye;ip.sling_2.tag;env.sling_reject_bin\uFF08\u7BB1\u53E3
+      trigger\uFF09"
+    toolId: env.tag_out_of_service
+    condition: env.sling_rejected.tagged&&env.sling_rejected.state=in_bin
+    standPointId: tp.stand.rig_e
+    subId: s1i2
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=IN&&fault.sling_cut.index=2
+  - text: "\u5F9E\u540A\u6881\u53D6\u4E0B\u5272\u50B7\u540A\u5E36\uFF0C\u639B\u4E0A\u505C\u7528\u724C\uFF0C\u653E\u9032\u505C\u7528\u7BB1"
+    why: 
+    targetId: "ip.sling_3.top_eye;ip.sling_3.tag;env.sling_reject_bin\uFF08\u7BB1\u53E3
+      trigger\uFF09"
+    toolId: env.tag_out_of_service
+    condition: env.sling_rejected.tagged&&env.sling_rejected.state=in_bin
+    standPointId: tp.stand.rig_e
+    subId: s1i3
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=IN&&fault.sling_cut.index=3
+  - text: "\u5F9E\u540A\u6881\u53D6\u4E0B\u5272\u50B7\u540A\u5E36\uFF0C\u639B\u4E0A\u505C\u7528\u724C\uFF0C\u653E\u9032\u505C\u7528\u7BB1"
+    why: 
+    targetId: "ip.sling_4.top_eye;ip.sling_4.tag;env.sling_reject_bin\uFF08\u7BB1\u53E3
+      trigger\uFF09"
+    toolId: env.tag_out_of_service
+    condition: env.sling_rejected.tagged&&env.sling_rejected.state=in_bin
+    standPointId: tp.stand.rig_w
+    subId: s1i4
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=IN&&fault.sling_cut.index=4
+  - text: "\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\uFF1A\u540A\u5E36\u5272\u50B7\u505C\u7528"
+    why: 
+    targetId: npc.work_leader
+    toolId: 
+    condition: rigging.cut_reported
+    standPointId: tp.stand.rig_w
+    subId: s2i1
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=IN&&fault.sling_cut.index=1
+  - text: "\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\uFF1A\u540A\u5E36\u5272\u50B7\u505C\u7528"
+    why: 
+    targetId: npc.work_leader
+    toolId: 
+    condition: rigging.cut_reported
+    standPointId: tp.stand.rig_e
+    subId: s2i2
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=IN&&fault.sling_cut.index=2
+  - text: "\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\uFF1A\u540A\u5E36\u5272\u50B7\u505C\u7528"
+    why: 
+    targetId: npc.work_leader
+    toolId: 
+    condition: rigging.cut_reported
+    standPointId: tp.stand.rig_e
+    subId: s2i3
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=IN&&fault.sling_cut.index=3
+  - text: "\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\uFF1A\u540A\u5E36\u5272\u50B7\u505C\u7528"
+    why: 
+    targetId: npc.work_leader
+    toolId: 
+    condition: rigging.cut_reported
+    standPointId: tp.stand.rig_w
+    subId: s2i4
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=IN&&fault.sling_cut.index=4
+  - text: "\u5230\u540A\u5177\u67B6\u62FF\u5099\u7528\u540A\u5E36\uFF0C\u67E5\u770B\u6A19\u7C64\u548C\u7834\u640D"
+    why: 
+    targetId: env.rigging_rack;env.sling_spare
+    toolId: 
+    condition: env.sling_spare.inspected&&env.sling_spare.verdict=ok
+    standPointId: tp.platform.crane
+    subId: s3
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=IN
+  - text: "\u628A\u5099\u7528\u540A\u5E36\u639B\u5230\u540A\u6881\u539F\u672C\u90A3\u4E00\u865F\u7684\u4F4D\u7F6E"
+    why: 
+    targetId: ip.lifting_beam.eye_1
+    toolId: 
+    condition: env.sling_1.replaced
+    standPointId: tp.stand.rig_w
+    subId: s4i1
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=IN&&fault.sling_cut.index=1
+  - text: "\u628A\u5099\u7528\u540A\u5E36\u639B\u5230\u540A\u6881\u539F\u672C\u90A3\u4E00\u865F\u7684\u4F4D\u7F6E"
+    why: 
+    targetId: ip.lifting_beam.eye_2
+    toolId: 
+    condition: env.sling_2.replaced
+    standPointId: tp.stand.rig_e
+    subId: s4i2
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=IN&&fault.sling_cut.index=2
+  - text: "\u628A\u5099\u7528\u540A\u5E36\u639B\u5230\u540A\u6881\u539F\u672C\u90A3\u4E00\u865F\u7684\u4F4D\u7F6E"
+    why: 
+    targetId: ip.lifting_beam.eye_3
+    toolId: 
+    condition: env.sling_3.replaced
+    standPointId: tp.stand.rig_e
+    subId: s4i3
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=IN&&fault.sling_cut.index=3
+  - text: "\u628A\u5099\u7528\u540A\u5E36\u639B\u5230\u540A\u6881\u539F\u672C\u90A3\u4E00\u865F\u7684\u4F4D\u7F6E"
+    why: 
+    targetId: ip.lifting_beam.eye_4
+    toolId: 
+    condition: env.sling_4.replaced
+    standPointId: tp.stand.rig_w
+    subId: s4i4
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=IN&&fault.sling_cut.index=4
+  - text: "\u89E3\u9664\u7DCA\u6025\u505C\u6B62"
+    why: 
+    targetId: "env.crane_pendant\uFF08Btn_EStop\uFF09"
+    toolId: 
+    condition: ctrl.crane.estop=false
+    standPointId: tp.stand.rig_e
+    subId: a3
+    textDesktop: 
+    when: 
+  - text: "\u628A\u540A\u6881\u5347\u5230\u4E0A\u9650"
+    why: 
+    targetId: env.crane_pendant
+    toolId: 
+    condition: part.crane.hook_y>=crane.empty_travel_min_y
+    standPointId: tp.stand.rig_e
+    subId: a4
+    textDesktop: 
+    when: 
   - text: "\u6309\u4F4F\u6309\u9375\uFF0C\u628A\u540A\u9264\u79FB\u5230\u53F0\u67B6\u4E0A\u65B9\u4E26\u964D\u4E0B"
     why: 
     targetId: env.crane_pendant
@@ -53,6 +287,8 @@ MonoBehaviour:
     condition: part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=crane.rig_height_lower_m&&part.crane.beam_above_pan_m<=crane.rig_height_upper_m
     standPointId: tp.stand.w
     subId: a
+    textDesktop: 
+    when: 
   - text: "\u628A\u540A\u5E36 1 \u639B\u4E0A\u540A\u8033 1"
     why: 
     targetId: ip.pan_assy.lift_point_1
@@ -60,6 +296,8 @@ MonoBehaviour:
     condition: ip.pan_assy.lift_point_1.state=Rigged
     standPointId: tp.stand.w
     subId: b1
+    textDesktop: 
+    when: 
   - text: "\u628A\u540A\u5E36 2 \u639B\u4E0A\u540A\u8033 2"
     why: 
     targetId: ip.pan_assy.lift_point_2
@@ -67,6 +305,8 @@ MonoBehaviour:
     condition: ip.pan_assy.lift_point_2.state=Rigged
     standPointId: tp.stand.w
     subId: b2
+    textDesktop: 
+    when: 
   - text: "\u628A\u540A\u5E36 3 \u639B\u4E0A\u540A\u8033 3"
     why: 
     targetId: ip.pan_assy.lift_point_3
@@ -74,6 +314,8 @@ MonoBehaviour:
     condition: ip.pan_assy.lift_point_3.state=Rigged
     standPointId: tp.stand.w
     subId: b3
+    textDesktop: 
+    when: 
   - text: "\u628A\u540A\u5E36 4 \u639B\u4E0A\u540A\u8033 4"
     why: 
     targetId: ip.pan_assy.lift_point_4
@@ -81,6 +323,8 @@ MonoBehaviour:
     condition: ip.pan_assy.lift_point_4.state=Rigged
     standPointId: tp.stand.w
     subId: b4
+    textDesktop: 
+    when: 
   - text: "\u89E3\u958B\u53F0\u67B6\u593E\u5177 1"
     why: 
     targetId: env.panto_stand.clamp_1
@@ -88,6 +332,8 @@ MonoBehaviour:
     condition: env.panto_stand.clamp_1.state=Open
     standPointId: tp.stand.w
     subId: c1
+    textDesktop: 
+    when: 
   - text: "\u89E3\u958B\u53F0\u67B6\u593E\u5177 2"
     why: 
     targetId: env.panto_stand.clamp_2
@@ -95,6 +341,8 @@ MonoBehaviour:
     condition: env.panto_stand.clamp_2.state=Open
     standPointId: tp.stand.w
     subId: c2
+    textDesktop: 
+    when: 
   - text: "\u8ACB\u540A\u639B\u6307\u63EE\u78BA\u8A8D\uFF0C\u653E\u884C\u8A66\u540A"
     why: 
     targetId: npc.rigging_lead
@@ -102,12 +350,14 @@ MonoBehaviour:
     condition: hold.3.checklist_done&&hold.3.released
     standPointId: tp.platform.crane
     subId: d
+    textDesktop: 
+    when: 
   presetDone: 0
   side: 
   presetStates: []
   valueTags: []
-  refSecondsTutorial: 82
-  refSecondsExam: 48
+  refSecondsTutorial: 132
+  refSecondsExam: 80
   references:
     version: 2
     RefIds:

@@ -42,6 +42,36 @@ namespace PantographSim.Tests
             }
         }
 
+        /// <summary>v3.10（SI_02 c／c2、d／d2）：先上鎖再掛牌；沒上鎖就掛牌——教學擋下不掛，練習照掛並記 tag_without_lock；解鎖連牌取下。</summary>
+        [Test]
+        public void LockThenTag_TagWithoutLock_TutorialBlocks_PracticeRecords()
+        {
+            using (var b = new BeltRig())
+            {
+                b.belt.ClickSlot(1); Sim.Bus.Publish(new ActionRequested { targetId = SimIds.WaistPouch, text = "click", toolId = "" });
+                void Part(string p) => Sim.Bus.Publish(new ActionRequested { targetId = SimIds.ToolLockout, text = "part:" + p, toolId = "" });
+                b.s.Set("training.mode", "tutorial");
+                Part("tag"); Send("ip.cab.raise_switch", SimIds.ToolLockout);
+                Assert.IsFalse(b.s.GetBool("lockout.raise_switch.tagged"), "教學：沒上鎖不能掛牌");
+                Assert.AreEqual("先上鎖再掛牌", b.s.Get("ui.toast"));
+                Assert.IsFalse(b.s.GetBool("lockout.raise_switch.tag_without_lock"), "教學不記錯");
+                Part("lock"); Send("ip.cab.raise_switch", SimIds.ToolLockout);
+                Assert.AreEqual("locked", b.s.Get("lockout.raise_switch"));
+                Assert.IsFalse(b.s.GetBool("lockout.raise_switch.tagged"), "上鎖不等於掛牌");
+                Part("tag"); Send("ip.cab.raise_switch", SimIds.ToolLockout);
+                Assert.IsTrue(b.s.GetBool("lockout.raise_switch.tagged"));
+                Assert.IsFalse(b.s.GetBool("lockout.raise_switch.tag_without_lock"));
+                Part("lock"); Send("ip.cab.raise_switch", SimIds.ToolLockout);
+                Assert.AreEqual("open", b.s.Get("lockout.raise_switch"));
+                Assert.IsFalse(b.s.GetBool("lockout.raise_switch.tagged"), "解鎖連牌一起取下");
+
+                b.s.Set("training.mode", "practice");
+                Part("tag"); Send("ip.cab.raise_switch", SimIds.ToolLockout);
+                Assert.IsTrue(b.s.GetBool("lockout.raise_switch.tagged"), "練習：照掛");
+                Assert.IsTrue(b.s.GetBool("lockout.raise_switch.tag_without_lock"), "練習：記 ERR_SI02_TagWithoutLock 的鍵");
+            }
+        }
+
         [Test]
         public void R1_WithoutBreakerKey_LockStillAllowed()
         {

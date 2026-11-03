@@ -20,7 +20,7 @@ namespace PantographSim.Tests
         /// <summary>已結案的段落：還有 stub 掛在這裡就失敗。</summary>
         static readonly string[] Completed = { "b4:p3", "b4:p3b", "b4:p3c", "b4:p3d", "b4:p4" };
         /// <summary>還沒結案、可以掛 stub 的段落（b4c:* 細項都算 b4c）。</summary>
-        static readonly string[] Open = { "b4:p5", "b4c", "b4d", "b4b", "b5" };
+        static readonly string[] Open = { "b4:p5", "v310", "b4c", "b4d", "b4b", "b5" };   // v310：steps-v6 v3.10 這一段，做完時要清空
         static readonly string[] NotApplicable = { "R2", "n/a" };
 
         static string Segment(string owner) => owner.StartsWith("b4c:") ? "b4c" : owner;
@@ -49,6 +49,23 @@ namespace PantographSim.Tests
             Assert.AreEqual("R2", defs["ERR_IN09_Misaligned"].owner);
             Assert.AreEqual("b4d", defs["ERR_SI03_CylinderPowerOn"].owner);
             foreach (var id in new[] { "ERR_IN07_WrongSocket", "ERR_IN09_WrongSocket", "ERR_CSR13_WrongSocket" }) Assert.AreEqual("b4c:torque_socket", defs[id].owner, id);
+        }
+
+        /// <summary>v3.10：停用狀態讀 ErrorStatus.csv（deprecated→Deprecated、not_applicable→NotApplicable、replacedBy），匯入檢查沒有問題。</summary>
+        [Test]
+        public void ErrorStatusCsv_Recognized()
+        {
+            var defs = StepsCsvImporter.LoadErrorRules();
+            Assert.AreEqual(StepsCsvImporter.Deprecated, defs["ERR_Global_RaiseWithHoldDown"].status);
+            Assert.AreEqual("ERR_IN11_StrapLeft", defs["ERR_Global_RaiseWithHoldDown"].replacedBy);
+            foreach (var id in new[] { "ERR_SI02_RaiseSwitchUnlocked", "ERR_Crane_RiggedOnArm", "ERR_IN09_Misaligned" })
+                Assert.AreEqual(StepsCsvImporter.NotApplicable, defs[id].status, id);
+            var errs = new List<string>();
+            StepsCsvImporter.CheckErrorStatus(StepsCsvImporter.LoadSubActionRows(), StepsCsvImporter.LoadStepRows(), defs, errs);
+            Assert.IsEmpty(errs, string.Join("\n", errs));
+            var rows = new List<StepsCsvImporter.Row> { new StepsCsvImporter.Row { line = 2, v = new Dictionary<string, string> { { "stepId", "STP_X" }, { "errorIds", "ERR_Crane_RiggedOnArm:Critical" } } } };
+            StepsCsvImporter.CheckErrorStatus(rows, new List<StepsCsvImporter.Row>(), defs, errs);
+            Assert.IsTrue(errs.Any(e => e.Contains("ERR_Crane_RiggedOnArm") && e.Contains("不可以再出現")), "停用的 ID 又寫回步驟表要失敗");
         }
 
         /// <summary>審查 F2：Docs/R1.5b/b4c-stubs.md 的表格（小動作、目標、錯誤規則）也不可以有列掛在已結案的段落。</summary>

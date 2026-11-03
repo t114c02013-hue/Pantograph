@@ -192,6 +192,15 @@ namespace PantographSim.Tests
             /// <summary>上鎖掛牌：手上拿著上鎖掛牌組（從腰包拿出）點主斷路器／升弓開關（LockoutTagTool）。</summary>
             void Lockout(string part)
             {
+                if (part.EndsWith(".tagged"))   // v3.10：已上鎖後換「牌」點同一個開關
+                {
+                    if (s.GetBool(part)) return;
+                    Hold(SimIds.ToolLockout);
+                    Command(SimIds.ToolLockout, "part:tag");
+                    Command("ip.cab." + part.Substring("lockout.".Length, part.Length - "lockout.".Length - ".tagged".Length), "click", SimIds.ToolLockout);
+                    Command(SimIds.ToolLockout, "part:lock");
+                    return;
+                }
                 int eq = part.IndexOf('=');
                 string target = "ip.cab." + part.Substring("lockout.".Length, eq - "lockout.".Length), want = part.Substring(eq + 1);
                 if (s.Get(part.Substring(0, eq), "open") == want) return;

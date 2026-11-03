@@ -22,6 +22,8 @@ namespace PantographSim.Editor
         public class ErrorRuleDef
         {
             public string errorId, severity, severityBeforeK3, courses, inputMode, status, owner, source, trigger, note;
+            /// <summary>v3.10：ErrorStatus.csv 的 replacedBy（併入哪一條；不適用的空白）。</summary>
+            [NonSerialized] public string replacedBy = "";
             /// <summary>global＝不分步驟、全程監看（放進 ProcedureDefinition.globalErrors，觸發 WhenCondition）；空白＝掛在 Steps.csv 引用它的步驟。</summary>
             public string scope;
             /// <summary>觸發條件（ProcedureJson 的 ErrorJson 格式）。有寫就以這份為準（取代 R1 的），並加到 Steps.csv 引用它的步驟。</summary>
@@ -36,8 +38,42 @@ namespace PantographSim.Editor
         public const string Deprecated = "Deprecated", NotApplicable = "NotApplicable";
         public static bool Disabled(string status) => status == Deprecated || status == NotApplicable;
 
-        public static Dictionary<string, ErrorRuleDef> LoadErrorRules() =>
-            JsonUtility.FromJson<ErrorRulesFile>(File.ReadAllText(ErrorRulesPath, Encoding.UTF8)).rules.ToDictionary(r => r.errorId);
+        public static Dictionary<string, ErrorRuleDef> LoadErrorRules()
+        {
+            var defs = JsonUtility.FromJson<ErrorRulesFile>(File.ReadAllText(ErrorRulesPath, Encoding.UTF8)).rules.ToDictionary(r => r.errorId);
+            foreach (var r in LoadErrorStatusRows())
+                if (defs.TryGetValue(r["errorId"], out var d)) { d.status = StatusOf(r["status"]); d.replacedBy = r["replacedBy"]; }
+            return defs;
+        }
+
+        /// <summary>
+        /// v3.10：ErrorStatus.csv（errorId,severity,status,replacedBy,since,note）是停用錯誤的權威清單，和 Steps.csv、SubActions.csv 放在一起：
+        /// deprecated＝併入 replacedBy 那一條、not_applicable＝本版不適用；ID 保留、認得、不判。
+        /// </summary>
+        public static string ErrorStatusPath => SourceFolder + "/ErrorStatus.csv";
+        public static List<Row> LoadErrorStatusRows() => File.Exists(ErrorStatusPath) ? Rows(File.ReadAllText(ErrorStatusPath, Encoding.UTF8)) : new List<Row>();
+        public static string StatusOf(string csvStatus) => csvStatus == "deprecated" ? Deprecated : csvStatus == "not_applicable" ? NotApplicable : csvStatus;
+
+        /// <summary>ErrorStatus.csv 和 ErrorRules.json、兩份步驟表一致：每列的 ID 要有定義、狀態只能是 deprecated／not_applicable、replacedBy 要是啟用中的錯誤；
+        /// ErrorRules.json 標停用的都要列在 ErrorStatus.csv；停用的 ID 不可以再出現在任何 errorIds。</summary>
+        public static void CheckErrorStatus(List<Row> subRows, List<Row> stepRows, Dictionary<string, ErrorRuleDef> defs, List<string> errors)
+        {
+            var listed = new HashSet<string>();
+            foreach (var r in LoadErrorStatusRows())
+            {
+                string id = r["errorId"], where = $"ErrorStatus.csv 第 {r.line} 行（{id}）";
+                listed.Add(id);
+                if (!defs.TryGetValue(id, out var d)) { errors.Add($"{where}：ErrorRules.json 沒有這個 ID"); continue; }
+                if (r["status"] != "deprecated" && r["status"] != "not_applicable") errors.Add($"{where}：status 只能是 deprecated 或 not_applicable，寫的是「{r["status"]}」");
+                if (r["severity"].Length > 0 && r["severity"] != d.severity) errors.Add($"{where}：嚴重度 {r["severity"]}，ErrorRules.json 是 {d.severity}");
+                if (r["replacedBy"].Length > 0 && (!defs.TryGetValue(r["replacedBy"], out var to) || Disabled(to.status))) errors.Add($"{where}：replacedBy {r["replacedBy"]} 要是啟用中的錯誤");
+                if (r["status"] == "deprecated" && r["replacedBy"].Length == 0) errors.Add($"{where}：deprecated 要寫 replacedBy");
+            }
+            foreach (var d in defs.Values.Where(d => Disabled(d.status) && !listed.Contains(d.errorId))) errors.Add($"ErrorRules.json {d.errorId}：標停用（{d.status}）但 ErrorStatus.csv 沒有列");
+            foreach (var r in stepRows.Concat(subRows))
+                foreach (var (id, _) in ParseErrorRefs(r["errorIds"], _ => { }))
+                    if (listed.Contains(id)) errors.Add($"{r}：錯誤 {id} 已停用（ErrorStatus.csv），不可以再出現在 errorIds");
+        }
 
         /// <summary>CSV 的錯誤引用和 ErrorRules.json 比對（行號＋內容寫進 errors）。</summary>
         public static void CheckErrorRefs(List<Row> subRows, List<Row> stepRows, Dictionary<string, ErrorRuleDef> defs, List<string> errors)

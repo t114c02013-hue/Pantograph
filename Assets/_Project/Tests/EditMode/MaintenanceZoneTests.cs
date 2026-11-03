@@ -60,7 +60,7 @@ namespace PantographSim.Tests
                 foreach (var col in Physics.OverlapBox(c, half, Quaternion.identity, ~0, QueryTriggerInteraction.Ignore))
                     Assert.IsTrue(col.transform.IsChildOf(stand), "台架四周 1.2 m 內不能有 " + col.name);
                 // 站點：維修區、離台架邊 0.6 m、面向台架
-                var pts = Object.FindObjectsOfType<XrTeleportPoint>(true).Where(p => p.gameObject.scene == scene && p.PointId.StartsWith("tp.stand.")).ToList();
+                var pts = Object.FindObjectsOfType<XrTeleportPoint>(true).Where(p => p.gameObject.scene == scene && StationLayoutCheck.IsStandEdge(p.PointId)).ToList();
                 Assert.AreEqual(4, pts.Count);
                 foreach (var p in pts)
                 {

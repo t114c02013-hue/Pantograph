@@ -52,9 +52,13 @@ namespace PantographSim.Tests
             var (runner, s, prc) = Rig();
             try
             {
-                Assert.AreEqual(0, (int)s.GetFloat("procedure.sub_index"), "吊梁停在 1.0 m 進入 IN_01：不完成（不和 LF_06 c 的 ≥ 1.0 m 重疊）");
+                // v3.10（D44）：a 之前先做空吊梁查看（a0–a4；沒開故障時 s1–s4 跳過）
+                var subs = prc.steps[0].subActions;
+                int ia = System.Array.FindIndex(subs, x => x.subId == "a");
+                foreach (var pre in subs.Take(ia).Where(x => string.IsNullOrEmpty(x.when))) CourseFlowTests.Write(s, pre.condition);
+                Assert.AreEqual(ia, (int)s.GetFloat("procedure.sub_index"), "吊梁停在 1.0 m 做到 IN_01 a：不完成（不和 LF_06 c 的 ≥ 1.0 m 重疊）");
                 s.SetFloat("part.crane.beam_above_pan_m", (Def.lowerM + Def.UpperM) / 2f);
-                Assert.AreEqual(1, (int)s.GetFloat("procedure.sub_index"), "降到範圍中間才完成");
+                Assert.AreEqual(ia + 1, (int)s.GetFloat("procedure.sub_index"), "降到範圍中間才完成");
             }
             finally { runner.Dispose(); Object.DestroyImmediate(prc); }
         }

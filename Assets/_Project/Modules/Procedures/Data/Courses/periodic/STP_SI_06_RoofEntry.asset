@@ -41,6 +41,9 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: 
     why: 
@@ -48,6 +51,30 @@ MonoBehaviour:
     - "\u5230\u5DE5\u5177\u67B6\u62FF\u8D77\u5B89\u5168\u5E36|rack.slot_4=in_use"
     - "\u62FF\u8D77\u77ED\u63A5\u5730\u7DDA\uFF0C\u639B\u5728\u5B89\u5168\u5E36\u5DE5\u5177\u74B0\u4E0A|rack.slot_12=in_use&&tool.grounding_lead.carried"
     - "\u5230\u639B\u5EA7\u62FF\u8D77\u5929\u8ECA\u9059\u63A7\u5668\uFF0C\u639B\u5728\u5DE6\u624B|env.crane_pendant.state=Held"
+    - "\u8F49\u9059\u63A7\u5668\u96FB\u6E90\u9470\u5319|ctrl.crane.power"
+    - "\u6309\u4E0B\u7DCA\u6025\u505C\u6B62\uFF0C\u518D\u65CB\u8F49\u5FA9\u6B78|ctrl.crane.estop=false&&ctrl.crane.estop_tested"
+    - "\u7528\u5FAE\u52D5\u628A\u7A7A\u540A\u6881\u964D\u5230\u5E73\u53F0\u67E5\u770B\u4F4D\u7F6E|part.crane.inspect_pose=platform&&part.crane.under_hook_clear"
+    - "\u6309\u4E0B\u9059\u63A7\u5668\u7684\u7DCA\u6025\u505C\u6B62|ctrl.crane.estop"
+    - "\u67E5\u770B\u540A\u9264\u5B89\u5168\u820C\u7247\u3001\u540A\u6881\u9298\u724C\u8377\u91CD\u3001\u540A\u8033\u548C\u5378\u6263|part.crane.hook.inspected&&env.lift_beam.inspected"
+    - "\u67E5\u770B\u540A\u5E36 2\uFF0C\u5224\u53EF\u7528\u6216\u4E0D\u53EF\u7528|env.sling_2.inspected&&env.sling_2.verdict"
+    - "\u67E5\u770B\u540A\u5E36 3\uFF0C\u5224\u53EF\u7528\u6216\u4E0D\u53EF\u7528|env.sling_3.inspected&&env.sling_3.verdict"
+    - "\u67E5\u770B\u540A\u5E36 1\uFF0C\u5224\u53EF\u7528\u6216\u4E0D\u53EF\u7528|env.sling_1.inspected&&env.sling_1.verdict"
+    - "\u67E5\u770B\u540A\u5E36 4\uFF0C\u5224\u53EF\u7528\u6216\u4E0D\u53EF\u7528|env.sling_4.inspected&&env.sling_4.verdict"
+    - "\u5F9E\u540A\u6881\u53D6\u4E0B\u5272\u50B7\u540A\u5E36\uFF0C\u639B\u4E0A\u505C\u7528\u724C\uFF0C\u653E\u9032\u505C\u7528\u7BB1|env.sling_rejected.tagged&&env.sling_rejected.state=in_bin"
+    - "\u5F9E\u540A\u6881\u53D6\u4E0B\u5272\u50B7\u540A\u5E36\uFF0C\u639B\u4E0A\u505C\u7528\u724C\uFF0C\u653E\u9032\u505C\u7528\u7BB1|env.sling_rejected.tagged&&env.sling_rejected.state=in_bin"
+    - "\u5F9E\u540A\u6881\u53D6\u4E0B\u5272\u50B7\u540A\u5E36\uFF0C\u639B\u4E0A\u505C\u7528\u724C\uFF0C\u653E\u9032\u505C\u7528\u7BB1|env.sling_rejected.tagged&&env.sling_rejected.state=in_bin"
+    - "\u5F9E\u540A\u6881\u53D6\u4E0B\u5272\u50B7\u540A\u5E36\uFF0C\u639B\u4E0A\u505C\u7528\u724C\uFF0C\u653E\u9032\u505C\u7528\u7BB1|env.sling_rejected.tagged&&env.sling_rejected.state=in_bin"
+    - "\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\uFF1A\u540A\u5E36\u5272\u50B7\u505C\u7528|rigging.cut_reported"
+    - "\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\uFF1A\u540A\u5E36\u5272\u50B7\u505C\u7528|rigging.cut_reported"
+    - "\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\uFF1A\u540A\u5E36\u5272\u50B7\u505C\u7528|rigging.cut_reported"
+    - "\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\uFF1A\u540A\u5E36\u5272\u50B7\u505C\u7528|rigging.cut_reported"
+    - "\u5230\u540A\u5177\u67B6\u62FF\u5099\u7528\u540A\u5E36\uFF0C\u67E5\u770B\u6A19\u7C64\u548C\u7834\u640D|env.sling_spare.inspected&&env.sling_spare.verdict=ok"
+    - "\u628A\u5099\u7528\u540A\u5E36\u639B\u5230\u540A\u6881\u539F\u672C\u90A3\u4E00\u865F\u7684\u4F4D\u7F6E|env.sling_1.replaced"
+    - "\u628A\u5099\u7528\u540A\u5E36\u639B\u5230\u540A\u6881\u539F\u672C\u90A3\u4E00\u865F\u7684\u4F4D\u7F6E|env.sling_2.replaced"
+    - "\u628A\u5099\u7528\u540A\u5E36\u639B\u5230\u540A\u6881\u539F\u672C\u90A3\u4E00\u865F\u7684\u4F4D\u7F6E|env.sling_3.replaced"
+    - "\u628A\u5099\u7528\u540A\u5E36\u639B\u5230\u540A\u6881\u539F\u672C\u90A3\u4E00\u865F\u7684\u4F4D\u7F6E|env.sling_4.replaced"
+    - "\u89E3\u9664\u7DCA\u6025\u505C\u6B62|ctrl.crane.estop=false"
+    - "\u628A\u540A\u6881\u5347\u5230\u4E0A\u9650|part.crane.hook_y>=crane.empty_travel_min_y"
     - "\u628A\u5B89\u5168\u5E36\u6263\u4E0A\u5E73\u53F0\u639B\u9EDE|harness.platform"
     - "\u586B\u4E0A\u8ECA\u9802\u524D\u78BA\u8A8D\u55AE\uFF0C\u8ACB\u4F5C\u696D\u8CA0\u8CAC\u4EBA\u653E\u884C\u4E26\u7C3D\u540D|env.work_order.roof_entry_check.checked_count>=11&&hold.1.released&&workorder.sign_start"
     - "\u628A\u5B89\u5168\u5E36\u6263\u4E0A\u8ECA\u9802\u639B\u9EDE|harness.roof&&harness.platform"
@@ -63,6 +90,8 @@ MonoBehaviour:
     condition: rack.slot_4=in_use
     standPointId: tp.platform.rack
     subId: a
+    textDesktop: 
+    when: 
   - text: "\u62FF\u8D77\u77ED\u63A5\u5730\u7DDA\uFF0C\u639B\u5728\u5B89\u5168\u5E36\u5DE5\u5177\u74B0\u4E0A"
     why: 
     targetId: env.tool_rack.slot_12
@@ -70,6 +99,8 @@ MonoBehaviour:
     condition: rack.slot_12=in_use&&tool.grounding_lead.carried
     standPointId: tp.platform.rack
     subId: a2
+    textDesktop: 
+    when: 
   - text: "\u5230\u639B\u5EA7\u62FF\u8D77\u5929\u8ECA\u9059\u63A7\u5668\uFF0C\u639B\u5728\u5DE6\u624B"
     why: 
     targetId: "env.crane_pendant\uFF08PendantDock\uFF09"
@@ -77,6 +108,228 @@ MonoBehaviour:
     condition: env.crane_pendant.state=Held
     standPointId: tp.platform.rack
     subId: a3
+    textDesktop: 
+    when: 
+  - text: "\u8F49\u9059\u63A7\u5668\u96FB\u6E90\u9470\u5319"
+    why: 
+    targetId: "env.crane_pendant\uFF08Key_Power\uFF09"
+    toolId: 
+    condition: ctrl.crane.power
+    standPointId: tp.platform.crane
+    subId: a4
+    textDesktop: 
+    when: 
+  - text: "\u6309\u4E0B\u7DCA\u6025\u505C\u6B62\uFF0C\u518D\u65CB\u8F49\u5FA9\u6B78"
+    why: 
+    targetId: "env.crane_pendant\uFF08Btn_EStop\uFF09"
+    toolId: 
+    condition: ctrl.crane.estop=false&&ctrl.crane.estop_tested
+    standPointId: tp.platform.crane
+    subId: a5
+    textDesktop: 
+    when: 
+  - text: "\u7528\u5FAE\u52D5\u628A\u7A7A\u540A\u6881\u964D\u5230\u5E73\u53F0\u67E5\u770B\u4F4D\u7F6E"
+    why: 
+    targetId: env.crane_pendant
+    toolId: 
+    condition: part.crane.inspect_pose=platform&&part.crane.under_hook_clear
+    standPointId: tp.platform.crane
+    subId: a6
+    textDesktop: 
+    when: 
+  - text: "\u6309\u4E0B\u9059\u63A7\u5668\u7684\u7DCA\u6025\u505C\u6B62"
+    why: 
+    targetId: "env.crane_pendant\uFF08Btn_EStop\uFF09"
+    toolId: 
+    condition: ctrl.crane.estop
+    standPointId: tp.platform.crane
+    subId: a7
+    textDesktop: 
+    when: 
+  - text: "\u67E5\u770B\u540A\u9264\u5B89\u5168\u820C\u7247\u3001\u540A\u6881\u9298\u724C\u8377\u91CD\u3001\u540A\u8033\u548C\u5378\u6263"
+    why: 
+    targetId: part.crane.hook;env.lift_beam
+    toolId: 
+    condition: part.crane.hook.inspected&&env.lift_beam.inspected
+    standPointId: tp.platform.crane
+    subId: a8
+    textDesktop: 
+    when: 
+  - text: "\u67E5\u770B\u540A\u5E36 2\uFF0C\u5224\u53EF\u7528\u6216\u4E0D\u53EF\u7528"
+    why: 
+    targetId: env.sling_2
+    toolId: 
+    condition: env.sling_2.inspected&&env.sling_2.verdict
+    standPointId: tp.platform.crane
+    subId: a92
+    textDesktop: 
+    when: 
+  - text: "\u67E5\u770B\u540A\u5E36 3\uFF0C\u5224\u53EF\u7528\u6216\u4E0D\u53EF\u7528"
+    why: 
+    targetId: env.sling_3
+    toolId: 
+    condition: env.sling_3.inspected&&env.sling_3.verdict
+    standPointId: tp.platform.crane
+    subId: a93
+    textDesktop: 
+    when: 
+  - text: "\u67E5\u770B\u540A\u5E36 1\uFF0C\u5224\u53EF\u7528\u6216\u4E0D\u53EF\u7528"
+    why: 
+    targetId: env.sling_1
+    toolId: 
+    condition: env.sling_1.inspected&&env.sling_1.verdict
+    standPointId: tp.platform.rigging_w
+    subId: a91
+    textDesktop: 
+    when: 
+  - text: "\u67E5\u770B\u540A\u5E36 4\uFF0C\u5224\u53EF\u7528\u6216\u4E0D\u53EF\u7528"
+    why: 
+    targetId: env.sling_4
+    toolId: 
+    condition: env.sling_4.inspected&&env.sling_4.verdict
+    standPointId: tp.platform.rigging_w
+    subId: a94
+    textDesktop: 
+    when: 
+  - text: "\u5F9E\u540A\u6881\u53D6\u4E0B\u5272\u50B7\u540A\u5E36\uFF0C\u639B\u4E0A\u505C\u7528\u724C\uFF0C\u653E\u9032\u505C\u7528\u7BB1"
+    why: 
+    targetId: "ip.sling_1.top_eye;ip.sling_1.tag;env.sling_reject_bin\uFF08\u7BB1\u53E3
+      trigger\uFF09"
+    toolId: env.tag_out_of_service
+    condition: env.sling_rejected.tagged&&env.sling_rejected.state=in_bin
+    standPointId: tp.platform.rigging_w
+    subId: s1i1
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=RM&&fault.sling_cut.index=1
+  - text: "\u5F9E\u540A\u6881\u53D6\u4E0B\u5272\u50B7\u540A\u5E36\uFF0C\u639B\u4E0A\u505C\u7528\u724C\uFF0C\u653E\u9032\u505C\u7528\u7BB1"
+    why: 
+    targetId: "ip.sling_2.top_eye;ip.sling_2.tag;env.sling_reject_bin\uFF08\u7BB1\u53E3
+      trigger\uFF09"
+    toolId: env.tag_out_of_service
+    condition: env.sling_rejected.tagged&&env.sling_rejected.state=in_bin
+    standPointId: tp.platform.crane
+    subId: s1i2
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=RM&&fault.sling_cut.index=2
+  - text: "\u5F9E\u540A\u6881\u53D6\u4E0B\u5272\u50B7\u540A\u5E36\uFF0C\u639B\u4E0A\u505C\u7528\u724C\uFF0C\u653E\u9032\u505C\u7528\u7BB1"
+    why: 
+    targetId: "ip.sling_3.top_eye;ip.sling_3.tag;env.sling_reject_bin\uFF08\u7BB1\u53E3
+      trigger\uFF09"
+    toolId: env.tag_out_of_service
+    condition: env.sling_rejected.tagged&&env.sling_rejected.state=in_bin
+    standPointId: tp.platform.crane
+    subId: s1i3
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=RM&&fault.sling_cut.index=3
+  - text: "\u5F9E\u540A\u6881\u53D6\u4E0B\u5272\u50B7\u540A\u5E36\uFF0C\u639B\u4E0A\u505C\u7528\u724C\uFF0C\u653E\u9032\u505C\u7528\u7BB1"
+    why: 
+    targetId: "ip.sling_4.top_eye;ip.sling_4.tag;env.sling_reject_bin\uFF08\u7BB1\u53E3
+      trigger\uFF09"
+    toolId: env.tag_out_of_service
+    condition: env.sling_rejected.tagged&&env.sling_rejected.state=in_bin
+    standPointId: tp.platform.rigging_w
+    subId: s1i4
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=RM&&fault.sling_cut.index=4
+  - text: "\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\uFF1A\u540A\u5E36\u5272\u50B7\u505C\u7528"
+    why: 
+    targetId: npc.work_leader
+    toolId: 
+    condition: rigging.cut_reported
+    standPointId: tp.platform.rigging_w
+    subId: s2i1
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=RM&&fault.sling_cut.index=1
+  - text: "\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\uFF1A\u540A\u5E36\u5272\u50B7\u505C\u7528"
+    why: 
+    targetId: npc.work_leader
+    toolId: 
+    condition: rigging.cut_reported
+    standPointId: tp.platform.crane
+    subId: s2i2
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=RM&&fault.sling_cut.index=2
+  - text: "\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\uFF1A\u540A\u5E36\u5272\u50B7\u505C\u7528"
+    why: 
+    targetId: npc.work_leader
+    toolId: 
+    condition: rigging.cut_reported
+    standPointId: tp.platform.crane
+    subId: s2i3
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=RM&&fault.sling_cut.index=3
+  - text: "\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\uFF1A\u540A\u5E36\u5272\u50B7\u505C\u7528"
+    why: 
+    targetId: npc.work_leader
+    toolId: 
+    condition: rigging.cut_reported
+    standPointId: tp.platform.rigging_w
+    subId: s2i4
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=RM&&fault.sling_cut.index=4
+  - text: "\u5230\u540A\u5177\u67B6\u62FF\u5099\u7528\u540A\u5E36\uFF0C\u67E5\u770B\u6A19\u7C64\u548C\u7834\u640D"
+    why: 
+    targetId: env.rigging_rack;env.sling_spare
+    toolId: 
+    condition: env.sling_spare.inspected&&env.sling_spare.verdict=ok
+    standPointId: tp.platform.crane
+    subId: s3
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=RM
+  - text: "\u628A\u5099\u7528\u540A\u5E36\u639B\u5230\u540A\u6881\u539F\u672C\u90A3\u4E00\u865F\u7684\u4F4D\u7F6E"
+    why: 
+    targetId: ip.lifting_beam.eye_1
+    toolId: 
+    condition: env.sling_1.replaced
+    standPointId: tp.platform.rigging_w
+    subId: s4i1
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=RM&&fault.sling_cut.index=1
+  - text: "\u628A\u5099\u7528\u540A\u5E36\u639B\u5230\u540A\u6881\u539F\u672C\u90A3\u4E00\u865F\u7684\u4F4D\u7F6E"
+    why: 
+    targetId: ip.lifting_beam.eye_2
+    toolId: 
+    condition: env.sling_2.replaced
+    standPointId: tp.platform.crane
+    subId: s4i2
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=RM&&fault.sling_cut.index=2
+  - text: "\u628A\u5099\u7528\u540A\u5E36\u639B\u5230\u540A\u6881\u539F\u672C\u90A3\u4E00\u865F\u7684\u4F4D\u7F6E"
+    why: 
+    targetId: ip.lifting_beam.eye_3
+    toolId: 
+    condition: env.sling_3.replaced
+    standPointId: tp.platform.crane
+    subId: s4i3
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=RM&&fault.sling_cut.index=3
+  - text: "\u628A\u5099\u7528\u540A\u5E36\u639B\u5230\u540A\u6881\u539F\u672C\u90A3\u4E00\u865F\u7684\u4F4D\u7F6E"
+    why: 
+    targetId: ip.lifting_beam.eye_4
+    toolId: 
+    condition: env.sling_4.replaced
+    standPointId: tp.platform.rigging_w
+    subId: s4i4
+    textDesktop: 
+    when: fault.sling_cut&&fault.sling_cut.where=RM&&fault.sling_cut.index=4
+  - text: "\u89E3\u9664\u7DCA\u6025\u505C\u6B62"
+    why: 
+    targetId: "env.crane_pendant\uFF08Btn_EStop\uFF09"
+    toolId: 
+    condition: ctrl.crane.estop=false
+    standPointId: tp.platform.rigging_w
+    subId: a10
+    textDesktop: 
+    when: 
+  - text: "\u628A\u540A\u6881\u5347\u5230\u4E0A\u9650"
+    why: 
+    targetId: env.crane_pendant
+    toolId: 
+    condition: part.crane.hook_y>=crane.empty_travel_min_y
+    standPointId: tp.platform.rigging_w
+    subId: a11
+    textDesktop: 
+    when: 
   - text: "\u628A\u5B89\u5168\u5E36\u6263\u4E0A\u5E73\u53F0\u639B\u9EDE"
     why: 
     targetId: ip.depot.platform_anchor
@@ -84,6 +337,8 @@ MonoBehaviour:
     condition: harness.platform
     standPointId: tp.platform.anchor
     subId: b
+    textDesktop: 
+    when: 
   - text: "\u586B\u4E0A\u8ECA\u9802\u524D\u78BA\u8A8D\u55AE\uFF0C\u8ACB\u4F5C\u696D\u8CA0\u8CAC\u4EBA\u653E\u884C\u4E26\u7C3D\u540D"
     why: 
     targetId: env.work_order.roof_entry_check;npc.work_leader;npc.guard
@@ -91,6 +346,8 @@ MonoBehaviour:
     condition: env.work_order.roof_entry_check.checked_count>=11&&hold.1.released&&workorder.sign_start
     standPointId: tp.platform.anchor
     subId: c
+    textDesktop: 
+    when: 
   - text: "\u628A\u5B89\u5168\u5E36\u6263\u4E0A\u8ECA\u9802\u639B\u9EDE"
     why: 
     targetId: ip.roof.anchor
@@ -98,6 +355,8 @@ MonoBehaviour:
     condition: harness.roof&&harness.platform
     standPointId: tp.platform.anchor
     subId: d
+    textDesktop: 
+    when: 
   - text: "\u89E3\u958B\u5E73\u53F0\u639B\u9EDE"
     why: 
     targetId: ip.depot.platform_anchor
@@ -105,12 +364,14 @@ MonoBehaviour:
     condition: harness.roof&&harness.platform=false
     standPointId: tp.platform.anchor
     subId: e
+    textDesktop: 
+    when: 
   presetDone: 0
   side: 
   presetStates: []
   valueTags: []
-  refSecondsTutorial: 85
-  refSecondsExam: 54
+  refSecondsTutorial: 181
+  refSecondsExam: 113
   references:
     version: 2
     RefIds:

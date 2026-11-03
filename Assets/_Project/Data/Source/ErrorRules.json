@@ -1498,10 +1498,98 @@
       "courses": "both",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
       "trigger": "SI_02 只掛牌沒上鎖／漏鎖升弓開關（v1.5 補 ID，v5.6 同）",
-      "note": "驗收組長裁定：上鎖掛牌拆成兩個動作（先上鎖、再掛牌），等步驟表 v3.9。"
+      "note": "v3.10：上鎖、掛牌拆成兩個動作（SI_02 c／c2、d／d2）。沒上鎖就掛牌：教學擋下並提示「先上鎖再掛牌」，練習／考核照掛並記錯（LockoutTagTool 寫 lockout.<x>.tag_without_lock）。",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "lockout.breaker.tag_without_lock",
+          "lockout.raise_switch.tag_without_lock"
+        ],
+        "why": "沒上鎖只掛牌，別人還是合得上閘、升得了弓，牌子擋不住。",
+        "fix": "先上鎖，再在同一個開關掛牌。",
+        "what": "沒上鎖就掛牌。"
+      }
+    },
+    {
+      "errorId": "ERR_Sling_CutJudgedUsable",
+      "severity": "Critical",
+      "severityBeforeK3": "",
+      "courses": "periodic",
+      "inputMode": "",
+      "status": "Defined",
+      "owner": "v310",
+      "source": "CSV",
+      "trigger": "吊帶割傷卻判「可用」；或吊掛指揮核對停留點 2／3 時割傷吊帶仍在吊梁上（只記這一條，不另記 HoldPointRejected）。教學擋下並提示（steps-v6 v3.10，D44）"
+    },
+    {
+      "errorId": "ERR_Sling_FalseReject",
+      "severity": "Minor",
+      "severityBeforeK3": "",
+      "courses": "periodic",
+      "inputMode": "",
+      "status": "Defined",
+      "owner": "v310",
+      "source": "CSV",
+      "trigger": "吊帶沒有破損卻判「不可用」（報表註明）（steps-v6 v3.10，D44）"
+    },
+    {
+      "errorId": "ERR_Sling_NoReport",
+      "severity": "Major",
+      "severityBeforeK3": "",
+      "courses": "periodic",
+      "inputMode": "",
+      "status": "Defined",
+      "owner": "v310",
+      "source": "CSV",
+      "trigger": "吊帶割傷停用後沒有回報作業負責人就去拿備用吊帶（steps-v6 v3.10，D44）"
+    },
+    {
+      "errorId": "ERR_Sling_CutReturnedToRack",
+      "severity": "Major",
+      "severityBeforeK3": "",
+      "courses": "periodic",
+      "inputMode": "",
+      "status": "Defined",
+      "owner": "v310",
+      "source": "CSV",
+      "trigger": "割傷吊帶放回吊具架（應掛停用牌放進停用箱）（steps-v6 v3.10，D44）"
+    },
+    {
+      "errorId": "ERR_Sling_TouchWithoutEStop",
+      "severity": "Major",
+      "severityBeforeK3": "",
+      "courses": "periodic",
+      "inputMode": "",
+      "status": "Defined",
+      "owner": "v310",
+      "source": "CSV",
+      "trigger": "碰吊具（查看吊鉤舌片、吊梁、吊帶，或取下、掛上吊帶）時遙控器緊急停止沒按下。教學擋下並提示「先按遙控器的緊急停止，吊鉤才不會突然動」，練習／考核記錯不擋，同一次查看只記 1 次（steps-v6 v3.10，D44）"
+    },
+    {
+      "errorId": "ERR_Crane_EmptyRigLowTravel",
+      "severity": "Major",
+      "severityBeforeK3": "",
+      "courses": "periodic",
+      "inputMode": "",
+      "status": "Defined",
+      "owner": "",
+      "source": "CSV",
+      "trigger": "空吊具沒升到上限（吊鉤 pivot < 4.92）就水平移動。教學擋下，練習／考核每次移動記 1 次（steps-v6 v3.10，D44）",
+      "scope": "global",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "part.crane.empty_low_travel"
+        ],
+        "why": "空吊梁太低就水平移動，吊帶下端會勾到防墜門架或碰到人。",
+        "fix": "先把空吊梁升到上限（吊鉤 pivot ≥ 4.92 m），再水平移動。",
+        "what": "空吊具沒升到上限就水平移動。"
+      }
     },
     {
       "errorId": "ERR_SI03_CylinderPowerOn",
