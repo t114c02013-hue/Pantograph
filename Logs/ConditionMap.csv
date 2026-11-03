@@ -28,7 +28,7 @@ daily,STP_SI_06_RoofEntry,b,29,3,"平台掛點 = 已扣","harness.platform",
 daily,STP_SI_06_RoofEntry,c,30,2,"9／9 已點過（日常版清單：11 項去掉第 8、10 項，第 5 項為架空線停電並掛接地器）、hold.1.released = true、sign_start 已簽","env.work_order.roof_entry_check.checked_count>=9&&hold.1.released&&workorder.sign_start",b4c:holdpoint
 daily,STP_SI_06_RoofEntry,d,31,3,"兩個掛點都扣著","harness.roof&&harness.platform",
 daily,STP_SI_06_RoofEntry,e,32,3,"只剩車頂掛點扣著","harness.roof&&harness.platform=false",
-daily,STP_CSR_01_CheckIsolation,a,80,3,"核對作業單上 SI 各項的狀態：SI_00–06 各項都已完成；有一項沒完成就不能過","workorder.si_all_done",b4:p3
+daily,STP_CSR_01_CheckIsolation,a,80,3,"核對作業單上 SI 各項的狀態：SI_00–06 各項都已完成；有一項沒完成就不能過","workorder.si_checked&&workorder.si_all_done",
 daily,STP_CSR_01_CheckIsolation,b,81,3,"三處都已查看，異常欄已勾選「無異常」或「有異常」","env.work_order.anomaly.checked",
 daily,STP_CSR_02_ZeroCaliper,a,82,1,"手持卡尺","tool.active=tool.caliper",
 daily,STP_CSR_02_ZeroCaliper,b,83,1,"量爪間距 = 0","tool.caliper.jaw=0",

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Linq;
 using PantographSim.Core;
 using UnityEngine;
 
@@ -19,7 +20,13 @@ namespace PantographSim.Worksite
         protected override void OnBareHand(ActionRequested e)
         {
             // 場景點擊（Picker）的 pointId 是擊中點座標、text 是 click／inspect：一律當成打開／收起，不是填欄位
-            if (IsToggle(e)) { State.SetBool("ui.workorder_open", !State.GetBool("ui.workorder_open")); return; }
+            if (IsToggle(e))
+            {
+                bool open = !State.GetBool("ui.workorder_open");
+                State.SetBool("ui.workorder_open", open);
+                if (open) CheckIsolation(State, ServiceLocator.Get<PantographSim.Data.ProcedureDefinition>());
+                return;
+            }
             Write(State, Bus, e.pointId, e.text);
         }
 
@@ -38,6 +45,14 @@ namespace PantographSim.Worksite
         public const string IrJudgementField = "ir_judgement";
 
         static bool Tutorial(ISimState s) => s.Get("training.mode") == "tutorial";
+
+        /// <summary>R1.5b b4（CSR_01 a，K7）：打開作業單＝逐項核對 SI：這門課所有 SI 步驟都完成才寫 si_all_done＝true（ERR_CSR01_IsolationIncomplete 讀這兩個鍵）。</summary>
+        public static void CheckIsolation(ISimState s, PantographSim.Data.ProcedureDefinition prc)
+        {
+            if (prc == null || prc.steps == null) return;
+            bool all = prc.steps.Where(x => x != null && x.stepId.StartsWith("STP_SI_")).All(x => s.GetBool("step." + x.stepId + ".done"));
+            s.Batch(() => { s.SetBool("workorder.si_checked", true); s.SetBool("workorder.si_all_done", all); });
+        }
 
         /// <summary>D43：勾選和高阻計讀值相符（≥ 下限＝pass）。</summary>
         public static bool JudgementCorrect(ISimState s, string value) => (value == "pass") == PantographSim.Data.MeggerLogic.Pass(s, PantographSim.Data.ToolRulesDef.Load());

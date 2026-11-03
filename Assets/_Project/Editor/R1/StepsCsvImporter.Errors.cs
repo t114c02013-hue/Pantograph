@@ -32,6 +32,9 @@ namespace PantographSim.Editor
         [Serializable] class ErrorRulesFile { public ErrorRuleDef[] rules = Array.Empty<ErrorRuleDef>(); }
 
         public const string Defined = "Defined", PendingRuling = "PendingRuling";
+        /// <summary>R1.5b b4（驗收組長裁定 2026-11-03）：停用的錯誤——併入別條（Deprecated）或本版不適用（NotApplicable）。ID 保留、認得，不判。</summary>
+        public const string Deprecated = "Deprecated", NotApplicable = "NotApplicable";
+        public static bool Disabled(string status) => status == Deprecated || status == NotApplicable;
 
         public static Dictionary<string, ErrorRuleDef> LoadErrorRules() =>
             JsonUtility.FromJson<ErrorRulesFile>(File.ReadAllText(ErrorRulesPath, Encoding.UTF8)).rules.ToDictionary(r => r.errorId);
@@ -61,6 +64,7 @@ namespace PantographSim.Editor
                 foreach (var (id, sev) in refs)
                 {
                     if (!defs.TryGetValue(id, out var d)) errors.Add($"{r}：錯誤 {id} 在 ErrorRules.json 沒有定義");
+                    else if (Disabled(d.status)) continue;   // 停用的 ID：認得、不判
                     else if (d.status != Defined) errors.Add($"{r}：錯誤 {id} 還沒裁定嚴重度（{d.status}）");
                     else if (d.severity != sev) errors.Add($"{r}：錯誤 {id} 寫 {sev}，ErrorRules.json 是 {d.severity}");
                 }

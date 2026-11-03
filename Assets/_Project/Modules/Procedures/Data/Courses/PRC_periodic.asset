@@ -382,6 +382,27 @@ MonoBehaviour:
     severityBeforeK3: 
     oncePerRun: 0
     inputMode: 
+  - errorId: ERR_CSR01_IsolationIncomplete
+    severity: 1
+    what: "SI \u9084\u6709\u9805\u76EE\u6C92\u5B8C\u6210\u5C31\u958B\u59CB\u62C6\u63DB\u6ED1\u677F\u3002"
+    why: "\u9694\u96E2\uFF08\u964D\u5F13\u3001\u4E0A\u9396\u3001\u65B7\u96FB\u3001\u9A57\u96FB\u3001\u63A5\u5730\u3001\u4E0A\u8ECA\u9802\uFF09\u6C92\u505A\u5B8C\uFF0C\u4F5C\u696D\u4E0D\u5B89\u5168\u3002"
+    fix: "\u56DE\u5230\u6C92\u5B8C\u6210\u7684 SI \u6B65\u9A5F\u88DC\u505A\uFF0C\u4F5C\u696D\u55AE
+      SI \u5404\u9805\u90FD\u5B8C\u6210\u624D\u80FD\u5F80\u4E0B\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - procedure.current=STP_CSR_01_CheckIsolation&&workorder.si_checked&&!workorder.si_all_done
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   - errorId: ERR_Global_GroundHangOrder
     severity: 2
     what: "\u639B\u63A5\u5730\u7684\u9806\u5E8F\u53CD\u4E86\uFF1A\u63A5\u5730\u7AEF\u9084\u6C92\u63A5\u5C31\u5148\u639B\u8A2D\u5099\u7AEF\uFF08\u5F13\u982D\u3001\u96FB\u7E9C\u7AEF\u5B50\uFF09\u3002"

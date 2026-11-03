@@ -8,9 +8,20 @@
       "courses": "both",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p4",
+      "owner": "",
       "source": "CSV",
-      "trigger": "01（K7）：定期檢修照 O3 跳過。日常更換改成「核對作業單上 SI 各項的狀態」，SI 有一項沒完成就不能過，並記 ERR_CSR01_IsolationIncomplete（Major，新 ID）。測試放在 CourseOverrideTests。"
+      "trigger": "01（K7）：定期檢修照 O3 跳過。日常更換改成「核對作業單上 SI 各項的狀態」，SI 有一項沒完成就不能過，並記 ERR_CSR01_IsolationIncomplete（Major，新 ID）。測試放在 CourseOverrideTests。",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "procedure.current=STP_CSR_01_CheckIsolation&&workorder.si_checked&&!workorder.si_all_done"
+        ],
+        "what": "SI 還有項目沒完成就開始拆換滑板。",
+        "why": "隔離（降弓、上鎖、斷電、驗電、接地、上車頂）沒做完，作業不安全。",
+        "fix": "回到沒完成的 SI 步驟補做，作業單 SI 各項都完成才能往下。"
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_CSR02_MeasureBeforeZero",
@@ -316,10 +327,10 @@
       "courses": "both",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "b4c:torque_socket",
       "source": "CSV",
       "trigger": "- 新錯誤 ERR_IN07_WrongSocket、ERR_IN09_WrongSocket、ERR_CSR13_WrongSocket（Minor，三種模式都判）：套錯擋下並提示「套筒尺寸不對」，同一步只記 1 次。",
-      "note": "b4 第 5 部分還沒做：同上：扭力扳手的套筒選擇（D38）還沒做。"
+      "note": "軟體工程裁定：扭力扳手選套筒排在 b4c（做法見 b4c-stubs.md「扭力扳手選套筒」）。"
     },
     {
       "errorId": "ERR_CSR14_Order",
@@ -545,8 +556,8 @@
       "severityBeforeK3": "",
       "courses": "periodic",
       "inputMode": "",
-      "status": "Defined",
-      "owner": "b4:p5",
+      "status": "NotApplicable",
+      "owner": "R2",
       "source": "CSV",
       "trigger": "吊帶在吊耳以外的地方（臂、弓頭）放開。**新 ID**",
       "rule": {
@@ -560,7 +571,7 @@
         "what": "吊帶在吊耳以外的地方（臂、弓頭）放開。**新 ID**"
       },
       "scope": "global",
-      "note": "b4 第 5 部分還沒做：點選操作時吊帶只能掛在吊耳上，不會掛到臂或弓頭；要等 VR 拿著吊帶自由放開（R1.5b 拿取吊帶）時才會發生。"
+      "note": "驗收組長裁定：本版不適用，排 R2（優先度中）：要 VR 拿著吊帶自由放開才會發生。"
     },
     {
       "errorId": "ERR_Crane_RiggingNotInspected",
@@ -940,11 +951,11 @@
       "severityBeforeK3": "",
       "courses": "periodic",
       "inputMode": "",
-      "status": "Defined",
-      "owner": "b4:p5",
+      "status": "Deprecated",
+      "owner": "n/a",
       "source": "CSV",
       "trigger": "- 固定帶還沒拆，記 Critical，錯誤 ID 為 ERR_Global_RaiseWithHoldDown（**新 ID**）。",
-      "note": "b4 第 5 部分還沒做：和 ERR_IN11_StrapLeft（鐵道裁定：WC_05 按升弓時固定帶沒拆，記 Major、一次作業一次）是同一個情況，兩條同時記會重複，待裁定要不要保留。"
+      "note": "驗收組長裁定（2026-11-03）：併入 ERR_IN11_StrapLeft（WC_05 按升弓時記 Major、一次作業只記一次）。ID 保留。"
     },
     {
       "errorId": "ERR_Global_RoofFallZone",
@@ -1204,10 +1215,10 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "b4c:torque_socket",
       "source": "CSV",
       "trigger": "- 新錯誤 ERR_IN07_WrongSocket、ERR_IN09_WrongSocket、ERR_CSR13_WrongSocket（Minor，三種模式都判）：套錯擋下並提示「套筒尺寸不對」，同一步只記 1 次。",
-      "note": "b4 第 5 部分還沒做：扭力扳手目前沒有選套筒（D38），扭力時不判套筒；要先做扭力扳手的套筒選擇。"
+      "note": "軟體工程裁定：扭力扳手選套筒排在 b4c（做法見 b4c-stubs.md「扭力扳手選套筒」）。"
     },
     {
       "errorId": "ERR_IN09_Misaligned",
@@ -1215,11 +1226,11 @@
       "severityBeforeK3": "",
       "courses": "periodic",
       "inputMode": "",
-      "status": "Defined",
-      "owner": "b4:p5",
+      "status": "NotApplicable",
+      "owner": "R2",
       "source": "CSV",
       "trigger": "：ERR_IN09_Under **Critical**；ERR_IN09_Setting、ERR_IN09_Over、ERR_IN09_Misaligned（沒對準記號就接上）Major。",
-      "note": "b4 第 5 部分還沒做：高壓端子裝回時會吸附到原位，沒有「沒對準記號」的狀態；要有可旋轉的端子才判得到。"
+      "note": "驗收組長裁定：本版不適用，排 R2（優先度低）：高壓端子裝回會吸附到原位，要有可旋轉的端子才判得到。"
     },
     {
       "errorId": "ERR_IN09_Over",
@@ -1313,10 +1324,10 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "b4c:torque_socket",
       "source": "CSV",
       "trigger": "- 新錯誤 ERR_IN07_WrongSocket、ERR_IN09_WrongSocket、ERR_CSR13_WrongSocket（Minor，三種模式都判）：套錯擋下並提示「套筒尺寸不對」，同一步只記 1 次。",
-      "note": "b4 第 5 部分還沒做：同上：扭力扳手的套筒選擇（D38）還沒做。"
+      "note": "軟體工程裁定：扭力扳手選套筒排在 b4c（做法見 b4c-stubs.md「扭力扳手選套筒」）。"
     },
     {
       "errorId": "ERR_IN10_NotConnected",
@@ -1463,11 +1474,11 @@
       "severityBeforeK3": "",
       "courses": "both",
       "inputMode": "",
-      "status": "Defined",
-      "owner": "b4:p5",
+      "status": "NotApplicable",
+      "owner": "n/a",
       "source": "CSV",
       "trigger": "| ERR_SI02_TagWithoutLock／ERR_SI02_RaiseSwitchUnlocked | Critical | SI_02 只掛牌沒上鎖／漏鎖升弓開關（v1.5 補 ID，v5.6 同） |",
-      "note": "b4 第 5 部分還沒做：SI_02 d 的條件就要求升弓開關上鎖，漏鎖這一步不會完成；要不要另外判（例如離開駕駛室時）待裁定。"
+      "note": "驗收組長裁定：本版不適用（SI_02 d 的條件就要求升弓開關上鎖）。ID 保留。"
     },
     {
       "errorId": "ERR_SI02_TagOnly",
@@ -1490,7 +1501,7 @@
       "owner": "b4:p5",
       "source": "CSV",
       "trigger": "SI_02 只掛牌沒上鎖／漏鎖升弓開關（v1.5 補 ID，v5.6 同）",
-      "note": "b4 第 5 部分還沒做：上鎖掛牌組一個動作同時上鎖和掛牌，沒有只掛牌的狀態。"
+      "note": "驗收組長裁定：上鎖掛牌拆成兩個動作（先上鎖、再掛牌），等步驟表 v3.9。"
     },
     {
       "errorId": "ERR_SI03_CylinderPowerOn",
@@ -1499,10 +1510,10 @@
       "courses": "both",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "b4d",
       "source": "CSV",
       "trigger": "沒斷電動缸電源就離開駕駛室（v1.5 補 ID）",
-      "note": "b4 第 5 部分還沒做：「離開駕駛室」要看人在哪個區域（player.zone），那是 b4d 的移動限制。"
+      "note": "軟體工程裁定：沒斷電動缸電源就走出駕駛室區域，要 b4d 的人員區域（player.zone）。b4d 收工時要有自己的測試（沒斷電走出駕駛室記 1 次）。"
     },
     {
       "errorId": "ERR_SI03_PowerOn",

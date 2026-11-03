@@ -129,7 +129,7 @@
     { "text": "part.pan_assy.state = Mounted，BaseHole 與 InsulatorTop 距離 ≤ EX 1 cm", "rule": "part.pan_assy.state=Mounted&&part.pan_assy.seat_error_cm<=1" },
     { "text": "吊梁底面高於弓頂 EX 1.0 m", "rule": "part.crane.beam_above_pan_m>=1.0" },
     { "text": "與 COG 水平差 ≤ 5 cm；吊梁底面在弓頂上方 EX 0.55–0.75 m（D42：吊帶要鬆才掛得上吊耳；上限 = 拉直高度 − 0.06 m，以實測為準）", "rule": "part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=crane.rig_height_lower_m&&part.crane.beam_above_pan_m<=crane.rig_height_upper_m" },
-    { "text": "核對作業單上 SI 各項的狀態：SI_00–06 各項都已完成；有一項沒完成就不能過", "rule": "workorder.si_all_done", "owner": "b4:p3" },
+    { "text": "核對作業單上 SI 各項的狀態：SI_00–06 各項都已完成；有一項沒完成就不能過", "rule": "workorder.si_checked&&workorder.si_all_done" },
     { "text": "待報廢箱有該條舊滑板", "rule": "part.carbon_strip_{side}.state=InTray" },
     { "text": "暫放墊上有該條舊滑板（1 條）", "rule": "part.carbon_strip_{side}.state=OnMat", "owner": "b4c:strip_carry" },
     { "text": "待報廢箱有該條舊滑板，暫放墊是空的", "rule": "part.carbon_strip_{side}.state=InTray&&env.roof_strip_mat.count<=0", "owner": "b4c:strip_carry" },

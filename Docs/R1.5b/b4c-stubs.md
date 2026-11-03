@@ -9,6 +9,9 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | owner | 項目 |
 |---|---|
 | b4c:holdpoint | HoldPointDef 停留點與 NPC（b4c） |
+| b4c:torque_socket | 扭力扳手選套筒（b4c，軟體工程裁定） |
+| R2 | 本版不適用，排 R2（驗收組長裁定） |
+| n/a | 本版不適用或已併入其他錯誤（驗收組長裁定，ID 保留） |
 | b4c:ppe | 個人防護具與手套模式（b4c） |
 | b4c:ground_register | 接地登記欄（b4c） |
 | b4c:lockout | 一人一鎖（b4c） |
@@ -20,7 +23,7 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | b4:p5 | 兩門課跑到結算（b4 第 5 部分；機制沒有指定段落，做的時候回報） |
 | b4:p3b | 扭力類錯誤與 K3 降級（b4 第 3b 部分） |
 
-## 小動作（共 49 列）
+## 小動作（共 48 列）
 
 | 步驟 | 小動作 | 課程 | 完成條件 | owner |
 |---|---|---|---|---|
@@ -67,7 +70,6 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_WC_02_LeaveRoof | c | daily | `player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use` | b4d |
 | STP_WC_02_LeaveRoof | c | periodic | `player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use` | b4d |
 | STP_RT_02_InsulationTest | r3h | periodic | `player.zone=platform&&harness.hooks_stowed` | b4d |
-| STP_CSR_01_CheckIsolation | a | daily | `workorder.si_all_done` | b4:p3 |
 | STP_CSR_10_CheckNew_L | g | daily | `env.work_order.part_trace.matches_spare_L` | b4:p4 |
 | STP_CSR_10_CheckNew_R | g | daily | `env.work_order.part_trace.matches_spare_R` | b4:p4 |
 | STP_CSR_10_CheckNew_L | g | periodic | `env.work_order.part_trace.matches_spare_L` | b4:p4 |
@@ -89,22 +91,13 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | consumable.carbon_strip | b4:p4 |
 | consumable.carbon_strip.measure_mid | b4:p4 |
 
-## 錯誤規則的觸發條件還沒做（Assets/_Project/Data/Source/ErrorRules.json 的 owner，共 24 條）
+## 錯誤規則的觸發條件還沒做（Assets/_Project/Data/Source/ErrorRules.json 的 owner，共 23 條）
 
 ErrorRuleTests.PendingTriggers_ListedInStubsDoc 檢查兩邊一致。觸發做好時把 owner 清空，再刪掉這裡那一列。
 
 | 錯誤 | owner | 嚴重度 |
 |---|---|---|
-| ERR_CSR01_IsolationIncomplete | b4:p4 | Major |
-| ERR_Crane_RiggedOnArm | b4:p5 | Critical |
-| ERR_CSR13_WrongSocket | b4:p5 | Minor |
-| ERR_Global_RaiseWithHoldDown | b4:p5 | Critical |
-| ERR_IN07_WrongSocket | b4:p5 | Minor |
-| ERR_IN09_Misaligned | b4:p5 | Major |
-| ERR_IN09_WrongSocket | b4:p5 | Minor |
-| ERR_SI02_RaiseSwitchUnlocked | b4:p5 | Critical |
 | ERR_SI02_TagWithoutLock | b4:p5 | Critical |
-| ERR_SI03_CylinderPowerOn | b4:p5 | Critical |
 | ERR_Global_GroundNotCleared | b4c:ground_register | Critical |
 | ERR_Global_GroundNotRegistered | b4c:ground_register | Major |
 | ERR_Global_HoldPointRejected | b4c:holdpoint | Major |
@@ -117,8 +110,25 @@ ErrorRuleTests.PendingTriggers_ListedInStubsDoc 檢查兩邊一致。觸發做�
 | ERR_Global_StartWithoutPermit | b4c:si00 | Critical |
 | ERR_Global_StripReleasedOnRoof | b4c:strip_carry | Major |
 | ERR_WC01a_StripOnMat | b4c:strip_carry | Major |
+| ERR_CSR13_WrongSocket | b4c:torque_socket | Minor |
+| ERR_IN07_WrongSocket | b4c:torque_socket | Minor |
+| ERR_IN09_WrongSocket | b4c:torque_socket | Minor |
 | ERR_Global_RoofFallZone | b4d | Major |
 | ERR_Global_TeleportWhileAnchored | b4d | Minor |
+| ERR_SI03_CylinderPowerOn | b4d | Critical |
+| ERR_Global_RaiseWithHoldDown | n/a | Critical |
+| ERR_SI02_RaiseSwitchUnlocked | n/a | Critical |
+| ERR_Crane_RiggedOnArm | R2 | Critical |
+| ERR_IN09_Misaligned | R2 | Major |
+
+## 扭力扳手選套筒（b4c:torque_socket，軟體工程裁定 2026-11-03）
+
+- 三支扳手（套筒扳手、扭力扳手、大扭力扳手）共用 ToolSocketMount，讀 SocketCatalog 和 ToolDefinition.driveIn。
+- VR：拿扳手頭碰工具袋 SocketCase 的 TGT_Socket_*，停 0.15 s 換上，舊的回盒；方頭不合不吸附，提示「方頭尺寸不符」，不記分。
+- 桌面：點 SocketCase 的格子換上；R1 的套筒選單保留當備援。
+- 接合螺栓時比對套筒 sizeMm 和 FastenerDef.sizeMm：不同就擋下，提示「套筒尺寸不對」，記該步的 WrongSocket（Minor），同一步只記一次（ERR_IN07／IN09／CSR13_WrongSocket）。
+- 教學模式 SocketCase 標尺寸。
+- R1 的換套筒測試改成三支扳手各跑一次。
 
 ## 等後面段落才能測的（不是機制）
 

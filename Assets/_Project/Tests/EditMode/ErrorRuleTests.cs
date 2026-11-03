@@ -25,7 +25,7 @@ namespace PantographSim.Tests
             var errs = new List<string>();
             StepsCsvImporter.CheckErrorRefs(StepsCsvImporter.LoadSubActionRows(), StepsCsvImporter.LoadStepRows(), defs, errs);
             Assert.IsEmpty(errs, string.Join("\n", errs));
-            var pending = defs.Values.Where(d => d.status != StepsCsvImporter.Defined).Select(d => d.errorId).ToList();
+            var pending = defs.Values.Where(d => d.status != StepsCsvImporter.Defined && !StepsCsvImporter.Disabled(d.status)).Select(d => d.errorId).ToList();   // 停用（Deprecated／NotApplicable）是已裁定
             Assert.IsEmpty(pending, "要給驗收組長裁定的（PendingRuling）：" + string.Join(", ", pending));
             foreach (var d in defs.Values) Assert.IsTrue(new[] { "Critical", "Major", "Minor" }.Contains(d.severity), d.errorId + "：嚴重度 " + d.severity);
         }
@@ -101,7 +101,7 @@ namespace PantographSim.Tests
         public void PendingTriggers_ListedInStubsDoc()
         {
             var defs = StepsCsvImporter.LoadErrorRules();
-            var owners = new HashSet<string> { "b4c:holdpoint", "b4c:ppe", "b4c:ground_register", "b4c:lockout", "b4c:si00", "b4c:strip_carry", "b4d", "b4:p3b", "b4:p3c", "b4:p3d", "b4:p4", "b4:p5" };
+            var owners = new HashSet<string> { "b4c:holdpoint", "b4c:ppe", "b4c:ground_register", "b4c:lockout", "b4c:si00", "b4c:strip_carry", "b4c:torque_socket", "b4d", "b4:p3b", "b4:p3c", "b4:p3d", "b4:p4", "b4:p5", "R2", "n/a" };
             foreach (var d in defs.Values.Where(d => !string.IsNullOrEmpty(d.owner))) Assert.IsTrue(owners.Contains(d.owner), $"{d.errorId}：{d.owner} 不是項目");
             var doc = System.IO.File.ReadAllLines("Docs/R1.5b/b4c-stubs.md").Where(l => l.StartsWith("| ERR_")).Select(l => l.Split('|').Select(x => x.Trim()).ToArray()).Select(c => c[1] + "|" + c[2]).ToList();
             var expected = defs.Values.Where(d => !string.IsNullOrEmpty(d.owner)).Select(d => d.errorId + "|" + d.owner).ToList();
