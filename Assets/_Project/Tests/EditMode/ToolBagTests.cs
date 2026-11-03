@@ -31,7 +31,7 @@ namespace PantographSim.Tests
             foreach (var def in AssetDatabase.FindAssets("t:ToolDefinition").Select(g => AssetDatabase.LoadAssetAtPath<ToolDefinition>(AssetDatabase.GUIDToAssetPath(g))).Where(d => d != null && d.hotkey > 0))
             {
                 var go = new GameObject(def.toolId); go.transform.SetParent(root.transform);
-                go.AddComponent<CarryTool>().Setup(def, def.toolId);   // 只測拿放：工具本身的操作不在這裡
+                ((ToolBase)go.AddComponent(PantographSim.Editor.SliceSceneBuilder.ToolTypes.TryGetValue(def.toolId, out var type) ? type : typeof(CarryTool))).Setup(def, def.toolId);   // 和場景同一種工具元件
             }
             var rule = AssetDatabase.FindAssets("t:SafetyRuleDefinition").Select(g => AssetDatabase.LoadAssetAtPath<SafetyRuleDefinition>(AssetDatabase.GUIDToAssetPath(g))).First(r => r.kind == SafetyRuleKind.ToolNotStowedOnRoof);
             belt = root.AddComponent<ToolBelt>();

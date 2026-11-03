@@ -18,7 +18,7 @@ daily,STP_SI_04_VoltageTest,a,17,1,"手持驗電桿（雙手）","tool.active=to
 daily,STP_SI_04_VoltageTest,b,18,1,"自檢通過","tool.voltage_detector.selftest",
 daily,STP_SI_04_VoltageTest,c,19,1,"顯示「無電」","isolation.voltage_tested",
 daily,STP_SI_04_VoltageTest,d,20,1,"掛位 2 = 在架","tool.active=",
-daily,STP_SI_05_Grounding,a,21,1,"手持接地桿（雙手），掛位 3 = 使用中","tool.active=tool.grounding_rod",
+daily,STP_SI_05_Grounding,a,21,1,"手持接地桿（雙手），掛位 3 = in_hand（手持中）","tool.active=tool.grounding_rod",
 daily,STP_SI_05_Grounding,b,22,1,"接地夾 = 已夾上","isolation.terminal_clamped",
 daily,STP_SI_05_Grounding,c,23,1,"拉線確認完成","isolation.pull_tested",
 daily,STP_SI_05_Grounding,d,24,1,"掛鉤 = 已掛上（接地棒留在場上）","isolation.head_clamped",
@@ -199,21 +199,21 @@ periodic,STP_SI_04_VoltageTest,a,17,1,"手持驗電桿（雙手）","tool.active
 periodic,STP_SI_04_VoltageTest,b,18,1,"自檢通過","tool.voltage_detector.selftest",
 periodic,STP_SI_04_VoltageTest,c,19,1,"顯示「無電」","isolation.voltage_tested",
 periodic,STP_SI_04_VoltageTest,d,20,1,"掛位 2 = 在架","tool.active=",
-periodic,STP_SI_05_Grounding,a,21,1,"手持接地桿（雙手），掛位 3 = 使用中","tool.active=tool.grounding_rod",
+periodic,STP_SI_05_Grounding,a,21,1,"手持接地桿（雙手），掛位 3 = in_hand（手持中）","tool.active=tool.grounding_rod",
 periodic,STP_SI_05_Grounding,b,22,1,"接地夾 = 已夾上","isolation.terminal_clamped",
 periodic,STP_SI_05_Grounding,c,23,1,"拉線確認完成","isolation.pull_tested",
 periodic,STP_SI_05_Grounding,d,24,1,"掛鉤 = 已掛上（接地棒留在場上）","isolation.head_clamped",
 periodic,STP_SI_05_Grounding,e,25,2,"#1 = 已登記","ground_register.1=registered",b4c:ground_register
 periodic,STP_SI_06_RoofEntry,a,26,3,"已穿戴，掛位 4 = 使用中","rack.slot_4=in_use",
-periodic,STP_SI_06_RoofEntry,a2,27,3,"掛位 12 = 使用中，短接地線 = 隨身","rack.slot_12=in_use&&tool.grounding_lead.carried",b4:p5
+periodic,STP_SI_06_RoofEntry,a2,27,3,"掛位 12 = 使用中，短接地線 = 隨身","rack.slot_12=in_use&&tool.grounding_lead.carried",
 periodic,STP_SI_06_RoofEntry,a3,28,3,"遙控器 = 隨身","env.crane_pendant.state=Held",
 periodic,STP_SI_06_RoofEntry,b,29,3,"平台掛點 = 已扣","harness.platform",
 periodic,STP_SI_06_RoofEntry,c,30,2,"11／11 已點過、hold.1.released = true（作業負責人與監護人 npc.guard 都放行）、sign_start 已簽","env.work_order.roof_entry_check.checked_count>=11&&hold.1.released&&workorder.sign_start",b4c:holdpoint
 periodic,STP_SI_06_RoofEntry,d,31,3,"兩個掛點都扣著","harness.roof&&harness.platform",
 periodic,STP_SI_06_RoofEntry,e,32,3,"只剩車頂掛點扣著","harness.roof&&harness.platform=false",
-periodic,STP_RM_00_SecondGround,a,33,3,"已夾上","ip.roof.carbody_ground.clamped",b4:p5
-periodic,STP_RM_00_SecondGround,b,34,3,"已掛上","ip.roof.hv_cable_ground.clamped",b4:p5
-periodic,STP_RM_00_SecondGround,c,35,3,"拉線確認完成","ip.roof.hv_cable_ground.pull_tested",b4:p5
+periodic,STP_RM_00_SecondGround,a,33,3,"已夾上","ip.roof.carbody_ground.clamped",
+periodic,STP_RM_00_SecondGround,b,34,3,"已掛上","ip.roof.hv_cable_ground.clamped",
+periodic,STP_RM_00_SecondGround,c,35,3,"拉線確認完成","ip.roof.hv_cable_ground.pull_tested",
 periodic,STP_RM_00_SecondGround,d,36,2,"#2 = 已登記","ground_register.2=registered",b4c:ground_register
 periodic,STP_RM_01_HoldDown,a,37,2,"手持固定帶","tool.active=tool.hold_down_strap",
 periodic,STP_RM_01_HoldDown,b,38,3,"hold_down = Installed","ip.pan_assy.hold_down.state=Installed",
@@ -256,9 +256,9 @@ periodic,STP_RM_06_Rig,a3,60,3,"Rigged","ip.pan_assy.lift_point_3.state=Rigged",
 periodic,STP_RM_06_Rig,b,61,3,"已查看","env.rigging.inspected",b4:p5
 periodic,STP_RM_07_LeaveRoof,a,62,3,"兩個都扣著","harness.roof&&harness.platform",
 periodic,STP_RM_07_LeaveRoof,b,63,3,"只剩平台掛點，人在平台","harness.platform&&harness.roof=false&&player.zone=platform",b4d
-periodic,STP_RM_07_LeaveRoof,c,64,3,"兩個掛鉤都收在胸前扣環，安全帶仍穿著","harness.hooks_stowed&&rack.slot_4=in_use",b4:p5
+periodic,STP_RM_07_LeaveRoof,c,64,3,"兩個掛鉤都收在胸前扣環，安全帶仍穿著","harness.hooks_stowed&&rack.slot_4=in_use",
 periodic,STP_LF_01_PreLift,a,65,3,"已取下","isolation.head_clamped=false",
-periodic,STP_LF_01_PreLift,b,66,3,"已鬆開（第二支的夾子仍在）","isolation.terminal_clamped=false&&ip.roof.carbody_ground.clamped",b4:p5
+periodic,STP_LF_01_PreLift,b,66,3,"已鬆開（第二支的夾子仍在）","isolation.terminal_clamped=false&&ip.roof.carbody_ground.clamped",
 periodic,STP_LF_01_PreLift,c,67,2,"掛位 3 = 在架","rack.slot_3=on_rack",
 periodic,STP_LF_01_PreLift,c2,68,2,"#1 = 已銷號","ground_register.1=cancelled",b4c:ground_register
 periodic,STP_LF_01_PreLift,d,69,3,"已查看；水平差 ≤ EX 5 cm","part.crane.hook.inspected&&part.crane.hook_cog_offset_cm<=5",b4:p5
@@ -408,12 +408,12 @@ periodic,STP_IN_04b_RegroundPan,a,146,2,"手持驗電桿（雙手）","tool.acti
 periodic,STP_IN_04b_RegroundPan,b,147,3,"自檢通過","tool.voltage_detector.selftest",
 periodic,STP_IN_04b_RegroundPan,c,148,3,"顯示「無電」","isolation.voltage_tested",
 periodic,STP_IN_04b_RegroundPan,d,149,2,"掛位 2 = 在架","rack.slot_2=on_rack",
-periodic,STP_IN_04b_RegroundPan,e,150,3,"手持接地桿（雙手），掛位 3 = 使用中","tool.active=tool.grounding_rod&&rack.slot_3=in_hand",
+periodic,STP_IN_04b_RegroundPan,e,150,3,"手持接地桿（雙手），掛位 3 = in_hand（手持中）","tool.active=tool.grounding_rod&&rack.slot_3=in_hand",
 periodic,STP_IN_04b_RegroundPan,f,151,3,"已夾上","isolation.terminal_clamped",
 periodic,STP_IN_04b_RegroundPan,g,152,3,"拉線確認完成","isolation.pull_tested",
 periodic,STP_IN_04b_RegroundPan,h,153,3,"已掛上","isolation.head_clamped",
 periodic,STP_IN_04b_RegroundPan,i,154,3,"#1 = 已登記（第二次）","ground_register.1=registered&&ground_register.1.registered_count>=2",b4c:ground_register
-periodic,STP_IN_05_RoofEntry,a,155,3,"掛鉤在手，安全帶仍穿著","harness.hooks_stowed=false&&rack.slot_4=in_use",b4:p5
+periodic,STP_IN_05_RoofEntry,a,155,3,"掛鉤在手，安全帶仍穿著","harness.hooks_stowed=false&&rack.slot_4=in_use",
 periodic,STP_IN_05_RoofEntry,b,156,3,"已扣","harness.platform",
 periodic,STP_IN_05_RoofEntry,c,157,3,"兩個都扣著","harness.roof&&harness.platform",
 periodic,STP_IN_05_RoofEntry,d,158,3,"只剩車頂掛點","harness.roof&&harness.platform=false",
@@ -449,9 +449,9 @@ periodic,STP_IN_10_CtrlReconnect,a,173,3,"防塵蓋 = 已取下","ip.pan_assy.ct
 periodic,STP_IN_10_CtrlReconnect,b,174,3,"Mounted","ip.pan_assy.ctrl_connector.state=Installed",
 periodic,STP_IN_11_RemoveHoldDown,a,175,3,"Removed","ip.pan_assy.hold_down.state=Removed",
 periodic,STP_IN_11_RemoveHoldDown,b,176,2,"掛位 10 = 在袋（比照 RM_04 d）","rack.slot_10=on_rack",
-periodic,STP_WC_03a_RemoveGroundRoof,a,177,3,"電纜端子端已取下（先於 b）","ip.roof.hv_cable_ground.clamped=false",b4:p5
-periodic,STP_WC_03a_RemoveGroundRoof,b,178,3,"夾具已鬆開","ip.roof.carbody_ground.clamped=false",b4:p5
-periodic,STP_WC_03a_RemoveGroundRoof,c,179,3,"短接地線 = 隨身（比照 SI_06 a2）","tool.grounding_lead.carried",b4:p5
+periodic,STP_WC_03a_RemoveGroundRoof,a,177,3,"電纜端子端已取下（先於 b）","ip.roof.hv_cable_ground.clamped=false",
+periodic,STP_WC_03a_RemoveGroundRoof,b,178,3,"夾具已鬆開","ip.roof.carbody_ground.clamped=false",
+periodic,STP_WC_03a_RemoveGroundRoof,c,179,3,"短接地線 = 隨身（比照 SI_06 a2）","tool.grounding_lead.carried",
 periodic,STP_WC_03a_RemoveGroundRoof,d,180,2,"#2 = 已銷號","ground_register.2=cancelled",b4c:ground_register
 periodic,STP_WC_01a_ToolCountRoof,a,181,3,"工具袋每個掛位都注視過（逐格），且 工具袋 5–9 號、13 號（大扭力扳手）和固定帶都在袋","env.tool_bag.slot_5.viewed&&env.tool_bag.slot_6.viewed&&env.tool_bag.slot_7.viewed&&env.tool_bag.slot_8.viewed&&env.tool_bag.slot_9.viewed&&env.tool_bag.slot_10.viewed&&env.tool_bag.slot_13.viewed&&rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&rack.slot_13=on_rack&&rack.slot_10=on_rack",b4:p5
 periodic,STP_WC_01a_ToolCountRoof,b,182,3,"零件袋與台架旁 L、R 螺栓盤都是空的，待報廢箱有 2 條舊滑板（CSR_05 判合格時為 0），車頂無遺留","env.tool_bag.bolt_pouch.count<=0&&env.bolt_tray_L.count<=0&&env.bolt_tray_R.count<=0&&env.parts_tray.strip_count_ok&&roof.leftover_count<=0",b4:p5

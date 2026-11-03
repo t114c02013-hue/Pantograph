@@ -114,17 +114,47 @@ namespace PantographSim.Tests
                 LiftControl.Send(s, "Stop");       // 放開：PositionCheck 強制量一次
             }
 
+            static IEnumerable<string> Parts(string condition) => condition.Split(new[] { "&&" }, System.StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim());
+            static bool IsLeadPart(string part) => part.StartsWith(GroundingLeadLogic.Carried) || part.StartsWith(GroundingLeadLogic.CarBody + ".") || part.StartsWith(GroundingLeadLogic.Cable + ".");
+            static void Command(string target, string text, string toolId = "") => Sim.Bus.Publish(new ActionRequested { targetId = target, text = text, toolId = toolId });
+            int LeadSlot => SlotOf(GroundingLeadLogic.ToolId);
+
+            /// <summary>短接地線拿到手上（前一個動作：工具環或接著的位置拿下來、或從工具架拿），ToolBelt 在這一批生效後才換手上的工具。</summary>
+            void EnsureLead()
+            {
+                if (s.Get(SimIds.ActiveTool) == GroundingLeadLogic.ToolId) return;
+                if (SlotState(LeadSlot) == RackLogic.InUse) { Hold(""); Command(GroundingLeadLogic.ToolId, "take"); }
+                else Hold(GroundingLeadLogic.ToolId);
+            }
+
+            /// <summary>短接地線的條件：掛到工具環、接上或取下兩端、拉線確認（GroundingLeadTool）。</summary>
+            void Lead(string part)
+            {
+                if (part == GroundingLeadLogic.Carried) { if (!s.GetBool(part)) Command(GroundingLeadLogic.ToolId, "ring"); return; }
+                if (part == GroundingLeadLogic.PullTestedKey) { Command(GroundingLeadLogic.ToolId, "pulltest"); return; }
+                bool want = !part.EndsWith("=false");
+                string point = part.StartsWith(GroundingLeadLogic.CarBody) ? GroundingLeadLogic.CarBody : GroundingLeadLogic.Cable;
+                if (s.GetBool(GroundingLeadLogic.ClampedKey(point)) != want) Command(point, "click", GroundingLeadLogic.ToolId);
+            }
+
             /// <summary>一個 tick：機制的動作和其他鍵一批生效（和原本的 Write 一樣）。回傳有沒有走機制。</summary>
-            public bool Write(string condition) { bool used = false; s.Batch(() => used = WriteInBatch(condition)); return used; }
+            public bool Write(string condition)
+            {
+                if (Parts(condition).Any(IsLeadPart)) EnsureLead();
+                bool used = false; s.Batch(() => used = WriteInBatch(condition)); return used;
+            }
 
             bool WriteInBatch(string condition)
             {
                 var rest = new List<string>();
                 float? dropLo = null, dropHi = null;
-                foreach (var part in condition.Split(new[] { "&&" }, System.StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()))
+                foreach (var part in Parts(condition).OrderBy(p => IsLeadPart(p) ? 0 : 1))   // 短接地線先（掛到工具環後掛位 12 才是使用中）
                 {
                     var m = Slot.Match(part);
-                    if (part.StartsWith(SimIds.ActiveTool + "=")) Hold(part.Substring(SimIds.ActiveTool.Length + 1));
+                    if (IsLeadPart(part)) Lead(part);
+                    else if (part == HarnessLogic.Stowed) { if (!s.GetBool(part)) Command(SimIds.ToolHarness, "stow"); }   // D31 胸前扣環
+                    else if (part == HarnessLogic.Stowed + "=false") Command(SimIds.ToolHarness, "take");
+                    else if (part.StartsWith(SimIds.ActiveTool + "=")) Hold(part.Substring(SimIds.ActiveTool.Length + 1));
                     else if (m.Success) Rack(int.Parse(m.Groups[1].Value), m.Groups[2].Value);
                     else if (part.StartsWith(SimIds.CraneLoadBottomY + ">="))
                     {
@@ -149,7 +179,7 @@ namespace PantographSim.Tests
                     HoistTo(restBottomY + drop);   // 試吊離座、放到定位銷／絕緣子上方
                 }
                 if (rest.Count > 0) CourseFlowTests.Write(s, string.Join("&&", rest));
-                return rest.Count < condition.Split(new[] { "&&" }, System.StringSplitOptions.RemoveEmptyEntries).Length || dropLo.HasValue || dropHi.HasValue;
+                return rest.Count < Parts(condition).Count() || dropLo.HasValue || dropHi.HasValue;
             }
 
             public void Dispose()
@@ -323,6 +353,31 @@ namespace PantographSim.Tests
         public void IN02_Inspect_NeedsNewInspection()
         {
             AssertNeedsAction("STP_IN_02_TrialLift", "b", "part.pan_assy.inspected");
+        }
+
+        /// <summary>D31：RM_07 c 把掛鉤收到胸前扣環後 harness.platform＝false，IN_05 b（扣平台掛點）啟用時不成立，要真的扣上。</summary>
+        [Test]
+        public void IN05b_AfterStowingHooks_PlatformNotHooked()
+        {
+            AssertNotHeldAtActivation("STP_IN_05_RoofEntry", "b", "harness.platform");
+        }
+
+        /// <summary>RM_00 把短接地線夾上車體接地座後就不在身上（carried＝false），WC_03a c（掛回工具環）啟用時不成立，要真的掛回去。</summary>
+        [Test]
+        public void WC03a_c_AfterClampingLead_NotCarried()
+        {
+            AssertNotHeldAtActivation("STP_WC_03a_RemoveGroundRoof", "c", GroundingLeadLogic.Carried);
+        }
+
+        static void AssertNotHeldAtActivation(string stepId, string subId, string key)
+        {
+            var f = new Flow("periodic");
+            try
+            {
+                Assert.IsTrue(f.Run((st, sub) => st == stepId && sub == subId), $"要跑到 {stepId} {subId}");
+                Assert.IsFalse(f.s.GetBool(key), $"{stepId} {subId} 啟用時 {key} 不能已經成立");
+            }
+            finally { f.Dispose(); }
         }
 
         static void AssertNeedsAction(string stepId, string subId, string actionKey)

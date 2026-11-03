@@ -30,13 +30,13 @@ namespace PantographSim.Editor
         public const string ScenePath = "Assets/_Project/Content/Scenes/SC_CarbonStripSlice.unity";
         /// <summary>存檔前的擴充點（例：XR 編輯器模組加 XR Origin、傳送點、扶手）。桌面建置不需要它。</summary>
         public static event Action<StringBuilder> BeforeSave;
-        static readonly Dictionary<string, Type> ToolTypes = new Dictionary<string, Type>
+        public static readonly Dictionary<string, Type> ToolTypes = new Dictionary<string, Type>
         {
             { "tool.voltage_detector", typeof(VoltageDetectorTool) }, { "tool.grounding_rod", typeof(GroundingRodTool) }, { "tool.caliper", typeof(CaliperTool) },
             { "tool.socket_wrench", typeof(SocketWrenchTool) }, { "tool.torque_wrench", typeof(TorqueWrenchTool) }, { "tool.cleaning_cloth", typeof(CleaningClothTool) },
             { "tool.marker", typeof(MarkerTool) }, { "tool.lockout_tag", typeof(LockoutTagTool) }, { "tool.safety_harness", typeof(SafetyHarnessTool) },
-            // R1.5b b3：降弓固定帶 slot_10、高阻計 slot_11、短接地線 slot_12（只拿著點目標）、大扭力扳手 slot_13（D39，同一套扭力扳手邏輯，量程讀 ToolDefinition.rangeNm）
-            { "tool.hold_down_strap", typeof(CarryTool) }, { "tool.megger", typeof(CarryTool) }, { "tool.grounding_lead", typeof(CarryTool) }, { "tool.torque_wrench_l", typeof(TorqueWrenchTool) }
+            // R1.5b b3：降弓固定帶 slot_10、高阻計 slot_11（只拿著點目標）、短接地線 slot_12（b4：GroundingLeadTool）、大扭力扳手 slot_13（D39，同一套扭力扳手邏輯，量程讀 ToolDefinition.rangeNm）
+            { "tool.hold_down_strap", typeof(CarryTool) }, { "tool.megger", typeof(CarryTool) }, { "tool.grounding_lead", typeof(GroundingLeadTool) }, { "tool.torque_wrench_l", typeof(TorqueWrenchTool) }
         };
 
         [MenuItem("PantographSim/Slice/Build Scene")]

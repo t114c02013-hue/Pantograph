@@ -20,7 +20,7 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | b4:p5 | 兩門課跑到結算（b4 第 5 部分；機制沒有指定段落，做的時候回報） |
 | b4:p3b | 扭力類錯誤與 K3 降級（b4 第 3b 部分） |
 
-## 小動作（共 106 列）
+## 小動作（共 96 列）
 
 | 步驟 | 小動作 | 課程 | 完成條件 | owner |
 |---|---|---|---|---|
@@ -73,10 +73,6 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_SI_03_CylinderPowerOff | a | periodic | `cab.cylinder_power=off` | b4:p5 |
 | STP_SI_03_CylinderPowerOff | b | daily | `cab.raise_test_done` | b4:p5 |
 | STP_SI_03_CylinderPowerOff | b | periodic | `cab.raise_test_done` | b4:p5 |
-| STP_SI_06_RoofEntry | a2 | periodic | `rack.slot_12=in_use&&tool.grounding_lead.carried` | b4:p5 |
-| STP_RM_00_SecondGround | a | periodic | `ip.roof.carbody_ground.clamped` | b4:p5 |
-| STP_RM_00_SecondGround | b | periodic | `ip.roof.hv_cable_ground.clamped` | b4:p5 |
-| STP_RM_00_SecondGround | c | periodic | `ip.roof.hv_cable_ground.pull_tested` | b4:p5 |
 | STP_RM_01_HoldDown | c | periodic | `ip.pan_assy.hold_down.pull_tested` | b4:p5 |
 | STP_RM_02_CtrlDisconnect | b | periodic | `ip.pan_assy.ctrl_connector.cap=on` | b4:p5 |
 | STP_RM_03_HVDisconnect | a | periodic | `ip.pan_head.ground_clamp.inspected&&isolation.head_clamped&&ip.roof.hv_cable_ground.clamped` | b4:p5 |
@@ -94,8 +90,6 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_RM_05_CraneRiggingCheck | f3 | periodic | `env.sling_3.inspected&&env.sling_3.verdict_correct` | b4:p5 |
 | STP_RM_05_CraneRiggingCheck | f4 | periodic | `env.sling_4.inspected&&env.sling_4.verdict_correct` | b4:p5 |
 | STP_RM_06_Rig | b | periodic | `env.rigging.inspected` | b4:p5 |
-| STP_RM_07_LeaveRoof | c | periodic | `harness.hooks_stowed&&rack.slot_4=in_use` | b4:p5 |
-| STP_LF_01_PreLift | b | periodic | `isolation.terminal_clamped=false&&ip.roof.carbody_ground.clamped` | b4:p5 |
 | STP_LF_01_PreLift | d | periodic | `part.crane.hook.inspected&&part.crane.hook_cog_offset_cm<=5` | b4:p5 |
 | STP_LF_02_TrialLift | a | periodic | `part.crane.drop_distance>=0.08&&part.crane.drop_distance<=0.15&&part.crane.still_s>=3` | b4:p5 |
 | STP_LF_02_TrialLift | b | periodic | `part.pan_assy.inspected&&part.pan_assy.tilt_deg<=3` | b4:p5 |
@@ -111,11 +105,7 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_IN_03_Transfer | b | periodic | `part.pan_assy.roof_offset_cm<=5` | b4:p5 |
 | STP_IN_04_LowerToRoof | a | periodic | `part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1` | b4:p5 |
 | STP_IN_04_LowerToRoof | b | periodic | `part.pan_assy.state=Mounted&&part.pan_assy.seat_error_cm<=1` | b4:p5 |
-| STP_IN_05_RoofEntry | a | periodic | `harness.hooks_stowed=false&&rack.slot_4=in_use` | b4:p5 |
 | STP_IN_10_CtrlReconnect | a | periodic | `ip.pan_assy.ctrl_connector.cap=off` | b4:p5 |
-| STP_WC_03a_RemoveGroundRoof | a | periodic | `ip.roof.hv_cable_ground.clamped=false` | b4:p5 |
-| STP_WC_03a_RemoveGroundRoof | b | periodic | `ip.roof.carbody_ground.clamped=false` | b4:p5 |
-| STP_WC_03a_RemoveGroundRoof | c | periodic | `tool.grounding_lead.carried` | b4:p5 |
 | STP_WC_01a_ToolCountRoof | a | daily | `env.tool_bag.slot_5.viewed&&env.tool_bag.slot_6.viewed&&env.tool_bag.slot_7.viewed&&env.tool_bag.slot_8.viewed&&env.tool_bag.slot_9.viewed&&rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack` | b4:p5 |
 | STP_WC_01a_ToolCountRoof | a | periodic | `env.tool_bag.slot_5.viewed&&env.tool_bag.slot_6.viewed&&env.tool_bag.slot_7.viewed&&env.tool_bag.slot_8.viewed&&env.tool_bag.slot_9.viewed&&env.tool_bag.slot_10.viewed&&env.tool_bag.slot_13.viewed&&rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&rack.slot_13=on_rack&&rack.slot_10=on_rack` | b4:p5 |
 | STP_WC_01a_ToolCountRoof | b | daily | `env.bolt_tray_L.count<=0&&env.bolt_tray_R.count<=0&&env.tool_bag.bolt_pouch.count<=0&&env.roof_strip_mat.count<=0&&roof.leftover_count<=0` | b4:p5 |
@@ -203,3 +193,4 @@ ErrorRuleTests.PendingTriggers_ListedInStubsDoc 檢查兩邊一致。觸發做�
 | 項目 | 由哪一段做 | 說明 |
 |---|---|---|
 | IN_04b h 分段起點的實體狀態 | b4b | 軟體工程裁定（補充 2b）：從 IN 段的 PhaseStartSnapshot 開始時，#1 弓頭端掛鉤要是「已取下」（isolation.head_clamped=false）。檢查的是還原有沒有把實體狀態設對，不是 version；PhaseStartSnapshot 在 b4b 才有 |
+| 日常 CSR_09_R d 改走機制 | b4c:strip_carry | 步驟計畫裁定（2026-11-03）：條件照 CSV 判「待報廢箱裡有該側那一條舊滑板，而且暫放墊是空的」，不能只看數量（做 R 側時箱裡已經有 L 側那一條）。CourseFlowTests 的腳本到時要走 strip_carry 機制 |
