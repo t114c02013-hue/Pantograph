@@ -17,11 +17,15 @@ namespace PantographSim.Core
         public static bool IsReplay => Mode == SimMode.Replay;
 
         public static void EnterReplay(string folder) { Mode = SimMode.Replay; ReplayFolder = folder ?? ""; }
+
+        /// <summary>R1.5b b4：這一場的課程（r1／daily／periodic）；空白＝資料的預設課程。換課程一律重新載入場景（軟體工程）。</summary>
+        public static string CourseId { get; private set; } = "";
+        public static void EnterCourse(string courseId) => CourseId = courseId ?? "";
         public static void EnterTraining() { Mode = SimMode.Training; ReplayFolder = ""; }
 
         /// <summary>每次進入 Play 都從訓練模式開始（關閉 Domain Reload 時靜態值不會殘留）。</summary>
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetOnPlay() => EnterTraining();
+        static void ResetOnPlay() { EnterTraining(); CourseId = ""; }
     }
 
     /// <summary>

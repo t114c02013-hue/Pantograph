@@ -135,6 +135,31 @@ namespace PantographSim.Tests
             finally { f.runner.Dispose(); }
         }
 
+        /// <summary>R1.5b b4（5a）：兩門課從頭跑到結算（ErrorDetector＋Scoring），結算畫面要的分數、Critical／Major／Minor 數都產生出來。</summary>
+        [TestCase("periodic")]
+        [TestCase("daily")]
+        public void Course_RunsToSettlement_ScoreAndCountsProduced(string course)
+        {
+            var f = new Flow(course);
+            var det = new ErrorDetector(f.runner, f.bus, f.s);
+            var scoring = new PantographSim.Training.Scoring(f.bus, f.s);
+            SessionResult? got = null;
+            f.bus.Subscribe<SessionResult>(r => got = r);
+            try
+            {
+                scoring.Start(0f);
+                f.Run();
+                Assert.IsTrue(got.HasValue, "要發結算（SessionResult）");
+                var result = got.Value;
+                Assert.IsTrue(f.s.GetBool("score.finished"));
+                Assert.AreEqual(f.s.GetFloat("score.total"), result.score);
+                Assert.AreEqual(System.Math.Max(0f, 100f - 2f * result.minor - 5f * result.major - 15f * result.critical), result.score, 1e-4f);
+                System.IO.File.AppendAllText($"Logs/CourseFlow_{course}.txt",
+                    $"結算：分數 {result.score}、Critical {result.critical}、Major {result.major}、Minor {result.minor}、通過 {result.passed}\n");
+            }
+            finally { scoring.Dispose(); det.Dispose(); f.runner.Dispose(); }
+        }
+
         /// <summary>反例：在 SI_04 b 做過自檢後，IN_04b b 啟用時 selftest 已經是 true，不能自動完成；要再點一次自檢器。</summary>
         [Test]
         public void IN04b_SelfTest_NeedsNewSelfTest()

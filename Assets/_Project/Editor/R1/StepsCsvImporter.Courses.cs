@@ -18,7 +18,7 @@ namespace PantographSim.Editor
         [Serializable]
         public class CourseJson
         {
-            public string courseId, title;
+            public string courseId, title, menuNote = "";
             public CourseDef.Placement[] placements = Array.Empty<CourseDef.Placement>();
             public JumpRule[] onPass = Array.Empty<JumpRule>();
             public float liftCapAboveO, contactGapM;
@@ -28,11 +28,15 @@ namespace PantographSim.Editor
         [Serializable]
         public class CoursesFile
         {
+            public string defaultCourse = "r1", r1Title = "", r1MenuNote = "";
             public CourseJson[] courses = Array.Empty<CourseJson>();
             public SpareArrangementDef.Entry[] spareArrangement = Array.Empty<SpareArrangementDef.Entry>();
         }
 
         public static CoursesFile LoadCourses() => JsonUtility.FromJson<CoursesFile>(File.ReadAllText(CoursesPath, Encoding.UTF8));
+
+        /// <summary>選單註記（課程 ID|註記；…），例「daily|開發中」。</summary>
+        public static string MenuNotes(CoursesFile f) => string.Join(";", new[] { "r1|" + f.r1MenuNote }.Concat(f.courses.Select(x => x.courseId + "|" + (x.menuNote ?? ""))));
 
         /// <summary>課程資料的檢查：每門課都有；擺放的 ID（name: 以外）在場景裡；onPass 的步驟在該課程裡。</summary>
         public static void CheckCourses(CoursesFile f, ICollection<string> sceneIds, Dictionary<string, List<StepDefinition>> courses, List<string> errors)

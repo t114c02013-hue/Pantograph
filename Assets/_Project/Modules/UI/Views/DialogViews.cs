@@ -9,7 +9,9 @@ namespace PantographSim.UI
     /// <summary>開場任務卡：目標、工具、安全重點、操作鍵；大的置中「開始」按鈕；下方練習情境。</summary>
     public class TaskCardView : View
     {
-        RectTransform dim, practiceRow, nameDesktop, nameXr;
+        RectTransform dim, practiceRow, nameDesktop, nameXr, courseRow;
+        string coursesBuiltFor = "";
+        readonly List<(string id, Image bg)> courseButtons = new List<(string, Image)>();
         Text title, goal, tools, safety, controls, xrName;
         InputField nameField;
         string builtFor = "";
@@ -23,6 +25,8 @@ namespace PantographSim.UI
             dim = d;
             Ui.VStack(card.gameObject, 30, 10, false);
             title = Ui.Text(card, "", 38, Color.white, TextAnchor.UpperCenter, FontStyle.Bold);
+            // R1.5b b4：課程選擇（換課程會重新載入場景）
+            courseRow = Ui.Rect(card, "CourseRow"); Ui.HStack(courseRow.gameObject, 12).childAlignment = TextAnchor.MiddleCenter;
             goal = Ui.Text(card, "", 24);
             tools = Ui.Text(card, "", 23);
             safety = Ui.Text(card, "", 22);
@@ -63,6 +67,23 @@ namespace PantographSim.UI
             goal.text = "<b>目標</b>：" + s.Get("task.goal");
             tools.text = "<b>工具</b>：" + s.Get("task.tools");
             safety.text = "<b>安全重點</b>\n・" + s.Get("task.safety").Replace("\n", "\n・");
+            var courses = s.Get("app.courses.list");
+            if (courses != coursesBuiltFor)
+            {
+                foreach (Transform c in courseRow) Object.Destroy(c.gameObject);
+                courseButtons.Clear();
+                foreach (var entry in courses.Split(';'))
+                {
+                    var f = entry.Split('|');
+                    if (f.Length < 2) continue;
+                    string id = f[0], label = f[1] + (f.Length > 2 && f[2].Length > 0 ? "（" + f[2] + "）" : "");
+                    var cb = Ui.Button(courseRow, label, 21, () => Ui.Send("app.course", id));
+                    Ui.Size(cb, 330, 56);
+                    courseButtons.Add((id, cb.GetComponent<Image>()));
+                }
+                coursesBuiltFor = courses;
+            }
+            foreach (var (id, bg) in courseButtons) bg.color = id == s.Get(SimIds.CourseId) ? Ui.ButtonOn : Ui.ButtonBg;
             var list = s.Get("scenarios.list");
             if (list != builtFor)
             {

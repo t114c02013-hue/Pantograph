@@ -64,7 +64,7 @@ namespace PantographSim.Data
         public ErrorJson[] errors = Array.Empty<ErrorJson>();
     }
 
-    [Serializable] public class SafetyRuleJson { public string ruleId, errorId, kind, what, why, fix; public float toleranceCm = 1f; public string severity = "Critical"; }   // R1.5b b3：severity
+    [Serializable] public class SafetyRuleJson { public string ruleId, errorId, kind, what, why, fix; public float toleranceCm = 1f; public string severity = "Critical"; public bool deprecated; public string replacedBy = ""; }   // R1.5b b3：severity
 
     [Serializable] public class ScenarioJson
     {
@@ -141,7 +141,7 @@ namespace PantographSim.Data
                 var sr = ScriptableObject.CreateInstance<SafetyRuleDefinition>();
                 sr.name = r.ruleId; sr.ruleId = r.ruleId; sr.errorId = r.errorId;
                 sr.kind = (SafetyRuleKind)Enum.Parse(typeof(SafetyRuleKind), r.kind);
-                sr.what = r.what; sr.why = r.why; sr.fix = r.fix; sr.toleranceCm = r.toleranceCm;
+                sr.what = r.what; sr.why = r.why; sr.fix = r.fix; sr.toleranceCm = r.toleranceCm; sr.deprecated = r.deprecated; sr.replacedBy = r.replacedBy ?? "";
                 sr.severity = (PantographSim.Core.Severity)Enum.Parse(typeof(PantographSim.Core.Severity), string.IsNullOrEmpty(r.severity) ? "Critical" : r.severity);
                 bundle.safetyRules.Add(sr);
             }

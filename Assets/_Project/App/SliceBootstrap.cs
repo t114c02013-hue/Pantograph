@@ -24,6 +24,10 @@ namespace PantographSim.App
         [SerializeField] SafetyRuleDefinition[] safetyRules = new SafetyRuleDefinition[0];
         [SerializeField] ScenarioDefinition[] scenarios = new ScenarioDefinition[0];
         [SerializeField] ToolDefinition[] tools = new ToolDefinition[0];
+        [Tooltip("R1.5b b4：可選的課程（日常／定期）；R1 原 25 步用上面的 procedure")] [SerializeField] CourseDef[] courses = new CourseDef[0];
+        [Tooltip("預設課程（Courses.json 的 defaultCourse；b4c 做完前是 r1）")] [SerializeField] string defaultCourse = SimIds.CourseR1;
+        [Tooltip("選單上 R1 的名稱、各課程後面的註記（例「開發中」），都讀 Courses.json")] [SerializeField] string r1Title = "", courseNotes = "";
+        CourseDef course;
 
         EventBus bus;
         SimState state;
@@ -42,6 +46,12 @@ namespace PantographSim.App
             procedure = prc; safetyRules = rules; scenarios = scns; tools = toolDefs;
         }
 
+        /// <summary>R1.5b b4：課程清單、預設課程、選單文字（場景建置時從 Courses.json 設定）。</summary>
+        public void SetCourses(CourseDef[] list, string defaultId, string r1Name, string notes) { courses = list; defaultCourse = defaultId; r1Title = r1Name; courseNotes = notes; }
+
+        /// <summary>這一場的課程：SimSession 選過的，否則資料的預設；r1＝原 25 步。</summary>
+        public static string ResolveCourse(string chosen, string fallback) => string.IsNullOrEmpty(chosen) ? (string.IsNullOrEmpty(fallback) ? SimIds.CourseR1 : fallback) : chosen;
+
         void Awake()
         {
             ServiceLocator.Clear();
@@ -58,6 +68,9 @@ namespace PantographSim.App
             ServiceLocator.Register(registry);
             ServiceLocator.Register<ISceneLocator>(registry);
 
+            string courseId = ResolveCourse(SimSession.CourseId, defaultCourse);
+            course = courseId == SimIds.CourseR1 ? null : courses.FirstOrDefault(c => c != null && c.courseId == courseId);
+            if (course != null) procedure = course.procedure;
             ServiceLocator.Register(procedure);   // 紀錄模組用來列出步驟名稱與參考時間
             var gates = new CompositeStepGate();
             var guard = new CompositeActionGuard();
@@ -70,7 +83,7 @@ namespace PantographSim.App
             }
             else
             {
-                var safety = new SafetyGuard(bus, state, safetyRules);
+                var safety = new SafetyGuard(bus, state, safetyRules) { SkipDeprecated = course != null };
                 gates.Add(safety);
                 runner = new ProcedureRunner(procedure, bus, state, gates);
                 detector = new ErrorDetector(runner, bus, state);
@@ -88,9 +101,14 @@ namespace PantographSim.App
                 .Where(s => !state.GetBool(s.DoneKey) && !state.GetBool("step." + s.RunId + ".skipped")).Select(s => s.RunId).ToArray();
 
             WriteTaskCard();
+            state.Set(SimIds.CourseId, course != null ? course.courseId : SimIds.CourseR1);   // 錄影、成績都記 courseId
+            state.Set("app.courses.list", string.Join(";", new[] { SimIds.CourseR1 + "|" + r1Title + "|" }.Concat(courses.Where(c => c != null).Select(c => c.courseId + "|" + c.title + "|" + NoteOf(c.courseId)))));
+            if (course != null) PantographSim.Worksite.CourseApplier.Apply(course, state);   // 課程覆寫（擺放、天車停駐、升弓上限）
             bus.Subscribe<ActionRequested>(OnRequest);
             if (SimSession.IsReplay) SetupReplay();
         }
+
+        string NoteOf(string id) => (courseNotes ?? "").Split(';').Select(x => x.Split('|')).Where(x => x.Length == 2 && x[0] == id).Select(x => x[1]).FirstOrDefault() ?? "";
 
         void Start() => RegisterPoseSource();
 
@@ -138,6 +156,7 @@ namespace PantographSim.App
         {
             if (e.targetId == "app.replay" && Directory.Exists(e.text ?? ""))
             {
+                SimSession.EnterCourse(PantographSim.Recording.RecordFiles.CourseOf(e.text));   // 回放先載入錄影的課程（舊 R1 錄影沒有 courseId＝r1）
                 SimSession.EnterReplay(e.text);
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
                 return;
@@ -158,6 +177,11 @@ namespace PantographSim.App
                 scoring.Start(Time.time);
                 // 等機構套用情境姿態、檢測點寫出實際距離後才開始判定（否則第一個小動作會用到上一個姿態的距離）
                 StartCoroutine(StartRunnerAfterPoseSettles());
+            }
+            else if (e.targetId == "app.course" && !runner.Started)
+            {
+                SimSession.EnterCourse(e.text);   // 換課程一律重新載入場景（軟體工程），不在同一場景裡切換
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
             else if (e.targetId == "app.restart")
             {

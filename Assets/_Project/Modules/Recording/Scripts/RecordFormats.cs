@@ -17,6 +17,22 @@ namespace PantographSim.Recording
         /// </summary>
         public const int SchemaVersion = 3;   // 3：新增 PanelMoved（R1 T3）；2 以前的檔照舊能讀、能重播
         public const string Meta = "meta.json";
+
+        /// <summary>R1.5b b4：錄影的課程（meta.json 的 courseId；舊錄影沒有＝r1）。</summary>
+        public static string CourseOf(string folder)
+        {
+            try
+            {
+                var path = System.IO.Path.Combine(folder ?? "", Meta);
+                if (System.IO.File.Exists(path) && Json.Parse(System.IO.File.ReadAllText(path)) is System.Collections.Generic.Dictionary<string, object> m)
+                {
+                    var id = m.Str("courseId");
+                    if (!string.IsNullOrEmpty(id)) return id;
+                }
+            }
+            catch (System.Exception e) { UnityEngine.Debug.LogWarning("[Recording] 讀不到 meta.json 的 courseId：" + e.Message); }
+            return PantographSim.Core.SimIds.CourseR1;
+        }
         public const string Session = "session.jsonl";
         public const string Poses = "poses.bin";
         public const string Snapshots = "snapshots.bin";

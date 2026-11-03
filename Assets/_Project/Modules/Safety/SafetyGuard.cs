@@ -24,6 +24,10 @@ namespace PantographSim.Safety
             rules = ruleDefs.Where(r => r != null).GroupBy(r => r.kind).ToDictionary(g => g.Key, g => g.First());
         }
 
+        /// <summary>R1.5b b4：載入課程時（日常／定期）不判已退役的規則（由 ErrorRules.json 的新規則取代，例 ERR_WC03_RemoveOrder），R1 的 25 步照舊。</summary>
+        public bool SkipDeprecated;
+        bool Active(SafetyRuleKind kind) => !(SkipDeprecated && rules.TryGetValue(kind, out var r) && r.deprecated);
+
         public const string VoltageTestStep = "STP_SI_04_VoltageTest";
         public const string GroundingStep = "STP_SI_05_Grounding";
 
@@ -56,7 +60,7 @@ namespace PantographSim.Safety
                 if (req.targetId == SimIds.GroundTerminal)
                 {
                     if (!terminal && !state.GetBool(SimIds.VoltageTested)) return Block(SafetyRuleKind.NoVoltageTest, req);
-                    if (terminal && head) return Block(SafetyRuleKind.RemoveOrder, req);
+                    if (terminal && head && Active(SafetyRuleKind.RemoveOrder)) return Block(SafetyRuleKind.RemoveOrder, req);
                 }
                 if (req.targetId == SimIds.GroundClamp && !head && !terminal) return Block(SafetyRuleKind.GroundOrder, req);
             }

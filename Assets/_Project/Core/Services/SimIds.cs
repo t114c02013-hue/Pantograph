@@ -28,6 +28,8 @@
         /// <summary>D30 個人腰包（和 ToolSlotTable.WaistPouch、RackLogic.InPouch 相同；UI 只能引用 Core）。</summary>
         public const string WaistPouch = "env.waist_pouch", RackInPouch = "in_pouch";
         /// <summary>R1.5b b4 第 4 部分（課程覆寫）：目前的課程、日常更換時天車停駐（D23）、升弓上限（lift 值）、弓頭到了接觸線（D41）。</summary>
+        /// <summary>R1 原 25 步的課程 ID（沒有 courseId 的舊錄影也當這個）。</summary>
+        public const string CourseR1 = "r1";
         public const string CourseId = "course.id", CourseCraneParked = "course.crane_parked", LiftMax = "lift.max", PanAtContactWire = "part.pan_head.at_contact_wire";
         public const string GroundTerminal = "ip.depot.ground_terminal";
         public const string VoltageTester = "ip.depot.detector_tester";

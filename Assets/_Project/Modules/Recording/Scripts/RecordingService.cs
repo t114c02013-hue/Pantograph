@@ -124,7 +124,8 @@ namespace PantographSim.Recording
                 { "schemaVersion", RecordFiles.SchemaVersion }, { "trainee", trainee }, { "mode", Labels.Mode(modeRaw) }, { "modeRaw", modeRaw },
                 { "input", Labels.Input(InputMode.XrActive) }, { "scenarioId", s.Get("training.scenario") }, { "scenarioTitle", s.Get("training.scenario_title") },
                 { "appVersion", Application.version }, { "unityVersion", Application.unityVersion }, { "startedAt", now.ToString("o", CultureInfo.InvariantCulture) },
-                { "folder", Path.GetFileName(folder) }, { "tools", s.Get("tools.list") }, { "trackedObjects", tracked.Count }
+                { "folder", Path.GetFileName(folder) }, { "tools", s.Get("tools.list") }, { "trackedObjects", tracked.Count },
+                { "courseId", s.Get(SimIds.CourseId, SimIds.CourseR1) }
             });
             s.Set("rec.trainee", trainee);
             s.Set("rec.folder", folder);

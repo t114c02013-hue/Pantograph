@@ -14,5 +14,7 @@ namespace PantographSim.Data
         [TextArea] public string why;
         [TextArea] public string fix;
         [Tooltip("NotLowered：降弓位置容許誤差（cm），檢測點距離 ≤ 此值才算降弓到位（示例值）")] public float toleranceCm = 1f;
+        [Tooltip("R1.5b b4：已由新的錯誤規則取代（ID 不刪，舊錄影照樣讀得到）。載入課程時不判，R1 的 25 步照舊判")] public bool deprecated;
+        [Tooltip("取代它的錯誤 ID")] public string replacedBy = "";
     }
 }
