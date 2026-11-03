@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b1625bd5ee9d02d4684021240bc131e0, type: 3}
-  m_Name: PRC_daily
+  m_Name: _import_tmp
   m_EditorClassIdentifier: 
   procedureId: PRC_daily
   title: daily
@@ -66,3 +66,47 @@ MonoBehaviour:
   onPass: []
   requireFreshWrite: 1
   autoCompleteAllowed: []
+  globalErrors:
+  - errorId: ERR_Global_GroundRemovedWhileOnRoof
+    severity: 2
+    what: "\u8ECA\u9802\u639B\u9EDE\u9084\u6263\u8457\uFF08\u4EBA\u5728\u8ECA\u9802\uFF09\u6642\u62C6
+      #1 \u63A5\u5730\u687F\u3002"
+    why: "#1 \u62C6\u6389\u6642\u8ECA\u9802\u4E0A\u9084\u6709\u4EBA\uFF0C\u842C\u4E00\u8AA4\u9001\u96FB\u5C31\u6C92\u6709\u4FDD\u8B77\u3002"
+    fix: "\u5148\u4E0B\u8ECA\u9802\uFF08\u89E3\u958B\u8ECA\u9802\u639B\u9EDE\u3001\u56DE\u5230\u5E73\u53F0\uFF09\uFF0C\u518D\u62C6
+      #1\u3002"
+    trigger: 9
+    key: 
+    key2: 
+    keys:
+    - ip.pan_head.ground_clamp|harness.roof&&isolation.head_clamped
+    - ip.depot.ground_terminal|harness.roof&&isolation.terminal_clamped
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    inputMode: 
+  - errorId: ERR_WC03_RemoveOrder
+    severity: 2
+    what: "\u62C6\u63A5\u5730\u7684\u9806\u5E8F\u53CD\u4E86\uFF1A\u8A2D\u5099\u7AEF\uFF08\u5F13\u982D\u639B\u9264\u3001\u96FB\u7E9C\u7AEF\u5B50\uFF09\u9084\u639B\u8457\u5C31\u5148\u9B06\u63A5\u5730\u7AEF\u3002"
+    why: "\u5148\u9B06\u63A5\u5730\u7AEF\uFF0C\u8A2D\u5099\u7AEF\u7684\u6B98\u7559\u96FB\u8377\u6C92\u6709\u5730\u65B9\u653E\uFF0C\u6703\u7D93\u904E\u4F60\u7684\u8EAB\u9AD4\u3002"
+    fix: "\u5148\u53D6\u4E0B\u8A2D\u5099\u7AEF\uFF08#1 \u5F13\u982D\u639B\u9264\u3001#2
+      \u96FB\u7E9C\u7AEF\u5B50\uFF09\uFF0C\u518D\u9B06\u63A5\u5730\u7AEF\u3002"
+    trigger: 9
+    key: 
+    key2: 
+    keys:
+    - ip.depot.ground_terminal|isolation.terminal_clamped&&isolation.head_clamped
+    - ip.roof.carbody_ground|ip.roof.carbody_ground.clamped&&ip.roof.hv_cable_ground.clamped
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    inputMode: 

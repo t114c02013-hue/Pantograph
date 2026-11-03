@@ -693,9 +693,20 @@
       "courses": "both",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3d",
+      "owner": "",
       "source": "CSV",
-      "trigger": "車頂掛點還扣著（人在車頂）時取下 #1 弓頭端掛鉤（D25，v1.5 新增）"
+      "trigger": "車頂掛點還扣著（人在車頂）時取下 #1 弓頭端掛鉤（D25，v1.5 新增）",
+      "rule": {
+        "trigger": "BlockWhen",
+        "keys": [
+          "ip.pan_head.ground_clamp|harness.roof&&isolation.head_clamped",
+          "ip.depot.ground_terminal|harness.roof&&isolation.terminal_clamped"
+        ],
+        "what": "車頂掛點還扣著（人在車頂）時拆 #1 接地桿。",
+        "why": "#1 拆掉時車頂上還有人，萬一誤送電就沒有保護。",
+        "fix": "先下車頂（解開車頂掛點、回到平台），再拆 #1。"
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_Global_GroundWithoutVoltageTest",
@@ -1190,9 +1201,20 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3d",
+      "owner": "",
       "source": "CSV",
-      "trigger": "- IN_10 新增 ERR_IN10_NotConnected（Major）；IN_11 新增 ERR_IN11_StrapLeft（Major）。WC_05 升弓試驗時會發現，所以不列 Critical。"
+      "trigger": "- IN_10 新增 ERR_IN10_NotConnected（Major）；IN_11 新增 ERR_IN11_StrapLeft（Major）。WC_05 升弓試驗時會發現，所以不列 Critical。",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "part.pan_assy.state=Fastened",
+        "keys": [
+          "ip.pan_assy.hold_down.state=Installed&&harness.roof=false&&harness.platform"
+        ],
+        "what": "降弓固定帶還裝在集電弓上就離開車頂。",
+        "why": "固定帶沒拆，升弓試驗時弓升不起來，要再上車頂拆。",
+        "fix": "IN_11 先解開降弓固定帶並收回工具袋，再下車頂。"
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_RM03_WrongSocket",
@@ -1388,9 +1410,21 @@
       "courses": "both",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3d",
+      "owner": "",
       "source": "CSV",
-      "trigger": "拆接地順序反了：#1 弓頭端未拆先鬆端子（WC_03b）；#2 電纜端子未拆先鬆車體接地座（WC_03a）（K2；日常更換的 WC_03 同用）"
+      "trigger": "拆接地順序反了：#1 弓頭端未拆先鬆端子（WC_03b）；#2 電纜端子未拆先鬆車體接地座（WC_03a）（K2；日常更換的 WC_03 同用）",
+      "rule": {
+        "trigger": "BlockWhen",
+        "keys": [
+          "ip.depot.ground_terminal|isolation.terminal_clamped&&isolation.head_clamped",
+          "ip.roof.carbody_ground|ip.roof.carbody_ground.clamped&&ip.roof.hv_cable_ground.clamped"
+        ],
+        "what": "拆接地的順序反了：設備端（弓頭掛鉤、電纜端子）還掛著就先鬆接地端。",
+        "why": "先鬆接地端，設備端的殘留電荷沒有地方放，會經過你的身體。",
+        "fix": "先取下設備端（#1 弓頭掛鉤、#2 電纜端子），再鬆接地端。"
+      },
+      "scope": "global",
+      "note": "#2 的順序讀 ip.roof.carbody_ground.clamped、ip.roof.hv_cable_ground.clamped，這兩個鍵的寫入機制在 b4 第 5 部分（短接地線）。R1 的 SR_Ground_RemoveOrder（ERR_Ground_RemoveOrder）照舊給 R1 25 步用；第 5 部分換成日常課時要拿掉，否則 #1 會兩條都記。"
     },
     {
       "errorId": "ERR_WC04_NotSigned",

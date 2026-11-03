@@ -101,6 +101,8 @@ namespace PantographSim.Procedures
         {
             var s = runner.Current;
             if (s == null || runner.Finished || req.verb == "inspect" || req.verb == "select") return GuardResult.Allow;
+            var block = BlockedByGlobal(req, s);
+            if (block != null) return block.Value;
             if (req.verb == "click" && string.IsNullOrEmpty(req.toolId)) return GuardResult.Allow;   // 徒手點一下只是查看
             var targets = ProcedureRunner.ExpandTargets(s);
             bool inStep = targets.Any(t => Matches(t, req.targetId));
@@ -171,6 +173,25 @@ namespace PantographSim.Procedures
                 }
         }
 
+        /// <summary>R1.5b b4 3d：BlockWhen 的全程規則（拆接地順序、車頂上拆 #1）：對目標動作前的狀態符合就擋下並記錯（徒手點也算：拆掛鉤是徒手）。</summary>
+        GuardResult? BlockedByGlobal(ActionRequest req, RuntimeStep s)
+        {
+            var ctx = runner.ContextFor(s);
+            foreach (var r in runner.Procedure?.globalErrors ?? Array.Empty<ErrorRule>())
+            {
+                if (r.trigger != ErrorTrigger.BlockWhen || (r.inputMode == "desktop" && InputMode.XrActive)) continue;
+                foreach (var k in r.keys)
+                {
+                    int bar = k.IndexOf('|');
+                    if (bar <= 0 || ctx.K(k.Substring(0, bar)) != req.targetId || !ChecklistEval.Done(state, ctx.K(k.Substring(bar + 1)))) continue;
+                    fired.Remove(r.errorId);   // 擋下的錯誤每次都記（每次都要讓學員知道為什麼不能做）
+                    Fire(r, s, req.targetId);
+                    return Blocked(req, r.errorId);
+                }
+            }
+            return null;
+        }
+
         // ---------- R1.5b b4 3c：全程監看的錯誤（天車安全等）----------
         readonly Dictionary<string, bool> globalWas = new Dictionary<string, bool>();
 
@@ -179,7 +200,7 @@ namespace PantographSim.Procedures
         {
             foreach (var r in runner.Procedure?.globalErrors ?? Array.Empty<ErrorRule>())
             {
-                if (r.inputMode == "desktop" && InputMode.XrActive) continue;
+                if (r.trigger != ErrorTrigger.WhenCondition || (r.inputMode == "desktop" && InputMode.XrActive)) continue;
                 var ctx = runner.ContextFor(s);
                 bool now = (string.IsNullOrEmpty(r.key2) || ChecklistEval.Done(state, ctx.K(r.key2))) && r.keys.Any(k => ChecklistEval.Done(state, ctx.K(k)));
                 bool was = globalWas.TryGetValue(r.errorId, out var w) && w;

@@ -19,7 +19,6 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | b4:p4 | CourseDef 覆寫（b4 第 4 部分） |
 | b4:p5 | 兩門課跑到結算（b4 第 5 部分；機制沒有指定段落，做的時候回報） |
 | b4:p3b | 扭力類錯誤與 K3 降級（b4 第 3b 部分） |
-| b4:p3d | 拆接地順序、車頂拆接地、固定帶遺留（b4 第 3d 部分） |
 
 ## 小動作（共 106 列）
 
@@ -149,15 +148,12 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | consumable.carbon_strip | b4:p4 |
 | consumable.carbon_strip.measure_mid | b4:p4 |
 
-## 錯誤規則的觸發條件還沒做（Assets/_Project/Data/Source/ErrorRules.json 的 owner，共 46 條）
+## 錯誤規則的觸發條件還沒做（Assets/_Project/Data/Source/ErrorRules.json 的 owner，共 43 條）
 
 ErrorRuleTests.PendingTriggers_ListedInStubsDoc 檢查兩邊一致。觸發做好時把 owner 清空，再刪掉這裡那一列。
 
 | 錯誤 | owner | 嚴重度 |
 |---|---|---|
-| ERR_Global_GroundRemovedWhileOnRoof | b4:p3d | Critical |
-| ERR_IN11_StrapLeft | b4:p3d | Major |
-| ERR_WC03_RemoveOrder | b4:p3d | Critical |
 | ERR_CSR01_IsolationIncomplete | b4:p4 | Major |
 | ERR_Crane_FastLowerEmptyHook | b4:p5 | Minor |
 | ERR_Crane_LiftWhileFixed | b4:p5 | Major |
