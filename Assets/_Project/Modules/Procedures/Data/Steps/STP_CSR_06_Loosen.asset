@@ -22,7 +22,7 @@ MonoBehaviour:
   - ip.carbon_strip_{side}.bolt_*
   requiredToolId: tool.socket_wrench
   completion:
-    rid: 8951035158582525972
+    rid: 1000
   errors:
   - errorId: ERR_CSR06_WrongSocket
     severity: 0
@@ -95,19 +95,19 @@ MonoBehaviour:
     targetId: env.tool_rack.slot_6
     toolId: tool.socket_wrench
     condition: tool.active=tool.socket_wrench
-    standPointId: tp.roof.shelf
+    standPointId: tp.roof.inner
   - text: "\u63DB\u4E0A 13 mm \u5957\u7B52"
     why: "M8 \u87BA\u6813\u7528 13 mm"
     targetId: 
     toolId: tool.socket_wrench
     condition: tool.socket_wrench.size=13
-    standPointId: tp.roof.shelf
+    standPointId: tp.roof.inner
   - text: "\u65B9\u5411\u5207\u5230\u300C\u9B06\u300D"
     why: 
     targetId: 
     toolId: tool.socket_wrench
     condition: tool.socket_wrench.dir=loosen
-    standPointId: tp.roof.shelf
+    standPointId: tp.roof.inner
   - text: "\u628A 1 \u865F\u87BA\u6813\u9B06\u534A\u5708"
     why: 
     targetId: ip.carbon_strip_{side}.bolt_1
@@ -143,20 +143,20 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035158582525972
+    - rid: 1000
       type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         rules:
-        - rid: 8951035158582525973
-        - rid: 8951035158582525974
-    - rid: 8951035158582525973
+        - rid: 1001
+        - rid: 1002
+    - rid: 1001
       type: {class: ValueInRange, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: ip.carbon_strip_{side}.bolt_{n}.angle_deg
         min: 150
         max: 210
         count: 4
-    - rid: 8951035158582525974
+    - rid: 1002
       type: {class: OrderedSequence, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: ip.carbon_strip_{side}.loosen_order

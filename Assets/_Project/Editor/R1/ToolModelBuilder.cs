@@ -22,7 +22,7 @@ namespace PantographSim.Editor
         public const string WrenchPrefabFolder = "Assets/_Project/Tools/TorqueWrench/Prefabs";
         public const string WrenchParamsPath = "Assets/_Project/Tools/TorqueWrench/Data/tool_torque_wrenches.json";
 
-        [System.Serializable] class WrenchParams { public string toolId, fbx; public float totalLengthM, handleLengthM, headWidthM, headThickM, driveSquareM; }
+        [System.Serializable] class WrenchParams { public string toolId, fbx, type; public float totalLengthM, handleLengthM, headWidthM, headThickM, driveSquareM; }
         [System.Serializable] class WrenchFile { public WrenchParams[] wrenches; }
 
         /// <summary>這次建置實測的 Socket_Mount（Attach_Grip 局部）。</summary>
@@ -70,8 +70,12 @@ namespace PantographSim.Editor
                 Kid("Socket_Mount", mount);   // 旋轉和 Attach_Grip 相同；−Y＝套筒軸（朝套筒口）
                 Kid("Tip", mount + Vector3.down * 0.012f).gameObject.SetActive(true);   // 扳手本身的 Tip（掛上套筒後判定改讀套筒的 Tip，R1.5b 停用）
                 Kid("FX_Head", new Vector3(0f, 0f, w.handleLengthM));
-                Kid("Poke_Plus", new Vector3(0.02f, 0.02f, w.handleLengthM * 0.55f));
-                Kid("Poke_Minus", new Vector3(-0.02f, 0.02f, w.handleLengthM * 0.55f));
+                if (w.type == "ratchet") { var pk = vis.GetComponentsInChildren<Transform>(true).FirstOrDefault(x => x.name == "Poke_Ratchet"); if (pk != null) pk.SetParent(root.transform, true); }   // 撥桿是獨立小件，放到根下面
+                else
+                {
+                    Kid("Poke_Plus", new Vector3(0.02f, 0.02f, w.handleLengthM * 0.55f));
+                    Kid("Poke_Minus", new Vector3(-0.02f, 0.02f, w.handleLengthM * 0.55f));
+                }
                 var col = Kid("COL_Body", new Vector3(0f, 0f, w.handleLengthM - w.totalLengthM / 2f + w.headWidthM / 2f)).gameObject.AddComponent<BoxCollider>();
                 col.size = new Vector3(w.headWidthM, w.headThickM, w.totalLengthM);
                 PrefabUtility.SaveAsPrefabAsset(root, $"{WrenchPrefabFolder}/{tool.prefab}.prefab");
@@ -89,7 +93,7 @@ namespace PantographSim.Editor
             var cat = ToolSocketSetup.Catalog;
             var tools = StepJsonImporter.LoadTools().Append(ToolSocketSetup.LargeWrench).Where(t => t != null && t.driveIn > 0f).ToList();
             GameObject Pf(string path) => AssetDatabase.LoadAssetAtPath<GameObject>(path);
-            foreach (var t in tools.Where(t => t.toolId.StartsWith("tool.torque_wrench")))
+            foreach (var t in tools.Where(t => t.toolId.StartsWith("tool.torque_wrench") || t.toolId == "tool.socket_wrench"))
             {
                 var pf = Pf($"{WrenchPrefabFolder}/{t.prefab}.prefab");
                 if (pf == null) { bad.Add($"§4-1 缺 {t.prefab}"); continue; }
@@ -112,8 +116,11 @@ namespace PantographSim.Editor
                 info.Add($"§6.6-5 {t.prefab} Socket_Mount 到 Attach_Grip Z {dz:0.000}（handleLengthM {t.handleLengthM}）");
                 if (Mathf.Abs(dz - t.handleLengthM) > 0.002f) bad.Add($"§6.6-5 {t.prefab} Z {dz:0.000} ≠ handleLengthM {t.handleLengthM}");
                 // §6.6-7：FX_CalLabel、calibration
-                if (!pf.GetComponentsInChildren<Transform>(true).Any(x => x.name == "FX_CalLabel")) bad.Add($"§6.6-7 {t.prefab} 缺 FX_CalLabel");
-                if (t.calibration == null || !t.calibration.IsSet) bad.Add($"§6.6-7 {t.toolId} 缺 calibration");
+                if (t.toolId != "tool.socket_wrench")   // 套筒扳手不是量具，沒有校正標籤
+                {
+                    if (!pf.GetComponentsInChildren<Transform>(true).Any(x => x.name == "FX_CalLabel")) bad.Add($"§6.6-7 {t.prefab} 缺 FX_CalLabel");
+                    if (t.calibration == null || !t.calibration.IsSet) bad.Add($"§6.6-7 {t.toolId} 缺 calibration");
+                }
                 // §4-2：掛上每一顆套筒後 Tip 到 Socket_Mount＝heightM ± 1 mm、Tip +Z 和 Socket_Mount −Y 夾角 ≤ 1°
                 foreach (var id in t.socketIds)
                 {
@@ -155,16 +162,19 @@ namespace PantographSim.Editor
             // §7.5-10：同一個 prefab 在多支扳手裡數值相同——數值只在目錄寫一次（SocketDef 唯一），檢查目錄裡沒有重複 prefab
             foreach (var g in cat.sockets.GroupBy(s => s.prefab).Where(g => g.Count() > 1)) bad.Add($"§7.5-10 目錄裡 {g.Key} 出現 {g.Count()} 次");
             info.Add("§7.5-10 " + string.Join("、", cat.sockets.Select(s => $"{s.prefab}：{string.Join("／", tools.Where(t => t.socketIds.Contains(s.socketId)).Select(t => t.toolId))}")));
-            // §6.6-8：掛位（工具架 slot_6 套筒扳手、slot_7 小扭力扳手在車頂工具箱；大扭力扳手 slot_13 是工具袋，R1.5b b3 才建）
-            foreach (var (id, slot) in new[] { ("tool.socket_wrench", 6), ("tool.torque_wrench", 7) })
-                if (!Object.FindObjectsOfType<Transform>(true).Any(x => x.name == "Slot_" + slot)) bad.Add($"§6.6-8 找不到 {id} 的掛位 Slot_{slot}");
-            info.Add("§6.6-8 tool.torque_wrench_l 的工具袋 slot_13：工具袋格子是 R1.5b b3，尚未建");
+            // §6.6-8：掛位在隨身工具袋（R1.5b b3）：slot_6 套筒扳手、slot_7 小扭力扳手、slot_13 大扭力扳手（只有定期檢修）
+            foreach (var (id, slot) in new[] { ("tool.socket_wrench", 6), ("tool.torque_wrench", 7), ("tool.torque_wrench_l", 13) })
+            {
+                bool ok = Object.FindObjectsOfType<Transform>(true).Any(x => x.name == "Pocket_" + slot);
+                info.Add($"§6.6-8 {id} 的工具袋掛位 Pocket_{slot}：{(ok ? "有" : "沒有")}");
+                if (!ok) bad.Add($"§6.6-8 找不到 {id} 的工具袋掛位 Pocket_{slot}");
+            }
             // §7.5-11：socket_case 有 6 個 TGT_Socket_*，名稱和所有扳手 sockets[] 的 prefab 一一對應
             var tgts = Object.FindObjectsOfType<Transform>(true).Where(x => x.name.StartsWith("TGT_Socket_")).Select(x => x.name.Substring(11)).OrderBy(x => x).ToList();
             var need = tools.SelectMany(t => t.socketIds).Distinct().Select(id => cat.Find(id)?.prefab?.Replace("TL_Socket_", "")).Where(x => x != null).OrderBy(x => x).ToList();
             info.Add($"§7.5-11 套筒盒 TGT_Socket_* {tgts.Count} 個：{string.Join("、", tgts)}");
             if (!tgts.SequenceEqual(need)) bad.Add($"§7.5-11 套筒盒 {string.Join("、", tgts)} ≠ 扳手套筒 {string.Join("、", need)}");
-            // §7.5-12：SubActions 裡「換上 N mm」那一步，該步工具的 sockets[] 有 N mm
+            // §7.5-12（R1.5b b3 改寫）：SubActions 裡「換上 N mm」那一步，該步工具的 sockets[] 有 sizeMm＝N 的套筒，而且這一步的螺栓 FastenerDef.sizeMm＝N
             foreach (var step in StepJsonImporter.LoadAll<StepDefinition>(StepJsonImporter.StepFolder))
                 foreach (var a in step.subActions ?? new SubAction[0])
                 {
@@ -172,8 +182,9 @@ namespace PantographSim.Editor
                     if (!m.Success) continue;
                     int mm = int.Parse(m.Groups[1].Value);
                     var t = tools.FirstOrDefault(x => x.toolId == a.toolId);
-                    bool ok = t != null && t.socketIds.Any(id => cat.Find(id)?.sizeMm == mm);
-                    info.Add($"§7.5-12 {step.stepId}「{a.text}」工具 {a.toolId}：{(ok ? "有" : "沒有")} {mm} mm");
+                    var boltSizes = step.subActions.Where(x => (x.targetId ?? "").Contains(".bolt_")).Select(x => cat.SizeFor(StateKeys.Expand(x.targetId, "L", 1))).Where(x => x > 0).Distinct().ToList();
+                    bool ok = t != null && t.socketIds.Any(id => cat.Find(id)?.sizeMm == mm) && boltSizes.All(x => x == mm);
+                    info.Add($"§7.5-12 {step.stepId}「{a.text}」工具 {a.toolId}：{(ok ? "有" : "沒有")} {mm} mm；這一步的螺栓要 {string.Join("／", boltSizes)} mm");
                     if (!ok) bad.Add($"§7.5-12 {step.stepId}「{a.text}」的工具 {a.toolId} 沒有 {mm} mm 套筒");
                 }
             return bad;

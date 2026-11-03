@@ -23,7 +23,7 @@ MonoBehaviour:
   - ip.carbon_strip_{side}.bolt_*
   requiredToolId: tool.socket_wrench
   completion:
-    rid: 8951035158582525988
+    rid: 1000
   errors:
   - errorId: ERR_CSR12_Overtight
     severity: 1
@@ -78,7 +78,7 @@ MonoBehaviour:
     targetId: env.tool_rack.slot_6
     toolId: tool.socket_wrench
     condition: tool.active=tool.socket_wrench
-    standPointId: tp.roof.shelf
+    standPointId: tp.roof.inner
   - text: "\u5F9E\u87BA\u6813\u76E4\u62FF 1 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
     why: 
     targetId: ip.carbon_strip_{side}.bolt_1
@@ -138,7 +138,7 @@ MonoBehaviour:
     targetId: env.tool_rack.slot_6
     toolId: 
     condition: tool.active=
-    standPointId: tp.roof.shelf
+    standPointId: tp.roof.inner
   presetDone: 0
   side: 
   presetStates: []
@@ -148,36 +148,36 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035158582525988
+    - rid: 1000
       type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         rules:
-        - rid: 8951035158582525989
-        - rid: 8951035158582525990
-        - rid: 8951035158582525991
-        - rid: 8951035158582525992
-        - rid: 8951035158582525993
-    - rid: 8951035158582525989
+        - rid: 1001
+        - rid: 1002
+        - rid: 1003
+        - rid: 1004
+        - rid: 1005
+    - rid: 1001
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: ip.carbon_strip_{side}.bolt_1.state
         value: Snug
-    - rid: 8951035158582525990
+    - rid: 1002
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: ip.carbon_strip_{side}.bolt_2.state
         value: Snug
-    - rid: 8951035158582525991
+    - rid: 1003
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: ip.carbon_strip_{side}.bolt_3.state
         value: Snug
-    - rid: 8951035158582525992
+    - rid: 1004
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: ip.carbon_strip_{side}.bolt_4.state
         value: Snug
-    - rid: 8951035158582525993
+    - rid: 1005
       type: {class: OrderedSequence, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: ip.carbon_strip_{side}.pretighten_order

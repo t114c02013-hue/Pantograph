@@ -256,6 +256,7 @@ namespace PantographSim.UI
             // R1：高度、蹲低視角（T1）與平滑移動、速度、遮罩（T6）；這些設定按了不關選單
             Text Setting(string cmd) { var b = Ui.Button(card, "", 26, () => Ui.Send("xr.menu", cmd)); Ui.Size(b, -1, 66); return Ui.LabelOf(b); }
             heightLabel = Setting("height"); crouchLabel = Setting("crouch"); moveLabel = Setting("move"); vignetteLabel = Setting("vignette");
+            bagLabel = Setting("toolbag_mount"); swapLabel = Setting("carry_swap");   // R1.5b b3：工具袋掛左手腕、工具袋與腰包左右對調
             var speedRow = Ui.Rect(card, "SpeedRow"); Ui.HStack(speedRow.gameObject, 10);
             var slower = Ui.Button(speedRow, "速度 −", 26, () => Ui.Send("xr.menu", "speed:-")); Ui.Size(slower, 180, 66);
             speedLabel = Ui.Text(speedRow, "", 26, Color.white, TextAnchor.MiddleCenter); Ui.Size(speedLabel, 200, 66);
@@ -268,7 +269,7 @@ namespace PantographSim.UI
             Item("關閉選單（≡）", "close");
         }
 
-        Text videoLabel, camLabel, heightLabel, crouchLabel, moveLabel, vignetteLabel, speedLabel;
+        Text videoLabel, camLabel, heightLabel, crouchLabel, moveLabel, vignetteLabel, speedLabel, bagLabel, swapLabel;
 
         public override void Refresh(ISimState s)
         {
@@ -281,6 +282,8 @@ namespace PantographSim.UI
             float vg = s.GetFloat("xr.vignette");
             vignetteLabel.text = "移動遮罩：" + (vg <= 0.01f ? "關" : vg < 0.45f ? "弱" : "強");
             speedLabel.text = $"{s.GetFloat("xr.move.speed", 1f):0.0} m/s";
+            bagLabel.text = "工具袋位置：" + (s.Get("xr.toolbag.mount") == "wrist" ? "左手腕" : "腰間") + "　<size=20>（點一下切換）</size>";
+            swapLabel.text = "工具袋／腰包：" + (s.GetBool("xr.carry.swap") ? "工具袋右腰、腰包左腰" : "工具袋左腰、腰包右腰");
             string rec = Ui.RecText(s);
             videoLabel.text = s.GetBool("rec.video.active") ? $"■ 停止錄影　<size=22>{rec}</size>" : "● 開始錄影";
             camLabel.text = "旁觀鏡頭：" + (s.Get("rec.video.view", "third") == "head" ? "頭盔視角（穩定化）" : "第三人稱") + "　<size=20>（點一下切換）</size>";

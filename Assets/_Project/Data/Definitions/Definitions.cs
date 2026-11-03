@@ -36,7 +36,7 @@ namespace PantographSim.Data
         public TutorialPage[] pages = Array.Empty<TutorialPage>();
     }
 
-    public enum SafetyRuleKind { NotLowered, NotGrounded, GroundOrder, NoVoltageTest, RemoveOrder, CranePersonUnderLoad, CraneCollision }   // R1.5b b1：天車的兩條 Critical 接在後面（序列化值不變）
+    public enum SafetyRuleKind { NotLowered, NotGrounded, GroundOrder, NoVoltageTest, RemoveOrder, CranePersonUnderLoad, CraneCollision, ToolNotStowedOnRoof }   // R1.5b b1：天車的兩條 Critical 接在後面（序列化值不變）
 
     public static class KeyValueList
     {

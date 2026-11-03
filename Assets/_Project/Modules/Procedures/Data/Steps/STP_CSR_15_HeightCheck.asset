@@ -24,7 +24,7 @@ MonoBehaviour:
   - env.work_order
   requiredToolId: tool.caliper
   completion:
-    rid: 8951035158582525998
+    rid: 1000
   errors:
   - errorId: ERR_CSR15_Exceeds
     severity: 1
@@ -79,7 +79,7 @@ MonoBehaviour:
     targetId: env.tool_rack.slot_5
     toolId: tool.caliper
     condition: tool.active=tool.caliper
-    standPointId: tp.roof.shelf
+    standPointId: tp.roof.inner
   - text: "\u91CF\u8098\u5074\u65B0\u6ED1\u677F\u4E2D\u9EDE"
     why: 
     targetId: ip.carbon_strip_L.measure_mid
@@ -103,7 +103,7 @@ MonoBehaviour:
     targetId: env.tool_rack.slot_5
     toolId: 
     condition: tool.active=
-    standPointId: tp.roof.shelf
+    standPointId: tp.roof.inner
   presetDone: 0
   side: 
   presetStates: []
@@ -114,20 +114,20 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035158582525998
+    - rid: 1000
       type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         rules:
-        - rid: 8951035158582525999
-        - rid: 8951035158582526000
-        - rid: 8951035158582526001
-    - rid: 8951035158582525999
+        - rid: 1001
+        - rid: 1002
+        - rid: 1003
+    - rid: 1001
       type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         keys:
         - ip.carbon_strip_L.measure_mid.new_measured
         - ip.carbon_strip_R.measure_mid.new_measured
-    - rid: 8951035158582526000
+    - rid: 1002
       type: {class: ReadingMatches, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         recordKeys:
@@ -137,7 +137,7 @@ MonoBehaviour:
         - ip.carbon_strip_L.measure_mid.reading
         - ip.carbon_strip_R.measure_mid.reading
         tolerance: 0.05
-    - rid: 8951035158582526001
+    - rid: 1003
       type: {class: ValueInRange, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: workorder.height_diff

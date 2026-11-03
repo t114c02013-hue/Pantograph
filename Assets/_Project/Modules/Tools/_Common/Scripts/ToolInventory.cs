@@ -33,7 +33,13 @@ namespace PantographSim.Tools
         void OnSelected(ToolSelected e) => Sim.State.SetBool("tools.all_returned", string.IsNullOrEmpty(e.toolId));
 
         public static void PlayBeep() { if (source != null) source.PlayOneShot(beep); }
-        public static void PlayClick() { if (source != null) source.PlayOneShot(click, 1f); }
+        /// <summary>
+        /// 到扭力的「喀」聲（驗收 F3、K3）：clip 由資料指定（ToolDefinition.clickClip），沒有指定就用內建的短音效，不可以沒聲音。
+        /// ClickPlayer 是實際播放的地方（預設 AudioSource.PlayOneShot），測試換成替身記錄呼叫次數。
+        /// </summary>
+        public static void PlayClick(AudioClip clip = null) => ClickPlayer(clip != null ? clip : BuiltinClick);
+        public static System.Action<AudioClip> ClickPlayer = c => { if (source != null) source.PlayOneShot(c, 1f); };
+        public static AudioClip BuiltinClick => click != null ? click : (click = Tone("click", 900f, 0.05f, true));
 
         static AudioClip Tone(string name, float freq, float seconds, bool percussive)
         {

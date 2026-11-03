@@ -9,6 +9,7 @@ namespace PantographSim.Data
         public string ruleId;
         public string errorId;
         public SafetyRuleKind kind;
+        [Tooltip("R1.5b b3：嚴重度（預設 Critical；工具未收回工具袋是 Major）")] public PantographSim.Core.Severity severity = PantographSim.Core.Severity.Critical;
         [TextArea] public string what;
         [TextArea] public string why;
         [TextArea] public string fix;

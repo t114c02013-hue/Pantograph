@@ -23,7 +23,7 @@ MonoBehaviour:
   targetIds: []
   requiredToolId: tool.caliper
   completion:
-    rid: 8951035158582525964
+    rid: 1000
   errors:
   - errorId: ERR_CSR02_MeasureBeforeZero
     severity: 1
@@ -58,19 +58,19 @@ MonoBehaviour:
     targetId: env.tool_rack.slot_5
     toolId: tool.caliper
     condition: tool.active=tool.caliper
-    standPointId: tp.roof.shelf
+    standPointId: tp.roof.inner
   - text: "\u628A\u91CF\u722A\u5B8C\u5168\u5408\u650F"
     why: "\u6309\u4E0B\u65B9\u300C\u5408\u650F\u91CF\u722A\u300D"
     targetId: 
     toolId: tool.caliper
     condition: tool.caliper.jaw=0
-    standPointId: tp.roof.shelf
+    standPointId: tp.roof.inner
   - text: "\u6309 ZERO \u9375\u6B78\u96F6"
     why: "\u8981\u986F\u793A 0.00"
     targetId: 
     toolId: tool.caliper
     condition: tool.caliper.zeroed
-    standPointId: tp.roof.shelf
+    standPointId: tp.roof.inner
   presetDone: 0
   side: 
   presetStates: []
@@ -81,7 +81,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035158582525964
+    - rid: 1000
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: tool.caliper.zeroed

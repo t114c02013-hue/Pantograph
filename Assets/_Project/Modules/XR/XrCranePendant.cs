@@ -143,7 +143,7 @@ namespace PantographSim.XR
         }
 
         /// <summary>左手的 interactor 有沒有選取掛座以外的東西。</summary>
-        bool LeftHandBusy() => rig.LeftHand.GetComponentsInChildren<XRBaseInteractor>().Any(i => i.hasSelection && !i.IsSelecting(dockInteractable));
+        bool LeftHandBusy() => XrHeldPole.LeftHandHolding || rig.LeftHand.GetComponentsInChildren<XRBaseInteractor>().Any(i => i.hasSelection && !i.IsSelecting(dockInteractable));
 
         HashSet<string> Pressed()
         {

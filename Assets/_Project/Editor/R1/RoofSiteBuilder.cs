@@ -572,12 +572,15 @@ namespace PantographSim.Editor
 
             // 平台工具架：掛位 1–4（上鎖掛牌組、驗電器、接地棒、安全帶），面朝 −X
             // R1.5a（D25）：工具架靠外護欄、面向 +X，只放掛位 1（上鎖掛牌組）、4（安全帶）；2、3 的絕緣桿在長桿桿架
-            var rack = BuildStorage("ToolRack_Platform", env, aRack.position, Vector3.right, tools.Where(t => t.hotkey == 1 || t.hotkey == 4).ToList(), mats, "env.tool_rack", "平台工具架（掛位 1、4）", d.toolRackHookTop - aRack.position.y);
+            // R1.5b b3：工具架保留 1、4，新增掛位 11 高阻計、12 短接地線（D20）；往 +Z 延伸，靠遙控器掛座（−Z）那一邊不動，StationLayoutCheck 第 19 項的間距不變
+            var rackTools = tools.Where(t => t.hotkey == 1 || t.hotkey == 4 || t.hotkey == 11 || t.hotkey == 12).ToList();
+            var rack = BuildStorage("ToolRack_Platform", env, aRack.position, Vector3.right, rackTools, mats, "env.tool_rack", "平台工具架（掛位 1、4、11、12）", d.toolRackHookTop - aRack.position.y,
+                -(StorageWidth(rackTools.Count, 0.25f) - StorageWidth(2)) / 2f, 0.25f);   // 掛位間距 0.25：+Z 邊到監護人站位 ≥ 0.6（第 15 項）
             Wrap(res, "ENV_PlatformToolRack", rack);
             res.ids["env.tool_rack"] = rack;
             res.layout.Add(("平台工具架", rack));
             res.layout.Add(("接地母線端子", term.transform));
-            sb.AppendLine($"平台：升降操作盒 {aLift.position:F2}、接地端子 {aBus.position:F2}、自檢器 {aTester.position:F2}、平台掛點 {aHarness.position:F2}、工具架 {aRack.position:F2}（掛位 1–4）");
+            sb.AppendLine($"平台：升降操作盒 {aLift.position:F2}、接地端子 {aBus.position:F2}、自檢器 {aTester.position:F2}、平台掛點 {aHarness.position:F2}、工具架 {aRack.position:F2}（掛位 1、4、11、12）");
         }
 
         // ---------- 車頂：工具箱（掛位 5–9＋套筒座）、零件盒、備品架、兩個螺栓盤 ----------
@@ -593,38 +596,7 @@ namespace PantographSim.Editor
                 return c;
             }
 
-            // 車頂工具箱（面朝 −X）
-            var box = BuildStorage("ToolBox_Roof", env, d.roofToolbox, Vector3.left, tools.Where(t => t.hotkey >= 5).ToList(), mats, SimIds.RoofToolbox, "車頂工具箱（掛位 5–9）", 0.4f);
-            var boxSupport = Support(d.roofToolbox, new Vector3(0.3f, 0, 1.2f), "ToolBox");
-            res.ids[SimIds.RoofToolbox] = box;
-            res.layout.Add(("車頂工具箱", box));
-            // 套筒盒 SocketCase（a6 增補 7 §7.4）：1/2" 區 10、13、17、19、24（5 格），3/8" 區 13_38（1 格），兩區之間隔板＋不同顏色底墊；
-            // 目標節點 TGT_Socket_*（膠囊半徑 1.5 cm），放在掛位 6 旁。套筒是「種類」：裝到扳手上盒裡那顆不消失（R1.5b）
-            var slot6 = box.Find("Slot_6");
-            if (slot6 != null)
-            {
-                var seats = Child(box, "SocketCase");
-                var origin = slot6.position + new Vector3(-0.04f, -0.2f, -0.12f);
-                int i = 0;
-                foreach (var (zone, sizes, pad) in new[] { ("1/2\"", new[] { "10", "13", "17", "19", "24" }, mats["steel"]), ("3/8\"", new[] { "13_38" }, mats["checkPoint"]) })
-                {
-                    float z0 = 0.05f * i;
-                    foreach (var size in sizes)
-                    {
-                        var cap = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-                        cap.name = "TGT_Socket_" + size;
-                        cap.transform.SetParent(seats, false);
-                        cap.transform.position = origin + new Vector3(0f, 0f, 0.05f * i++);
-                        cap.transform.localScale = new Vector3(0.03f, 0.02f, 0.03f);
-                        cap.GetComponent<Renderer>().sharedMaterial = mats["steel"];
-                        var cc = cap.GetComponent<CapsuleCollider>(); cc.isTrigger = true;
-                        cap.AddComponent<InteractionPointMarker>().Configure("env.socket_seat_" + size, (size.EndsWith("_38") ? "3/8\" 13" : size) + " mm 套筒座");
-                    }
-                    var padGo = Box("Pad_" + (zone.StartsWith("1") ? "Half" : "ThreeEighths"), seats, origin + new Vector3(0f, -0.025f, z0 + 0.05f * (sizes.Length - 1) / 2f), new Vector3(0.05f, 0.004f, 0.05f * sizes.Length), pad, collider: false);
-                    if (i < 6) Box("Divider", seats, origin + new Vector3(0f, -0.01f, 0.05f * i - 0.025f), new Vector3(0.05f, 0.03f, 0.004f), mats["panel"], collider: false);
-                }
-            }
-            Wrap(res, "ENV_RoofToolbox", box, boxSupport);
+            // R1.5b b3（D26）：車頂工具箱 env.roof_toolbox 移除，兩門課都用隨身工具袋（掛位 5–10、13）；套筒盒在工具袋的 SocketCase（BuildCraneAndRigging）
 
             // 零件盒（只收舊滑板）
             Support(d.partsTray, new Vector3(0.4f, 0, 0.3f), "PartsTray");
@@ -675,7 +647,7 @@ namespace PantographSim.Editor
             res.layout.Add(("備品架", shelf));
 
             // R1.5a：車頂安全帶掛點 ip.roof.anchor 改成平台防墜器門架的掛鉤（BuildPoleRackAndAnchorHook）
-            sb.AppendLine($"車頂：工具箱 {d.roofToolbox:F2}（掛位 5–9＋套筒座）、零件盒 {d.partsTray:F2}、備品架 {d.spareShelf:F2}、螺栓盤 R/L 在 {roofStation:F2} 的 ±{d.boltTrayOffset} m");
+            sb.AppendLine($"車頂：零件盒 {d.partsTray:F2}、備品架 {d.spareShelf:F2}、螺栓盤 R/L 在 {roofStation:F2} 的 ±{d.boltTrayOffset} m");
         }
 
         /// <summary>
@@ -1007,6 +979,7 @@ namespace PantographSim.Editor
             var pouch = Fbx("ENV_ToolPouch", null, env, bench, yaw: 90f);
             pouch.AddComponent<InteractionPointMarker>().Configure("env.tool_bag", "工具袋");
             res.ids["env.tool_bag"] = pouch.transform;
+            BuildToolBagPockets(res, pouch.transform, sb);
             var bolts = pouch.GetComponentsInChildren<Transform>(true).First(x => x.name == "BoltBag");
             bolts.gameObject.AddComponent<InteractionPointMarker>().Configure("env.tool_bag.bolt_pouch", "零件袋");
             res.ids["env.tool_bag.bolt_pouch"] = bolts;
@@ -1090,25 +1063,77 @@ namespace PantographSim.Editor
             sb.AppendLine($"駕駛室：控制盤 {aPanel.position:F2}（盤面朝 +X）、指示燈複本、弓頭監視畫面（{MonitorTexturePath}）");
         }
 
-        /// <summary>工具存放處（平台工具架／車頂工具箱）：背板＋掛位（ToolRackSlot，ID env.tool_rack.slot_k 不變）＋簡易工具模型。facing＝掛位朝向（學員那一側）。</summary>
-        static Transform BuildStorage(string name, Transform env, Vector3 pos, Vector3 facing, List<ToolDefinition> list, Dictionary<string, Material> mats, string boardId, string label, float height)
+        /// <summary>
+        /// R1.5b b3 隨身工具袋（§3.4）：每個 Pocket_k（k＝5..10、13；13 給大扭力扳手，模型沒有就在 10 旁補一個）是掛位 env.tool_rack.slot_k（ToolRackSlot），
+        /// 名稱標籤 Label_k（手伸進袋子時顯示，文字從工具資料讀）；SocketCase＝env.tool_bag.socket_case，底下 6 個套筒座 TGT_Socket_*（a6 增補 7 §7.4，3 × 2 排）。
+        /// </summary>
+        static void BuildToolBagPockets(Result res, Transform bag, StringBuilder sb)
+        {
+            var all = bag.GetComponentsInChildren<Transform>(true).ToList();
+            var tools = StepJsonImporter.LoadTools().Append(ToolSocketSetup.LargeWrench).Where(t => t != null).ToList();
+            var slots = R1Data.ApplyToolSlots().slots.Where(s => s.homeStorageId == ToolSlotTable.ToolBag).ToList();
+            var p10 = all.FirstOrDefault(x => x.name == "Pocket_10");
+            foreach (var s in slots.Where(s => all.All(x => x.name != "Pocket_" + s.slot)))   // 模型沒有的格子（13）先從乾淨的 Pocket_10 複製，再一起加元件
+                if (p10 != null) { var c = Object.Instantiate(p10.gameObject, p10.parent).transform; c.name = "Pocket_" + s.slot; c.position = p10.position + bag.right * 0.06f; all.Add(c); }
+            foreach (var s in slots)
+            {
+                var p = all.FirstOrDefault(x => x.name == "Pocket_" + s.slot);
+                if (p == null) continue;
+                if (p.GetComponent<Collider>() == null) p.gameObject.AddComponent<BoxCollider>();
+                var tool = tools.FirstOrDefault(t => t.toolId == s.toolId);
+                var comp = p.gameObject.AddComponent<ToolRackSlot>();
+                comp.Configure("env.tool_rack.slot_" + s.slot, "工具袋：" + (tool != null ? tool.displayName : s.toolId));
+                comp.Setup(s.slot, null, p.GetComponent<Renderer>());
+                var model = SliceSceneBuilder.BuildToolModelPublic(s.toolId, p, SliceModelBuilder.Materials());   // VR 手上的工具模型從這裡複製（XrPlayer.ShowHeldModel）；袋子裡不顯示
+                model.SetActive(false);
+                var label = new GameObject("Label_" + s.slot).AddComponent<TextMesh>();
+                label.transform.SetParent(p, false); label.transform.position = p.position + Vector3.up * 0.09f;
+                label.text = tool != null ? tool.displayName : s.toolId; label.characterSize = 0.006f; label.fontSize = 48; label.anchor = TextAnchor.LowerCenter; label.color = Color.white;
+                label.gameObject.SetActive(false);   // 手在工具袋範圍內才顯示（XrCarryContainer）
+                res.ids["env.tool_rack.slot_" + s.slot] = p;
+            }
+            var caseT = all.FirstOrDefault(x => x.name == "SocketCase");
+            if (caseT != null)
+            {
+                caseT.gameObject.AddComponent<InteractionPointMarker>().Configure("env.tool_bag.socket_case", "套筒盒");
+                res.ids["env.tool_bag.socket_case"] = caseT;
+                var sizes = new[] { "10", "13", "17", "19", "24", "13_38" };
+                for (int i = 0; i < sizes.Length; i++)
+                {
+                    var cap = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                    cap.name = "TGT_Socket_" + sizes[i];
+                    cap.transform.SetParent(caseT, true);
+                    cap.transform.position = caseT.position + bag.right * (-0.033f + 0.033f * (i % 3)) + bag.forward * (i < 3 ? -0.012f : 0.012f) + Vector3.up * 0.03f;
+                    cap.transform.localScale = Vector3.one;
+                    cap.transform.localScale = new Vector3(0.02f / cap.transform.lossyScale.x, 0.02f / cap.transform.lossyScale.y, 0.02f / cap.transform.lossyScale.z);
+                    var cc = cap.GetComponent<CapsuleCollider>(); cc.isTrigger = true;
+                    cap.AddComponent<InteractionPointMarker>().Configure("env.socket_seat_" + sizes[i], (sizes[i].EndsWith("_38") ? "3/8\" 13" : sizes[i]) + " mm 套筒座");
+                }
+            }
+            sb.AppendLine($"工具袋（b3）：掛位 {string.Join("、", slots.Select(s => s.slot))}、套筒盒 6 格");
+        }
+
+        /// <summary>工具存放處（平台工具架／桿架）：背板＋掛位（ToolRackSlot，ID env.tool_rack.slot_k 不變）＋簡易工具模型。facing＝掛位朝向（學員那一側）。</summary>
+        static float StorageWidth(int n, float spacing = 0.3f) => Mathf.Max(0.6f, spacing * n + 0.1f);
+
+        static Transform BuildStorage(string name, Transform env, Vector3 pos, Vector3 facing, List<ToolDefinition> list, Dictionary<string, Material> mats, string boardId, string label, float height, float shiftX = 0f, float spacing = 0.3f)
         {
             var root = new GameObject(name).transform;
             root.SetParent(env, false);
             root.position = pos;
             root.rotation = Quaternion.LookRotation(facing, Vector3.up);   // 本地 +Z＝朝學員（工具模型在掛位前方）
-            float width = Mathf.Max(0.6f, 0.3f * list.Count + 0.1f);
-            var board = SliceModelBuilder.Prim(PrimitiveType.Cube, "Board", root, new Vector3(0, height / 2f + 0.05f, -0.04f), new Vector3(width, height + 0.1f, 0.04f), mats["shelf"]);
+            float width = StorageWidth(list.Count, spacing);
+            var board = SliceModelBuilder.Prim(PrimitiveType.Cube, "Board", root, new Vector3(shiftX, height / 2f + 0.05f, -0.04f), new Vector3(width, height + 0.1f, 0.04f), mats["shelf"]);
             board.AddComponent<ToolRackBoard>().Configure(boardId, label + "（點一下查看掛位）");
             int i = 0;
             foreach (var t in list.OrderBy(t => t.hotkey))
             {
-                var slotPos = new Vector3(-width / 2f + 0.2f + 0.3f * i++, height / 2f + 0.05f, 0f);
-                var slot = SliceModelBuilder.Prim(PrimitiveType.Cube, $"Slot_{t.hotkey}", root, slotPos, new Vector3(0.26f, Mathf.Min(0.32f, height), 0.03f), mats["panel"]);
+                var slotPos = new Vector3(shiftX - width / 2f + 0.05f + spacing / 2f + spacing * i++, height / 2f + 0.05f, 0f);
+                var slot = SliceModelBuilder.Prim(PrimitiveType.Cube, $"Slot_{t.hotkey}", root, slotPos, new Vector3(Mathf.Min(0.26f, spacing - 0.03f), Mathf.Min(0.32f, height), 0.03f), mats["panel"]);
                 var model = SliceSceneBuilder.BuildToolModelPublic(t.toolId, slot.transform, mats);
                 Track(model, t.toolId);
                 var comp = slot.AddComponent<ToolRackSlot>();
-                comp.Configure($"env.tool_rack.slot_{t.hotkey}", $"{(boardId == SimIds.RoofToolbox ? "車頂工具箱" : "工具架")}：{t.displayName}");
+                comp.Configure($"env.tool_rack.slot_{t.hotkey}", $"{(boardId == "env.pole_rack" ? "桿架" : "工具架")}：{t.displayName}");
                 comp.Setup(t.hotkey, model, slot.GetComponent<Renderer>());
                 slot.AddComponent<Highlightable>();
             }

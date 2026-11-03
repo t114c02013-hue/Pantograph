@@ -46,15 +46,19 @@ namespace PantographSim.Tests
             const string path = "Assets/_Project/Modules/Procedures/Data/carbon_strip_slice.json";
             Assert.IsTrue(File.Exists(path), "步驟資料不存在：" + path);
             var bundle = ProcedureJsonConverter.Build(File.ReadAllText(path));
-            var expected = new[] { "tool.voltage_detector", "tool.grounding_rod", "tool.caliper", "tool.socket_wrench", "tool.torque_wrench", "tool.cleaning_cloth", "tool.marker", "tool.lockout_tag", "tool.safety_harness" };
+            // R1.5b b3：工具清單和掛位表一一對應（不寫死件數）；大扭力扳手 slot_13 的資料在 Assets/_Project/Tools，不在這份 json
+            var table = UnityEditor.AssetDatabase.LoadAssetAtPath<ToolSlotTable>("Assets/_Project/Modules/Worksite/Data/ToolSlotTable.asset");
+            var expected = table.slots.Where(s => s.toolId != "tool.torque_wrench_l").Select(s => s.toolId).ToArray();
+            Assert.GreaterOrEqual(expected.Length, 9, "R1 的 9 件都還在");
+            foreach (var r1 in new[] { "tool.voltage_detector", "tool.grounding_rod", "tool.caliper", "tool.socket_wrench", "tool.torque_wrench", "tool.cleaning_cloth", "tool.marker", "tool.lockout_tag", "tool.safety_harness" }) CollectionAssert.Contains(expected, r1);
             CollectionAssert.AreEquivalent(expected, bundle.tools.Select(t => t.toolId).ToArray());
             foreach (var t in bundle.tools)
             {
                 Assert.That(t.tutorial.pages.Length, Is.InRange(3, 5), t.toolId + " 教學頁數");
                 Assert.IsTrue(t.tutorial.pages.All(p => !string.IsNullOrWhiteSpace(p.title) && !string.IsNullOrWhiteSpace(p.body)), t.toolId);
-                Assert.That(t.hotkey, Is.InRange(1, 9));
+                Assert.AreEqual(table.FindTool(t.toolId).slot, t.hotkey, t.toolId + "：hotkey＝掛位編號（R1 的 1–9，R1.5b 加 10–12）");
             }
-            Assert.AreEqual(9, bundle.tools.Select(t => t.hotkey).Distinct().Count(), "熱鍵不重複");
+            Assert.AreEqual(bundle.tools.Count, bundle.tools.Select(t => t.hotkey).Distinct().Count(), "熱鍵不重複");
         }
     }
 }

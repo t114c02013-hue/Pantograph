@@ -17,7 +17,7 @@ namespace PantographSim.XR
             var bad = new List<string>();
             if (set == null) { bad.Add("沒有 StationSet"); return bad; }
             var st = set.stations ?? new StationDef[0];
-            foreach (var must in new[] { "tp.cab", "tp.platform.lift", "tp.platform.rack", "tp.platform.ground", "tp.platform.anchor", "tp.roof.inner", "tp.roof.outer", "tp.roof.shelf",
+            foreach (var must in new[] { "tp.cab", "tp.platform.lift", "tp.platform.rack", "tp.platform.ground", "tp.platform.anchor", "tp.roof.inner", "tp.roof.outer",
                 "tp.platform.parts", "tp.platform.scrap", "tp.roof.base_w", "tp.roof.base_e", "tp.roof.base_w.s", "tp.roof.base_e.s", "tp.roof.base_e.n", "tp.roof.base_w.n" })
                 if (!st.Any(s => s != null && s.id == must)) bad.Add($"缺少 R1 站點 {must}");
             if (st.Any(s => s == null)) { bad.Add("StationSet 有空的站點"); return bad; }

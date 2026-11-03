@@ -1,12 +1,12 @@
 步驟 25 個 → Assets/_Project/Modules/Procedures/Data/Steps
 程序 → Assets/_Project/Modules/Procedures/Data/PRC_CarbonStripSlice.asset
-安全規則 7 條 → Assets/_Project/Modules/Safety/Data
+安全規則 8 條 → Assets/_Project/Modules/Safety/Data
 情境 3 個 → Assets/_Project/Data/Scenarios
-工具 9 個 → Modules/Tools/*/Data
+工具 12 個 → Modules/Tools/*/Data
 位置檢測 3 個 → Assets/_Project/Modules/Parts/_Common/Data
 升降參數 → Assets/_Project/Modules/Worksite/Data/LiftSettings.asset
 
-套筒目錄 6 顆、螺栓對照 3 筆；扳手 tool.torque_wrench（3/8"、10–60、0.28）、tool.torque_wrench_l（1/2"、40–200、0.45）、tool.socket_wrench（1/2"、把手 0.45）
+套筒目錄 6 顆、螺栓對照 3 筆；扳手 tool.torque_wrench（3/8"、10–60、0.28）、tool.torque_wrench_l（1/2"、40–200、0.45）、tool.socket_wrench（1/2"、把手 0.19）
 PF_CarbonStrip_L ← CarbonStrip_2：尺寸 1.102 × 0.016 × 0.074 m
   截面：頂點數 68；頂面高度 −Z 邊 7.8 mm、中央 （中央無頂點）、+Z 邊 7.8 mm → 左右對稱，無法從外形看出斜面，加貼「此側朝外」箭頭
 PF_CarbonStrip_R ← CarbonStrip_1：尺寸 1.102 × 0.016 × 0.074 m
@@ -14,7 +14,7 @@ PF_CarbonStrip_R ← CarbonStrip_1：尺寸 1.102 × 0.016 × 0.074 m
 PF_StripBolt：M8×25 六角頭 對邊 13 mm、高 5.3 mm；墊圈 Ø16×1.6 mm；螺桿 Ø8×25 mm（示例值）
 螺栓位置：距端 3 cm、距中心線 ±2.5 cm，編號 1 左外、2 右內、3 右外、4 左內（外＝斜面側）
 
-圖層：新增 WalkLimit=14、Crane=15
+圖層：已存在
 場景：肘側滑板 (0.000, 0.675, 0.150)、4 支螺栓、托架遮罩
 場景：外側滑板 (0.000, 0.675, -0.150)、4 支螺栓、托架遮罩
 降弓位置檢測：檢測點 (0.000, 0.708, 0.000)、容許 1 cm、全程行程 182 cm
@@ -69,9 +69,9 @@ LoweredTightBounds（PAN_Root 局部，排除可拆件）：(-0.825, 0.000, -1.0
   挖除 10：X -0.579…-0.409、Z 1.563…1.733
   挖除 11：X -0.574…0.558、Z -0.076…1.748
 共用車頂站點：(0.00, -0.65)；肘側最遠螺栓 0.976 m、外側 0.740 m；側移提示 不啟用；stripTopAboveRoof=0.693
-平台：升降操作盒 (-1.81, 1.10, 0.00)、接地端子 (-1.81, 1.00, 0.35)、自檢器 (-1.81, 1.10, 0.85)、平台掛點 (-1.86, 1.20, -2.10)、工具架 (-3.06, 1.00, -2.40)（掛位 1–4）
+平台：升降操作盒 (-1.81, 1.10, 0.00)、接地端子 (-1.81, 1.00, 0.35)、自檢器 (-1.81, 1.10, 0.85)、平台掛點 (-1.86, 1.20, -2.10)、工具架 (-3.06, 1.00, -2.40)（掛位 1、4、11、12）
 平台：長桿桿架 (-2.85, 0.00, 0.60)（掛位 2、3）、防墜器掛鉤 (-1.95, 1.40, -1.55)
-車頂：工具箱 (0.10, 0.90, -2.50)（掛位 5–9＋套筒座）、零件盒 (-0.30, 0.90, -1.90)、備品架 (-0.30, 0.90, -3.10)、螺栓盤 R/L 在 (0.00, 0.00, -0.65) 的 ±0.4 m
+車頂：零件盒 (-0.30, 0.90, -1.90)、備品架 (-0.30, 0.90, -3.10)、螺栓盤 R/L 在 (0.00, 0.00, -0.65) 的 ±0.4 m
 車頂暫放墊：中心 (0.000, 0.000, -1.100)、1.2 × 0.3 m（存檔 inactive，日常課程打開）
 駕駛室：控制盤 (-0.69, -1.30, -30.00)（盤面朝 +X）、指示燈複本、弓頭監視畫面（Assets/_Project/Content/Textures/RT_PanHeadMonitor.renderTexture）
 台架（G2）：支撐座 1.103 × 1.804 m（BaseHole 間距 0.973 × 1.624 ＋ (0.13, 0.18)）；外框 1.967 × 2.565 m（FBX 原本 2.00 × 2.60）
@@ -79,32 +79,33 @@ LoweredTightBounds（PAN_Root 局部，排除可拆件）：(-0.825, 0.000, -1.0
 D40 吊鉤上限位：pivot 5.850 時正上方最近 Crane_Bridge 距離 0.549 m → hookYMax 5.850；吊鉤 pivot Y 5.850、頂面 Y 6.050 → 正上方最近 Crane_Bridge 距離 0.549 m（≥ 0.3）
 吊梁 ENV_LiftingBeam（G2）：梁長 1.233 m（沿 X）、吊耳間距 1.033 m
 天車機構（b1）：上限位 Y 5.850、小車 X -15…2、橋架 Z -15…15、安全規則 2 條
+工具袋（b3）：掛位 5、6、7、8、9、10、13、套筒盒 6 格
 天車：軌道 X 3／-16、Z ±15，停在 Z 12，吊鉤 Y 5.85；遙控器在掛座 (-3.06, 1.20, -2.95)；吊帶 4 條在 (-6.5, -3.8)；工具袋在工作檯上
 吊運（b2）：LoadProbe 層 13（只和 Default、Boundary 互動）；台架落點 Y -2.900；對位燈 台架 4、車頂 4；吸附 0.02 m
-場景件 prefab：ENV_Insulators、ENV_RoofSection、ENV_InspectionPlatform、ENV_PlatformStair、ENV_CabFloor、ENV_Backdrop、ENV_CarBody、ENV_PlatformToolRack、ENV_PoleRack、ENV_RoofToolbox、ENV_BoltTray_R、ENV_BoltTray_L、ENV_RoofStripMat、ENV_MaintenanceArea、ENV_PantographStand、ENV_WorkBench、ENV_OverheadCrane（Assets/_Project/Modules/Worksite/Prefabs）
+場景件 prefab：ENV_Insulators、ENV_RoofSection、ENV_InspectionPlatform、ENV_PlatformStair、ENV_CabFloor、ENV_Backdrop、ENV_CarBody、ENV_PlatformToolRack、ENV_PoleRack、ENV_BoltTray_R、ENV_BoltTray_L、ENV_RoofStripMat、ENV_MaintenanceArea、ENV_PantographStand、ENV_WorkBench、ENV_OverheadCrane（Assets/_Project/Modules/Worksite/Prefabs）
 PF_TorqueWrench：Socket_Mount 實測（Attach_Grip 局部）(0.0000, -0.0100, 0.2800)（推估 (0.0000, -0.0100, 0.2800)）
 PF_TorqueWrench_L：Socket_Mount 實測（Attach_Grip 局部）(0.0000, -0.0130, 0.4500)（推估 (0.0000, -0.0130, 0.4500)）
+PF_SocketWrench：Socket_Mount 實測（Attach_Grip 局部）(0.0000, -0.0110, 0.1900)（推估 (0.0000, -0.0110, 0.1900)）
 
 扳手與套筒建置檢查：全過
 G1：C1：(b) 頂點正常、(a) Renderer.bounds 偏低（關節旋轉後網格 AABB 變鬆）。建置改用頂點算的 LoweredTightBounds（RoofSceneDef.panLoweredTightBounds）。
 擺放檢查：通過
 集電弓（升降全程）範圍：中心 (0.00, 1.08, 0.97)、尺寸 (1.67, 2.93, 2.31)
-✔ 平台工具架：不相交，水平間距 2.86 m
+✔ 平台工具架：不相交，水平間距 2.61 m
 ✔ 接地母線端子：不相交，水平間距 0.98 m
 ✔ 長桿桿架：不相交，水平間距 1.77 m
-✔ 車頂工具箱：不相交，水平間距 1.51 m
 ✔ 零件盒：不相交，水平間距 1.58 m
 ✔ 備品架：不相交，水平間距 2.84 m
 ✔ 控制盤：不相交，水平間距 29.46 m
 
-紀錄：RecordingService（根目錄 C:\Huang Tai Hsiang\collector shoes\.claude\worktrees\compassionate-perlman-f00f6f\Recordings）、VideoCaptureService、SpectatorCamera；ReplayTracked 22 個
+紀錄：RecordingService（根目錄 C:\Huang Tai Hsiang\collector shoes\.claude\worktrees\compassionate-perlman-f00f6f\Recordings）、VideoCaptureService、SpectatorCamera；ReplayTracked 19 個
 按鍵表：182 列（Assets/_Project/Modules/XR/Resources/InputBindingTable.asset）
 VR：XR Origin（Floor）＋頭盔攝影機，控制器使用 XRI Starter Assets 輸入動作 Assets/Samples/XR Interaction Toolkit/2.6.5/Starter Assets/XRI Default Input Actions.inputactions
 VR：右搖桿平滑移動 1 m/s（車頂上限 1）、死區 0.15、CharacterController r 0.2、遮罩 開
 VR：腰包 env.waist_pouch 在 XR Origin 局部 (0.18, 0.95, 0.05)（右腰）
 平台：去駕駛室光圈 mk.platform.to_cab (-2.200, 0.000, -0.450)（r 0.25）
-VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、接地端子旁、活動欄與平台掛點、車頂（肘側滑板）（車頂開放才解鎖）、車頂（外側滑板）（車頂開放才解鎖）、車頂工具箱與零件盒（車頂開放才解鎖）、天車遙控器掛座旁、台架北側、台架東側、台架南側、台架西側、備品架前（日常）、待報廢箱前（日常）、車頂拆裝座（−X 側）（車頂開放才解鎖）、車頂拆裝座（+X 側）（車頂開放才解鎖）、底座螺栓 1 前（車頂開放才解鎖）、底座螺栓 2 前（車頂開放才解鎖）、底座螺栓 3 前（車頂開放才解鎖）、底座螺栓 4 前（車頂開放才解鎖）
-站點檢查：結果：21 站，202 過／0 待定／0 不合格（全過）
+VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、接地端子旁、活動欄與平台掛點、車頂（肘側滑板）（車頂開放才解鎖）、車頂（外側滑板）（車頂開放才解鎖）、天車遙控器掛座旁、台架北側、台架東側、台架南側、台架西側、備品架前（日常）、待報廢箱前（日常）、車頂拆裝座（−X 側）（車頂開放才解鎖）、車頂拆裝座（+X 側）（車頂開放才解鎖）、底座螺栓 1 前（車頂開放才解鎖）、底座螺栓 2 前（車頂開放才解鎖）、底座螺栓 3 前（車頂開放才解鎖）、底座螺栓 4 前（車頂開放才解鎖）
+站點檢查：結果：20 站，197 過／0 待定／0 不合格（全過）
 ・tp.cab：(-0.190, -2.350, -30.000)
 ・tp.platform.lift：(-2.200, 0.000, -0.050)
 ・tp.platform.rack：(-2.410, 0.000, -2.400)
@@ -112,7 +113,6 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ・tp.platform.anchor：(-2.200, 0.000, -1.800)
 ・tp.roof.inner：(0.000, 0.000, -0.650)
 ・tp.roof.outer：(0.000, 0.000, -0.650)
-・tp.roof.shelf：(-0.600, 0.000, -2.500)
 ・tp.platform.crane：(-2.400, 0.000, -3.500)
 ・tp.stand.n：(-9.492, -3.640, 1.993)
 ・tp.stand.e：(-7.909, -3.640, 0.110)
@@ -167,8 +167,6 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ・【第9項】tp.roof.base_e → HoldDown_BuckleBase_A：0.49 m、偏 48.5°
 ・【第9項】tp.roof.base_e → HoldDown_BuckleBase_B：1.44 m、偏 14.6°
 ・【第19項】PendantDock Bounds (-3.080, 0.930, -3.000)–(-2.990, 1.230, -2.900)
-・【第19項】工具架掛位 11 還沒建（R1.5b b3）
-・【第19項】工具架掛位 12 還沒建（R1.5b b3）
 ✔ 【第1項】tp.platform.lift–tp.platform.rack 水平 2.36 m（≥ 0.6）
 ✔ 【第1項】tp.platform.lift–tp.platform.ground 水平 0.65 m（≥ 0.6）
 ✔ 【第1項】tp.platform.lift–tp.platform.anchor 水平 1.75 m（≥ 0.6）
@@ -223,7 +221,6 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ✔ 【第6項】tp.stand.w 離台架上的降弓整組 水平 0.75 m（≥ 0.4）
 ✔ 【第7b項】tp.roof.inner (0.00, -0.65) 不在母線帶、絕緣子孔上
 ✔ 【第7b項】tp.roof.outer (0.00, -0.65) 不在母線帶、絕緣子孔上
-✔ 【第7b項】tp.roof.shelf (-0.60, -2.50) 不在母線帶、絕緣子孔上
 ✔ 【第7b項】tp.roof.base_w (-0.85, 0.84) 不在母線帶、絕緣子孔上
 ✔ 【第7b項】tp.roof.base_e (0.85, 0.84) 不在母線帶、絕緣子孔上
 ✔ 【第7b項】tp.roof.base_w.s (-0.85, -0.55) 不在母線帶、絕緣子孔上
@@ -244,7 +241,7 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ✔ 【第12項】吊帶 4：(-10.02, -2.57, 0.86)→(-9.51, -0.76, 0.00) 不穿過台架外框（頂面 Y -3.200）
 ✔ 【第13項】活動欄開口中心 (-1.81, -1.00) 到防墜器掛鉤 (-1.95, -1.55) 0.57 m（≤ 2）
 ✔ 【第13項】活動欄開口中心 (-1.81, -1.00) 到桿架 (-2.77, 0.60) 1.87 m（≤ 2）
-✔ 【第13項】活動欄開口中心 (-1.81, -1.00) 到工具架 (-3.10, -2.40) 1.90 m（≤ 2）
+✔ 【第13項】活動欄開口中心 (-1.81, -1.00) 到工具架 (-3.10, -2.20) 1.76 m（≤ 2）
 ✔ 【第14項】mk.platform.to_cab (-2.200, 0.000, -0.450) 到 tp.platform.lift 0.40 m（≤ 0.5）
 ✔ 【第14項】mk.platform.to_cab 正下方有 Walkable
 ✔ 【第15項】npc.guard（平時）(-3.00, -1.00) 最近的設備 去駕駛室光圈 0.63 m（≥ 0.6）
@@ -298,27 +295,21 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ✔ 【第16項】(h) tp.roof.base_e 到降弓羊角頂點範圍 X -0.833…0.833、Z -0.187…0.187 0.649 m（≥ 身體半徑 0.2）
 ✔ 【第16項】(i) tp.roof.base_e 到不會動零件最近的 底架 0.292 m（≥ 0.25）
 ✔ 【第16項】(f) tp.roof.base_w.s–tp.roof.inner 0.856 m（≥ 0.6）
-✔ 【第16項】(f) tp.roof.base_w.s–tp.roof.shelf 1.966 m（≥ 0.6）
 ✔ 【第16項】(f) tp.roof.base_e.s–tp.roof.inner 0.856 m（≥ 0.6）
-✔ 【第16項】(f) tp.roof.base_e.s–tp.roof.shelf 2.430 m（≥ 0.6）
 ✔ 【第16項】(f) tp.roof.base_e.s–tp.roof.base_w 2.193 m（≥ 0.6）
 ✔ 【第16項】(f) tp.roof.base_e.s–tp.roof.base_w.s 1.700 m（≥ 0.6）
 ✔ 【第16項】(f) tp.roof.base_e.s–tp.roof.base_w.n 2.779 m（≥ 0.6）
 ✔ 【第16項】(f) tp.roof.base_e.n–tp.roof.inner 2.450 m（≥ 0.6）
-✔ 【第16項】(f) tp.roof.base_e.n–tp.roof.shelf 4.394 m（≥ 0.6）
 ✔ 【第16項】(f) tp.roof.base_e.n–tp.roof.base_w 1.884 m（≥ 0.6）
 ✔ 【第16項】(f) tp.roof.base_e.n–tp.roof.base_w.s 2.779 m（≥ 0.6）
 ✔ 【第16項】(f) tp.roof.base_e.n–tp.roof.base_e.s 2.198 m（≥ 0.6）
 ✔ 【第16項】(f) tp.roof.base_e.n–tp.roof.base_w.n 1.700 m（≥ 0.6）
 ✔ 【第16項】(f) tp.roof.base_w.n–tp.roof.inner 2.450 m（≥ 0.6）
-✔ 【第16項】(f) tp.roof.base_w.n–tp.roof.shelf 4.156 m（≥ 0.6）
 ✔ 【第16項】(f) tp.roof.base_w.n–tp.roof.base_w.s 2.198 m（≥ 0.6）
 ✔ 【第16項】(f) tp.roof.base_w–tp.roof.inner 1.712 m（≥ 0.6）
-✔ 【第16項】(f) tp.roof.base_w–tp.roof.shelf 3.345 m（≥ 0.6）
 ✔ 【第16項】(f) tp.roof.base_w–tp.roof.base_w.s 1.386 m（≥ 0.6）
 ✔ 【第16項】(f) tp.roof.base_w–tp.roof.base_w.n 0.812 m（≥ 0.6）
 ✔ 【第16項】(f) tp.roof.base_e–tp.roof.inner 1.712 m（≥ 0.6）
-✔ 【第16項】(f) tp.roof.base_e–tp.roof.shelf 3.637 m（≥ 0.6）
 ✔ 【第16項】(f) tp.roof.base_e–tp.roof.base_w 1.700 m（≥ 0.6）
 ✔ 【第16項】(f) tp.roof.base_e–tp.roof.base_w.s 2.193 m（≥ 0.6）
 ✔ 【第16項】(f) tp.roof.base_e–tp.roof.base_e.s 1.386 m（≥ 0.6）
@@ -327,14 +318,14 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ✔ 【第16項】(j) tp.roof.base_e.n → 控制線接頭（手） 水平 0.781 m，伸手時頭部 |X| 約 0.747（≤ 1；可及 0.55 m）
 ✔ 【第16項】(j) tp.roof.base_e.n → 降弓固定帶綁點（手） 水平 0.719 m，伸手時頭部 |X| 約 0.718（≤ 1；可及 0.55 m）
 ✔ 【第16項】(j) tp.roof.base_e.n → 高壓電纜接地掛點（短絕緣桿桿頭） 水平 0.585 m，伸手時頭部 |X| 約 0.850（≤ 1；可及 0.8 m）
-✔ 【第21項】tp.roof.base_w.s × 鎖緊 × tool.socket_wrench：螺栓 1（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
-✔ 【第21項】tp.roof.base_w.s × 起鬆 × tool.socket_wrench：螺栓 1（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
-✔ 【第21項】tp.roof.base_e.s × 鎖緊 × tool.socket_wrench：螺栓 2（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
-✔ 【第21項】tp.roof.base_e.s × 起鬆 × tool.socket_wrench：螺栓 2（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
-✔ 【第21項】tp.roof.base_e.n × 鎖緊 × tool.socket_wrench：螺栓 3（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）1.500 m（≥ 0.02）
-✔ 【第21項】tp.roof.base_e.n × 起鬆 × tool.socket_wrench：螺栓 3（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）1.500 m（≥ 0.02）
-✔ 【第21項】tp.roof.base_w.n × 鎖緊 × tool.socket_wrench：螺栓 4（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）1.017 m（≥ 0.02）
-✔ 【第21項】tp.roof.base_w.n × 起鬆 × tool.socket_wrench：螺栓 4（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）1.017 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_w.s × 鎖緊 × tool.socket_wrench：螺栓 1（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.19 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_w.s × 起鬆 × tool.socket_wrench：螺栓 1（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.19 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_e.s × 鎖緊 × tool.socket_wrench：螺栓 2（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.19 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_e.s × 起鬆 × tool.socket_wrench：螺栓 2（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.19 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_e.n × 鎖緊 × tool.socket_wrench：螺栓 3（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.19 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）1.500 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_e.n × 起鬆 × tool.socket_wrench：螺栓 3（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.19 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）1.500 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_w.n × 鎖緊 × tool.socket_wrench：螺栓 4（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.19 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）1.315 m（≥ 0.02）
+✔ 【第21項】tp.roof.base_w.n × 起鬆 × tool.socket_wrench：螺栓 4（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.19 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）1.315 m（≥ 0.02）
 ✔ 【第21項】tp.roof.base_w.s × 鎖緊 × tool.torque_wrench_l：螺栓 1（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
 ✔ 【第21項】tp.roof.base_w.s × 起鬆 × tool.torque_wrench_l：螺栓 1（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
 ✔ 【第21項】tp.roof.base_e.s × 鎖緊 × tool.torque_wrench_l：螺栓 2（套筒 socket.24 高 0.04）把手中心 Y 0.345、半徑 0.45 m，最小淨空 0.045 m（最近 InsulatorCollision）；到弓頭（含羊角）0.111 m（≥ 0.02）
@@ -358,11 +349,13 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ✔ 【第18項】HoldDown_Leg_B 長 0.801 m（0.05–1.00）
 ✔ 【第19項】PendantDock 不在吊物禁區 Z -2.25…2.25 內（離禁區 0.65 m）
 ✔ 【第19項】PendantDock 中心 (-3.04, -2.95) 到 tp.platform.crane 0.840 m（量站點到掛座中心，≤ 1；a6 回報的 0.74 是量到掛座 Bounds 最近的邊）
-✔ 【第19項】PendantDock 和工具架 Bounds Z -2.750…-2.050 間距 0.150 m（≥ 0.15 − 容差 0.005）
+✔ 【第19項】PendantDock 和工具架 Bounds Z -2.750…-1.650 間距 0.150 m（≥ 0.15 − 容差 0.005）
 ✔ 【第19項】遙控器 Bounds (-3.045, 0.970, -2.989)–(-2.953, 1.250, -2.920)：Z 在掛座 -3.000…-2.900 內
 ✔ 【第19項】遙控器和工具架間距 0.170 m（≥ 0.15 − 0.005）
-✔ 【第19項】PendantDock 和掛位 1 間距 0.520 m（不重疊且 ≥ 0.15 − 0.005）
-✔ 【第19項】PendantDock 和掛位 4 間距 0.220 m（不重疊且 ≥ 0.15 − 0.005）
+✔ 【第19項】PendantDock 和掛位 1 間距 0.965 m（不重疊且 ≥ 0.15 − 0.005）
+✔ 【第19項】PendantDock 和掛位 4 間距 0.715 m（不重疊且 ≥ 0.15 − 0.005）
+✔ 【第19項】PendantDock 和掛位 11 間距 0.465 m（不重疊且 ≥ 0.15 − 0.005）
+✔ 【第19項】PendantDock 和掛位 12 間距 0.215 m（不重疊且 ≥ 0.15 − 0.005）
 ✔ 【第20項】防墜器 → tp.roof.base_w.s D 環（跪姿 0.9 m）不碰集電弓與絕緣子
 ✔ 【第20項】防墜器 → tp.roof.base_w.s D 環（站姿 1.35 m）不碰集電弓與絕緣子
 ✔ 【第20項】防墜器 → tp.roof.base_e.s D 環（跪姿 0.9 m）不碰集電弓與絕緣子
@@ -371,18 +364,18 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ✔ 【第20項】防墜器 → tp.roof.base_e.n D 環（站姿 1.35 m）不碰集電弓與絕緣子
 ✔ 【第20項】防墜器 → tp.roof.base_w.n D 環（跪姿 0.9 m）不碰集電弓與絕緣子
 ✔ 【第20項】防墜器 → tp.roof.base_w.n D 環（站姿 1.35 m）不碰集電弓與絕緣子
-VR：77 個互動點加上 XRInteractableBridge
+VR：80 個互動點加上 XRInteractableBridge
 場景已存檔：Assets/_Project/Content/Scenes/SC_CarbonStripSlice.unity（Build Settings 第 0 位）
-場景互動物件 95 個：env.bolt_tray_L, env.bolt_tray_R, env.crane, env.crane_pendant, env.panto_stand, env.panto_stand.clamp_1, env.panto_stand.clamp_2, env.panto_stand.tool_tray, env.parts_tray, env.pole_rack, env.roof_strip_mat, env.roof_toolbox, env.sling_1, env.sling_2, env.sling_3, env.sling_4, env.socket_seat_10, env.socket_seat_13, env.socket_seat_13_38, env.socket_seat_17, env.socket_seat_19, env.socket_seat_24, env.spare_shelf.slot_1, env.spare_shelf.slot_2, env.spare_shelf.slot_3, env.tool_bag, env.tool_bag.bolt_pouch, env.tool_rack, env.tool_rack.slot_1, env.tool_rack.slot_2, env.tool_rack.slot_3, env.tool_rack.slot_4, env.tool_rack.slot_5, env.tool_rack.slot_6, env.tool_rack.slot_7, env.tool_rack.slot_8, env.tool_rack.slot_9, env.waist_pouch, env.work_order, ip.cab.breaker, ip.cab.cylinder_power, ip.cab.pan_indicator, ip.cab.pan_indicator_repeat, ip.cab.panel, ip.cab.raise_button, ip.cab.raise_switch, ip.carbon_strip_L.bolt_1, ip.carbon_strip_L.bolt_2, ip.carbon_strip_L.bolt_3, ip.carbon_strip_L.bolt_4, ip.carbon_strip_L.bracket, ip.carbon_strip_L.install_check, ip.carbon_strip_L.install_target, ip.carbon_strip_L.measure_left, ip.carbon_strip_L.measure_mid, ip.carbon_strip_L.measure_right, ip.carbon_strip_L.outward, ip.carbon_strip_R.bolt_1, ip.carbon_strip_R.bolt_2, ip.carbon_strip_R.bolt_3, ip.carbon_strip_R.bolt_4, ip.carbon_strip_R.bracket, ip.carbon_strip_R.install_check, ip.carbon_strip_R.install_target, ip.carbon_strip_R.measure_left, ip.carbon_strip_R.measure_mid, ip.carbon_strip_R.measure_right, ip.carbon_strip_R.outward, ip.depot.detector_tester, ip.depot.ground_terminal, ip.depot.platform_anchor, ip.pan_assy.ctrl_connector, ip.pan_assy.hold_down, ip.pan_assy.hv_terminal, ip.pan_assy.lift_point_1, ip.pan_assy.lift_point_2, ip.pan_assy.lift_point_3, ip.pan_assy.lift_point_4, ip.pan_head.ground_clamp, ip.pan_head.lower_check, ip.pan_head.lower_target, ip.roof.anchor, ip.roof.carbody_ground, ip.roof.hv_cable_ground, part.carbon_strip_L, part.carbon_strip_R, part.crane.hook, part.pan_assy, part.pan_assy.hv_bolt_1, part.pan_assy.hv_bolt_2, part.pan_base.bolt_1, part.pan_base.bolt_2, part.pan_base.bolt_3, part.pan_base.bolt_4, part.pan_head
+場景互動物件 99 個：env.bolt_tray_L, env.bolt_tray_R, env.crane, env.crane_pendant, env.panto_stand, env.panto_stand.clamp_1, env.panto_stand.clamp_2, env.panto_stand.tool_tray, env.parts_tray, env.pole_rack, env.roof_strip_mat, env.sling_1, env.sling_2, env.sling_3, env.sling_4, env.socket_seat_10, env.socket_seat_13, env.socket_seat_13_38, env.socket_seat_17, env.socket_seat_19, env.socket_seat_24, env.spare_shelf.slot_1, env.spare_shelf.slot_2, env.spare_shelf.slot_3, env.tool_bag, env.tool_bag.bolt_pouch, env.tool_bag.socket_case, env.tool_rack, env.tool_rack.slot_1, env.tool_rack.slot_10, env.tool_rack.slot_11, env.tool_rack.slot_12, env.tool_rack.slot_13, env.tool_rack.slot_2, env.tool_rack.slot_3, env.tool_rack.slot_4, env.tool_rack.slot_5, env.tool_rack.slot_6, env.tool_rack.slot_7, env.tool_rack.slot_8, env.tool_rack.slot_9, env.waist_pouch, env.work_order, ip.cab.breaker, ip.cab.cylinder_power, ip.cab.pan_indicator, ip.cab.pan_indicator_repeat, ip.cab.panel, ip.cab.raise_button, ip.cab.raise_switch, ip.carbon_strip_L.bolt_1, ip.carbon_strip_L.bolt_2, ip.carbon_strip_L.bolt_3, ip.carbon_strip_L.bolt_4, ip.carbon_strip_L.bracket, ip.carbon_strip_L.install_check, ip.carbon_strip_L.install_target, ip.carbon_strip_L.measure_left, ip.carbon_strip_L.measure_mid, ip.carbon_strip_L.measure_right, ip.carbon_strip_L.outward, ip.carbon_strip_R.bolt_1, ip.carbon_strip_R.bolt_2, ip.carbon_strip_R.bolt_3, ip.carbon_strip_R.bolt_4, ip.carbon_strip_R.bracket, ip.carbon_strip_R.install_check, ip.carbon_strip_R.install_target, ip.carbon_strip_R.measure_left, ip.carbon_strip_R.measure_mid, ip.carbon_strip_R.measure_right, ip.carbon_strip_R.outward, ip.depot.detector_tester, ip.depot.ground_terminal, ip.depot.platform_anchor, ip.pan_assy.ctrl_connector, ip.pan_assy.hold_down, ip.pan_assy.hv_terminal, ip.pan_assy.lift_point_1, ip.pan_assy.lift_point_2, ip.pan_assy.lift_point_3, ip.pan_assy.lift_point_4, ip.pan_head.ground_clamp, ip.pan_head.lower_check, ip.pan_head.lower_target, ip.roof.anchor, ip.roof.carbody_ground, ip.roof.hv_cable_ground, part.carbon_strip_L, part.carbon_strip_R, part.crane.hook, part.pan_assy, part.pan_assy.hv_bolt_1, part.pan_assy.hv_bolt_2, part.pan_base.bolt_1, part.pan_base.bolt_2, part.pan_base.bolt_3, part.pan_base.bolt_4, part.pan_head
 資料檢查：
 結果：通過
 ✔ 步驟 ID 不重複（25 步）
 ✔ 錯誤規則 43 條皆檢查三段說明
-✔ 安全規則 7 條
-✔ 工具 9 個皆有教學
-✔ 所有步驟目標都存在於場景（95 個互動物件）
+✔ 安全規則 8 條
+✔ 工具 12 個皆有教學
+✔ 所有步驟目標都存在於場景（99 個互動物件）
 ・STP_CSR_05_Decide：小動作都在原地（B 鍵不傳送）
-✔ 小動作的站點都在 StationSet（21 站）
+✔ 小動作的站點都在 StationSet（20 站）
 ✔ 組件引用檢查完成（UI 只引用 Core；功能層互不引用，CarbonStrip→Parts.Common 為同一零件層）
 
 預覽圖：Logs/rig_slice_scene.png、rig_slice_strip_L.png、rig_slice_bolts.png

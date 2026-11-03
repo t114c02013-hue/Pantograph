@@ -31,7 +31,6 @@
         public const string PartsTray = "env.parts_tray";
         /// <summary>R1：車頂的螺栓盤（磁性盤），每側一個；拆下的螺栓放這裡，零件盒只收舊滑板。</summary>
         public static string BoltTray(string side) => "env.bolt_tray_" + side;
-        public const string RoofToolbox = "env.roof_toolbox";
         public const string SpareShelf = "env.spare_shelf";
         public const string ActiveTool = "tool.active";
 

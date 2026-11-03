@@ -11,7 +11,7 @@ namespace PantographSim.Tests
         static readonly string[] Pieces =
         {
             "ENV_RoofSection", "Roof_Insulators", "Roof_Busbar", "Roof_CarBodyGround", "Car_Roof_Work", "ENV_CarBody", "ENV_PoleRack", "ENV_InspectionPlatform", "ENV_PlatformStair", "ENV_CabFloor", "ENV_Backdrop",
-            "ENV_PlatformToolRack", "ENV_RoofToolbox", "ENV_BoltTray_L", "ENV_BoltTray_R", "TP_Marker",
+            "ENV_PlatformToolRack", "ENV_PantographStand", "ENV_BoltTray_L", "ENV_BoltTray_R", "TP_Marker",
         };
 
         [Test]

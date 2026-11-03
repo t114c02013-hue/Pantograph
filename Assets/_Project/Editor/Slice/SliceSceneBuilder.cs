@@ -34,7 +34,9 @@ namespace PantographSim.Editor
         {
             { "tool.voltage_detector", typeof(VoltageDetectorTool) }, { "tool.grounding_rod", typeof(GroundingRodTool) }, { "tool.caliper", typeof(CaliperTool) },
             { "tool.socket_wrench", typeof(SocketWrenchTool) }, { "tool.torque_wrench", typeof(TorqueWrenchTool) }, { "tool.cleaning_cloth", typeof(CleaningClothTool) },
-            { "tool.marker", typeof(MarkerTool) }, { "tool.lockout_tag", typeof(LockoutTagTool) }, { "tool.safety_harness", typeof(SafetyHarnessTool) }
+            { "tool.marker", typeof(MarkerTool) }, { "tool.lockout_tag", typeof(LockoutTagTool) }, { "tool.safety_harness", typeof(SafetyHarnessTool) },
+            // R1.5b b3：降弓固定帶 slot_10、高阻計 slot_11、短接地線 slot_12（只拿著點目標）、大扭力扳手 slot_13（D39，同一套扭力扳手邏輯，量程讀 ToolDefinition.rangeNm）
+            { "tool.hold_down_strap", typeof(CarryTool) }, { "tool.megger", typeof(CarryTool) }, { "tool.grounding_lead", typeof(CarryTool) }, { "tool.torque_wrench_l", typeof(TorqueWrenchTool) }
         };
 
         [MenuItem("PantographSim/Slice/Build Scene")]
@@ -62,6 +64,8 @@ namespace PantographSim.Editor
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
             RenderSettings.ambientLight = new Color(0.55f, 0.57f, 0.6f);
             sb.AppendLine(R1Layers.Ensure());
+            int heldPole = LayerMask.NameToLayer("HeldPole"), contact = LayerMask.NameToLayer("ContactTarget");
+            if (heldPole >= 0) for (int i = 0; i < 32; i++) Physics.IgnoreLayerCollision(heldPole, i, i != contact);   // R1.5b b3（P2）：手上的長桿不和場景碰撞，只碰互動點的觸發器
             var roofDef = R1Data.RoofScene;
             var stationSet = R1Data.ApplyA6();   // R1.5a a3＋a6：站點相對平台邊、駕駛室移位、tp.platform.crane、a6 擺放與新站點
             CarParamsExport.Export();   // a6：RoofSceneDef → car_params.json（新的參數區塊）
@@ -251,13 +255,13 @@ namespace PantographSim.Editor
 
             // ---- 工具列 ----
             var belt = new GameObject("ToolBelt");
-            foreach (var t in tools)
+            foreach (var t in tools.Append(ToolSocketSetup.LargeWrench).Where(t => t != null))
             {
                 var tg = new GameObject("Tool_" + t.displayName);
                 tg.transform.SetParent(belt.transform, false);
                 ((ToolBase)tg.AddComponent(ToolTypes[t.toolId])).Setup(t, t.toolId);
             }
-            belt.AddComponent<ToolBelt>();
+            belt.AddComponent<ToolBelt>().Setup(R1Data.ApplyToolSlots(), StepJsonImporter.LoadAll<SafetyRuleDefinition>(StepJsonImporter.SafetyFolder).FirstOrDefault(r => r.kind == SafetyRuleKind.ToolNotStowedOnRoof));   // R1.5b b3
             belt.AddComponent<ToolTutorialTrigger>();
             belt.AddComponent<ToolInventory>();
 

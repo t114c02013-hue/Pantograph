@@ -10,6 +10,8 @@ namespace PantographSim.Data
     public static class RackLogic
     {
         public const string OnRack = "on_rack", InHand = "in_hand", InUse = "in_use";
+        /// <summary>R1.5b b3：在腰包（D30，上鎖掛牌組作業期間）、掛在防墜繫繩上垂著（車頂放開沒收回工具袋）、掉在地上（地面工作區放開）。</summary>
+        public const string InPouch = "in_pouch", Hanging = "hanging", Dropped = "dropped";
 
         public static string SlotKey(int slot) => "rack.slot_" + slot;
         public static string SlotId(int slot) => "env.tool_rack.slot_" + slot;
@@ -27,7 +29,7 @@ namespace PantographSim.Data
             if (!string.IsNullOrEmpty(active)) return $"手上已經拿著「{activeName}」，先把它放回工具架";
             if (!string.IsNullOrEmpty(s.Get("hand.item"))) return "手上拿著零件，先把它放好再拿工具";
             string st = s.Get(SlotKey(slot), OnRack);
-            if (st != OnRack) return $"「{toolName}」正在使用中，不在架上";
+            if (st != OnRack && st != Hanging && st != Dropped) return $"「{toolName}」正在使用中，不在架上";   // 垂在繫繩上、掉在地上的工具可以撿回來
             // 一批寫入：手上、掛位、清點三個鍵同時生效，步驟判定與下一步的開始快照不會拍到只寫一半的狀態
             // （上一輪 WC_01 卡關就是快照拍到「手上空了、清點還是沒收回」）
             s.Batch(() =>
@@ -59,6 +61,29 @@ namespace PantographSim.Data
                 return null;
             }
             return st == InUse ? "這件工具還在使用中（例如接地還掛著），不能收回" : null;
+        }
+
+        /// <summary>手上的工具收進腰包（D30）；回傳 null＝成功。</summary>
+        public static string StowToPouch(ISimState s, int slot, string toolId)
+        {
+            if (s.Get(SimIds.ActiveTool) != toolId) return "手上沒有拿著這件工具";
+            s.Batch(() => { s.SetBool("tools.all_returned", true); s.Set(SlotKey(slot), InPouch); s.Set(SimIds.ActiveTool, ""); });
+            return null;
+        }
+
+        /// <summary>從腰包拿出（手要空著）。</summary>
+        public static string TakeFromPouch(ISimState s, int slot, string toolId)
+        {
+            if (s.Get(SlotKey(slot)) != InPouch) return "腰包裡沒有這件工具";
+            if (!string.IsNullOrEmpty(s.Get(SimIds.ActiveTool)) || !string.IsNullOrEmpty(s.Get("hand.item"))) return "手上已經拿著東西";
+            s.Batch(() => { s.SetBool("tools.all_returned", false); s.Set(SlotKey(slot), InHand); s.Set(SimIds.ActiveTool, toolId); });
+            return null;
+        }
+
+        /// <summary>在車頂放開沒收回工具袋（Hanging）或在地面放開（Dropped）：手空出來，工具不在存放處。</summary>
+        public static void Release(ISimState s, int slot, bool onRoof)
+        {
+            s.Batch(() => { s.SetBool("tools.all_returned", false); s.Set(SlotKey(slot), onRoof ? Hanging : Dropped); s.Set(SimIds.ActiveTool, ""); });
         }
 
         /// <summary>工具留在場上使用（接地棒掛上後），手空出來。</summary>

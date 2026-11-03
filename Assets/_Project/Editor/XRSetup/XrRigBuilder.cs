@@ -210,6 +210,12 @@ namespace PantographSim.Editor.XR
             pouch.GetComponent<BoxCollider>().isTrigger = true;
             pouch.AddComponent<PantographSim.Parts.Common.InteractionPointMarker>().Configure("env.waist_pouch", "腰包（上鎖掛牌組）");
             sb.AppendLine($"VR：腰包 env.waist_pouch 在 XR Origin 局部 {R1Data.RoofScene.waistPouchLocal:F2}（右腰）");
+            // R1.5b b3：工具袋、腰包跟著頭的 yaw（同一個隨身容器元件）；工具袋可改掛左手腕
+            var rd = R1Data.RoofScene;
+            var bagT = T("env.tool_bag");
+            if (bagT != null)
+                rigGo.AddComponent<XrCarryContainer>().Setup(rig, bagT, rd.toolBagHeadOffset, true, rd.carryOpenRange, bagT.GetComponentsInChildren<Transform>(true).Where(x => x.name.StartsWith("Label_")).Select(x => x.gameObject).ToArray());
+            rigGo.AddComponent<XrCarryContainer>().Setup(rig, pouch.transform, rd.waistPouchHeadOffset, false, rd.carryOpenRange, null);
             rigGo.SetActive(false);
             BuildToCabMarker(xrRoot.transform, mats, lineMat, sb);
             sb.AppendLine("VR：站點 " + string.Join("、", points.Select(p => p.Label + (string.IsNullOrEmpty(p.LockKey) ? "" : "（車頂開放才解鎖）"))));

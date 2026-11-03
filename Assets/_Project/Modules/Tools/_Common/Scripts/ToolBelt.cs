@@ -15,6 +15,10 @@ namespace PantographSim.Tools
     public class ToolBelt : MonoBehaviour
     {
         readonly List<ToolBase> tools = new List<ToolBase>();
+        [Tooltip("R1.5b b3：掛位表（homeStorageId、作業期間在腰包）")] [SerializeField] ToolSlotTable slotTable;
+        [Tooltip("R1.5b b3：車頂放開工具沒收回工具袋（ERR_Tool_NotStowedOnRoof，Major）")] [SerializeField] SafetyRuleDefinition notStowedRule;
+
+        public void Setup(ToolSlotTable table, SafetyRuleDefinition notStowed) { slotTable = table; notStowedRule = notStowed; }
         ToolBase active;
         bool bound;
 
@@ -75,9 +79,11 @@ namespace PantographSim.Tools
                     case "deploy": if (active != null) { var t = active; Sim.State.Batch(() => { Activate(null); RackLogic.Deploy(Sim.State, t.Hotkey); }); } break;
                     case "put_away": if (active != null) ClickSlot(active.Hotkey); break;
                     case "reset": ResetActive(); break;
+                    case "release": Release(parts.Length > 1 && parts[1] == "roof"); break;
                 }
                 return;
             }
+            if (e.targetId == ToolSlotTable.WaistPouch && string.IsNullOrEmpty(e.toolId) || e.targetId == ToolSlotTable.WaistPouch && active != null && e.toolId == active.ToolId) { Sim.State.Batch(Pouch); return; }
             if (e.targetId != null && e.targetId.StartsWith("tool."))
             {
                 // 工具列按鈕或舊的「select」：只高亮掛位；其他是工具自己的介面指令
@@ -117,9 +123,65 @@ namespace PantographSim.Tools
                 else { if (active == tool) Activate(null); Toast($"已把「{tool.DisplayName}」放回工具架"); }
                 return;
             }
+            if (s.Get(RackLogic.SlotKey(slot)) == RackLogic.InPouch)
+            {
+                // D30：WC_06 c 交接時把個人上鎖包從腰包掛回工具架（手要空著）
+                if (active != null) { Toast($"手上已經拿著「{active.DisplayName}」，先把它放好"); return; }
+                s.Set(RackLogic.SlotKey(slot), RackLogic.OnRack); s.SetBool("tools.all_returned", true);
+                Toast($"已把「{tool.DisplayName}」從腰包掛回工具架"); return;
+            }
             var err = RackLogic.TryPick(s, slot, tool.ToolId, tool.DisplayName, active != null ? active.DisplayName : "");
             if (err != null) { Toast(err); return; }
+            if (slotTable != null && slotTable.Find(slot) is ToolSlotDef def && def.workInPouch)
+            {
+                RackLogic.StowToPouch(s, slot, tool.ToolId);   // D30：SI_00 f 領取個人上鎖包，直接掛在腰間
+                Toast($"「{tool.DisplayName}」已放進腰包");
+                return;
+            }
             Activate(tool);
+        }
+
+        /// <summary>D30：點腰包＝手上的上鎖掛牌組收進腰包，或（手空著）從腰包拿出。</summary>
+        void Pouch()
+        {
+            var s = Sim.State;
+            if (slotTable == null) return;
+            if (active != null)
+            {
+                var def = slotTable.Find(active.Hotkey);
+                if (def == null || !def.workInPouch) { Toast($"「{active.DisplayName}」不放腰包"); return; }
+                var t = active; RackLogic.StowToPouch(s, t.Hotkey, t.ToolId); Activate(null); Toast($"已把「{t.DisplayName}」收進腰包");
+                return;
+            }
+            foreach (var def in slotTable.slots.Where(x => x != null && x.workInPouch))
+            {
+                var tool = BySlot(def.slot);
+                if (tool != null && RackLogic.TakeFromPouch(s, def.slot, tool.ToolId) == null) { Activate(tool); return; }
+            }
+            Toast("腰包是空的");
+        }
+
+        /// <summary>
+        /// 放開手上的工具、沒有收回存放處（防墜繫繩，crane-procedure 6.3）：在車頂＝掛在繫繩上垂著，記 Major ERR_Tool_NotStowedOnRoof；
+        /// 在地面工作區＝落在地面或台架上，不記錯（WC_01 清點時要收回）。
+        /// </summary>
+        public void Release(bool onRoof)
+        {
+            if (active == null) return;
+            var t = active;
+            Sim.State.Batch(() =>
+            {
+                RackLogic.Release(Sim.State, t.Hotkey, onRoof);
+                Activate(null);
+                if (!onRoof) { Toast($"「{t.DisplayName}」放在地上了，清點時要收回"); return; }
+                Toast($"「{t.DisplayName}」掛在防墜繫繩上垂著：用完要收回工具袋");
+                Sim.Bus.Publish(new ErrorDetected
+                {
+                    errorId = notStowedRule != null ? notStowedRule.errorId : "ERR_Tool_NotStowedOnRoof", severity = notStowedRule != null ? notStowedRule.severity : Severity.Major,
+                    what = notStowedRule?.what ?? "", why = notStowedRule?.why ?? "", fix = notStowedRule?.fix ?? "",
+                    stepId = Sim.State.Get("procedure.current"), toolId = t.ToolId, targetId = t.ToolId, time = SimClock.Now
+                });
+            });
         }
 
         void Activate(ToolBase next)

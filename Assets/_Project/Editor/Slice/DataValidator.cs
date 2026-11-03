@@ -72,7 +72,11 @@ namespace PantographSim.Editor
             var tools = StepJsonImporter.LoadTools();
             foreach (var t in tools)
                 if (t.tutorial?.pages == null || t.tutorial.pages.Length < 3 || t.tutorial.pages.Length > 5) Fail($"{t.toolId} 教學頁數 {t.tutorial?.pages?.Length ?? 0}（需 3–5）");
-            if (tools.Count != 9) Fail($"工具應有 9 個，實際 {tools.Count}");
+            // R1.5b b3：工具數不寫死，和掛位表一一對應（slot_13 大扭力扳手的資料在 Assets/_Project/Tools，另外加）
+            var slotTable = R1Data.ApplyToolSlots();
+            var allTools = tools.Append(ToolSocketSetup.LargeWrench).Where(t => t != null).ToList();
+            foreach (var t in allTools) if (slotTable.FindTool(t.toolId) is var def && (def == null || def.slot != t.hotkey)) Fail($"{t.toolId}（hotkey {t.hotkey}）在掛位表裡沒有同號的掛位");
+            foreach (var s in slotTable.slots) if (allTools.All(t => t.toolId != s.toolId)) Fail($"掛位 {s.slot} 的工具 {s.toolId} 不存在");
             Pass($"工具 {tools.Count} 個皆有教學");
             foreach (var s in prc.steps.Where(s => !string.IsNullOrEmpty(s.requiredToolId)))
                 if (tools.All(t => t.toolId != s.requiredToolId)) Fail($"{s.stepId} 需要的工具 {s.requiredToolId} 不存在");

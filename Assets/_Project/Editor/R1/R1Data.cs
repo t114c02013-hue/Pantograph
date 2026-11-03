@@ -31,6 +31,27 @@ namespace PantographSim.Editor
         /// <summary>R1.5b b2：吊運資料（起吊條件、吸附容差、對位燈、下降對位時的碰撞排除）與傳送限制（和 RoofAccessRule 放在一起）。</summary>
         public static RiggingDef Rigging => Ensure<RiggingDef>(Folder + "/RiggingDef.asset");
         public static TeleportRule Teleport => Ensure<TeleportRule>(Folder + "/TeleportRule.asset");
+        public static ToolSlotTable ToolSlots => Ensure<ToolSlotTable>(Folder + "/ToolSlotTable.asset");
+
+        /// <summary>
+        /// R1.5b b3 掛位表（§3.4，D17、D20、D25、D26、D30、D39）：5–10、13 在隨身工具袋；1、4、11、12 在平台工具架；2、3 在桿架。
+        /// slot_1 上鎖掛牌組開始與結束在工具架、作業期間在腰包；slot_13 大扭力扳手只有定期檢修。可以重跑（每次寫同樣的值，見類別註解）。
+        /// </summary>
+        public static ToolSlotTable ApplyToolSlots()
+        {
+            var t = ToolSlots;
+            ToolSlotDef S(int k, string tool, string home, string courses = "both", bool pouch = false) => new ToolSlotDef { slot = k, toolId = tool, homeStorageId = home, courses = courses, workInPouch = pouch };
+            t.slots = new[]
+            {
+                S(1, "tool.lockout_tag", ToolSlotTable.ToolRack, pouch: true), S(2, "tool.voltage_detector", ToolSlotTable.PoleRack), S(3, "tool.grounding_rod", ToolSlotTable.PoleRack),
+                S(4, "tool.safety_harness", ToolSlotTable.ToolRack), S(5, "tool.caliper", ToolSlotTable.ToolBag), S(6, "tool.socket_wrench", ToolSlotTable.ToolBag),
+                S(7, "tool.torque_wrench", ToolSlotTable.ToolBag), S(8, "tool.cleaning_cloth", ToolSlotTable.ToolBag), S(9, "tool.marker", ToolSlotTable.ToolBag),
+                S(10, "tool.hold_down_strap", ToolSlotTable.ToolBag), S(11, "tool.megger", ToolSlotTable.ToolRack), S(12, "tool.grounding_lead", ToolSlotTable.ToolRack),
+                S(13, "tool.torque_wrench_l", ToolSlotTable.ToolBag, "periodic"),
+            };
+            EditorUtility.SetDirty(t);
+            return t;
+        }
 
         /// <summary>按鍵表（Resources，執行期 InputBindingTable.LoadDefault 讀它）；不存在或空的就用預設表建立，已存在就照用。</summary>
         public const string InputBindingsPath = "Assets/_Project/Modules/XR/Resources/InputBindingTable.asset";
@@ -80,7 +101,6 @@ namespace PantographSim.Editor
                     Station("tp.platform.anchor", "活動欄與平台掛點", StationFloor.Platform, new Vector2(-2.00f, -1.00f), "ip.depot.platform_anchor"),
                     Station("tp.roof.inner", "車頂（肘側滑板）", StationFloor.Roof, new Vector2(0.00f, -0.65f), "part.carbon_strip_L", 0f, "roof.open", roofLock),
                     Station("tp.roof.outer", "車頂（外側滑板）", StationFloor.Roof, new Vector2(0.00f, -0.65f), "part.carbon_strip_R", 0f, "roof.open", roofLock, "tp.roof.inner"),
-                    Station("tp.roof.shelf", "車頂工具箱與零件盒", StationFloor.Roof, new Vector2(-0.60f, -2.50f), "env.roof_toolbox", 0f, "roof.open", roofLock),
                 };
                 EditorUtility.SetDirty(set);
                 AssetDatabase.SaveAssets();

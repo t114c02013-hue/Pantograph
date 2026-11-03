@@ -23,7 +23,7 @@ namespace PantographSim.XR
         [SerializeField] XRBaseController rightController;
         [SerializeField] XrTeleport teleport;
         [SerializeField] XrCoach coach;
-        [SerializeField] float maxDistance = 30f, grabRadius = 0.15f, trayRadius = 0.3f;
+        [SerializeField] float maxDistance = 30f, grabRadius = 0.15f, trayRadius = 0.3f, pouchRadius = 0.15f;
 
         XRInputMapper mapper;
         XrControllerInput input;
@@ -260,6 +260,8 @@ namespace PantographSim.XR
             grabPickedThisPress = false;
             if (!S.GetBool("training.running") || S.GetBool("training.paused")) return;
             string active = S.Get(SimIds.ActiveTool);
+            // D30：手伸到腰包按握把＝從腰包拿出上鎖掛牌組（手要空著）
+            if (string.IsNullOrEmpty(active) && string.IsNullOrEmpty(S.Get("hand.item")) && Near("env.waist_pouch", pouchRadius)) { Send("env.waist_pouch", "click"); grabPickedThisPress = true; return; }
             int slot = SlotOf(hoveredId);
             if (slot == 0) slot = SlotNearHand();
             if (slot > 0 && string.IsNullOrEmpty(active) && string.IsNullOrEmpty(S.Get("hand.item")))
@@ -282,7 +284,8 @@ namespace PantographSim.XR
                 int k = SlotOfTool(active);
                 if (k > 0 && (SlotOf(hoveredId) == k || Near("env.tool_rack.slot_" + k, grabRadius)))
                     Sim.Bus.Publish(new ToolReturnRequested { targetId = "env.tool_rack.slot_" + k, value = k, time = SimClock.Now });
-                else Toast($"要歸還：把手伸到工具架第 {k} 格前（15 cm 內）再放開握把");
+                else if (Near("env.waist_pouch", pouchRadius)) Send("env.waist_pouch", "click");   // D30：上鎖掛牌組收進腰包（不是腰包的工具由 ToolBelt 提示）
+                else Send("tool.belt", "release:" + (S.Get(XrViewHeight.FloorKey) == "Roof" ? "roof" : "ground"));   // 防墜繫繩：車頂垂掛並記 Major、地面放下（crane-procedure 6.3）
                 return;
             }
             if (!string.IsNullOrEmpty(S.Get("hand.item")) && (hoveredId == SimIds.PartsTray || Near(SimIds.PartsTray, trayRadius)))
@@ -346,6 +349,8 @@ namespace PantographSim.XR
             switch (text)
             {
                 case "move": S.SetBool(XrLocomotion.OnKey, S.Has(XrLocomotion.OnKey) && !S.GetBool(XrLocomotion.OnKey)); return true;
+                case "toolbag_mount": S.Set(XrCarryContainer.MountKey, S.Get(XrCarryContainer.MountKey) == "wrist" ? "waist" : "wrist"); return true;   // R1.5b b3
+                case "carry_swap": S.SetBool(XrCarryContainer.SwapKey, !S.GetBool(XrCarryContainer.SwapKey)); return true;
                 case "speed:+": case "speed:-":
                     S.SetFloat(XrLocomotion.SpeedKey, Mathf.Clamp(Mathf.Round((S.GetFloat(XrLocomotion.SpeedKey, 1f) + (text == "speed:+" ? 0.1f : -0.1f)) * 10f) / 10f, 0.6f, 1.5f));
                     return true;
@@ -414,6 +419,7 @@ namespace PantographSim.XR
             heldModel = null;
             if (string.IsNullOrEmpty(toolId) || rig == null || Sim.Registry == null) return;
             int k = SlotOfTool(toolId);
+            if (IsPole(toolId)) { ShowHeldPole(toolId); return; }
             if (!Sim.Registry.TryGetTransform("env.tool_rack.slot_" + k, out var slot)) return;
             var model = slot.Cast<Transform>().FirstOrDefault(t => t.name.StartsWith("Model_"));
             if (model == null) return;
@@ -426,6 +432,24 @@ namespace PantographSim.XR
             var s = model.lossyScale;
             heldModel.transform.localScale = new Vector3(s.x / parentScale.x, s.y / parentScale.y, s.z / parentScale.z);
             foreach (var c in heldModel.GetComponentsInChildren<Collider>()) Destroy(c);
+        }
+
+        static bool IsPole(string toolId) => toolId == SimIds.ToolGroundingRod || toolId == "tool.voltage_detector";
+
+        /// <summary>R1.5b b3（P2）：2.5 m 長桿（驗電器、接地棒）：桿身沿 +Z、護環在桿尾 1.6 m，XrHeldPole 負責雙手握持、HeldPole 層與輕震。</summary>
+        void ShowHeldPole(string toolId)
+        {
+            const float length = 2.5f, guard = 1.6f;
+            heldModel = new GameObject("Held_" + toolId);
+            var shaft = GameObject.CreatePrimitive(PrimitiveType.Cylinder); shaft.name = "Shaft"; Destroy(shaft.GetComponent<Collider>());
+            shaft.transform.SetParent(heldModel.transform, false); shaft.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            shaft.transform.localPosition = new Vector3(0f, 0f, length / 2f); shaft.transform.localScale = new Vector3(0.03f, length / 2f, 0.03f);
+            var ring = GameObject.CreatePrimitive(PrimitiveType.Cylinder); ring.name = "GuardRing"; Destroy(ring.GetComponent<Collider>());
+            ring.transform.SetParent(heldModel.transform, false); ring.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            ring.transform.localPosition = new Vector3(0f, 0f, guard); ring.transform.localScale = new Vector3(0.09f, 0.005f, 0.09f);
+            var tint = toolId == SimIds.ToolGroundingRod ? new Color(0.2f, 0.6f, 0.2f) : new Color(0.9f, 0.7f, 0.1f);
+            foreach (var r in heldModel.GetComponentsInChildren<Renderer>()) r.material.color = tint;
+            heldModel.AddComponent<XrHeldPole>().Setup(rig, length, guard);
         }
 
         // ---------- 震動 ----------

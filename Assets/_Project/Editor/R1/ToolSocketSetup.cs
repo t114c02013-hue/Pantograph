@@ -11,7 +11,7 @@ namespace PantographSim.Editor
     /// a6 增補 7（鐵道 D39，torque-wrench-sockets.md v1.3 §6.5、§7）：套筒目錄 SocketCatalog、兩支扭力扳手與套筒扳手的 ToolDefinition 欄位、
     /// 螺栓用哪顆套筒（FastenerDef.socketId 的對照）、tool_sockets.json（Blender 讀的單一來源）＋雜湊。可以重跑（每次寫同樣的值）：每次建置都覆寫套筒目錄與這三支扳手的 ToolDefinition 欄位，在 Inspector 手改會被蓋掉，改數值要改這裡。
     /// 數值是規格表的值（EX 的照抄），之後只改這裡的資料或資產。
-    /// shortcut: tool.torque_wrench_l 的 ToolDefinition 放在 Assets/_Project/Tools（不在 R1 的工具清單裡，不進工具列、不影響 25 步）, R1.5b b4c 把它接進工具袋 slot_13 時搬進工具清單
+    /// tool.torque_wrench_l 的 ToolDefinition 放在 Assets/_Project/Tools（LoadTools 讀不到；R1.5b b3 起由 SliceSceneBuilder 另外加進工具列，掛位 slot_13＝工具袋，只有定期檢修）。
     /// </summary>
     public static class ToolSocketSetup
     {
@@ -36,22 +36,22 @@ namespace PantographSim.Editor
         public static string Apply()
         {
             var cat = Ensure<SocketCatalog>(CatalogPath);
-            SocketDef S(string id, string prefab, float drive, int size, float h, float dia, string src, params string[] fits) =>
-                new SocketDef { socketId = id, prefab = prefab, driveIn = drive, sizeMm = size, heightM = h, outerDiaM = dia, fits = fits, source = src };
+            SocketDef S(string id, string prefab, float drive, int size, float h, float dia, string src) =>
+                new SocketDef { socketId = id, prefab = prefab, driveIn = drive, sizeMm = size, heightM = h, outerDiaM = dia, source = src };
             cat.sockets = new[]
             {
                 S("socket.10", "TL_Socket_10", 0.5f, 10, 0.038f, 0.022f, "EX（v1.3 §7.2，錯誤選項）"),
-                S("socket.13", "TL_Socket_13", 0.5f, 13, 0.038f, 0.022f, "EX（v1.3 §7.2）", "ip.carbon_strip_*.bolt_*"),
+                S("socket.13", "TL_Socket_13", 0.5f, 13, 0.038f, 0.022f, "EX（v1.3 §7.2）"),
                 S("socket.17", "TL_Socket_17", 0.5f, 17, 0.038f, 0.024f, "EX（v1.3 §7.2，錯誤選項）"),
-                S("socket.19", "TL_Socket_19", 0.5f, 19, 0.035f, 0.028f, "D38", "part.pan_assy.hv_bolt_*"),
-                S("socket.24", "TL_Socket_24", 0.5f, 24, 0.040f, 0.033f, "D38", "part.pan_base.bolt_*"),
-                S("socket.13_38", "TL_Socket_13_38", 0.375f, 13, 0.030f, 0.019f, "EX（D39）", "ip.carbon_strip_*.bolt_*"),
+                S("socket.19", "TL_Socket_19", 0.5f, 19, 0.035f, 0.028f, "D38"),
+                S("socket.24", "TL_Socket_24", 0.5f, 24, 0.040f, 0.033f, "D38"),
+                S("socket.13_38", "TL_Socket_13_38", 0.375f, 13, 0.030f, 0.019f, "EX（D39）"),
             };
             cat.fasteners = new[]
             {
-                new FastenerSocket { fastenerPattern = "part.pan_base.bolt_*", socketId = "socket.24" },
-                new FastenerSocket { fastenerPattern = "part.pan_assy.hv_bolt_*", socketId = "socket.19" },
-                new FastenerSocket { fastenerPattern = "ip.carbon_strip_*.bolt_*", socketId = "socket.13", estimated = true },   // 鬆／鎖用套筒扳手 13；上扭力（CSR_13）用小扭力扳手的 13_38
+                new FastenerSocket { fastenerPattern = "part.pan_base.bolt_*", sizeMm = 24 },          // 底座 M16
+                new FastenerSocket { fastenerPattern = "part.pan_assy.hv_bolt_*", sizeMm = 19 },       // 高壓端子 M12
+                new FastenerSocket { fastenerPattern = "ip.carbon_strip_*.bolt_*", sizeMm = 13, estimated = true },   // 碳滑板 M8：套筒扳手 socket.13、小扭力扳手 socket.13_38 都對
             };
             EditorUtility.SetDirty(cat);
 
@@ -65,10 +65,10 @@ namespace PantographSim.Editor
             var small = tools.First(t => t.toolId == "tool.torque_wrench");
             Wrench(small, "PF_TorqueWrench", 0.375f, new Vector2(10, 60), 0.28f, "socket.13_38", new[] { "socket.13_38" }, new ToolCalibration { labelId = "TW-S-001", dueDate = "2027-05-31", source = "示例值" });
             var large = Ensure<ToolDefinition>(LargeWrenchPath);
-            large.toolId = "tool.torque_wrench_l"; large.displayName = "大扭力扳手（1/2\"）"; large.hotkey = 0;
+            large.toolId = "tool.torque_wrench_l"; large.displayName = "大扭力扳手（1/2\"）"; large.hotkey = 13;   // R1.5b b3：工具袋 slot_13（D39，只有定期檢修）
             Wrench(large, "PF_TorqueWrench_L", 0.5f, new Vector2(40, 200), 0.45f, "socket.24", new[] { "socket.24", "socket.19" }, new ToolCalibration { labelId = "TW-L-001", dueDate = "2027-05-31", source = "示例值" });
             var sw = tools.First(t => t.toolId == "tool.socket_wrench");
-            float swHandle = float.TryParse(sw.Param("handleLength"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var h) ? h : 0f;   // 套筒扳手讀它自己現在的值
+            const float swHandle = 0.19f;   // R1.5b b3（建模 B v1.4 §8）：EX；PF_SocketWrench 的 Attach_Grip 到 Socket_Mount 實測要在 2 mm 內（建置檢查 §6.6-5）
             Wrench(sw, "PF_SocketWrench", 0.5f, Vector2.zero, swHandle, "socket.13", new[] { "socket.10", "socket.13", "socket.17", "socket.19", "socket.24" }, null);
 
             // tool_sockets.json：Blender tools.build_socket 只讀這份（單一來源）；雜湊給建置檢查 §4-4

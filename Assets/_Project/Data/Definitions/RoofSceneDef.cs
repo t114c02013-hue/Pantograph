@@ -142,6 +142,8 @@ namespace PantographSim.Data
         [Tooltip("增補 2：PAN_HoldDownStrap 參數；armHalfWidth＝實測下臂在綁點 Z 的 X 半寬＋0.005（建置時寫入）")] public float strapWidth = 0.050f, strapThickness = 0.003f, strapArmHalfWidth = 0.035f, strapRollDiameter = 0.07f;
         public Vector3 strapBuckleSize = new Vector3(0.06f, 0.02f, 0.08f);
         [Tooltip("D30：腰包 env.waist_pouch（相對 XR Origin；x＞0＝右腰）")] public Vector3 waistPouchLocal = new Vector3(0.18f, 0.95f, 0.05f);
+        [Tooltip("R1.5b b3：隨身容器相對頭部的位置（頭下方 0.65 m；工具袋左腰、腰包右腰，選單可對調；只跟著頭的 yaw 轉）")] public Vector3 toolBagHeadOffset = new Vector3(-0.2f, -0.65f, 0.1f), waistPouchHeadOffset = new Vector3(0.2f, -0.65f, 0.05f);
+        [Tooltip("R1.5b b3：右手在隨身容器這個範圍（m）內＝袋子打開、顯示每格名稱")] public float carryOpenRange = 0.25f;
         [Tooltip("D30：防墜器繩子的視覺長度（不改判定）")] public float fallArresterLineLength = 6.0f;   // 增補 3：捲收器標示 6 m；單位長 1 m 的 Ø10 mm 細圓柱縮放到 D 環
         public float fallArresterLineDiameter = 0.010f;
         [Tooltip("D32：遙控器掛座固定在外護欄立柱的橫臂長度")] public float pendantDockArmLength = 0.25f;

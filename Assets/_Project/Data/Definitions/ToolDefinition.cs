@@ -23,6 +23,7 @@ namespace PantographSim.Data
         [Tooltip("可以裝的套筒（SocketCatalog 的 socketId）")] public string[] socketIds = Array.Empty<string>();
         [Tooltip("目前裝的套筒的黑板鍵（例 tool.torque_wrench.socket）")] public string socketStateKey;
         public ToolCalibration calibration = new ToolCalibration();
+        [Tooltip("R1.5b b3（K3）：到扭力時的喀聲；空白＝內建短音效")] public AudioClip clickClip;
 
         public string Param(string name, string fallback = "")
         {

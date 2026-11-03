@@ -21,7 +21,7 @@ MonoBehaviour:
   - ip.carbon_strip_{side}.bolt_*
   requiredToolId: tool.socket_wrench
   completion:
-    rid: 8951035158582525975
+    rid: 1000
   errors:
   - errorId: ERR_CSR07_NotCollected
     severity: 1
@@ -106,7 +106,7 @@ MonoBehaviour:
     targetId: env.tool_rack.slot_6
     toolId: 
     condition: tool.active=
-    standPointId: tp.roof.shelf
+    standPointId: tp.roof.inner
   presetDone: 0
   side: 
   presetStates: []
@@ -116,30 +116,30 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035158582525975
+    - rid: 1000
       type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         rules:
-        - rid: 8951035158582525976
-        - rid: 8951035158582525977
-        - rid: 8951035158582525978
-        - rid: 8951035158582525979
-    - rid: 8951035158582525976
+        - rid: 1001
+        - rid: 1002
+        - rid: 1003
+        - rid: 1004
+    - rid: 1001
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: ip.carbon_strip_{side}.bolt_1.state
         value: InTray
-    - rid: 8951035158582525977
+    - rid: 1002
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: ip.carbon_strip_{side}.bolt_2.state
         value: InTray
-    - rid: 8951035158582525978
+    - rid: 1003
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: ip.carbon_strip_{side}.bolt_3.state
         value: InTray
-    - rid: 8951035158582525979
+    - rid: 1004
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: ip.carbon_strip_{side}.bolt_4.state

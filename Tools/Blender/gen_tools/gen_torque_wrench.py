@@ -1,4 +1,5 @@
 """a6 增補 7（鐵道 D39，torque-wrench-sockets.md v1.3 §6.2）：兩支扭力扳手 TL_TorqueWrench_S（3/8"）、TL_TorqueWrench_L（1/2"），同一支參數化腳本、不共用網格。
+R1.5b b3（v1.4 §8）：type: ratchet 輸出套筒扳手 TL_SocketWrench（1/2" 方頭、撥桿 Poke_Ratchet 是獨立小件，沒有校正標籤）。
 執行："<Blender>\blender.exe" -b --factory-startup -P Tools/Blender/gen_tools/gen_torque_wrench.py -- --params "Assets/_Project/Tools/TorqueWrench/Data/tool_torque_wrenches.json" --out "Assets/_Project/Tools/TorqueWrench/Models"
 原點＝Attach_Grip（握把中心）：Unity +Z 朝扳手頭部（Blender +Y）、+Y 朝上（Blender +Z）。方頭在頭部底面往下伸；Socket_Mount（方頭根部截面中心）由 Unity 用頂點實測建立。
 FX_Head、Poke_Plus、Poke_Minus、COL_Body、Tip、Socket_Mount 等空節點由 Unity 建置腳本建（FBX 只含網格）；FX_CalLabel 是獨立網格（40 × 20 mm，貼在握把上方）。每支 ≤ 1.5k 三角面。"""
@@ -30,6 +31,11 @@ def wrench(ctx, w):
     bm = bmesh.new()
     add_cylinder(bm, r + 0.002, 0.12, (0, 0, 0), axis="Y", segments=12)                                   # 握把套
     mesh_object(ctx, "Grip", bm, "Dark", "rubber", parent=body)
+    if w.get("type") == "ratchet":   # 套筒扳手（棘輪）：頭上一支撥桿 Poke_Ratchet，沒有校正標籤和刻度窗
+        bm = bmesh.new()
+        add_box(bm, (0.008, 0.016, 0.006), (0, -L + hw * 0.4, ht / 2.0 + 0.003))
+        mesh_object(ctx, "Poke_Ratchet", bm, "Paint", "red", parent=body)
+        return body
     bm = bmesh.new()
     add_box(bm, (0.020, 0.040, 0.002), (0, -0.10, r + 0.001))                                             # 校正標籤 40 × 20 mm
     mesh_object(ctx, "FX_CalLabel", bm, "Paint", "white", parent=body)

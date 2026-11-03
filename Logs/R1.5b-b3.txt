@@ -1,0 +1,32 @@
+段：R1.5b b3 隨身工具袋、ToolSlotDef.homeStorageId、slot_10–13、工具架掛位 11／12、防墜繫繩、個人腰包（D30）、移除車頂工具箱與 tp.roof.shelf、K3 喀聲、套筒 sizeMm、套筒扳手 prefab、2.5 m 長桿雙手握與 HeldPole 層。另含 b2 確認事項三點（已在 7ac99ce）與 D40 結案條件。
+改動：
+- Data：ToolSlotTable（ToolSlotDef：slot、toolId、homeStorageId、courses、workInPouch；5–10、13 工具袋，1、4、11、12 工具架，2、3 桿架；slot_1 作業期間在腰包；slot_13 只有定期）＋ ToolStorageLogic（InHome、Stowed、Missing 清點，件數從表算）。RackLogic 加 in_pouch／hanging／dropped 與 StowToPouch、TakeFromPouch、Release。SafetyRuleDefinition 加 severity（預設 Critical）；新規則 SR_Tool_NotStowedOnRoof（ERR_Tool_NotStowedOnRoof，Major）。
+- 工具：新工具 tool.hold_down_strap（10）、tool.megger（11）、tool.grounding_lead（12）（CarryTool：拿著點目標，送 ActionPerformed）；大扭力扳手 tool.torque_wrench_l 進工具列（hotkey 13，同一套扭力扳手邏輯）。ToolBelt：SI_00 f 從工具架領取上鎖掛牌組＝直接進腰包；點腰包＝收進／拿出；WC_06 c 從腰包掛回工具架；Release（車頂垂掛記 Major、地面放下不記錯）。
+- 場景：車頂工具箱 ToolBox_Roof 與 SimIds.RoofToolbox 移除；tp.roof.shelf 站點與資產移除（R1 步驟資料裡 28 個 stand 改成 tp.roof.inner，b4 匯入 CSV 時整份換掉）；工具袋 Pocket_5..10、13（13 從 Pocket_10 複製）是掛位 env.tool_rack.slot_k，名稱標籤 Label_k、VR 手上模型的樣板；套筒盒在工具袋的 SocketCase（env.tool_bag.socket_case，TGT_Socket_* 3 × 2 排）。工具架掛位 1、4、11、12（間距 0.25，往 +Z 延伸：靠遙控器掛座那一邊不動，+Z 邊到監護人站位 0.63 m）。
+- XR：XrCarryContainer（工具袋左腰、腰包右腰，頭下方 0.65 m，只跟頭的 yaw；選單可改工具袋掛左手腕、左右對調；手在 0.25 m 內顯示每格名稱）；XrPlayer 握把：腰包拿出／收回，放開時不在掛位旁＝release（車頂垂掛記 Major／地面放下）。XrHeldPole（2.5 m 驗電器、接地棒：右手後手、左手在護環以下按握把＝前手；單手下垂 15°；collider 換 HeldPole 層，碰撞矩陣只和 ContactTarget 互動；桿身穿過場景兩手各輕震 0.2／0.05 s，同一物件 0.3 s 內不重複）；左手握長桿時遙控器隱藏。
+- K3：ToolDefinition.clickClip；ToolInventory.PlayClick(clip) 沒指定就用內建短音效；扭力扳手到扭力時（TorqueWrenchTool.ReachStep，和閃色同一個事件）播一次。
+- 套筒：FastenerDef.socketId 改成 sizeMm（底座 24、高壓端子 19、碳滑板 13），SocketDef.fits 刪掉；建置檢查 §7.5-12 改成工具有 sizeMm＝N 的套筒且該步螺栓 sizeMm＝N；第 21 項改到那支扳手的 sockets[] 找同尺寸套筒讀 heightM（結果和改之前相同）。
+- 套筒扳手 prefab：gen_torque_wrench.py 加 type: ratchet（TL_SocketWrench.fbx，124 三角面，Poke_Ratchet 撥桿）；ToolModelBuilder 建 PF_SocketWrench（Attach_Grip、Visual、Poke_Ratchet、Socket_Mount、COL_Body、Tip）；handleLengthM 0.19（EX），實測 Socket_Mount 到 Attach_Grip Z 0.190、方頭根部差 0.0 mm（建置檢查 §4-1、§6.6-5、§4-2 都算它）。
+- 驗證：DataValidator 的工具數改成和掛位表一一對應（不寫死 9）；ToolTests 同樣改成讀掛位表（R1 的 9 件都還在、hotkey＝掛位編號）。
+- 測試：ToolBagTests 3、ToolHomeStorageTests 4（含 D40 結案：固定帶留在車頂時 WC_01a 清點不合格）、WaistPouchTests 1、PreHeldToolTests 1、TorqueClickTests 1、PoleNoCollisionTests 4。PrefabStructureTests 的 ENV_RoofToolbox 換成 ENV_PantographStand（車頂工具箱已移除）。
+略過：
+- 套筒扳手正式 prefab 做到 prefab 與資料（handleLengthM 實測 0.190）；場景裡手上的套筒扳手仍是 R1 執行期建的物件（XrToolWidgets），還沒換成 PF_SocketWrench＋TL_Socket_*，R1 的套筒選單照舊。
+- 腰包只在 VR 的 XR Rig 上；桌面版沒有點腰包的介面（SI_00 f 從工具架領取照樣進腰包；SI_02 a 從腰包拿出要等 b4 在工具列加一顆）。
+- 吊帶、工具垂在繫繩上的外觀沒做（只有狀態）。
+- 「起點狀態（日 B、日 C、定期第二到五段都在腰包）」是 PhaseStartSnapshot，b4b 測。
+風險：
+- 長桿雙手握沒有用 XRI 的 XRGrabInteractable 多選取＋XRGeneralGrabTransformer：R1 的手上工具不是 XRI 互動物件（ToolBelt 管狀態、手上只是模型），要用 XRI 得把整個工具握持方式換掉。改成自己算姿態（後手→前手、單手下垂），程式裡有 shortcut 註解。請軟體工程確認。
+- brief 提到的 ContactRouter 在程式裡不存在（互動判定是射線點選），所以 PoleNoCollisionTests 驗的是碰撞矩陣、桿身只有 trigger、layer 換回、輕震去抖動；「桿身穿過護欄不算碰到」由 HeldPole 層不和場景互動保證。
+- VR 握把行為改了：拿著工具按握把再放開、手不在掛位旁＝放開工具（車頂垂掛記 Major），以前是提示「把手伸到工具架」。
+- 工具袋位置：§3.4 寫「偏右前方 0.2」、D30 寫「工具袋在左腰」，照 D30（左腰，資料 RoofSceneDef.toolBagHeadOffset）。
+ponytail-review Verdict：Ship（上面三點列為風險與略過；ToolBelt 腰包判斷、清點從資料算、K3 用同一個事件都有測試）。
+測試：EditMode 305/305、PlayMode 3/3，Console 紅字 0（編譯 0 error、0 warning）
+功能不變檢查：
+1. 0 紅字、沒有新的 warning：是
+2. 測試數量不減少：291 → 305；ToolTests、PrefabStructureTests 只改成讀掛位表／換成現存的 prefab，沒有拿掉斷言
+3. 公開簽章：SocketCatalog.SocketFor → SizeFor／ForTool（本段要求）；FastenerSocket.socketId → sizeMm、SocketDef.fits 刪（本段要求）；SimIds.RoofToolbox 刪（grep 沒有其他引用）；ToolInventory.PlayClick 加選填參數；黑板鍵新增 rack.slot_k 的 in_pouch／hanging／dropped、xr.toolbag.mount、xr.carry.swap
+4. 資料檔：本段要求的工具、掛位表、規則；R1 步驟 json 的 28 個 stand tp.roof.shelf → tp.roof.inner
+5. 場景與 prefab 沒有 Missing：建置成功、StationLayoutCheck 20 站 197 過／0 待定／0 不合格（tp.roof.shelf 移除後少一站）
+6. 桌面版 25 步：跑完，分數 85、只有刻意的 E1，和之前相同
+7. 純精簡和功能改動分開：本段只有功能改動
+未檢查：頭盔實機（工具袋握把拿放、腰包、長桿雙手握、喀聲）——R1.5b 收尾一起請 terry 試

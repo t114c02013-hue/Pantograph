@@ -21,7 +21,7 @@ MonoBehaviour:
   - part.carbon_strip_{side}
   requiredToolId: 
   completion:
-    rid: 8951035158582525980
+    rid: 1000
   errors:
   - errorId: ERR_CSR08_Pry
     severity: 1
@@ -61,7 +61,7 @@ MonoBehaviour:
     targetId: env.parts_tray
     toolId: 
     condition: part.carbon_strip_{side}.state=InTray
-    standPointId: tp.roof.shelf
+    standPointId: tp.roof.inner
   presetDone: 0
   side: 
   presetStates: []
@@ -71,18 +71,18 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035158582525980
+    - rid: 1000
       type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         rules:
-        - rid: 8951035158582525981
-        - rid: 8951035158582525982
-    - rid: 8951035158582525981
+        - rid: 1001
+        - rid: 1002
+    - rid: 1001
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: part.carbon_strip_{side}.state
         value: InTray
-    - rid: 8951035158582525982
+    - rid: 1002
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: part.carbon_strip_{side}.removal

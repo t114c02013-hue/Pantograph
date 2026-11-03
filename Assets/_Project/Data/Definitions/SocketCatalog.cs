@@ -13,15 +13,18 @@ namespace PantographSim.Data
         public int sizeMm;
         [Tooltip("套筒高（套筒口到驅動端面）＝第 21 項把手高度的加數")] public float heightM;
         public float outerDiaM;
-        [Tooltip("對得上的螺栓 ID（* 萬用）")] public string[] fits = Array.Empty<string>();
         public string source;
     }
 
-    /// <summary>螺栓用哪一顆套筒（D39 的 FastenerDef.socketId：正確答案，第 21 項也用它查套筒高）。pattern 支援 *。</summary>
+    /// <summary>
+    /// 螺栓要用幾 mm 的套筒（R1.5b b3：FastenerDef.socketId 改成 sizeMm，只寫尺寸、不寫哪一顆套筒；只用來判斷對錯，不會自動幫學員套上）。
+    /// 例：碳滑板 M8＝13，套筒扳手的 socket.13（1/2"）和小扭力扳手的 socket.13_38（3/8"）都對。pattern 支援 *。
+    /// </summary>
     [Serializable]
     public class FastenerSocket
     {
-        public string fastenerPattern, socketId;
+        public string fastenerPattern;
+        public int sizeMm;
         [Tooltip("尺寸是否推估（EX）")] public bool estimated;
     }
 
@@ -34,8 +37,11 @@ namespace PantographSim.Data
 
         public SocketDef Find(string socketId) => Array.Find(sockets, s => s != null && s.socketId == socketId);
 
-        /// <summary>螺栓的正確套筒（第一筆 pattern 相符的）。</summary>
-        public string SocketFor(string fastenerId) => fasteners?.FirstOrDefault(f => f != null && Match(f.fastenerPattern, fastenerId))?.socketId;
+        /// <summary>螺栓要用的套筒尺寸（第一筆 pattern 相符的；0＝沒有對照）。</summary>
+        public int SizeFor(string fastenerId) => fasteners?.FirstOrDefault(f => f != null && Match(f.fastenerPattern, fastenerId))?.sizeMm ?? 0;
+
+        /// <summary>這支扳手能裝的套筒裡，尺寸＝sizeMm 的那一顆（第 21 項查套筒高）。</summary>
+        public SocketDef ForTool(ToolDefinition tool, int sizeMm) => tool == null ? null : tool.socketIds.Select(Find).FirstOrDefault(s => s != null && s.sizeMm == sizeMm);
 
         public static bool Match(string pattern, string id)
         {

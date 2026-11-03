@@ -22,7 +22,7 @@ MonoBehaviour:
   - ip.carbon_strip_{side}.bolt_*
   requiredToolId: tool.torque_wrench
   completion:
-    rid: 8951035158582525994
+    rid: 1000
   errors:
   - errorId: ERR_CSR13_Setting
     severity: 1
@@ -109,13 +109,13 @@ MonoBehaviour:
     targetId: env.tool_rack.slot_7
     toolId: tool.torque_wrench
     condition: tool.active=tool.torque_wrench
-    standPointId: tp.roof.shelf
+    standPointId: tp.roof.inner
   - text: "\u628A\u626D\u529B\u8A2D\u5B9A\u70BA 25 N\xB7m"
     why: "\u793A\u4F8B\u503C"
     targetId: 
     toolId: tool.torque_wrench
     condition: tool.torque_wrench.setting=25
-    standPointId: tp.roof.shelf
+    standPointId: tp.roof.inner
   - text: "\u9396 1 \u865F\u87BA\u6813\u5230\u5580\u8072"
     why: 
     targetId: ip.carbon_strip_{side}.bolt_1
@@ -145,7 +145,7 @@ MonoBehaviour:
     targetId: env.tool_rack.slot_7
     toolId: 
     condition: tool.active=
-    standPointId: tp.roof.shelf
+    standPointId: tp.roof.inner
   presetDone: 0
   side: 
   presetStates: []
@@ -157,20 +157,20 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035158582525994
+    - rid: 1000
       type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         rules:
-        - rid: 8951035158582525995
-        - rid: 8951035158582525996
-    - rid: 8951035158582525995
+        - rid: 1001
+        - rid: 1002
+    - rid: 1001
       type: {class: ValueInRange, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: ip.carbon_strip_{side}.bolt_{n}.torque_Nm
         min: 23
         max: 27
         count: 4
-    - rid: 8951035158582525996
+    - rid: 1002
       type: {class: OrderedSequence, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: ip.carbon_strip_{side}.torque_order

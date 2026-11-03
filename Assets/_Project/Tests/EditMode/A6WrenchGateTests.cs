@@ -51,8 +51,9 @@ namespace PantographSim.Tests
             StationTests.WithScene(scene =>
             {
                 var bolt = StationTests.SceneIds(scene)["part.pan_base.bolt_1"];
-                var sock = Catalog.Find(Catalog.SocketFor("part.pan_base.bolt_1"));
-                Assert.AreEqual("socket.24", sock.socketId, "底座 M16 用 24 mm（FastenerDef.socketId）");
+                Assert.AreEqual(24, Catalog.SizeFor("part.pan_base.bolt_1"), "底座 M16 用 24 mm（FastenerDef.sizeMm）");
+                var sock = Catalog.ForTool(UnityEditor.AssetDatabase.LoadAssetAtPath<ToolDefinition>("Assets/_Project/Tools/TorqueWrench/Data/TL_torque_wrench_l.asset"), 24);
+                Assert.AreEqual("socket.24", sock.socketId);
                 float top = StationLayoutCheck.VertexBounds(bolt.GetComponentsInChildren<Renderer>(true)).Value.max.y;
                 Assert.AreEqual(top + 0.04f, StationLayoutCheck.WrenchHandleY(bolt, sock), 0.001f, "把手中心＝螺栓頂點最高點＋套筒高 0.04");
             });

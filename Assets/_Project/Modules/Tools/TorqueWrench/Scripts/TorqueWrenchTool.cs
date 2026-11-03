@@ -37,6 +37,14 @@ namespace PantographSim.Tools
             State.SetFloat(Key("setting"), setting);
         }
 
+        /// <summary>K3：這一步剛好到扭力就播一次喀聲（和閃色、震動同一個「到扭力」事件，不另寫判定）；回傳是否剛到。</summary>
+        public static bool ReachStep(float before, float current, float setting, AudioClip clip)
+        {
+            if (!TorqueLogic.JustReached(before, current, setting)) return false;
+            ToolInventory.PlayClick(clip);
+            return true;
+        }
+
         public override void OnClick(ActionRequested e)
         {
             if (!e.targetId.Contains(".bolt_")) return;
@@ -59,11 +67,10 @@ namespace PantographSim.Tools
                 float before = current;
                 current = TorqueLogic.Hold(current, Time.deltaTime);
                 State.SetFloat(Key("current"), Mathf.Round(current * 10f) / 10f);
-                if (TorqueLogic.JustReached(before, current, setting))
+                if (ReachStep(before, current, setting, Definition != null ? Definition.clickClip : null))
                 {
                     State.SetBool(Key("reached"), true);
                     State.SetFloat(Key("flash_time"), Time.time);
-                    ToolInventory.PlayClick();
                 }
                 return;
             }

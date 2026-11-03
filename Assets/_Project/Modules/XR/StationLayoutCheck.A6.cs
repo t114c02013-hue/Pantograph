@@ -607,7 +607,7 @@ namespace PantographSim.XR
 
         /// <summary>
         /// 第21項（鐵道 D36 補充三、D38、增補 7 第 3、5 點）：每個底座螺栓子站點 × 鎖緊（起始方向往 + 擺）／起鬆（往 − 擺）× StationSet.wrenchSweepTools 的每一支扳手，
-        /// 半徑＝那支扳手的 handleLengthM，把手中心高＝螺栓頂點最高點＋該螺栓套筒（SocketCatalog.SocketFor）的 heightM；
+        /// 半徑＝那支扳手的 handleLengthM，把手中心高＝螺栓頂點最高點＋這支扳手 sockets[] 裡尺寸＝螺栓 sizeMm 的那顆套筒的 heightM（R1.5b b3）；
         /// 不碰 PAN_Root 底下的實體 collider（該螺栓本身除外）、絕緣子 collider、會動的段降弓頂點範圍。最小淨空 ≥ wrenchSweepMinClearance 才合格。
         /// shortcut: 「LoweredTightBounds」用各段自己的頂點範圍判（整組 AABB 包住底架四周，扇形一定在裡面）；底架本身不算（螺栓就鎖在底架上）, 要更準時改成三角面距離
         /// </summary>
@@ -627,9 +627,9 @@ namespace PantographSim.XR
                 foreach (var (def, boltId, n) in BoltStations(set))
                 {
                     var bolt = F(boltId);
-                    var sock = input.catalog.Find(input.catalog.SocketFor(boltId));
+                    var sock = input.catalog.ForTool(tool, input.catalog.SizeFor(boltId));
                     if (bolt == null || def.wrenchStartDir.sqrMagnitude < Eps) { Miss(r, "21", def.id + " 的螺栓或 wrenchStartDir"); continue; }
-                    if (sock == null || !tool.socketIds.Contains(sock.socketId)) { Miss(r, "21", $"{toolId} 的 sockets[] 裡沒有 {boltId} 的套筒 {sock?.socketId}"); continue; }
+                    if (sock == null) { Miss(r, "21", $"{toolId} 的 sockets[] 裡沒有 {boltId} 要的 {input.catalog.SizeFor(boltId)} mm 套筒"); continue; }
                     float y = WrenchHandleY(bolt, sock);
                     float baseAng = Mathf.Atan2(def.wrenchStartDir.y, def.wrenchStartDir.x) * Mathf.Rad2Deg;
                     foreach (var (dir, from, to) in new[] { ("鎖緊", 0f, set.wrenchSwingDeg), ("起鬆", -set.wrenchSwingDeg, 0f) })
