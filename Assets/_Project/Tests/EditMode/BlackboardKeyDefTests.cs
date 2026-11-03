@@ -29,7 +29,40 @@ namespace PantographSim.Tests
                 foreach (var a in st.subActions)
                     foreach (var side in new[] { "L", "R" })
                         foreach (var k in FreshWriteGate.ConditionKeys(StateKeys.Expand(a.done, side))) set.Add(k);
+            // 錯誤規則的觸發條件（BlockWhen 是「目標|條件」）也算有人讀
+            foreach (var r in StepsCsvImporter.LoadErrorRules().Values.Where(r => r.HasRule && !StepsCsvImporter.Disabled(r.status)))
+                foreach (var c in r.rule.keys.Append(r.rule.key).Append(r.rule.key2).Where(c => !string.IsNullOrEmpty(c)))
+                    foreach (var side in new[] { "L", "R" })
+                        foreach (var k in FreshWriteGate.ConditionKeys(StateKeys.Expand(c.Substring(c.IndexOf('|') + 1), side))) set.Add(k);
             return set;
+        }
+
+        [System.Serializable] class ResetJson { public string pattern, kind, resetBy; }
+        [System.Serializable] class ResetFile { public ResetJson[] keys = System.Array.Empty<ResetJson>(); }
+
+        /// <summary>
+        /// 軟體工程裁定 2026-11-03 2d：每個 LiveState 鍵都要有回到 false（或換成別的值）的路徑，寫在 resetBy；
+        /// 寫的機制「類別.方法」要真的存在；寫不回來的標「n/a: 理由」，清單寫到 Logs/BlackboardKeys_ResetBy.txt 給軟體確認。
+        /// </summary>
+        [Test]
+        public void EveryLiveState_HasResetPath()
+        {
+            var src = JsonUtility.FromJson<ResetFile>(System.IO.File.ReadAllText(StepsCsvImporter.BlackboardKeysPath, System.Text.Encoding.UTF8));
+            var types = System.AppDomain.CurrentDomain.GetAssemblies().Where(a => a.GetName().Name.StartsWith("PantographSim"))
+                .SelectMany(a => a.GetTypes()).GroupBy(t => t.Name).ToDictionary(g => g.Key, g => g.ToList());
+            var na = new List<string>();
+            foreach (var k in src.keys.Where(k => k.kind == "LiveState"))
+            {
+                Assert.IsFalse(string.IsNullOrWhiteSpace(k.resetBy), $"LiveState {k.pattern}：resetBy 沒寫（由哪個機制寫回，或「n/a: 理由」）");
+                if (k.resetBy.StartsWith("n/a:")) { na.Add(k.pattern + "：" + k.resetBy.Substring(4).Trim()); continue; }
+                var refs = System.Text.RegularExpressions.Regex.Matches(k.resetBy, @"\b([A-Z]\w+)\.([A-Z]\w+)\b").Cast<System.Text.RegularExpressions.Match>().ToList();
+                Assert.IsNotEmpty(refs, $"LiveState {k.pattern}：resetBy 要寫出「類別.方法」");
+                foreach (var m in refs)
+                    Assert.IsTrue(types.TryGetValue(m.Groups[1].Value, out var ts) && ts.Any(t => t.GetMember(m.Groups[2].Value, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).Length > 0),
+                        $"LiveState {k.pattern}：resetBy 寫的 {m.Value} 不存在");
+            }
+            System.IO.Directory.CreateDirectory("Logs");
+            System.IO.File.WriteAllText("Logs/BlackboardKeys_ResetBy.txt", $"LiveState 鍵找不到寫回 false 路徑（n/a）的 {na.Count} 個：\n" + string.Join("\n", na) + "\n");
         }
 
         [Test]
