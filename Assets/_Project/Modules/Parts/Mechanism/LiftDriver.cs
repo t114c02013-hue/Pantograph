@@ -27,6 +27,19 @@ namespace PantographSim.Parts.Mechanism
             return 0;
         }
 
+        /// <summary>
+        /// R1.5b b4（D23、D41）：課程的升弓上限（lift.max，CourseApplier 依建置量測寫入）：到了就停，寫 part.pan_head.at_contact_wire＝已接觸。
+        /// 升降判定本身不改，只改上限。沒有 lift.max（定期檢修、R1）時不影響。
+        /// </summary>
+        public static void ApplyCap(ISimState s, ref float value, ref float velocity)
+        {
+            if (s == null || !s.Has(SimIds.LiftMax)) return;
+            float max = s.GetFloat(SimIds.LiftMax);
+            if (value >= max) { value = max; if (velocity > 0f) velocity = 0f; }
+            bool contact = value >= max - 1e-4f;
+            if (s.GetBool(SimIds.PanAtContactWire) != contact) s.SetBool(SimIds.PanAtContactWire, contact);
+        }
+
         void OnApplicationFocus(bool focus)
         {
             if (!focus && Sim.State != null) LiftControl.Release(Sim.State);
@@ -47,6 +60,7 @@ namespace PantographSim.Parts.Mechanism
             int input = s.GetBool("training.paused") ? 0 : InputOf(s.Get(CmdKey), LiftControl.UpLocked(s));
             float distance = s.Has(SimIds.PanHeadLowerDistance) ? s.GetFloat(SimIds.PanHeadLowerDistance) : float.MaxValue;
             LiftLogic.Step(ref value, ref velocity, input, Time.deltaTime, LiftSettingsValues.From(settings), distance);
+            ApplyCap(s, ref value, ref velocity);
             s.SetFloat(SimIds.LiftValue, Mathf.Round(value * 10000f) / 10000f);
             s.SetBool("lift.moving", Mathf.Abs(velocity) > 1e-5f);
         }

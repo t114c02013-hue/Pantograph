@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 
 namespace PantographSim.Data
@@ -8,6 +9,7 @@ namespace PantographSim.Data
     public class TeleportBlock
     {
         public string condition, stationPrefix, message;
+        [Tooltip("R1.5b b4（D23）：成立時這一站也不出現在傳送點清單（例：日常更換的 tp.platform.crane）")] public bool hidden;
     }
 
     /// <summary>
@@ -22,6 +24,10 @@ namespace PantographSim.Data
         {
             new TeleportBlock { condition = "part.pan_assy.state=Lifted", stationPrefix = "", message = "吊物懸空時不能傳送，請用平滑移動走過去" },
         };
+
+        /// <summary>D23：這一站現在不出現在傳送點清單（被 hidden 的列擋下）。</summary>
+        public bool Hidden(PantographSim.Core.ISimState s, string stationId) =>
+            s != null && blocks.Any(b => b != null && b.hidden && (stationId ?? "").StartsWith(b.stationPrefix ?? "") && !string.IsNullOrEmpty(b.stationPrefix) && PantographSim.Core.ChecklistEval.Done(s, b.condition));
 
         /// <summary>傳送到 stationId 被擋的原因；null＝可以去。</summary>
         public string BlockReason(PantographSim.Core.ISimState s, string stationId)

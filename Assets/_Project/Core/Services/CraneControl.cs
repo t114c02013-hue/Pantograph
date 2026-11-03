@@ -39,6 +39,7 @@ namespace PantographSim.Core
         public static void SetPendant(ISimState s, bool held)
         {
             if (s == null) return;
+            if (held && s.GetBool(SimIds.CourseCraneParked)) return;   // D23：日常更換時遙控器留在掛座，拿不起來
             s.Batch(() => { s.Set(SimIds.CranePendantState, held ? Held : Docked); if (!held) s.Set(SimIds.CraneCmd, "None"); s.SetBool(SimIds.CraneFast, false); });
         }
 

@@ -21,6 +21,8 @@ namespace PantographSim.Editor
             public string courseId, title;
             public CourseDef.Placement[] placements = Array.Empty<CourseDef.Placement>();
             public JumpRule[] onPass = Array.Empty<JumpRule>();
+            public float liftCapAboveO, contactGapM;
+            public bool craneParked;
         }
 
         [Serializable]

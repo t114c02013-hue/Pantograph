@@ -96,6 +96,15 @@ namespace PantographSim.Data
         [Tooltip("台架 env.panto_stand 中心（XZ）")] public Vector2 standCenterXZ = new Vector2(-9.5f, 0f);
         [Tooltip("台架外形：X、Z")] public Vector2 standSizeXZ = new Vector2(2.0f, 2.6f);
         [Tooltip("R1.5b b4：定期檢修的螺栓盤在台架外框頂面：離中心的 X、從靠 tp.stand.s 的邊往內的 Z")] public float boltTrayStandOffsetX = 0.40f, boltTrayStandInsetZ = 0.15f;
+        [Header("R1.5b b4 4c 架空線暫代物（建模 A model-spec v3.10 §8.3b；接觸線高度在 Courses.json 的 liftCapAboveO，D41）")]
+        [Tooltip("接觸線、承力索沿 Z 從 O −值 到 O ＋值")] public float catenaryHalfLengthZ = 12.5f;
+        [Tooltip("承力索在 O 點上方（m）")] public float catenaryMessengerAboveO = 2.75f;
+        public float catenaryWireDiameter = 0.02f;
+        [Tooltip("支柱：X（相對 O）、邊長、Y 從 O −3.65 到 O +3.30")] public float catenaryMastX = 3.10f, catenaryMastSize = 0.30f, catenaryMastYMin = -3.65f, catenaryMastYMax = 3.30f;
+        [Tooltip("接地器 #E1／#E2：Z ±值（相對 O）、從接觸線斜拉到 +X 鋼軌（X、Y 相對 O）、桿徑、Inspect 方塊邊長")] public float earthingDeviceZ = 10f;
+        public Vector2 earthingRailXY = new Vector2(0.72f, -3.65f);
+        public float earthingDiameter = 0.04f, earthingInspectBox = 0.3f;
+        [Tooltip("D23 天車駐車位 Crane_ParkPose：吊車台 X、橋架 Z（吊鉤 Y 讀 CraneProfile.hookYMax）")] public Vector2 craneParkXZ = new Vector2(-14.0f, 14.0f);
         [Tooltip("台架頂面（支撐座、定位銷）離地")] public float standTopAboveGround = 0.75f;
         [Tooltip("F6：台架外框（支撐座四周與四角立柱）頂面離地，低於支撐座，懸出的臂和吊帶不會掃到")] public float standFrameTopAboveGround = 0.45f;
         [Tooltip("a6 G2：台架外框＝降弓整組 LoweredTightBounds 兩端各外擴這個值（standSizeXZ 由建置寫入）")] public float standFrameMargin = 0.15f;

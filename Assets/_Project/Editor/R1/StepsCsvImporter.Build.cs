@@ -246,6 +246,7 @@ namespace PantographSim.Editor
                 var savedPrc = SaveAsset(prc, ProcedurePath(kv.Key));
                 var course = ScriptableObject.CreateInstance<CourseDef>();
                 course.courseId = cj.courseId; course.title = cj.title; course.procedure = savedPrc; course.placements = cj.placements; course.onPass = cj.onPass;
+                course.liftCapAboveO = cj.liftCapAboveO; course.contactGapM = cj.contactGapM; course.craneParked = cj.craneParked;
                 SaveAsset(course, CourseDefPath(kv.Key));
                 var rs = resolved.Where(r => r.e.course == kv.Key).ToList();
                 sb.AppendLine($"{kv.Key}：步驟 {saved.Count}、小動作 {rs.Count}（第 1 層 {rs.Count(r => r.layer == 1)}、第 2 層 {rs.Count(r => r.layer == 2)}、第 3 層 {rs.Count(r => r.layer == 3)}；機制待做 {rs.Count(r => r.owner.Length > 0)}）→ {CourseFolder}/{kv.Key}");
@@ -258,6 +259,12 @@ namespace PantographSim.Editor
             }
             EditorUtility.SetDirty(AssetDatabase.LoadAssetAtPath<ExamPolicyDef>(policyPath));
             SaveAsset(LoadKeyDefSource(new List<string>()), BlackboardKeysAssetPath);   // 鍵的種類（LiveState／Event）
+            var tr = R1Data.Teleport;   // D23：日常更換不開放 tp.platform.crane（不出現在傳送點清單、傳送擋下）
+            if (!tr.blocks.Any(b => b != null && b.condition == SimIds.CourseCraneParked))
+            {
+                tr.blocks = tr.blocks.Concat(new[] { new TeleportBlock { condition = SimIds.CourseCraneParked, stationPrefix = "tp.platform.crane", message = "日常更換不使用天車", hidden = true } }).ToArray();
+                EditorUtility.SetDirty(tr);
+            }
             var spare = ScriptableObject.CreateInstance<SpareArrangementDef>();
             spare.entries = LoadCourses().spareArrangement;
             SaveAsset(spare, SpareArrangementPath);   // 備品架 L、R 排列（負責人裁定）

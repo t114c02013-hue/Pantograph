@@ -25,6 +25,8 @@
         public const string CraneHookPos = "part.crane.hook.pos", CraneLoadBottomY = "part.crane.load_bottom_y", CraneState = "part.crane.state";
         /// <summary>遙控器在掛座（Docked）或隨身（Held）。</summary>
         public const string CranePendantState = "env.crane_pendant.state";
+        /// <summary>R1.5b b4 第 4 部分（課程覆寫）：目前的課程、日常更換時天車停駐（D23）、升弓上限（lift 值）、弓頭到了接觸線（D41）。</summary>
+        public const string CourseId = "course.id", CourseCraneParked = "course.crane_parked", LiftMax = "lift.max", PanAtContactWire = "part.pan_head.at_contact_wire";
         public const string GroundTerminal = "ip.depot.ground_terminal";
         public const string VoltageTester = "ip.depot.detector_tester";
         public const string WorkOrder = "env.work_order";

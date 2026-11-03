@@ -14,7 +14,7 @@ namespace PantographSim.Worksite
     public static class CourseApplier
     {
         /// <summary>黑板：目前載入的課程（periodic／daily）；R1 的 25 步沒有這個鍵。</summary>
-        public const string CourseKey = "course.id";
+        public const string CourseKey = SimIds.CourseId;
 
         public static List<string> Apply(CourseDef course, Func<string, Transform> byId, Func<string, Transform> byName)
         {
@@ -46,7 +46,14 @@ namespace PantographSim.Worksite
         public static List<string> Apply(CourseDef course, ISimState state = null)
         {
             var ids = SceneIds();
-            state?.Set(CourseKey, course.courseId);
+            if (state != null)
+                state.Batch(() =>
+                {
+                    state.Set(CourseKey, course.courseId);
+                    state.SetBool(SimIds.CourseCraneParked, course.craneParked);   // D23
+                    var cap = course.liftCapAboveO > 0f ? LiftCapsDef.Load()?.Find(course.courseId) : null;   // D23、D41：建置量測的升弓上限
+                    if (cap != null) state.SetFloat(SimIds.LiftMax, cap.liftMax); else state.Set(SimIds.LiftMax, null);
+                });
             return Apply(course, id => ids.TryGetValue(id, out var t) ? t : null, FindByName);
         }
     }

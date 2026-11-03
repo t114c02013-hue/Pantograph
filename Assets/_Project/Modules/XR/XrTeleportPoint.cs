@@ -71,7 +71,9 @@ namespace PantographSim.XR
         public void SetLook(Look look, float time)
         {
             if (marker == null) return;
-            if (!marker.activeSelf) marker.SetActive(true);
+            bool hidden = Rule != null && Rule.Hidden(Sim.State, pointId);   // D23：日常更換不開放 tp.platform.crane
+            if (marker.activeSelf == hidden) marker.SetActive(!hidden);
+            if (hidden) return;
             Paint(ColorOf(look, time));
             if (lockIcon != null && lockIcon.activeSelf != (look == Look.Locked)) lockIcon.SetActive(look == Look.Locked);
         }

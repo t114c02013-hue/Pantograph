@@ -84,9 +84,24 @@ namespace PantographSim.Parts.Mechanism
             (load.TransformPoint(loadLocalBounds.center), Vector3.Scale(loadLocalBounds.extents, load.lossyScale), load.rotation);
 
         /// <summary>一幀（EditMode 測試直接呼叫）。</summary>
+        [Tooltip("R1.5b b4（D23）：駐車位空節點 Crane_ParkPose（X＝吊車台、Y＝吊鉤、Z＝橋架）")] [SerializeField] Transform parkPose;
+        public void SetParkPose(Transform pose) => parkPose = pose;
+        public Transform ParkPose => parkPose;
+        /// <summary>三軸目前位置：X＝吊車台、Y＝吊鉤、Z＝橋架（D23 測試比對駐車位）。</summary>
+        public Vector3 AxisPositions => new Vector3(trolley.position.x, hookBlock.position.y, bridge.position.z);
+
+        /// <summary>D23：日常更換時天車停在駐車位（位置從 Crane_ParkPose 節點讀），電源固定關、命令一律無效。</summary>
+        public void Park(ISimState s)
+        {
+            if (parkPose != null) Apply(parkPose.position.x, parkPose.position.y, parkPose.position.z);
+            vHoist = vTraverse = vTravel = 0f;
+            if (s != null && s.GetBool(SimIds.CranePower)) s.SetBool(SimIds.CranePower, false);
+        }
+
         public void Tick(ISimState s, float dt)
         {
             if (profile == null || bridge == null || trolley == null || hookBlock == null) return;
+            if (s.GetBool(SimIds.CourseCraneParked)) { Park(s); return; }   // D23
             bool power = s.GetBool(SimIds.CranePower), estop = s.GetBool(SimIds.CraneEStop), fast = s.GetBool(SimIds.CraneFast);
             string cmd = s.Get(SimIds.CraneCmd, CraneLogic.None);
             if (estop) needPowerCycle = true;

@@ -22,5 +22,8 @@ namespace PantographSim.Data
         public ProcedureDefinition procedure;
         public Placement[] placements = Array.Empty<Placement>();
         public JumpRule[] onPass = Array.Empty<JumpRule>();
+        [Tooltip("D23、D41：升弓上限＝接觸線，從 O 點往上量（m）；0＝不覆寫（定期檢修）")] public float liftCapAboveO;
+        [Tooltip("D41：滑板頂面停在接觸線下方多少（m，避免閃爍的視覺間距）")] public float contactGapM;
+        [Tooltip("D23：天車停駐（停到 Crane_ParkPose、電源固定關、命令無效、遙控器拿不起來、tp.platform.crane 不開放）")] public bool craneParked;
     }
 }
