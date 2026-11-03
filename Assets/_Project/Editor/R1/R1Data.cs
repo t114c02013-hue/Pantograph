@@ -26,6 +26,8 @@ namespace PantographSim.Editor
         public static RoofAccessRule RoofAccess => Ensure<RoofAccessRule>(RoofAccessPath);
         public static HeightProfile Height => Ensure<HeightProfile>(HeightPath);
         public static LocomotionSettings Locomotion => Ensure<LocomotionSettings>(LocomotionPath);
+        /// <summary>R1.5b b1：天車參數（不存在就用預設值建立；hookYMax 由 RoofSiteBuilder 從模型量測寫回）。</summary>
+        public static CraneProfile Crane => Ensure<CraneProfile>(Folder + "/CraneProfile.asset");
 
         /// <summary>按鍵表（Resources，執行期 InputBindingTable.LoadDefault 讀它）；不存在或空的就用預設表建立，已存在就照用。</summary>
         public const string InputBindingsPath = "Assets/_Project/Modules/XR/Resources/InputBindingTable.asset";

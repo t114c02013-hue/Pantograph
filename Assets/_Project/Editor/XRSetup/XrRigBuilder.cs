@@ -162,6 +162,13 @@ namespace PantographSim.Editor.XR
             rigGo.AddComponent<XrStations>().Setup(teleport, arrow, camGo.transform);
             rigGo.AddComponent<XrToolWidgets>().Setup(toolAnchor, pokeTip.transform, leftCtrl);
             rigGo.AddComponent<XrPanels>().Setup(R1Data.Panels, camGo.transform, teleport);
+            // R1.5b b1：天車遙控器（左握把在掛座旁拿起／掛回，右手 Poke_Tip 或射線＋扳機按鍵）
+            var rightPoke = new GameObject("Poke_Tip_Right");
+            rightPoke.transform.SetParent(rightT, false);
+            rightPoke.transform.localPosition = new Vector3(0, -0.01f, 0.05f);
+            var pendantT = T("env.crane_pendant"); var dockGo = GameObject.Find("PendantDock");
+            if (pendantT != null && dockGo != null) rigGo.AddComponent<XrCranePendant>().Setup(rig, R1Data.Crane, pendantT, dockGo.transform, rightPoke.transform);
+            else sb.AppendLine("⚠ 天車遙控器：找不到 env.crane_pendant 或 PendantDock");
 
             // T6 右搖桿平滑移動：CharacterController（半徑 0.2、step 0.2、重力）＋XRI 連續移動（方向跟頭、水平、可橫移、死區 0.15、無加速、不做平滑轉向）
             var loco6 = R1Data.Locomotion;

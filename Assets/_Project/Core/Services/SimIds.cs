@@ -20,6 +20,11 @@
         /// <summary>升降指令（Up / Down / Stop）：介面按鈕與鍵盤寫入，機構端 LiftDriver 讀取。</summary>
         public const string LiftCmd = "ctrl.lift.cmd";
         public const string LiftValue = "lift.value";
+        /// <summary>R1.5b b1 天車（crane-software v0.5 §2.1、§2.2）：遙控器只寫 ctrl.crane.*，CraneMechanism 讀命令、寫 part.crane.*。</summary>
+        public const string CraneCmd = "ctrl.crane.cmd", CraneFast = "ctrl.crane.fast", CraneEStop = "ctrl.crane.estop", CranePower = "ctrl.crane.power";
+        public const string CraneHookPos = "part.crane.hook.pos", CraneLoadBottomY = "part.crane.load_bottom_y", CraneState = "part.crane.state";
+        /// <summary>遙控器在掛座（Docked）或隨身（Held）。</summary>
+        public const string CranePendantState = "env.crane_pendant.state";
         public const string GroundTerminal = "ip.depot.ground_terminal";
         public const string VoltageTester = "ip.depot.detector_tester";
         public const string WorkOrder = "env.work_order";

@@ -1,0 +1,195 @@
+using System;
+using System.Linq;
+using PantographSim.Core;
+using PantographSim.Data;
+using UnityEngine;
+
+namespace PantographSim.Parts.Mechanism
+{
+    /// <summary>
+    /// R1.5b b1 天車機構（crane-software v0.5 §2.2，和升降同一個模式）：只讀黑板 ctrl.crane.*（遙控器寫），依 CraneProfile 直接移動 Transform——
+    /// Crane_Bridge 只沿 Z、Crane_Trolley 只沿 X、Crane_HookBlock 的 Y 由捲揚決定（XZ 跟著小車的 Crane_RopeAnchor）、Crane_Rope 依兩端距離縮放。
+    /// 寫 part.crane.hook.pos（變化超過 hookPosWriteThreshold 或放開按鍵時）、part.crane.load_bottom_y、part.crane.state。
+    /// 安全：上限位（LimitUp）、緊急停止鎖住（EStop，要復歸再重轉電源）、碰撞停止（Collision，記 ERR_Crane_Collision）、
+    /// 紅區停車（RedZoneStop，頭部水平投影進入吊物投影外擴 redZoneMargin，記 ERR_Crane_PersonUnderLoad；離開紅區前命令無效）。
+    /// 吊物 load（b1 除錯方塊、b2 起是 PAN_Root）是 kinematic 的子物件，晃動只轉吊梁的外觀，不寫黑板。
+    /// </summary>
+    public class CraneMechanism : MonoBehaviour
+    {
+        public enum CraneState { Idle, Moving, EStop, Collision, LimitUp, RedZoneStop }
+
+        [SerializeField] CraneProfile profile;
+        [SerializeField] Transform bridge, trolley, hookBlock, ropeAnchor, rope, swayPivot;
+        [SerializeField] SafetyRuleDefinition[] rules = Array.Empty<SafetyRuleDefinition>();
+        [Tooltip("吊鉤掛點下方的吊物（null＝空鉤）；loadLocalBounds 是吊物局部座標的緊包圍盒（PAN_Root 用 LoweredTightBounds）")]
+        [SerializeField] Transform load;
+        [SerializeField] Bounds loadLocalBounds;
+
+        /// <summary>頭部位置來源（紅區判定）；預設是主攝影機。測試換成固定值。</summary>
+        public static Func<Vector3?> HeadSource = () => Camera.main != null ? Camera.main.transform.position : (Vector3?)null;
+
+        float vHoist, vTraverse, vTravel, ropeTopOffset;
+        Vector3 lastWritten = new Vector3(float.NaN, 0f, 0f), lastHookVel;
+        Vector2 sway;
+        Quaternion swayBase = Quaternion.identity;
+        bool needPowerCycle, inRedZone, collided, wasMoving;
+        string lastCmd = CraneLogic.None;
+
+        public CraneProfile Profile => profile;
+        public Transform Load => load;
+        public Vector3 HookPosition => hookBlock.position;
+
+        public void Setup(CraneProfile p, Transform bridgeT, Transform trolleyT, Transform hookT, Transform anchorT, Transform ropeT, Transform swayT, SafetyRuleDefinition[] safety)
+        {
+            profile = p; bridge = bridgeT; trolley = trolleyT; hookBlock = hookT; ropeAnchor = anchorT; rope = ropeT; swayPivot = swayT; rules = safety ?? Array.Empty<SafetyRuleDefinition>();
+            if (swayPivot != null) swayBase = swayPivot.localRotation;
+            var rr = rope != null ? rope.GetComponent<Renderer>() : null;
+            ropeTopOffset = rr != null && hookBlock != null ? rr.bounds.min.y - hookBlock.position.y : 0f;   // 繩子下端在吊鉤上方多少（建置時擺好的值）
+        }
+
+        /// <summary>掛上吊物（null＝卸下）。吊物成為吊鉤（晃動支點）的子物件，跟著走。</summary>
+        public void Attach(Transform loadT, Bounds localBounds)
+        {
+            load = loadT; loadLocalBounds = localBounds;
+            if (load != null) load.SetParent(swayPivot != null ? swayPivot : hookBlock, true);
+        }
+
+        void Awake() { if (swayPivot != null) swayBase = swayPivot.localRotation; }
+
+        void Update()
+        {
+            var s = Sim.State;
+            if (s == null || !s.GetBool("training.running")) return;
+            Tick(s, s.GetBool("training.paused") ? 0f : Time.deltaTime);
+        }
+
+        /// <summary>吊物的世界座標包圍盒（AABB；碰撞停止用旋轉後的 OverlapBox，見 LoadBox）。</summary>
+        public Bounds? LoadWorldBounds()
+        {
+            if (load == null) return null;
+            var (c, half, rot) = LoadBox();
+            var b = new Bounds(c, Vector3.zero);
+            for (int i = 0; i < 8; i++) b.Encapsulate(c + rot * Vector3.Scale(half, new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1)));
+            return b;
+        }
+
+        (Vector3 center, Vector3 half, Quaternion rot) LoadBox() =>
+            (load.TransformPoint(loadLocalBounds.center), Vector3.Scale(loadLocalBounds.extents, load.lossyScale), load.rotation);
+
+        /// <summary>一幀（EditMode 測試直接呼叫）。</summary>
+        public void Tick(ISimState s, float dt)
+        {
+            if (profile == null || bridge == null || trolley == null || hookBlock == null) return;
+            bool power = s.GetBool(SimIds.CranePower), estop = s.GetBool(SimIds.CraneEStop), fast = s.GetBool(SimIds.CraneFast);
+            string cmd = s.Get(SimIds.CraneCmd, CraneLogic.None);
+            if (estop) needPowerCycle = true;
+            else if (!power) needPowerCycle = false;   // 復歸後要先關電源再開，才解除鎖住
+
+            // 紅區：吊物懸空時才有（b1 的除錯吊物＝掛上就算懸空）
+            var lb = LoadWorldBounds();
+            var head = HeadSource();
+            bool red = lb.HasValue && head.HasValue && CraneLogic.InRedZone(lb.Value, profile.redZoneMargin, head.Value);
+            if (red && !inRedZone) Fault(SafetyRuleKind.CranePersonUnderLoad, "ERR_Crane_PersonUnderLoad");
+            inRedZone = red;
+            if (cmd != lastCmd) { collided = false; lastCmd = cmd; }   // 放開（或換方向）後才重新允許移動
+
+            var (axis, dir) = CraneLogic.Parse(cmd);
+            bool allowed = power && !estop && !needPowerCycle && !red && !collided;
+            if (!allowed) { axis = CraneAxis.None; dir = 0; }
+            bool hitLimit = false;
+            float full = CraneLogic.Speed(profile, axis, fast);
+            var hook = hookBlock.position; var br = bridge.position; var tr = trolley.position;
+            float hy = hook.y, tx = tr.x, bz = br.z;
+            var before = new Vector3(tx, hy, bz);
+            hitLimit |= CraneLogic.StepAxis(ref hy, ref vHoist, axis == CraneAxis.Hoist ? dir * full : 0f, CraneLogic.Speed(profile, CraneAxis.Hoist, true), profile.accelSeconds, profile.hookYMin, profile.hookYMax, dt) && axis == CraneAxis.Hoist && dir > 0;
+            CraneLogic.StepAxis(ref tx, ref vTraverse, axis == CraneAxis.Traverse ? dir * full : 0f, CraneLogic.Speed(profile, CraneAxis.Traverse, true), profile.accelSeconds, profile.trolleyXMin, profile.trolleyXMax, dt);
+            CraneLogic.StepAxis(ref bz, ref vTravel, axis == CraneAxis.Travel ? dir * full : 0f, CraneLogic.Speed(profile, CraneAxis.Travel, true), profile.accelSeconds, profile.bridgeZMin, profile.bridgeZMax, dt);
+            if (!allowed) { vHoist = vTraverse = vTravel = 0f; hy = before.y; tx = before.x; bz = before.z; }   // 不允許時立刻停（紅區、緊急停止不平滑）
+
+            Apply(tx, hy, bz);
+            // 碰撞停止：移動後吊物和場景 Collision 群組重疊就退回這一幀之前的位置
+            if (load != null && (tx != before.x || hy != before.y || bz != before.z) && Overlapping())
+            {
+                Apply(before.x, before.y, before.z);
+                vHoist = vTraverse = vTravel = 0f; collided = true;
+                Fault(SafetyRuleKind.CraneCollision, "ERR_Crane_Collision");
+            }
+
+            // 視覺晃動（只轉吊梁，不寫黑板）
+            var hv = new Vector2(vTraverse, vTravel);
+            var acc = dt > 0f ? (hv - new Vector2(lastHookVel.x, lastHookVel.z)) / dt : Vector2.zero;
+            lastHookVel = new Vector3(hv.x, 0f, hv.y);
+            sway = CraneLogic.StepSway(sway, acc, profile.swayMaxDeg, profile.swayDecaySeconds, dt);
+            if (swayPivot != null) swayPivot.localRotation = swayBase * Quaternion.Euler(sway.y, 0f, -sway.x);
+
+            bool moving = Mathf.Abs(vHoist) + Mathf.Abs(vTraverse) + Mathf.Abs(vTravel) > 1e-5f;
+            CraneState state = estop || needPowerCycle && power ? CraneState.EStop : red ? CraneState.RedZoneStop : collided ? CraneState.Collision
+                : hitLimit || (axis == CraneAxis.Hoist && dir > 0 && hy >= profile.hookYMax - 1e-4f) ? CraneState.LimitUp : moving ? CraneState.Moving : CraneState.Idle;
+            s.Batch(() =>
+            {
+                s.Set(SimIds.CraneState, state.ToString());
+                var hp = hookBlock.position;
+                bool released = wasMoving && !moving;
+                if (float.IsNaN(lastWritten.x) || released || (hp - lastWritten).magnitude > profile.hookPosWriteThreshold)
+                {
+                    s.Set(SimIds.CraneHookPos, $"{SimState.Format(hp.x)},{SimState.Format(hp.y)},{SimState.Format(hp.z)}", released);
+                    lastWritten = hp;
+                }
+                if (lb.HasValue) s.SetFloat(SimIds.CraneLoadBottomY, Mathf.Round(LoadWorldBounds().Value.min.y * 1000f) / 1000f);
+            });
+            wasMoving = moving;
+        }
+
+        void Apply(float trolleyX, float hookY, float bridgeZ)
+        {
+            bridge.position = new Vector3(bridge.position.x, bridge.position.y, bridgeZ);
+            trolley.position = new Vector3(trolleyX, trolley.position.y, trolley.position.z);
+            var a = ropeAnchor != null ? ropeAnchor.position : trolley.position;
+            hookBlock.position = new Vector3(a.x, hookY, a.z);
+            if (rope != null && ropeAnchor != null)
+            {
+                var top = ropeAnchor.position; var bottom = hookBlock.position + Vector3.up * ropeTopOffset;
+                float len = Mathf.Max(0.01f, top.y - bottom.y);
+                rope.position = (top + bottom) / 2f;
+                var rend = rope.GetComponent<Renderer>();
+                float now = rend != null ? rend.bounds.size.y : 0f;   // 目前世界長度（繩子垂直）
+                if (now > 1e-6f)
+                {
+                    // 縮放和世界 +Y 最平行的那一個局部軸（FBX 匯入後繩子的長軸不一定是局部 Y）
+                    var up = rope.InverseTransformDirection(Vector3.up); int k = Mathf.Abs(up.x) > Mathf.Abs(up.y) ? (Mathf.Abs(up.x) > Mathf.Abs(up.z) ? 0 : 2) : (Mathf.Abs(up.y) > Mathf.Abs(up.z) ? 1 : 2);
+                    var ls = rope.localScale; ls[k] *= len / now; rope.localScale = ls;
+                }
+            }
+        }
+
+        bool Overlapping()
+        {
+            Physics.SyncTransforms();   // 這一幀剛移動過 Transform
+            var (c, half, rot) = LoadBox();
+            foreach (var col in Physics.OverlapBox(c, half, rot, ~0, QueryTriggerInteraction.Ignore))
+            {
+                if (col.transform.IsChildOf(load) || col.transform.IsChildOf(transform)) continue;   // 吊物自己、天車自己
+                if (InCollisionGroup(col.transform)) return true;
+            }
+            return false;
+        }
+
+        /// <summary>場景件的「Collision」群組底下的 collider 才算障礙（Walkable、互動點不算）。</summary>
+        static bool InCollisionGroup(Transform t)
+        {
+            for (var p = t; p != null; p = p.parent) if (p.name == "Collision") return true;
+            return false;
+        }
+
+        void Fault(SafetyRuleKind kind, string fallbackId)
+        {
+            var r = rules.FirstOrDefault(x => x != null && x.kind == kind);
+            Sim.Bus?.Publish(new ErrorDetected
+            {
+                errorId = r != null ? r.errorId : fallbackId, severity = Severity.Critical, blocks = true,
+                what = r?.what ?? "", why = r?.why ?? "", fix = r?.fix ?? "",
+                stepId = Sim.State?.Get("procedure.current") ?? "", targetId = "env.crane", time = SimClock.Now
+            });
+        }
+    }
+}

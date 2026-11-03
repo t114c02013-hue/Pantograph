@@ -731,7 +731,15 @@
     { "ruleId": "SR_Ground_RemoveOrder", "errorId": "ERR_Ground_RemoveOrder", "kind": "RemoveOrder",
       "what": "弓頭端還掛著，就先拆平台接地端子。",
       "why": "先拆端子時，接地棒另一端仍接在弓頭，若此時有電，電流會經過你手上的接地棒。",
-      "fix": "拆除順序和掛接相反：先取下弓頭端，再拆平台端子。" }
+      "fix": "拆除順序和掛接相反：先取下弓頭端，再拆平台端子。" },
+    { "ruleId": "SR_Crane_PersonUnderLoad", "errorId": "ERR_Crane_PersonUnderLoad", "kind": "CranePersonUnderLoad",
+      "what": "吊物懸空時，你走進了吊物下方的紅區，天車已停止。",
+      "why": "吊物或吊具一旦脫落、擺盪，下方的人會被砸傷；吊物下方任何時候都不能有人。",
+      "fix": "先退出紅區（吊物投影外 1 m），再重新按住按鍵操作；吊運時站在紅區外看著吊物。" },
+    { "ruleId": "SR_Crane_Collision", "errorId": "ERR_Crane_Collision", "kind": "CraneCollision",
+      "what": "吊物撞到了車體、護欄、門架或台架，天車已停止。",
+      "why": "碰撞會損壞集電弓和設備，吊物也可能因此擺盪、脫鉤。",
+      "fix": "放開按鍵，往反方向用微動移開；橫移前先把吊物升到越障高度。" }
   ],
   "scenarios": [
     { "scenarioId": "SCN_Default", "title": "正常（兩條都要換）", "description": "開場弓是升起的，先用升降控制器降弓；肘側最小 2.8 mm，需兩條一起更換。",

@@ -884,6 +884,12 @@ namespace PantographSim.Editor
             sb.AppendLine($"吊梁 ENV_LiftingBeam（G2）：梁長 {beam.GetComponent<Renderer>().bounds.size.x:0.000} m（沿 X）、吊耳間距 {Vector3.Distance(eyeL.position, eyeR.position):0.000} m");
             foreach (var n in new[] { "Hook_AttachPoint", "Beam_SlingEye_L", "Beam_SlingEye_R", "Crane_RopeAnchor" }) Anchor(craneP.anchors, "Anchor_" + n, N(n).position, Vector3.zero);
             res.equipment.Add(craneP.root);
+            // R1.5b b1：天車機構（讀 ctrl.crane.*）。上限位＝建置時吊鉤所在的最高點（量測寫回 CraneProfile.hookYMax）；晃動只轉吊梁
+            var profile = R1Data.Crane;
+            profile.hookYMax = Mathf.Round(hook.position.y * 1000f) / 1000f; EditorUtility.SetDirty(profile);
+            var craneRules = StepJsonImporter.LoadAll<SafetyRuleDefinition>(StepJsonImporter.SafetyFolder).Where(x => x.kind == SafetyRuleKind.CranePersonUnderLoad || x.kind == SafetyRuleKind.CraneCollision).ToArray();
+            craneP.root.gameObject.AddComponent<PantographSim.Parts.Mechanism.CraneMechanism>().Setup(profile, bridge, trolley, hook, anchor, rope, beam, craneRules);
+            sb.AppendLine($"天車機構（b1）：上限位 Y {profile.hookYMax:0.000}、小車 X {profile.trolleyXMin}…{profile.trolleyXMax}、橋架 Z {profile.bridgeZMin}…{profile.bridgeZMax}、安全規則 {craneRules.Length} 條");
 
             var remote = Fbx("ENV_CraneRemote", null, env, aDock.position + new Vector3(0.06f, -0.1f, 0f));
             remote.AddComponent<InteractionPointMarker>().Configure("env.crane_pendant", "天車遙控器（掛在掛座）");

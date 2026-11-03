@@ -89,6 +89,7 @@ namespace PantographSim.UI
             views.Add(new ToolBarView());
             views.Add(new ToolPanelView());
             views.Add(new LiftPanelView());
+            views.Add(new CranePanelView());    // R1.5b b1：桌面版天車遙控器（拿起遙控器才顯示）
             views.Add(new XrWristView());       // VR：左手腕面板、手勢小卡、右控制器按鍵標籤
             views.Add(new XrGestureView());
             views.Add(new ControllerLabelsView());

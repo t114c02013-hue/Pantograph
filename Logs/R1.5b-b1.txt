@@ -1,0 +1,27 @@
+段：R1.5b b1 天車機構、遙控器、CraneProfile、碰撞停止、紅區停車、上限位、視覺晃動（不接流程，除錯情境吊一個方塊驗證）
+改動：
+- Data：CraneProfile（三軸高速／微動 m/min、行程、加減速 0.3 s、紅區外擴 1.0、晃動 3°／1.5 s、掛座半徑 0.3、按鍵中文標籤）＋ CraneLogic 純計算（命令解析、同時按兩個＝None、軸平滑加減速、紅區、晃動）。資產 Modules/Worksite/Data/CraneProfile.asset，hookYMax 由建置從模型量測寫回（5.850）。
+- Core：CraneControl（遙控器與桌面面板的唯一寫入口，只寫 ctrl.crane.* 與 env.crane_pendant.state）；SimIds 加天車鍵。
+- Parts/Mechanism：CraneMechanism（讀 ctrl.crane.*，移動 Crane_Bridge Z、Crane_Trolley X、Crane_HookBlock Y、Crane_Rope 縮放；寫 part.crane.hook.pos（> 1 cm 或放開時）、load_bottom_y、state；緊急停止鎖住要復歸＋重轉電源；上限位 LimitUp；碰撞停止（吊物 Bounds 轉世界 OverlapBox，只算場景件的 Collision 群組）記 ERR_Crane_Collision；紅區（頭部水平投影在吊物投影外擴 1.0 m）同一幀停車、記 ERR_Crane_PersonUnderLoad，紅區內命令無效；晃動只轉吊梁）。
+- Safety 資料：carbon_strip_slice.json 加 SR_Crane_PersonUnderLoad、SR_Crane_Collision（SafetyRuleKind 往後加兩個值，序列化值不變）。
+- XR：XrCranePendant（掛座 0.3 m 的 XRSimpleInteractable 在 PanelHandle 層，左握把按一下拿起／掛回，附著左手；右手射線＋扳機或右手 Poke_Tip_Right 按鍵；作業單開或左手選取其他物件時隱藏並放開按鍵；Label_* 標籤文字讀 CraneProfile）。XrRigBuilder 加右手 Poke_Tip_Right 並掛上。
+- UI：CranePanelView（桌面版，拿起遙控器才顯示，按住方向鍵、放開就停）。
+- 測試 CraneTests.cs：CraneMechanismTests 6 個（＋參數化 3）、CraneRedZoneTests 2 個、CraneInputTests 3 個。
+略過：
+- 吊物「懸空」判定（part.pan_assy.state = Lifted）是 b2；b1 的紅區與碰撞以「有掛吊物」為條件（除錯方塊）。
+- CraneCollisionIgnoreDef（下降對位時排除 StandSeat／InsulatorTop）是 b2，b1 沒有落點。
+風險：
+- Btn_Speed2 改成「按一下切換高速／微動」（shortcut 註解）：規格是和方向鍵一起按住，但 VR 只有右手一個 poke／射線、桌面一個滑鼠，同時按兩顆做不到。請負責人確認。
+- 吊鉤上限位用模型的實際最高點 5.850（規格表寫 6.35；a6 D35 實測吊鉤最高點 5.53 是另一個量法），數值在 CraneProfile.hookYMax。
+- 桌面「點遙控器拿起」走 ActionRequested(env.crane_pendant)，25 步檢查沒有走到這條路，未實測。
+ponytail-review Verdict：fix 1 first（按鍵標籤沒用到資料，已修）；2（紅區要改看 Lifted）留給 b2；3 桌面拿起未實測。
+測試：EditMode 273/273、PlayMode 3/3，Console 紅字 0（編譯 0 error、0 warning）
+功能不變檢查：
+1. 0 紅字、沒有新的 warning：是
+2. 測試數量不減少：259 → 273，沒有停用或跳過
+3. 公開簽章、事件、黑板鍵、SerializeField、asmdef：既有的都沒改；新增 SimIds 常數、SafetyRuleKind 往後加兩個值
+4. 資料檔：只加 safetyRules 兩條（本段要求的錯誤）
+5. 場景與 prefab 沒有 Missing：建置成功、StationLayoutCheck 21 站 202 過
+6. 桌面版 25 步：跑完，分數 85、只有刻意的 E1，和 b1 之前相同
+7. 純精簡和功能改動分開：本段只有功能改動
+未檢查：頭盔實機（左握把拿起、右手 poke 按鍵）——要 terry 戴頭盔試
