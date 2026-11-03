@@ -158,8 +158,8 @@ daily,STP_CSR_15_HeightCheck,b,131,1,"讀數已取得","ip.carbon_strip_L.measur
 daily,STP_CSR_15_HeightCheck,c,132,1,"讀數已取得","ip.carbon_strip_R.measure_mid.new_measured",
 daily,STP_CSR_15_HeightCheck,d,133,1,"兩格與讀數相差 ≤ 0.05 mm，差值 ≤ EX 1.0 mm","workorder.height_diff",
 daily,STP_CSR_15_HeightCheck,e,134,1,"掛位 5 = 在袋","tool.active=",
-daily,STP_WC_01a_ToolCountRoof,a,181,3,"工具袋每個掛位都注視過（逐格），且 工具袋 5–9 號都在袋","env.tool_bag.slot_5.viewed&&env.tool_bag.slot_6.viewed&&env.tool_bag.slot_7.viewed&&env.tool_bag.slot_8.viewed&&env.tool_bag.slot_9.viewed&&rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack",b4:p5
-daily,STP_WC_01a_ToolCountRoof,b,182,3,"兩個螺栓盤、零件袋、暫放墊都空，車頂沒有遺留螺栓或滑板","env.bolt_tray_L.count<=0&&env.bolt_tray_R.count<=0&&env.tool_bag.bolt_pouch.count<=0&&env.roof_strip_mat.count<=0&&roof.leftover_count<=0",b4:p5
+daily,STP_WC_01a_ToolCountRoof,a,181,3,"工具袋每個掛位都注視過（逐格），且 工具袋 5–9 號都在袋","env.tool_bag.slot_5.viewed&&env.tool_bag.slot_6.viewed&&env.tool_bag.slot_7.viewed&&env.tool_bag.slot_8.viewed&&env.tool_bag.slot_9.viewed&&rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack",
+daily,STP_WC_01a_ToolCountRoof,b,182,3,"兩個螺栓盤、零件袋、暫放墊都空，車頂沒有遺留螺栓或滑板","env.bolt_tray_L.bolts<=0&&env.bolt_tray_R.bolts<=0&&env.tool_bag.bolt_pouch.count<=0&&env.roof_strip_mat.count<=0&&roof.leftover_count<=0",b4c:strip_carry
 daily,STP_WC_01a_ToolCountRoof,c,183,3,"已確認","workorder.toolcount_confirmed",
 daily,STP_WC_02_LeaveRoof,a,184,3,"兩個掛點都扣著","harness.roof&&harness.platform",
 daily,STP_WC_02_LeaveRoof,b,185,3,"只剩平台掛點扣著","harness.platform&&harness.roof=false",
@@ -389,7 +389,7 @@ periodic,STP_CSR_15_HeightCheck,a,130,1,"手持卡尺","tool.active=tool.caliper
 periodic,STP_CSR_15_HeightCheck,b,131,1,"讀數已取得","ip.carbon_strip_L.measure_mid.new_measured",
 periodic,STP_CSR_15_HeightCheck,c,132,1,"讀數已取得","ip.carbon_strip_R.measure_mid.new_measured",
 periodic,STP_CSR_15_HeightCheck,d,133,1,"兩格與讀數相差 ≤ 0.05 mm，差值 ≤ EX 1.0 mm","workorder.height_diff",
-periodic,STP_CSR_15_HeightCheck,f,135,3,"掛位 5–9 = 在袋，台架工具盤是空的","rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&env.panto_stand.tool_tray.count<=0",b4:p5
+periodic,STP_CSR_15_HeightCheck,f,135,3,"掛位 5–9 = 在袋，台架工具盤是空的","rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&env.panto_stand.tool_tray.count<=0",
 periodic,STP_IN_01_RigOnStand,a,136,3,"與 COG 水平差 ≤ 5 cm；吊梁底面在弓頂上方 EX 0.55–0.75 m（D42：吊帶要鬆才掛得上吊耳；上限 = 拉直高度 − 0.06 m，以實測為準）","part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=crane.rig_height_lower_m&&part.crane.beam_above_pan_m<=crane.rig_height_upper_m",b4:p5
 periodic,STP_IN_01_RigOnStand,b1,137,3,"Rigged","ip.pan_assy.lift_point_1.state=Rigged",
 periodic,STP_IN_01_RigOnStand,b2,137,3,"Rigged","ip.pan_assy.lift_point_2.state=Rigged",
@@ -453,8 +453,8 @@ periodic,STP_WC_03a_RemoveGroundRoof,a,177,3,"電纜端子端已取下（先於 
 periodic,STP_WC_03a_RemoveGroundRoof,b,178,3,"夾具已鬆開","ip.roof.carbody_ground.clamped=false",
 periodic,STP_WC_03a_RemoveGroundRoof,c,179,3,"短接地線 = 隨身（比照 SI_06 a2）","tool.grounding_lead.carried",
 periodic,STP_WC_03a_RemoveGroundRoof,d,180,2,"#2 = 已銷號","ground_register.2=cancelled",b4c:ground_register
-periodic,STP_WC_01a_ToolCountRoof,a,181,3,"工具袋每個掛位都注視過（逐格），且 工具袋 5–9 號、13 號（大扭力扳手）和固定帶都在袋","env.tool_bag.slot_5.viewed&&env.tool_bag.slot_6.viewed&&env.tool_bag.slot_7.viewed&&env.tool_bag.slot_8.viewed&&env.tool_bag.slot_9.viewed&&env.tool_bag.slot_10.viewed&&env.tool_bag.slot_13.viewed&&rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&rack.slot_13=on_rack&&rack.slot_10=on_rack",b4:p5
-periodic,STP_WC_01a_ToolCountRoof,b,182,3,"零件袋與台架旁 L、R 螺栓盤都是空的，待報廢箱有 2 條舊滑板（CSR_05 判合格時為 0），車頂無遺留","env.tool_bag.bolt_pouch.count<=0&&env.bolt_tray_L.count<=0&&env.bolt_tray_R.count<=0&&env.parts_tray.strip_count_ok&&roof.leftover_count<=0",b4:p5
+periodic,STP_WC_01a_ToolCountRoof,a,181,3,"工具袋每個掛位都注視過（逐格），且 工具袋 5–9 號、13 號（大扭力扳手）和固定帶都在袋","env.tool_bag.slot_5.viewed&&env.tool_bag.slot_6.viewed&&env.tool_bag.slot_7.viewed&&env.tool_bag.slot_8.viewed&&env.tool_bag.slot_9.viewed&&env.tool_bag.slot_10.viewed&&env.tool_bag.slot_13.viewed&&rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&rack.slot_13=on_rack&&rack.slot_10=on_rack",
+periodic,STP_WC_01a_ToolCountRoof,b,182,3,"零件袋與台架旁 L、R 螺栓盤都是空的，待報廢箱有 2 條舊滑板（CSR_05 判合格時為 0），車頂無遺留","env.tool_bag.bolt_pouch.count<=0&&env.bolt_tray_L.bolts<=0&&env.bolt_tray_R.bolts<=0&&env.parts_tray.strip_count_ok&&roof.leftover_count<=0",
 periodic,STP_WC_01a_ToolCountRoof,c,183,3,"已確認","workorder.toolcount_confirmed",
 periodic,STP_WC_02_LeaveRoof,a,184,3,"兩個掛點都扣著","harness.roof&&harness.platform",
 periodic,STP_WC_02_LeaveRoof,b,185,3,"只剩平台掛點扣著","harness.platform&&harness.roof=false",

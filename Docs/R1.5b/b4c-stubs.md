@@ -20,7 +20,7 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | b4:p5 | 兩門課跑到結算（b4 第 5 部分；機制沒有指定段落，做的時候回報） |
 | b4:p3b | 扭力類錯誤與 K3 降級（b4 第 3b 部分） |
 
-## 小動作（共 70 列）
+## 小動作（共 66 列）
 
 | 步驟 | 小動作 | 課程 | 完成條件 | owner |
 |---|---|---|---|---|
@@ -58,6 +58,7 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_CSR_08_RemoveStrip_R | b | daily | `part.carbon_strip_R.state=OnMat` | b4c:strip_carry |
 | STP_CSR_09_CleanBracket_L | d | daily | `part.carbon_strip_L.state=InTray&&env.roof_strip_mat.count<=0` | b4c:strip_carry |
 | STP_CSR_09_CleanBracket_R | d | daily | `part.carbon_strip_R.state=InTray&&env.roof_strip_mat.count<=0` | b4c:strip_carry |
+| STP_WC_01a_ToolCountRoof | b | daily | `env.bolt_tray_L.bolts<=0&&env.bolt_tray_R.bolts<=0&&env.tool_bag.bolt_pouch.count<=0&&env.roof_strip_mat.count<=0&&roof.leftover_count<=0` | b4c:strip_carry |
 | STP_RM_07_LeaveRoof | b | periodic | `harness.platform&&harness.roof=false&&player.zone=platform` | b4d |
 | STP_WC_02_LeaveRoof | c | daily | `player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use` | b4d |
 | STP_WC_02_LeaveRoof | c | periodic | `player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use` | b4d |
@@ -82,17 +83,12 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_LF_04_Traverse | a | periodic | `part.pan_assy.stand_offset_cm<=5` | b4:p5 |
 | STP_LF_05_LowerToStand | a | periodic | `part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1` | b4:p5 |
 | STP_LF_06_SecureOnStand | c | periodic | `part.crane.beam_above_pan_m>=1.0` | b4:p5 |
-| STP_CSR_15_HeightCheck | f | periodic | `rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&env.panto_stand.tool_tray.count<=0` | b4:p5 |
 | STP_IN_01_RigOnStand | a | periodic | `part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=crane.rig_height_lower_m&&part.crane.beam_above_pan_m<=crane.rig_height_upper_m` | b4:p5 |
 | STP_IN_02_TrialLift | a | periodic | `part.crane.drop_distance>=0.1&&part.crane.still_s>=3` | b4:p5 |
 | STP_IN_02_TrialLift | b | periodic | `part.pan_assy.inspected&&part.pan_assy.tilt_deg<=3` | b4:p5 |
 | STP_IN_03_Transfer | b | periodic | `part.pan_assy.roof_offset_cm<=5` | b4:p5 |
 | STP_IN_04_LowerToRoof | a | periodic | `part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1` | b4:p5 |
 | STP_IN_04_LowerToRoof | b | periodic | `part.pan_assy.state=Mounted&&part.pan_assy.seat_error_cm<=1` | b4:p5 |
-| STP_WC_01a_ToolCountRoof | a | daily | `env.tool_bag.slot_5.viewed&&env.tool_bag.slot_6.viewed&&env.tool_bag.slot_7.viewed&&env.tool_bag.slot_8.viewed&&env.tool_bag.slot_9.viewed&&rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack` | b4:p5 |
-| STP_WC_01a_ToolCountRoof | a | periodic | `env.tool_bag.slot_5.viewed&&env.tool_bag.slot_6.viewed&&env.tool_bag.slot_7.viewed&&env.tool_bag.slot_8.viewed&&env.tool_bag.slot_9.viewed&&env.tool_bag.slot_10.viewed&&env.tool_bag.slot_13.viewed&&rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&rack.slot_13=on_rack&&rack.slot_10=on_rack` | b4:p5 |
-| STP_WC_01a_ToolCountRoof | b | daily | `env.bolt_tray_L.count<=0&&env.bolt_tray_R.count<=0&&env.tool_bag.bolt_pouch.count<=0&&env.roof_strip_mat.count<=0&&roof.leftover_count<=0` | b4:p5 |
-| STP_WC_01a_ToolCountRoof | b | periodic | `env.tool_bag.bolt_pouch.count<=0&&env.bolt_tray_L.count<=0&&env.bolt_tray_R.count<=0&&env.parts_tray.strip_count_ok&&roof.leftover_count<=0` | b4:p5 |
 | STP_WC_05_RaiseTest | a | periodic | `part.crane.hook.inspected&&part.pan_assy.inspected` | b4:p5 |
 
 ## 場景裡還沒有的目標（ConditionTables.json 的 pendingTargets）

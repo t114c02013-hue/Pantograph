@@ -53,6 +53,12 @@ namespace PantographSim.Tests
                 s.SetFloat(SimIds.PanHeadLowerTolerance, notLowered.toleranceCm);   // App 開場寫的（容許值只有一個來源）
                 foreach (var side in new[] { "L", "R" }) s.SetFloat(SimIds.BoltTray(side) + ".bolts", 0);   // BoltTray、BoltPouch 的 OnBound
                 s.SetFloat(FastenerLogic.BoltPouchCount, 0);
+                bus.Subscribe<StateChanged>(e =>   // 工具袋元件（ToolBag）做的：相關鍵一變就重算清點
+                {
+                    if (counting) return;
+                    counting = true;
+                    try { ToolCountLogic.Update(s, BeltRig.Table); } finally { counting = false; }
+                });
                 bus.Subscribe<ActionPerformed>(e =>
                 {
                     if (e.targetId == FastenerLogic.BoltPouch) PantographSim.Worksite.BoltPouch.Apply(s, e.text);
@@ -130,10 +136,13 @@ namespace PantographSim.Tests
             int LeadSlot => SlotOf(GroundingLeadLogic.ToolId);
 
             const string CtrlConnector = "ip.pan_assy.ctrl_connector";
-            static readonly System.Text.RegularExpressions.Regex BoltState = new System.Text.RegularExpressions.Regex(@"^(.+\.bolt_\d+)\.state=(Out|InTray)$");
+            static readonly System.Text.RegularExpressions.Regex ViewedSlot = new System.Text.RegularExpressions.Regex(@"^env\.tool_bag\.slot_(\d+)\.viewed$");
+            static readonly string[] Derived = { ToolCountLogic.TrayCount, ToolCountLogic.Leftover, ToolCountLogic.StripCountOk, FastenerLogic.BoltPouchCount, "env.bolt_tray_L.bolts", "env.bolt_tray_R.bolts" };
+            bool counting;
+            static readonly System.Text.RegularExpressions.Regex BoltState = new System.Text.RegularExpressions.Regex(@"^(.+\.bolt_\d+)\.state=(Out|InTray|Placed)$");
             readonly SocketCatalog sockets = AssetDatabase.LoadAssetAtPath<SocketCatalog>("Assets/_Project/Tools/Data/SocketCatalog.asset");
 
-            /// <summary>螺栓轉到脫出（先到鬆開、再到脫出，鬆開順序照記）、收進螺栓盤／零件袋：FastenerLogic（FastenerBehaviour 收到工具動作時呼叫的同一段），套筒讀 SocketCatalog。</summary>
+            /// <summary>螺栓轉到脫出（先到鬆開、再到脫出，鬆開順序照記）、收進螺栓盤／零件袋、裝回時從那裡拿：FastenerLogic（FastenerBehaviour 收到工具動作時呼叫的同一段），套筒讀 SocketCatalog。</summary>
             void Bolt(string part)
             {
                 var m = BoltState.Match(part);
@@ -144,7 +153,7 @@ namespace PantographSim.Tests
                     FastenerLogic.Apply(s, Sim.Bus, id, $"rotate:{size}:loosen", FastenerLogic.LoosenedAt, size);
                     FastenerLogic.Apply(s, Sim.Bus, id, $"rotate:{size}:loosen", FastenerLogic.OutAt, size);
                 }
-                else Assert.IsTrue(FastenerLogic.Apply(s, Sim.Bus, id, "take", 0, size), part);
+                else Assert.IsTrue(FastenerLogic.Apply(s, Sim.Bus, id, want == FastenerLogic.InTray ? "take" : "place", 0, size), part);   // 裝回：從螺栓盤／零件袋拿
                 Assert.AreEqual(want, s.Get(id + ".state"), part);
             }
 
@@ -201,6 +210,8 @@ namespace PantographSim.Tests
             public bool Write(string condition)
             {
                 if (Parts(condition).Any(IsLeadPart)) EnsureLead();
+                foreach (var m in Parts(condition).Select(p => ViewedSlot.Match(p)).Where(m => m.Success))
+                    s.Set(ToolCountLogic.HoverKey, "env.tool_rack.slot_" + m.Groups[1].Value);   // 逐格指著工具袋（一格一個畫面；ToolCountLogic 記注視）
                 bool used = false; s.Batch(() => used = WriteInBatch(condition)); return used;
             }
 
@@ -215,6 +226,8 @@ namespace PantographSim.Tests
                     else if (part.StartsWith("lockout.key_holder")) { }   // 上鎖時 LockoutTagTool 一起寫
                     else if (part.StartsWith(MeggerLogic.Count + ">=")) Megger();
                     else if (BoltState.IsMatch(part)) Bolt(part);
+                    else if (ViewedSlot.IsMatch(part)) { }   // 已在批次前逐格指過
+                    else if (Derived.Any(part.StartsWith)) { }   // 清點的件數由機制算（ToolBag／BoltPouch／BoltTray），腳本不寫
                     else if (part == "ip.pan_assy.hold_down.pull_tested") DetachableLogic.PullTest(s, "ip.pan_assy.hold_down");   // DetachablePart：裝著空手拉一下
                     else if (part.StartsWith(DetachableLogic.CapKey(CtrlConnector) + "=")) { if (s.Get(DetachableLogic.CapKey(CtrlConnector)) != part.Substring(part.IndexOf('=') + 1)) Assert.IsTrue(DetachableLogic.CapClick(s, CtrlConnector), part); }
                     else if (part.StartsWith("workorder.ir_reading>="))

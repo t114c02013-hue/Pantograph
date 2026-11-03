@@ -21,6 +21,7 @@ namespace PantographSim.Editor
     /// </summary>
     public static class RoofSiteBuilder
     {
+        const string ToolSlotTablePath = "Assets/_Project/Modules/Worksite/Data/ToolSlotTable.asset";
         public const string PrefabFolder = "Assets/_Project/Modules/Worksite/Prefabs";
         public const string MonitorTexturePath = "Assets/_Project/Content/Textures/RT_PanHeadMonitor.renderTexture";
 
@@ -719,7 +720,8 @@ namespace PantographSim.Editor
             res.ids["env.panto_stand"] = standP.root;
             var tray = standVis.GetComponentsInChildren<Transform>(true).First(x => x.name == "ToolTray");
             tray.gameObject.AddComponent<BoxCollider>();
-            tray.gameObject.AddComponent<InteractionPointMarker>().Configure("env.panto_stand.tool_tray", "台架工具盤");
+            var trayComp = tray.gameObject.AddComponent<PantographSim.Worksite.ToolTray>(); trayComp.Configure("env.panto_stand.tool_tray", "台架工具盤");   // R1.5b b4：拿著工具點＝放上盤
+            trayComp.Setup(AssetDatabase.LoadAssetAtPath<ToolSlotTable>(ToolSlotTablePath));
             res.ids["env.panto_stand.tool_tray"] = tray;
             Anchor(standP.anchors, "Anchor_StandTop", new Vector3(sc.x, d.StandTopY, sc.z), Vector3.forward);
             // R1.5b b4：定期檢修的螺栓盤放在台架外框頂面、靠 tp.stand.s 的一邊（L 在 −X、R 在 +X；位置寫在 RoofSceneDef）
@@ -982,7 +984,8 @@ namespace PantographSim.Editor
 
             var bench = new Vector3(d.workbenchCenterXZ.x, g + 0.92f, d.workbenchCenterXZ.y + 0.45f);
             var pouch = Fbx("ENV_ToolPouch", null, env, bench, yaw: 90f);
-            pouch.AddComponent<InteractionPointMarker>().Configure("env.tool_bag", "工具袋");
+            var bagComp = pouch.AddComponent<PantographSim.Worksite.ToolBag>(); bagComp.Configure("env.tool_bag", "工具袋");   // R1.5b b4：清點（ToolCountLogic）
+            bagComp.Setup(AssetDatabase.LoadAssetAtPath<ToolSlotTable>(ToolSlotTablePath));
             res.ids["env.tool_bag"] = pouch.transform;
             BuildToolBagPockets(res, pouch.transform, sb);
             var bolts = pouch.GetComponentsInChildren<Transform>(true).First(x => x.name == "BoltBag");

@@ -12,6 +12,8 @@ namespace PantographSim.Data
         public const string OnRack = "on_rack", InHand = "in_hand", InUse = "in_use";
         /// <summary>R1.5b b3：在腰包（D30，上鎖掛牌組作業期間）、掛在防墜繫繩上垂著（車頂放開沒收回工具袋）、掉在地上（地面工作區放開）。</summary>
         public const string InPouch = "in_pouch", Hanging = "hanging", Dropped = "dropped";
+        /// <summary>R1.5b b4：放在台架工具盤上（CSR_15 f 要全部收回工具袋）。</summary>
+        public const string OnTray = "on_tray";
 
         public static string SlotKey(int slot) => "rack.slot_" + slot;
         public static string SlotId(int slot) => "env.tool_rack.slot_" + slot;
@@ -29,7 +31,7 @@ namespace PantographSim.Data
             if (!string.IsNullOrEmpty(active)) return $"手上已經拿著「{activeName}」，先把它放回工具架";
             if (!string.IsNullOrEmpty(s.Get("hand.item"))) return "手上拿著零件，先把它放好再拿工具";
             string st = s.Get(SlotKey(slot), OnRack);
-            if (st != OnRack && st != Hanging && st != Dropped) return $"「{toolName}」正在使用中，不在架上";   // 垂在繫繩上、掉在地上的工具可以撿回來
+            if (st != OnRack && st != Hanging && st != Dropped && st != OnTray) return $"「{toolName}」正在使用中，不在架上";   // 垂在繫繩上、掉在地上的工具可以撿回來
             // 一批寫入：手上、掛位、清點三個鍵同時生效，步驟判定與下一步的開始快照不會拍到只寫一半的狀態
             // （上一輪 WC_01 卡關就是快照拍到「手上空了、清點還是沒收回」）
             s.Batch(() =>
