@@ -71,7 +71,7 @@ namespace PantographSim.Procedures
             foreach (var part in condition.Split(new[] { "&&" }, StringSplitOptions.RemoveEmptyEntries))
                 foreach (var tok in part.Trim().Split(new[] { "<=", ">=", "=" }, StringSplitOptions.None))
                 {
-                    var t = tok.Trim();
+                    var t = tok.Trim().TrimStart('!');
                     if (t.Length > 0 && t.Contains(".") && !float.TryParse(t, NumberStyles.Float, CultureInfo.InvariantCulture, out _)) yield return t;
                 }
         }

@@ -42,6 +42,7 @@ MonoBehaviour:
     count: 4
     blocks: 0
     severityBeforeK3: 
+    oncePerRun: 0
     inputMode: 
   - errorId: ERR_CSR13_Under
     severity: 2
@@ -60,6 +61,7 @@ MonoBehaviour:
     count: 4
     blocks: 0
     severityBeforeK3: Major
+    oncePerRun: 0
     inputMode: 
   - errorId: ERR_CSR13_Over
     severity: 1
@@ -78,6 +80,7 @@ MonoBehaviour:
     count: 4
     blocks: 0
     severityBeforeK3: 
+    oncePerRun: 0
     inputMode: 
   - errorId: ERR_CSR13_Order
     severity: 1
@@ -96,6 +99,28 @@ MonoBehaviour:
     count: 0
     blocks: 0
     severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
+  - errorId: ERR_CSR13_WrenchRange
+    severity: 0
+    what: "\u8A2D\u5B9A\u7684\u626D\u529B\u8D85\u51FA\u9019\u652F\u6273\u624B\u7684\u91CF\u7A0B\u3002"
+    why: "\u91CF\u7A0B\u5916\u7684\u6273\u624B\u8B80\u4E0D\u6E96\uFF0C\u4E5F\u53EF\u80FD\u640D\u58DE\u3002"
+    fix: "\u63DB\u91CF\u7A0B\u6DB5\u84CB\u9019\u500B\u626D\u529B\u7684\u6273\u624B\uFF08\u5927\uFF0F\u5C0F\u626D\u529B\u6273\u624B\uFF09\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - tool.torque_wrench.range_blocked
+    - tool.torque_wrench_l.range_blocked
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
     inputMode: 
   hints:
     text: "\u4E0B\u65B9\u9762\u677F\u628A\u8A2D\u5B9A\u8ABF\u5230 25.0\uFF1B\u5728\u87BA\u6813\u4E0A\u6309\u4F4F\u5DE6\u9375\uFF0C\u807D\u5230\u5580\u8072\u5C31\u653E\u958B\u3002"
@@ -121,6 +146,8 @@ MonoBehaviour:
     condition: tool.active=tool.torque_wrench
     standPointId: tp.roof.inner
     subId: a
+    textDesktop: 
+    when: 
   - text: "\u5F9E\u5957\u7B52\u76D2\u62FF 13 mm \u5957\u7B52\u88DD\u4E0A\u5C0F\u626D\u529B\u6273\u624B\uFF0C\u4E26\u628A\u626D\u529B\u8A2D\u70BA
       25 N\xB7m"
     why: 
@@ -129,6 +156,8 @@ MonoBehaviour:
     condition: tool.torque_wrench.setting=25
     standPointId: tp.roof.inner
     subId: b
+    textDesktop: 
+    when: 
   - text: "\u9396 1 \u865F\u87BA\u6813\u5230\u5580\u8072\uFF0F\u9707\u52D5\u9583\u8272"
     why: 
     targetId: ip.carbon_strip_L.bolt_1
@@ -136,6 +165,8 @@ MonoBehaviour:
     condition: ip.carbon_strip_L.bolt_1.state=Torqued
     standPointId: tp.roof.inner
     subId: c1
+    textDesktop: 
+    when: 
   - text: "\u9396 2 \u865F\u87BA\u6813\u5230\u5580\u8072\uFF0F\u9707\u52D5\u9583\u8272"
     why: 
     targetId: ip.carbon_strip_L.bolt_2
@@ -143,6 +174,8 @@ MonoBehaviour:
     condition: ip.carbon_strip_L.bolt_2.state=Torqued
     standPointId: tp.roof.inner
     subId: c2
+    textDesktop: 
+    when: 
   - text: "\u9396 3 \u865F\u87BA\u6813\u5230\u5580\u8072\uFF0F\u9707\u52D5\u9583\u8272"
     why: 
     targetId: ip.carbon_strip_L.bolt_3
@@ -150,6 +183,8 @@ MonoBehaviour:
     condition: ip.carbon_strip_L.bolt_3.state=Torqued
     standPointId: tp.roof.inner
     subId: c3
+    textDesktop: 
+    when: 
   - text: "\u9396 4 \u865F\u87BA\u6813\u5230\u5580\u8072\uFF0F\u9707\u52D5\u9583\u8272"
     why: 
     targetId: ip.carbon_strip_L.bolt_4
@@ -157,6 +192,8 @@ MonoBehaviour:
     condition: ip.carbon_strip_L.bolt_4.state=Torqued
     standPointId: tp.roof.inner
     subId: c4
+    textDesktop: 
+    when: 
   - text: "\u628A\u5C0F\u626D\u529B\u6273\u624B\u6536\u56DE\u5DE5\u5177\u888B"
     why: 
     targetId: env.tool_rack.slot_7
@@ -164,6 +201,8 @@ MonoBehaviour:
     condition: tool.active=
     standPointId: tp.roof.inner
     subId: d
+    textDesktop: 
+    when: 
   presetDone: 0
   side: L
   presetStates: []

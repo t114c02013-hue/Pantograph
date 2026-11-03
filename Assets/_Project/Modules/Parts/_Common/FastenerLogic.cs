@@ -59,6 +59,7 @@ namespace PantographSim.Parts.Common
                     }
                     if (dir == "lock" && (st == Placed || st == Snug))
                     {
+                        if (!IsStripBolt(boltId) && !OthersAtLeast(s, boltId, Placed) && !s.GetBool(boltId + ".tighten_before_all")) s.SetBool(boltId + ".tighten_before_all", true);   // R1.5b b4（IN_06）：四支還沒都放回就開始鎖
                         float a = s.GetFloat(boltId + ".lock_deg") + deg;
                         s.SetFloat(boltId + ".lock_deg", a);
                         if (a >= SnugAt && st == Placed) { s.Set(boltId + ".state", Snug); AppendOrder(s, boltId, "pretighten_order"); }

@@ -294,9 +294,20 @@
       "courses": "both",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
-      "trigger": "- 新錯誤 ERR_IN07_WrenchRange、ERR_IN09_WrenchRange、ERR_CSR13_WrenchRange（Minor，三種模式都判；組長）：設定的扭力超出量程時刻度轉不過去，提示換扳手，同一步只記 1 次。Over／Under 照原規則，不另外加重。教學模式在握把上標示量程。"
+      "trigger": "- 新錯誤 ERR_IN07_WrenchRange、ERR_IN09_WrenchRange、ERR_CSR13_WrenchRange（Minor，三種模式都判；組長）：設定的扭力超出量程時刻度轉不過去，提示換扳手，同一步只記 1 次。Over／Under 照原規則，不另外加重。教學模式在握把上標示量程。",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "tool.torque_wrench.range_blocked",
+          "tool.torque_wrench_l.range_blocked"
+        ],
+        "what": "設定的扭力超出這支扳手的量程。",
+        "why": "量程外的扳手讀不準，也可能損壞。",
+        "fix": "換量程涵蓋這個扭力的扳手（大／小扭力扳手）。"
+      }
     },
     {
       "errorId": "ERR_CSR13_WrongSocket",
@@ -307,7 +318,8 @@
       "status": "Defined",
       "owner": "b4:p5",
       "source": "CSV",
-      "trigger": "- 新錯誤 ERR_IN07_WrongSocket、ERR_IN09_WrongSocket、ERR_CSR13_WrongSocket（Minor，三種模式都判）：套錯擋下並提示「套筒尺寸不對」，同一步只記 1 次。"
+      "trigger": "- 新錯誤 ERR_IN07_WrongSocket、ERR_IN09_WrongSocket、ERR_CSR13_WrongSocket（Minor，三種模式都判）：套錯擋下並提示「套筒尺寸不對」，同一步只記 1 次。",
+      "note": "b4 第 5 部分還沒做：同上：扭力扳手的套筒選擇（D38）還沒做。"
     },
     {
       "errorId": "ERR_CSR14_Order",
@@ -360,7 +372,7 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
       "trigger": "空鉤靠近車頂或台架時沒有切到微動（吊梁底面離作業面 < EX 2 m 時用高速下降）。**新 ID**",
       "rule": {
@@ -408,7 +420,7 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
       "trigger": "底座螺栓、高壓電纜或控制線還沒拆就起吊，連續拉 3 s 才算",
       "rule": {
@@ -455,7 +467,7 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
       "trigger": "沒有試吊（LF_02、IN_02）就升高超過 EX 0.3 m 或水平移動",
       "rule": {
@@ -547,7 +559,8 @@
         "fix": "吊帶只能掛在 4 個吊耳上。",
         "what": "吊帶在吊耳以外的地方（臂、弓頭）放開。**新 ID**"
       },
-      "scope": "global"
+      "scope": "global",
+      "note": "b4 第 5 部分還沒做：點選操作時吊帶只能掛在吊耳上，不會掛到臂或弓頭；要等 VR 拿著吊帶自由放開（R1.5b 拿取吊帶）時才會發生。"
     },
     {
       "errorId": "ERR_Crane_RiggingNotInspected",
@@ -556,7 +569,7 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
       "trigger": "RM_05 還沒完成就起吊，**或**掛著判為「不合格」的吊帶起吊（D20，不另開 ID；回饋文字依原因區分）",
       "rule": {
@@ -579,7 +592,7 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
       "trigger": "起吊時吊鉤和 COG 的水平差 > EX 5 cm。**新 ID**",
       "rule": {
@@ -660,9 +673,21 @@
       "courses": "both",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
-      "trigger": "掛接地順序反了，先掛設備端（弓頭或電纜端子）再接接地端：SI_05、RM_00、IN_04b（v1.5 補 ID）"
+      "trigger": "掛接地順序反了，先掛設備端（弓頭或電纜端子）再接接地端：SI_05、RM_00、IN_04b（v1.5 補 ID）",
+      "rule": {
+        "trigger": "BlockWhen",
+        "keys": [
+          "ip.pan_head.ground_clamp|!isolation.terminal_clamped&&!isolation.head_clamped&&!tool.megger.charged",
+          "ip.roof.hv_cable_ground|!ip.roof.carbody_ground.clamped&&!ip.roof.hv_cable_ground.clamped"
+        ],
+        "what": "掛接地的順序反了：接地端還沒接就先掛設備端（弓頭、電纜端子）。",
+        "why": "設備端如果還帶電，接地棒另一端沒接地，電流會經過你。",
+        "fix": "先夾接地端（平台端子、車體接地座），再掛設備端。"
+      },
+      "scope": "global",
+      "note": "R1 的 SR_Ground_Order（ERR_Ground_Order）照舊給 R1 25 步用；課程裡 SafetyGuard 不判（已標 deprecated，由這條取代）。帶電時（絕緣測試後）碰弓頭是放電，不擋。"
     },
     {
       "errorId": "ERR_Global_GroundNotCleared",
@@ -715,9 +740,21 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
-      "trigger": "IN_04b 還沒驗電（c）就夾端子或掛弓頭（D25，鐵道；v1.5 新增）"
+      "trigger": "IN_04b 還沒驗電（c）就夾端子或掛弓頭（D25，鐵道；v1.5 新增）",
+      "rule": {
+        "trigger": "BlockWhen",
+        "keys": [
+          "ip.depot.ground_terminal|procedure.current=STP_IN_04b_RegroundPan&&procedure.sub_index<=2&&!isolation.terminal_clamped",
+          "ip.pan_head.ground_clamp|procedure.current=STP_IN_04b_RegroundPan&&procedure.sub_index<=2&&!isolation.head_clamped"
+        ],
+        "what": "還沒驗電就夾接地端子或掛弓頭。",
+        "why": "吊回裝好之後要重新確認無電，舊的驗電結果不算。",
+        "fix": "先用驗電桿自檢、驗電（IN_04b b、c），再接地。"
+      },
+      "scope": "global",
+      "note": "procedure.sub_index<=2＝IN_04b 的 c（驗電）還沒完成。"
     },
     {
       "errorId": "ERR_Global_HVDisconnectWithoutSecondGround",
@@ -726,9 +763,20 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
-      "trigger": "掛著**：弓頭的接地棒，以及車頂電纜端點的短接地線（RM_00）。沒有第二支就拆，記 Critical，錯誤 ID 為 ERR_Global_HVDisconnectWithoutSecondGround（**新 ID**，鐵道 Q1「先掛後拆」）。"
+      "trigger": "掛著**：弓頭的接地棒，以及車頂電纜端點的短接地線（RM_00）。沒有第二支就拆，記 Critical，錯誤 ID 為 ERR_Global_HVDisconnectWithoutSecondGround（**新 ID**，鐵道 Q1「先掛後拆」）。",
+      "rule": {
+        "trigger": "BlockWhen",
+        "keys": [
+          "ip.pan_assy.hv_terminal|ip.pan_assy.hv_terminal.state=Installed&&!ip.roof.hv_cable_ground.clamped",
+          "ip.pan_assy.hv_terminal|ip.pan_assy.hv_terminal.state=Installed&&!isolation.head_clamped"
+        ],
+        "what": "第二支接地（車頂短接地線）沒有掛著就拆高壓電纜。",
+        "why": "拆下電纜後弓體和電纜分開，兩邊都要各自接地（先掛後拆）。",
+        "fix": "先用短接地線接好電纜端子（RM_00），弓頭的接地棒也要掛著，再拆電纜。"
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_Global_HarnessUnclipped",
@@ -737,9 +785,21 @@
       "courses": "both",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
-      "trigger": "換扣時先解再扣，有一刻兩個掛點都沒扣：SI_06、RM_07、IN_05、WC_02（v1.5 補 ID）"
+      "trigger": "換扣時先解再扣，有一刻兩個掛點都沒扣：SI_06、RM_07、IN_05、WC_02（v1.5 補 ID）",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "harness.unhooked"
+        ],
+        "what": "換扣時有一刻兩個掛點都沒扣。",
+        "why": "那一刻滑倒就沒有防墜保護。",
+        "fix": "先扣上新的掛點，再解開舊的。",
+        "oncePerRun": false
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_Global_HoldPointRejected",
@@ -781,9 +841,20 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
-      "trigger": "動作。要拆掉接地後才量得出來，所以排在 WC_03b 之後。量完沒放電就進 WC_04，記 Major，錯誤 ID 為 ERR_Global_NoDischargeAfterIR（**新 ID**）。讀值不合格時，教學模式提示，考核模式記 Critical，不能進 WC_04 |"
+      "trigger": "動作。要拆掉接地後才量得出來，所以排在 WC_03b 之後。量完沒放電就進 WC_04，記 Major，錯誤 ID 為 ERR_Global_NoDischargeAfterIR（**新 ID**）。讀值不合格時，教學模式提示，考核模式記 Critical，不能進 WC_04 |",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "procedure.current=STP_WC_04_Unlock&&tool.megger.charged"
+        ],
+        "what": "絕緣測試後沒有放電就準備復電。",
+        "why": "加壓量測後弓體還帶著電。",
+        "fix": "用接地桿碰弓頭接地掛點放電滿 5 秒。"
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_Global_NoHelmet",
@@ -847,9 +918,21 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
-      "trigger": "- 吊鉤還在弓上方 EX 3 m 以內，記 Critical，錯誤 ID 為 ERR_Global_RaiseUnderHook（**新 ID**）。"
+      "trigger": "- 吊鉤還在弓上方 EX 3 m 以內，記 Critical，錯誤 ID 為 ERR_Global_RaiseUnderHook（**新 ID**）。",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "ctrl.lift.cmd=Up&&part.crane.beam_above_pan_m<=3&&part.crane.hook_cog_offset_cm<=100"
+        ],
+        "what": "吊鉤還在弓上方 3 m 以內就升弓。",
+        "why": "升起來的弓會撞到吊梁或吊鉤。",
+        "fix": "先把吊鉤移開、升到高處，再升弓。"
+      },
+      "scope": "global",
+      "note": "「在弓上方」＝吊鉤離集電弓重心水平 1 m（EX）以內。"
     },
     {
       "errorId": "ERR_Global_RaiseWithHoldDown",
@@ -860,7 +943,8 @@
       "status": "Defined",
       "owner": "b4:p5",
       "source": "CSV",
-      "trigger": "- 固定帶還沒拆，記 Critical，錯誤 ID 為 ERR_Global_RaiseWithHoldDown（**新 ID**）。"
+      "trigger": "- 固定帶還沒拆，記 Critical，錯誤 ID 為 ERR_Global_RaiseWithHoldDown（**新 ID**）。",
+      "note": "b4 第 5 部分還沒做：和 ERR_IN11_StrapLeft（鐵道裁定：WC_05 按升弓時固定帶沒拆，記 Major、一次作業一次）是同一個情況，兩條同時記會重複，待裁定要不要保留。"
     },
     {
       "errorId": "ERR_Global_RoofFallZone",
@@ -946,9 +1030,22 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
-      "trigger": "- 選錯順序去鎖，照原本的順序錯誤判定（例如 ERR_IN06_TightenBeforeAllThreaded、扭力順序錯誤）。換位本身不記錯。"
+      "trigger": "- 選錯順序去鎖，照原本的順序錯誤判定（例如 ERR_IN06_TightenBeforeAllThreaded、扭力順序錯誤）。換位本身不記錯。",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "part.pan_base.bolt_1.tighten_before_all",
+          "part.pan_base.bolt_2.tighten_before_all",
+          "part.pan_base.bolt_3.tighten_before_all",
+          "part.pan_base.bolt_4.tighten_before_all"
+        ],
+        "what": "四支底座螺栓還沒全部放回孔位就開始鎖。",
+        "why": "先鎖一支會把底座拉歪，其他螺栓對不上孔。",
+        "fix": "四支都先用手放回孔位，再依順序預鎖。"
+      }
     },
     {
       "errorId": "ERR_IN06_WrongSocket",
@@ -957,9 +1054,22 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
-      "trigger": "06 b），目標加上套筒盒，並補上 ERR_RM03_WrongSocket、ERR_RM04_WrongSocket、ERR_IN06_WrongSocket（Minor，規則同上），時間不變。CSR_06 b 原本就有 ERR_CSR06_WrongSocket。"
+      "trigger": "06 b），目標加上套筒盒，並補上 ERR_RM03_WrongSocket、ERR_RM04_WrongSocket、ERR_IN06_WrongSocket（Minor，規則同上），時間不變。CSR_06 b 原本就有 ERR_CSR06_WrongSocket。",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "part.pan_base.bolt_1.wrong_socket",
+          "part.pan_base.bolt_2.wrong_socket",
+          "part.pan_base.bolt_3.wrong_socket",
+          "part.pan_base.bolt_4.wrong_socket"
+        ],
+        "what": "套筒尺寸不對，套不上這支螺栓。",
+        "why": "套錯尺寸會滑牙、傷螺栓頭。",
+        "fix": "換上這支螺栓對應的套筒（作業單上有標）。"
+      }
     },
     {
       "errorId": "ERR_IN07_MarkMissing",
@@ -1072,9 +1182,20 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
-      "trigger": "- 新錯誤 ERR_IN07_WrenchRange、ERR_IN09_WrenchRange、ERR_CSR13_WrenchRange（Minor，三種模式都判；組長）：設定的扭力超出量程時刻度轉不過去，提示換扳手，同一步只記 1 次。Over／Under 照原規則，不另外加重。教學模式在握把上標示量程。"
+      "trigger": "- 新錯誤 ERR_IN07_WrenchRange、ERR_IN09_WrenchRange、ERR_CSR13_WrenchRange（Minor，三種模式都判；組長）：設定的扭力超出量程時刻度轉不過去，提示換扳手，同一步只記 1 次。Over／Under 照原規則，不另外加重。教學模式在握把上標示量程。",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "tool.torque_wrench.range_blocked",
+          "tool.torque_wrench_l.range_blocked"
+        ],
+        "what": "設定的扭力超出這支扳手的量程。",
+        "why": "量程外的扳手讀不準，也可能損壞。",
+        "fix": "換量程涵蓋這個扭力的扳手（大／小扭力扳手）。"
+      }
     },
     {
       "errorId": "ERR_IN07_WrongSocket",
@@ -1085,7 +1206,8 @@
       "status": "Defined",
       "owner": "b4:p5",
       "source": "CSV",
-      "trigger": "- 新錯誤 ERR_IN07_WrongSocket、ERR_IN09_WrongSocket、ERR_CSR13_WrongSocket（Minor，三種模式都判）：套錯擋下並提示「套筒尺寸不對」，同一步只記 1 次。"
+      "trigger": "- 新錯誤 ERR_IN07_WrongSocket、ERR_IN09_WrongSocket、ERR_CSR13_WrongSocket（Minor，三種模式都判）：套錯擋下並提示「套筒尺寸不對」，同一步只記 1 次。",
+      "note": "b4 第 5 部分還沒做：扭力扳手目前沒有選套筒（D38），扭力時不判套筒；要先做扭力扳手的套筒選擇。"
     },
     {
       "errorId": "ERR_IN09_Misaligned",
@@ -1096,7 +1218,8 @@
       "status": "Defined",
       "owner": "b4:p5",
       "source": "CSV",
-      "trigger": "：ERR_IN09_Under **Critical**；ERR_IN09_Setting、ERR_IN09_Over、ERR_IN09_Misaligned（沒對準記號就接上）Major。"
+      "trigger": "：ERR_IN09_Under **Critical**；ERR_IN09_Setting、ERR_IN09_Over、ERR_IN09_Misaligned（沒對準記號就接上）Major。",
+      "note": "b4 第 5 部分還沒做：高壓端子裝回時會吸附到原位，沒有「沒對準記號」的狀態；要有可旋轉的端子才判得到。"
     },
     {
       "errorId": "ERR_IN09_Over",
@@ -1168,9 +1291,20 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
-      "trigger": "- 新錯誤 ERR_IN07_WrenchRange、ERR_IN09_WrenchRange、ERR_CSR13_WrenchRange（Minor，三種模式都判；組長）：設定的扭力超出量程時刻度轉不過去，提示換扳手，同一步只記 1 次。Over／Under 照原規則，不另外加重。教學模式在握把上標示量程。"
+      "trigger": "- 新錯誤 ERR_IN07_WrenchRange、ERR_IN09_WrenchRange、ERR_CSR13_WrenchRange（Minor，三種模式都判；組長）：設定的扭力超出量程時刻度轉不過去，提示換扳手，同一步只記 1 次。Over／Under 照原規則，不另外加重。教學模式在握把上標示量程。",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "tool.torque_wrench.range_blocked",
+          "tool.torque_wrench_l.range_blocked"
+        ],
+        "what": "設定的扭力超出這支扳手的量程。",
+        "why": "量程外的扳手讀不準，也可能損壞。",
+        "fix": "換量程涵蓋這個扭力的扳手（大／小扭力扳手）。"
+      }
     },
     {
       "errorId": "ERR_IN09_WrongSocket",
@@ -1181,7 +1315,8 @@
       "status": "Defined",
       "owner": "b4:p5",
       "source": "CSV",
-      "trigger": "- 新錯誤 ERR_IN07_WrongSocket、ERR_IN09_WrongSocket、ERR_CSR13_WrongSocket（Minor，三種模式都判）：套錯擋下並提示「套筒尺寸不對」，同一步只記 1 次。"
+      "trigger": "- 新錯誤 ERR_IN07_WrongSocket、ERR_IN09_WrongSocket、ERR_CSR13_WrongSocket（Minor，三種模式都判）：套錯擋下並提示「套筒尺寸不對」，同一步只記 1 次。",
+      "note": "b4 第 5 部分還沒做：同上：扭力扳手的套筒選擇（D38）還沒做。"
     },
     {
       "errorId": "ERR_IN10_NotConnected",
@@ -1190,9 +1325,21 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
-      "trigger": "- IN_10 新增 ERR_IN10_NotConnected（Major）；IN_11 新增 ERR_IN11_StrapLeft（Major）。WC_05 升弓試驗時會發現，所以不列 Critical。"
+      "trigger": "- IN_10 新增 ERR_IN10_NotConnected（Major）；IN_11 新增 ERR_IN11_StrapLeft（Major）。WC_05 升弓試驗時會發現，所以不列 Critical。",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "ctrl.lift.cmd=Up&&ip.pan_assy.ctrl_connector.state=Removed"
+        ],
+        "what": "升弓控制線沒有接回就升弓試驗。",
+        "why": "控制線沒接，升弓試驗時弓不會動，要再上車頂。",
+        "fix": "IN_10 先取下防塵蓋、插回控制線接頭。",
+        "oncePerRun": true
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_IN11_StrapLeft",
@@ -1226,9 +1373,20 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
-      "trigger": "扳手原本就有「換上 X mm 套筒」的小動作（RM_03 f、RM_04 a、IN_06 b），目標加上套筒盒，並補上 ERR_RM03_WrongSocket、ERR_RM04_WrongSocket、ERR_IN06_WrongSocket（Minor，規則同上），時間不變。CSR_06 b 原本就有 ERR_CSR06_WrongSocket。"
+      "trigger": "扳手原本就有「換上 X mm 套筒」的小動作（RM_03 f、RM_04 a、IN_06 b），目標加上套筒盒，並補上 ERR_RM03_WrongSocket、ERR_RM04_WrongSocket、ERR_IN06_WrongSocket（Minor，規則同上），時間不變。CSR_06 b 原本就有 ERR_CSR06_WrongSocket。",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "part.pan_assy.hv_bolt_1.wrong_socket",
+          "part.pan_assy.hv_bolt_2.wrong_socket"
+        ],
+        "what": "套筒尺寸不對，套不上這支螺栓。",
+        "why": "套錯尺寸會滑牙、傷螺栓頭。",
+        "fix": "換上這支螺栓對應的套筒（作業單上有標）。"
+      }
     },
     {
       "errorId": "ERR_RM04_WrongSocket",
@@ -1237,9 +1395,22 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
-      "trigger": "作（RM_03 f、RM_04 a、IN_06 b），目標加上套筒盒，並補上 ERR_RM03_WrongSocket、ERR_RM04_WrongSocket、ERR_IN06_WrongSocket（Minor，規則同上），時間不變。CSR_06 b 原本就有 ERR_CSR06_WrongSocket。"
+      "trigger": "作（RM_03 f、RM_04 a、IN_06 b），目標加上套筒盒，並補上 ERR_RM03_WrongSocket、ERR_RM04_WrongSocket、ERR_IN06_WrongSocket（Minor，規則同上），時間不變。CSR_06 b 原本就有 ERR_CSR06_WrongSocket。",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "part.pan_base.bolt_1.wrong_socket",
+          "part.pan_base.bolt_2.wrong_socket",
+          "part.pan_base.bolt_3.wrong_socket",
+          "part.pan_base.bolt_4.wrong_socket"
+        ],
+        "what": "套筒尺寸不對，套不上這支螺栓。",
+        "why": "套錯尺寸會滑牙、傷螺栓頭。",
+        "fix": "換上這支螺栓對應的套筒（作業單上有標）。"
+      }
     },
     {
       "errorId": "ERR_RT02_IRFail",
@@ -1248,9 +1419,21 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p5",
+      "owner": "",
       "source": "CSV",
-      "trigger": "RT_02 讀值 < EX 100 MΩ 仍要進 WC_04（v1.5 補 ID）"
+      "trigger": "RT_02 讀值 < EX 100 MΩ 仍要進 WC_04（v1.5 補 ID）",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "procedure.current=STP_WC_04_Unlock&&tool.megger.measured&&tool.megger.reading<=99.99"
+        ],
+        "what": "絕緣電阻不合格（< 100 MΩ）還要申請復電。",
+        "why": "絕緣不良的弓體帶電會漏電、閃絡。",
+        "fix": "回報作業負責人，清潔或更換後重量，合格才能復電。"
+      },
+      "scope": "global",
+      "note": "合格下限 100 MΩ 待高鐵 SOP 確認（和 ToolRulesDef.irPassMinMOhm 一致，改值時兩處一起改）。停留點 4 NPC 一律退回、只記這條的部分在 b4c:holdpoint。"
     },
     {
       "errorId": "ERR_SI01_LightOnly",
@@ -1283,7 +1466,8 @@
       "status": "Defined",
       "owner": "b4:p5",
       "source": "CSV",
-      "trigger": "| ERR_SI02_TagWithoutLock／ERR_SI02_RaiseSwitchUnlocked | Critical | SI_02 只掛牌沒上鎖／漏鎖升弓開關（v1.5 補 ID，v5.6 同） |"
+      "trigger": "| ERR_SI02_TagWithoutLock／ERR_SI02_RaiseSwitchUnlocked | Critical | SI_02 只掛牌沒上鎖／漏鎖升弓開關（v1.5 補 ID，v5.6 同） |",
+      "note": "b4 第 5 部分還沒做：SI_02 d 的條件就要求升弓開關上鎖，漏鎖這一步不會完成；要不要另外判（例如離開駕駛室時）待裁定。"
     },
     {
       "errorId": "ERR_SI02_TagOnly",
@@ -1305,7 +1489,8 @@
       "status": "Defined",
       "owner": "b4:p5",
       "source": "CSV",
-      "trigger": "SI_02 只掛牌沒上鎖／漏鎖升弓開關（v1.5 補 ID，v5.6 同）"
+      "trigger": "SI_02 只掛牌沒上鎖／漏鎖升弓開關（v1.5 補 ID，v5.6 同）",
+      "note": "b4 第 5 部分還沒做：上鎖掛牌組一個動作同時上鎖和掛牌，沒有只掛牌的狀態。"
     },
     {
       "errorId": "ERR_SI03_CylinderPowerOn",
@@ -1316,7 +1501,8 @@
       "status": "Defined",
       "owner": "b4:p5",
       "source": "CSV",
-      "trigger": "沒斷電動缸電源就離開駕駛室（v1.5 補 ID）"
+      "trigger": "沒斷電動缸電源就離開駕駛室（v1.5 補 ID）",
+      "note": "b4 第 5 部分還沒做：「離開駕駛室」要看人在哪個區域（player.zone），那是 b4d 的移動限制。"
     },
     {
       "errorId": "ERR_SI03_PowerOn",

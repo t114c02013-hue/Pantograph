@@ -195,10 +195,10 @@ namespace PantographSim.Procedures
         // ---------- R1.5b b4 3c：全程監看的錯誤（天車安全等）----------
         readonly Dictionary<string, bool> globalWas = new Dictionary<string, bool>();
 
-        /// <summary>前提 key2 成立且 keys 任一條件成立，由不成立變成立時記一次（同一步同一個 ID 只記一次）。</summary>
+        /// <summary>前提 key2 成立且 keys 任一條件成立，由不成立變成立時記一次（同一步同一個 ID 只記一次）。R1.5b b4：這一步自己的 WhenCondition 規則也一起看（例 ERR_RM04_WrongSocket）。</summary>
         void WatchGlobal(RuntimeStep s)
         {
-            foreach (var r in runner.Procedure?.globalErrors ?? Array.Empty<ErrorRule>())
+            foreach (var r in (runner.Procedure?.globalErrors ?? Array.Empty<ErrorRule>()).Concat(ActiveRules(s.def).Where(x => x.trigger == ErrorTrigger.WhenCondition)))
             {
                 if (r.trigger != ErrorTrigger.WhenCondition || (r.inputMode == "desktop" && InputMode.XrActive)) continue;
                 var ctx = runner.ContextFor(s);

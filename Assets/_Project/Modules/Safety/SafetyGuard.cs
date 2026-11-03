@@ -62,7 +62,7 @@ namespace PantographSim.Safety
                     if (!terminal && !state.GetBool(SimIds.VoltageTested)) return Block(SafetyRuleKind.NoVoltageTest, req);
                     if (terminal && head && Active(SafetyRuleKind.RemoveOrder)) return Block(SafetyRuleKind.RemoveOrder, req);
                 }
-                if (req.targetId == SimIds.GroundClamp && !head && !terminal) return Block(SafetyRuleKind.GroundOrder, req);
+                if (req.targetId == SimIds.GroundClamp && !head && !terminal && Active(SafetyRuleKind.GroundOrder)) return Block(SafetyRuleKind.GroundOrder, req);   // 課程裡由 ERR_Global_GroundHangOrder 取代
             }
             return GuardResult.Allow;
         }

@@ -89,39 +89,19 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | consumable.carbon_strip | b4:p4 |
 | consumable.carbon_strip.measure_mid | b4:p4 |
 
-## 錯誤規則的觸發條件還沒做（Assets/_Project/Data/Source/ErrorRules.json 的 owner，共 44 條）
+## 錯誤規則的觸發條件還沒做（Assets/_Project/Data/Source/ErrorRules.json 的 owner，共 24 條）
 
 ErrorRuleTests.PendingTriggers_ListedInStubsDoc 檢查兩邊一致。觸發做好時把 owner 清空，再刪掉這裡那一列。
 
 | 錯誤 | owner | 嚴重度 |
 |---|---|---|
 | ERR_CSR01_IsolationIncomplete | b4:p4 | Major |
-| ERR_Crane_FastLowerEmptyHook | b4:p5 | Minor |
-| ERR_Crane_LiftWhileFixed | b4:p5 | Major |
-| ERR_Crane_NoTrialLift | b4:p5 | Major |
 | ERR_Crane_RiggedOnArm | b4:p5 | Critical |
-| ERR_Crane_RiggingNotInspected | b4:p5 | Critical |
-| ERR_Crane_SideLoad | b4:p5 | Major |
-| ERR_CSR13_WrenchRange | b4:p5 | Minor |
 | ERR_CSR13_WrongSocket | b4:p5 | Minor |
-| ERR_Global_GroundHangOrder | b4:p5 | Critical |
-| ERR_Global_GroundWithoutVoltageTest | b4:p5 | Critical |
-| ERR_Global_HarnessUnclipped | b4:p5 | Critical |
-| ERR_Global_HVDisconnectWithoutSecondGround | b4:p5 | Critical |
-| ERR_Global_NoDischargeAfterIR | b4:p5 | Major |
-| ERR_Global_RaiseUnderHook | b4:p5 | Critical |
 | ERR_Global_RaiseWithHoldDown | b4:p5 | Critical |
-| ERR_IN06_TightenBeforeAllThreaded | b4:p5 | Major |
-| ERR_IN06_WrongSocket | b4:p5 | Minor |
-| ERR_IN07_WrenchRange | b4:p5 | Minor |
 | ERR_IN07_WrongSocket | b4:p5 | Minor |
 | ERR_IN09_Misaligned | b4:p5 | Major |
-| ERR_IN09_WrenchRange | b4:p5 | Minor |
 | ERR_IN09_WrongSocket | b4:p5 | Minor |
-| ERR_IN10_NotConnected | b4:p5 | Major |
-| ERR_RM03_WrongSocket | b4:p5 | Minor |
-| ERR_RM04_WrongSocket | b4:p5 | Minor |
-| ERR_RT02_IRFail | b4:p5 | Critical |
 | ERR_SI02_RaiseSwitchUnlocked | b4:p5 | Critical |
 | ERR_SI02_TagWithoutLock | b4:p5 | Critical |
 | ERR_SI03_CylinderPowerOn | b4:p5 | Critical |

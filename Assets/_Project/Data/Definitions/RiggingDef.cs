@@ -48,6 +48,8 @@ namespace PantographSim.Data
         [Tooltip("吊物底面離落點這麼近（m）就算放下（吸附或擋住下降）")] public float seatTolerance = 0.005f;
         [Tooltip("R1.5b b4（RM_06 b）：「查看四條吊帶」的判定框大小與離吊梁的距離（m；只框吊帶中段，不擋下方吊耳）")] public Vector3 inspectBoxSize = new Vector3(1.2f, 0.4f, 1.2f);
         public float inspectBoxOffset = 0.05f;
+        [Tooltip("R1.5b b4（ERR_Crane_NoTrialLift）：試吊＝離座這個範圍內（m）停住這麼久（s），示例值")] public float trialDropMin = 0.08f, trialDropMax = 0.15f, trialStillSeconds = 3f;
+        [Tooltip("R1.5b b4（ERR_Crane_FastLowerEmptyHook）：吊鉤在台架中心這個水平距離（m）內，作業面算台架頂面")] public float standSurfaceRadius = 1.5f;
         [Tooltip("R1.5b b4（RM_05 f）：有割傷、要判「不合格」的吊帶編號（空＝四條都可用）")] public int[] defectiveSlings = new int[0];
 
         /// <summary>把 {n} 展開成 1..4。</summary>

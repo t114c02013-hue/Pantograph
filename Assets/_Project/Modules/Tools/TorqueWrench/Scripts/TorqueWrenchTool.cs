@@ -34,6 +34,14 @@ namespace PantographSim.Tools
             if (v == "+") setting = TorqueLogic.Adjust(setting, TorqueLogic.Step);
             else if (v == "-") setting = TorqueLogic.Adjust(setting, -TorqueLogic.Step);
             else if (float.TryParse(v, NumberStyles.Float, CultureInfo.InvariantCulture, out var f)) setting = TorqueLogic.Adjust(f, 0f);
+            // R1.5b b4（D39）：設定超出這支扳手的量程時刻度轉不過去，提示換扳手（ERR_*_WrenchRange，三種模式都判）
+            var range = Definition != null ? Definition.rangeNm : Vector2.zero;
+            if (range.y > range.x && (setting < range.x - 1e-4f || setting > range.y + 1e-4f))
+            {
+                State.Batch(() => { State.SetBool(Key("range_blocked"), true); State.Set(Key("message"), $"超出這支扳手的量程（{range.x:0}–{range.y:0} N·m），換另一支扳手"); });
+                return;
+            }
+            if (State.GetBool(Key("range_blocked"))) State.SetBool(Key("range_blocked"), false);
             State.SetFloat(Key("setting"), setting);
         }
 

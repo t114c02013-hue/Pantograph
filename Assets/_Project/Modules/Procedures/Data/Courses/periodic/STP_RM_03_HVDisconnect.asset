@@ -31,7 +31,28 @@ MonoBehaviour:
   requiredToolId: 
   completion:
     rid: 1000
-  errors: []
+  errors:
+  - errorId: ERR_RM03_WrongSocket
+    severity: 0
+    what: "\u5957\u7B52\u5C3A\u5BF8\u4E0D\u5C0D\uFF0C\u5957\u4E0D\u4E0A\u9019\u652F\u87BA\u6813\u3002"
+    why: "\u5957\u932F\u5C3A\u5BF8\u6703\u6ED1\u7259\u3001\u50B7\u87BA\u6813\u982D\u3002"
+    fix: "\u63DB\u4E0A\u9019\u652F\u87BA\u6813\u5C0D\u61C9\u7684\u5957\u7B52\uFF08\u4F5C\u696D\u55AE\u4E0A\u6709\u6A19\uFF09\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - part.pan_assy.hv_bolt_1.wrong_socket
+    - part.pan_assy.hv_bolt_2.wrong_socket
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: 
     why: 
@@ -58,6 +79,8 @@ MonoBehaviour:
     condition: ip.pan_head.ground_clamp.inspected&&isolation.head_clamped&&ip.roof.hv_cable_ground.clamped
     standPointId: tp.roof.base_e.n
     subId: a
+    textDesktop: 
+    when: 
   - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u6A19\u8A18\u7B46"
     why: 
     targetId: env.tool_rack.slot_9
@@ -65,6 +88,8 @@ MonoBehaviour:
     condition: tool.active=tool.marker
     standPointId: tp.roof.base_e.n
     subId: b
+    textDesktop: 
+    when: 
   - text: "\u5728\u7AEF\u5B50\u8207\u7AEF\u5B50\u5EA7\u756B\u5C0D\u4F4D\u8A18\u865F"
     why: 
     targetId: ip.pan_assy.hv_terminal
@@ -72,6 +97,8 @@ MonoBehaviour:
     condition: ip.pan_assy.hv_terminal.marked
     standPointId: tp.roof.base_e.n
     subId: c
+    textDesktop: 
+    when: 
   - text: "\u628A\u6A19\u8A18\u7B46\u6536\u56DE\u5DE5\u5177\u888B"
     why: 
     targetId: env.tool_rack.slot_9
@@ -79,6 +106,8 @@ MonoBehaviour:
     condition: rack.slot_9=on_rack
     standPointId: tp.roof.base_e.n
     subId: d
+    textDesktop: 
+    when: 
   - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u5957\u7B52\u6273\u624B"
     why: 
     targetId: env.tool_rack.slot_6
@@ -86,6 +115,8 @@ MonoBehaviour:
     condition: tool.active=tool.socket_wrench
     standPointId: tp.roof.base_e.n
     subId: e
+    textDesktop: 
+    when: 
   - text: "\u63DB\u4E0A 19 mm \u5957\u7B52"
     why: 
     targetId: "env.tool_bag.socket_case;tool.socket_wrench\uFF08\u5957\u7B52\uFF09"
@@ -93,6 +124,8 @@ MonoBehaviour:
     condition: tool.socket_wrench.size=19
     standPointId: tp.roof.base_e.n
     subId: f
+    textDesktop: 
+    when: 
   - text: "\u628A\u7AEF\u5B50\u87BA\u6813 1 \u8F49\u5230\u812B\u51FA"
     why: 
     targetId: part.pan_assy.hv_bolt_1
@@ -100,6 +133,8 @@ MonoBehaviour:
     condition: part.pan_assy.hv_bolt_1.state=Out
     standPointId: tp.roof.base_e.n
     subId: g1
+    textDesktop: 
+    when: 
   - text: "\u628A\u87BA\u6813 1 \u6536\u9032\u96F6\u4EF6\u888B"
     why: 
     targetId: env.tool_bag.bolt_pouch
@@ -107,6 +142,8 @@ MonoBehaviour:
     condition: part.pan_assy.hv_bolt_1.state=InTray
     standPointId: tp.roof.base_e.n
     subId: h1
+    textDesktop: 
+    when: 
   - text: "\u628A\u7AEF\u5B50\u87BA\u6813 2 \u8F49\u5230\u812B\u51FA"
     why: 
     targetId: part.pan_assy.hv_bolt_2
@@ -114,6 +151,8 @@ MonoBehaviour:
     condition: part.pan_assy.hv_bolt_2.state=Out
     standPointId: tp.roof.base_e.n
     subId: g2
+    textDesktop: 
+    when: 
   - text: "\u628A\u87BA\u6813 2 \u6536\u9032\u96F6\u4EF6\u888B"
     why: 
     targetId: env.tool_bag.bolt_pouch
@@ -121,6 +160,8 @@ MonoBehaviour:
     condition: part.pan_assy.hv_bolt_2.state=InTray
     standPointId: tp.roof.base_e.n
     subId: h2
+    textDesktop: 
+    when: 
   - text: "\u53D6\u4E0B\u7AEF\u5B50\uFF0C\u653E\u5230\u505C\u653E\u4F4D"
     why: 
     targetId: ip.pan_assy.hv_terminal
@@ -128,6 +169,8 @@ MonoBehaviour:
     condition: ip.pan_assy.hv_terminal.state=Removed
     standPointId: tp.roof.base_e.n
     subId: i
+    textDesktop: 
+    when: 
   presetDone: 0
   side: 
   presetStates: []

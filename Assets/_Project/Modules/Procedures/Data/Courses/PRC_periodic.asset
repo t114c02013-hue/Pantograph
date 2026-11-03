@@ -382,6 +382,27 @@ MonoBehaviour:
     severityBeforeK3: 
     oncePerRun: 0
     inputMode: 
+  - errorId: ERR_Global_GroundHangOrder
+    severity: 2
+    what: "\u639B\u63A5\u5730\u7684\u9806\u5E8F\u53CD\u4E86\uFF1A\u63A5\u5730\u7AEF\u9084\u6C92\u63A5\u5C31\u5148\u639B\u8A2D\u5099\u7AEF\uFF08\u5F13\u982D\u3001\u96FB\u7E9C\u7AEF\u5B50\uFF09\u3002"
+    why: "\u8A2D\u5099\u7AEF\u5982\u679C\u9084\u5E36\u96FB\uFF0C\u63A5\u5730\u68D2\u53E6\u4E00\u7AEF\u6C92\u63A5\u5730\uFF0C\u96FB\u6D41\u6703\u7D93\u904E\u4F60\u3002"
+    fix: "\u5148\u593E\u63A5\u5730\u7AEF\uFF08\u5E73\u53F0\u7AEF\u5B50\u3001\u8ECA\u9AD4\u63A5\u5730\u5EA7\uFF09\uFF0C\u518D\u639B\u8A2D\u5099\u7AEF\u3002"
+    trigger: 9
+    key: 
+    key2: 
+    keys:
+    - ip.pan_head.ground_clamp|!isolation.terminal_clamped&&!isolation.head_clamped&&!tool.megger.charged
+    - ip.roof.hv_cable_ground|!ip.roof.carbody_ground.clamped&&!ip.roof.hv_cable_ground.clamped
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   - errorId: ERR_Global_GroundRemovedWhileOnRoof
     severity: 2
     what: "\u8ECA\u9802\u639B\u9EDE\u9084\u6263\u8457\uFF08\u4EBA\u5728\u8ECA\u9802\uFF09\u6642\u62C6
@@ -405,6 +426,130 @@ MonoBehaviour:
     severityBeforeK3: 
     oncePerRun: 0
     inputMode: 
+  - errorId: ERR_Global_GroundWithoutVoltageTest
+    severity: 2
+    what: "\u9084\u6C92\u9A57\u96FB\u5C31\u593E\u63A5\u5730\u7AEF\u5B50\u6216\u639B\u5F13\u982D\u3002"
+    why: "\u540A\u56DE\u88DD\u597D\u4E4B\u5F8C\u8981\u91CD\u65B0\u78BA\u8A8D\u7121\u96FB\uFF0C\u820A\u7684\u9A57\u96FB\u7D50\u679C\u4E0D\u7B97\u3002"
+    fix: "\u5148\u7528\u9A57\u96FB\u687F\u81EA\u6AA2\u3001\u9A57\u96FB\uFF08IN_04b
+      b\u3001c\uFF09\uFF0C\u518D\u63A5\u5730\u3002"
+    trigger: 9
+    key: 
+    key2: 
+    keys:
+    - ip.depot.ground_terminal|procedure.current=STP_IN_04b_RegroundPan&&procedure.sub_index<=2&&!isolation.terminal_clamped
+    - ip.pan_head.ground_clamp|procedure.current=STP_IN_04b_RegroundPan&&procedure.sub_index<=2&&!isolation.head_clamped
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
+  - errorId: ERR_Global_HarnessUnclipped
+    severity: 2
+    what: "\u63DB\u6263\u6642\u6709\u4E00\u523B\u5169\u500B\u639B\u9EDE\u90FD\u6C92\u6263\u3002"
+    why: "\u90A3\u4E00\u523B\u6ED1\u5012\u5C31\u6C92\u6709\u9632\u589C\u4FDD\u8B77\u3002"
+    fix: "\u5148\u6263\u4E0A\u65B0\u7684\u639B\u9EDE\uFF0C\u518D\u89E3\u958B\u820A\u7684\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - harness.unhooked
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
+  - errorId: ERR_Global_HVDisconnectWithoutSecondGround
+    severity: 2
+    what: "\u7B2C\u4E8C\u652F\u63A5\u5730\uFF08\u8ECA\u9802\u77ED\u63A5\u5730\u7DDA\uFF09\u6C92\u6709\u639B\u8457\u5C31\u62C6\u9AD8\u58D3\u96FB\u7E9C\u3002"
+    why: "\u62C6\u4E0B\u96FB\u7E9C\u5F8C\u5F13\u9AD4\u548C\u96FB\u7E9C\u5206\u958B\uFF0C\u5169\u908A\u90FD\u8981\u5404\u81EA\u63A5\u5730\uFF08\u5148\u639B\u5F8C\u62C6\uFF09\u3002"
+    fix: "\u5148\u7528\u77ED\u63A5\u5730\u7DDA\u63A5\u597D\u96FB\u7E9C\u7AEF\u5B50\uFF08RM_00\uFF09\uFF0C\u5F13\u982D\u7684\u63A5\u5730\u68D2\u4E5F\u8981\u639B\u8457\uFF0C\u518D\u62C6\u96FB\u7E9C\u3002"
+    trigger: 9
+    key: 
+    key2: 
+    keys:
+    - ip.pan_assy.hv_terminal|ip.pan_assy.hv_terminal.state=Installed&&!ip.roof.hv_cable_ground.clamped
+    - ip.pan_assy.hv_terminal|ip.pan_assy.hv_terminal.state=Installed&&!isolation.head_clamped
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
+  - errorId: ERR_Global_NoDischargeAfterIR
+    severity: 1
+    what: "\u7D55\u7DE3\u6E2C\u8A66\u5F8C\u6C92\u6709\u653E\u96FB\u5C31\u6E96\u5099\u5FA9\u96FB\u3002"
+    why: "\u52A0\u58D3\u91CF\u6E2C\u5F8C\u5F13\u9AD4\u9084\u5E36\u8457\u96FB\u3002"
+    fix: "\u7528\u63A5\u5730\u687F\u78B0\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u653E\u96FB\u6EFF
+      5 \u79D2\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - procedure.current=STP_WC_04_Unlock&&tool.megger.charged
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
+  - errorId: ERR_Global_RaiseUnderHook
+    severity: 2
+    what: "\u540A\u9264\u9084\u5728\u5F13\u4E0A\u65B9 3 m \u4EE5\u5167\u5C31\u5347\u5F13\u3002"
+    why: "\u5347\u8D77\u4F86\u7684\u5F13\u6703\u649E\u5230\u540A\u6881\u6216\u540A\u9264\u3002"
+    fix: "\u5148\u628A\u540A\u9264\u79FB\u958B\u3001\u5347\u5230\u9AD8\u8655\uFF0C\u518D\u5347\u5F13\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - ctrl.lift.cmd=Up&&part.crane.beam_above_pan_m<=3&&part.crane.hook_cog_offset_cm<=100
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
+  - errorId: ERR_IN10_NotConnected
+    severity: 1
+    what: "\u5347\u5F13\u63A7\u5236\u7DDA\u6C92\u6709\u63A5\u56DE\u5C31\u5347\u5F13\u8A66\u9A57\u3002"
+    why: "\u63A7\u5236\u7DDA\u6C92\u63A5\uFF0C\u5347\u5F13\u8A66\u9A57\u6642\u5F13\u4E0D\u6703\u52D5\uFF0C\u8981\u518D\u4E0A\u8ECA\u9802\u3002"
+    fix: "IN_10 \u5148\u53D6\u4E0B\u9632\u5875\u84CB\u3001\u63D2\u56DE\u63A7\u5236\u7DDA\u63A5\u982D\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - ctrl.lift.cmd=Up&&ip.pan_assy.ctrl_connector.state=Removed
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 1
+    inputMode: 
   - errorId: ERR_IN11_StrapLeft
     severity: 1
     what: "\u964D\u5F13\u56FA\u5B9A\u5E36\u9084\u88DD\u5728\u96C6\u96FB\u5F13\u4E0A\u5C31\u96E2\u958B\u8ECA\u9802\u3002"
@@ -425,6 +570,26 @@ MonoBehaviour:
     blocks: 0
     severityBeforeK3: 
     oncePerRun: 1
+    inputMode: 
+  - errorId: ERR_RT02_IRFail
+    severity: 2
+    what: "\u7D55\u7DE3\u96FB\u963B\u4E0D\u5408\u683C\uFF08< 100 M\u03A9\uFF09\u9084\u8981\u7533\u8ACB\u5FA9\u96FB\u3002"
+    why: "\u7D55\u7DE3\u4E0D\u826F\u7684\u5F13\u9AD4\u5E36\u96FB\u6703\u6F0F\u96FB\u3001\u9583\u7D61\u3002"
+    fix: "\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\uFF0C\u6E05\u6F54\u6216\u66F4\u63DB\u5F8C\u91CD\u91CF\uFF0C\u5408\u683C\u624D\u80FD\u5FA9\u96FB\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - procedure.current=STP_WC_04_Unlock&&tool.megger.measured&&tool.megger.reading<=99.99
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
     inputMode: 
   - errorId: ERR_RT02_LeadRemovedBeforeDischarge
     severity: 1

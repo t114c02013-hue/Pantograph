@@ -65,7 +65,7 @@ namespace PantographSim.Tests
         public void Tick(float dt, string cmd, bool fast = false)
         {
             s.Set(SimIds.CraneCmd, cmd); s.SetBool(SimIds.CraneFast, fast);
-            rig.Tick(s); crane.Tick(s, dt); Physics.SyncTransforms();
+            rig.Tick(s, dt); crane.Tick(s, dt); Physics.SyncTransforms();
         }
 
         /// <summary>按住 cmd 直到 until 成立（或逾時）；回傳是否成立。</summary>

@@ -32,9 +32,9 @@ namespace PantographSim.Parts.Mechanism
         [SerializeField] Renderer[] standLights = new Renderer[0], roofLights = new Renderer[0];
         [SerializeField] BoxCollider probe;
         [SerializeField] Transform homeParent;   // 放下（吸附）後回到原本的父物件
-        [Tooltip("R1.5b b4：車頂斷面（吊梁離車頂高度用）")] [SerializeField] RoofSceneDef roof;
+        [Tooltip("R1.5b b4：車頂斷面（吊梁離車頂高度用）")] [SerializeField] RoofSceneDef roofScene;
 
-        public void SetRoof(RoofSceneDef r) => roof = r;
+        public void SetRoof(RoofSceneDef r) => roofScene = r;
         [SerializeField] Color lightOk = new Color(0.2f, 0.9f, 0.3f), lightBad = new Color(0.95f, 0.2f, 0.15f);
 
         bool subscribed;
@@ -74,7 +74,13 @@ namespace PantographSim.Parts.Mechanism
             {
                 if (State(s) == Lifted) return false;   // 懸空時不能卸吊帶
                 var k = targetId + ".state";
-                s.Set(k, s.Get(k) == "Rigged" ? "Free" : "Rigged");
+                bool rig = s.Get(k) != "Rigged";
+                s.Batch(() =>
+                {
+                    s.Set(k, rig ? "Rigged" : "Free");
+                    // R1.5b b4（ERR_Crane_RiggingNotInspected）：掛上判為不合格的吊帶（吊耳 n 配吊帶 n）
+                    if (rig && s.Get("env.sling_" + targetId.Substring(targetId.LastIndexOf('_') + 1) + ".verdict") == "ng") s.SetBool("part.crane.failed_sling_rigged", true);
+                });
                 return true;
             }
             if (targetId == HookId) { s.SetBool(LatchedKey, !s.GetBool(LatchedKey)); return true; }
@@ -109,7 +115,12 @@ namespace PantographSim.Parts.Mechanism
         }
 
         /// <summary>一幀（EditMode 測試直接呼叫）。</summary>
-        public void Tick(ISimState s)
+        public void Tick(ISimState s) => Tick(s, Time.deltaTime);
+
+        float pullFixed;
+
+        /// <summary>一幀；dt＝這一幀的秒數（拉著固定件起吊的累計秒數用）。</summary>
+        public void Tick(ISimState s, float dt)
         {
             if (def == null) return;
             string st = State(s);
@@ -132,11 +143,17 @@ namespace PantographSim.Parts.Mechanism
                 if (missing.Count == 0 && (st == Rigged || st == OnStand) && crane != null) { crane.Attach(transform, probe != null ? new Bounds(probe.center, probe.size) : new Bounds()); st = Lifted; s.SetBool("pan_assy.reseated", false); }
                 else { upBlocked = true; block = string.Join("、", missing); }
             }
+            // R1.5b b4（ERR_Crane_LiftWhileFixed）：固定件（底座螺栓、高壓電纜、控制線）還沒拆就按上升的累計秒數
+            pullFixed = up && anyRigged && upBlocked && !FixingsReleased(s) && !reseatedOrFastened(st) ? pullFixed + dt : 0f;
+            float pf = Mathf.Floor(pullFixed * 10f) / 10f;
+            if (!s.Has("part.crane.pull_fixed_s") || Mathf.Abs(s.GetFloat("part.crane.pull_fixed_s") - pf) >= 0.1f - 1e-4f) s.SetFloat("part.crane.pull_fixed_s", pf);
             var (pins, dist, height, roof) = Target();
             WriteMeasures(s, st, dist, roof);
             if (st == Lifted)
             {
                 s.SetFloat(DropDistanceKey, Mathf.Round(height * 1000f) / 1000f);
+                // R1.5b b4（ERR_Crane_NoTrialLift）：離座 trialDrop 範圍內停住 trialStillSeconds＝試吊過（落地後清掉，下一次起吊要再試吊）
+                if (!s.GetBool("part.crane.trial_ok") && height >= def.trialDropMin - 1e-4f && height <= def.trialDropMax + 1e-4f && s.GetFloat("part.crane.still_s") >= def.trialStillSeconds - 1e-4f) s.SetBool("part.crane.trial_ok", true);
                 if (down && height <= def.seatTolerance)   // 往下放到落點才算放下（剛吊起時底面也貼著支撐）
                 {
                     if (RiggingLogic.AllWithin(dist, def.snapRadius)) { Seat(pins); st = roof ? Mounted : OnStand; if (roof) s.SetBool("pan_assy.reseated", true); }
@@ -144,6 +161,7 @@ namespace PantographSim.Parts.Mechanism
                 }
             }
             else if (s.Has(DropDistanceKey)) s.Set(DropDistanceKey, "");
+            if (st != Lifted && s.Get("part.crane.trial_ok") != "") s.Set("part.crane.trial_ok", "");
             if (probe != null) probe.enabled = st == Lifted;
             Lights(st == Lifted && height <= def.indicatorRange, roof, dist);
             s.Batch(() =>
@@ -175,6 +193,9 @@ namespace PantographSim.Parts.Mechanism
                     float beamBottom = rs.Min(r => r.bounds.min.y);
                     var hp = crane.HookBlock.position;
                     F("part.crane.beam_above_roof_m", beamBottom - RoofY(hp.x), 0.01f);
+                    // 吊梁離作業面（吊鉤在台架附近＝台架頂面，否則＝車頂）：ERR_Crane_FastLowerEmptyHook
+                    bool overStand = roofScene != null && new Vector2(hp.x - roofScene.standCenterXZ.x, hp.z - roofScene.standCenterXZ.y).magnitude <= def.standSurfaceRadius;
+                    F("part.crane.beam_above_surface_m", beamBottom - (overStand ? roofScene.StandTopY : RoofY(hp.x)), 0.01f);
                     var head = transform.Find("PAN_Head") ?? transform;
                     var hr = head.GetComponentsInChildren<Renderer>();
                     if (hr.Length > 0) F("part.crane.beam_above_pan_m", beamBottom - hr.Max(r => r.bounds.max.y), 0.01f);
@@ -187,7 +208,9 @@ namespace PantographSim.Parts.Mechanism
         }
 
         /// <summary>車頂面高度（RoofSceneDef 的車頂斷面）。</summary>
-        float RoofY(float x) => roof != null ? roof.RoofSurfaceY(x) : 0f;
+        float RoofY(float x) => roofScene != null ? roofScene.RoofSurfaceY(x) : 0f;
+
+        static bool reseatedOrFastened(string st) => st == Fastened || st == Lifted;
 
         static bool FixingsReleased(ISimState s) =>
             s.Get("ip.pan_assy.ctrl_connector.state") == "Removed" && s.Get("ip.pan_assy.hv_terminal.state") == "Removed" &&

@@ -48,6 +48,7 @@ MonoBehaviour:
     count: 4
     blocks: 0
     severityBeforeK3: 
+    oncePerRun: 0
     inputMode: 
   - errorId: ERR_IN07_Under
     severity: 2
@@ -67,6 +68,7 @@ MonoBehaviour:
     count: 4
     blocks: 0
     severityBeforeK3: Major
+    oncePerRun: 0
     inputMode: 
   - errorId: ERR_IN07_Over
     severity: 1
@@ -86,6 +88,7 @@ MonoBehaviour:
     count: 4
     blocks: 0
     severityBeforeK3: 
+    oncePerRun: 0
     inputMode: 
   - errorId: ERR_IN07_Order
     severity: 1
@@ -104,6 +107,7 @@ MonoBehaviour:
     count: 0
     blocks: 0
     severityBeforeK3: 
+    oncePerRun: 0
     inputMode: 
   - errorId: ERR_IN07_MarkMissing
     severity: 1
@@ -122,6 +126,28 @@ MonoBehaviour:
     count: 4
     blocks: 0
     severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
+  - errorId: ERR_IN07_WrenchRange
+    severity: 0
+    what: "\u8A2D\u5B9A\u7684\u626D\u529B\u8D85\u51FA\u9019\u652F\u6273\u624B\u7684\u91CF\u7A0B\u3002"
+    why: "\u91CF\u7A0B\u5916\u7684\u6273\u624B\u8B80\u4E0D\u6E96\uFF0C\u4E5F\u53EF\u80FD\u640D\u58DE\u3002"
+    fix: "\u63DB\u91CF\u7A0B\u6DB5\u84CB\u9019\u500B\u626D\u529B\u7684\u6273\u624B\uFF08\u5927\uFF0F\u5C0F\u626D\u529B\u6273\u624B\uFF09\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - tool.torque_wrench.range_blocked
+    - tool.torque_wrench_l.range_blocked
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
     inputMode: 
   hints:
     text: 
@@ -146,6 +172,8 @@ MonoBehaviour:
     condition: rack.slot_6=on_rack
     standPointId: tp.roof.base_w
     subId: a
+    textDesktop: 
+    when: 
   - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u5927\u626D\u529B\u6273\u624B"
     why: 
     targetId: env.tool_rack.slot_13
@@ -153,6 +181,8 @@ MonoBehaviour:
     condition: tool.active=tool.torque_wrench_l
     standPointId: tp.roof.base_w
     subId: b
+    textDesktop: 
+    when: 
   - text: "\u5F9E\u5957\u7B52\u76D2\u62FF 24 mm \u5957\u7B52\u88DD\u4E0A\u5927\u626D\u529B\u6273\u624B\uFF0C\u4E26\u628A\u626D\u529B\u8A2D\u70BA
       100 N\xB7m"
     why: 
@@ -161,6 +191,8 @@ MonoBehaviour:
     condition: tool.torque_wrench_l.setting=100
     standPointId: tp.roof.base_w
     subId: c
+    textDesktop: 
+    when: 
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 1 \u4E0A\u626D\u529B\u5230\u5580\u8072\uFF0C\u4E26\u756B\u9632\u9B06\u6A19\u8A18"
     why: 
     targetId: part.pan_base.bolt_1
@@ -168,6 +200,8 @@ MonoBehaviour:
     condition: part.pan_base.bolt_1.state=Torqued&&part.pan_base.bolt_1.marked
     standPointId: tp.roof.base_w.s
     subId: d1
+    textDesktop: 
+    when: 
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 3 \u4E0A\u626D\u529B\u5230\u5580\u8072\uFF0C\u4E26\u756B\u9632\u9B06\u6A19\u8A18"
     why: 
     targetId: part.pan_base.bolt_3
@@ -175,6 +209,8 @@ MonoBehaviour:
     condition: part.pan_base.bolt_3.state=Torqued&&part.pan_base.bolt_3.marked
     standPointId: tp.roof.base_e.n
     subId: d3
+    textDesktop: 
+    when: 
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 2 \u4E0A\u626D\u529B\u5230\u5580\u8072\uFF0C\u4E26\u756B\u9632\u9B06\u6A19\u8A18"
     why: 
     targetId: part.pan_base.bolt_2
@@ -182,6 +218,8 @@ MonoBehaviour:
     condition: part.pan_base.bolt_2.state=Torqued&&part.pan_base.bolt_2.marked
     standPointId: tp.roof.base_e.s
     subId: d2
+    textDesktop: 
+    when: 
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 4 \u4E0A\u626D\u529B\u5230\u5580\u8072\uFF0C\u4E26\u756B\u9632\u9B06\u6A19\u8A18"
     why: 
     targetId: part.pan_base.bolt_4
@@ -189,6 +227,8 @@ MonoBehaviour:
     condition: part.pan_base.bolt_4.state=Torqued&&part.pan_base.bolt_4.marked
     standPointId: tp.roof.base_w.n
     subId: d4
+    textDesktop: 
+    when: 
   presetDone: 0
   side: 
   presetStates: []

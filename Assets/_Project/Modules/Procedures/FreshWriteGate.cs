@@ -26,7 +26,7 @@ namespace PantographSim.Procedures
         {
             foreach (var raw in (condition ?? "").Split(new[] { "&&" }, System.StringSplitOptions.RemoveEmptyEntries))
             {
-                var p = raw.Trim();
+                var p = raw.Trim().TrimStart('!');
                 int op = p.IndexOf(">=") > 0 ? p.IndexOf(">=") : p.IndexOf("<=");
                 if (op > 0)
                 {

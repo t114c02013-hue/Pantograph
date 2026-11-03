@@ -6,6 +6,7 @@ namespace PantographSim.Core
     /// 小步驟清單的條件判斷（UI 顯示 ☐/☑ 用）。條件格式：
     /// 「鍵」→ 值為 true 或非空且不是 false；「鍵=值」→ 相等（值可為空字串）；
     /// 「鍵>=數字」→ 數值不小於；「鍵&lt;=數字」→ 數值不大於。比較的右邊也可以是另一個鍵（例：距離&lt;=容許值鍵）。
+    /// R1.5b b4：「!鍵」→ 沒有寫過、是空的或是 false（錯誤規則用，例 BlockWhen「端子還沒夾」）。
     /// </summary>
     public static class ChecklistEval
     {
@@ -18,6 +19,7 @@ namespace PantographSim.Core
                     if (!Done(s, part.Trim())) return false;
                 return true;
             }
+            if (condition.StartsWith("!")) return !Done(s, condition.Substring(1).Trim());
             int ge = condition.IndexOf(">=");
             if (ge > 0)
             {

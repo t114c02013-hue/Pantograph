@@ -28,7 +28,53 @@ MonoBehaviour:
   requiredToolId: 
   completion:
     rid: 1000
-  errors: []
+  errors:
+  - errorId: ERR_IN06_WrongSocket
+    severity: 0
+    what: "\u5957\u7B52\u5C3A\u5BF8\u4E0D\u5C0D\uFF0C\u5957\u4E0D\u4E0A\u9019\u652F\u87BA\u6813\u3002"
+    why: "\u5957\u932F\u5C3A\u5BF8\u6703\u6ED1\u7259\u3001\u50B7\u87BA\u6813\u982D\u3002"
+    fix: "\u63DB\u4E0A\u9019\u652F\u87BA\u6813\u5C0D\u61C9\u7684\u5957\u7B52\uFF08\u4F5C\u696D\u55AE\u4E0A\u6709\u6A19\uFF09\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - part.pan_base.bolt_1.wrong_socket
+    - part.pan_base.bolt_2.wrong_socket
+    - part.pan_base.bolt_3.wrong_socket
+    - part.pan_base.bolt_4.wrong_socket
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
+  - errorId: ERR_IN06_TightenBeforeAllThreaded
+    severity: 1
+    what: "\u56DB\u652F\u5E95\u5EA7\u87BA\u6813\u9084\u6C92\u5168\u90E8\u653E\u56DE\u5B54\u4F4D\u5C31\u958B\u59CB\u9396\u3002"
+    why: "\u5148\u9396\u4E00\u652F\u6703\u628A\u5E95\u5EA7\u62C9\u6B6A\uFF0C\u5176\u4ED6\u87BA\u6813\u5C0D\u4E0D\u4E0A\u5B54\u3002"
+    fix: "\u56DB\u652F\u90FD\u5148\u7528\u624B\u653E\u56DE\u5B54\u4F4D\uFF0C\u518D\u4F9D\u9806\u5E8F\u9810\u9396\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - part.pan_base.bolt_1.tighten_before_all
+    - part.pan_base.bolt_2.tighten_before_all
+    - part.pan_base.bolt_3.tighten_before_all
+    - part.pan_base.bolt_4.tighten_before_all
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: 
     why: 
@@ -54,6 +100,8 @@ MonoBehaviour:
     condition: tool.active=tool.socket_wrench
     standPointId: tp.roof.base_e
     subId: a
+    textDesktop: 
+    when: 
   - text: "\u63DB\u4E0A 24 mm \u5957\u7B52"
     why: 
     targetId: "env.tool_bag.socket_case;tool.socket_wrench\uFF08\u5957\u7B52\uFF09"
@@ -61,6 +109,8 @@ MonoBehaviour:
     condition: tool.socket_wrench.size=24
     standPointId: tp.roof.base_e
     subId: b
+    textDesktop: 
+    when: 
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 2 \u5F9E\u96F6\u4EF6\u888B\u62FF\u51FA\uFF0C\u7528\u624B\u8F49\u5165\u5230\u5165\u7259"
     why: 
     targetId: part.pan_base.bolt_2
@@ -68,6 +118,8 @@ MonoBehaviour:
     condition: part.pan_base.bolt_2.state=Placed
     standPointId: tp.roof.base_e
     subId: c2
+    textDesktop: 
+    when: 
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 3 \u5F9E\u96F6\u4EF6\u888B\u62FF\u51FA\uFF0C\u7528\u624B\u8F49\u5165\u5230\u5165\u7259"
     why: 
     targetId: part.pan_base.bolt_3
@@ -75,6 +127,8 @@ MonoBehaviour:
     condition: part.pan_base.bolt_3.state=Placed
     standPointId: tp.roof.base_e
     subId: c3
+    textDesktop: 
+    when: 
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 1 \u5F9E\u96F6\u4EF6\u888B\u62FF\u51FA\uFF0C\u7528\u624B\u8F49\u5165\u5230\u5165\u7259"
     why: 
     targetId: part.pan_base.bolt_1
@@ -82,6 +136,8 @@ MonoBehaviour:
     condition: part.pan_base.bolt_1.state=Placed
     standPointId: tp.roof.base_w
     subId: c1
+    textDesktop: 
+    when: 
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 4 \u5F9E\u96F6\u4EF6\u888B\u62FF\u51FA\uFF0C\u7528\u624B\u8F49\u5165\u5230\u5165\u7259"
     why: 
     targetId: part.pan_base.bolt_4
@@ -89,6 +145,8 @@ MonoBehaviour:
     condition: part.pan_base.bolt_4.state=Placed
     standPointId: tp.roof.base_w
     subId: c4
+    textDesktop: 
+    when: 
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 1 \u9396\u5230\u8CBC\u5408"
     why: 
     targetId: part.pan_base.bolt_1
@@ -96,6 +154,8 @@ MonoBehaviour:
     condition: part.pan_base.bolt_1.state=Snug
     standPointId: tp.roof.base_w
     subId: d1
+    textDesktop: 
+    when: 
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 3 \u9396\u5230\u8CBC\u5408"
     why: 
     targetId: part.pan_base.bolt_3
@@ -103,6 +163,8 @@ MonoBehaviour:
     condition: part.pan_base.bolt_3.state=Snug
     standPointId: tp.roof.base_e
     subId: d3
+    textDesktop: 
+    when: 
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 2 \u9396\u5230\u8CBC\u5408"
     why: 
     targetId: part.pan_base.bolt_2
@@ -110,6 +172,8 @@ MonoBehaviour:
     condition: part.pan_base.bolt_2.state=Snug
     standPointId: tp.roof.base_e
     subId: d2
+    textDesktop: 
+    when: 
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 4 \u9396\u5230\u8CBC\u5408"
     why: 
     targetId: part.pan_base.bolt_4
@@ -117,6 +181,8 @@ MonoBehaviour:
     condition: part.pan_base.bolt_4.state=Snug
     standPointId: tp.roof.base_w
     subId: d4
+    textDesktop: 
+    when: 
   presetDone: 0
   side: 
   presetStates: []

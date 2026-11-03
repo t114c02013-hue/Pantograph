@@ -71,6 +71,27 @@ MonoBehaviour:
   requireFreshWrite: 1
   autoCompleteAllowed: []
   globalErrors:
+  - errorId: ERR_Global_GroundHangOrder
+    severity: 2
+    what: "\u639B\u63A5\u5730\u7684\u9806\u5E8F\u53CD\u4E86\uFF1A\u63A5\u5730\u7AEF\u9084\u6C92\u63A5\u5C31\u5148\u639B\u8A2D\u5099\u7AEF\uFF08\u5F13\u982D\u3001\u96FB\u7E9C\u7AEF\u5B50\uFF09\u3002"
+    why: "\u8A2D\u5099\u7AEF\u5982\u679C\u9084\u5E36\u96FB\uFF0C\u63A5\u5730\u68D2\u53E6\u4E00\u7AEF\u6C92\u63A5\u5730\uFF0C\u96FB\u6D41\u6703\u7D93\u904E\u4F60\u3002"
+    fix: "\u5148\u593E\u63A5\u5730\u7AEF\uFF08\u5E73\u53F0\u7AEF\u5B50\u3001\u8ECA\u9AD4\u63A5\u5730\u5EA7\uFF09\uFF0C\u518D\u639B\u8A2D\u5099\u7AEF\u3002"
+    trigger: 9
+    key: 
+    key2: 
+    keys:
+    - ip.pan_head.ground_clamp|!isolation.terminal_clamped&&!isolation.head_clamped&&!tool.megger.charged
+    - ip.roof.hv_cable_ground|!ip.roof.carbody_ground.clamped&&!ip.roof.hv_cable_ground.clamped
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   - errorId: ERR_Global_GroundRemovedWhileOnRoof
     severity: 2
     what: "\u8ECA\u9802\u639B\u9EDE\u9084\u6263\u8457\uFF08\u4EBA\u5728\u8ECA\u9802\uFF09\u6642\u62C6
@@ -84,6 +105,26 @@ MonoBehaviour:
     keys:
     - ip.pan_head.ground_clamp|harness.roof&&isolation.head_clamped
     - ip.depot.ground_terminal|harness.roof&&isolation.terminal_clamped
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
+  - errorId: ERR_Global_HarnessUnclipped
+    severity: 2
+    what: "\u63DB\u6263\u6642\u6709\u4E00\u523B\u5169\u500B\u639B\u9EDE\u90FD\u6C92\u6263\u3002"
+    why: "\u90A3\u4E00\u523B\u6ED1\u5012\u5C31\u6C92\u6709\u9632\u589C\u4FDD\u8B77\u3002"
+    fix: "\u5148\u6263\u4E0A\u65B0\u7684\u639B\u9EDE\uFF0C\u518D\u89E3\u958B\u820A\u7684\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - harness.unhooked
     value: 
     whenAnswer: 
     min: 0
