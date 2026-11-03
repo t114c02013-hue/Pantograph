@@ -616,6 +616,7 @@ namespace PantographSim.Editor
 
             // 螺栓盤：共用車頂站點的 +X（R）／−X（L）boltTrayOffset，盤面高 boltTrayHeight；|X| 不能超過可走寬度
             float walkHalf = d.carBodyHalfWidth - d.roofEdgeNoWalk;
+            var courseAnchors = Child(env, "CourseAnchors");   // R1.5b b4：課程擺放（CourseDef.placements）用的錨點
             foreach (var (side, sgn) in new[] { ("R", 1f), ("L", -1f) })
             {
                 float x = roofStation.x + sgn * d.boltTrayOffset;
@@ -625,6 +626,7 @@ namespace PantographSim.Editor
                 // 0.25 × 0.18 m、4 格（B 段 2.2）
                 var bt = SliceModelBuilder.Prim(PrimitiveType.Cube, "BoltTray_" + side, env, Vector3.zero, new Vector3(0.25f, 0.024f, 0.18f), mats["tray"]);
                 bt.transform.position = top + new Vector3(0, 0.012f, 0);
+                Anchor(courseAnchors, "Anchor_BoltTray_Roof_" + side, bt.transform.position, Vector3.zero);   // 日常更換：車頂
                 for (int k = 1; k < 4; k++)
                     Object.DestroyImmediate(SliceModelBuilder.Prim(PrimitiveType.Cube, "Divider" + k, bt.transform, new Vector3(-0.5f + 0.25f * k, 0.75f, 0), new Vector3(0.02f, 0.5f, 0.95f), mats["steel"]).GetComponent<Collider>());
                 var icons = Enumerable.Range(0, 4).Select(i =>
@@ -720,6 +722,9 @@ namespace PantographSim.Editor
             tray.gameObject.AddComponent<InteractionPointMarker>().Configure("env.panto_stand.tool_tray", "台架工具盤");
             res.ids["env.panto_stand.tool_tray"] = tray;
             Anchor(standP.anchors, "Anchor_StandTop", new Vector3(sc.x, d.StandTopY, sc.z), Vector3.forward);
+            // R1.5b b4：定期檢修的螺栓盤放在台架外框頂面、靠 tp.stand.s 的一邊（L 在 −X、R 在 +X；位置寫在 RoofSceneDef）
+            foreach (var (side, sgn) in new[] { ("L", -1f), ("R", 1f) })
+                Anchor(standP.anchors, "Anchor_BoltTray_Stand_" + side, new Vector3(fc.x + sgn * d.boltTrayStandOffsetX, gy + d.standFrameTopAboveGround + 0.012f, fc.z - d.standSizeXZ.y / 2f + d.boltTrayStandInsetZ), Vector3.zero);
             foreach (var n in standVis.GetComponentsInChildren<Transform>(true).Where(x => x.name.StartsWith("StandSeat_")))
                 Anchor(standP.anchors, "Anchor_" + n.name, n.position, Vector3.zero);
             res.equipment.Add(standP.root);

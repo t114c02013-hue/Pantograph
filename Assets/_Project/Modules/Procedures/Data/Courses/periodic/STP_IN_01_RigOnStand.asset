@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
-  m_Name: STP_IN_01_RigOnStand
+  m_Name: _import_tmp
   m_EditorClassIdentifier: 
   stepId: STP_IN_01_RigOnStand
   title: "\u53F0\u67B6\u4E0A\u639B\u540A\u5E36"
@@ -34,7 +34,7 @@ MonoBehaviour:
     text: 
     why: 
     checklist:
-    - "\u6309\u4F4F\u6309\u9375\uFF0C\u628A\u540A\u9264\u79FB\u5230\u53F0\u67B6\u4E0A\u65B9\u4E26\u964D\u4E0B|part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=0.6&&part.crane.beam_above_pan_m<=1.0"
+    - "\u6309\u4F4F\u6309\u9375\uFF0C\u628A\u540A\u9264\u79FB\u5230\u53F0\u67B6\u4E0A\u65B9\u4E26\u964D\u4E0B|part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=crane.rig_height_lower_m&&part.crane.beam_above_pan_m<=crane.rig_height_upper_m"
     - "\u628A\u540A\u5E36 1 \u639B\u4E0A\u540A\u8033 1|ip.pan_assy.lift_point_1.state=Rigged"
     - "\u628A\u540A\u5E36 2 \u639B\u4E0A\u540A\u8033 2|ip.pan_assy.lift_point_2.state=Rigged"
     - "\u628A\u540A\u5E36 3 \u639B\u4E0A\u540A\u8033 3|ip.pan_assy.lift_point_3.state=Rigged"
@@ -50,7 +50,7 @@ MonoBehaviour:
     why: 
     targetId: env.crane_pendant
     toolId: 
-    condition: part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=0.6&&part.crane.beam_above_pan_m<=1.0
+    condition: part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=crane.rig_height_lower_m&&part.crane.beam_above_pan_m<=crane.rig_height_upper_m
     standPointId: tp.stand.w
     subId: a
   - text: "\u628A\u540A\u5E36 1 \u639B\u4E0A\u540A\u8033 1"

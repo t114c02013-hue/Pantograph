@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: _import_tmp
   m_EditorClassIdentifier: 
   procedureId: PRC_periodic
-  title: periodic
+  title: "\u96C6\u96FB\u5F13\u5B9A\u671F\u6AA2\u4FEE"
   goal: 
   safetyPoints: []
   steps:
@@ -93,7 +93,11 @@ MonoBehaviour:
     sideLabels:
     - "\u8098\u5074\u6ED1\u677F"
     - "\u5916\u5074\u6ED1\u677F"
-  onPass: []
+  onPass:
+  - stepId: STP_CSR_05_Decide
+    key: workorder.decision
+    value: pass
+    jumpTo: STP_IN_01_RigOnStand
   requireFreshWrite: 1
   autoCompleteAllowed: []
   globalErrors:

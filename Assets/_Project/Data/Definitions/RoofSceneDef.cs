@@ -95,6 +95,7 @@ namespace PantographSim.Data
         public Vector2 maintMinXZ = new Vector2(-13.5f, -5f), maintMaxXZ = new Vector2(-5.5f, 5f);
         [Tooltip("台架 env.panto_stand 中心（XZ）")] public Vector2 standCenterXZ = new Vector2(-9.5f, 0f);
         [Tooltip("台架外形：X、Z")] public Vector2 standSizeXZ = new Vector2(2.0f, 2.6f);
+        [Tooltip("R1.5b b4：定期檢修的螺栓盤在台架外框頂面：離中心的 X、從靠 tp.stand.s 的邊往內的 Z")] public float boltTrayStandOffsetX = 0.40f, boltTrayStandInsetZ = 0.15f;
         [Tooltip("台架頂面（支撐座、定位銷）離地")] public float standTopAboveGround = 0.75f;
         [Tooltip("F6：台架外框（支撐座四周與四角立柱）頂面離地，低於支撐座，懸出的臂和吊帶不會掃到")] public float standFrameTopAboveGround = 0.45f;
         [Tooltip("a6 G2：台架外框＝降弓整組 LoweredTightBounds 兩端各外擴這個值（standSizeXZ 由建置寫入）")] public float standFrameMargin = 0.15f;

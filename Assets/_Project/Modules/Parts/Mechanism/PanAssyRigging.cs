@@ -58,6 +58,7 @@ namespace PantographSim.Parts.Mechanism
             Sim.Bus.Subscribe<ActionRequested>(OnRequest);
             subscribed = true;
             if (!Sim.State.Has(StateKey)) Sim.State.Set(StateKey, Mounted);
+            RigHeightDef.Load()?.Publish(Sim.State);   // D42：IN_01 a 吊梁高度範圍（建置量測的拉直高度 − slackMarginM）
         }
 
         /// <summary>徒手 Operate：吊點掛／卸吊帶、扣／開吊鉤舌片、鎖／開台架夾具。</summary>

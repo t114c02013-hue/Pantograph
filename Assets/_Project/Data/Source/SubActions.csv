@@ -133,7 +133,7 @@ STP_CSR_15_HeightCheck,c,3,量外側新滑板中點,,ip.carbon_strip_R.measure_m
 STP_CSR_15_HeightCheck,d,4,兩個讀數填入作業單,把兩個讀數填入作業單,env.work_order.height_check,,兩格與讀數相差 ≤ 0.05 mm，差值 ≤ EX 1.0 mm,,,,tp.stand.s,tp.roof.outer,both,,ERR_CSR15_Exceeds:Major;ERR_CSR15_NotCompared:Major,B §2.5 CSR_15 d; StepTable；VR 文字取自 R1 StepTable,yes
 STP_CSR_15_HeightCheck,e,5,把游標卡尺收回工具袋,,env.tool_rack.slot_5,tool.caliper,掛位 5 = 在袋,,,,,tp.roof.outer,daily,,ERR_CSR15_Exceeds:Major;ERR_CSR15_NotCompared:Major,B §2.5 CSR_15 e; StepTable,
 STP_CSR_15_HeightCheck,f,6,把台架工具盤上的工具全部收回工具袋,,env.tool_bag,,掛位 5–9 = 在袋，台架工具盤是空的,,,,tp.stand.s,,periodic,,ERR_CSR15_Exceeds:Major;ERR_CSR15_NotCompared:Major,A §5.4 CSR_15 f (O1),
-STP_IN_01_RigOnStand,a,1,按住按鍵，把吊鉤移到台架上方並降下,,env.crane_pendant,,與 COG 水平差 ≤ 5 cm；吊梁底面在弓頂上方 EX 0.6–1.0 m,,,,tp.stand.w,,periodic,,ERR_Crane_UnderMovingHook:Major;ERR_Crane_FastLowerEmptyHook:Minor,A §6 IN_01,
+STP_IN_01_RigOnStand,a,1,按住按鍵，把吊鉤移到台架上方並降下,,env.crane_pendant,,與 COG 水平差 ≤ 5 cm；吊梁底面在弓頂上方 EX 0.55–0.75 m（D42：吊帶要鬆才掛得上吊耳；上限 = 拉直高度 − 0.06 m，以實測為準）,,,,tp.stand.w,,periodic,,ERR_Crane_UnderMovingHook:Major;ERR_Crane_FastLowerEmptyHook:Minor,A §6 IN_01,
 STP_IN_01_RigOnStand,b,2,把吊帶 {n} 掛上吊耳 {n},,ip.pan_assy.lift_point_{n},,Rigged,,,,tp.stand.w,,periodic,n=1→4,ERR_Crane_RiggedOnArm:Critical,A §6 IN_01,
 STP_IN_01_RigOnStand,c,3,解開台架夾具 {n},,env.panto_stand.clamp_{n},,開,,,,tp.stand.w,,periodic,n=1→2,,A §6 IN_01,
 STP_IN_01_RigOnStand,d,4,請吊掛指揮確認，放行試吊,,npc.rigging_lead,,停留點 3 清單全部點過，hold.3.released = true（清單含吊帶角度 ≤ 45°）,,,,tp.platform.crane,,periodic,,ERR_Global_HoldPointRejected:Major,A §6 IN_01; D36 補充,

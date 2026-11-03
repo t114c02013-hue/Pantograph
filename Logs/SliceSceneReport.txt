@@ -7,8 +7,8 @@
 升降參數 → Assets/_Project/Modules/Worksite/Data/LiftSettings.asset
 
 套筒目錄 6 顆、螺栓對照 3 筆；扳手 tool.torque_wrench（3/8"、10–60、0.28）、tool.torque_wrench_l（1/2"、40–200、0.45）、tool.socket_wrench（1/2"、把手 0.19）
-R1.5b 步驟資料（SubActions.csv／Steps.csv 展開）：periodic：步驟 67、小動作 312、參考時間 教學 3533 s／考核 2304 s
-daily：步驟 37、小動作 185、參考時間 教學 1834 s／考核 1161 s
+R1.5b 步驟資料（SubActions.csv／Steps.csv 展開）：periodic：步驟 67、小動作 308、參考時間 教學 3533 s／考核 2304 s
+daily：步驟 37、小動作 181、參考時間 教學 1834 s／考核 1161 s
 
 PF_CarbonStrip_L ← CarbonStrip_2：尺寸 1.102 × 0.016 × 0.074 m
   截面：頂點數 68；頂面高度 −Z 邊 7.8 mm、中央 （中央無頂點）、+Z 邊 7.8 mm → 左右對稱，無法從外形看出斜面，加貼「此側朝外」箭頭
@@ -369,6 +369,7 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ✔ 【第20項】防墜器 → tp.roof.base_w.n D 環（站姿 1.35 m）不碰集電弓與絕緣子
 VR：80 個互動點加上 XRInteractableBridge
 場景已存檔：Assets/_Project/Content/Scenes/SC_CarbonStripSlice.unity（Build Settings 第 0 位）
+D42 IN_01 a：拉直高度 0.844 m（弓頂取 head；PAN_Root 局部，降弓）：吊梁正下方最高點 0.343（LowerArm）、弓頭頂 0.426、上臂頂 0.380；吊耳在吊點上方 0.905、吊耳比吊梁底面低 0.030；上限 0.784 m（− slackMarginM 0.06），下限 0.55 m
 場景互動物件 99 個：env.bolt_tray_L, env.bolt_tray_R, env.crane, env.crane_pendant, env.panto_stand, env.panto_stand.clamp_1, env.panto_stand.clamp_2, env.panto_stand.tool_tray, env.parts_tray, env.pole_rack, env.roof_strip_mat, env.sling_1, env.sling_2, env.sling_3, env.sling_4, env.socket_seat_10, env.socket_seat_13, env.socket_seat_13_38, env.socket_seat_17, env.socket_seat_19, env.socket_seat_24, env.spare_shelf.slot_1, env.spare_shelf.slot_2, env.spare_shelf.slot_3, env.tool_bag, env.tool_bag.bolt_pouch, env.tool_bag.socket_case, env.tool_rack, env.tool_rack.slot_1, env.tool_rack.slot_10, env.tool_rack.slot_11, env.tool_rack.slot_12, env.tool_rack.slot_13, env.tool_rack.slot_2, env.tool_rack.slot_3, env.tool_rack.slot_4, env.tool_rack.slot_5, env.tool_rack.slot_6, env.tool_rack.slot_7, env.tool_rack.slot_8, env.tool_rack.slot_9, env.waist_pouch, env.work_order, ip.cab.breaker, ip.cab.cylinder_power, ip.cab.pan_indicator, ip.cab.pan_indicator_repeat, ip.cab.panel, ip.cab.raise_button, ip.cab.raise_switch, ip.carbon_strip_L.bolt_1, ip.carbon_strip_L.bolt_2, ip.carbon_strip_L.bolt_3, ip.carbon_strip_L.bolt_4, ip.carbon_strip_L.bracket, ip.carbon_strip_L.install_check, ip.carbon_strip_L.install_target, ip.carbon_strip_L.measure_left, ip.carbon_strip_L.measure_mid, ip.carbon_strip_L.measure_right, ip.carbon_strip_L.outward, ip.carbon_strip_R.bolt_1, ip.carbon_strip_R.bolt_2, ip.carbon_strip_R.bolt_3, ip.carbon_strip_R.bolt_4, ip.carbon_strip_R.bracket, ip.carbon_strip_R.install_check, ip.carbon_strip_R.install_target, ip.carbon_strip_R.measure_left, ip.carbon_strip_R.measure_mid, ip.carbon_strip_R.measure_right, ip.carbon_strip_R.outward, ip.depot.detector_tester, ip.depot.ground_terminal, ip.depot.platform_anchor, ip.pan_assy.ctrl_connector, ip.pan_assy.hold_down, ip.pan_assy.hv_terminal, ip.pan_assy.lift_point_1, ip.pan_assy.lift_point_2, ip.pan_assy.lift_point_3, ip.pan_assy.lift_point_4, ip.pan_head.ground_clamp, ip.pan_head.lower_check, ip.pan_head.lower_target, ip.roof.anchor, ip.roof.carbody_ground, ip.roof.hv_cable_ground, part.carbon_strip_L, part.carbon_strip_R, part.crane.hook, part.pan_assy, part.pan_assy.hv_bolt_1, part.pan_assy.hv_bolt_2, part.pan_base.bolt_1, part.pan_base.bolt_2, part.pan_base.bolt_3, part.pan_base.bolt_4, part.pan_head
 資料檢查：
 結果：通過
@@ -379,6 +380,7 @@ VR：80 個互動點加上 XRInteractableBridge
 ✔ 所有步驟目標都存在於場景（99 個互動物件）
 ・STP_CSR_05_Decide：小動作都在原地（B 鍵不傳送）
 ✔ 小動作的站點都在 StationSet（20 站）
+✔ 兩門課的 VR 指令都沒有鍵盤字樣
 ✔ 組件引用檢查完成（UI 只引用 Core；功能層互不引用，CarbonStrip→Parts.Common 為同一零件層）
 
 預覽圖：Logs/rig_slice_scene.png、rig_slice_strip_L.png、rig_slice_bolts.png

@@ -199,6 +199,7 @@ namespace PantographSim.Editor
             var courses = Courses.ToDictionary(c => c, c => BuildCourse(c, res, metas, r1));
             var stepErrors = metas.ToDictionary(m => m.stepId, m => m.errors.Select(x => x.id).ToList());
             foreach (var st in courses.Values.SelectMany(x => x)) ApplyErrorDefs(st, defs, stepErrors[st.stepId], errors);
+            CheckCourses(LoadCourses(), sceneIds, courses, errors);   // 第 4 部分：課程擺放、onPass、備品架排列
             return courses;
         }
 
@@ -240,7 +241,12 @@ namespace PantographSim.Editor
                 prc.requireFreshWrite = true;   // 軟體工程裁定 2026-11-03：小動作要啟用後真的做了動作才算完成
                 prc.autoCompleteAllowed = LoadTables().autoCompleteAllowed;
                 prc.globalErrors = GlobalErrors(kv.Key, LoadErrorRules());   // 3c：天車安全等全程監看
-                SaveAsset(prc, ProcedurePath(kv.Key));
+                var cj = LoadCourses().courses.First(x => x.courseId == kv.Key);
+                prc.title = cj.title; prc.onPass = cj.onPass;   // 第 4 部分：CSR_05 合格跳轉
+                var savedPrc = SaveAsset(prc, ProcedurePath(kv.Key));
+                var course = ScriptableObject.CreateInstance<CourseDef>();
+                course.courseId = cj.courseId; course.title = cj.title; course.procedure = savedPrc; course.placements = cj.placements; course.onPass = cj.onPass;
+                SaveAsset(course, CourseDefPath(kv.Key));
                 var rs = resolved.Where(r => r.e.course == kv.Key).ToList();
                 sb.AppendLine($"{kv.Key}：步驟 {saved.Count}、小動作 {rs.Count}（第 1 層 {rs.Count(r => r.layer == 1)}、第 2 層 {rs.Count(r => r.layer == 2)}、第 3 層 {rs.Count(r => r.layer == 3)}；機制待做 {rs.Count(r => r.owner.Length > 0)}）→ {CourseFolder}/{kv.Key}");
             }
@@ -252,6 +258,9 @@ namespace PantographSim.Editor
             }
             EditorUtility.SetDirty(AssetDatabase.LoadAssetAtPath<ExamPolicyDef>(policyPath));
             SaveAsset(LoadKeyDefSource(new List<string>()), BlackboardKeysAssetPath);   // 鍵的種類（LiveState／Event）
+            var spare = ScriptableObject.CreateInstance<SpareArrangementDef>();
+            spare.entries = LoadCourses().spareArrangement;
+            SaveAsset(spare, SpareArrangementPath);   // 備品架 L、R 排列（負責人裁定）
             const string toolRulesPath = "Assets/_Project/Modules/Tools/_Common/Resources/ToolRules.asset";   // 放開握把的規則（gripReleaseDrops、寬限秒數）
             if (AssetDatabase.LoadAssetAtPath<ToolRulesDef>(toolRulesPath) == null)
             {

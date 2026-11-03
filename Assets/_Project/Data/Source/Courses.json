@@ -1,0 +1,45 @@
+{
+  "_doc": "R1.5b b4 第 4 部分：CourseDef.overrides（第 2 部分 3.5，只放 SubActions.csv 表達不了的）。placements：id＝場景 ISimObject 的 ID，或「name:物件名稱」；anchor＝場景錨點名稱（空白＝不移動）；active＝顯示與否。onPass：CSR_05 合格跳轉。spareArrangement：備品架 L、R 兩側的排列（負責人裁定 2026-11-03，換到 R 側時補貨並換成 R 排列）。數值都在這裡，程式不寫死。",
+  "courses": [
+    {
+      "courseId": "periodic",
+      "title": "集電弓定期檢修",
+      "placements": [
+        { "id": "env.bolt_tray_L", "anchor": "Anchor_BoltTray_Stand_L", "active": true },
+        { "id": "env.bolt_tray_R", "anchor": "Anchor_BoltTray_Stand_R", "active": true },
+        { "id": "name:BoltTray_L_Support", "anchor": "", "active": false },
+        { "id": "name:BoltTray_R_Support", "anchor": "", "active": false },
+        { "id": "env.parts_tray", "anchor": "Anchor_PartsTray_Maint", "active": true },
+        { "id": "name:PartsTray_Support", "anchor": "", "active": false },
+        { "id": "name:SpareShelf", "anchor": "Anchor_BenchTop", "active": true },
+        { "id": "name:SpareShelf_Support", "anchor": "", "active": false },
+        { "id": "env.roof_strip_mat", "anchor": "", "active": false }
+      ],
+      "onPass": [ { "stepId": "STP_CSR_05_Decide", "key": "workorder.decision", "value": "pass", "jumpTo": "STP_IN_01_RigOnStand" } ]
+    },
+    {
+      "courseId": "daily",
+      "title": "日常更換",
+      "placements": [
+        { "id": "env.bolt_tray_L", "anchor": "Anchor_BoltTray_Roof_L", "active": true },
+        { "id": "env.bolt_tray_R", "anchor": "Anchor_BoltTray_Roof_R", "active": true },
+        { "id": "name:BoltTray_L_Support", "anchor": "", "active": true },
+        { "id": "name:BoltTray_R_Support", "anchor": "", "active": true },
+        { "id": "env.parts_tray", "anchor": "Anchor_ScrapBox_Daily", "active": true },
+        { "id": "name:PartsTray_Support", "anchor": "", "active": false },
+        { "id": "name:SpareShelf", "anchor": "Anchor_SpareShelf_Daily", "active": true },
+        { "id": "name:SpareShelf_Support", "anchor": "", "active": false },
+        { "id": "env.roof_strip_mat", "anchor": "", "active": true }
+      ],
+      "onPass": [ { "stepId": "STP_CSR_05_Decide", "key": "workorder.decision", "value": "pass", "jumpTo": "STP_WC_01a_ToolCountRoof" } ]
+    }
+  ],
+  "spareArrangement": [
+    { "side": "L", "slot": 1, "model": "CS-1100-64B", "cracked": false },
+    { "side": "L", "slot": 2, "model": "CS-1100-74A", "cracked": false },
+    { "side": "L", "slot": 3, "model": "CS-1100-74A", "cracked": true },
+    { "side": "R", "slot": 1, "model": "CS-1100-74A", "cracked": true },
+    { "side": "R", "slot": 2, "model": "CS-1100-64B", "cracked": false },
+    { "side": "R", "slot": 3, "model": "CS-1100-74A", "cracked": false }
+  ]
+}

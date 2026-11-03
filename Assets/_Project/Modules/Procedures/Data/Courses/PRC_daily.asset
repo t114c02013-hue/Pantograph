@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: _import_tmp
   m_EditorClassIdentifier: 
   procedureId: PRC_daily
-  title: daily
+  title: "\u65E5\u5E38\u66F4\u63DB"
   goal: 
   safetyPoints: []
   steps:
@@ -63,7 +63,11 @@ MonoBehaviour:
     sideLabels:
     - "\u8098\u5074\u6ED1\u677F"
     - "\u5916\u5074\u6ED1\u677F"
-  onPass: []
+  onPass:
+  - stepId: STP_CSR_05_Decide
+    key: workorder.decision
+    value: pass
+    jumpTo: STP_WC_01a_ToolCountRoof
   requireFreshWrite: 1
   autoCompleteAllowed: []
   globalErrors:
@@ -88,6 +92,7 @@ MonoBehaviour:
     count: 0
     blocks: 0
     severityBeforeK3: 
+    oncePerRun: 0
     inputMode: 
   - errorId: ERR_WC03_RemoveOrder
     severity: 2
@@ -109,4 +114,5 @@ MonoBehaviour:
     count: 0
     blocks: 0
     severityBeforeK3: 
+    oncePerRun: 0
     inputMode: 

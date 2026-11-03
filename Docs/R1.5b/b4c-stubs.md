@@ -54,14 +54,14 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_SI_00_PreWork | c | periodic | `env.work_order.tbm.checked_count>=5&&env.work_order.tbm.signed` | b4c:si00 |
 | STP_SI_00_PreWork | e | daily | `env.work_order.calibration_check.valid_count>=2` | b4c:si00 |
 | STP_SI_00_PreWork | e | periodic | `env.work_order.calibration_check.valid_count>=3` | b4c:si00 |
+| STP_CSR_08_RemoveStrip_L | b | daily | `part.carbon_strip_L.state=OnMat` | b4c:strip_carry |
+| STP_CSR_08_RemoveStrip_R | b | daily | `part.carbon_strip_R.state=OnMat` | b4c:strip_carry |
+| STP_CSR_09_CleanBracket_L | d | daily | `part.carbon_strip_L.state=InTray&&env.roof_strip_mat.count<=0` | b4c:strip_carry |
+| STP_CSR_09_CleanBracket_R | d | daily | `part.carbon_strip_R.state=InTray&&env.roof_strip_mat.count<=0` | b4c:strip_carry |
 | STP_RM_07_LeaveRoof | b | periodic | `harness.platform&&harness.roof=false&&player.zone=platform` | b4d |
 | STP_WC_02_LeaveRoof | c | daily | `player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use` | b4d |
 | STP_WC_02_LeaveRoof | c | periodic | `player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use` | b4d |
 | STP_CSR_01_CheckIsolation | a | daily | `workorder.si_all_done` | b4:p3 |
-| STP_CSR_08_RemoveStrip_L | b | daily | `part.carbon_strip_L.state=OnMat` | b4:p4 |
-| STP_CSR_08_RemoveStrip_R | b | daily | `part.carbon_strip_R.state=OnMat` | b4:p4 |
-| STP_CSR_09_CleanBracket_L | d | daily | `part.carbon_strip_L.state=InTray&&env.roof_strip_mat.count<=0` | b4:p4 |
-| STP_CSR_09_CleanBracket_R | d | daily | `part.carbon_strip_R.state=InTray&&env.roof_strip_mat.count<=0` | b4:p4 |
 | STP_CSR_10_CheckNew_L | g | daily | `env.work_order.part_trace.matches_spare_L` | b4:p4 |
 | STP_CSR_10_CheckNew_R | g | daily | `env.work_order.part_trace.matches_spare_R` | b4:p4 |
 | STP_CSR_10_CheckNew_L | g | periodic | `env.work_order.part_trace.matches_spare_L` | b4:p4 |
@@ -105,7 +105,7 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_CSR_01_CheckIsolation | b | daily | `env.work_order.anomaly.checked` | b4:p5 |
 | STP_CSR_01_CheckIsolation | b | periodic | `env.work_order.anomaly.checked` | b4:p5 |
 | STP_CSR_15_HeightCheck | f | periodic | `rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&env.panto_stand.tool_tray.count<=0` | b4:p5 |
-| STP_IN_01_RigOnStand | a | periodic | `part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=0.6&&part.crane.beam_above_pan_m<=1.0` | b4:p5 |
+| STP_IN_01_RigOnStand | a | periodic | `part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=crane.rig_height_lower_m&&part.crane.beam_above_pan_m<=crane.rig_height_upper_m` | b4:p5 |
 | STP_IN_02_TrialLift | a | periodic | `part.crane.drop_distance>=0.1&&part.crane.still_s>=3` | b4:p5 |
 | STP_IN_02_TrialLift | b | periodic | `part.pan_assy.inspected&&part.pan_assy.tilt_deg<=3` | b4:p5 |
 | STP_IN_03_Transfer | b | periodic | `part.pan_assy.roof_offset_cm<=5` | b4:p5 |

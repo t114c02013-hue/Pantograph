@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using PantographSim.Core;
+using PantographSim.Data;
 using UnityEngine;
 
 namespace PantographSim.Worksite
@@ -31,7 +32,18 @@ namespace PantographSim.Worksite
             State.Set("spare.required_model", CorrectModel);   // 作業單要求的型號（教學模式資訊卡並排顯示）
         }
 
-        void Restock() => Stock(State, id, modelCode, thicknessMm);
+        /// <summary>補貨：換成這一側的排列（SpareArrangementDef，負責人裁定 2026-11-03：L slot_2 正確、R slot_3 正確；沒有資料就照場景設定）。</summary>
+        void Restock(string side = "L")
+        {
+            // 只在載入課程時（CourseApplier 寫 course.id）換排列；R1 的 25 步照舊（第 5 部分換成日常課後一律用排列）
+            var e = State.Has(CourseApplier.CourseKey) ? SpareArrangementDef.Load()?.Find(side, SlotNumber(id)) : null;
+            if (e != null) { modelCode = e.model; cracked = e.cracked; }
+            Stock(State, id, modelCode, thicknessMm);
+            State.SetBool(id + ".cracked", cracked);
+        }
+
+        /// <summary>env.spare_shelf.slot_3 → 3。</summary>
+        public static int SlotNumber(string slotId) => int.TryParse(slotId.Substring(slotId.LastIndexOf('_') + 1), out var n) ? n : 0;
 
         protected override bool Watches(string key) => key.StartsWith(id + ".") || key == "procedure.side";
 
@@ -50,7 +62,7 @@ namespace PantographSim.Worksite
         {
             if (State == null) return;
             var side = State.Get("procedure.side");
-            if (side != lastSide) { if (!string.IsNullOrEmpty(lastSide) && side == "R") Restock(); lastSide = side; }
+            if (side != lastSide) { if (!string.IsNullOrEmpty(lastSide) && side == "R") Restock("R"); lastSide = side; }
         }
 
         protected override void OnBareHand(ActionRequested e)

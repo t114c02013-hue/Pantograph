@@ -293,6 +293,7 @@ namespace PantographSim.Editor
             EditorBuildSettings.scenes = buildScenes.ToArray();
             sb.AppendLine("場景已存檔：" + ScenePath + "（Build Settings 第 0 位）");
 
+            sb.AppendLine(RigHeightMeasure.MeasureAndStore());   // R1.5b b4（D42）：IN_01 a 上限＝吊帶拉直高度 − slackMarginM，量不到範圍就建置失敗
             var ids = Object.FindObjectsOfType<MonoBehaviour>(true).OfType<ISimObject>().Select(x => x.Id).Where(x => !string.IsNullOrEmpty(x)).Distinct().ToList();
             sb.AppendLine($"場景互動物件 {ids.Count} 個：" + string.Join(", ", ids.OrderBy(x => x)));
             DataValidator.Validate(out var validation, ids);

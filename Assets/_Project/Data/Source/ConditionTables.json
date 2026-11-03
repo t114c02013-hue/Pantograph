@@ -17,6 +17,7 @@
   ],
   "autoCompleteAllowed": [],
   "completionOverrides": [
+    { "step": "STP_CSR_08_RemoveStrip", "courses": "daily", "why": "步驟計畫裁定：日常把舊滑板平放到車頂暫放墊 env.roof_strip_mat.slot_old（CSR_09 d 才拿到 tp.platform.scrap 放進待報廢箱），不沿用 R1 的「在零件盒」", "completion": { "type": "StateEquals", "key": "part.carbon_strip_{side}.state", "value": "OnMat" } },
     { "step": "STP_CSR_13_Torque", "courses": "both", "why": "驗收組長 K3：扭力不足在離開螺栓時判、練習與考核放行，步驟完成不再要求 23–27 N·m（教學模式由 ExamPolicyDef 擋下）；只留順序", "completion": { "type": "OrderedSequence", "key": "ip.carbon_strip_{side}.torque_order", "expected": "1,2,3,4" } }
   ],
   "patterns": [
@@ -127,11 +128,11 @@
     { "text": "底面離絕緣子頂 0.05–0.15 m，停 ≥ EX 1 s（比照 LF_05 a）", "rule": "part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1", "owner": "b4:p5" },
     { "text": "part.pan_assy.state = Mounted，BaseHole 與 InsulatorTop 距離 ≤ EX 1 cm", "rule": "part.pan_assy.state=Mounted&&part.pan_assy.seat_error_cm<=1", "owner": "b4:p5" },
     { "text": "吊梁底面高於弓頂 EX 1.0 m", "rule": "part.crane.beam_above_pan_m>=1.0", "owner": "b4:p5" },
-    { "text": "與 COG 水平差 ≤ 5 cm；吊梁底面在弓頂上方 EX 0.6–1.0 m", "rule": "part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=0.6&&part.crane.beam_above_pan_m<=1.0", "owner": "b4:p5" },
+    { "text": "與 COG 水平差 ≤ 5 cm；吊梁底面在弓頂上方 EX 0.55–0.75 m（D42：吊帶要鬆才掛得上吊耳；上限 = 拉直高度 − 0.06 m，以實測為準）", "rule": "part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=crane.rig_height_lower_m&&part.crane.beam_above_pan_m<=crane.rig_height_upper_m", "owner": "b4:p5" },
     { "text": "核對作業單上 SI 各項的狀態：SI_00–06 各項都已完成；有一項沒完成就不能過", "rule": "workorder.si_all_done", "owner": "b4:p3" },
     { "text": "待報廢箱有該條舊滑板", "rule": "part.carbon_strip_{side}.state=InTray" },
-    { "text": "暫放墊上有該條舊滑板（1 條）", "rule": "part.carbon_strip_{side}.state=OnMat", "owner": "b4:p4" },
-    { "text": "待報廢箱有該條舊滑板，暫放墊是空的", "rule": "part.carbon_strip_{side}.state=InTray&&env.roof_strip_mat.count<=0", "owner": "b4:p4" },
+    { "text": "暫放墊上有該條舊滑板（1 條）", "rule": "part.carbon_strip_{side}.state=OnMat", "owner": "b4c:strip_carry" },
+    { "text": "待報廢箱有該條舊滑板，暫放墊是空的", "rule": "part.carbon_strip_{side}.state=InTray&&env.roof_strip_mat.count<=0", "owner": "b4c:strip_carry" },
     { "text": "三處都已查看，異常欄已勾選「無異常」或「有異常」", "rule": "{t0}.checked", "owner": "b4:p5" },
     { "text": "兩欄和所選備品標籤一致", "rule": "{t0}.matches_spare_{side}", "owner": "b4:p4" },
     { "text": "掛位 5–9 = 在袋，台架工具盤是空的", "rule": "rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&env.panto_stand.tool_tray.count<=0", "owner": "b4:p5" },

@@ -76,16 +76,16 @@ daily,STP_CSR_07_RemoveBolts_L,c,101,1,"掛位 6 = 在袋","tool.active=",
 daily,STP_CSR_07_RemoveBolts_R,c,101,1,"掛位 6 = 在袋","tool.active=",
 daily,STP_CSR_08_RemoveStrip_L,a,102,1,"滑板 = 已拆下","part.carbon_strip_L.state=Removed",
 daily,STP_CSR_08_RemoveStrip_R,a,102,1,"滑板 = 已拆下","part.carbon_strip_R.state=Removed",
-daily,STP_CSR_08_RemoveStrip_L,b,103,3,"暫放墊上有該條舊滑板（1 條）","part.carbon_strip_L.state=OnMat",b4:p4
-daily,STP_CSR_08_RemoveStrip_R,b,103,3,"暫放墊上有該條舊滑板（1 條）","part.carbon_strip_R.state=OnMat",b4:p4
+daily,STP_CSR_08_RemoveStrip_L,b,103,3,"暫放墊上有該條舊滑板（1 條）","part.carbon_strip_L.state=OnMat",b4c:strip_carry
+daily,STP_CSR_08_RemoveStrip_R,b,103,3,"暫放墊上有該條舊滑板（1 條）","part.carbon_strip_R.state=OnMat",b4c:strip_carry
 daily,STP_CSR_09_CleanBracket_L,a,104,1,"手持清潔布","tool.active=tool.cleaning_cloth",
 daily,STP_CSR_09_CleanBracket_R,a,104,1,"手持清潔布","tool.active=tool.cleaning_cloth",
 daily,STP_CSR_09_CleanBracket_L,b,105,1,"清除率 ≥ EX 95 %","ip.carbon_strip_L.bracket.clean_ratio>=0.95",
 daily,STP_CSR_09_CleanBracket_R,b,105,1,"清除率 ≥ EX 95 %","ip.carbon_strip_R.bracket.clean_ratio>=0.95",
 daily,STP_CSR_09_CleanBracket_L,c,106,1,"掛位 8 = 在袋","tool.active=",
 daily,STP_CSR_09_CleanBracket_R,c,106,1,"掛位 8 = 在袋","tool.active=",
-daily,STP_CSR_09_CleanBracket_L,d,107,3,"待報廢箱有該條舊滑板，暫放墊是空的","part.carbon_strip_L.state=InTray&&env.roof_strip_mat.count<=0",b4:p4
-daily,STP_CSR_09_CleanBracket_R,d,107,3,"待報廢箱有該條舊滑板，暫放墊是空的","part.carbon_strip_R.state=InTray&&env.roof_strip_mat.count<=0",b4:p4
+daily,STP_CSR_09_CleanBracket_L,d,107,3,"待報廢箱有該條舊滑板，暫放墊是空的","part.carbon_strip_L.state=InTray&&env.roof_strip_mat.count<=0",b4c:strip_carry
+daily,STP_CSR_09_CleanBracket_R,d,107,3,"待報廢箱有該條舊滑板，暫放墊是空的","part.carbon_strip_R.state=InTray&&env.roof_strip_mat.count<=0",b4c:strip_carry
 daily,STP_CSR_10_CheckNew_L,a,108,1,"三條標籤都看過","spare.L.viewed_count>=3",
 daily,STP_CSR_10_CheckNew_R,a,108,1,"三條標籤都看過","spare.R.viewed_count>=3",
 daily,STP_CSR_10_CheckNew_L,b,109,2,"已旋轉檢視一圈（判定對象為 spare.L.selected，依側別，不寫死 slot_2）","spare.L.selected.flipped",
@@ -390,7 +390,7 @@ periodic,STP_CSR_15_HeightCheck,b,131,1,"讀數已取得","ip.carbon_strip_L.mea
 periodic,STP_CSR_15_HeightCheck,c,132,1,"讀數已取得","ip.carbon_strip_R.measure_mid.new_measured",
 periodic,STP_CSR_15_HeightCheck,d,133,1,"兩格與讀數相差 ≤ 0.05 mm，差值 ≤ EX 1.0 mm","workorder.height_diff",
 periodic,STP_CSR_15_HeightCheck,f,135,3,"掛位 5–9 = 在袋，台架工具盤是空的","rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&env.panto_stand.tool_tray.count<=0",b4:p5
-periodic,STP_IN_01_RigOnStand,a,136,3,"與 COG 水平差 ≤ 5 cm；吊梁底面在弓頂上方 EX 0.6–1.0 m","part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=0.6&&part.crane.beam_above_pan_m<=1.0",b4:p5
+periodic,STP_IN_01_RigOnStand,a,136,3,"與 COG 水平差 ≤ 5 cm；吊梁底面在弓頂上方 EX 0.55–0.75 m（D42：吊帶要鬆才掛得上吊耳；上限 = 拉直高度 − 0.06 m，以實測為準）","part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=crane.rig_height_lower_m&&part.crane.beam_above_pan_m<=crane.rig_height_upper_m",b4:p5
 periodic,STP_IN_01_RigOnStand,b1,137,3,"Rigged","ip.pan_assy.lift_point_1.state=Rigged",
 periodic,STP_IN_01_RigOnStand,b2,137,3,"Rigged","ip.pan_assy.lift_point_2.state=Rigged",
 periodic,STP_IN_01_RigOnStand,b3,137,3,"Rigged","ip.pan_assy.lift_point_3.state=Rigged",

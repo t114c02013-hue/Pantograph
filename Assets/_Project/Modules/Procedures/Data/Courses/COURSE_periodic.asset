@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964423439d826654983b4a4f5c04363a, type: 3}
+  m_Name: COURSE_periodic
+  m_EditorClassIdentifier: 
+  courseId: periodic
+  title: "\u96C6\u96FB\u5F13\u5B9A\u671F\u6AA2\u4FEE"
+  procedure: {fileID: 11400000, guid: 0bcba3f58ef595046b302bf91278a681, type: 2}
+  placements:
+  - id: env.bolt_tray_L
+    anchor: Anchor_BoltTray_Stand_L
+    active: 1
+  - id: env.bolt_tray_R
+    anchor: Anchor_BoltTray_Stand_R
+    active: 1
+  - id: name:BoltTray_L_Support
+    anchor: 
+    active: 0
+  - id: name:BoltTray_R_Support
+    anchor: 
+    active: 0
+  - id: env.parts_tray
+    anchor: Anchor_PartsTray_Maint
+    active: 1
+  - id: name:PartsTray_Support
+    anchor: 
+    active: 0
+  - id: name:SpareShelf
+    anchor: Anchor_BenchTop
+    active: 1
+  - id: name:SpareShelf_Support
+    anchor: 
+    active: 0
+  - id: env.roof_strip_mat
+    anchor: 
+    active: 0
+  onPass:
+  - stepId: STP_CSR_05_Decide
+    key: workorder.decision
+    value: pass
+    jumpTo: STP_IN_01_RigOnStand
