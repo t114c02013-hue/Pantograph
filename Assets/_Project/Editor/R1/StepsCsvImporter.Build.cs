@@ -249,7 +249,13 @@ namespace PantographSim.Editor
                 Directory.CreateDirectory(Path.GetDirectoryName(policyPath));
                 AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<ExamPolicyDef>(), policyPath);
             }
-            EditorUtility.SetDirty(AssetDatabase.LoadAssetAtPath<ExamPolicyDef>(policyPath));   // 新增的欄位（例：k3DowngradeModes）寫進資產，組長看得到、改得到
+            EditorUtility.SetDirty(AssetDatabase.LoadAssetAtPath<ExamPolicyDef>(policyPath));
+            const string toolRulesPath = "Assets/_Project/Modules/Tools/_Common/Resources/ToolRules.asset";   // 放開握把的規則（gripReleaseDrops、寬限秒數）
+            if (AssetDatabase.LoadAssetAtPath<ToolRulesDef>(toolRulesPath) == null)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(toolRulesPath));
+                AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<ToolRulesDef>(), toolRulesPath);
+            }   // 新增的欄位（例：k3DowngradeModes）寫進資產，組長看得到、改得到
             AssetDatabase.SaveAssets();
             Directory.CreateDirectory("Logs");
             File.WriteAllText(MapReportPath, MapReport(resolved), new UTF8Encoding(true));

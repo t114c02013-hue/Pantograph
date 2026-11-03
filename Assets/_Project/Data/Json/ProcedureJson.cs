@@ -31,6 +31,7 @@ namespace PantographSim.Data
         public float min, max;
         public int count;
         public bool blocks;
+        public bool oncePerRun;   // R1.5b b4 3d
     }
 
     [Serializable] public class HintJson
@@ -219,7 +220,7 @@ namespace PantographSim.Data
             trigger = (ErrorTrigger)Enum.Parse(typeof(ErrorTrigger), e.trigger),
             what = e.what, why = e.why, fix = e.fix,
             key = e.key, key2 = e.key2, keys = e.keys ?? Array.Empty<string>(), value = e.value, whenAnswer = e.whenAnswer,
-            min = e.min, max = e.max, expected = e.expected, count = e.count, blocks = e.blocks
+            min = e.min, max = e.max, expected = e.expected, count = e.count, blocks = e.blocks, oncePerRun = e.oncePerRun
         };
     }
 }

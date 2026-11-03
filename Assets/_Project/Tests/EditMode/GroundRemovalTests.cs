@@ -25,17 +25,30 @@ namespace PantographSim.Tests
             public readonly List<ErrorDetected> errors = new List<ErrorDetected>();
             readonly ProcedureDefinition prc;
 
-            public Rig(string course, string stepId)
+            public Rig(string course, params string[] stepIds)
             {
                 var src = AssetDatabase.LoadAssetAtPath<ProcedureDefinition>(StepsCsvImporter.ProcedurePath(course));
                 prc = ScriptableObject.CreateInstance<ProcedureDefinition>();
-                prc.procedureId = "PRC_Ground"; prc.steps = new List<StepDefinition> { src.steps.First(x => x.stepId == stepId) };
+                prc.procedureId = "PRC_Ground"; prc.steps = stepIds.Select(id => src.steps.First(x => x.stepId == id)).ToList();
                 prc.globalErrors = src.globalErrors;
                 s = new SimState(bus);
                 runner = new ProcedureRunner(prc, bus, s);
                 det = new ErrorDetector(runner, bus, s);
                 bus.Subscribe<ErrorDetected>(e => errors.Add(e));
                 runner.Start();
+            }
+
+            /// <summary>照順序寫完目前這一步的小動作條件（下一步開始為止）。</summary>
+            public void FinishStep()
+            {
+                var step = runner.Current;
+                for (int i = 0; i < 20 && runner.Current == step; i++)
+                {
+                    var subs = ProcedureRunner.SubActions(step); int k = (int)s.GetFloat("procedure.sub_index");
+                    if (k >= subs.Length) break;
+                    CourseFlowTests.Write(s, subs[k].condition);
+                }
+                Assert.AreNotEqual(step, runner.Current, step.def.stepId + " 要完成");
             }
 
             public bool Try(string targetId, string toolId = "tool.grounding_rod") => det.Check(new ActionRequest(toolId, targetId, "click")).allowed;
@@ -100,6 +113,34 @@ namespace PantographSim.Tests
                 Assert.IsEmpty(r.errors.Where(x => x.errorId == OnRoof), "下車頂後拆就不觸發");
             }
             finally { r.Dispose(); }
+        }
+
+        /// <summary>鐵道裁定的後備：固定帶沒拆就到 WC_05 按升弓，弓升不起來並提示「降弓固定帶未拆」，記同一條；一次作業只記 1 次。</summary>
+        [Test]
+        public void StrapLeft_WC05Fallback_RaiseBlocked_OncePerRun()
+        {
+            var r = new Rig("periodic", "STP_WC_02_LeaveRoof", "STP_WC_05_RaiseTest");
+            try
+            {
+                r.s.Batch(() => { r.s.Set("part.pan_assy.state", "Fastened"); r.s.Set("ip.pan_assy.hold_down.state", "Installed"); r.s.SetBool("harness.roof", true); });
+                r.FinishStep();   // WC_02：換扣、下車頂
+                Assert.AreEqual(1, r.errors.Count(x => x.errorId == "ERR_IN11_StrapLeft"), "下車頂時抓到，記一次");
+                Assert.AreEqual("STP_WC_05_RaiseTest", r.runner.Current.def.stepId);
+                Assert.AreEqual("降弓固定帶未拆", LiftControl.UpBlockReason(r.s), "升不起來，提示");
+                r.s.Set(SimIds.LiftCmd, "Up");
+                Assert.AreEqual(1, r.errors.Count(x => x.errorId == "ERR_IN11_StrapLeft"), "WC_05 再按升弓：同一次作業不重複記");
+            }
+            finally { r.Dispose(); }
+            var only = new Rig("periodic", "STP_WC_05_RaiseTest");
+            try
+            {
+                only.s.Batch(() => { only.s.Set("part.pan_assy.state", "Fastened"); only.s.Set("ip.pan_assy.hold_down.state", "Installed"); });
+                only.s.Set(SimIds.LiftCmd, "Up");
+                Assert.AreEqual(Severity.Major, only.errors.Single(x => x.errorId == "ERR_IN11_StrapLeft").severity, "下車頂時沒抓到：WC_05 按升弓時記");
+                only.s.Set(SimIds.LiftCmd, "Stop"); only.s.Set(SimIds.LiftCmd, "Up");
+                Assert.AreEqual(1, only.errors.Count(x => x.errorId == "ERR_IN11_StrapLeft"), "再按也只記 1 次");
+            }
+            finally { only.Dispose(); }
         }
 
         [Test]

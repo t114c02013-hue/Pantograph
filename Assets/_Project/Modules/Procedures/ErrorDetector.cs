@@ -246,8 +246,11 @@ namespace PantographSim.Procedures
                 m => SimIds.IsDistanceKey(m.Groups[1].Value) ? SimIds.CmText(state.GetFloat(m.Groups[1].Value))   // 距離往上進位：不會出現「還差 0.0 cm」
                     : state.GetFloat(m.Groups[1].Value).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture));
 
+        readonly HashSet<string> firedRun = new HashSet<string>();   // oncePerRun 的規則：整次作業記過就不再記
+
         void Fire(ErrorRule r, RuntimeStep s, string target, string detail = "")
         {
+            if (r.oncePerRun && !firedRun.Add(r.errorId)) return;
             if (!fired.Add(r.errorId)) return;
             state.Set("error.last", r.errorId);
             // R1.5b K3：喀聲回饋還沒確認（k3Ready=false）時，k3DowngradeModes（練習、考核）改記 severityBeforeK3，報告註明

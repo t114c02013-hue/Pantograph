@@ -68,10 +68,14 @@ namespace PantographSim.Tests
         {
             using (var b = new BeltRig())
             {
+                b.belt.Rules = ScriptableObject.CreateInstance<ToolRulesDef>();   // 預設：放開就掉、寬限 1.5 s
+                b.s.Set("training.mode", "practice");
                 b.belt.ClickSlot(6);
                 b.belt.Release(true);
                 Assert.AreEqual(RackLogic.Hanging, b.Slot(6), "車頂放開＝掛在防墜繫繩上垂著");
                 Assert.AreEqual("", b.s.Get(SimIds.ActiveTool));
+                Assert.IsEmpty(b.errors, "寬限內還不記（R1.5b b4 負責人裁定：1.5 s 內抓回不算）");
+                b.belt.TickRelease(SimClock.Now + 2f);
                 var e = b.errors.Single();
                 Assert.AreEqual(("ERR_Tool_NotStowedOnRoof", Severity.Major), (e.errorId, e.severity));
                 b.belt.ClickSlot(6);

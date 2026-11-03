@@ -1208,13 +1208,16 @@
         "trigger": "WhenCondition",
         "key2": "part.pan_assy.state=Fastened",
         "keys": [
-          "ip.pan_assy.hold_down.state=Installed&&harness.roof=false&&harness.platform"
+          "ip.pan_assy.hold_down.state=Installed&&harness.roof=false&&harness.platform",
+          "procedure.current=STP_WC_05_RaiseTest&&ip.pan_assy.hold_down.state=Installed&&ctrl.lift.cmd=Up"
         ],
         "what": "降弓固定帶還裝在集電弓上就離開車頂。",
         "why": "固定帶沒拆，升弓試驗時弓升不起來，要再上車頂拆。",
-        "fix": "IN_11 先解開降弓固定帶並收回工具袋，再下車頂。"
+        "fix": "IN_11 先解開降弓固定帶並收回工具袋，再下車頂。",
+        "oncePerRun": true
       },
-      "scope": "global"
+      "scope": "global",
+      "note": "鐵道裁定：下車頂時抓到就記；後備：還沒拆就到 WC_05 按升弓，弓升不起來（LiftControl：降弓固定帶未拆），記同一條。一次作業只記 1 次。"
     },
     {
       "errorId": "ERR_RM03_WrongSocket",

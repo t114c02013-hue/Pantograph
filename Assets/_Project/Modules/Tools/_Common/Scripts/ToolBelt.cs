@@ -21,6 +21,10 @@ namespace PantographSim.Tools
         public void Setup(ToolSlotTable table, SafetyRuleDefinition notStowed) { slotTable = table; notStowedRule = notStowed; }
         ToolBase active;
         bool bound;
+        /// <summary>R1.5b b4：放開握把的規則（Resources/ToolRules；測試可換）。</summary>
+        public ToolRulesDef Rules { get { if (!rulesLoaded) { rules = ToolRulesDef.Load(); rulesLoaded = true; } return rules; } set { rules = value; rulesLoaded = true; } }
+        ToolRulesDef rules; bool rulesLoaded;   // Resources.Load 不能在 MonoBehaviour 的欄位初始值裡呼叫
+        readonly ToolReleaseLogic releaseLogic = new ToolReleaseLogic();
 
         public IReadOnlyList<ToolBase> Tools => tools;
         public ToolBase Active => active;
@@ -132,6 +136,7 @@ namespace PantographSim.Tools
             }
             var err = RackLogic.TryPick(s, slot, tool.ToolId, tool.DisplayName, active != null ? active.DisplayName : "");
             if (err != null) { Toast(err); return; }
+            releaseLogic.Regrab(tool.ToolId);   // 寬限內抓回不算
             if (slotTable != null && slotTable.Find(slot) is ToolSlotDef def && def.workInPouch)
             {
                 RackLogic.StowToPouch(s, slot, tool.ToolId);   // D30：SI_00 f 領取個人上鎖包，直接掛在腰間
@@ -162,26 +167,36 @@ namespace PantographSim.Tools
         }
 
         /// <summary>
-        /// 放開手上的工具、沒有收回存放處（防墜繫繩，crane-procedure 6.3）：在車頂＝掛在繫繩上垂著，記 Major ERR_Tool_NotStowedOnRoof；
-        /// 在地面工作區＝落在地面或台架上，不記錯（WC_01 清點時要收回）。
+        /// 放開手上的工具、沒有收回存放處（防墜繫繩，crane-procedure 6.3；ToolRulesDef）：在車頂＝掛在繫繩上垂著，regrabGraceSec 內抓回不算，
+        /// 超過時練習、考核記 Major ERR_Tool_NotStowedOnRoof（教學模式只提示，見 TickRelease）；在地面工作區＝落在地面或台架上，不記錯（WC_01 清點時要收回）。
+        /// gripReleaseDrops=false：工具留在手上，只提示。
         /// </summary>
         public void Release(bool onRoof)
         {
             if (active == null) return;
             var t = active;
+            if (!releaseLogic.Release(Rules, t.ToolId, onRoof, SimClock.Now)) { Toast(Rules.keepHint); return; }
             Sim.State.Batch(() =>
             {
                 RackLogic.Release(Sim.State, t.Hotkey, onRoof);
                 Activate(null);
-                if (!onRoof) { Toast($"「{t.DisplayName}」放在地上了，清點時要收回"); return; }
-                Toast($"「{t.DisplayName}」掛在防墜繫繩上垂著：用完要收回工具袋");
+                Toast(onRoof ? $"「{t.DisplayName}」{Rules?.hangingHint ?? "掛在防墜繫繩上垂著：用完要收回工具袋"}" : $"「{t.DisplayName}」放在地上了，清點時要收回");
+            });
+        }
+
+        /// <summary>寬限到了：記錯（練習、考核）或只提示（教學）。Update 每幀呼叫；EditMode 測試直接呼叫。</summary>
+        public void TickRelease(float now)
+        {
+            var errors = new List<string>(); var hints = new List<string>();
+            releaseLogic.Due(Rules, now, Sim.State.Get("procedure.current"), Sim.State.Get("training.mode"), errors, hints);
+            foreach (var id in hints) Toast($"「{ById(id)?.DisplayName ?? id}」{Rules?.hangingHint}");
+            foreach (var id in errors)
                 Sim.Bus.Publish(new ErrorDetected
                 {
                     errorId = notStowedRule != null ? notStowedRule.errorId : "ERR_Tool_NotStowedOnRoof", severity = notStowedRule != null ? notStowedRule.severity : Severity.Major,
                     what = notStowedRule?.what ?? "", why = notStowedRule?.why ?? "", fix = notStowedRule?.fix ?? "",
-                    stepId = Sim.State.Get("procedure.current"), toolId = t.ToolId, targetId = t.ToolId, time = SimClock.Now
+                    stepId = Sim.State.Get("procedure.current"), toolId = id, targetId = id, time = now
                 });
-            });
         }
 
         void Activate(ToolBase next)
@@ -222,6 +237,7 @@ namespace PantographSim.Tools
             Bind();
             if (!bound || !Sim.Ready) return;   // 結束 Play／場景卸載時服務已清掉
             if (Sim.State.GetBool("training.paused")) { PointerState.ScrollCaptured = false; return; }
+            TickRelease(SimClock.Now);
             if (!PointerState.TypingInUi)
                 for (int k = 1; k <= 9; k++)
                     if (Input.GetKeyDown(KeyCode.Alpha0 + k) || Input.GetKeyDown(KeyCode.Keypad0 + k)) Hint(k);

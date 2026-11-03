@@ -61,6 +61,7 @@ namespace PantographSim.Core
             if (s.GetBool(RoofOpenKey)) return "車頂有人作業，不能升弓";
             if (s.Get("lockout.raise_switch") == "locked") return "升弓開關已上鎖，不能升弓";
             if (s.Get("cab.cylinder_power") == "off") return "電動缸電源已關閉，不能升弓";
+            if (s.Get("ip.pan_assy.hold_down.state") == "Installed") return "降弓固定帶未拆";   // R1.5b b4 3d（鐵道）：WC_05 升弓時的後備，ERR_IN11_StrapLeft
             return null;
         }
 
