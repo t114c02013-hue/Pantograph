@@ -180,14 +180,19 @@ namespace PantographSim.Editor
         /// <summary>全部做一次（不存檔）：回傳兩門課的步驟；errors 有東西就不能存。sceneIds＝場景 ISimObject 的 ID。</summary>
         public static Dictionary<string, List<StepDefinition>> BuildAll(ICollection<string> sceneIds, List<string> errors, out List<Resolved> resolved)
         {
-            var ex = Expand(LoadSubActionRows(), errors);
-            var metas = Steps(LoadStepRows(), errors);
+            var subRows = LoadSubActionRows(); var stepRows = LoadStepRows();
+            var ex = Expand(subRows, errors);
+            var metas = Steps(stepRows, errors);
+            var defs = LoadErrorRules();
+            CheckErrorRefs(subRows, stepRows, defs, errors);
             var t = LoadTables(); var r1 = LoadR1();
             resolved = Resolve(ex, r1, t, errors);
             var toolIds = new HashSet<string>(R1Data.ToolSlots.slots.Select(s => s.toolId));
             CheckTargets(ex, sceneIds, toolIds, t, errors);
             var res = resolved;
-            return Courses.ToDictionary(c => c, c => BuildCourse(c, res, metas, r1));
+            var courses = Courses.ToDictionary(c => c, c => BuildCourse(c, res, metas, r1));
+            foreach (var st in courses.Values.SelectMany(x => x)) ApplyErrorDefs(st, defs, errors);
+            return courses;
         }
 
         [MenuItem("Tools/Import Steps")]

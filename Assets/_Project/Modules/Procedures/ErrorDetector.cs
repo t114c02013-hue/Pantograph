@@ -104,12 +104,16 @@ namespace PantographSim.Procedures
             if (s == null || runner.Finished || s.def.errors == null) return;
             var ctx = runner.ContextFor(s);
             foreach (var c in e.Changes)
-                foreach (var rule in s.def.errors)
+                foreach (var rule in ActiveRules(s.def))
                 {
                     if (fired.Contains(rule.errorId)) continue;
                     if (Triggered(rule, c, ctx, s)) Fire(rule, s, c.key);
                 }
         }
+
+        /// <summary>R1.5b K8：目前輸入模式下載入的錯誤規則（inputMode=desktop 的只在桌面模式；VR 讀數自動填入，抄錯讀數不會發生）。</summary>
+        public static IEnumerable<ErrorRule> ActiveRules(StepDefinition def) =>
+            (def.errors ?? Array.Empty<ErrorRule>()).Where(r => r.inputMode != "desktop" || !InputMode.XrActive);
 
         bool Triggered(ErrorRule r, StateChange c, EvalContext ctx, RuntimeStep s)
         {

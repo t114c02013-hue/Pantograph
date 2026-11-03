@@ -18,6 +18,9 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | b4:p3 | ErrorRule（b4 第 3 部分） |
 | b4:p4 | CourseDef 覆寫（b4 第 4 部分） |
 | b4:p5 | 兩門課跑到結算（b4 第 5 部分；機制沒有指定段落，做的時候回報） |
+| b4:p3b | 扭力類錯誤與 K3 降級（b4 第 3b 部分） |
+| b4:p3c | 天車安全錯誤與 CraneSafetyTests（b4 第 3c 部分） |
+| b4:p3d | 拆接地順序、車頂拆接地、固定帶遺留（b4 第 3d 部分） |
 
 ## 小動作（共 106 列）
 
@@ -146,3 +149,71 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | env.spare_shelf | b4:p4 |
 | consumable.carbon_strip | b4:p4 |
 | consumable.carbon_strip.measure_mid | b4:p4 |
+
+## 錯誤規則的觸發條件還沒做（Assets/_Project/Data/Source/ErrorRules.json 的 owner，共 61 條）
+
+ErrorRuleTests.PendingTriggers_ListedInStubsDoc 檢查兩邊一致。觸發做好時把 owner 清空，再刪掉這裡那一列。
+
+| 錯誤 | owner | 嚴重度 |
+|---|---|---|
+| ERR_CSR13_Under | b4:p3b | Critical |
+| ERR_CSR13_WrenchRange | b4:p3b | Minor |
+| ERR_CSR13_WrongSocket | b4:p3b | Minor |
+| ERR_IN06_WrongSocket | b4:p3b | Minor |
+| ERR_IN07_MarkMissing | b4:p3b | Major |
+| ERR_IN07_Order | b4:p3b | Major |
+| ERR_IN07_Over | b4:p3b | Major |
+| ERR_IN07_Setting | b4:p3b | Major |
+| ERR_IN07_Under | b4:p3b | Critical |
+| ERR_IN07_WrenchRange | b4:p3b | Minor |
+| ERR_IN07_WrongSocket | b4:p3b | Minor |
+| ERR_IN09_Over | b4:p3b | Major |
+| ERR_IN09_Setting | b4:p3b | Major |
+| ERR_IN09_Under | b4:p3b | Critical |
+| ERR_IN09_WrenchRange | b4:p3b | Minor |
+| ERR_IN09_WrongSocket | b4:p3b | Minor |
+| ERR_RM03_WrongSocket | b4:p3b | Minor |
+| ERR_RM04_WrongSocket | b4:p3b | Minor |
+| ERR_Crane_FastLowerEmptyHook | b4:p3c | Minor |
+| ERR_Crane_HoldDownMissing | b4:p3c | Critical |
+| ERR_Crane_LiftWhileFixed | b4:p3c | Major |
+| ERR_Crane_LowClearance | b4:p3c | Major |
+| ERR_Crane_NoTrialLift | b4:p3c | Major |
+| ERR_Crane_OperatorTooClose | b4:p3c | Major |
+| ERR_Crane_PersonOnRoofDuringLift | b4:p3c | Critical |
+| ERR_Crane_RiggedOnArm | b4:p3c | Critical |
+| ERR_Crane_RiggingNotInspected | b4:p3c | Critical |
+| ERR_Crane_SideLoad | b4:p3c | Major |
+| ERR_Crane_UnderMovingHook | b4:p3c | Major |
+| ERR_Crane_UnrigBeforeClamp | b4:p3c | Major |
+| ERR_Global_GroundRemovedWhileOnRoof | b4:p3d | Critical |
+| ERR_IN11_StrapLeft | b4:p3d | Major |
+| ERR_WC03_RemoveOrder | b4:p3d | Critical |
+| ERR_CSR01_IsolationIncomplete | b4:p4 | Major |
+| ERR_Global_GroundHangOrder | b4:p5 | Critical |
+| ERR_Global_GroundWithoutVoltageTest | b4:p5 | Critical |
+| ERR_Global_HarnessUnclipped | b4:p5 | Critical |
+| ERR_Global_HVDisconnectWithoutSecondGround | b4:p5 | Critical |
+| ERR_Global_NoDischargeAfterIR | b4:p5 | Major |
+| ERR_Global_RaiseUnderHook | b4:p5 | Critical |
+| ERR_Global_RaiseWithHoldDown | b4:p5 | Critical |
+| ERR_IN06_TightenBeforeAllThreaded | b4:p5 | Major |
+| ERR_IN09_Misaligned | b4:p5 | Major |
+| ERR_IN10_NotConnected | b4:p5 | Major |
+| ERR_RT02_IRFail | b4:p5 | Critical |
+| ERR_SI02_RaiseSwitchUnlocked | b4:p5 | Critical |
+| ERR_SI02_TagWithoutLock | b4:p5 | Critical |
+| ERR_SI03_CylinderPowerOn | b4:p5 | Critical |
+| ERR_Global_GroundNotCleared | b4c:ground_register | Critical |
+| ERR_Global_GroundNotRegistered | b4c:ground_register | Major |
+| ERR_Global_HoldPointRejected | b4c:holdpoint | Major |
+| ERR_Global_HoldPointSkipped | b4c:holdpoint | Critical |
+| ERR_Global_KeyLeftUnattended | b4c:lockout | Minor |
+| ERR_Global_NoHelmet | b4c:ppe | Critical |
+| ERR_Global_NoInsulatingGloves | b4c:ppe | Critical |
+| ERR_Global_PPEMissing | b4c:ppe | Major |
+| ERR_Global_StartWithoutPermit | b4c:si00 | Critical |
+| ERR_Global_StripReleasedOnRoof | b4c:strip_carry | Major |
+| ERR_WC01a_StripOnMat | b4c:strip_carry | Major |
+| ERR_Global_RoofFallZone | b4d | Major |
+| ERR_Global_TeleportWhileAnchored | b4d | Minor |

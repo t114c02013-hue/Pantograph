@@ -82,6 +82,8 @@ namespace PantographSim.Data
         public string expected;
         public int count;
         [Tooltip("Critical 時要求從這一步重做")] public bool blocks;
+        [Tooltip("R1.5b K3：考核模式且 ExamPolicyDef.k3Ready=false 時改記這個等級（空白＝不降級）")] public string severityBeforeK3 = "";
+        [Tooltip("R1.5b K8：desktop＝只在桌面模式載入（VR 讀數自動填入，例 ERR_CSR03_CopyError）；空白＝兩種都載入")] public string inputMode = "";
     }
 
     /// <summary>

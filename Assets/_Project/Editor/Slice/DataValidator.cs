@@ -22,6 +22,10 @@ namespace PantographSim.Editor
             "PantographSim.Worksite", "PantographSim.Procedures", "PantographSim.Safety", "PantographSim.Interaction"
         };
 
+        /// <summary>R1.5b K4：VR 指令（小動作的 text）不可出現鍵盤、滑鼠字樣。「按 R」這種單一按鍵算；「按 ZERO 鍵」是卡尺上的鍵，不算。</summary>
+        public static readonly System.Text.RegularExpressions.Regex XrKeyboardWords =
+            new System.Text.RegularExpressions.Regex(@"按\s?[A-Za-z0-9](?![A-Za-z0-9])|滑鼠|鍵盤|空白鍵|滾輪|左鍵|右鍵|Shift|Ctrl|Tab 鍵");
+
         [MenuItem("PantographSim/Slice/Validate Data")]
         public static void ValidateMenu()
         {
@@ -109,6 +113,16 @@ namespace PantographSim.Editor
                 if (stands.Count == 0) sb.AppendLine($"・{s.stepId}：小動作都在原地（B 鍵不傳送）");
             }
             if (badStand == 0) Pass($"小動作的站點都在 StationSet（{stationIds.Count} 站）");
+
+            // 5c. R1.5b K4：匯入的兩門課，VR 指令沒有鍵盤字樣
+            int keyboard = 0;
+            foreach (var c in StepsCsvImporter.Courses)
+            {
+                var course = AssetDatabase.LoadAssetAtPath<ProcedureDefinition>(StepsCsvImporter.ProcedurePath(c));
+                foreach (var s in course != null ? course.steps : new List<StepDefinition>())
+                    foreach (var a in s.subActions.Where(a => XrKeyboardWords.IsMatch(a.text ?? ""))) { keyboard++; Fail($"{c} {s.stepId} {a.subId} 的 VR 指令有鍵盤字樣：{a.text}"); }
+            }
+            if (keyboard == 0) Pass("兩門課的 VR 指令都沒有鍵盤字樣");
 
             // 6. 架構：UI 只引用 Core；功能層互不引用
             foreach (var path in Directory.GetFiles("Assets/_Project", "*.asmdef", SearchOption.AllDirectories))

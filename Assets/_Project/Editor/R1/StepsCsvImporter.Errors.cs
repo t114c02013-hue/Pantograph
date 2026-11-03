@@ -1,0 +1,77 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using PantographSim.Core;
+using PantographSim.Data;
+using UnityEngine;
+
+namespace PantographSim.Editor
+{
+    /// <summary>
+    /// R1.5b b4（第 3 部分）：ErrorRule 的唯一定義 Data/Source/ErrorRules.json（第 2 部分 2.6）。
+    /// CSV 的「ID:嚴重度」只是引用：ID 沒有定義、還在 PendingRuling、嚴重度不同、小動作的 errorIds 不在該步 Steps.errorIds 裡，都算匯入失敗（資深軟體 B 審查 S1）。
+    /// 產生的步驟沿用 R1 的錯誤規則（觸發條件），嚴重度、severityBeforeK3、inputMode 以這份為準。
+    /// </summary>
+    public static partial class StepsCsvImporter
+    {
+        public static string ErrorRulesPath => SourceFolder + "/ErrorRules.json";
+
+        [Serializable]
+        public class ErrorRuleDef
+        {
+            public string errorId, severity, severityBeforeK3, courses, inputMode, status, owner, source, trigger, note;
+        }
+
+        [Serializable] class ErrorRulesFile { public ErrorRuleDef[] rules = Array.Empty<ErrorRuleDef>(); }
+
+        public const string Defined = "Defined", PendingRuling = "PendingRuling";
+
+        public static Dictionary<string, ErrorRuleDef> LoadErrorRules() =>
+            JsonUtility.FromJson<ErrorRulesFile>(File.ReadAllText(ErrorRulesPath, Encoding.UTF8)).rules.ToDictionary(r => r.errorId);
+
+        /// <summary>CSV 的錯誤引用和 ErrorRules.json 比對（行號＋內容寫進 errors）。</summary>
+        public static void CheckErrorRefs(List<Row> subRows, List<Row> stepRows, Dictionary<string, ErrorRuleDef> defs, List<string> errors)
+        {
+            var stepRefs = new Dictionary<string, HashSet<string>>();
+            foreach (var r in stepRows)
+            {
+                var refs = ParseErrorRefs(r["errorIds"], s => errors.Add($"{r}：{s}"));
+                stepRefs[r["stepId"]] = new HashSet<string>(refs.Select(x => x.id));
+                Check(r, refs);
+            }
+            foreach (var r in subRows)
+            {
+                var refs = ParseErrorRefs(r["errorIds"], s => errors.Add($"{r}：{s}"));
+                Check(r, refs);
+                var stepIds = r["stepId"].Contains("{side}") ? new[] { r["stepId"].Replace("{side}", "L"), r["stepId"].Replace("{side}", "R") } : new[] { r["stepId"] };
+                foreach (var sid in stepIds)
+                    foreach (var x in refs.Where(x => !stepRefs.TryGetValue(sid, out var s) || !s.Contains(x.id)))
+                        errors.Add($"{r}：錯誤 {x.id} 不在 Steps.csv 的 {sid} errorIds 裡");
+            }
+
+            void Check(Row r, List<(string id, string severity)> refs)
+            {
+                foreach (var (id, sev) in refs)
+                {
+                    if (!defs.TryGetValue(id, out var d)) errors.Add($"{r}：錯誤 {id} 在 ErrorRules.json 沒有定義");
+                    else if (d.status != Defined) errors.Add($"{r}：錯誤 {id} 還沒裁定嚴重度（{d.status}）");
+                    else if (d.severity != sev) errors.Add($"{r}：錯誤 {id} 寫 {sev}，ErrorRules.json 是 {d.severity}");
+                }
+            }
+        }
+
+        /// <summary>產生的步驟：沿用的錯誤規則以 ErrorRules.json 的嚴重度為準，加上 K3 的 severityBeforeK3、K8 的 inputMode。</summary>
+        public static void ApplyErrorDefs(StepDefinition st, Dictionary<string, ErrorRuleDef> defs, List<string> errors)
+        {
+            foreach (var e in st.errors ?? Array.Empty<ErrorRule>())
+            {
+                if (!defs.TryGetValue(e.errorId, out var d)) { errors.Add($"{st.stepId}：沿用的錯誤 {e.errorId} 在 ErrorRules.json 沒有定義"); continue; }
+                e.severity = (Severity)Enum.Parse(typeof(Severity), d.severity);
+                e.severityBeforeK3 = d.severityBeforeK3 ?? "";
+                e.inputMode = d.inputMode ?? "";
+            }
+        }
+    }
+}
