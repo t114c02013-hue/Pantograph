@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
-  m_Name: STP_CSR_04_Measure_R
+  m_Name: _import_tmp
   m_EditorClassIdentifier: 
   stepId: STP_CSR_04_Measure_R
   title: "\u91CF\u5916\u5074\u6ED1\u677F\u4E09\u9EDE"
@@ -44,6 +44,7 @@ MonoBehaviour:
     count: 0
     blocks: 0
     severityBeforeK3: 
+    oncePerRun: 0
     inputMode: 
   - errorId: ERR_CSR04_CopyError
     severity: 0
@@ -63,6 +64,7 @@ MonoBehaviour:
     count: 0
     blocks: 0
     severityBeforeK3: 
+    oncePerRun: 0
     inputMode: desktop
   - errorId: ERR_CSR04_CopyError
     severity: 0
@@ -82,6 +84,7 @@ MonoBehaviour:
     count: 0
     blocks: 0
     severityBeforeK3: 
+    oncePerRun: 0
     inputMode: desktop
   - errorId: ERR_CSR04_CopyError
     severity: 0
@@ -101,6 +104,7 @@ MonoBehaviour:
     count: 0
     blocks: 0
     severityBeforeK3: 
+    oncePerRun: 0
     inputMode: desktop
   hints:
     text: "\u540C\u8098\u5074\uFF1A\u62FF\u5361\u5C3A\u9EDE\u4E09\u500B\u91CF\u6E2C\u9EDE\uFF0C\u7167\u6284\u8B80\u6578\u5230\u4F5C\u696D\u55AE\u3002"
@@ -123,6 +127,7 @@ MonoBehaviour:
     condition: ip.carbon_strip_R.measure_left.measured
     standPointId: tp.roof.outer
     subId: a
+    textDesktop: 
   - text: "\u91CF\u5916\u5074\u6ED1\u677F\u4E2D\u9EDE"
     why: 
     targetId: ip.carbon_strip_R.measure_mid
@@ -130,6 +135,7 @@ MonoBehaviour:
     condition: ip.carbon_strip_R.measure_mid.measured
     standPointId: tp.roof.outer
     subId: b
+    textDesktop: 
   - text: "\u91CF\u5916\u5074\u6ED1\u677F\u53F3\u5074\u9EDE"
     why: 
     targetId: ip.carbon_strip_R.measure_right
@@ -137,6 +143,7 @@ MonoBehaviour:
     condition: ip.carbon_strip_R.measure_right.measured
     standPointId: tp.roof.outer
     subId: c
+    textDesktop: 
   - text: "\u4E09\u500B\u8B80\u6578\u586B\u5165\u4F5C\u696D\u55AE"
     why: 
     targetId: env.work_order.readings_R
@@ -144,6 +151,7 @@ MonoBehaviour:
     condition: workorder.reading.R.submitted
     standPointId: tp.roof.outer
     subId: d
+    textDesktop: "\u628A\u4E09\u500B\u8B80\u6578\u586B\u5165\u4F5C\u696D\u55AE"
   - text: "\u628A\u6E38\u6A19\u5361\u5C3A\u6536\u56DE\u5DE5\u5177\u888B"
     why: 
     targetId: env.tool_rack.slot_5
@@ -151,6 +159,7 @@ MonoBehaviour:
     condition: tool.active=
     standPointId: tp.roof.outer
     subId: e
+    textDesktop: 
   presetDone: 0
   side: R
   presetStates: []

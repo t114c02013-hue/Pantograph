@@ -10,6 +10,8 @@ namespace PantographSim.UI
     {
         RectTransform root;
         readonly List<(string id, Image bg, Text num, Text name)> buttons = new List<(string, Image, Text, Text)>();
+        Image pouchBg;
+        readonly List<string> slotKeys = new List<string>();
         string builtFor = "";
         string requiredTool = "";
 
@@ -27,12 +29,29 @@ namespace PantographSim.UI
             foreach (Transform c in root) Object.Destroy(c.gameObject);
             buttons.Clear();
             Add("", "手", "放回");
+            AddPouch();
+            slotKeys.Clear();
             foreach (var entry in list.Split(';'))
             {
                 var f = entry.Split('|');
-                if (f.Length >= 3) Add(f[1], f[0], f[2]);
+                if (f.Length >= 3) { Add(f[1], f[0], f[2]); slotKeys.Add("rack.slot_" + f[0]); }
             }
             builtFor = list;
+        }
+
+        /// <summary>R1.5b b4（D30）：桌面版腰包按鈕。點一下＝手上的工具收進腰包，或（手空著）從腰包拿出；和 VR 伸手到腰間相同（ToolBelt 處理）。</summary>
+        public static (string target, string text) PouchRequest => (SimIds.WaistPouch, "click");
+
+        void AddPouch()
+        {
+            var b = Ui.Button(root, "", 16, () => Ui.Send(PouchRequest.target, PouchRequest.text));
+            Ui.Size(b, 88, 88);
+            Object.Destroy(Ui.LabelOf(b).gameObject);
+            var num = Ui.Text(b.transform, "包", 34, Color.white, TextAnchor.UpperCenter, FontStyle.Bold);
+            Ui.Stretch(num.rectTransform, 2, 4, 2, 34);
+            var nm = Ui.Text(b.transform, "腰包", 16, Ui.Muted, TextAnchor.LowerCenter);
+            Ui.Stretch(nm.rectTransform, 2, 50, 2, 6);
+            pouchBg = b.GetComponent<Image>();
         }
 
         void Add(string toolId, string key, string name)
@@ -57,6 +76,7 @@ namespace PantographSim.UI
             if (list != builtFor && list.Length > 0) Build(list);
             string active = s.Get(SimIds.ActiveTool);
             float blink = Ui.Blink(6f);
+            if (pouchBg != null) pouchBg.color = slotKeys.Exists(k => s.Get(k) == SimIds.RackInPouch) ? Ui.ButtonOn : Ui.ButtonBg;   // 腰包裡有東西＝亮
             foreach (var (id, bg, num, name) in buttons)
             {
                 bool isActive = id == active;

@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
-  m_Name: STP_SI_05_Grounding
+  m_Name: _import_tmp
   m_EditorClassIdentifier: 
   stepId: STP_SI_05_Grounding
   title: "\u639B\u63A5\u5730\u68D2"
@@ -41,6 +41,9 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: "\u9806\u5E8F\uFF1A\u7AEF\u5B50 \u2192 \u62C9\u7DDA \u2192 \u5F13\u982D\u3002\u5148\u639B\u5F13\u982D\u7AEF\u6703\u88AB\u64CB\u4E0B\u3002"
     why: "\u842C\u4E00\u6709\u96FB\uFF0C\u96FB\u6D41\u6703\u8D70\u63A5\u5730\u7DDA\u800C\u4E0D\u662F\u4F60\u7684\u8EAB\u9AD4\uFF1B\u5148\u63A5\u5927\u5730\u7AEF\u624D\u5B89\u5168\u3002"
@@ -63,6 +66,7 @@ MonoBehaviour:
     condition: tool.active=tool.grounding_rod
     standPointId: tp.platform.ground
     subId: a
+    textDesktop: 
   - text: "\u63A5\u5730\u593E\u593E\u4E0A\u63A5\u5730\u7AEF\u5B50"
     why: 
     targetId: ip.depot.ground_terminal
@@ -70,6 +74,7 @@ MonoBehaviour:
     condition: isolation.terminal_clamped
     standPointId: tp.platform.ground
     subId: b
+    textDesktop: "\u628A\u63A5\u5730\u593E\u593E\u4E0A\u63A5\u5730\u7AEF\u5B50"
   - text: "\u62C9\u4E00\u4E0B\u63A5\u5730\u7DDA\u78BA\u8A8D"
     why: 
     targetId: ip.depot.ground_terminal
@@ -77,6 +82,7 @@ MonoBehaviour:
     condition: isolation.pull_tested
     standPointId: tp.platform.ground
     subId: c
+    textDesktop: 
   - text: "\u639B\u9264\u639B\u4E0A\u5F13\u982D\u63A5\u5730\u9EDE"
     why: 
     targetId: ip.pan_head.ground_clamp
@@ -84,6 +90,7 @@ MonoBehaviour:
     condition: isolation.head_clamped
     standPointId: tp.platform.ground
     subId: d
+    textDesktop: "\u628A\u639B\u9264\u639B\u4E0A\u5F13\u982D\u63A5\u5730\u9EDE"
   - text: "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u767B\u8A18 #1 \u63A5\u5730\u68D2"
     why: 
     targetId: env.work_order.ground_register
@@ -91,6 +98,7 @@ MonoBehaviour:
     condition: ground_register.1=registered
     standPointId: tp.platform.ground
     subId: e
+    textDesktop: 
   presetDone: 0
   side: 
   presetStates: []

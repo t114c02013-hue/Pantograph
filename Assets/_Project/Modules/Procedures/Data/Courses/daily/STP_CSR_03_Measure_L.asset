@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
-  m_Name: STP_CSR_03_Measure_L
+  m_Name: _import_tmp
   m_EditorClassIdentifier: 
   stepId: STP_CSR_03_Measure_L
   title: "\u91CF\u8098\u5074\u6ED1\u677F\u4E09\u9EDE"
@@ -45,6 +45,7 @@ MonoBehaviour:
     count: 0
     blocks: 0
     severityBeforeK3: 
+    oncePerRun: 0
     inputMode: 
   - errorId: ERR_CSR03_CopyError
     severity: 0
@@ -64,6 +65,7 @@ MonoBehaviour:
     count: 0
     blocks: 0
     severityBeforeK3: 
+    oncePerRun: 0
     inputMode: desktop
   - errorId: ERR_CSR03_CopyError
     severity: 0
@@ -83,6 +85,7 @@ MonoBehaviour:
     count: 0
     blocks: 0
     severityBeforeK3: 
+    oncePerRun: 0
     inputMode: desktop
   - errorId: ERR_CSR03_CopyError
     severity: 0
@@ -102,6 +105,7 @@ MonoBehaviour:
     count: 0
     blocks: 0
     severityBeforeK3: 
+    oncePerRun: 0
     inputMode: desktop
   hints:
     text: "\u62FF\u5361\u5C3A\u9EDE\u6ED1\u677F\u4E0A\u4E09\u500B\u85CD\u8272\u91CF\u6E2C\u9EDE\uFF0C\u628A\u5361\u5C3A\u8B80\u6578\u6284\u9032\u4F5C\u696D\u55AE\u3002"
@@ -123,6 +127,7 @@ MonoBehaviour:
     condition: ip.carbon_strip_L.measure_left.measured
     standPointId: tp.roof.inner
     subId: a
+    textDesktop: 
   - text: "\u91CF\u8098\u5074\u6ED1\u677F\u4E2D\u9EDE"
     why: 
     targetId: ip.carbon_strip_L.measure_mid
@@ -130,6 +135,7 @@ MonoBehaviour:
     condition: ip.carbon_strip_L.measure_mid.measured
     standPointId: tp.roof.inner
     subId: b
+    textDesktop: 
   - text: "\u91CF\u8098\u5074\u6ED1\u677F\u53F3\u5074\u9EDE"
     why: 
     targetId: ip.carbon_strip_L.measure_right
@@ -137,6 +143,7 @@ MonoBehaviour:
     condition: ip.carbon_strip_L.measure_right.measured
     standPointId: tp.roof.inner
     subId: c
+    textDesktop: 
   - text: "\u4E09\u500B\u8B80\u6578\u586B\u5165\u4F5C\u696D\u55AE"
     why: 
     targetId: env.work_order.readings_L
@@ -144,6 +151,7 @@ MonoBehaviour:
     condition: workorder.reading.L.submitted
     standPointId: tp.roof.inner
     subId: d
+    textDesktop: "\u628A\u4E09\u500B\u8B80\u6578\u586B\u5165\u4F5C\u696D\u55AE"
   presetDone: 0
   side: L
   presetStates: []

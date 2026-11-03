@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
-  m_Name: STP_CSR_11_Install_R
+  m_Name: _import_tmp
   m_EditorClassIdentifier: 
   stepId: STP_CSR_11_Install_R
   title: "\u5B89\u88DD\u65B0\u6ED1\u677F\uFF08\u5916\u5074\uFF09"
@@ -41,6 +41,9 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 1
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: "\u6309 R \u8F49\u5230\u7BAD\u982D\u671D\u5916\uFF0C\u518D\u5F92\u624B\u9EDE\u6258\u67B6\u653E\u4E0B\u3002"
     why: "\u659C\u9762\u662F\u8B93\u67B6\u7A7A\u7DDA\u5E73\u9806\u6ED1\u5165\u7684\u5C0E\u89D2\uFF0C\u88DD\u53CD\u6703\u522E\u7DDA\u3001\u8DF3\u5F13\u3002"
@@ -61,6 +64,7 @@ MonoBehaviour:
     condition: part.carbon_strip_R.over_bracket
     standPointId: tp.roof.outer
     subId: a
+    textDesktop: 
   - text: "\u8F49\u52D5\u624B\u8155\u628A\u65B0\u6ED1\u677F\u7FFB\u9762\uFF0C\u8B93\u7BAD\u982D\u671D\u5916"
     why: 
     targetId: "consumable.carbon_strip\uFF08\u624B\u6301\u65B0\u6ED1\u677F\uFF09"
@@ -68,6 +72,7 @@ MonoBehaviour:
     condition: part.carbon_strip_R.new_orientation=out
     standPointId: tp.roof.outer
     subId: b
+    textDesktop: "\u6309 R \u8B93\u7BAD\u982D\u671D\u5916"
   - text: "\u5C0D\u6E96\u87BA\u6813\u5B54\u653E\u4E0B"
     why: 
     targetId: ip.carbon_strip_R.install_target
@@ -75,6 +80,7 @@ MonoBehaviour:
     condition: part.carbon_strip_R.state=NewMounted && part.carbon_strip_R.install_distance_cm<=0.5
     standPointId: tp.roof.outer
     subId: c
+    textDesktop: 
   presetDone: 0
   side: R
   presetStates: []

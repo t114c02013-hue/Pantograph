@@ -105,6 +105,7 @@ namespace PantographSim.Data
         [Tooltip("完成條件")] public string condition;
         [Tooltip("站點 ID（R1：B 鍵傳到這一站；tp.roof.{side} 依側別展開成 tp.roof.inner／tp.roof.outer）")] public string standPointId;
         [Tooltip("R1.5b：展開後的小動作 ID（a、d1、b2…；R1 的資料空白）")] public string subId = "";
+        [Tooltip("R1.5b K4：桌面版指令（空白＝和 text 相同；text 是 VR 版）")] public string textDesktop = "";
 
         /// <summary>tp.roof.L → tp.roof.inner、tp.roof.R → tp.roof.outer（肘側／外側）。</summary>
         public static string ExpandStand(string stand, string side)

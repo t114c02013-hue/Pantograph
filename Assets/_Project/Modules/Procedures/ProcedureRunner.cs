@@ -277,11 +277,14 @@ namespace PantographSim.Procedures
             Evaluate();
         }
 
+        /// <summary>R1.5b K4：教學面板依目前輸入模式顯示對應的指令（VR＝text；桌面＝textDesktop，空白就用 text）。</summary>
+        public static string TextFor(SubAction a) => !InputMode.XrActive && !string.IsNullOrEmpty(a.textDesktop) ? a.textDesktop : a.text;
+
         /// <summary>本步的小動作（已展開側別）。</summary>
         public static SubAction[] SubActions(RuntimeStep s) =>
             (s.def.subActions ?? Array.Empty<SubAction>()).Select(a => new SubAction
             {
-                text = StateKeys.Expand(a.text, s.side), why = StateKeys.Expand(a.why, s.side), targetId = StateKeys.Expand(a.targetId, s.side),
+                text = StateKeys.Expand(TextFor(a), s.side), why = StateKeys.Expand(a.why, s.side), targetId = StateKeys.Expand(a.targetId, s.side), textDesktop = StateKeys.Expand(a.textDesktop ?? "", s.side),
                 toolId = a.toolId, condition = StateKeys.Expand(a.condition, s.side), standPointId = SubAction.ExpandStand(a.standPointId, s.side), subId = a.subId ?? ""
             }).ToArray();
 
