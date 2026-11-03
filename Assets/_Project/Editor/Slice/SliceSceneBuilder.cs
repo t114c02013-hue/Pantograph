@@ -50,7 +50,8 @@ namespace PantographSim.Editor
         {
             var sb = new StringBuilder();
             sb.AppendLine(StepJsonImporter.Import());
-            sb.AppendLine(ToolSocketSetup.Apply());   // a6 增補 7（D39）：套筒目錄、扳手 ToolDef、tool_sockets.json
+            sb.AppendLine(ToolSocketSetup.Apply());
+            sb.AppendLine("R1.5b 步驟資料（SubActions.csv／Steps.csv 展開）：" + StepsCsvImporter.CountsReport());   // a6 增補 7（D39）：套筒目錄、扳手 ToolDef、tool_sockets.json
             sb.AppendLine(SliceModelBuilder.Build());
             var mats = SliceModelBuilder.Materials();
 

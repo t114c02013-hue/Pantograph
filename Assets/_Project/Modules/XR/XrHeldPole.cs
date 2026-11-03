@@ -12,7 +12,7 @@ namespace PantographSim.XR
     ///   位置每幀直接等於手的目標位置（等同 XRI 的 Instantaneous），不會被場景推開。
     /// ・桿身的 collider 換到 HeldPole 層（碰撞矩陣只和 ContactTarget 互動），放回桿架後換回原本的層。
     /// ・桿身穿過場景物件時，兩手各輕震一次（振幅、時間讀資料）；同一個物件 hapticCooldown 秒內不重複。不記錯、不顯示文字。互動判定照舊只看桿頭。
-    /// shortcut: 雙手握持用自己算的姿態（後手→前手），沒有用 XRI XRGrabInteractable 多選取＋XRGeneralGrabTransformer（R1 的手持工具不是 XRI 互動物件，改成 XRI 要整個換掉工具握持方式）, 頭盔試玩覺得手感不對再改用 XRI
+    /// shortcut: 雙手握持用自己算的姿態（後手→前手），只支援長桿；R1 的手持工具不是 XRI 互動物件, 等手持工具改成 XRI 互動物件時再改用 XRI 的 XRGrabInteractable 多選取＋XRGeneralGrabTransformer（軟體工程裁定 2026-11-03）
     /// </summary>
     public class XrHeldPole : MonoBehaviour
     {
