@@ -507,6 +507,7 @@ namespace PantographSim.Editor
 
             BuildMaintenanceArea(res, d, mats, mWarn, sb);   // R1.5a a4：地面維修區（台架、工作檯）
             BuildCraneAndRigging(res, d, aDock, sb);            // R1.5a a5：天車、遙控器、吊具、工具袋（靜態）
+            WireRigging(res, d, sb);                            // R1.5b b2：吊運（集電弓狀態機、對位燈、台架夾具、吊物探測 collider）
             var pieces = new[] { roof.root, plat.root, stair.root, cab.root, back.root }.Concat(res.equipment).ToList();
             foreach (var p in pieces) SavePrefab(p);
             sb.AppendLine("場景件 prefab：ENV_Insulators、" + string.Join("、", pieces.Select(t => t.name)) + $"（{PrefabFolder}）");
@@ -844,6 +845,87 @@ namespace PantographSim.Editor
             t.localScale = s;
         }
 
+        public const string LoadProbeLayer = "LoadProbe";
+
+        /// <summary>D40：台車底面（Crane_Hoist、Crane_Trolley 自己的網格頂點最低 Y）、吊鉤組頂面（Crane_HookBlock 自己的網格頂點最高 Y，不含吊梁等子物件），回傳（間距, 台車底面, 吊鉤組頂面）。</summary>
+        public static (float gap, float hoistBottom, float hookTop) HookTopGap(Transform hookBlock, Transform trolley)
+        {
+            float Ys(Transform t, bool max)
+            {
+                var mf = t.GetComponent<MeshFilter>(); if (mf == null || mf.sharedMesh == null) return max ? float.MinValue : float.MaxValue;
+                var ys = mf.sharedMesh.vertices.Select(v => t.TransformPoint(v).y);
+                return max ? ys.Max() : ys.Min();
+            }
+            var hoist = trolley.GetComponentsInChildren<Transform>(true).FirstOrDefault(x => x.name == "Crane_Hoist");
+            float bottom = Mathf.Min(Ys(trolley, false), hoist != null ? Ys(hoist, false) : float.MaxValue);
+            float top = Ys(hookBlock, true);
+            return (bottom - top, bottom, top);
+        }
+
+        /// <summary>
+        /// R1.5b b2（crane-software v0.5 §2.3、§3.1；a5 留下的第 2 件事）：PAN_Root 掛 PanAssyRigging；整體 Box 改成吊物探測 collider（LoadProbe 層、trigger、只在 Lifted 時開，
+        /// 碰撞矩陣只和 Default、Boundary 互動，不和手、工具、清潔布互動）；台架夾具 env.panto_stand.clamp_n；落點：台架＝StandSeat_n 的 XZ、高度＝台架頂面＋BaseHole 在 PAN_Root 的高度，
+        /// 車頂＝InsulatorTop_n；對位燈：台架 AlignLight_n（依最近的定位銷編號）、車頂在每個絕緣子旁加一顆。
+        /// </summary>
+        static void WireRigging(Result res, RoofSceneDef d, StringBuilder sb)
+        {
+            var rigging = R1Data.Rigging;
+            var root = GameObject.Find(PantographAssemblyBuilder.RootName).transform;
+            var holes = Enumerable.Range(1, 4).Select(i => root.Find("PAN_Base/BaseHole_" + i)).ToArray();
+            int probeLayer = EnsureLayer(LoadProbeLayer);
+            for (int i = 0; i < 32; i++) Physics.IgnoreLayerCollision(probeLayer, i, !(i == 0 || i == LayerMask.NameToLayer(SceneLayers.Boundary)));   // 寫進專案的碰撞矩陣
+            var box = root.GetComponent<BoxCollider>();
+            box.isTrigger = true; box.enabled = false; root.gameObject.layer = probeLayer;
+            var standP = res.env.Find("ENV_PantographStand");
+            var standAll = standP.GetComponentsInChildren<Transform>(true);
+            var pins = new Transform[4];
+            for (int n = 1; n <= 4; n++)
+            {
+                var seat = standAll.First(x => x.name == "StandSeat_" + n);
+                var t = new GameObject("SeatTarget_" + n).transform; t.SetParent(standP.Find("Anchors"), false);
+                t.position = new Vector3(seat.position.x, d.StandTopY + (holes[n - 1].position.y - root.position.y), seat.position.z);
+                pins[n - 1] = t;
+            }
+            var lightsAll = standAll.Where(x => x.name.StartsWith("AlignLight_")).ToList();
+            var standLights = pins.Select(p => lightsAll.OrderBy(l => Vector2.Distance(new Vector2(l.position.x, l.position.z), new Vector2(p.position.x, p.position.z))).First().GetComponent<Renderer>()).ToArray();
+            for (int k = 1; k <= 2; k++)
+            {
+                var c = standAll.FirstOrDefault(x => x.name == "StandClamp_" + k);
+                if (c == null) continue;
+                if (c.GetComponent<Collider>() == null) c.gameObject.AddComponent<BoxCollider>();
+                c.gameObject.AddComponent<InteractionPointMarker>().Configure("env.panto_stand.clamp_" + k, $"台架夾具 {k}");
+                res.ids["env.panto_stand.clamp_" + k] = c;
+            }
+            var tops = Enumerable.Range(1, 4).Select(i => res.env.GetComponentsInChildren<Transform>(true).First(x => x.name == "InsulatorTop_" + i)).ToArray();
+            var roofLights = tops.Select(t =>
+            {
+                var g = Box("AlignLight_Roof_" + t.name.Substring(t.name.Length - 1), t, t.position + new Vector3(0f, 0.05f, 0.12f), new Vector3(0.04f, 0.04f, 0.04f), Mat("alignLight", new Color(0.2f, 0.9f, 0.3f)), collider: false);
+                return g.GetComponent<Renderer>();
+            }).ToArray();
+            foreach (var r in standLights.Concat(roofLights)) r.enabled = false;   // 吊物在落點上方 indicatorRange 內才亮
+            var crane = Object.FindObjectOfType<PantographSim.Parts.Mechanism.CraneMechanism>(true);
+            crane.SetRigging(rigging);
+            var latch = crane.GetComponentsInChildren<Transform>(true).First(x => x.name == "Hook_Latch");   // LF_01 舌片：part.crane.hook（Operate 切換 part.crane.hook.latched）
+            if (latch.GetComponent<Collider>() == null) latch.gameObject.AddComponent<BoxCollider>();
+            latch.gameObject.AddComponent<InteractionPointMarker>().Configure(PantographSim.Parts.Mechanism.PanAssyRigging.HookId, "吊鉤安全舌片");
+            res.ids[PantographSim.Parts.Mechanism.PanAssyRigging.HookId] = latch;
+            var rig = root.GetComponent<PantographSim.Parts.Mechanism.PanAssyRigging>() ?? root.gameObject.AddComponent<PantographSim.Parts.Mechanism.PanAssyRigging>();
+            rig.Setup(rigging, crane, holes, pins, tops, standLights, roofLights, box);
+            sb.AppendLine($"吊運（b2）：LoadProbe 層 {probeLayer}（只和 Default、Boundary 互動）；台架落點 Y {pins[0].position.y:0.000}；對位燈 台架 {standLights.Length}、車頂 {roofLights.Length}；吸附 {rigging.snapRadius} m");
+        }
+
+        /// <summary>沒有這個 layer 就加在第一個空的使用者 layer（8 以後）。</summary>
+        static int EnsureLayer(string name)
+        {
+            int existing = LayerMask.NameToLayer(name);
+            if (existing >= 0) return existing;
+            var tm = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+            var layers = tm.FindProperty("layers");
+            for (int i = 8; i < layers.arraySize; i++)
+                if (string.IsNullOrEmpty(layers.GetArrayElementAtIndex(i).stringValue)) { layers.GetArrayElementAtIndex(i).stringValue = name; tm.ApplyModifiedProperties(); return i; }
+            throw new System.Exception("沒有空的 layer 可以放 " + name);
+        }
+
         /// <summary>
         /// R1.5a a5：天車 ENV_OverheadCrane（env.crane；走行軌道 X craneRunwayEastX／WestX、Z ±craneRunwayHalfLength；橋停在 Z craneParkZ，小車 X craneParkTrolleyX，吊鉤在最高點，不擋站點視線）、
         /// 遙控器 ENV_CraneRemote（env.crane_pendant，掛在 PendantDock，不能拿）、吊具 ENV_Sling（env.sling_1..4，掛在維修區的吊具架）、工具袋 ENV_ToolPouch（env.tool_bag，零件袋 env.tool_bag.bolt_pouch，放在工作檯上）。
@@ -864,6 +946,16 @@ namespace PantographSim.Editor
             trolley.position = new Vector3(d.craneParkTrolleyX, trolley.position.y, d.craneParkZ);
             var hook = N("Crane_HookBlock");
             hook.position = new Vector3(d.craneParkTrolleyX, bridge.position.y - d.hookTopBelowBridge, d.craneParkZ);
+            // D40（鐵道）：吊鉤上限位＝吊鉤組頂點最高點到台車底面（Crane_Hoist／Crane_Trolley 頂點最低點）留 hookTopClearance；在原本的最高點已經不夠就往下移
+            var profile = R1Data.Crane;
+            var (gap, hoistBottom, hookTop) = HookTopGap(hook, trolley);
+            float pivot0 = hook.position.y;
+            if (gap < profile.hookTopClearance - 1e-4f) hook.position += Vector3.down * (profile.hookTopClearance - gap);
+            profile.hookYMax = Mathf.Round(hook.position.y * 1000f) / 1000f; EditorUtility.SetDirty(profile);
+            hook.position = new Vector3(hook.position.x, profile.hookYMax, hook.position.z);
+            var (gap1, _, hookTop1) = HookTopGap(hook, trolley);
+            if (gap1 < profile.hookTopClearance - 1e-3f) throw new Exception($"D40：吊鉤上限位 {profile.hookYMax} 時吊鉤組頂面到台車底面只有 {gap1:0.000} m（要 ≥ {profile.hookTopClearance}）");
+            sb.AppendLine($"D40 吊鉤上限位：台車底面（Crane_Hoist／Crane_Trolley 頂點最低）Y {hoistBottom:0.000}；吊鉤 pivot 在 {pivot0:0.000} 時吊鉤組頂面（頂點最高）Y {hookTop:0.000}、間距 {gap:0.000} m → hookYMax（pivot）{profile.hookYMax:0.000}，頂面 Y {hookTop1:0.000}、間距 {gap1:0.000} m（≥ {profile.hookTopClearance}）");
             var anchor = N("Crane_RopeAnchor"); var rope = N("Crane_Rope");
             float ropeLen = Mathf.Max(0.05f, anchor.position.y - hook.position.y - 0.2f);
             rope.position = new Vector3(hook.position.x, hook.position.y + 0.2f + ropeLen / 2f, hook.position.z);
@@ -884,9 +976,7 @@ namespace PantographSim.Editor
             sb.AppendLine($"吊梁 ENV_LiftingBeam（G2）：梁長 {beam.GetComponent<Renderer>().bounds.size.x:0.000} m（沿 X）、吊耳間距 {Vector3.Distance(eyeL.position, eyeR.position):0.000} m");
             foreach (var n in new[] { "Hook_AttachPoint", "Beam_SlingEye_L", "Beam_SlingEye_R", "Crane_RopeAnchor" }) Anchor(craneP.anchors, "Anchor_" + n, N(n).position, Vector3.zero);
             res.equipment.Add(craneP.root);
-            // R1.5b b1：天車機構（讀 ctrl.crane.*）。上限位＝建置時吊鉤所在的最高點（量測寫回 CraneProfile.hookYMax）；晃動只轉吊梁
-            var profile = R1Data.Crane;
-            profile.hookYMax = Mathf.Round(hook.position.y * 1000f) / 1000f; EditorUtility.SetDirty(profile);
+            // R1.5b b1：天車機構（讀 ctrl.crane.*）。上限位 CraneProfile.hookYMax 上面已依 D40 量測寫回；晃動只轉吊梁
             var craneRules = StepJsonImporter.LoadAll<SafetyRuleDefinition>(StepJsonImporter.SafetyFolder).Where(x => x.kind == SafetyRuleKind.CranePersonUnderLoad || x.kind == SafetyRuleKind.CraneCollision).ToArray();
             craneP.root.gameObject.AddComponent<PantographSim.Parts.Mechanism.CraneMechanism>().Setup(profile, bridge, trolley, hook, anchor, rope, beam, craneRules);
             sb.AppendLine($"天車機構（b1）：上限位 Y {profile.hookYMax:0.000}、小車 X {profile.trolleyXMin}…{profile.trolleyXMax}、橋架 Z {profile.bridgeZMin}…{profile.bridgeZMax}、安全規則 {craneRules.Length} 條");

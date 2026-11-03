@@ -81,7 +81,7 @@ namespace PantographSim.Tests
                 }
                 Assert.AreEqual("part.pan_assy", root.GetComponent<ISimObject>()?.Id);
                 var sims = Object.FindObjectsOfType<MonoBehaviour>(true).OfType<ISimObject>().Where(o => ((Component)o).gameObject.scene == scene)
-                    .Where(o => o.Id.StartsWith("part.") || o.Id.StartsWith("ip.pan_") || o.Id.StartsWith("ip.carbon_strip_")).ToList();
+                    .Where(o => (o.Id.StartsWith("part.") && !o.Id.StartsWith("part.crane.")) || o.Id.StartsWith("ip.pan_") || o.Id.StartsWith("ip.carbon_strip_")).ToList();   // part.crane.hook（R1.5b b2，CSV 的吊鉤 ID）是天車的，不是集電弓的零件
                 Assert.Greater(sims.Count, 30);
                 foreach (var o in sims) Assert.IsTrue(((Component)o).transform.IsChildOf(root), o.Id + " 不在 PAN_Root 底下");
                 var mech = root.GetComponentInChildren<PantographMechanism>(true);

@@ -24,6 +24,9 @@ namespace PantographSim.XR
         [SerializeField] string startPointId = "tp.platform.lift";
         [SerializeField] XrFader fader;
         [SerializeField] float launchSpeed = 7f, snapRadius = 1.6f;
+        [Tooltip("R1.5b b2：傳送限制（吊物懸空一律不能傳送）")] [SerializeField] PantographSim.Data.TeleportRule rule;
+
+        public void SetRule(PantographSim.Data.TeleportRule r) { rule = r; XrTeleportPoint.Rule = r; }
 
         bool aiming;
         XrTeleportPoint target;
@@ -47,6 +50,7 @@ namespace PantographSim.XR
 
         void Start()
         {
+            XrTeleportPoint.Rule = rule;
             if (arc != null) arc.enabled = false;
             foreach (var p in points) p.ShowMarker(false, false, false, null);   // 名稱只在瞄準時顯示；地上的標記由 XrStations 每幀上色
         }

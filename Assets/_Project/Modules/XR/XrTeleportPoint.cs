@@ -1,4 +1,5 @@
 using PantographSim.Core;
+using PantographSim.Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -27,7 +28,9 @@ namespace PantographSim.XR
         public string PointId => pointId;
         public string Label => label;
         public string LockKey => lockKey;
-        public string LockedMessage => lockedMessage;
+        public string LockedMessage => Rule?.BlockReason(Sim.State, pointId) ?? lockedMessage;
+        /// <summary>R1.5b b2：傳送限制（TeleportRule，XrTeleport 啟動時設定）；擋下時這一站算 Locked，訊息用規則的。</summary>
+        public static TeleportRule Rule;
         public string Floor => floor;
         public string SharedWith => sharedWith;
         public bool HasMarker => marker != null;
@@ -46,7 +49,7 @@ namespace PantographSim.XR
         /// <summary>同一點（自己或共用的那一站）。</summary>
         public bool Same(string id) => id == pointId || (!string.IsNullOrEmpty(sharedWith) && id == sharedWith);
 
-        public bool Unlocked(ISimState s) => string.IsNullOrEmpty(lockKey) || (s != null && s.GetBool(lockKey));
+        public bool Unlocked(ISimState s) => (string.IsNullOrEmpty(lockKey) || (s != null && s.GetBool(lockKey))) && Rule?.BlockReason(s, pointId) == null;
 
         /// <summary>B 鍵要不要傳到 target（純函式；值對應 XrTeleport.GoResult：0 Moved、1 AlreadyThere、2 Locked、3 Missing）。</summary>
         public static int Decide(XrTeleportPoint target, XrTeleportPoint current, ISimState s)

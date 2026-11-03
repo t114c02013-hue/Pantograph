@@ -21,7 +21,7 @@ namespace PantographSim.Tests
         static Transform Named(UnityEngine.SceneManagement.Scene s, string n) => s.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<Transform>(true)).FirstOrDefault(t => t.name == n);
 
         /// <summary>在降弓姿態跑一次 CheckScene（mutate 可以先改場景，量完一律還原）。</summary>
-        static StationLayoutCheck.SceneResult Run(UnityEngine.SceneManagement.Scene scene, Action<System.Collections.Generic.Dictionary<string, XrTeleportPoint>> mutate = null, StationSet set = null)
+        internal static StationLayoutCheck.SceneResult Run(UnityEngine.SceneManagement.Scene scene, Action<System.Collections.Generic.Dictionary<string, XrTeleportPoint>> mutate = null, StationSet set = null, RoofSceneDef def = null)
         {
             var ids = StationTests.SceneIds(scene);
             var pts = Object.FindObjectsOfType<XrTeleportPoint>(true).Where(p => p.gameObject.scene == scene).ToDictionary(p => p.PointId);
@@ -34,7 +34,7 @@ namespace PantographSim.Tests
             {
                 mutate?.Invoke(pts);
                 Physics.SyncTransforms();
-                return StationLayoutCheck.CheckScene(set ?? Set, Def, pts.Values, id => ids.TryGetValue(id ?? "", out var t) ? t : null, footprints, A6Tests.Wrench);
+                return StationLayoutCheck.CheckScene(set ?? Set, def ?? Def, pts.Values, id => ids.TryGetValue(id ?? "", out var t) ? t : null, footprints, A6Tests.Wrench);
             }
             finally
             {

@@ -43,14 +43,14 @@ namespace PantographSim.Editor
                 S("socket.10", "TL_Socket_10", 0.5f, 10, 0.038f, 0.022f, "EX（v1.3 §7.2，錯誤選項）"),
                 S("socket.13", "TL_Socket_13", 0.5f, 13, 0.038f, 0.022f, "EX（v1.3 §7.2）", "ip.carbon_strip_*.bolt_*"),
                 S("socket.17", "TL_Socket_17", 0.5f, 17, 0.038f, 0.024f, "EX（v1.3 §7.2，錯誤選項）"),
-                S("socket.19", "TL_Socket_19", 0.5f, 19, 0.035f, 0.028f, "D38", "ip.pan_assy.hv_terminal.bolt_*"),
+                S("socket.19", "TL_Socket_19", 0.5f, 19, 0.035f, 0.028f, "D38", "part.pan_assy.hv_bolt_*"),
                 S("socket.24", "TL_Socket_24", 0.5f, 24, 0.040f, 0.033f, "D38", "part.pan_base.bolt_*"),
                 S("socket.13_38", "TL_Socket_13_38", 0.375f, 13, 0.030f, 0.019f, "EX（D39）", "ip.carbon_strip_*.bolt_*"),
             };
             cat.fasteners = new[]
             {
                 new FastenerSocket { fastenerPattern = "part.pan_base.bolt_*", socketId = "socket.24" },
-                new FastenerSocket { fastenerPattern = "ip.pan_assy.hv_terminal.bolt_*", socketId = "socket.19" },
+                new FastenerSocket { fastenerPattern = "part.pan_assy.hv_bolt_*", socketId = "socket.19" },
                 new FastenerSocket { fastenerPattern = "ip.carbon_strip_*.bolt_*", socketId = "socket.13", estimated = true },   // 鬆／鎖用套筒扳手 13；上扭力（CSR_13）用小扭力扳手的 13_38
             };
             EditorUtility.SetDirty(cat);

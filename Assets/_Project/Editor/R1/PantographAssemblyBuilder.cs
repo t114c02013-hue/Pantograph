@@ -165,11 +165,11 @@ namespace PantographSim.Editor
         public static string TightTopMesh { get; private set; }
 
         /// <summary>可拆件（不算進 LoweredTightBounds）。</summary>
-        /// shortcut: 用 FastenerBehaviour＋兩個名稱（ip.pan_assy.hv_terminal、DustCap_*）判斷，新增的可拆件要手動加進來, R1.5b b2 有 DetachablePart 後改成「掛 DetachablePart 或 FastenerBehaviour」
+        /// R1.5b b2：掛 FastenerBehaviour 或 DetachablePart 的節點，加上防塵蓋 DustCap_*（接頭接著時的那一個狀態網格）。
         static bool IsDetachable(Transform t, Transform root)
         {
             for (var p = t; p != null && p != root; p = p.parent)
-                if (p.GetComponent<FastenerBehaviour>() != null || p.name == "ip.pan_assy.hv_terminal" || p.name.StartsWith("DustCap_")) return true;
+                if (p.GetComponent<FastenerBehaviour>() != null || p.GetComponent<DetachablePart>() != null || p.name.StartsWith("DustCap_")) return true;
             return false;
         }
 
@@ -226,6 +226,7 @@ namespace PantographSim.Editor
         {
             var pBase = root.Find("PAN_Base");
             var d = R1Data.RoofScene;
+            var rigging = R1Data.Rigging;   // R1.5b b2：吸附半徑等吊運資料
             // 底座螺栓 part.pan_base.bolt_1..4：FastenerBehaviour，狀態 Torqued（n 跟 BaseHole_n，依正負號編號）
             for (int i = 1; i <= 4; i++)
             {
@@ -248,22 +249,26 @@ namespace PantographSim.Editor
             // 高壓端子座 ip.pan_assy.hv_terminal（Mounted），底下 HV_Bolt_1..2（FastenerBehaviour）
             var conn = root.Find("PAN_Connections");
             var hv = Rig("HV_TerminalSeat", conn, new Vector3(baseR.max.x - 0.08f, baseR.max.y, baseR.max.z - 0.15f), "ip.pan_assy.hv_terminal");
-            Part<InteractionPointMarker>(hv, "ip.pan_assy.hv_terminal", "高壓端子", null, "Mounted");
+            // R1.5b b2：高壓端子 DetachablePart（兩支端子螺栓 part.pan_assy.hv_bolt_1..2 都 Out 才拿得下來）
+            var hvBolts = hv.GetComponentsInChildren<Transform>(true).Where(t => t.name.StartsWith("HV_Bolt_")).ToList();
+            var hvIds = hvBolts.Select(hb => "part.pan_assy.hv_bolt_" + hb.name.Substring("HV_Bolt_".Length)).ToArray();
+            var hvPart = hv.AddComponent<DetachablePart>(); hvPart.Configure("ip.pan_assy.hv_terminal", "高壓端子");
+            hvPart.Setup(hvIds.Select(id => id + ".state=Out").ToArray(), hvIds.Select(id => $"端子螺栓 {id.Substring(id.Length - 1)} 還沒轉到脫出").ToArray(), null, null, hv.transform, rigging.snapRadius, DetachablePart.Installed);
             Trigger(hv, 0.06f);
-            foreach (var hb in hv.GetComponentsInChildren<Transform>(true).Where(t => t.name.StartsWith("HV_Bolt_")).ToList())
+            for (int i = 0; i < hvBolts.Count; i++)
             {
-                string id = "ip.pan_assy.hv_terminal." + hb.name.ToLower().Replace("hv_", "");
-                Part<FastenerBehaviour>(hb.gameObject, id, "高壓端子螺栓", null, "Torqued");
-                Trigger(hb.gameObject, 0.015f);
+                Part<FastenerBehaviour>(hvBolts[i].gameObject, hvIds[i], "高壓端子螺栓", null, "Torqued");
+                Trigger(hvBolts[i].gameObject, 0.015f);
             }
             // a6 v4.3 第 11 點＋增補 2：控制線接頭 ip.pan_assy.ctrl_connector（Mounted；接頭接著 → DustCap_Off 顯示、DustCap_On 隱藏）
             var ctrlPos = new Vector3(d.ctrlConnectorXZ.x, baseR.max.y, d.ctrlConnectorXZ.y);
             var ctrl = Node(conn, "ip.pan_assy.ctrl_connector", ctrlPos);
             foreach (var n in new[] { "Connector_Body", "DustCap_On", "DustCap_Off" }) Gen("PAN_CtrlConnector", n, ctrl, ctrlPos);
-            ctrl.Find("DustCap_On").gameObject.SetActive(false);
+            ctrl.Find("DustCap_On").gameObject.SetActive(false);   // 開場接著（Installed）：DetachablePart 依狀態切換 DustCap_Off／DustCap_On
             var plug = Node(ctrl, "Ctrl_PlugPoint", ctrlPos + new Vector3(d.ctrlConnectorBodySize.x / 2f + d.ctrlSocketLength, d.ctrlConnectorBodySize.y / 2f, 0f));
             plug.rotation = Quaternion.LookRotation(Vector3.right, Vector3.up);
-            Part<InteractionPointMarker>(ctrl.gameObject, "ip.pan_assy.ctrl_connector", "控制線接頭", null, "Mounted");
+            var ctrlPart = ctrl.gameObject.AddComponent<DetachablePart>(); ctrlPart.Configure("ip.pan_assy.ctrl_connector", "控制線接頭");
+            ctrlPart.Setup(null, null, new[] { ctrl.Find("DustCap_Off").gameObject }, new[] { ctrl.Find("DustCap_On").gameObject }, plug, rigging.snapRadius, DetachablePart.Installed);
             Trigger(ctrl.gameObject, 0.04f);
             // 分流線：只做外觀
             for (int i = 1; i <= 2; i++) Rig("Shunt_Visual", conn, new Vector3(baseR.center.x + (i == 1 ? -0.3f : 0.3f), baseR.max.y + 0.02f, baseR.max.z - 0.3f), "Shunt_Visual_" + i);
@@ -292,7 +297,9 @@ namespace PantographSim.Editor
             Gen("PAN_HoldDownStrap", "HoldDown_Removed", hd, new Vector3(baseR.max.x - d.strapBuckleSize.x / 2f, baseR.max.y, tie.top.z - 0.10f));
             installed.gameObject.SetActive(false);
             hd.Find("HoldDown_Removed").gameObject.SetActive(false);
-            Part<InteractionPointMarker>(hd.gameObject, "ip.pan_assy.hold_down", "降弓固定帶", null, "InToolBag");
+            // R1.5b b2：降弓固定帶 DetachablePart（用 tool.hold_down_strap 綁上／解開）。開場帶子在工具袋 slot_10＝Removed；拆下後直接收回工具袋，所以 Removed 不顯示 HoldDown_Removed
+            var hdPart = hd.gameObject.AddComponent<DetachablePart>(); hdPart.Configure("ip.pan_assy.hold_down", "降弓固定帶");
+            hdPart.Setup(null, null, new[] { installed.gameObject }, null, tiePt, rigging.snapRadius, DetachablePart.Removed, "tool.hold_down_strap");
             Trigger(hd.gameObject, 0.05f);
             HoldDownMeasure = (tie.top, armHalf, legLens[0], legLens[1]);
             sb.AppendLine($"集電弓新節點：底座螺栓 4、吊耳 4、高壓端子（螺栓 2）、控制線接頭 {ctrlPos:F3}（DustCap_Off）、降弓固定帶綁點 {tie.top:F3}（上臂半寬 {tie.halfWidth:0.000}、腳長 A {legLens[0]:0.000}／B {legLens[1]:0.000} m；Installed／Removed 都隱藏）、分流線外觀 2");

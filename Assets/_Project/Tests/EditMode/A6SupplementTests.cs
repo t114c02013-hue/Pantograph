@@ -78,6 +78,36 @@ namespace PantographSim.Tests
             });
         }
 
+        /// <summary>
+        /// R1.5b 軟體工程裁定（panFootprints 觸發範圍）：升降範圍檢查和「下方有沒有 Walkable」各自獨立。
+        /// (1) movingCarveInflate＝0 的 RoofSceneDef 副本、站點放進弓頭升降範圍內：升降範圍那一項不合格，而且「下方沒有 Walkable」也照樣列出；
+        /// (2) 站點離範圍 0.10 m（小於挖除外擴 0.15）：不合格；(3) 離範圍 0.45 m（大於 0.40）：合格。
+        /// </summary>
+        [Test]
+        public void PanFootprintStationTest_CounterExamples()
+        {
+            StationTests.WithScene(scene =>
+            {
+                var mech = Object.FindObjectOfType<PantographMechanism>(true);
+                var fp = PantographSim.Editor.PanGeometry.SweptFootprints(mech)["PanHead"];
+                var def = Object.Instantiate(Def);
+                try
+                {
+                    def.movingCarveInflate = 0f;
+                    bool FootFail(StationLayoutCheck.SceneResult r) => r.failures.Any(f => f.item == "core" && f.text.Contains("tp.roof.base_w.s") && f.text.Contains("升降範圍（PanHead）"));
+                    var inside = A6WrenchGateTests.Run(scene, p => { var q = p["tp.roof.base_w.s"].transform; q.position = new Vector3(fp.center.x, q.position.y, fp.center.z); }, null, def);
+                    Assert.IsTrue(FootFail(inside), "站在弓頭升降範圍內：升降範圍那一項不合格");
+                    Assert.IsTrue(inside.failures.Any(f => f.text.Contains("tp.roof.base_w.s") && f.text.Contains("下方沒有 Walkable")), "兩項各報各的");
+                    foreach (var (gap, fail) in new[] { (0.10f, true), (0.45f, false) })
+                    {
+                        var r = A6WrenchGateTests.Run(scene, p => { var q = p["tp.roof.base_w.s"].transform; q.position = new Vector3(q.position.x, q.position.y, fp.min.z - gap); }, null, def);
+                        Assert.AreEqual(fail, FootFail(r), $"離範圍 {gap} m：" + string.Join("\n", r.failures.Select(f => f.text)));
+                    }
+                }
+                finally { Object.DestroyImmediate(def); }
+            });
+        }
+
         /// <summary>增補 4 第 6 點（建模 B H1）＋增補 7 E3(1)：LoweredTightBounds 存在 RoofSceneDef，排除可拆件後 Y 最低點＝0（底架底面），PAN_Root 的 Box 一致；舊的 json 已刪。</summary>
         [Test]
         public void LoweredTightBounds_ExcludesDetachables_MinY0_MatchesBox()

@@ -150,6 +150,7 @@ namespace PantographSim.Editor.XR
             rig.Setup(cam, left, rightT, rightT, toolAnchor);
             var teleport = rigGo.AddComponent<XrTeleport>();
             teleport.Setup(origin, provider, left, arc, points, stationSet.startStationId, fader);
+            teleport.SetRule(R1Data.Teleport);   // R1.5b b2
 
             // 教學模式的地面箭頭（指向目前小動作的站點）
             var arrow = new GameObject("StationArrow").transform;

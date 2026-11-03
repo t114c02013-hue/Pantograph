@@ -143,6 +143,43 @@ namespace PantographSim.Tests
             }
         }
 
+        // ---------- 軟體工程裁定（2026-11-03）：Btn_Speed2 按一下切換，預設微動，幾種情況自動回到微動 ----------
+
+        [Test]
+        public void Speed2_TapToggles_FastThenFine()
+        {
+            var s = new SimState(new EventBus());
+            Assert.IsFalse(s.GetBool(SimIds.CraneFast), "預設微動");
+            CraneControl.ToggleFast(s); Assert.IsTrue(s.GetBool(SimIds.CraneFast), "按一下高速");
+            CraneControl.ToggleFast(s); Assert.IsFalse(s.GetBool(SimIds.CraneFast), "再按一下回到微動");
+        }
+
+        [Test]
+        public void Speed2_PickupIsFine_EStopReturnsToFine()
+        {
+            var s = new SimState(new EventBus());
+            s.SetBool(SimIds.CraneFast, true);
+            CraneControl.SetPendant(s, true); Assert.IsFalse(s.GetBool(SimIds.CraneFast), "拿起遙控器時是微動");
+            CraneControl.ToggleFast(s);
+            CraneControl.PressEStop(s); Assert.IsFalse(s.GetBool(SimIds.CraneFast), "高速時按緊急停止 → 微動");
+            CraneControl.PressEStop(s); Assert.IsFalse(s.GetBool(SimIds.CraneFast), "復歸後仍是微動");
+            CraneControl.ToggleFast(s); CraneControl.SetPendant(s, false); Assert.IsFalse(s.GetBool(SimIds.CraneFast), "掛回也回到微動");
+        }
+
+        [Test]
+        public void Speed2_LoadFreeToLifted_ReturnsToFine()
+        {
+            using (var c = new CraneRig())
+            {
+                c.state.Set("part.pan_assy.state", "Rigged");
+                c.Run(0.04f);
+                CraneControl.ToggleFast(c.state); c.Run(0.04f);
+                Assert.IsTrue(c.state.GetBool(SimIds.CraneFast), "吊物沒變時維持高速");
+                c.state.Set("part.pan_assy.state", "Lifted"); c.Run(0.02f);
+                Assert.IsFalse(c.state.GetBool(SimIds.CraneFast), "Free → Lifted 自動回到微動");
+            }
+        }
+
         [Test]
         public void UpperLimit_StopsAndReportsLimitUp()
         {
@@ -249,6 +286,28 @@ namespace PantographSim.Tests
             using (var sha = System.Security.Cryptography.SHA256.Create()) hash = System.BitConverter.ToString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(text))).Replace("-", "").Substring(0, 16);
             Assert.AreEqual(R1BindingHash, hash, $"按鍵表 {table.rows.Length} 列");
             Assert.IsFalse(table.rows.Any(r => (r.functionId ?? "").ToLowerInvariant().Contains("crane")), "沒有天車專用按鍵");
+        }
+    }
+}
+
+namespace PantographSim.Tests
+{
+    /// <summary>D40（鐵道）：吊鉤升到 hookYMax 時，吊鉤組頂面（頂點最高）到台車底面（Crane_Hoist／Crane_Trolley 頂點最低）≥ hookTopClearance；場景裡吊鉤就在 hookYMax。</summary>
+    public class CraneHookTopTests
+    {
+        [Test]
+        public void AtHookYMax_ClearanceToTrolley_AtLeastHookTopClearance()
+        {
+            var profile = UnityEditor.AssetDatabase.LoadAssetAtPath<CraneProfile>("Assets/_Project/Modules/Worksite/Data/CraneProfile.asset");
+            StationTests.WithScene(scene =>
+            {
+                var crane = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<CraneMechanism>(true)).First();
+                Transform N(string n) => crane.GetComponentsInChildren<Transform>(true).First(t => t.name == n);
+                var hook = N("Crane_HookBlock");
+                Assert.AreEqual(profile.hookYMax, hook.position.y, 1e-3f, "場景的吊鉤在上限位");
+                var (gap, bottom, top) = PantographSim.Editor.RoofSiteBuilder.HookTopGap(hook, N("Crane_Trolley"));
+                Assert.GreaterOrEqual(gap, profile.hookTopClearance - 1e-3f, $"台車底面 {bottom:0.000}、吊鉤組頂面 {top:0.000}");
+            });
         }
     }
 }

@@ -24,6 +24,7 @@ namespace PantographSim.Parts.Mechanism
         [Tooltip("吊鉤掛點下方的吊物（null＝空鉤）；loadLocalBounds 是吊物局部座標的緊包圍盒（PAN_Root 用 LoweredTightBounds）")]
         [SerializeField] Transform load;
         [SerializeField] Bounds loadLocalBounds;
+        [Tooltip("R1.5b b2：下降對位時要排除的 collider（CraneCollisionIgnoreDef）")] [SerializeField] RiggingDef rigging;
 
         /// <summary>頭部位置來源（紅區判定）；預設是主攝影機。測試換成固定值。</summary>
         public static Func<Vector3?> HeadSource = () => Camera.main != null ? Camera.main.transform.position : (Vector3?)null;
@@ -33,9 +34,12 @@ namespace PantographSim.Parts.Mechanism
         Vector2 sway;
         Quaternion swayBase = Quaternion.identity;
         bool needPowerCycle, inRedZone, collided, wasMoving;
+        bool? wasAirborne;
         string lastCmd = CraneLogic.None;
 
         public CraneProfile Profile => profile;
+        /// <summary>上一次碰撞停止撞到的 collider 名稱（寫進 ErrorDetected.text，回放和報表看得到撞到什麼）。</summary>
+        public string LastHit { get; private set; } = "";
         public Transform Load => load;
         public Vector3 HookPosition => hookBlock.position;
 
@@ -46,6 +50,8 @@ namespace PantographSim.Parts.Mechanism
             var rr = rope != null ? rope.GetComponent<Renderer>() : null;
             ropeTopOffset = rr != null && hookBlock != null ? rr.bounds.min.y - hookBlock.position.y : 0f;   // 繩子下端在吊鉤上方多少（建置時擺好的值）
         }
+
+        public void SetRigging(RiggingDef r) => rigging = r;
 
         /// <summary>掛上吊物（null＝卸下）。吊物成為吊鉤（晃動支點）的子物件，跟著走。</summary>
         public void Attach(Transform loadT, Bounds localBounds)
@@ -85,17 +91,24 @@ namespace PantographSim.Parts.Mechanism
             if (estop) needPowerCycle = true;
             else if (!power) needPowerCycle = false;   // 復歸後要先關電源再開，才解除鎖住
 
-            // 紅區：吊物懸空時才有（b1 的除錯吊物＝掛上就算懸空）
-            var lb = LoadWorldBounds();
+            // 紅區、碰撞停止：吊物懸空時才有（part.pan_assy.state＝Lifted；b1 的除錯吊物沒有這個鍵＝掛上就算懸空）
+            bool airborne = load != null && (!s.Has("part.pan_assy.state") || s.Get("part.pan_assy.state") == "Lifted");
+            var lb = airborne ? LoadWorldBounds() : null;
             var head = HeadSource();
             bool red = lb.HasValue && head.HasValue && CraneLogic.InRedZone(lb.Value, profile.redZoneMargin, head.Value);
             if (red && !inRedZone) Fault(SafetyRuleKind.CranePersonUnderLoad, "ERR_Crane_PersonUnderLoad");
+            // 高速回到微動（軟體工程裁定）：吊物狀態改變（Free↔Lifted）、進入紅區停車
+            if (fast && ((red && !inRedZone) || (wasAirborne.HasValue && airborne != wasAirborne.Value))) { s.SetBool(SimIds.CraneFast, false); fast = false; }
+            wasAirborne = airborne;
             inRedZone = red;
             if (cmd != lastCmd) { collided = false; lastCmd = cmd; }   // 放開（或換方向）後才重新允許移動
 
             var (axis, dir) = CraneLogic.Parse(cmd);
             bool allowed = power && !estop && !needPowerCycle && !red && !collided;
             if (!allowed) { axis = CraneAxis.None; dir = 0; }
+            // b2：吊運條件不足（吊帶繃緊、集電弓不動）或定位銷頂住時，捲揚不動（PanAssyRigging 寫黑板，天車不引用它）
+            bool hoistHeld = axis == CraneAxis.Hoist && (dir > 0 ? s.GetBool("part.crane.hoist_up_blocked") : s.GetBool("part.crane.hoist_down_blocked"));
+            if (hoistHeld) { axis = CraneAxis.None; dir = 0; }
             bool hitLimit = false;
             float full = CraneLogic.Speed(profile, axis, fast);
             var hook = hookBlock.position; var br = bridge.position; var tr = trolley.position;
@@ -105,10 +118,11 @@ namespace PantographSim.Parts.Mechanism
             CraneLogic.StepAxis(ref tx, ref vTraverse, axis == CraneAxis.Traverse ? dir * full : 0f, CraneLogic.Speed(profile, CraneAxis.Traverse, true), profile.accelSeconds, profile.trolleyXMin, profile.trolleyXMax, dt);
             CraneLogic.StepAxis(ref bz, ref vTravel, axis == CraneAxis.Travel ? dir * full : 0f, CraneLogic.Speed(profile, CraneAxis.Travel, true), profile.accelSeconds, profile.bridgeZMin, profile.bridgeZMax, dt);
             if (!allowed) { vHoist = vTraverse = vTravel = 0f; hy = before.y; tx = before.x; bz = before.z; }   // 不允許時立刻停（紅區、緊急停止不平滑）
+            if (hoistHeld) { vHoist = 0f; hy = before.y; }
 
             Apply(tx, hy, bz);
             // 碰撞停止：移動後吊物和場景 Collision 群組重疊就退回這一幀之前的位置
-            if (load != null && (tx != before.x || hy != before.y || bz != before.z) && Overlapping())
+            if (airborne && (tx != before.x || hy != before.y || bz != before.z) && Overlapping(s))
             {
                 Apply(before.x, before.y, before.z);
                 vHoist = vTraverse = vTravel = 0f; collided = true;
@@ -162,15 +176,27 @@ namespace PantographSim.Parts.Mechanism
             }
         }
 
-        bool Overlapping()
+        bool Overlapping(ISimState s)
         {
+            // 吊物底面離落點 ≤ ignoreDistance 時，定位銷與絕緣子本來就要接觸底架（CraneCollisionIgnoreDef，建模 B 12.9 H2）。
+            // 規格只寫「下降時」；剛起吊離座的那 0.10 m 也一樣貼著支撐，不排除的話一起吊就碰撞停車，所以上下都排除
+            bool ignoreSeats = rigging != null && float.TryParse(s.Get("part.crane.drop_distance"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var drop) && drop <= rigging.ignoreDistance;
             Physics.SyncTransforms();   // 這一幀剛移動過 Transform
             var (c, half, rot) = LoadBox();
             foreach (var col in Physics.OverlapBox(c, half, rot, ~0, QueryTriggerInteraction.Ignore))
             {
                 if (col.transform.IsChildOf(load) || col.transform.IsChildOf(transform)) continue;   // 吊物自己、天車自己
-                if (InCollisionGroup(col.transform)) return true;
+                if (ignoreSeats && Ignored(col.transform)) continue;
+                if (col.gameObject.layer == LayerMask.NameToLayer(SceneLayers.LocomotionBlocker) || profile.invisibleWallPrefixes.Any(x => col.name.StartsWith(x))) continue;   // 學員移動用的不可見牆
+                if (InCollisionGroup(col.transform)) { LastHit = col.name; return true; }
             }
+            return false;
+        }
+
+        bool Ignored(Transform t)
+        {
+            for (var p = t; p != null && p.name != "Collision"; p = p.parent)
+                if (rigging.collisionIgnorePrefixes.Any(x => p.name.StartsWith(x))) return true;
             return false;
         }
 
@@ -188,7 +214,7 @@ namespace PantographSim.Parts.Mechanism
             {
                 errorId = r != null ? r.errorId : fallbackId, severity = Severity.Critical, blocks = true,
                 what = r?.what ?? "", why = r?.why ?? "", fix = r?.fix ?? "",
-                stepId = Sim.State?.Get("procedure.current") ?? "", targetId = "env.crane", time = SimClock.Now
+                stepId = Sim.State?.Get("procedure.current") ?? "", targetId = "env.crane", text = kind == SafetyRuleKind.CraneCollision ? LastHit : "", time = SimClock.Now
             });
         }
     }

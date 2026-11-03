@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9dece606db712f40baa304bb5a39e8e, type: 3}
+  m_Name: RiggingDef
+  m_EditorClassIdentifier: 
+  liftConditions:
+  - condition: ip.pan_assy.hold_down.state=Installed
+    label: "\u964D\u5F13\u56FA\u5B9A\u5E36\u9084\u6C92\u88DD\u4E0A\uFF08RM_01\uFF09"
+  - condition: ip.pan_assy.ctrl_connector.state=Removed
+    label: "\u63A7\u5236\u7DDA\u9084\u6C92\u62C6\u4E0B\uFF08RM_02\uFF09"
+  - condition: ip.pan_assy.hv_terminal.state=Removed
+    label: "\u9AD8\u58D3\u96FB\u7E9C\u7AEF\u5B50\u9084\u6C92\u62C6\u4E0B\uFF08RM_03\uFF09"
+  - condition: part.pan_base.bolt_{n}.state=Out
+    label: "\u5E95\u5EA7\u87BA\u6813 {n} \u9084\u6C92\u53D6\u51FA\uFF08RM_04\uFF09"
+  - condition: ip.pan_assy.lift_point_{n}.state=Rigged
+    label: "\u540A\u9EDE {n} \u9084\u6C92\u639B\u4E0A\u540A\u5E36\uFF08RM_06\uFF09"
+  - condition: part.crane.hook.latched
+    label: "\u540A\u9264\u820C\u7247\u9084\u6C92\u6263\u4E0A\uFF08LF_01\uFF09"
+  standLiftConditions:
+  - condition: ip.pan_assy.lift_point_{n}.state=Rigged
+    label: "\u540A\u9EDE {n} \u9084\u6C92\u639B\u4E0A\u540A\u5E36\uFF08IN_01\uFF09"
+  - condition: env.panto_stand.clamp_1.state=Open
+    label: "\u53F0\u67B6\u593E\u5177 1 \u9084\u6C92\u89E3\u958B\uFF08IN_01\uFF09"
+  - condition: env.panto_stand.clamp_2.state=Open
+    label: "\u53F0\u67B6\u593E\u5177 2 \u9084\u6C92\u89E3\u958B\uFF08IN_01\uFF09"
+  - condition: part.crane.hook.latched
+    label: "\u540A\u9264\u820C\u7247\u9084\u6C92\u6263\u4E0A"
+  snapRadius: 0.02
+  indicatorRange: 0.3
+  collisionIgnorePrefixes:
+  - StandSeat
+  - InsulatorTop_
+  - InsulatorCollision
+  ignoreDistance: 0.1
+  seatTolerance: 0.005

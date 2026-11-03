@@ -224,7 +224,7 @@ namespace PantographSim.XR
             if (hookTarget == null || hook == null) { Miss(r, "5越障", "Hook_AttachPoint_Target／天車吊鉤 Anchor_Hook_AttachPoint"); return; }
             float bottom = hook.transform.position.y - (root.InverseTransformPoint(hookTarget.position).y - tight.Value.min.y);
             Note(r, "5越障", $"吊鉤最高點 Y {hook.transform.position.y:0.000} → 吊物底面 Y {bottom:0.000}（掛點在 LoweredTightBounds 底面上 {root.InverseTransformPoint(hookTarget.position).y - tight.Value.min.y:0.000} m）");
-            Pend(r, "5越障", $"吊鉤最高點實測 Y {hook.transform.position.y:0.000}，規格值 {d.craneHookTopSpecY} ± {d.craneHookTopTolerance}（鐵道 D35）", Mathf.Abs(hook.transform.position.y - d.craneHookTopSpecY) <= d.craneHookTopTolerance, "env.crane");
+            // D40：吊鉤最高點只有一個數值（CraneProfile.hookYMax，建置時量測寫回、場景的吊鉤就放在那裡），這裡不再和另一個規格值比對；間距 ≥ hookTopClearance 由建置檢查與 CraneHookTopTests 保證
             var tops = new List<(string, float)>();
             void Top(string label, IEnumerable<Transform> ts)
             {

@@ -1,0 +1,36 @@
+段：R1.5b b2 吊具、part.pan_assy 狀態機、起吊條件、對位指示燈、放上台架與吊回車頂、TeleportRule；a5 留下的三件事（DetachablePart、吊物探測 collider、新節點 ID）。另含 b1 的兩項裁定（Btn_Speed2、panFootprints 觸發範圍）和鐵道 D40（吊鉤上限位）。
+改動：
+- Data：RiggingDef（起吊條件：車頂 6 項、台架 3 項；吸附 0.02 m；對位燈 0.3 m；CraneCollisionIgnoreDef＝StandSeat／InsulatorTop_／InsulatorCollision，離落點 ≤ 0.10 m 時排除；放下容差 0.005 m）＋ RiggingLogic（孔對落點的水平距離、全部在容差內、吸附平移）。TeleportRule（和 RoofAccessRule 同一處：part.pan_assy.state＝Lifted 一律不能傳送）。資產在 Modules/Worksite/Data。
+- Parts/Common：DetachablePart（Installed／Removed 寫黑板、requires 條件與 Explain()、InstallSnap 2 cm、子節點依狀態切換、可指定工具）。
+- Parts/Mechanism：PanAssyRigging（PAN_Root；狀態 Mounted→Released→Rigged→Lifted→OnStand→Lifted→Mounted→Fastened；吊點、吊鉤舌片 part.crane.hook、台架夾具 env.panto_stand.clamp_1..2 徒手 Operate；有吊帶連著弓時按上升：條件全成立才變成吊梁的子物件，不足就寫 part.crane.hoist_up_blocked 與 part.pan_assy.lift_block；往下放到落點時 4 孔都在 2 cm 內才吸附，否則 hoist_down_blocked；對位燈讀同一份距離；對位用 BaseHole／PAN_Root，不用 COG）。CraneMechanism：紅區與碰撞只在吊物懸空時判定；讀 hoist_up／down_blocked；碰撞不算學員移動用的不可見牆（CraneProfile.invisibleWallPrefixes）與下降對位的支撐（RiggingDef）；撞到的 collider 名稱寫進 ErrorDetected.text。
+- 場景（RoofSiteBuilder.WireRigging）：PAN_Root 的整體 Box 改成 LoadProbe 層（13）的 trigger，只在 Lifted 時開，碰撞矩陣只和 Default、Boundary 互動；台架落點 SeatTarget_1..4（Y −2.900）；車頂每個絕緣子旁一顆對位燈；台架夾具、吊鉤舌片加互動 ID。PantographAssemblyBuilder：高壓端子（requires 兩支 part.pan_assy.hv_bolt_n＝Out）、控制線接頭（DustCap_Off／On）、降弓固定帶（tool.hold_down_strap，HoldDown_Installed）改用 DetachablePart；高壓端子螺栓 ID 改成 part.pan_assy.hv_bolt_1..2（照 R1.5b 正文與 CSV），套筒目錄的對照跟著改；IsDetachable 改看 DetachablePart。
+- XR：XrTeleportPoint／XrTeleport 讀 TeleportRule（擋下時那一站算 Locked、訊息用規則的）。
+- 裁定一 Btn_Speed2：按一下切換是正式規格（拿掉 shortcut 註解）；預設微動；拿起、掛回、按緊急停止（CraneControl）、吊物 Free↔Lifted、進入紅區停車（CraneMechanism）都回到微動；按鍵發光顏色（微動綠、高速橘）與 Label 文字讀 CraneProfile，切換時嗶一聲（程式產生的 0.08 s 提示音）。
+- 裁定二 panFootprints：升降範圍檢查移到「下方有沒有 Walkable」之前，兩項各自判定、各自列出；距離 < clearRadius（範圍內＝0 也算）就不合格。
+- D40：CraneProfile.hookTopClearance 0.30；建置量測台車底面與吊鉤組頂面（都用自己網格的頂點），不足就把上限位往下移；RoofSceneDef.craneHookTopSpecY／craneHookTopTolerance 刪掉（吊鉤最高點只有 CraneProfile.hookYMax 一個數值），第 5 越障項不再和另一個規格值比。
+- 測試：RiggingTests 4（起吊條件 6 項各缺一項、吸附 2 cm／2.1 cm 與對位燈、COG 偏 0.3 m 用 PAN_Root 對位、車頂→台架→車頂完整往返）、TeleportRuleTests 5、DetachablePartTests 2、LoadProbeTests 1、CraneMechanismTests 加 3（Speed2）、A6SupplementTests 加 PanFootprintStationTest_CounterExamples、CraneHookTopTests 1。PanAssyHierarchyTests 的篩選排除 part.crane.*（CSV 的吊鉤 ID part.crane.hook 是天車的，不是集電弓零件）。
+D40 實測（場景，世界座標 Y）：
+- 台車底面（Crane_Hoist／Crane_Trolley 網格頂點最低）7.000（Crane_Hoist 7.000…7.600、Crane_Trolley 7.350…7.950）。
+- 吊鉤 pivot 5.850 時，吊鉤組頂面（Crane_HookBlock 自己網格的頂點最高，不含吊梁等子物件）6.050，間距 0.950 m ≥ 0.30 → hookYMax 維持 5.850。
+- 另外：吊車橋 Crane_Bridge 網格底面 6.600，到吊鉤組頂面 0.55 m（也 ≥ 0.30）。模型的捲揚機在 7.0 以上，和建模 B 推估的 5.6–5.9 不同，請建模確認。
+- 越障：吊鉤掛點 Anchor_Hook_AttachPoint Y 5.530（吊鉤 pivot 5.850 下方 0.32）→ 吊物底面 Y 3.390（吊鉤掛點到 LoweredTightBounds 底面 2.140 m，含 1.25 m 吊帶、吊梁、吊鉤到吊梁），要求 ≥ 3.1，餘裕 0.29 m。路徑上最高的固定物是防墜器門架頂 2.640，餘裕 0.750（≥ 0.5）。
+略過：
+- 吊帶外觀：吊帶依兩端距離縮放、對準方向（§2.3 RM_06）沒做，吊點只切換黑板狀態。
+- 試吊（ValueInRange load_lift_height 0.08–0.15 停 3 s）、RM_05 檢查卡、吊運錯誤 ErrorRule 是 b4。
+- 吊運中 NPC、車頂封閉是 b4c；扣著車頂掛點時的傳送限制是 b4d。
+風險：
+- 碰撞停止排除「離落點 ≤ 0.10 m」的支撐時，規格只寫「下降時」；剛起吊離座的那 0.10 m 也貼著支撐，不排除會一起吊就停車，所以上下都排除。
+- 碰撞停止不算 EdgeWall_／EndWall_／Edge_／GapBlocker／Blocker／StepCollision／Walkable 開頭的 collider（學員移動用的不可見牆），清單在 CraneProfile.invisibleWallPrefixes。
+- 降弓固定帶開場在工具袋＝Removed；拆下後直接收回工具袋，所以 Removed 不顯示 HoldDown_Removed（a6 的 InToolBag 不再使用）。
+- StationLayoutCheck 從 202 過變成 201 過：第 5 越障項的「吊鉤最高點 vs 規格值 5.53」那一條因 D40 刪掉（只留一個數值）。
+ponytail-review Verdict：fix 1、2 first（放下後回到原本的父物件、吊鉤舌片要有 part.crane.hook 互動 ID），已修。
+測試：EditMode 290/290、PlayMode 3/3，Console 紅字 0（編譯 0 error、0 warning）
+功能不變檢查：
+1. 0 紅字、沒有新的 warning：是
+2. 測試數量不減少：273 → 290；PanAssyHierarchyTests 只把篩選縮到集電弓（排除 part.crane.*），沒有拿掉斷言
+3. 公開簽章：XrTeleportPoint.Unlocked、LockedMessage 加讀 TeleportRule（簽章不變）；CraneMechanism 新增 SetRigging、LastHit；黑板鍵新增 part.crane.hoist_up_blocked／hoist_down_blocked／drop_distance／hook.latched、part.pan_assy.lift_block、pan_assy.reseated；ID 改名 ip.pan_assy.hv_terminal.bolt_n → part.pan_assy.hv_bolt_n（R1.5b 正文指定）；SerializeField：RoofSceneDef 刪 craneHookTopSpecY／Tolerance（D40 指定）
+4. 資料檔：本段要求的 RiggingDef、TeleportRule、CraneProfile 新欄位
+5. 場景與 prefab 沒有 Missing：建置成功、StationLayoutCheck 21 站 201 過／0 待定／0 不合格
+6. 桌面版 25 步：跑完，分數 85、只有刻意的 E1，和之前相同
+7. 純精簡和功能改動分開：本段只有功能改動
+未檢查：頭盔實機（吊點、舌片、夾具的 VR 操作）；桌面版吊運流程要等 b4 接上步驟

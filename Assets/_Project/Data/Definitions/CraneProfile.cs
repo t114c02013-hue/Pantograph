@@ -17,13 +17,18 @@ namespace PantographSim.Data
         [Header("行程（世界座標）")]
         public float trolleyXMin = -15f, trolleyXMax = 2f;
         public float bridgeZMin = -15f, bridgeZMax = 15f;
-        [Tooltip("吊鉤最高 Y（上限位；建置時從模型量測寫回）")] public float hookYMax = 6.35f;
+        [Tooltip("吊鉤最高 Y（上限位，Crane_HookBlock 的 pivot；建置時依 D40 從模型量測寫回：吊鉤組頂點最高點到台車／捲揚機底面要留 hookTopClearance）。唯一的吊鉤最高點數值，6.35 與 RoofSceneDef.craneHookTopSpecY 作廢")] public float hookYMax = 5.85f;
+        [Tooltip("D40（鐵道）：吊鉤升到上限位時，吊鉤組頂面（頂點最高點）到台車底面（Crane_Hoist／Crane_Trolley 頂點最低點）的最小間距，避免過捲")] public float hookTopClearance = 0.30f;
         [Tooltip("吊鉤最低 Y（EX，地面維修區台架以下）")] public float hookYMin = -3.0f;
         [Tooltip("起動、停止的平滑加減速秒數（EX）")] public float accelSeconds = 0.3f;
         [Tooltip("part.crane.hook.pos 變化超過這個值（m）才寫入")] public float hookPosWriteThreshold = 0.01f;
         [Header("紅區、晃動、遙控器")]
         [Tooltip("紅區＝吊物水平投影外擴（m，D18）")] public float redZoneMargin = 1.0f;
         [Tooltip("視覺晃動最大角度（度）與停車後衰減到 0 的秒數")] public float swayMaxDeg = 3f, swayDecaySeconds = 1.5f;
+        [Tooltip("碰撞停止不算的 collider（名稱開頭）：只給學員移動用的不可見牆，不是實體障礙（車體、護欄、門架、台架、絕緣子照算）")]
+        public string[] invisibleWallPrefixes = { "EdgeWall_", "EndWall_", "Edge_", "GapBlocker", "Blocker", "StepCollision", "Walkable" };
+        [Tooltip("Btn_Speed2 的發光顏色與標籤：微動／高速（軟體工程裁定）")] public Color speedFineColor = new Color(0.2f, 0.85f, 0.3f), speedFastColor = new Color(1f, 0.55f, 0.1f);
+        public string speedFineLabel = "微動", speedFastLabel = "高速";
         [Tooltip("左握把在掛座這個半徑（m）內才是拿起／掛回")] public float pendantDockRadius = 0.3f;
         [Tooltip("遙控器按鍵的中文標籤（按鍵節點名 → 文字）")] public string[] buttonLabels =
         {

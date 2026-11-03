@@ -27,6 +27,8 @@ namespace PantographSim.XR
         readonly HashSet<string> wasPressed = new HashSet<string>();
         Vector3 dockedPos; Quaternion dockedRot; Transform dockedParent;
         XRSimpleInteractable dockInteractable;
+        Renderer speedRenderer; TextMesh speedLabel; AudioSource beep; bool? lastFast;
+        MaterialPropertyBlock mpb;
         Renderer[] renderers = new Renderer[0];
 
         public void Setup(XrRig r, CraneProfile p, Transform pendantT, Transform dockT, Transform rightPokeT)
@@ -57,6 +59,10 @@ namespace PantographSim.XR
                 var tm = new GameObject("Text").AddComponent<TextMesh>();
                 tm.transform.SetParent(a, false); tm.text = kv.Value; tm.characterSize = 0.004f; tm.fontSize = 48; tm.anchor = TextAnchor.MiddleLeft; tm.color = Color.white;
             }
+            speedRenderer = buttonColliders.TryGetValue("Btn_Speed2", out var sc2) ? sc2.GetComponent<Renderer>() : null;
+            speedLabel = pendant.GetComponentsInChildren<Transform>(true).FirstOrDefault(x => x.name == "Label_Btn_Speed2")?.GetComponentInChildren<TextMesh>();
+            beep = pendant.gameObject.AddComponent<AudioSource>(); beep.playOnAwake = false; beep.spatialBlend = 0.5f;
+            beep.clip = Beep();
             var zone = new GameObject("PendantDockZone");
             zone.transform.SetParent(dock, false);
             var sc = zone.AddComponent<SphereCollider>(); sc.isTrigger = true; sc.radius = profile != null ? profile.pendantDockRadius : 0.3f;
@@ -87,9 +93,31 @@ namespace PantographSim.XR
             CraneControl.SetPendant(s, !CraneControl.PendantHeld(s));
         }
 
+        /// <summary>高速鍵的模式提示（軟體工程裁定）：按鍵發光顏色與標籤跟著變，切換時嗶一聲。顏色、文字讀 CraneProfile。</summary>
+        void ShowSpeed(ISimState s)
+        {
+            bool fast = s.GetBool(SimIds.CraneFast);
+            if (lastFast.HasValue && lastFast.Value != fast && beep != null && beep.clip != null) beep.PlayOneShot(beep.clip);
+            lastFast = fast;
+            if (profile == null) return;
+            var c = fast ? profile.speedFastColor : profile.speedFineColor;
+            if (speedRenderer != null) { mpb ??= new MaterialPropertyBlock(); speedRenderer.GetPropertyBlock(mpb); mpb.SetColor("_Color", c); mpb.SetColor("_EmissionColor", c); mpb.SetColor("_BaseColor", c); speedRenderer.SetPropertyBlock(mpb); }
+            if (speedLabel != null) speedLabel.text = fast ? profile.speedFastLabel : profile.speedFineLabel;
+        }
+
+        /// <summary>短提示音（0.08 s、1 kHz 正弦）；不用外部音檔。</summary>
+        static AudioClip Beep()
+        {
+            const int rate = 22050; int n = rate * 8 / 100;
+            var data = new float[n];
+            for (int i = 0; i < n; i++) data[i] = Mathf.Sin(2f * Mathf.PI * 1000f * i / rate) * 0.3f * (1f - (float)i / n);
+            var clip = AudioClip.Create("CraneSpeedBeep", n, 1, rate, false); clip.SetData(data, 0); return clip;
+        }
+
         void LateUpdate()
         {
             var s = Sim.State; if (s == null || pendant == null) return;
+            ShowSpeed(s);
             bool held = CraneControl.PendantHeld(s);
             bool xr = InputMode.XrActive && rig != null && rig.LeftHand != null;
             if (held && xr)

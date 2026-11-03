@@ -99,7 +99,6 @@ namespace PantographSim.Data
         [Tooltip("F6：台架外框（支撐座四周與四角立柱）頂面離地，低於支撐座，懸出的臂和吊帶不會掃到")] public float standFrameTopAboveGround = 0.45f;
         [Tooltip("a6 G2：台架外框＝降弓整組 LoweredTightBounds 兩端各外擴這個值（standSizeXZ 由建置寫入）")] public float standFrameMargin = 0.15f;
         [Tooltip("a6 增補 4：外框中心相對台架中心（＝底架中心）的偏移；LoweredTightBounds 前後不對稱，建置時寫入")] public Vector2 standFrameOffsetXZ;
-        [Tooltip("a6 增補 4（鐵道 D35）：吊鉤最高點 Y 的規格值（實測 5.53 合格，不調模型參數）與容許差")] public float craneHookTopSpecY = 5.53f, craneHookTopTolerance = 0.02f;
         [Tooltip("增補 7 E3(1)：降弓整組 LoweredTightBounds（PAN_Root 局部、頂點算法、排除可拆件；建置時寫入）")] public Bounds panLoweredTightBounds;
         [Tooltip("增補 7 第 8 點（組長）：活動欄開口（車頂側）最小淨寬")] public float gateMinWidth = 0.60f;
         [Tooltip("R1.5b F1（資深軟體 B）：活動欄開口側擋欄 ENV_GateSliceGuard 的高度與第 22 項的容許差（高度、寬度都用這個容差）")] public float gateGuardHeight = 1.00f, gateGuardTolerance = 0.01f;

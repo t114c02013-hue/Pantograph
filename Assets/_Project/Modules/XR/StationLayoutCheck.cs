@@ -84,6 +84,15 @@ namespace PantographSim.XR
             {
                 if (!pts.TryGetValue(s.id, out var tp)) { r.Fail("core", s.id, $"{s.id}：場景裡沒有這個站點"); continue; }
                 var p = tp.transform.position;
+                // 集電弓升降範圍（R1.5b 軟體工程裁定）：和「下方有沒有 Walkable」各自獨立，距離 < 該零件的 clearRadius 就不合格（站在範圍內＝距離 0 也算），不靠 Walkable 挖洞保證
+                if (s.floor == StationFloor.Roof && panFootprints != null)
+                    foreach (var kv in panFootprints)
+                    {
+                        var fp = kv.Value; float need = PanClearRadius(set, kv.Key, s.floor);   // D37＋增補 6 第 7 點 G：依零件與站點樓層（StationSet.partClearRadius）
+                        float dd = Flat(p, fp.ClosestPoint(new Vector3(p.x, fp.center.y, p.z)));
+                        if (dd < need) r.Fail("core", s.id, $"{s.id}：離集電弓升降範圍（{kv.Key}）X {fp.min.x:0.00}…{fp.max.x:0.00}、Z {fp.min.z:0.00}…{fp.max.z:0.00} {dd:0.000} m，不到 {need} m");
+                        else if (kv.Key == "PanHead" && s.id.StartsWith("tp.roof.base")) r.info.Add($"{s.id}：到羊角升降範圍 {dd:0.000} m（≥ {need}，D37）");
+                    }
                 // 站在 Walkable 上
                 if (!Physics.Raycast(new Vector3(p.x, 5f, p.z), Vector3.down, out var hit, 20f, walk, QueryTriggerInteraction.Ignore)) { r.Fail("core", s.id, $"{s.id}：({p.x:0.00}, {p.z:0.00}) 下方沒有 Walkable"); continue; }
                 if (Mathf.Abs(hit.point.y - p.y) > 0.02f) r.Fail("core", s.id, $"{s.id}：y {p.y:0.000} 和地板 {hit.point.y:0.000} 差超過 0.02 m");
@@ -97,14 +106,6 @@ namespace PantographSim.XR
                 // D11：平台護欄（封閉 1.1 m 護欄、活動欄）至少 guardrailClearance（身體膠囊 0.25＋0.05）
                 foreach (var c in Physics.OverlapCapsule(p + Vector3.up * 0.1f, p + Vector3.up * 1.8f, set.guardrailClearance, invisible, QueryTriggerInteraction.Ignore))
                     if (IsGuardrail(c)) r.Fail("core", s.id, $"{s.id}：離護欄 {c.name} {Flat(p, c.ClosestPoint(p + Vector3.up * 0.5f)):0.00} m，不到 {set.guardrailClearance} m");
-                if (s.floor == StationFloor.Roof && panFootprints != null)
-                    foreach (var kv in panFootprints)
-                    {
-                        var fp = kv.Value; float need = PanClearRadius(set, kv.Key, s.floor);   // D37＋增補 6 第 7 點 G：依零件與站點樓層（StationSet.partClearRadius）
-                        float dd = Flat(p, fp.ClosestPoint(new Vector3(p.x, fp.center.y, p.z)));
-                        if (dd < need) r.Fail("core", s.id, $"{s.id}：離集電弓升降範圍（{kv.Key}）X {fp.min.x:0.00}…{fp.max.x:0.00}、Z {fp.min.z:0.00}…{fp.max.z:0.00} {dd:0.000} m，不到 {need} m");
-                        else if (kv.Key == "PanHead" && s.id.StartsWith("tp.roof.base")) r.info.Add($"{s.id}：到羊角升降範圍 {dd:0.000} m（≥ {need}，D37）");
-                    }
                 float walkLimit = d.RoofWalkLimitAt(p.z);   // 增補 6 第 3 點：在底架兩側放寬帶的 Z 範圍內才用 roofBaseWalkHalfWidth
                 if (s.floor == StationFloor.Roof && Mathf.Abs(p.x) > walkLimit + Eps) r.Fail("core", s.id, $"{s.id}：不在車頂可走範圍 |X| ≤ {walkLimit}");
                 if (string.IsNullOrEmpty(s.facingTargetId)) { if (Vector3.Angle(tp.transform.forward, s.facingDirection) > 1f) r.Fail("core", s.id, $"{s.id}：朝向不是 {s.facingDirection}"); continue; }

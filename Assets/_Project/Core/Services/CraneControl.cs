@@ -16,8 +16,8 @@ namespace PantographSim.Core
         }
 
         /// <summary>
-        /// 高速鍵 Btn_Speed2。
-        /// shortcut: 規格是「和方向鍵一起按住」，但 VR 只有右手一個 poke／射線、桌面只有一個滑鼠，同時按兩顆做不到，所以改成按一下切換高速／微動, 換成雙鍵輸入（或左手拇指）時改回按住
+        /// 高速鍵 Btn_Speed2：按一下切換高速／微動（軟體工程裁定 2026-11-03，crane-software §1）。預設微動；拿起、掛回、按緊急停止時回到微動，
+        /// 吊物狀態改變（Free↔Lifted）與紅區停車時由 CraneMechanism 回到微動。方向鍵照舊按住才動，高速只影響速度。
         /// </summary>
         public static void ToggleFast(ISimState s) { if (s != null) s.SetBool(SimIds.CraneFast, !s.GetBool(SimIds.CraneFast)); }
 
@@ -25,7 +25,7 @@ namespace PantographSim.Core
         public static void PressEStop(ISimState s)
         {
             if (s == null) return;
-            s.Batch(() => { s.SetBool(SimIds.CraneEStop, !s.GetBool(SimIds.CraneEStop)); s.Set(SimIds.CraneCmd, "None"); });
+            s.Batch(() => { s.SetBool(SimIds.CraneEStop, !s.GetBool(SimIds.CraneEStop)); s.Set(SimIds.CraneCmd, "None"); s.SetBool(SimIds.CraneFast, false); });
         }
 
         /// <summary>電源鑰匙 Key_Power：轉一下切換開／關。</summary>
@@ -39,7 +39,7 @@ namespace PantographSim.Core
         public static void SetPendant(ISimState s, bool held)
         {
             if (s == null) return;
-            s.Batch(() => { s.Set(SimIds.CranePendantState, held ? Held : Docked); if (!held) s.Set(SimIds.CraneCmd, "None"); });
+            s.Batch(() => { s.Set(SimIds.CranePendantState, held ? Held : Docked); if (!held) s.Set(SimIds.CraneCmd, "None"); s.SetBool(SimIds.CraneFast, false); });
         }
 
         public static bool PendantHeld(ISimState s) => s != null && s.Get(SimIds.CranePendantState) == Held;

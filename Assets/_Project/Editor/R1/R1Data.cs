@@ -28,6 +28,9 @@ namespace PantographSim.Editor
         public static LocomotionSettings Locomotion => Ensure<LocomotionSettings>(LocomotionPath);
         /// <summary>R1.5b b1：天車參數（不存在就用預設值建立；hookYMax 由 RoofSiteBuilder 從模型量測寫回）。</summary>
         public static CraneProfile Crane => Ensure<CraneProfile>(Folder + "/CraneProfile.asset");
+        /// <summary>R1.5b b2：吊運資料（起吊條件、吸附容差、對位燈、下降對位時的碰撞排除）與傳送限制（和 RoofAccessRule 放在一起）。</summary>
+        public static RiggingDef Rigging => Ensure<RiggingDef>(Folder + "/RiggingDef.asset");
+        public static TeleportRule Teleport => Ensure<TeleportRule>(Folder + "/TeleportRule.asset");
 
         /// <summary>按鍵表（Resources，執行期 InputBindingTable.LoadDefault 讀它）；不存在或空的就用預設表建立，已存在就照用。</summary>
         public const string InputBindingsPath = "Assets/_Project/Modules/XR/Resources/InputBindingTable.asset";
@@ -190,7 +193,7 @@ namespace PantographSim.Editor
             // 增補 7（D38、D39）：第 21 項門檻與要算的扳手（底座螺栓 CSV v2.9：RM_04 b、IN_06 d 套筒扳手，IN_07 d 大扭力扳手）
             set.wrenchSweepMinClearance = 0.02f; set.wrenchRadialStep = 0.05f;
             set.wrenchSweepTools = new[] { "tool.socket_wrench", "tool.torque_wrench_l" };
-            d.craneHookTopTolerance = 0.02f; d.gateMinWidth = 0.60f; d.gateGuardHeight = 1.00f; d.gateGuardTolerance = 0.01f; EditorUtility.SetDirty(d);
+            d.gateMinWidth = 0.60f; d.gateGuardHeight = 1.00f; d.gateGuardTolerance = 0.01f; EditorUtility.SetDirty(d);
             set.partClearRadius = new[]
             {
                 new PartClearRadius { partGroup = "PanHead", radius = 0.20f, scope = PartClearScope.RoofOnly },
