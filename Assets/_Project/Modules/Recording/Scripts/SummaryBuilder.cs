@@ -25,6 +25,12 @@ namespace PantographSim.Recording
         };
         static readonly HashSet<string> NoisyValueKeys = new HashSet<string> { "tool.torque_wrench.current", SimIds.PanHeadLowerDistance };
 
+        /// <summary>這條錯誤在同一步一共發生幾次（ErrorRepeated 的最大值；沒有＝1）。驗收組長：偵測照記 1 次，次數另外顯示給教官。</summary>
+        public static int RepeatCount(IEnumerable<RecordLine> lines, RecordLine error) =>
+            lines.Where(x => x.type == "ErrorRepeated" && x.step == error.step && x.S("errorId") == error.S("errorId")).Select(x => (int)x.N("count")).DefaultIfEmpty(1).Max();
+
+        public static string CountNote(int n) => n > 1 ? $"（本步發生 {n} 次）" : "";
+
         public static Dictionary<string, object> Build(Dictionary<string, object> meta, IReadOnlyList<RecordLine> lines, bool rebuiltAfterCrash)
         {
             meta = meta ?? new Dictionary<string, object>();
@@ -57,7 +63,7 @@ namespace PantographSim.Recording
             s["errors"] = lines.Where(l => l.type == "ErrorDetected").Select(l => (object)new Dictionary<string, object>
             {
                 { "t", l.t }, { "step", l.step }, { "stepName", cat.NameOf(l.step) }, { "errorId", l.S("errorId") }, { "name", l.S("name", ErrorNames.Of(l.S("errorId"), l.S("what"))) },
-                { "severity", l.S("severity") }, { "what", l.S("what") }, { "why", l.S("why") }, { "fix", l.S("fix") }
+                { "severity", l.S("severity") }, { "what", l.S("what") + CountNote(RepeatCount(lines, l)) }, { "why", l.S("why") }, { "fix", l.S("fix") }, { "count", RepeatCount(lines, l) }
             }).ToList();
             var sev = lines.Where(l => l.type == "ErrorDetected").GroupBy(l => l.S("severity")).ToDictionary(g => g.Key, g => g.Count());
             s["errorEvents"] = new Dictionary<string, object>

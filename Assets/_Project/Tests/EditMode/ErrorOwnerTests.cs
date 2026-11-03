@@ -122,5 +122,40 @@ namespace PantographSim.Tests
             }
             finally { det.Dispose(); runner.Dispose(); Object.DestroyImmediate(prc); }
         }
+
+        /// <summary>驗收組長（2026-11-03）：同一步重複觸發只記 1 次錯，但次數累計（error.repeat → 錄影 ErrorRepeated），報表那條錯誤後面加「本步發生 N 次」。</summary>
+        [Test]
+        public void RepeatedInSameStep_RecordedOnce_CountShownInReport()
+        {
+            var bus = new EventBus(); var s = new SimState(bus);
+            var src = AssetDatabase.LoadAssetAtPath<ProcedureDefinition>(StepsCsvImporter.ProcedurePath("periodic"));
+            var prc = ScriptableObject.CreateInstance<ProcedureDefinition>();
+            prc.procedureId = "PRC_Repeat"; prc.steps = new List<StepDefinition> { src.steps.First(x => x.stepId == "STP_LF_03_Clearance") }; prc.globalErrors = src.globalErrors;
+            s.Set("training.mode", "practice");
+            var runner = new ProcedureRunner(prc, bus, s);
+            var det = new ErrorDetector(runner, bus, s);
+            var errors = new List<ErrorDetected>(); var repeats = new List<string>();
+            bus.Subscribe<ErrorDetected>(e => errors.Add(e));
+            bus.Subscribe<StateChanged>(e => { foreach (var c in e.Changes) if (c.key == ErrorDetector.RepeatKey) repeats.Add(c.newValue); });
+            try
+            {
+                runner.Start();
+                foreach (var v in new[] { true, false, true, false, true }) s.SetBool("part.crane.empty_low_travel", v);   // 三次移動
+                s.SetBool("part.crane.empty_low_travel", true);   // 一直成立不算新的一次
+                Assert.AreEqual(1, errors.Count(e => e.errorId == "ERR_Crane_EmptyRigLowTravel"), "同一步只記 1 次");
+                CollectionAssert.AreEqual(new[] { "STP_LF_03_Clearance|ERR_Crane_EmptyRigLowTravel|2", "STP_LF_03_Clearance|ERR_Crane_EmptyRigLowTravel|3" }, repeats, "第 2、3 次只累計");
+
+                var lines = new List<PantographSim.Recording.RecordLine>
+                {
+                    new PantographSim.Recording.RecordLine { type = "ErrorDetected", step = "STP_LF_03_Clearance", data = new Dictionary<string, object> { { "errorId", "ERR_Crane_EmptyRigLowTravel" } } },
+                    new PantographSim.Recording.RecordLine { type = "ErrorRepeated", step = "STP_LF_03_Clearance", data = new Dictionary<string, object> { { "errorId", "ERR_Crane_EmptyRigLowTravel" }, { "count", 2.0 } } },
+                    new PantographSim.Recording.RecordLine { type = "ErrorRepeated", step = "STP_LF_03_Clearance", data = new Dictionary<string, object> { { "errorId", "ERR_Crane_EmptyRigLowTravel" }, { "count", 3.0 } } },
+                };
+                Assert.AreEqual(3, PantographSim.Recording.SummaryBuilder.RepeatCount(lines, lines[0]));
+                Assert.AreEqual("（本步發生 3 次）", PantographSim.Recording.SummaryBuilder.CountNote(3));
+                Assert.AreEqual("", PantographSim.Recording.SummaryBuilder.CountNote(1), "只發生一次不加註");
+            }
+            finally { det.Dispose(); runner.Dispose(); Object.DestroyImmediate(prc); }
+        }
     }
 }

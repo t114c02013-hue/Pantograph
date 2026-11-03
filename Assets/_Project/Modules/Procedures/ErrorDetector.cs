@@ -54,7 +54,21 @@ namespace PantographSim.Procedures
                     Fire(r, s, r.key);
         }
 
-        void OnStepStarted(StepStarted e) { fired.Clear(); leaving.Clear(); }
+        void OnStepStarted(StepStarted e) { fired.Clear(); leaving.Clear(); repeats.Clear(); trig.Clear(); }
+
+        // ---------- 驗收組長（2026-11-03）：同一步重複觸發的次數 ----------
+        /// <summary>同一步同一個 ID 只記一次錯（偵測不變）；之後再發生（條件由不成立變成立、另一顆螺栓、另一筆寫入）只累計次數，寫 error.repeat＝「步驟|錯誤|本步第 N 次」，錄影記成 ErrorRepeated，報表在那條錯誤後面加「本步發生 N 次」。</summary>
+        public const string RepeatKey = "error.repeat";
+        readonly Dictionary<string, int> repeats = new Dictionary<string, int>();
+        /// <summary>逐筆比對的規則：錯誤|鍵 上一次是否成立（只在由不成立變成立時算一次發生）。</summary>
+        readonly Dictionary<string, bool> trig = new Dictionary<string, bool>();
+
+        void Repeat(ErrorRule r, RuntimeStep s)
+        {
+            int n = repeats.TryGetValue(r.errorId, out var c) ? c + 1 : 2;
+            repeats[r.errorId] = n;
+            state.Set(RepeatKey, s.RunId + "|" + r.errorId + "|" + n);
+        }
 
         // ---------- R1.5b K3：扭力不足（驗收組長裁定）----------
         /// <summary>每條 OnLeave 規則目前正在鎖的那顆螺栓的鍵（離開時判）。</summary>
@@ -73,7 +87,7 @@ namespace PantographSim.Procedures
 
         void JudgeLeave(ErrorRule r, string key, RuntimeStep s)
         {
-            if (fired.Contains(r.errorId) || !state.Has(key)) return;
+            if (!state.Has(key)) return;
             float v = state.GetFloat(key);
             if (v >= r.min - ValueInRangeEvaluator.Epsilon) return;
             if (!ExamPolicyDef.In(Policy?.recordModes, state.Get("training.mode"))) return;   // 教學模式擋下（HoldSubAction），不記
@@ -169,8 +183,10 @@ namespace PantographSim.Procedures
             foreach (var c in e.Changes)
                 foreach (var rule in ActiveRules(s.def))
                 {
-                    if (fired.Contains(rule.errorId)) continue;
-                    if (Triggered(rule, c, ctx, s)) Fire(rule, s, c.key);
+                    string ek = rule.errorId + "|" + c.key;
+                    bool t = Triggered(rule, c, ctx, s), was = trig.TryGetValue(ek, out var w) && w;
+                    if (t != was && (t || trig.ContainsKey(ek))) trig[ek] = t;
+                    if (t && !was) Fire(rule, s, c.key);   // 已記過＝累計次數（Fire 裡）
                 }
         }
 
@@ -206,7 +222,7 @@ namespace PantographSim.Procedures
                 bool now = (string.IsNullOrEmpty(r.key2) || ChecklistEval.Done(state, ctx.K(r.key2))) && r.keys.Any(k => ChecklistEval.Done(state, ctx.K(k)));
                 bool was = globalWas.TryGetValue(r.errorId, out var w) && w;
                 globalWas[r.errorId] = now;
-                if (now && !was && !fired.Contains(r.errorId)) Fire(r, s, "global");
+                if (now && !was) Fire(r, s, "global");   // 已記過＝累計次數（Fire 裡）
             }
         }
 
@@ -252,7 +268,7 @@ namespace PantographSim.Procedures
         void Fire(ErrorRule r, RuntimeStep s, string target, string detail = "")
         {
             if (r.oncePerRun && !firedRun.Add(r.errorId)) return;
-            if (!fired.Add(r.errorId)) return;
+            if (!fired.Add(r.errorId)) { Repeat(r, s); return; }
             state.Set("error.last", r.errorId);
             // R1.5b K3：喀聲回饋還沒確認（k3Ready=false）時，k3DowngradeModes（練習、考核）改記 severityBeforeK3，報告註明
             var severity = r.severity; var what = Format(r.what) + detail;

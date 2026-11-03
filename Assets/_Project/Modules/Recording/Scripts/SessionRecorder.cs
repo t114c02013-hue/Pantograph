@@ -364,6 +364,13 @@ namespace PantographSim.Recording
                 Write("Judgement", currentStep, new Dictionary<string, object> { { "key", key }, { "value", text } });
                 return;
             }
+            // 同一步重複觸發的錯誤：只記次數（ErrorDetector 寫「步驟|錯誤|本步第 N 次」）
+            if (key == "error.repeat")
+            {
+                var p = (text ?? "").Split('|');
+                if (p.Length == 3 && int.TryParse(p[2], out int n)) Write("ErrorRepeated", p[0], new Dictionary<string, object> { { "errorId", p[1] }, { "count", n } });
+                return;
+            }
             // 錯誤數（只抄黑板上 Training 算好的值）與錯誤視窗開關，給重播顯示用
             if (key == "score.minor" || key == "score.major" || key == "score.critical" || key == "ui.error.active" || key == "training.paused")
             {
