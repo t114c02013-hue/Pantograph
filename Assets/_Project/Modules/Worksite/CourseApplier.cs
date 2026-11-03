@@ -34,6 +34,16 @@ namespace PantographSim.Worksite
             return problems;
         }
 
+        /// <summary>課程的開場狀態（CourseDef.initialStates，鍵=值）。</summary>
+        public static void ApplyInitialStates(CourseDef course, ISimState state) => state.Batch(() =>
+        {
+            foreach (var kv in course?.initialStates ?? Array.Empty<string>())
+            {
+                int eq = kv.IndexOf('=');
+                if (eq > 0) state.Set(kv.Substring(0, eq).Trim(), kv.Substring(eq + 1).Trim());
+            }
+        });
+
         /// <summary>場景裡的 ISimObject（含 inactive）：ID → Transform。</summary>
         public static Dictionary<string, Transform> SceneIds() =>
             UnityEngine.Object.FindObjectsOfType<MonoBehaviour>(true).OfType<ISimObject>().Where(o => !string.IsNullOrEmpty(o.Id))
@@ -53,6 +63,7 @@ namespace PantographSim.Worksite
                     state.SetBool(SimIds.CourseCraneParked, course.craneParked);   // D23
                     var cap = course.liftCapAboveO > 0f ? LiftCapsDef.Load()?.Find(course.courseId) : null;   // D23、D41：建置量測的升弓上限
                     if (cap != null) state.SetFloat(SimIds.LiftMax, cap.liftMax); else state.Set(SimIds.LiftMax, null);
+                    ApplyInitialStates(course, state);
                 });
             return Apply(course, id => ids.TryGetValue(id, out var t) ? t : null, FindByName);
         }

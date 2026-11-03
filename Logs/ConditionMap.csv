@@ -9,11 +9,11 @@ daily,STP_SI_01_ConfirmLowered,a,8,1,"放開時 lower_check 與 lower_target 距
 daily,STP_SI_01_ConfirmLowered,b,9,1,"弓頭已確認","part.pan_head.inspected",
 daily,STP_SI_01_ConfirmLowered,c,10,1,"指示燈 = 降弓且已確認","ip.cab.pan_indicator.checked",
 daily,STP_SI_02_LockOut,a,11,2,"手持上鎖掛牌組","tool.active=tool.lockout_tag",
-daily,STP_SI_02_LockOut,b,12,3,"主斷路器 = OFF","cab.breaker=off",b4:p5
+daily,STP_SI_02_LockOut,b,12,3,"主斷路器 = OFF","cab.breaker=off",
 daily,STP_SI_02_LockOut,c,13,3,"主斷路器 = 已上鎖＋掛牌","lockout.breaker=locked",
 daily,STP_SI_02_LockOut,d,14,3,"升弓開關 = 已上鎖＋掛牌，鑰匙帶在身上","lockout.raise_switch=locked&&lockout.key_holder=trainee",
-daily,STP_SI_03_CylinderPowerOff,a,15,3,"電動缸電源 = OFF","cab.cylinder_power=off",b4:p5
-daily,STP_SI_03_CylinderPowerOff,b,16,3,"已按下且弓頭位置不變","cab.raise_test_done",b4:p5
+daily,STP_SI_03_CylinderPowerOff,a,15,3,"電動缸電源 = OFF","cab.cylinder_power=off",
+daily,STP_SI_03_CylinderPowerOff,b,16,3,"已按下且弓頭位置不變","cab.raise_test_done",
 daily,STP_SI_04_VoltageTest,a,17,1,"手持驗電桿（雙手）","tool.active=tool.voltage_detector",
 daily,STP_SI_04_VoltageTest,b,18,1,"自檢通過","tool.voltage_detector.selftest",
 daily,STP_SI_04_VoltageTest,c,19,1,"顯示「無電」","isolation.voltage_tested",
@@ -174,8 +174,8 @@ daily,STP_WC_01b_ToolCountPlatform,c,200,3,"已確認","workorder.toolcount_plat
 daily,STP_WC_04_Unlock,a0,207,2,"停留點 4 清單 3 項全部點過（#1 已銷號且桿架 slot_3 在架；人員已離開車頂；工具清點完成），hold.4.released = true","hold.4.checklist_done&&hold.4.released",b4c:holdpoint
 daily,STP_WC_04_Unlock,a,208,2,"手持上鎖掛牌組","tool.active=tool.lockout_tag",
 daily,STP_WC_04_Unlock,b,209,3,"升弓開關 = 未上鎖","lockout.raise_switch=open",
-daily,STP_WC_04_Unlock,c,210,3,"主斷路器 = 未上鎖；放開後掛牌組自動收回腰包（WC_06 c 才歸還工具架）","lockout.breaker=open&&rack.slot_1=in_pouch",b4:p5
-daily,STP_WC_04_Unlock,d,211,3,"電動缸電源 = ON","cab.cylinder_power=on",b4:p5
+daily,STP_WC_04_Unlock,c,210,3,"主斷路器 = 未上鎖；放開後掛牌組自動收回腰包（WC_06 c 才歸還工具架）","lockout.breaker=open&&rack.slot_1=in_pouch",
+daily,STP_WC_04_Unlock,d,211,3,"電動缸電源 = ON","cab.cylinder_power=on",
 daily,STP_WC_04_Unlock,f,212,3,"已簽名","workorder.sign_end",
 daily,STP_WC_06_Handover,a,218,3,"作業單各欄（讀數、判定、新品履歷、接地登記、異常欄）都已填，作業負責人已簽","workorder.all_filled&&npc.work_leader.signed",b4c:holdpoint
 daily,STP_WC_06_Handover,b,219,3,"檢查員 NPC 核對扭力標記、量測值、高低差後判「可出車」（日常沒有升弓試驗）","npc.inspector.verdict=pass",b4c:holdpoint
@@ -190,11 +190,11 @@ periodic,STP_SI_01_ConfirmLowered,a,8,1,"放開時 lower_check 與 lower_target 
 periodic,STP_SI_01_ConfirmLowered,b,9,1,"弓頭已確認","part.pan_head.inspected",
 periodic,STP_SI_01_ConfirmLowered,c,10,1,"指示燈 = 降弓且已確認","ip.cab.pan_indicator.checked",
 periodic,STP_SI_02_LockOut,a,11,2,"手持上鎖掛牌組","tool.active=tool.lockout_tag",
-periodic,STP_SI_02_LockOut,b,12,3,"主斷路器 = OFF","cab.breaker=off",b4:p5
+periodic,STP_SI_02_LockOut,b,12,3,"主斷路器 = OFF","cab.breaker=off",
 periodic,STP_SI_02_LockOut,c,13,3,"主斷路器 = 已上鎖＋掛牌","lockout.breaker=locked",
 periodic,STP_SI_02_LockOut,d,14,3,"升弓開關 = 已上鎖＋掛牌，鑰匙帶在身上","lockout.raise_switch=locked&&lockout.key_holder=trainee",
-periodic,STP_SI_03_CylinderPowerOff,a,15,3,"電動缸電源 = OFF","cab.cylinder_power=off",b4:p5
-periodic,STP_SI_03_CylinderPowerOff,b,16,3,"已按下且弓頭位置不變","cab.raise_test_done",b4:p5
+periodic,STP_SI_03_CylinderPowerOff,a,15,3,"電動缸電源 = OFF","cab.cylinder_power=off",
+periodic,STP_SI_03_CylinderPowerOff,b,16,3,"已按下且弓頭位置不變","cab.raise_test_done",
 periodic,STP_SI_04_VoltageTest,a,17,1,"手持驗電桿（雙手）","tool.active=tool.voltage_detector",
 periodic,STP_SI_04_VoltageTest,b,18,1,"自檢通過","tool.voltage_detector.selftest",
 periodic,STP_SI_04_VoltageTest,c,19,1,"顯示「無電」","isolation.voltage_tested",
@@ -478,8 +478,8 @@ periodic,STP_RT_02_InsulationTest,f,206,2,"掛位 3 = 在架","rack.slot_3=on_ra
 periodic,STP_WC_04_Unlock,a0,207,2,"停留點 4 清單全部點過，hold.4.released = true（接地登記欄 2 列都已銷號，且桿架 slot_3、工具架 slot_12 實物在架；人員已離開車頂；工具清點完成；絕緣電阻合格且已放電）","hold.4.checklist_done&&hold.4.released",b4c:holdpoint
 periodic,STP_WC_04_Unlock,a,208,2,"手持上鎖掛牌組","tool.active=tool.lockout_tag",
 periodic,STP_WC_04_Unlock,b,209,3,"升弓開關 = 未上鎖","lockout.raise_switch=open",
-periodic,STP_WC_04_Unlock,c,210,3,"主斷路器 = 未上鎖；放開後掛牌組自動收回腰包（WC_06 c 才歸還工具架）","lockout.breaker=open&&rack.slot_1=in_pouch",b4:p5
-periodic,STP_WC_04_Unlock,d,211,3,"電動缸電源 = ON","cab.cylinder_power=on",b4:p5
+periodic,STP_WC_04_Unlock,c,210,3,"主斷路器 = 未上鎖；放開後掛牌組自動收回腰包（WC_06 c 才歸還工具架）","lockout.breaker=open&&rack.slot_1=in_pouch",
+periodic,STP_WC_04_Unlock,d,211,3,"電動缸電源 = ON","cab.cylinder_power=on",
 periodic,STP_WC_05_RaiseTest,a,213,3,"已查看","part.crane.hook.inspected&&part.pan_assy.inspected",b4:p5
 periodic,STP_WC_05_RaiseTest,b,214,3,"弓頭升到頂","part.pan_head.pose=Raised",
 periodic,STP_WC_05_RaiseTest,c,215,3,"指示燈 = 升弓且已確認","ip.cab.pan_indicator.checked&&ip.cab.pan_indicator.shows=升弓",

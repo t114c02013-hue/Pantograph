@@ -1036,7 +1036,8 @@ namespace PantographSim.Editor
                 knob.transform.localRotation = Quaternion.Euler(0, 0, 90);
                 Object.DestroyImmediate(knob.GetComponent<Collider>());
                 knob.AddComponent<SphereCollider>().radius = 0.5f;
-                knob.AddComponent<InteractionPointMarker>().Configure(id, name);
+                if (id == "ip.cab.raise_switch") knob.AddComponent<InteractionPointMarker>().Configure(id, name);
+                else knob.AddComponent<PantographSim.Worksite.CabSwitch>().Configure(id, name);   // R1.5b b4：空手點＝切換／按下（CabControlLogic）
                 res.ids[id] = knob.transform;
             }
             // 弓位指示燈複本（只顯示，不能點）

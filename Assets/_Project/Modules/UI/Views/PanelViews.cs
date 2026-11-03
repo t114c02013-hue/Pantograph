@@ -314,7 +314,7 @@ namespace PantographSim.UI
 
         protected override void OnBuild(RectTransform safe)
         {
-            var (d, card) = Modal.Create(safe, "ControlPanel", new Vector2(700, 440));
+            var (d, card) = Modal.Create(safe, "ControlPanel", new Vector2(700, 520));
             dim = d;
             Ui.VStack(card.gameObject, 24, 10, false);
             Ui.Text(card, "駕駛室控制盤", 32, Color.white, TextAnchor.UpperLeft, FontStyle.Bold);
@@ -323,6 +323,10 @@ namespace PantographSim.UI
             indicator = Ui.Text(row, "", 30, Color.white, TextAnchor.MiddleLeft, FontStyle.Bold);
             check = Ui.Button(row, "查看指示燈", 22, () => Ui.Send("ip.cab.pan_indicator", "check"), Ui.ButtonOn); Ui.Size(check, 180, 50);
             rows = Ui.Text(card, "", 23);
+            // R1.5b b4：控制盤開關（和 VR 點旋鈕送同一個請求，CabSwitch 處理）
+            var sw = Ui.Rect(card, "Switches"); Ui.HStack(sw.gameObject, 12);
+            foreach (var (id, label) in new[] { ("ip.cab.breaker", "主斷路器 ON／OFF"), ("ip.cab.cylinder_power", "電動缸電源 ON／OFF"), ("ip.cab.raise_button", "按升弓鈕") })
+                Ui.Size(Ui.Button(sw, label, 21, () => Ui.Send(id, "click")), 210, 50);
             Ui.Text(card, "只看指示燈不夠，還要親眼確認弓頭已降下（點弓頭）。", 21, Ui.Accent);
             var close = Ui.Button(card, "關閉", 22, () => Ui.Send("ip.cab.panel", "close")); Ui.Size(close, -1, 50);
         }
@@ -336,7 +340,7 @@ namespace PantographSim.UI
             bool checkedLight = s.GetBool("ip.cab.pan_indicator.checked");
             indicator.text = checkedLight ? (lowered ? Ui.Tint("● 降弓", Ui.Ok) : Ui.Tint("● 升弓", Ui.Bad)) : "";
             Ui.SetActive(check, !checkedLight);
-            rows.text = $"主斷路器：{(s.Get("lockout.breaker") == "locked" ? "OFF　已上鎖＋掛牌" : "未上鎖")}\n" +
+            rows.text = $"主斷路器：{(s.Get("cab.breaker") == "on" ? "ON　" : s.Has("cab.breaker") ? "OFF　" : "")}{(s.Get("lockout.breaker") == "locked" ? "已上鎖＋掛牌" : "未上鎖")}\n" +
                         $"升弓開關：{(s.Get("lockout.raise_switch") == "locked" ? "已上鎖＋掛牌" : "未上鎖")}\n" +
                         $"升弓氣缸電源：{(s.Get("cab.cylinder_power") == "off" ? "OFF（已確認按升弓鈕弓體不動）" : "ON")}";
         }

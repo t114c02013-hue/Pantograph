@@ -246,7 +246,7 @@ namespace PantographSim.Editor
                 var savedPrc = SaveAsset(prc, ProcedurePath(kv.Key));
                 var course = ScriptableObject.CreateInstance<CourseDef>();
                 course.courseId = cj.courseId; course.title = cj.title; course.procedure = savedPrc; course.placements = cj.placements; course.onPass = cj.onPass;
-                course.liftCapAboveO = cj.liftCapAboveO; course.contactGapM = cj.contactGapM; course.craneParked = cj.craneParked;
+                course.liftCapAboveO = cj.liftCapAboveO; course.contactGapM = cj.contactGapM; course.craneParked = cj.craneParked; course.initialStates = cj.initialStates;
                 SaveAsset(course, CourseDefPath(kv.Key));
                 var rs = resolved.Where(r => r.e.course == kv.Key).ToList();
                 sb.AppendLine($"{kv.Key}：步驟 {saved.Count}、小動作 {rs.Count}（第 1 層 {rs.Count(r => r.layer == 1)}、第 2 層 {rs.Count(r => r.layer == 2)}、第 3 層 {rs.Count(r => r.layer == 3)}；機制待做 {rs.Count(r => r.owner.Length > 0)}）→ {CourseFolder}/{kv.Key}");
@@ -301,7 +301,7 @@ namespace PantographSim.Editor
             AssetDatabase.CreateAsset(obj, tmp);
             AssetDatabase.SaveAssets();
             File.Copy(tmp, path, true);
-            File.WriteAllText(path, File.ReadAllText(path).Replace("m_Name: StepsCsvImporter.Build.cs", "m_Name: " + Path.GetFileNameWithoutExtension(path)));   // CreateAsset 把名稱設成暫存檔名
+            File.WriteAllText(path, File.ReadAllText(path).Replace("m_Name: " + Path.GetFileNameWithoutExtension(tmp), "m_Name: " + Path.GetFileNameWithoutExtension(path)));   // CreateAsset 把名稱設成暫存檔名
             AssetDatabase.DeleteAsset(tmp);
             AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
             return AssetDatabase.LoadAssetAtPath<T>(path);

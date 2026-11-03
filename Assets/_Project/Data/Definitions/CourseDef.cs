@@ -24,6 +24,7 @@ namespace PantographSim.Data
         public JumpRule[] onPass = Array.Empty<JumpRule>();
         [Tooltip("D23、D41：升弓上限＝接觸線，從 O 點往上量（m）；0＝不覆寫（定期檢修）")] public float liftCapAboveO;
         [Tooltip("D41：滑板頂面停在接觸線下方多少（m，避免閃爍的視覺間距）")] public float contactGapM;
+        [Tooltip("R1.5b b4：開場狀態（鍵=值），例 cab.breaker=on（主斷路器、電動缸電源開著，學員自己切 OFF）")] public string[] initialStates = Array.Empty<string>();
         [Tooltip("D23：天車停駐（停到 Crane_ParkPose、電源固定關、命令無效、遙控器拿不起來、tp.platform.crane 不開放）")] public bool craneParked;
     }
 }

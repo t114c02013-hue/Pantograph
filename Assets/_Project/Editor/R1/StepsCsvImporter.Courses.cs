@@ -23,6 +23,7 @@ namespace PantographSim.Editor
             public JumpRule[] onPass = Array.Empty<JumpRule>();
             public float liftCapAboveO, contactGapM;
             public bool craneParked;
+            public string[] initialStates = Array.Empty<string>();
         }
 
         [Serializable]

@@ -20,7 +20,7 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | b4:p5 | 兩門課跑到結算（b4 第 5 部分；機制沒有指定段落，做的時候回報） |
 | b4:p3b | 扭力類錯誤與 K3 降級（b4 第 3b 部分） |
 
-## 小動作（共 96 列）
+## 小動作（共 86 列）
 
 | 步驟 | 小動作 | 課程 | 完成條件 | owner |
 |---|---|---|---|---|
@@ -67,12 +67,6 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_CSR_10_CheckNew_L | g | periodic | `env.work_order.part_trace.matches_spare_L` | b4:p4 |
 | STP_CSR_10_CheckNew_R | g | periodic | `env.work_order.part_trace.matches_spare_R` | b4:p4 |
 | STP_RT_01_CraneStow | a | periodic | `part.crane.hook.parked` | b4:p4 |
-| STP_SI_02_LockOut | b | daily | `cab.breaker=off` | b4:p5 |
-| STP_SI_02_LockOut | b | periodic | `cab.breaker=off` | b4:p5 |
-| STP_SI_03_CylinderPowerOff | a | daily | `cab.cylinder_power=off` | b4:p5 |
-| STP_SI_03_CylinderPowerOff | a | periodic | `cab.cylinder_power=off` | b4:p5 |
-| STP_SI_03_CylinderPowerOff | b | daily | `cab.raise_test_done` | b4:p5 |
-| STP_SI_03_CylinderPowerOff | b | periodic | `cab.raise_test_done` | b4:p5 |
 | STP_RM_01_HoldDown | c | periodic | `ip.pan_assy.hold_down.pull_tested` | b4:p5 |
 | STP_RM_02_CtrlDisconnect | b | periodic | `ip.pan_assy.ctrl_connector.cap=on` | b4:p5 |
 | STP_RM_03_HVDisconnect | a | periodic | `ip.pan_head.ground_clamp.inspected&&isolation.head_clamped&&ip.roof.hv_cable_ground.clamped` | b4:p5 |
@@ -115,10 +109,6 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_RT_02_InsulationTest | b | periodic | `tool.megger.connected_count>=2` | b4:p5 |
 | STP_RT_02_InsulationTest | c | periodic | `workorder.ir_reading>=100` | b4:p5 |
 | STP_RT_02_InsulationTest | e | periodic | `ip.pan_head.ground_clamp.discharge_s>=3` | b4:p5 |
-| STP_WC_04_Unlock | c | daily | `lockout.breaker=open&&rack.slot_1=in_pouch` | b4:p5 |
-| STP_WC_04_Unlock | c | periodic | `lockout.breaker=open&&rack.slot_1=in_pouch` | b4:p5 |
-| STP_WC_04_Unlock | d | daily | `cab.cylinder_power=on` | b4:p5 |
-| STP_WC_04_Unlock | d | periodic | `cab.cylinder_power=on` | b4:p5 |
 | STP_WC_05_RaiseTest | a | periodic | `part.crane.hook.inspected&&part.pan_assy.inspected` | b4:p5 |
 
 ## 場景裡還沒有的目標（ConditionTables.json 的 pendingTargets）

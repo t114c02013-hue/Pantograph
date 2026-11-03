@@ -33,7 +33,7 @@ namespace PantographSim.Tests
             readonly PantographSim.Parts.Common.PositionCheck pc;
             readonly UnityEngine.Transform check;
             readonly float restBottomY;
-            static readonly System.Text.RegularExpressions.Regex Slot = new System.Text.RegularExpressions.Regex(@"^rack\.slot_(\d+)=(on_rack|in_hand|in_use)$");
+            static readonly System.Text.RegularExpressions.Regex Slot = new System.Text.RegularExpressions.Regex(@"^rack\.slot_(\d+)=(on_rack|in_hand|in_use|in_pouch)$");
 
             public Mechanisms(EventBus bus, SimState state)
             {
@@ -80,6 +80,7 @@ namespace PantographSim.Tests
                 else
                 {
                     Hold(tool);
+                    if (want == RackLogic.InPouch) { Pouch(); return; }
                     if (want == RackLogic.InUse) Sim.Bus.Publish(new ActionRequested { targetId = "tool.belt", text = "deploy", toolId = "" });
                 }
             }
@@ -119,6 +120,16 @@ namespace PantographSim.Tests
             static void Command(string target, string text, string toolId = "") => Sim.Bus.Publish(new ActionRequested { targetId = target, text = text, toolId = toolId });
             int LeadSlot => SlotOf(GroundingLeadLogic.ToolId);
 
+            /// <summary>上鎖掛牌：手上拿著上鎖掛牌組（從腰包拿出）點主斷路器／升弓開關（LockoutTagTool）。</summary>
+            void Lockout(string part)
+            {
+                int eq = part.IndexOf('=');
+                string target = "ip.cab." + part.Substring("lockout.".Length, eq - "lockout.".Length), want = part.Substring(eq + 1);
+                if (s.Get(part.Substring(0, eq), "open") == want) return;
+                Hold(SimIds.ToolLockout);
+                Command(target, "click", SimIds.ToolLockout);
+            }
+
             /// <summary>短接地線拿到手上（前一個動作：工具環或接著的位置拿下來、或從工具架拿），ToolBelt 在這一批生效後才換手上的工具。</summary>
             void EnsureLead()
             {
@@ -152,6 +163,11 @@ namespace PantographSim.Tests
                 {
                     var m = Slot.Match(part);
                     if (IsLeadPart(part)) Lead(part);
+                    else if (part.StartsWith("lockout.key_holder")) { }   // 上鎖時 LockoutTagTool 一起寫
+                    else if (part.StartsWith("lockout.")) Lockout(part);
+                    else if (part.StartsWith(CabControlLogic.Breaker + "=")) { if (s.Get(CabControlLogic.Breaker, CabControlLogic.On) != part.Substring(CabControlLogic.Breaker.Length + 1)) Assert.IsNull(CabControlLogic.ToggleBreaker(s), part); }
+                    else if (part.StartsWith(CabControlLogic.CylinderPower + "=")) { if (s.Get(CabControlLogic.CylinderPower, CabControlLogic.On) != part.Substring(CabControlLogic.CylinderPower.Length + 1)) Assert.IsNull(CabControlLogic.ToggleCylinderPower(s), part); }
+                    else if (part == CabControlLogic.RaiseTestDone) CabControlLogic.PressRaise(s);   // 控制盤 CabSwitch 呼叫的同一段邏輯
                     else if (part == HarnessLogic.Stowed) { if (!s.GetBool(part)) Command(SimIds.ToolHarness, "stow"); }   // D31 胸前扣環
                     else if (part == HarnessLogic.Stowed + "=false") Command(SimIds.ToolHarness, "take");
                     else if (part.StartsWith(SimIds.ActiveTool + "=")) Hold(part.Substring(SimIds.ActiveTool.Length + 1));
@@ -208,6 +224,7 @@ namespace PantographSim.Tests
                 Assert.IsTrue(prc.requireFreshWrite, course + "：匯入的課程要開 requireFreshWrite");
                 s = new SimState(bus);
                 mech = new Mechanisms(bus, s);   // 先接機制（開場狀態），再建流程
+                PantographSim.Worksite.CourseApplier.ApplyInitialStates(AssetDatabase.LoadAssetAtPath<CourseDef>(StepsCsvImporter.CourseDefPath(course)), s);   // 課程的開場狀態（主斷路器、電動缸電源開著）
                 runner = new ProcedureRunner(prc, bus, s);
             }
 
