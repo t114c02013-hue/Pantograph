@@ -78,12 +78,12 @@ MonoBehaviour:
     why: "\u578B\u865F\u932F\u6216\u6709\u88C2\u7D0B\u7684\u6ED1\u677F\u88DD\u4E0A\u53BB\uFF0C\u884C\u99DB\u4E2D\u53EF\u80FD\u65B7\u88C2\u3002"
     checklist:
     - "\u67E5\u770B\u5099\u54C1\u67B6\u4E09\u689D\u6A19\u7C64|spare.R.viewed_count>=3"
-    - "\u65CB\u8F49\u6AA2\u67E5\u6709\u7121\u88C2\u7D0B|env.spare_shelf.slot_2.flipped"
+    - "\u65CB\u8F49\u6AA2\u67E5\u6709\u7121\u88C2\u7D0B|spare.R.selected.flipped"
     - "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u6E38\u6A19\u5361\u5C3A|tool.active=tool.caliper"
-    - "\u91CF\u9078\u5B9A\u65B0\u6ED1\u677F\u7684\u4E2D\u9EDE|env.spare_shelf.slot_2.measured"
+    - "\u91CF\u9078\u5B9A\u65B0\u6ED1\u677F\u7684\u4E2D\u9EDE|spare.R.selected.measured"
     - "\u628A\u6E38\u6A19\u5361\u5C3A\u6536\u56DE\u5DE5\u5177\u888B|tool.active="
     - "\u62FF\u8D77\u9078\u5B9A\u7684\u65B0\u6ED1\u677F|spare.R.picked"
-    - "\u5728\u4F5C\u696D\u55AE\u8A18\u4E0B\u65B0\u54C1\u6599\u865F\u548C\u5E8F\u865F|env.work_order.part_trace.matches_spare"
+    - "\u5728\u4F5C\u696D\u55AE\u8A18\u4E0B\u65B0\u54C1\u6599\u865F\u548C\u5E8F\u865F|env.work_order.part_trace.matches_spare_R"
     highlightIds:
     - env.spare_shelf.slot_*
     showBoltNumbers: 0
@@ -100,7 +100,7 @@ MonoBehaviour:
     why: 
     targetId: "env.spare_shelf\uFF08\u9078\u5B9A\u7684\u5099\u54C1\uFF09"
     toolId: 
-    condition: env.spare_shelf.slot_2.flipped
+    condition: spare.R.selected.flipped
     standPointId: tp.platform.parts
     subId: b
   - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u6E38\u6A19\u5361\u5C3A"
@@ -114,7 +114,7 @@ MonoBehaviour:
     why: 
     targetId: consumable.carbon_strip.measure_mid
     toolId: tool.caliper
-    condition: env.spare_shelf.slot_2.measured
+    condition: spare.R.selected.measured
     standPointId: tp.platform.parts
     subId: d
   - text: "\u628A\u6E38\u6A19\u5361\u5C3A\u6536\u56DE\u5DE5\u5177\u888B"
@@ -135,7 +135,7 @@ MonoBehaviour:
     why: 
     targetId: env.work_order.part_trace
     toolId: 
-    condition: env.work_order.part_trace.matches_spare
+    condition: env.work_order.part_trace.matches_spare_R
     standPointId: tp.platform.parts
     subId: g
   presetDone: 0

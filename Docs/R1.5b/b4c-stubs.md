@@ -19,7 +19,7 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | b4:p4 | CourseDef 覆寫（b4 第 4 部分） |
 | b4:p5 | 兩門課跑到結算（b4 第 5 部分；機制沒有指定段落，做的時候回報） |
 
-## 小動作（共 102 列）
+## 小動作（共 106 列）
 
 | 步驟 | 小動作 | 課程 | 完成條件 | owner |
 |---|---|---|---|---|
@@ -43,8 +43,8 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_WC_03a_RemoveGroundRoof | d | periodic | `ground_register.2=cancelled` | b4c:ground_register |
 | STP_WC_03_RemoveGround | d | daily | `ground_register.1=cancelled` | b4c:ground_register |
 | STP_WC_03b_RemoveGroundPlatform | d | periodic | `ground_register.1=cancelled` | b4c:ground_register |
-| STP_WC_01b_ToolCountPlatform | b | daily | `ground_register.1=cancelled&&rack.slot_3=on_rack` | b4c:ground_register |
-| STP_WC_01b_ToolCountPlatform | b | periodic | `ground_register.1=cancelled&&ground_register.2=cancelled` | b4c:ground_register |
+| STP_WC_01b_ToolCountPlatform | b | daily | `ground_register.1.confirmed&&ground_register.1=cancelled&&rack.slot_3=on_rack` | b4c:ground_register |
+| STP_WC_01b_ToolCountPlatform | b | periodic | `ground_register.1.confirmed&&ground_register.2.confirmed&&ground_register.1=cancelled&&ground_register.2=cancelled` | b4c:ground_register |
 | STP_SI_00_PreWork | a | daily | `env.work_order.anti_roll_check.checked_count>=3` | b4c:si00 |
 | STP_SI_00_PreWork | a | periodic | `env.work_order.anti_roll_check.checked_count>=3` | b4c:si00 |
 | STP_SI_00_PreWork | b | daily | `env.work_order.permit.viewed_count>=5` | b4c:si00 |
@@ -61,10 +61,10 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_CSR_08_RemoveStrip_R | b | daily | `part.carbon_strip_R.state=OnMat` | b4:p4 |
 | STP_CSR_09_CleanBracket_L | d | daily | `part.carbon_strip_L.state=InTray&&env.roof_strip_mat.count<=0` | b4:p4 |
 | STP_CSR_09_CleanBracket_R | d | daily | `part.carbon_strip_R.state=InTray&&env.roof_strip_mat.count<=0` | b4:p4 |
-| STP_CSR_10_CheckNew_L | g | daily | `env.work_order.part_trace.matches_spare` | b4:p4 |
-| STP_CSR_10_CheckNew_R | g | daily | `env.work_order.part_trace.matches_spare` | b4:p4 |
-| STP_CSR_10_CheckNew_L | g | periodic | `env.work_order.part_trace.matches_spare` | b4:p4 |
-| STP_CSR_10_CheckNew_R | g | periodic | `env.work_order.part_trace.matches_spare` | b4:p4 |
+| STP_CSR_10_CheckNew_L | g | daily | `env.work_order.part_trace.matches_spare_L` | b4:p4 |
+| STP_CSR_10_CheckNew_R | g | daily | `env.work_order.part_trace.matches_spare_R` | b4:p4 |
+| STP_CSR_10_CheckNew_L | g | periodic | `env.work_order.part_trace.matches_spare_L` | b4:p4 |
+| STP_CSR_10_CheckNew_R | g | periodic | `env.work_order.part_trace.matches_spare_R` | b4:p4 |
 | STP_RT_01_CraneStow | a | periodic | `part.crane.hook.parked` | b4:p4 |
 | STP_SI_02_LockOut | b | daily | `cab.breaker=off` | b4:p5 |
 | STP_SI_02_LockOut | b | periodic | `cab.breaker=off` | b4:p5 |
@@ -115,6 +115,8 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_WC_03a_RemoveGroundRoof | a | periodic | `ip.roof.hv_cable_ground.clamped=false` | b4:p5 |
 | STP_WC_03a_RemoveGroundRoof | b | periodic | `ip.roof.carbody_ground.clamped=false` | b4:p5 |
 | STP_WC_03a_RemoveGroundRoof | c | periodic | `tool.grounding_lead.carried` | b4:p5 |
+| STP_WC_01a_ToolCountRoof | a | daily | `env.tool_bag.slot_5.viewed&&env.tool_bag.slot_6.viewed&&env.tool_bag.slot_7.viewed&&env.tool_bag.slot_8.viewed&&env.tool_bag.slot_9.viewed&&rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack` | b4:p5 |
+| STP_WC_01a_ToolCountRoof | a | periodic | `env.tool_bag.slot_5.viewed&&env.tool_bag.slot_6.viewed&&env.tool_bag.slot_7.viewed&&env.tool_bag.slot_8.viewed&&env.tool_bag.slot_9.viewed&&env.tool_bag.slot_10.viewed&&env.tool_bag.slot_13.viewed&&rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&rack.slot_13=on_rack&&rack.slot_10=on_rack` | b4:p5 |
 | STP_WC_01a_ToolCountRoof | b | daily | `env.bolt_tray_L.count<=0&&env.bolt_tray_R.count<=0&&env.tool_bag.bolt_pouch.count<=0&&env.roof_strip_mat.count<=0&&roof.leftover_count<=0` | b4:p5 |
 | STP_WC_01a_ToolCountRoof | b | periodic | `env.tool_bag.bolt_pouch.count<=0&&env.bolt_tray_L.count<=0&&env.bolt_tray_R.count<=0&&env.parts_tray.strip_count_ok&&roof.leftover_count<=0` | b4:p5 |
 | STP_WC_01b_ToolCountPlatform | c | daily | `workorder.toolcount_platform_confirmed` | b4:p5 |
@@ -122,6 +124,8 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_RT_02_InsulationTest | b | periodic | `tool.megger.connected_count>=2` | b4:p5 |
 | STP_RT_02_InsulationTest | c | periodic | `workorder.ir_reading>=100` | b4:p5 |
 | STP_RT_02_InsulationTest | e | periodic | `ip.pan_head.ground_clamp.discharge_s>=3` | b4:p5 |
+| STP_WC_04_Unlock | c | daily | `lockout.breaker=open&&rack.slot_1=in_pouch` | b4:p5 |
+| STP_WC_04_Unlock | c | periodic | `lockout.breaker=open&&rack.slot_1=in_pouch` | b4:p5 |
 | STP_WC_04_Unlock | d | daily | `cab.cylinder_power=on` | b4:p5 |
 | STP_WC_04_Unlock | d | periodic | `cab.cylinder_power=on` | b4:p5 |
 | STP_WC_05_RaiseTest | a | periodic | `part.crane.hook.inspected&&part.pan_assy.inspected` | b4:p5 |

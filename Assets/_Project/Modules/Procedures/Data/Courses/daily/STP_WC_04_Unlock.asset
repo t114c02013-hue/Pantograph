@@ -47,9 +47,8 @@ MonoBehaviour:
     - "\u8ACB\u4F5C\u696D\u8CA0\u8CAC\u4EBA\u548C\u6A5F\u5EE0\u8ABF\u5EA6\u78BA\u8A8D\uFF0C\u653E\u884C\u5FA9\u96FB|hold.4.checklist_done&&hold.4.released"
     - "\u5F9E\u8170\u5305\u62FF\u51FA\u4E0A\u9396\u639B\u724C\u7D44|tool.active=tool.lockout_tag"
     - "\u89E3\u9664\u5347\u5F13\u958B\u95DC\u7684\u9396|lockout.raise_switch=open"
-    - "\u89E3\u9664\u4E3B\u65B7\u8DEF\u5668\u7684\u9396|lockout.breaker=open"
+    - "\u89E3\u9664\u4E3B\u65B7\u8DEF\u5668\u7684\u9396|lockout.breaker=open&&rack.slot_1=in_pouch"
     - "\u6062\u5FA9\u96FB\u52D5\u7F38\u96FB\u6E90|cab.cylinder_power=on"
-    - "\u628A\u639B\u724C\u7D44\u6536\u9032\u8170\u5305|rack.slot_1=in_pouch"
     - "\u5728\u4F5C\u696D\u55AE\u7C3D\u540D\u5B8C\u5DE5|workorder.sign_end"
     highlightIds: []
     showBoltNumbers: 0
@@ -80,7 +79,7 @@ MonoBehaviour:
     why: 
     targetId: ip.cab.breaker
     toolId: tool.lockout_tag
-    condition: lockout.breaker=open
+    condition: lockout.breaker=open&&rack.slot_1=in_pouch
     standPointId: tp.cab
     subId: c
   - text: "\u6062\u5FA9\u96FB\u52D5\u7F38\u96FB\u6E90"
@@ -90,13 +89,6 @@ MonoBehaviour:
     condition: cab.cylinder_power=on
     standPointId: tp.cab
     subId: d
-  - text: "\u628A\u639B\u724C\u7D44\u6536\u9032\u8170\u5305"
-    why: 
-    targetId: env.waist_pouch
-    toolId: tool.lockout_tag
-    condition: rack.slot_1=in_pouch
-    standPointId: tp.cab
-    subId: e
   - text: "\u5728\u4F5C\u696D\u55AE\u7C3D\u540D\u5B8C\u5DE5"
     why: 
     targetId: env.work_order.sign_end

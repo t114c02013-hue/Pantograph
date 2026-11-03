@@ -94,8 +94,6 @@ MonoBehaviour:
     why: "\u592A\u9B06\u6703\u9B06\u812B\u98DB\u51FA\uFF0C\u592A\u7DCA\u6703\u62C9\u50B7\u87BA\u7D0B\u6216\u58D3\u88C2\u6ED1\u677F\u3002"
     checklist:
     - "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u5C0F\u626D\u529B\u6273\u624B|tool.active=tool.torque_wrench"
-    - "\u5F9E\u5957\u7B52\u76D2\u62FF 13 mm \u5957\u7B52\u88DD\u4E0A\u5C0F\u626D\u529B\u6273\u624B\uFF0C\u4E26\u628A\u626D\u529B\u8A2D\u70BA
-      25 N\xB7m|tool.torque_wrench.setting=25"
     - "\u9396 1 \u865F\u87BA\u6813\u5230\u5580\u8072\uFF0F\u9707\u52D5\u9583\u8272|ip.carbon_strip_R.bolt_1.state=Torqued"
     - "\u9396 2 \u865F\u87BA\u6813\u5230\u5580\u8072\uFF0F\u9707\u52D5\u9583\u8272|ip.carbon_strip_R.bolt_2.state=Torqued"
     - "\u9396 3 \u865F\u87BA\u6813\u5230\u5580\u8072\uFF0F\u9707\u52D5\u9583\u8272|ip.carbon_strip_R.bolt_3.state=Torqued"
@@ -112,14 +110,6 @@ MonoBehaviour:
     condition: tool.active=tool.torque_wrench
     standPointId: tp.stand.s
     subId: a
-  - text: "\u5F9E\u5957\u7B52\u76D2\u62FF 13 mm \u5957\u7B52\u88DD\u4E0A\u5C0F\u626D\u529B\u6273\u624B\uFF0C\u4E26\u628A\u626D\u529B\u8A2D\u70BA
-      25 N\xB7m"
-    why: 
-    targetId: "env.tool_bag.socket_case;tool.torque_wrench\uFF08\u8A2D\u5B9A\u9762\u677F\uFF09"
-    toolId: tool.torque_wrench
-    condition: tool.torque_wrench.setting=25
-    standPointId: tp.stand.s
-    subId: b
   - text: "\u9396 1 \u865F\u87BA\u6813\u5230\u5580\u8072\uFF0F\u9707\u52D5\u9583\u8272"
     why: 
     targetId: ip.carbon_strip_R.bolt_1

@@ -58,7 +58,13 @@ namespace PantographSim.Worksite
             if (State.GetBool(id + ".taken")) return;
             switch (e.text)
             {
-                case "flip": State.SetBool(id + ".flipped", !State.GetBool(id + ".flipped")); break;
+                case "flip":
+                    State.Batch(() =>   // R1.5b b4（步驟計畫 v3.0）：CSR_10 b 判「本側選定的那一條」，不寫死 slot_2
+                    {
+                        State.SetBool(id + ".flipped", !State.GetBool(id + ".flipped"));
+                        if (State.GetBool(id + ".flipped")) State.SetBool($"spare.{CurrentSide()}.selected.flipped", true);
+                    });
+                    break;
                 case "pick":
                     // 同一批：選用成功就請零件端把新滑板拿到手上（RemovableBehaviour 處理 carry），不會出現「已選用、手上卻沒有」的中間狀態
                     if (Pick(State, id, CurrentSide(), modelCode, cracked))
@@ -109,7 +115,11 @@ namespace PantographSim.Worksite
             return true;
         }
 
-        protected override void OnMeasured(MeasurementTaken e) => RecordMeasurement(State, id, e.value);
+        protected override void OnMeasured(MeasurementTaken e) => State.Batch(() =>
+        {
+            RecordMeasurement(State, id, e.value);
+            State.SetBool($"spare.{CurrentSide()}.selected.measured", true);   // CSR_10 d 判本側選定的那一條
+        });
 
         public static void RecordMeasurement(ISimState s, string slotId, float value) => s.Batch(() =>
         {

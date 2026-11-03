@@ -99,14 +99,14 @@ namespace PantographSim.Editor
             {
                 var res = new Resolved { e = e };
                 var r1s = R1Step(r1, e.stepId);
-                if (e.course == "daily" && r1s != null && e.order <= r1s.subActions.Length && !excluded.Contains(e.stepId + "|" + e.subId))
+                if (e.course == "daily" && r1s != null && e.fullOrder <= r1s.subActions.Length && !excluded.Contains(e.stepId + "|" + e.subId))
                 {
-                    var src = r1s.subActions[e.order - 1];
+                    var src = r1s.subActions[e.fullOrder - 1];
                     res.layer = 1; res.rule = (src.done ?? "").Replace("{side}", e.side ?? "");
                     string r1t = Regex.Replace((src.target ?? "").Replace("{side}", e.side ?? ""), @"\.slot_(\*|\d+)$", ""), v6t = Targets(e.targetId).FirstOrDefault() ?? "";
                     bool same = r1t.Length == 0 || r1t == v6t || v6t.StartsWith(r1t + ".") || r1t.StartsWith(v6t + ".");
                     if (!same && !t.reuseTargetChanged.Any(x => e.stepId.StartsWith(x.step) && x.sub == e.subId))
-                        { errors.Add($"{e}：沿用 R1 第 {e.order} 個小動作，但 R1 目標 {src.target} 和 v6 目標 {v6t} 不同（CSV 插列錯位？目標真的改了就加進 reuseTargetChanged）"); continue; }
+                        { errors.Add($"{e}：沿用 R1 第 {e.fullOrder} 個小動作，但 R1 目標 {src.target} 和 v6 目標 {v6t} 不同（CSV 插列錯位？目標真的改了就加進 reuseTargetChanged）"); continue; }
                 }
                 else if (e.course == "periodic" && byDaily.TryGetValue(e.stepId + "|" + e.subId, out var d) && d.layer == 1 && d.e.condition == e.condition)
                 { res.layer = 1; res.rule = d.rule; }

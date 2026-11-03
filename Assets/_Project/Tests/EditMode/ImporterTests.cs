@@ -206,11 +206,12 @@ namespace PantographSim.Tests
                 {
                     var src = r1[id];
                     var mine = resolved.Where(r => r.e.course == "daily" && r.e.stepId == id + "_" + side).OrderBy(r => r.e.order).ToList();
-                    Assert.AreEqual(src.subActions.Length, mine.Count, $"{id}_{side}：小動作數和 R1 相同");
-                    for (int i = 0; i < mine.Count; i++)
+                    int rOnly = side == "R" && id == "STP_CSR_06_Loosen" ? 1 : 0;   // 步驟計畫 v3.0：CSR_06 b 只在 L 側
+                    Assert.AreEqual(src.subActions.Length - rOnly, mine.Count, $"{id}_{side}：小動作數和 R1 相同（R 側少了只在 L 做的列）");
+                    foreach (var m in mine)
                     {
-                        Assert.AreEqual(1, mine[i].layer, $"{id}_{side} 第 {i + 1} 個沿用 R1");
-                        Assert.AreEqual(src.subActions[i].done.Replace("{side}", side), mine[i].rule, $"{id}_{side} 第 {i + 1} 個條件和 R1 相同");
+                        Assert.AreEqual(1, m.layer, $"{id}_{side} {m.e.subId} 沿用 R1");
+                        Assert.AreEqual(src.subActions[m.e.fullOrder - 1].done.Replace("{side}", side), m.rule, $"{id}_{side} {m.e.subId}：條件和 R1 同一個位置的相同（不因 R 側少一列而錯位）");
                     }
                     var built = courses["daily"].First(s => s.stepId == id + "_" + side);
                     var old = ProcedureJsonConverter.BuildStep(src);
@@ -250,6 +251,17 @@ namespace PantographSim.Tests
                 }
             }
             finally { foreach (var s in courses.Values.Concat(again.Values).SelectMany(x => x)) UnityEngine.Object.DestroyImmediate(s); }
+        }
+
+        [Test]
+        public void ConditionTables_EveryEntryUsed()
+        {
+            LoadResolved();
+            var t = StepsCsvImporter.LoadTables();
+            var conds = expanded.Select(e => e.condition).ToList();
+            foreach (var p in t.patterns) Assert.IsTrue(conds.Any(c => System.Text.RegularExpressions.Regex.IsMatch(c, p.re)), $"pattern 沒有任何一列用到（刪掉）：{p.re}");
+            foreach (var x in t.exact) Assert.IsTrue(expanded.Any(e => e.condition == x.text && (string.IsNullOrEmpty(x.step) || e.stepId.StartsWith(x.step))), $"exact 沒有任何一列用到（刪掉）：{x.text}");
+            foreach (var x in t.reuseExcluded.Concat(t.reuseTargetChanged)) Assert.IsTrue(expanded.Any(e => e.stepId.StartsWith(x.step) && e.subId == x.sub), $"沒有這一列：{x.step} {x.sub}");
         }
 
         static string Json(StepDefinition s) => System.Text.RegularExpressions.Regex.Replace(EditorJsonUtility.ToJson(s), "\"(rid|m_Name)\":\\s*(-?\\d+|\"[^\"]*\")", "");

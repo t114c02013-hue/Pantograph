@@ -91,6 +91,8 @@ namespace PantographSim.Editor
             public Row row;
             public string course, stepId, side, subId, text, textDesktop, targetId, toolId, condition, standPointId, errorIds;
             public int n, order;
+            /// <summary>把只在某一側展開的列（side=L）也算進去的順序：第 1 層用它對 R1 的位置（R 側少了 CSR_06 b 也不會錯位）。</summary>
+            public int fullOrder;
             public override string ToString() => $"{course} {stepId} {subId}（{row}）";
         }
 
@@ -142,12 +144,13 @@ namespace PantographSim.Editor
                     foreach (var side in sides)
                     {
                         string stepId = g.Key.Replace("{side}", side);
-                        int order = 0;
+                        int order = 0, skipped = 0;
                         var consumed = new HashSet<Row>();
                         foreach (var r in rs)
                         {
                             if (consumed.Contains(r) || !InCourse(r["courses"], course)) continue;
                             var t = tmpl[r];
+                            if (sided && t.sides.Count > 0 && !t.sides.Contains(side)) { skipped += Math.Max(1, t.n.Count) * (t.interleave.HasValue ? 2 : 1); continue; }   // 只在某一側展開（例：CSR_06 b side=L）
                             var pair = t.interleave.HasValue && t.interleave.Value.a == r["subId"] ? rs.FirstOrDefault(x => x["subId"] == t.interleave.Value.b) : null;
                             if (t.interleave.HasValue && pair == null && t.interleave.Value.b != r["subId"]) errors.Add($"{r}：interleave={t.interleave.Value.a}+{t.interleave.Value.b} 找不到另一列");
                             if (pair != null) consumed.Add(pair);
@@ -163,7 +166,7 @@ namespace PantographSim.Editor
                                     if (se != null) errors.Add($"{src}（{course}）：{se}");
                                     var e = new Expanded
                                     {
-                                        row = src, course = course, stepId = stepId, side = side, n = n, order = ++order,
+                                        row = src, course = course, stepId = stepId, side = side, n = n, order = ++order, fullOrder = order + skipped,
                                         subId = src["subId"] + (n > 0 ? n.ToString() : ""),
                                         text = Sub(Pick("instruction"), side, n), textDesktop = Sub(src["instructionDesktop"], side, n),
                                         targetId = Sub(Pick("targetId"), side, n), toolId = Sub(src["toolId"], side, n), condition = Sub(Pick("condition"), side, n),
