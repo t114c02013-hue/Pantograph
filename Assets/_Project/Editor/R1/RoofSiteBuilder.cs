@@ -679,6 +679,7 @@ namespace PantographSim.Editor
             // 備品架（3 條：型號不符、正確、正確但背面裂紋），在車頂支架上
             var shelf = BuildSpareShelf(env, d.spareShelf, mats);
             Support(d.spareShelf - new Vector3(0, 0.12f, 0), new Vector3(0.3f, 0, 0.3f), "SpareShelf");
+            shelf.gameObject.AddComponent<InteractionPointMarker>().Configure(SimIds.SpareShelf, "備品架");   // CSR_10 a/b/f 的目標（整個架子；三格各有自己的 ID）
             res.ids["env.spare_shelf"] = shelf;
             res.layout.Add(("備品架", shelf));
 
@@ -699,6 +700,7 @@ namespace PantographSim.Editor
             Fbx("ENV_RoofStripMat", null, p.visual, c);
             Anchor(p.anchors, "Anchor_RoofStripMat", c, Vector3.forward);
             foreach (var n in new[] { "StripMat_Surface", "StripMat_Slot_Old" }) Child(p.root, n).localPosition = new Vector3(0f, d.roofStripMatThickness, 0f);
+            p.root.Find("StripMat_Slot_Old").gameObject.AddComponent<InteractionPointMarker>().Configure("env.roof_strip_mat.slot_old", "暫放墊（舊滑板位置）");   // CSR_08 b、CSR_09 d 的目標
             var trig = new GameObject("StripMat_Trigger");
             trig.transform.SetParent(p.col, false);
             trig.transform.position = c + Vector3.up * (d.roofStripMatThickness + d.roofStripMatTriggerHeight / 2f);

@@ -37,12 +37,18 @@ namespace PantographSim.Worksite
         static bool IsField(string field) =>
             field.StartsWith("reading.") || field.StartsWith("newmid.") || field.StartsWith("submit.") || field == "decision"
             || field == SignField || field == SignStart || field == SignEnd || field == "toolcount_confirmed" || field.EndsWith("_signed")
-            || field == AnomalyField || field == IrReadingField || field == PlatformCountField || field == IrJudgementField;   // R1.5b b4
+            || field == AnomalyField || field == IrReadingField || field == PlatformCountField || field == IrJudgementField || field.StartsWith(PartTracePrefix);   // R1.5b b4
 
         /// <summary>R1.5b b4：CSR_01 b 異常欄（none／found，勾了就寫 env.work_order.anomaly.checked）、RT_02 c 絕緣電阻讀值（MΩ，和高阻計讀值比對）、WC_01b c 平台清點完成。</summary>
         public const string AnomalyField = "anomaly", IrReadingField = "ir_reading", PlatformCountField = "toolcount_platform_confirmed";
         /// <summary>D43：RT_02 c3 絕緣電阻判定（pass／fail）。勾錯：教學擋下並提示，練習／考核照寫並記 workorder.ir_judgement_wrong（ERR_RT02_WrongJudgement）。</summary>
         public const string IrJudgementField = "ir_judgement";
+        /// <summary>
+        /// CSR_10 g：part_trace.L／R＝抄了哪一條備品的標籤（值＝env.spare_shelf.slot_n）；和選用的那一條（spare.&lt;side&gt;.picked_slot）一致才寫 matches_spare_&lt;side&gt;＝true。
+        /// shortcut: 料號、序號沒有分開存（一條備品的標籤＝一組料號＋序號）, 要練「抄錯其中一欄」時再拆成兩欄輸入
+        /// </summary>
+        public const string PartTracePrefix = "part_trace.", SpareSlotPrefix = "env.spare_shelf.slot_";
+        public static string PartTraceMatchKey(string side) => "env.work_order.part_trace.matches_spare_" + side;
 
         static bool Tutorial(ISimState s) => s.Get("training.mode") == "tutorial";
 
@@ -87,6 +93,12 @@ namespace PantographSim.Worksite
                 written = (value ?? "").Trim();
                 if (field == SignStart) s.SetBool("workorder.si_signed", true);
                 if (field == SignEnd) s.SetBool("workorder.unlock_signed", true);
+                if (field.StartsWith(PartTracePrefix))
+                {
+                    if (!written.StartsWith(SpareSlotPrefix)) return false;
+                    string side = field.Substring(PartTracePrefix.Length);
+                    s.SetBool(PartTraceMatchKey(side), written == s.Get("spare." + side + ".picked_slot"));
+                }
                 if (field == AnomalyField) { if (written != "none" && written != "found") return false; s.SetBool("env.work_order.anomaly.checked", true); }
                 if (field == IrJudgementField)
                 {

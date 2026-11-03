@@ -10,7 +10,7 @@ namespace PantographSim.Worksite
         {
             State.SetBool("ui.rack_viewed", true);
             int onRack = 0, inUse = 0;
-            for (int k = 1; k <= 9; k++)
+            foreach (int k in SimIds.RackSlotNumbers(State))   // 掛位清單讀 rack.slots（ToolSlotTable），不寫死 1–9
             {
                 var st = State.Get(RackLogic.SlotKey(k), RackLogic.OnRack);
                 if (st == RackLogic.OnRack) onRack++; else inUse++;

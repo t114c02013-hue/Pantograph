@@ -255,7 +255,7 @@ namespace PantographSim.XR
 
         int SlotNearHand()
         {
-            for (int k = 1; k <= 9; k++) if (Near("env.tool_rack.slot_" + k, grabRadius)) return k;
+            foreach (int k in SimIds.RackSlotNumbers(S)) if (Near("env.tool_rack.slot_" + k, grabRadius)) return k;
             return 0;
         }
 

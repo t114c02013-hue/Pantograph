@@ -180,6 +180,13 @@ namespace PantographSim.UI
                 Submit("newmid.L"); Submit("newmid.R");
             }); Ui.Size(sendNew, 76, 40);
             diffText = Ui.Text(card, "", 17, Ui.Muted);
+            // R1.5b b4（CSR_10 g）：新品料號和序號——抄哪一條備品的標籤（要和選用的那一條一致）
+            var pt = Ui.Rect(card, "PartTrace"); Ui.HStack(pt.gameObject, 6);
+            Ui.Text(pt, "新品料號／序號：抄自", 17, Ui.Muted);
+            foreach (var n in new[] { 1, 2, 3 })
+            {
+                var pb = Ui.Button(pt, "備品 " + n + " 的標籤", 17, () => Ui.Send(SimIds.WorkOrder, "env.spare_shelf.slot_" + n, "part_trace." + Sim.State.Get("procedure.side", "L"))); Ui.Size(pb, 150, 40);
+            }
 
             // R1.5b b4：CSR_01 b 異常欄、RT_02 c 絕緣電阻（MΩ，示例值 ≥ 100）
             Ui.Text(card, "異常欄（分流線、托架、絕緣子）　絕緣電阻（MΩ）", 19, Ui.Accent, TextAnchor.UpperLeft, FontStyle.Bold);

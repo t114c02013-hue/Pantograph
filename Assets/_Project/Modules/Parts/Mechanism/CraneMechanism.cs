@@ -91,6 +91,13 @@ namespace PantographSim.Parts.Mechanism
         [Tooltip("R1.5b b4（D23）：駐車位空節點 Crane_ParkPose（X＝吊車台、Y＝吊鉤、Z＝橋架）")] [SerializeField] Transform parkPose;
         public void SetParkPose(Transform pose) => parkPose = pose;
         public Transform ParkPose => parkPose;
+
+        /// <summary>RT_01 a：吊鉤在停放區（CraneProfile.parkZoneRadius／parkZoneBelowY，以 Crane_ParkPose 為中心）。和 D23 的 course.crane_parked（課程設定）不同。</summary>
+        public const string HookParkedKey = "part.crane.hook.parked";
+
+        public bool InParkZone(Vector3 hookPos) => parkPose != null && profile != null
+            && new Vector2(hookPos.x - parkPose.position.x, hookPos.z - parkPose.position.z).magnitude <= profile.parkZoneRadius
+            && hookPos.y >= parkPose.position.y - profile.parkZoneBelowY;
         /// <summary>三軸目前位置：X＝吊車台、Y＝吊鉤、Z＝橋架（D23 測試比對駐車位）。</summary>
         public Vector3 AxisPositions => new Vector3(trolley.position.x, hookBlock.position.y, bridge.position.z);
 
@@ -171,6 +178,8 @@ namespace PantographSim.Parts.Mechanism
                 }
                 if (lb.HasValue) s.SetFloat(SimIds.CraneLoadBottomY, Mathf.Round(LoadWorldBounds().Value.min.y * 1000f) / 1000f);
                 WriteSafetyMeasures(s, airborne, moving, lb, head);
+                bool parked = InParkZone(hp);
+                if (s.GetBool(HookParkedKey) != parked || !s.Has(HookParkedKey)) s.SetBool(HookParkedKey, parked);   // 每 tick 判，值變了才寫
                 stillSeconds = moving ? 0f : stillSeconds + dt;   // R1.5b b4：試吊、放下時停住幾秒（LF_02 a、LF_05 a、IN_02 a、IN_04 a）
                 float still = Mathf.Floor(stillSeconds * 10f) / 10f;
                 if (!s.Has("part.crane.still_s") || Mathf.Abs(s.GetFloat("part.crane.still_s") - still) >= 0.1f - 1e-4f) s.SetFloat("part.crane.still_s", still);

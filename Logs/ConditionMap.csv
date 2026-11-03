@@ -98,8 +98,8 @@ daily,STP_CSR_10_CheckNew_L,e,112,1,"掛位 5 = 在袋","tool.active=",
 daily,STP_CSR_10_CheckNew_R,e,112,1,"掛位 5 = 在袋","tool.active=",
 daily,STP_CSR_10_CheckNew_L,f,113,1,"手持新滑板，且為正確型號、無裂紋","spare.L.picked",
 daily,STP_CSR_10_CheckNew_R,f,113,1,"手持新滑板，且為正確型號、無裂紋","spare.R.picked",
-daily,STP_CSR_10_CheckNew_L,g,114,3,"兩欄和所選備品標籤一致","env.work_order.part_trace.matches_spare_L",b4:p4
-daily,STP_CSR_10_CheckNew_R,g,114,3,"兩欄和所選備品標籤一致","env.work_order.part_trace.matches_spare_R",b4:p4
+daily,STP_CSR_10_CheckNew_L,g,114,3,"兩欄和所選備品標籤一致","env.work_order.part_trace.matches_spare_L",
+daily,STP_CSR_10_CheckNew_R,g,114,3,"兩欄和所選備品標籤一致","env.work_order.part_trace.matches_spare_R",
 daily,STP_CSR_11_Install_L,a,115,1,"新滑板位於托架上方","part.carbon_strip_L.over_bracket",
 daily,STP_CSR_11_Install_R,a,115,1,"新滑板位於托架上方","part.carbon_strip_R.over_bracket",
 daily,STP_CSR_11_Install_L,b,116,1,"方向 = 斜面／箭頭朝弓頭外側","part.carbon_strip_L.new_orientation=out",
@@ -336,8 +336,8 @@ periodic,STP_CSR_10_CheckNew_L,d,111,2,"讀數 EX 12.0 ± 0.2 mm（判定對象�
 periodic,STP_CSR_10_CheckNew_R,d,111,2,"讀數 EX 12.0 ± 0.2 mm（判定對象為 spare.R.selected，依側別，不寫死 slot_2）","spare.R.selected.measured",
 periodic,STP_CSR_10_CheckNew_L,f,113,1,"手持新滑板，且為正確型號、無裂紋","spare.L.picked",
 periodic,STP_CSR_10_CheckNew_R,f,113,1,"手持新滑板，且為正確型號、無裂紋","spare.R.picked",
-periodic,STP_CSR_10_CheckNew_L,g,114,3,"兩欄和所選備品標籤一致","env.work_order.part_trace.matches_spare_L",b4:p4
-periodic,STP_CSR_10_CheckNew_R,g,114,3,"兩欄和所選備品標籤一致","env.work_order.part_trace.matches_spare_R",b4:p4
+periodic,STP_CSR_10_CheckNew_L,g,114,3,"兩欄和所選備品標籤一致","env.work_order.part_trace.matches_spare_L",
+periodic,STP_CSR_10_CheckNew_R,g,114,3,"兩欄和所選備品標籤一致","env.work_order.part_trace.matches_spare_R",
 periodic,STP_CSR_11_Install_L,a,115,1,"新滑板位於托架上方","part.carbon_strip_L.over_bracket",
 periodic,STP_CSR_11_Install_R,a,115,1,"新滑板位於托架上方","part.carbon_strip_R.over_bracket",
 periodic,STP_CSR_11_Install_L,b,116,1,"方向 = 斜面／箭頭朝弓頭外側","part.carbon_strip_L.new_orientation=out",
@@ -460,7 +460,7 @@ periodic,STP_WC_02_LeaveRoof,a,184,3,"兩個掛點都扣著","harness.roof&&harn
 periodic,STP_WC_02_LeaveRoof,b,185,3,"只剩平台掛點扣著","harness.platform&&harness.roof=false",
 periodic,STP_WC_02_LeaveRoof,c,186,3,"人在平台，兩個掛鉤都收在胸前扣環，安全帶仍穿著","player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use",b4d
 periodic,STP_WC_02_LeaveRoof,d,187,2,"掛位 12 = 在架","rack.slot_12=on_rack",
-periodic,STP_RT_01_CraneStow,a,188,3,"吊鉤在停放位置","part.crane.hook.parked",b4:p4
+periodic,STP_RT_01_CraneStow,a,188,3,"吊鉤在停放位置","part.crane.hook.parked",
 periodic,STP_RT_01_CraneStow,b,189,3,"power = false，遙控器 = 在掛座","ctrl.crane.power=false&&env.crane_pendant.state=Docked",
 periodic,STP_WC_03b_RemoveGroundPlatform,a,194,3,"掛鉤 = 已取下（比照 WC_03 a）","isolation.head_clamped=false",
 periodic,STP_WC_03b_RemoveGroundPlatform,b,195,3,"接地夾 = 已鬆開（比照 WC_03 b）","isolation.terminal_clamped=false",

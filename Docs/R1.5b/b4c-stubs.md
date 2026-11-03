@@ -17,13 +17,11 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | b4c:lockout | 一人一鎖（b4c） |
 | b4c:si00 | SI_00 限制（b4c） |
 | b4c:strip_carry | 日常滑板上下車頂（b4c） |
+| b4c:spare_target | 選定備品／手上新滑板的目標 ID（b4c） |
 | b4d | 車頂邊兩級判定與移動限制（b4d） |
-| b4:p3 | ErrorRule（b4 第 3 部分） |
-| b4:p4 | CourseDef 覆寫（b4 第 4 部分） |
-| b4:p5 | 兩門課跑到結算（b4 第 5 部分；機制沒有指定段落，做的時候回報） |
-| b4:p3b | 扭力類錯誤與 K3 降級（b4 第 3b 部分） |
+| b4:p5 | 兩門課跑到結算（b4 第 5 部分；v3.10 做完時結案） |
 
-## 小動作（共 48 列）
+## 小動作（共 43 列）
 
 | 步驟 | 小動作 | 課程 | 完成條件 | owner |
 |---|---|---|---|---|
@@ -70,11 +68,6 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_WC_02_LeaveRoof | c | daily | `player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use` | b4d |
 | STP_WC_02_LeaveRoof | c | periodic | `player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use` | b4d |
 | STP_RT_02_InsulationTest | r3h | periodic | `player.zone=platform&&harness.hooks_stowed` | b4d |
-| STP_CSR_10_CheckNew_L | g | daily | `env.work_order.part_trace.matches_spare_L` | b4:p4 |
-| STP_CSR_10_CheckNew_R | g | daily | `env.work_order.part_trace.matches_spare_R` | b4:p4 |
-| STP_CSR_10_CheckNew_L | g | periodic | `env.work_order.part_trace.matches_spare_L` | b4:p4 |
-| STP_CSR_10_CheckNew_R | g | periodic | `env.work_order.part_trace.matches_spare_R` | b4:p4 |
-| STP_RT_01_CraneStow | a | periodic | `part.crane.hook.parked` | b4:p4 |
 
 ## 場景裡還沒有的目標（ConditionTables.json 的 pendingTargets）
 
@@ -86,10 +79,8 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | npc.inspector | b4c:holdpoint |
 | env.ppe_station | b4c:ppe |
 | Crane_HookBlock/Hook_Latch | b4:p5 |
-| env.roof_strip_mat.slot_old | b4:p4 |
-| env.spare_shelf | b4:p4 |
-| consumable.carbon_strip | b4:p4 |
-| consumable.carbon_strip.measure_mid | b4:p4 |
+| consumable.carbon_strip | b4c:spare_target |
+| consumable.carbon_strip.measure_mid | b4c:spare_target |
 
 ## 錯誤規則的觸發條件還沒做（Assets/_Project/Data/Source/ErrorRules.json 的 owner，共 23 條）
 
@@ -136,3 +127,21 @@ ErrorRuleTests.PendingTriggers_ListedInStubsDoc 檢查兩邊一致。觸發做�
 |---|---|---|
 | IN_04b h 分段起點的實體狀態 | b4b | 軟體工程裁定（補充 2b）：從 IN 段的 PhaseStartSnapshot 開始時，#1 弓頭端掛鉤要是「已取下」（isolation.head_clamped=false）。檢查的是還原有沒有把實體狀態設對，不是 version；PhaseStartSnapshot 在 b4b 才有 |
 | 日常 CSR_09_R d 改走機制 | b4c:strip_carry | 步驟計畫裁定（2026-11-03）：條件照 CSV 判「待報廢箱裡有該側那一條舊滑板，而且暫放墊是空的」，不能只看數量（做 R 側時箱裡已經有 L 側那一條）。CourseFlowTests 的腳本到時要走 strip_carry 機制 |
+
+## b4:p4 收尾的處理（資深軟體工程師 B 審查 F2，2026-11-03）
+
+| 項目 | 處理 |
+|---|---|
+| RT_01 a part.crane.hook.parked | 做了：CraneMechanism 每 tick 判吊鉤在不在停放區（CraneProfile.parkZoneRadius／parkZoneBelowY，以 Crane_ParkPose 為中心） |
+| CSR_10 g part_trace.matches_spare_L／R（兩門課） | 做了：作業單「新品料號／序號：抄自備品 n 的標籤」，WorkOrder 比對選用的那一條（spare.<side>.picked_slot） |
+| env.spare_shelf | 做了：備品架本體加 ID（三格各自的 ID 不變） |
+| env.roof_strip_mat.slot_old | 做了：暫放墊既有的 StripMat_Slot_Old 節點加 ID |
+| consumable.carbon_strip、consumable.carbon_strip.measure_mid | 改 b4c:spare_target：這兩個 ID 指的是「選定的那一條備品」（CSR_10 d）和「手上的新滑板」（CSR_11 b），執行期才知道是哪一個物件，要做動態登錄（選定時把那一條登錄成這個 ID、拿起後換成手上的滑板）；完成條件已經讀 spare.<side>.selected／part.carbon_strip_<side>，只差高亮和箭頭 |
+
+## 下一輪（資深軟體工程師 B 審查的非阻擋建議）
+
+- MeggerLogic、InsulatorsClean 寫死的數量改讀資料。
+- FreshWriteGate.Kinds 在測試 TearDown 還原。
+- SimState 刪除不存在的鍵時不加 version。
+- 常數搬到設定（軟體工程已裁定 BlackboardKeyDef 加 Constant 種類）。
+- 每幀寫的量測鍵會讓 FreshWriteGate 失效（Event 鍵每幀被寫就永遠算「啟用後寫過」）：列出這些鍵，改成值變才寫或改 LiveState。

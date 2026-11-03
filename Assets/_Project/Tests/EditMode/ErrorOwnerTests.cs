@@ -51,6 +51,30 @@ namespace PantographSim.Tests
             foreach (var id in new[] { "ERR_IN07_WrongSocket", "ERR_IN09_WrongSocket", "ERR_CSR13_WrongSocket" }) Assert.AreEqual("b4c:torque_socket", defs[id].owner, id);
         }
 
+        /// <summary>審查 F2：Docs/R1.5b/b4c-stubs.md 的表格（小動作、目標、錯誤規則）也不可以有列掛在已結案的段落。</summary>
+        [Test]
+        public void StubsDoc_NoRowUnderCompleted()
+        {
+            var bad = System.IO.File.ReadAllLines("Docs/R1.5b/b4c-stubs.md")
+                .Where(l => l.StartsWith("|") && l.Split('|').Select(c => c.Trim()).Any(c => Completed.Contains(c))).ToList();
+            Assert.IsEmpty(bad, "還掛在已結案段落的 stub：\n" + string.Join("\n", bad));
+        }
+
+        /// <summary>審查 F1：停用的錯誤（Deprecated／NotApplicable）不放進兩門課任何一步的 errors，也不放進 globalErrors（執行期不判）。</summary>
+        [Test]
+        public void DisabledErrors_NotInAnyCourse()
+        {
+            var disabled = StepsCsvImporter.LoadErrorRules().Values.Where(d => StepsCsvImporter.Disabled(d.status)).Select(d => d.errorId).ToList();
+            Assert.IsNotEmpty(disabled, "資料裡有停用的錯誤（例 ERR_Crane_RiggedOnArm）");
+            foreach (var c in StepsCsvImporter.Courses)
+            {
+                var prc = AssetDatabase.LoadAssetAtPath<ProcedureDefinition>(StepsCsvImporter.ProcedurePath(c));
+                var found = prc.globalErrors.Select(e => "global " + e.errorId).Concat(prc.steps.SelectMany(st => st.errors.Select(e => st.stepId + " " + e.errorId)))
+                    .Where(x => disabled.Contains(x.Substring(x.IndexOf(' ') + 1))).ToList();
+                Assert.IsEmpty(found, c + "：停用的錯誤還在：\n" + string.Join("\n", found));
+            }
+        }
+
         /// <summary>裁定 7a：步驟上的 WhenCondition 只在那一步啟用時判——條件在前一步就成立不記錯，到那一步才記。</summary>
         [Test]
         public void StepWhenCondition_OnlyWhileStepActive()

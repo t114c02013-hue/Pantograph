@@ -14,6 +14,21 @@ namespace PantographSim.Tests
         static void Click(string target, string toolId) => Sim.Bus.Publish(new ActionRequested { targetId = target, text = "click", toolId = toolId });
         static ToolRulesDef Rules => ToolRulesDef.Load();
 
+        /// <summary>CSR_10 g（審查 F2）：作業單抄的標籤要和選用的那一條備品一致；不是備品格的值不收。</summary>
+        [Test]
+        public void PartTrace_MatchesPickedSpareOnly()
+        {
+            var s = new SimState(new EventBus());
+            s.Set("spare.L.picked_slot", "env.spare_shelf.slot_2");
+            Assert.IsTrue(WorkOrder.Write(s, null, WorkOrder.PartTracePrefix + "L", "env.spare_shelf.slot_3"));
+            Assert.IsFalse(s.GetBool(WorkOrder.PartTraceMatchKey("L")), "抄了別條的標籤");
+            Assert.IsTrue(WorkOrder.Write(s, null, WorkOrder.PartTracePrefix + "L", "env.spare_shelf.slot_2"));
+            Assert.IsTrue(s.GetBool(WorkOrder.PartTraceMatchKey("L")), "抄選用那一條");
+            Assert.IsFalse(WorkOrder.Write(s, null, WorkOrder.PartTracePrefix + "L", "12.0"), "不是備品格不收");
+            Assert.IsTrue(s.GetBool(WorkOrder.PartTraceMatchKey("L")), "被拒的不改結果");
+            Assert.IsFalse(s.GetBool(WorkOrder.PartTraceMatchKey("R")), "另一側不受影響");
+        }
+
         [Test]
         public void D43_RulesFromData()
         {

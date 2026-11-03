@@ -71,17 +71,18 @@ namespace PantographSim.Editor
             }
         }
 
-        /// <summary>產生的步驟：沿用的錯誤規則以 ErrorRules.json 的嚴重度為準，加上 K3 的 severityBeforeK3、K8 的 inputMode。</summary>
+        /// <summary>產生的步驟：沿用的錯誤規則以 ErrorRules.json 的嚴重度為準，加上 K3 的 severityBeforeK3、K8 的 inputMode。停用的（Deprecated／NotApplicable）不放進步驟，也不判。</summary>
         public static void ApplyErrorDefs(StepDefinition st, Dictionary<string, ErrorRuleDef> defs, IEnumerable<string> stepErrorIds, List<string> errors)
         {
             var list = new List<ErrorRule>();
             foreach (var e in st.errors ?? Array.Empty<ErrorRule>())
             {
                 if (!defs.TryGetValue(e.errorId, out var d)) { errors.Add($"{st.stepId}：沿用的錯誤 {e.errorId} 在 ErrorRules.json 沒有定義"); continue; }
+                if (Disabled(d.status)) continue;
                 list.Add(d.HasRule ? Build(d, e) : e);
             }
             foreach (var id in stepErrorIds.Where(id => list.All(x => x.errorId != id)))
-                if (defs.TryGetValue(id, out var d) && d.HasRule && d.scope != "global") list.Add(Build(d, null));
+                if (defs.TryGetValue(id, out var d) && d.HasRule && d.scope != "global" && !Disabled(d.status)) list.Add(Build(d, null));
             foreach (var e in list)
             {
                 var d = defs[e.errorId];
@@ -92,9 +93,9 @@ namespace PantographSim.Editor
             st.errors = list.ToArray();
         }
 
-        /// <summary>這門課全程監看的錯誤（scope=global，依 courses 欄篩選）。</summary>
+        /// <summary>這門課全程監看的錯誤（scope=global，依 courses 欄篩選；停用的不放）。</summary>
         public static ErrorRule[] GlobalErrors(string course, Dictionary<string, ErrorRuleDef> defs) =>
-            defs.Values.Where(d => d.scope == "global" && d.HasRule && InCourse(string.IsNullOrEmpty(d.courses) ? "both" : d.courses, course)).OrderBy(d => d.errorId)
+            defs.Values.Where(d => d.scope == "global" && d.HasRule && !Disabled(d.status) && InCourse(string.IsNullOrEmpty(d.courses) ? "both" : d.courses, course)).OrderBy(d => d.errorId)
                 .Select(d =>
                 {
                     var r = Build(d, null);

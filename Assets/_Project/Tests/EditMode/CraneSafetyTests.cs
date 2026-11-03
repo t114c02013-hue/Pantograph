@@ -4,6 +4,7 @@ using NUnit.Framework;
 using PantographSim.Core;
 using PantographSim.Data;
 using PantographSim.Editor;
+using PantographSim.Parts.Mechanism;
 using PantographSim.Procedures;
 using UnityEditor;
 using UnityEngine;
@@ -86,6 +87,7 @@ namespace PantographSim.Tests
         {
             var defs = StepsCsvImporter.LoadErrorRules();
             var hit = Play(Cases[id].hit).Where(e => e.errorId == id).ToList();
+            if (StepsCsvImporter.Disabled(defs[id].status)) { Assert.IsEmpty(hit, $"{id}：停用（{defs[id].status}）：觸發情境也不可以記"); return; }
             Assert.AreEqual(1, hit.Count, $"{id}：觸發情境要記一次（{string.Join(" → ", Cases[id].hit)}）");
             Assert.AreEqual(defs[id].severity, hit[0].severity.ToString(), id + "：嚴重度照 ErrorRules.json");
             Assert.IsEmpty(Play(Cases[id].miss).Where(e => e.errorId == id).ToList(), $"{id}：不觸發情境不可以記（{string.Join(" → ", Cases[id].miss)}）");
@@ -97,7 +99,7 @@ namespace PantographSim.Tests
             var daily = AssetDatabase.LoadAssetAtPath<ProcedureDefinition>(StepsCsvImporter.ProcedurePath("daily"));
             Assert.IsFalse(daily.globalErrors.Any(e => e.errorId.StartsWith("ERR_Crane_")), "日常更換不用天車");
             var periodic = AssetDatabase.LoadAssetAtPath<ProcedureDefinition>(StepsCsvImporter.ProcedurePath("periodic"));
-            CollectionAssert.IsSubsetOf(ConditionIds().ToList(), periodic.globalErrors.Select(e => e.errorId).ToList(), "定期檢修全程監看這些天車錯誤");
+            CollectionAssert.IsSubsetOf(ConditionIds().Where(id => !StepsCsvImporter.Disabled(StepsCsvImporter.LoadErrorRules()[id].status)).ToList(), periodic.globalErrors.Select(e => e.errorId).ToList(), "定期檢修全程監看這些天車錯誤");
         }
 
         [Test]
@@ -107,6 +109,58 @@ namespace PantographSim.Tests
             Assert.AreEqual(0f, CraneLogic.HorizontalDistance(b, new Vector3(0.5f, 5f, 0.5f)), 1e-5f, "在投影內＝0（不看高度）");
             Assert.AreEqual(1.5f, CraneLogic.HorizontalDistance(b, new Vector3(2.5f, 0f, 0f)), 1e-5f);
             Assert.AreEqual(Mathf.Sqrt(2f), CraneLogic.HorizontalDistance(b, new Vector3(2f, 0f, 2f)), 1e-5f);
+        }
+    }
+    /// <summary>軟體工程裁定（13 個狀態鍵 1）：part.crane.hook.parked 由 CraneMechanism 每 tick 判（停放區在 CraneProfile），RT_01 a 讀這個鍵。</summary>
+    public class CraneHookParkedTests
+    {
+        static string Rt01a() => AssetDatabase.LoadAssetAtPath<ProcedureDefinition>(StepsCsvImporter.ProcedurePath("periodic"))
+            .steps.First(s => s.stepId == "STP_RT_01_CraneStow").subActions.First(a => a.subId == "a").condition;
+
+        static Transform Pose(CraneRig c, Vector3 p)
+        {
+            var pose = new GameObject("Crane_ParkPose").transform; pose.SetParent(c.root.transform); pose.position = p;
+            c.mech.SetParkPose(pose);
+            return pose;
+        }
+
+        [Test]
+        public void IntoParkZone_Rt01aDone()
+        {
+            Assert.AreEqual(CraneMechanism.HookParkedKey, Rt01a(), "RT_01 a 讀 part.crane.hook.parked");
+            using (var c = new CraneRig(false))
+            {
+                Pose(c, c.Hook + new Vector3(0.1f, 0.05f, 0f));
+                c.Run(0.1f);
+                Assert.IsTrue(c.state.GetBool(CraneMechanism.HookParkedKey));
+                Assert.IsTrue(ChecklistEval.Done(c.state, Rt01a()));
+            }
+        }
+
+        [Test]
+        public void OutsideParkZone_NotDone()
+        {
+            using (var c = new CraneRig(false))
+            {
+                Pose(c, c.Hook + new Vector3(c.profile.parkZoneRadius + 0.2f, 0f, 0f));
+                c.Run(0.1f);
+                Assert.IsTrue(c.state.Has(CraneMechanism.HookParkedKey), "區外也寫（false）");
+                Assert.IsFalse(ChecklistEval.Done(c.state, Rt01a()));
+            }
+        }
+
+        [Test]
+        public void IntoThenOut_BackToFalse()
+        {
+            using (var c = new CraneRig(false))
+            {
+                Pose(c, c.Hook);
+                c.Run(0.1f);
+                Assert.IsTrue(c.state.GetBool(CraneMechanism.HookParkedKey));
+                c.Cmd("Down", true); c.Run(3f); c.Cmd("None"); c.Run(0.5f);
+                Assert.Less(c.Hook.y, c.mech.ParkPose.position.y - c.profile.parkZoneBelowY, "吊鉤降到停放區下方");
+                Assert.IsFalse(c.state.GetBool(CraneMechanism.HookParkedKey), "離開停放區寫回 false");
+            }
         }
     }
 }

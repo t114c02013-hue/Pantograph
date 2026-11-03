@@ -252,6 +252,11 @@ namespace PantographSim.Tests
                     else if (part == MeggerLogic.Count + "<=0")   // 空手拆兩條測試線（MeggerLeads）
                         foreach (var p in new[] { MeggerLogic.PanPoint, MeggerLogic.BodyPoint }) Assert.IsNull(MeggerLogic.RemoveLead(s, p, ToolRulesDef.Load()), part);
                     else if (part == "env.work_order.anomaly.checked") PantographSim.Worksite.WorkOrder.Write(s, Sim.Bus, PantographSim.Worksite.WorkOrder.AnomalyField, "none");
+                    else if (part.StartsWith("env.work_order.part_trace.matches_spare_"))   // CSR_10 g：抄選用那一條備品的標籤（WorkOrder）
+                    {
+                        string side = part.Substring(part.Length - 1);
+                        Assert.IsTrue(PantographSim.Worksite.WorkOrder.Write(s, Sim.Bus, PantographSim.Worksite.WorkOrder.PartTracePrefix + side, s.Get("spare." + side + ".picked_slot")), part);
+                    }
                     else if (part == "workorder.toolcount_platform_confirmed") PantographSim.Worksite.WorkOrder.Write(s, Sim.Bus, PantographSim.Worksite.WorkOrder.PlatformCountField, "true");
                     else if (part.StartsWith("lockout.")) Lockout(part);
                     else if (part.StartsWith(CabControlLogic.Breaker + "=")) { if (s.Get(CabControlLogic.Breaker, CabControlLogic.On) != part.Substring(CabControlLogic.Breaker.Length + 1)) Assert.IsNull(CabControlLogic.ToggleBreaker(s), part); }

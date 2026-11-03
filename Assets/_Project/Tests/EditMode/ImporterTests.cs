@@ -275,7 +275,8 @@ namespace PantographSim.Tests
             {
                 { "b4c:holdpoint", "HoldPointDef 停留點與 NPC" }, { "b4c:ppe", "個人防護具與手套模式" }, { "b4c:ground_register", "接地登記欄" },
                 { "b4c:lockout", "一人一鎖" }, { "b4c:si00", "SI_00 限制" }, { "b4c:strip_carry", "日常滑板上下車頂" },
-                { "b4d", "車頂邊兩級判定與移動限制" }, { "b4:p3", "b4 第 3 部分 ErrorRule" }, { "b4:p4", "b4 第 4 部分 CourseDef 覆寫" }, { "b4:p5", "b4 第 5 部分 兩門課跑到結算" },
+                { "b4c:spare_target", "選定備品／手上新滑板的目標 ID" },
+                { "b4d", "車頂邊兩級判定與移動限制" }, { "b4:p5", "b4 第 5 部分 兩門課跑到結算（v3.10 做完時結案）" },   // b4:p3、b4:p4 已結案（審查 F2），不再收 stub
             };
             var doc = System.IO.File.ReadAllLines("Docs/R1.5b/b4c-stubs.md").Where(l => l.StartsWith("| STP_")).Select(l => l.Split('|').Select(x => x.Trim()).ToArray()).ToList();
             var listed = new HashSet<string>(doc.Select(c => $"{c[1]}|{c[2]}|{c[3]}|{c[4].Trim('`')}|{c[5]}"));

@@ -78,8 +78,9 @@ namespace PantographSim.Procedures
             if (v >= r.min - ValueInRangeEvaluator.Epsilon) return;
             if (!ExamPolicyDef.In(Policy?.recordModes, state.Get("training.mode"))) return;   // 教學模式擋下（HoldSubAction），不記
             var ci = System.Globalization.CultureInfo.InvariantCulture;
-            string bolt = key.Substring(0, key.LastIndexOf('.'));   // …bolt_3.torque_Nm → 3
-            Fire(r, s, key, $"（{bolt.Substring(bolt.LastIndexOf('_') + 1)} 號螺栓 {v.ToString("0.0", ci)} N·m，差 {(r.min - v).ToString("0.0", ci)} N·m）");
+            var m = System.Text.RegularExpressions.Regex.Match(key, @"_(\d+)\.[^.]+$");   // …bolt_3.torque_Nm → 3；切不出來就不附號碼
+            string which = m.Success ? m.Groups[1].Value + " 號螺栓 " : "";
+            Fire(r, s, key, $"（{which}{v.ToString("0.0", ci)} N·m，差 {(r.min - v).ToString("0.0", ci)} N·m）");
         }
 
         /// <summary>教學模式（holdModes）：這個小動作的螺栓扭力不足時不讓它完成，回傳提示（null＝不擋）。給 ProcedureRunner.SubActionHold。</summary>

@@ -39,7 +39,6 @@ namespace PantographSim.UI
             layer = Ui.Rect(safe, "Markers");
             Ui.Stretch(layer);
             foreach (var (id, name) in Persistent) labels[id] = MakeLabel(name, 20, LabelBg, Color.white);
-            for (int k = 1; k <= 9; k++) labels["env.tool_rack.slot_" + k] = MakeLabel("", 17, LabelBg, Color.white);
             hover = MakeLabel("", 22, new Color(0.1f, 0.35f, 0.55f, 0.95f), Color.white);
             outward = MakeLabel("此側朝外 ➜", 26, new Color(0.9f, 0.5f, 0.05f, 0.95f), Color.white);        }
 
@@ -87,6 +86,8 @@ namespace PantographSim.UI
         public override void Refresh(ISimState s)
         {
             var reg = Sim.Registry;
+            foreach (int k in SimIds.RackSlotNumbers(s))   // 掛位標籤：掛位清單讀 rack.slots（ToolSlotTable），不寫死 1–9
+                if (!labels.ContainsKey("env.tool_rack.slot_" + k)) labels["env.tool_rack.slot_" + k] = MakeLabel("", 17, LabelBg, Color.white);
             bool running = s.GetBool("training.running") && !s.GetBool("procedure.finished");
             Ui.SetActive(layer, running && reg != null);
             if (!running || reg == null) return;

@@ -1,4 +1,6 @@
-﻿namespace PantographSim.Core
+﻿using System.Linq;
+
+namespace PantographSim.Core
 {
     /// <summary>共用的 ID 與黑板鍵常數（各模組透過字串溝通，集中在這裡避免拼錯）。</summary>
     public static class SimIds
@@ -27,6 +29,10 @@
         public const string CranePendantState = "env.crane_pendant.state";
         /// <summary>D30 個人腰包（和 ToolSlotTable.WaistPouch、RackLogic.InPouch 相同；UI 只能引用 Core）。</summary>
         public const string WaistPouch = "env.waist_pouch", RackInPouch = "in_pouch";
+        /// <summary>審查建議：工具架／工具袋有哪些掛位（ToolBelt 開場從 ToolSlotTable 寫「1,2,…,13」；UI、VR 只能引用 Core，從這裡讀，不寫死 1–9）。</summary>
+        public const string RackSlots = "rack.slots";
+        public static int[] RackSlotNumbers(ISimState s) =>
+            (s?.Get(RackSlots) ?? "").Split(',').Select(x => int.TryParse(x, out var n) ? n : 0).Where(n => n > 0).ToArray();
         /// <summary>R1.5b b4 第 4 部分（課程覆寫）：目前的課程、日常更換時天車停駐（D23）、升弓上限（lift 值）、弓頭到了接觸線（D41）。</summary>
         /// <summary>R1 原 25 步的課程 ID（沒有 courseId 的舊錄影也當這個）。</summary>
         public const string CourseR1 = "r1";

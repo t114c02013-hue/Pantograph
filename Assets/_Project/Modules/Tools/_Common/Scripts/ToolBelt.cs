@@ -45,6 +45,7 @@ namespace PantographSim.Tools
             s.Set(SimIds.ActiveTool, "");
             s.SetBool("tools.all_returned", true);
             foreach (var t in tools) RackLogic.Initialize(s, t.Hotkey);
+            s.Set(SimIds.RackSlots, string.Join(",", (slotTable != null ? slotTable.slots.Where(x => x != null).Select(x => x.slot) : tools.Select(t => t.Hotkey)).Where(n => n > 0).Distinct().OrderBy(n => n)));
             s.Set("tools.list", string.Join(";", tools.Select(t => $"{t.Hotkey}|{t.ToolId}|{t.DisplayName}")));
             // 一句用途（工具教學的「用途」頁），給資訊卡顯示
             foreach (var t in tools)

@@ -123,6 +123,7 @@ namespace PantographSim.Worksite
             s.SetFloat(key + ".true_mid", s.GetFloat(slotId + ".true", Nominal));
             s.SetBool(slotId + ".taken", true);
             s.SetBool(key + ".picked", true);
+            s.Set(key + ".picked_slot", slotId);   // CSR_10 g 作業單抄的標籤要和這一條一致
             s.Set("ui.spare_inspect", "");
             return true;
         }

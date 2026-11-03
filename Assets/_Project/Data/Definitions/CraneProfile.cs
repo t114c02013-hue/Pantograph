@@ -28,6 +28,7 @@ namespace PantographSim.Data
         [Tooltip("Btn_Speed2 的發光顏色與標籤：微動／高速（軟體工程裁定）")] public Color speedFineColor = new Color(0.2f, 0.85f, 0.3f), speedFastColor = new Color(1f, 0.55f, 0.1f);
         public string speedFineLabel = "微動", speedFastLabel = "高速";
         [Tooltip("左握把在掛座這個半徑（m）內才是拿起／掛回")] public float pendantDockRadius = 0.3f;
+        [Tooltip("RT_01 a 吊鉤停放區（part.crane.hook.parked）：以 Crane_ParkPose 為中心的水平半徑、吊鉤 pivot 比停放高度低多少以內（m，示例值）")] public float parkZoneRadius = 0.3f, parkZoneBelowY = 0.1f;
         [Tooltip("遙控器按鍵的中文標籤（按鍵節點名 → 文字）")] public string[] buttonLabels =
         {
             "Btn_Up=上升", "Btn_Down=下降", "Btn_East=橫行 +X", "Btn_West=橫行 −X", "Btn_North=走行 +Z", "Btn_South=走行 −Z",
