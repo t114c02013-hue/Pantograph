@@ -138,12 +138,14 @@ namespace PantographSim.Tests
             const string CtrlConnector = "ip.pan_assy.ctrl_connector";
             static readonly System.Text.RegularExpressions.Regex InsulatorClean = new System.Text.RegularExpressions.Regex(@"^(ip\.roof\.insulator_\d+)\.clean_ratio>=");
 
-            /// <summary>D43：清潔布擦絕緣子髒汙殼——繞一圈、每一列都掃過（DirtMask 收到 clean:u,v 時呼叫的同一段，16×6、頭尾相接）。</summary>
+            /// <summary>D43 v3.12：清潔布擦絕緣子面向站點的計分格（DirtMask 收到 clean:u,v 時呼叫的同一段；計分格達門檻整支變乾淨）。</summary>
             void WipeInsulator(string id)
             {
-                for (int r = 0; r < 6; r++)
-                    for (int c = 0; c < DirtMask.Cols; c += 2)
-                        DirtMask.Clean(s, id, (c + 0.5f) / DirtMask.Cols, (r + 0.5f) / 6f, 6, true);
+                var def = InsulatorDirtDef.Load();
+                int k = int.Parse(id.Substring(id.LastIndexOf('_') + 1)) - 1;
+                var score = def.scoreMask[k];
+                for (int i = 0; i < score.Length && !s.GetBool(id + ".wrapped"); i++)
+                    if (score[i] == '1') DirtMask.Clean(s, id, (i % def.cols + 0.5f) / def.cols, (i / def.cols + 0.5f) / def.rows, def.rows, true, score, def.faceMask[k], def.cleanRatio);
             }
             static readonly System.Text.RegularExpressions.Regex ViewedSlot = new System.Text.RegularExpressions.Regex(@"^env\.tool_bag\.slot_(\d+)\.viewed$");
             static readonly string[] Derived = { ToolCountLogic.TrayCount, ToolCountLogic.Leftover, ToolCountLogic.StripCountOk, FastenerLogic.BoltPouchCount, "env.bolt_tray_L.bolts", "env.bolt_tray_R.bolts" };

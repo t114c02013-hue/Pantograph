@@ -101,6 +101,24 @@ namespace PantographSim.Tests
             Assert.AreEqual(Rules.meggerReadingMOhm, s.GetFloat(MeggerLogic.Reading), "4 支擦淨（≥ 95 %）：恢復正常讀值");
         }
 
+        /// <summary>D43 v3.12：清除率只算計分格（背面不計分），達門檻整支變乾淨並記 wrapped；面向的行每行擦到 1 格＝已目視繞看一圈。</summary>
+        [Test]
+        public void InsulatorScore_BackNotScored_ThresholdCleansAll_FaceColumnsInspected()
+        {
+            var s = new SimState(new EventBus());
+            const string id = "ip.roof.insulator_1";
+            var score = new char[16 * 6]; for (int i = 0; i < score.Length; i++) score[i] = (i % 16) < 8 ? '1' : '0';   // 前 8 行計分
+            string mask = new string(score), face = "0,1,2,3,4,5,6,7";
+            PantographSim.Parts.Common.DirtMask.Clean(s, id, (12 + 0.5f) / 16f, 0.5f, 6, true, mask, face, 0.95f);
+            Assert.AreEqual(0f, s.GetFloat(id + ".clean_ratio"), 1e-4f, "擦背面不計分");
+            for (int c = 0; c < 8; c++) for (int r = 0; r < 6; r++)
+                PantographSim.Parts.Common.DirtMask.Clean(s, id, (c + 0.5f) / 16f, (r + 0.5f) / 6f, 6, true, mask, face, 0.95f);
+            Assert.AreEqual(1f, s.GetFloat(id + ".clean_ratio"), "計分格達門檻：整支擦淨");
+            Assert.IsFalse(s.Get(id + ".dirt").Contains('1'), "背面也一起變乾淨");
+            Assert.IsTrue(s.GetBool(id + ".wrapped"), "播拉一圈");
+            Assert.IsTrue(s.GetBool(id + ".inspected"), "面向的 8 行都擦到＝已目視繞看一圈");
+        }
+
         [Test]
         public void LeadRemovedBeforeDischarge_TutorialBlocks_PracticeRecords()
         {

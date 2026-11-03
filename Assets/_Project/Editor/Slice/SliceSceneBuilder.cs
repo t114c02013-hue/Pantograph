@@ -286,7 +286,8 @@ namespace PantographSim.Editor
             mechSo.ApplyModifiedPropertiesWithoutUndo();
             mech.SetLift(1f);
 
-            CourseSceneBuilder.Build(sb);   // R1.5b b4 4c：Anchor_O、架空線暫代物、天車駐車位、升弓上限（D23、D41）
+            CourseSceneBuilder.Build(sb);
+            InsulatorDirtBake.Build(sb);   // R1.5b b4（D43 v3.12）：絕緣子髒汙計分格（每支至少 32 格，不到就建置失敗）   // R1.5b b4 4c：Anchor_O、架空線暫代物、天車駐車位、升弓上限（D23、D41）
             sb.AppendLine(RigHeightMeasure.MeasureAndStore());   // R1.5b b4（D42）：IN_01 a 上限＝吊帶拉直高度 − slackMarginM，量不到範圍就建置失敗
             try { BeforeSave?.Invoke(sb); }
             catch (Exception e) { sb.AppendLine("⚠ 存檔前擴充失敗：" + e.Message); Debug.LogException(e); }

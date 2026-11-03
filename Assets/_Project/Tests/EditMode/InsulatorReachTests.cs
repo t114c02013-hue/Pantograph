@@ -4,61 +4,63 @@ using NUnit.Framework;
 using PantographSim.Data;
 using PantographSim.Editor;
 using PantographSim.Parts.Common;
-using PantographSim.XR;
 using UnityEditor;
 using UnityEngine;
 
 namespace PantographSim.Tests
 {
     /// <summary>
-    /// R1.5b b4（D43）：絕緣子髒汙殼（16×6 格）從 r3f 指定的子站點（桌面：站點眼高的攝影機）看得到幾成——
-    /// 每格中心從眼睛打射線，第一個打到的是這支的 COL_Dirt 才算擦得到。結果寫 Logs/InsulatorReach.txt（< 95 % 要回報，不降門檻）。
-    /// VR 可以伸手繞到背面，這裡只量桌面的下限。
+    /// R1.5b b4（D43，model-spec v3.12 §7.7.1c）：絕緣子髒汙計分格（InsulatorDirtDef.scoreMask，建置時烘焙）。
+    /// 驗證：每支計分格 ≥ minScoreCells；從 r3f 指定子站點（桌面：站點眼高）打射線（和清潔布同一個射線設定）打得到全部計分格（可見率 100 %）。
+    /// 結果寫 Logs/InsulatorReach.txt。背面不計分，VR、桌面同一套規則。
     /// </summary>
     public class InsulatorReachTests
     {
         [Test]
-        public void InsulatorDirt_DesktopReachFromAssignedStation_Measured()
+        public void InsulatorDirt_ScoreCells_AtLeastMin_AllVisibleFromDesktopStation()
         {
+            var def = InsulatorDirtDef.Load();
+            Assert.IsNotNull(def, "要先建置場景（InsulatorDirtBake）");
+            Assert.AreEqual(4, def.scoreMask.Length);
             var prc = AssetDatabase.LoadAssetAtPath<ProcedureDefinition>(StepsCsvImporter.ProcedurePath("periodic"));
-            var step = prc.steps.First(s => s.stepId == "STP_RT_02_InsulationTest");
-            var subs = step.subActions.Where(a => a.subId.StartsWith("r3f")).ToList();
+            var subs = prc.steps.First(s => s.stepId == "STP_RT_02_InsulationTest").subActions.Where(a => a.subId.StartsWith("r3f")).ToList();
             Assert.AreEqual(4, subs.Count, "r3f 展開成 4 支");
-            float eye = AssetDatabase.LoadAssetAtPath<StationSet>("Assets/_Project/Modules/Worksite/Data/StationSet.asset").eyeHeight;
-            var sb = new StringBuilder("D43 絕緣子髒汙殼：從 r3f 指定子站點（眼高 " + eye + " m）看得到的格子比例（桌面下限；VR 可伸手繞背面）\n");
+            var set = AssetDatabase.LoadAssetAtPath<StationSet>("Assets/_Project/Modules/Worksite/Data/StationSet.asset");
+            var sb = new StringBuilder($"D43 絕緣子髒汙計分格（v3.12）：面向子站點的 {def.faceColumns} 行裡、跪姿肩點（站點上方 {def.shoulderY} m）{def.reach} m 內手搆得到的格；桌面從站點眼高 {set.eyeHeight} m 檢查看不看得到\n");
+            var bad = new System.Collections.Generic.List<string>();
             StationTests.WithScene(scene =>
             {
                 Physics.SyncTransforms();
-                var pts = Object.FindObjectsOfType<XrTeleportPoint>(true).Where(p => p.gameObject.scene == scene).ToDictionary(p => p.PointId, p => p.transform);
+                var pts = Object.FindObjectsOfType<PantographSim.XR.XrTeleportPoint>(true).Where(p => p.gameObject.scene == scene).ToDictionary(p => p.PointId, p => p.transform);
                 var masks = Object.FindObjectsOfType<DirtMask>(true).Where(m => m.gameObject.scene == scene && m.Id.StartsWith("ip.roof.insulator_")).ToDictionary(m => m.Id);
                 foreach (var a in subs)
                 {
+                    int n = int.Parse(a.targetId.Substring(a.targetId.LastIndexOf('_') + 1));
                     Assert.IsTrue(masks.TryGetValue(a.targetId, out var mask), a.targetId + " 要在場景");
                     Assert.IsTrue(pts.TryGetValue(a.standPointId, out var st), a.standPointId + " 要在場景");
+                    Assert.AreEqual(def.scoreMask[n - 1], mask.ScoreMask, a.targetId + "：場景的計分格要和 InsulatorDirtDef 一致");
+                    var score = def.scoreMask[n - 1];
+                    int cells = score.Count(ch => ch == '1');
                     var col = mask.GetComponentInChildren<CapsuleCollider>(true);
-                    bool wasOn = col.enabled; col.enabled = true;
-                    var origin = st.position + Vector3.up * eye;
-                    int seen = 0, total = 0;
-                    var firstHits = new System.Collections.Generic.Dictionary<string, int>();
-                    for (int r = 0; r < 6; r++)
-                        for (int c = 0; c < DirtMask.Cols; c++)
-                        {
-                            float ang = ((c + 0.5f) / DirtMask.Cols - 0.5f) * 2f * Mathf.PI, y = ((r + 0.5f) / 6f - 0.5f) * 2f;
-                            var cell = mask.transform.TransformPoint(new Vector3(Mathf.Cos(ang) * 0.5f, y, Mathf.Sin(ang) * 0.5f));
-                            total++;
-                            var dir = cell - origin;
-                            bool any = Physics.Raycast(origin, dir.normalized, out var hit, dir.magnitude + 0.01f, PantographSim.Core.SceneLayers.InteractMask, QueryTriggerInteraction.Collide);   // 和清潔布同一個射線設定
-                            if (any && hit.collider == col && (hit.point - cell).magnitude < 0.02f) seen++;
-                            else { string k = any ? hit.collider.name + "@" + LayerMask.LayerToName(hit.collider.gameObject.layer) : "（沒打到）"; firstHits[k] = firstHits.TryGetValue(k, out var nn) ? nn + 1 : 1; }
-                        }
+                    bool wasOn = col.enabled; col.enabled = true; Physics.SyncTransforms();
+                    var eye = st.position + Vector3.up * set.eyeHeight;
+                    int seen = 0;
+                    for (int i = 0; i < score.Length; i++)
+                    {
+                        if (score[i] != '1') continue;
+                        var cell = InsulatorDirtBake.CellWorld(mask.transform, i % def.cols, i / def.cols, def.cols, def.rows);
+                        var dir = cell - eye;
+                        if (Physics.Raycast(eye, dir.normalized, out var hit, dir.magnitude + 0.01f, PantographSim.Core.SceneLayers.InteractMask, QueryTriggerInteraction.Collide) && hit.collider == col && (hit.point - cell).magnitude < 0.02f) seen++;
+                    }
                     col.enabled = wasOn;
-                    float frac = seen / (float)total;
-                    sb.AppendLine($"{a.targetId}（{a.subId}）從 {a.standPointId}：{seen}/{total} 格＝{frac:P0}{(frac < 0.95f ? "　＜ 95 %：桌面從這一站擦不到門檻" : "")}；擋住的：{string.Join("、", firstHits.OrderByDescending(x => x.Value).Take(4).Select(x => x.Key + "×" + x.Value))}");
+                    sb.AppendLine($"{a.targetId}（{a.subId}）從 {a.standPointId}：計分格 {cells} 格（面向的行 {def.faceMask[n - 1]}），桌面看得到 {seen}/{cells}＝{(cells > 0 ? seen / (float)cells : 0f):P0}");
+                    if (cells < def.minScoreCells) bad.Add($"{a.targetId} 計分格 {cells} < {def.minScoreCells}");
+                    if (seen < cells) bad.Add($"{a.targetId} 桌面只看得到 {seen}/{cells} 個計分格");
                 }
             });
             System.IO.Directory.CreateDirectory("Logs");
-            System.IO.File.WriteAllText("Logs/InsulatorReach.txt", sb.ToString());
-            Debug.Log(sb.ToString());
+            System.IO.File.WriteAllText("Logs/InsulatorReach.txt", sb.ToString() + (bad.Count == 0 ? "全部通過\n" : "不通過：\n" + string.Join("\n", bad) + "\n"));
+            Assert.IsEmpty(bad, string.Join("\n", bad));
         }
     }
 }

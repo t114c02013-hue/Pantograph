@@ -46,6 +46,12 @@ namespace PantographSim.Editor
             var mask = g.AddComponent<DirtMask>();
             mask.Configure("ip.roof.insulator_" + n, $"絕緣子 {n}");
             mask.SetupSurface(r, 6, "fault.insulator_dirty");
+            var cloth = GameObject.CreatePrimitive(PrimitiveType.Cylinder);   // v3.12：計分格達門檻時「用布包住絕緣子拉一圈」（DirtMask 播 0.5 s）
+            cloth.name = "WrapCloth"; cloth.transform.SetParent(g.transform, false); cloth.transform.localScale = new Vector3(1.06f, 0.08f, 1.06f);
+            Object.DestroyImmediate(cloth.GetComponent<Collider>());
+            cloth.GetComponent<Renderer>().sharedMaterial = SliceModelBuilder.Materials()["panel"];
+            cloth.SetActive(false);
+            mask.SetScore(null, n - 1, cloth.transform);   // 計分格在建置最後烘焙（InsulatorDirtBake）
             g.AddComponent<Highlightable>();
         }
         public const string PrefabFolder = "Assets/_Project/Modules/Worksite/Prefabs";
