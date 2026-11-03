@@ -301,6 +301,7 @@ namespace PantographSim.Editor
             AssetDatabase.CreateAsset(obj, tmp);
             AssetDatabase.SaveAssets();
             File.Copy(tmp, path, true);
+            File.WriteAllText(path, File.ReadAllText(path).Replace("m_Name: StepsCsvImporter.Build.cs", "m_Name: " + Path.GetFileNameWithoutExtension(path)));   // CreateAsset 把名稱設成暫存檔名
             AssetDatabase.DeleteAsset(tmp);
             AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
             return AssetDatabase.LoadAssetAtPath<T>(path);

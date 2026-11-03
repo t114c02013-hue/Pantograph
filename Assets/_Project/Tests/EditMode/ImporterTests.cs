@@ -285,5 +285,14 @@ namespace PantographSim.Tests
             foreach (var c in doc) Assert.IsTrue(items.ContainsKey(c[5]), $"{c[1]} {c[2]}：{c[5]} 不是 b4c／後續段落的項目");
             foreach (var p in StepsCsvImporter.LoadTables().pendingTargets) Assert.IsTrue(items.ContainsKey(p.owner), $"待做目標 {p.id}：{p.owner} 不是項目");
         }
+
+        /// <summary>匯入產生的資產：物件名稱＝檔名（SaveAsset 用暫存檔複製，不能把暫存檔名留在 m_Name）。</summary>
+        [Test]
+        public void ImportedAssets_NameMatchesFileName()
+        {
+            var bad = AssetDatabase.FindAssets("t:ScriptableObject", new[] { "Assets/_Project/Modules/Procedures/Data/Courses", "Assets/_Project/Modules/Procedures/Resources" })
+                .Select(AssetDatabase.GUIDToAssetPath).Where(p => System.IO.File.ReadAllText(p).Contains("m_Name: _import_tmp")).ToList();
+            Assert.IsEmpty(bad, string.Join("\n", bad));
+        }
     }
 }
