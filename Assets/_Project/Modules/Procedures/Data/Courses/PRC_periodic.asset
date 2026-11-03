@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b1625bd5ee9d02d4684021240bc131e0, type: 3}
-  m_Name: PRC_periodic
+  m_Name: _import_tmp
   m_EditorClassIdentifier: 
   procedureId: PRC_periodic
   title: periodic
@@ -96,3 +96,273 @@ MonoBehaviour:
   onPass: []
   requireFreshWrite: 1
   autoCompleteAllowed: []
+  globalErrors:
+  - errorId: ERR_Crane_FastLowerEmptyHook
+    severity: 0
+    what: "\u7A7A\u9264\u9760\u8FD1\u8ECA\u9802\u6216\u53F0\u67B6\u6642\u6C92\u6709\u5207\u5230\u5FAE\u52D5\uFF08\u540A\u6881\u5E95\u9762\u96E2\u4F5C\u696D\u9762
+      < EX 2 m \u6642\u7528\u9AD8\u901F\u4E0B\u964D\uFF09\u3002**\u65B0 ID**"
+    why: "\u9AD8\u901F\u4E0B\u964D\u4F86\u4E0D\u53CA\u505C\uFF0C\u540A\u6881\u6703\u649E\u5230\u8ECA\u9802\u6216\u53F0\u67B6\u3002"
+    fix: "\u7A7A\u9264\u9760\u8FD1\u8ECA\u9802\u6216\u53F0\u67B6\uFF08\u540A\u6881\u96E2\u4F5C\u696D\u9762
+      2 m \u5167\uFF09\u6642\u5207\u5230\u5FAE\u52D5\u518D\u4E0B\u964D\u3002"
+    trigger: 9
+    key: 
+    key2: 
+    keys:
+    - part.crane.empty_hook_moving&&ctrl.crane.cmd=Down&&ctrl.crane.fast&&part.crane.beam_above_surface_m<=2
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    inputMode: 
+  - errorId: ERR_Crane_HoldDownMissing
+    severity: 2
+    what: "\u964D\u5F13\u56FA\u5B9A\u5E36\uFF08RM_01\uFF09\u9084\u6C92\u88DD\u5C31\u639B\u540A\u5177\u6216\u8D77\u540A\u3002**\u65B0
+      ID**"
+    why: "\u6C92\u6709\u56FA\u5B9A\u5E36\uFF0C\u540A\u8D77\u6642\u96C6\u96FB\u5F13\u6703\u5F48\u958B\u3002"
+    fix: "\u5148\u88DD\u964D\u5F13\u56FA\u5B9A\u5E36\uFF08RM_01\uFF09\u518D\u639B\u540A\u5177\u3002"
+    trigger: 9
+    key: 
+    key2: 
+    keys:
+    - ip.pan_assy.lift_point_1.state=Rigged&&ip.pan_assy.hold_down.state=Removed
+    - ip.pan_assy.lift_point_2.state=Rigged&&ip.pan_assy.hold_down.state=Removed
+    - ip.pan_assy.lift_point_3.state=Rigged&&ip.pan_assy.hold_down.state=Removed
+    - ip.pan_assy.lift_point_4.state=Rigged&&ip.pan_assy.hold_down.state=Removed
+    - part.pan_assy.state=Lifted&&ip.pan_assy.hold_down.state=Removed
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    inputMode: 
+  - errorId: ERR_Crane_LiftWhileFixed
+    severity: 1
+    what: "\u5E95\u5EA7\u87BA\u6813\u3001\u9AD8\u58D3\u96FB\u7E9C\u6216\u63A7\u5236\u7DDA\u9084\u6C92\u62C6\u5C31\u8D77\u540A\uFF0C\u9023\u7E8C\u62C9
+      3 s \u624D\u7B97"
+    why: "\u9084\u56FA\u5B9A\u8457\u5C31\u786C\u62C9\uFF0C\u6703\u62C9\u58DE\u5E95\u5EA7\u6216\u96FB\u7E9C\u3002"
+    fix: "\u5148\u62C6\u5E95\u5EA7\u87BA\u6813\u3001\u9AD8\u58D3\u96FB\u7E9C\u548C\u63A7\u5236\u7DDA\u518D\u8D77\u540A\u3002"
+    trigger: 9
+    key: 
+    key2: 
+    keys:
+    - part.crane.pull_fixed_s>=3
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    inputMode: 
+  - errorId: ERR_Crane_LowClearance
+    severity: 1
+    what: "\u6A6B\u79FB\u6642\u540A\u7269\u5E95\u9762 < Y 3.1\uFF08\u9435\u9053 6.1\uFF09\u3002\u771F\u7684\u649E\u5230\u6642\u7531
+      ERR_Crane_Collision \u8A18 Critical"
+    why: "\u9AD8\u5EA6\u4E0D\u5920\uFF0C\u6A6B\u79FB\u6642\u540A\u7269\u6703\u649E\u5230\u8ECA\u9AD4\u6216\u8B77\u6B04\u3002"
+    fix: "\u5148\u628A\u540A\u7269\u5347\u5230 Y 3.1 \u4EE5\u4E0A\u518D\u6A6B\u79FB\u3002"
+    trigger: 9
+    key: 
+    key2: part.pan_assy.state=Lifted
+    keys:
+    - ctrl.crane.cmd=E&&part.crane.load_bottom_y<=3.0999
+    - ctrl.crane.cmd=W&&part.crane.load_bottom_y<=3.0999
+    - ctrl.crane.cmd=N&&part.crane.load_bottom_y<=3.0999
+    - ctrl.crane.cmd=S&&part.crane.load_bottom_y<=3.0999
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    inputMode: 
+  - errorId: ERR_Crane_NoTrialLift
+    severity: 1
+    what: "\u6C92\u6709\u8A66\u540A\uFF08LF_02\u3001IN_02\uFF09\u5C31\u5347\u9AD8\u8D85\u904E
+      EX 0.3 m \u6216\u6C34\u5E73\u79FB\u52D5"
+    why: "\u6C92\u6709\u8A66\u540A\u5C31\u770B\u4E0D\u51FA\u540A\u639B\u662F\u5426\u504F\u659C\u3001\u540A\u5E36\u662F\u5426\u6ED1\u52D5\u3002"
+    fix: "\u5148\u96E2\u5EA7 0.08\u20130.15 m \u505C 3 s \u8A66\u540A\uFF0C\u78BA\u8A8D\u5E73\u7A69\u518D\u5347\u9AD8\u6216\u6A6B\u79FB\u3002"
+    trigger: 9
+    key: 
+    key2: part.pan_assy.state=Lifted
+    keys:
+    - part.crane.trial_ok=&&part.crane.drop_distance>=0.3
+    - part.crane.trial_ok=&&part.crane.horizontal_since_lift_m>=0.05
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    inputMode: 
+  - errorId: ERR_Crane_OperatorTooClose
+    severity: 1
+    what: "\u540A\u7269\u61F8\u7A7A\u6642\uFF0C\u64CD\u4F5C\u8005\u96E2\u540A\u7269\u6295\u5F71
+      < 2 m\uFF08\u9435\u9053 2.2\uFF09\uFF1B\u9032\u5165\u7D05\u5340\u5247\u7531
+      PersonUnderLoad \u8A18 Critical"
+    why: "\u540A\u7269\u6643\u52D5\u6216\u6389\u843D\u6642\uFF0C\u592A\u8FD1\u4F86\u4E0D\u53CA\u907F\u958B\u3002"
+    fix: "\u540A\u7269\u61F8\u7A7A\u6642\u96E2\u540A\u7269\u6295\u5F71\u81F3\u5C11
+      2 m\u3002"
+    trigger: 9
+    key: 
+    key2: part.pan_assy.state=Lifted
+    keys:
+    - part.crane.operator_distance_m>=1.001&&part.crane.operator_distance_m<=1.999
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    inputMode: 
+  - errorId: ERR_Crane_PersonOnRoofDuringLift
+    severity: 2
+    what: "\u8ECA\u9802\u639B\u9EDE\u9084\u6263\u8457\uFF0C\u6216\u4EBA\u5728\u8ECA\u9802\u53EF\u8D70\u5340\u6642\u8D77\u540A\u3002**\u65B0
+      ID**"
+    why: "\u540A\u7269\u61F8\u7A7A\u6642\u8ECA\u9802\u4E0A\u6709\u4EBA\uFF0C\u540A\u7269\u6643\u52D5\u6216\u6389\u843D\u6703\u76F4\u63A5\u7838\u5230\u4EBA\u3002"
+    fix: "\u8D77\u540A\u524D\u6240\u6709\u4EBA\u90FD\u8981\u4E0B\u8ECA\u9802\uFF0C\u8ECA\u9802\u639B\u9EDE\u4E5F\u8981\u89E3\u958B\u3002"
+    trigger: 9
+    key: 
+    key2: part.pan_assy.state=Lifted
+    keys:
+    - harness.roof
+    - player.zone=roof
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    inputMode: 
+  - errorId: ERR_Crane_RiggedOnArm
+    severity: 2
+    what: "\u540A\u5E36\u5728\u540A\u8033\u4EE5\u5916\u7684\u5730\u65B9\uFF08\u81C2\u3001\u5F13\u982D\uFF09\u653E\u958B\u3002**\u65B0
+      ID**"
+    why: "\u639B\u5728\u81C2\u6216\u5F13\u982D\u4E0A\uFF0C\u8D77\u540A\u6642\u6703\u62C9\u58DE\u96C6\u96FB\u5F13\u3002"
+    fix: "\u540A\u5E36\u53EA\u80FD\u639B\u5728 4 \u500B\u540A\u8033\u4E0A\u3002"
+    trigger: 9
+    key: 
+    key2: 
+    keys:
+    - part.pan_assy.rig_misplaced
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    inputMode: 
+  - errorId: ERR_Crane_RiggingNotInspected
+    severity: 2
+    what: "RM_05 \u9084\u6C92\u5B8C\u6210\u5C31\u8D77\u540A\uFF0C**\u6216**\u639B\u8457\u5224\u70BA\u300C\u4E0D\u5408\u683C\u300D\u7684\u540A\u5E36\u8D77\u540A\uFF08D20\uFF0C\u4E0D\u53E6\u958B
+      ID\uFF1B\u56DE\u994B\u6587\u5B57\u4F9D\u539F\u56E0\u5340\u5206\uFF09"
+    why: "\u540A\u5E36\u6216\u540A\u9264\u6709\u640D\u50B7\uFF0C\u8D77\u540A\u6642\u53EF\u80FD\u65B7\u88C2\u3002"
+    fix: "\u5148\u5B8C\u6210 RM_05 \u540A\u5177\u6AA2\u67E5\uFF1B\u5224\u70BA\u4E0D\u5408\u683C\u7684\u540A\u5E36\u4E0D\u53EF\u4F7F\u7528\u3002"
+    trigger: 9
+    key: 
+    key2: part.pan_assy.state=Lifted
+    keys:
+    - step.STP_RM_05_CraneRiggingCheck.done=
+    - part.crane.failed_sling_rigged
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    inputMode: 
+  - errorId: ERR_Crane_SideLoad
+    severity: 1
+    what: "\u8D77\u540A\u6642\u540A\u9264\u548C COG \u7684\u6C34\u5E73\u5DEE > EX
+      5 cm\u3002**\u65B0 ID**"
+    why: "\u540A\u9264\u548C\u91CD\u5FC3\u4E0D\u5728\u540C\u4E00\u689D\u5782\u76F4\u7DDA\u4E0A\uFF0C\u8D77\u540A\u6642\u540A\u7269\u6703\u64FA\u52D5\u3001\u5074\u62C9\u5929\u8ECA\u3002"
+    fix: "\u628A\u540A\u9264\u79FB\u5230\u96C6\u96FB\u5F13\u91CD\u5FC3\u6B63\u4E0A\u65B9\u518D\u8D77\u540A\u3002"
+    trigger: 9
+    key: 
+    key2: 
+    keys:
+    - part.pan_assy.state=Lifted&&part.crane.hook_cog_offset_cm>=5.001
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    inputMode: 
+  - errorId: ERR_Crane_UnderMovingHook
+    severity: 1
+    what: "\u7A7A\u9264\u79FB\u52D5\u6642\uFF0C\u982D\u76D4\u6295\u5F71\u5728\u540A\u9264
+      0.5 m \u4EE5\u5167\uFF0C\u4E0D\u505C\u8ECA\uFF08\u9435\u9053 Q2\uFF09\u3002**\u65B0
+      ID**"
+    why: "\u540A\u9264\u6703\u649E\u5230\u982D\u6216\u8EAB\u9AD4\u3002"
+    fix: "\u7A7A\u9264\u79FB\u52D5\u6642\u96E2\u540A\u9264 0.5 m \u4EE5\u4E0A\u3002"
+    trigger: 9
+    key: 
+    key2: 
+    keys:
+    - part.crane.empty_hook_moving&&part.crane.head_to_hook_m<=0.5
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    inputMode: 
+  - errorId: ERR_Crane_UnrigBeforeClamp
+    severity: 1
+    what: "\u53F0\u67B6\u593E\u5177\u9084\u6C92\u9396\u5C31\u5378\u540A\u5E36\u3002**\u65B0
+      ID**"
+    why: "\u6C92\u9396\u5C31\u5378\u540A\u5E36\uFF0C\u96C6\u96FB\u5F13\u53EF\u80FD\u5F9E\u53F0\u67B6\u6ED1\u843D\u3002"
+    fix: "\u5148\u628A\u53F0\u67B6\u5169\u500B\u593E\u5177\u9396\u4E0A\uFF0C\u518D\u5378\u540A\u5E36\u3002"
+    trigger: 9
+    key: 
+    key2: 
+    keys:
+    - part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_1.state=Free&&env.panto_stand.clamp_1.state=Open
+    - part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_1.state=Free&&env.panto_stand.clamp_1.state=
+    - part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_1.state=Free&&env.panto_stand.clamp_2.state=Open
+    - part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_1.state=Free&&env.panto_stand.clamp_2.state=
+    - part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_2.state=Free&&env.panto_stand.clamp_1.state=Open
+    - part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_2.state=Free&&env.panto_stand.clamp_1.state=
+    - part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_2.state=Free&&env.panto_stand.clamp_2.state=Open
+    - part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_2.state=Free&&env.panto_stand.clamp_2.state=
+    - part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_3.state=Free&&env.panto_stand.clamp_1.state=Open
+    - part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_3.state=Free&&env.panto_stand.clamp_1.state=
+    - part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_3.state=Free&&env.panto_stand.clamp_2.state=Open
+    - part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_3.state=Free&&env.panto_stand.clamp_2.state=
+    - part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_4.state=Free&&env.panto_stand.clamp_1.state=Open
+    - part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_4.state=Free&&env.panto_stand.clamp_1.state=
+    - part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_4.state=Free&&env.panto_stand.clamp_2.state=Open
+    - part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_4.state=Free&&env.panto_stand.clamp_2.state=
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    inputMode: 

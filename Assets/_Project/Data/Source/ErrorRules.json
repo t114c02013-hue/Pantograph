@@ -360,9 +360,20 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3c",
+      "owner": "b4:p5",
       "source": "CSV",
-      "trigger": "空鉤靠近車頂或台架時沒有切到微動（吊梁底面離作業面 < EX 2 m 時用高速下降）。**新 ID**"
+      "trigger": "空鉤靠近車頂或台架時沒有切到微動（吊梁底面離作業面 < EX 2 m 時用高速下降）。**新 ID**",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "part.crane.empty_hook_moving&&ctrl.crane.cmd=Down&&ctrl.crane.fast&&part.crane.beam_above_surface_m<=2"
+        ],
+        "why": "高速下降來不及停，吊梁會撞到車頂或台架。",
+        "fix": "空鉤靠近車頂或台架（吊梁離作業面 2 m 內）時切到微動再下降。",
+        "what": "空鉤靠近車頂或台架時沒有切到微動（吊梁底面離作業面 < EX 2 m 時用高速下降）。**新 ID**"
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_Crane_HoldDownMissing",
@@ -371,9 +382,24 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3c",
+      "owner": "",
       "source": "CSV",
-      "trigger": "降弓固定帶（RM_01）還沒裝就掛吊具或起吊。**新 ID**"
+      "trigger": "降弓固定帶（RM_01）還沒裝就掛吊具或起吊。**新 ID**",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "ip.pan_assy.lift_point_1.state=Rigged&&ip.pan_assy.hold_down.state=Removed",
+          "ip.pan_assy.lift_point_2.state=Rigged&&ip.pan_assy.hold_down.state=Removed",
+          "ip.pan_assy.lift_point_3.state=Rigged&&ip.pan_assy.hold_down.state=Removed",
+          "ip.pan_assy.lift_point_4.state=Rigged&&ip.pan_assy.hold_down.state=Removed",
+          "part.pan_assy.state=Lifted&&ip.pan_assy.hold_down.state=Removed"
+        ],
+        "why": "沒有固定帶，吊起時集電弓會彈開。",
+        "fix": "先裝降弓固定帶（RM_01）再掛吊具。",
+        "what": "降弓固定帶（RM_01）還沒裝就掛吊具或起吊。**新 ID**"
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_Crane_LiftWhileFixed",
@@ -382,9 +408,20 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3c",
+      "owner": "b4:p5",
       "source": "CSV",
-      "trigger": "底座螺栓、高壓電纜或控制線還沒拆就起吊，連續拉 3 s 才算"
+      "trigger": "底座螺栓、高壓電纜或控制線還沒拆就起吊，連續拉 3 s 才算",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "part.crane.pull_fixed_s>=3"
+        ],
+        "why": "還固定著就硬拉，會拉壞底座或電纜。",
+        "fix": "先拆底座螺栓、高壓電纜和控制線再起吊。",
+        "what": "底座螺栓、高壓電纜或控制線還沒拆就起吊，連續拉 3 s 才算"
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_Crane_LowClearance",
@@ -393,9 +430,23 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3c",
+      "owner": "",
       "source": "CSV",
-      "trigger": "橫移時吊物底面 < Y 3.1（鐵道 6.1）。真的撞到時由 ERR_Crane_Collision 記 Critical"
+      "trigger": "橫移時吊物底面 < Y 3.1（鐵道 6.1）。真的撞到時由 ERR_Crane_Collision 記 Critical",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "part.pan_assy.state=Lifted",
+        "keys": [
+          "ctrl.crane.cmd=E&&part.crane.load_bottom_y<=3.0999",
+          "ctrl.crane.cmd=W&&part.crane.load_bottom_y<=3.0999",
+          "ctrl.crane.cmd=N&&part.crane.load_bottom_y<=3.0999",
+          "ctrl.crane.cmd=S&&part.crane.load_bottom_y<=3.0999"
+        ],
+        "why": "高度不夠，橫移時吊物會撞到車體或護欄。",
+        "fix": "先把吊物升到 Y 3.1 以上再橫移。",
+        "what": "橫移時吊物底面 < Y 3.1（鐵道 6.1）。真的撞到時由 ERR_Crane_Collision 記 Critical"
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_Crane_NoTrialLift",
@@ -404,9 +455,21 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3c",
+      "owner": "b4:p5",
       "source": "CSV",
-      "trigger": "沒有試吊（LF_02、IN_02）就升高超過 EX 0.3 m 或水平移動"
+      "trigger": "沒有試吊（LF_02、IN_02）就升高超過 EX 0.3 m 或水平移動",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "part.pan_assy.state=Lifted",
+        "keys": [
+          "part.crane.trial_ok=&&part.crane.drop_distance>=0.3",
+          "part.crane.trial_ok=&&part.crane.horizontal_since_lift_m>=0.05"
+        ],
+        "why": "沒有試吊就看不出吊掛是否偏斜、吊帶是否滑動。",
+        "fix": "先離座 0.08–0.15 m 停 3 s 試吊，確認平穩再升高或橫移。",
+        "what": "沒有試吊（LF_02、IN_02）就升高超過 EX 0.3 m 或水平移動"
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_Crane_OperatorTooClose",
@@ -415,9 +478,20 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3c",
+      "owner": "",
       "source": "CSV",
-      "trigger": "吊物懸空時，操作者離吊物投影 < 2 m（鐵道 2.2）；進入紅區則由 PersonUnderLoad 記 Critical"
+      "trigger": "吊物懸空時，操作者離吊物投影 < 2 m（鐵道 2.2）；進入紅區則由 PersonUnderLoad 記 Critical",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "part.pan_assy.state=Lifted",
+        "keys": [
+          "part.crane.operator_distance_m>=1.001&&part.crane.operator_distance_m<=1.999"
+        ],
+        "why": "吊物晃動或掉落時，太近來不及避開。",
+        "fix": "吊物懸空時離吊物投影至少 2 m。",
+        "what": "吊物懸空時，操作者離吊物投影 < 2 m（鐵道 2.2）；進入紅區則由 PersonUnderLoad 記 Critical"
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_Crane_PersonOnRoofDuringLift",
@@ -426,9 +500,21 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3c",
+      "owner": "",
       "source": "CSV",
-      "trigger": "車頂掛點還扣著，或人在車頂可走區時起吊。**新 ID**"
+      "trigger": "車頂掛點還扣著，或人在車頂可走區時起吊。**新 ID**",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "part.pan_assy.state=Lifted",
+        "keys": [
+          "harness.roof",
+          "player.zone=roof"
+        ],
+        "why": "吊物懸空時車頂上有人，吊物晃動或掉落會直接砸到人。",
+        "fix": "起吊前所有人都要下車頂，車頂掛點也要解開。",
+        "what": "車頂掛點還扣著，或人在車頂可走區時起吊。**新 ID**"
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_Crane_PersonUnderLoad",
@@ -448,9 +534,20 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3c",
+      "owner": "b4:p5",
       "source": "CSV",
-      "trigger": "吊帶在吊耳以外的地方（臂、弓頭）放開。**新 ID**"
+      "trigger": "吊帶在吊耳以外的地方（臂、弓頭）放開。**新 ID**",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "part.pan_assy.rig_misplaced"
+        ],
+        "why": "掛在臂或弓頭上，起吊時會拉壞集電弓。",
+        "fix": "吊帶只能掛在 4 個吊耳上。",
+        "what": "吊帶在吊耳以外的地方（臂、弓頭）放開。**新 ID**"
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_Crane_RiggingNotInspected",
@@ -459,9 +556,21 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3c",
+      "owner": "b4:p5",
       "source": "CSV",
-      "trigger": "RM_05 還沒完成就起吊，**或**掛著判為「不合格」的吊帶起吊（D20，不另開 ID；回饋文字依原因區分）"
+      "trigger": "RM_05 還沒完成就起吊，**或**掛著判為「不合格」的吊帶起吊（D20，不另開 ID；回饋文字依原因區分）",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "part.pan_assy.state=Lifted",
+        "keys": [
+          "step.STP_RM_05_CraneRiggingCheck.done=",
+          "part.crane.failed_sling_rigged"
+        ],
+        "why": "吊帶或吊鉤有損傷，起吊時可能斷裂。",
+        "fix": "先完成 RM_05 吊具檢查；判為不合格的吊帶不可使用。",
+        "what": "RM_05 還沒完成就起吊，**或**掛著判為「不合格」的吊帶起吊（D20，不另開 ID；回饋文字依原因區分）"
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_Crane_SideLoad",
@@ -470,9 +579,20 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3c",
+      "owner": "b4:p5",
       "source": "CSV",
-      "trigger": "起吊時吊鉤和 COG 的水平差 > EX 5 cm。**新 ID**"
+      "trigger": "起吊時吊鉤和 COG 的水平差 > EX 5 cm。**新 ID**",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "part.pan_assy.state=Lifted&&part.crane.hook_cog_offset_cm>=5.001"
+        ],
+        "why": "吊鉤和重心不在同一條垂直線上，起吊時吊物會擺動、側拉天車。",
+        "fix": "把吊鉤移到集電弓重心正上方再起吊。",
+        "what": "起吊時吊鉤和 COG 的水平差 > EX 5 cm。**新 ID**"
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_Crane_UnderMovingHook",
@@ -481,9 +601,20 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3c",
+      "owner": "",
       "source": "CSV",
-      "trigger": "空鉤移動時，頭盔投影在吊鉤 0.5 m 以內，不停車（鐵道 Q2）。**新 ID**"
+      "trigger": "空鉤移動時，頭盔投影在吊鉤 0.5 m 以內，不停車（鐵道 Q2）。**新 ID**",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "part.crane.empty_hook_moving&&part.crane.head_to_hook_m<=0.5"
+        ],
+        "why": "吊鉤會撞到頭或身體。",
+        "fix": "空鉤移動時離吊鉤 0.5 m 以上。",
+        "what": "空鉤移動時，頭盔投影在吊鉤 0.5 m 以內，不停車（鐵道 Q2）。**新 ID**"
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_Crane_UnrigBeforeClamp",
@@ -492,9 +623,35 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3c",
+      "owner": "",
       "source": "CSV",
-      "trigger": "台架夾具還沒鎖就卸吊帶。**新 ID**"
+      "trigger": "台架夾具還沒鎖就卸吊帶。**新 ID**",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_1.state=Free&&env.panto_stand.clamp_1.state=Open",
+          "part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_1.state=Free&&env.panto_stand.clamp_1.state=",
+          "part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_1.state=Free&&env.panto_stand.clamp_2.state=Open",
+          "part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_1.state=Free&&env.panto_stand.clamp_2.state=",
+          "part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_2.state=Free&&env.panto_stand.clamp_1.state=Open",
+          "part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_2.state=Free&&env.panto_stand.clamp_1.state=",
+          "part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_2.state=Free&&env.panto_stand.clamp_2.state=Open",
+          "part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_2.state=Free&&env.panto_stand.clamp_2.state=",
+          "part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_3.state=Free&&env.panto_stand.clamp_1.state=Open",
+          "part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_3.state=Free&&env.panto_stand.clamp_1.state=",
+          "part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_3.state=Free&&env.panto_stand.clamp_2.state=Open",
+          "part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_3.state=Free&&env.panto_stand.clamp_2.state=",
+          "part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_4.state=Free&&env.panto_stand.clamp_1.state=Open",
+          "part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_4.state=Free&&env.panto_stand.clamp_1.state=",
+          "part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_4.state=Free&&env.panto_stand.clamp_2.state=Open",
+          "part.pan_assy.state=OnStand&&ip.pan_assy.lift_point_4.state=Free&&env.panto_stand.clamp_2.state="
+        ],
+        "why": "沒鎖就卸吊帶，集電弓可能從台架滑落。",
+        "fix": "先把台架兩個夾具鎖上，再卸吊帶。",
+        "what": "台架夾具還沒鎖就卸吊帶。**新 ID**"
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_Global_GroundHangOrder",

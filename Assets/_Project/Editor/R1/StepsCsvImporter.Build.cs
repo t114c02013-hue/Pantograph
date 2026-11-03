@@ -238,6 +238,7 @@ namespace PantographSim.Editor
                 prc.procedureId = "PRC_" + kv.Key; prc.title = kv.Key; prc.steps = saved;
                 prc.requireFreshWrite = true;   // 軟體工程裁定 2026-11-03：小動作要啟用後真的做了動作才算完成
                 prc.autoCompleteAllowed = LoadTables().autoCompleteAllowed;
+                prc.globalErrors = GlobalErrors(kv.Key, LoadErrorRules());   // 3c：天車安全等全程監看
                 SaveAsset(prc, ProcedurePath(kv.Key));
                 var rs = resolved.Where(r => r.e.course == kv.Key).ToList();
                 sb.AppendLine($"{kv.Key}：步驟 {saved.Count}、小動作 {rs.Count}（第 1 層 {rs.Count(r => r.layer == 1)}、第 2 層 {rs.Count(r => r.layer == 2)}、第 3 層 {rs.Count(r => r.layer == 3)}；機制待做 {rs.Count(r => r.owner.Length > 0)}）→ {CourseFolder}/{kv.Key}");
@@ -248,6 +249,7 @@ namespace PantographSim.Editor
                 Directory.CreateDirectory(Path.GetDirectoryName(policyPath));
                 AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<ExamPolicyDef>(), policyPath);
             }
+            EditorUtility.SetDirty(AssetDatabase.LoadAssetAtPath<ExamPolicyDef>(policyPath));   // 新增的欄位（例：k3DowngradeModes）寫進資產，組長看得到、改得到
             AssetDatabase.SaveAssets();
             Directory.CreateDirectory("Logs");
             File.WriteAllText(MapReportPath, MapReport(resolved), new UTF8Encoding(true));

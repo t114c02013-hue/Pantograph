@@ -35,6 +35,7 @@ namespace PantographSim.Parts.Mechanism
         Quaternion swayBase = Quaternion.identity;
         bool needPowerCycle, inRedZone, collided, wasMoving;
         bool? wasAirborne;
+        Vector3? liftOffHook;   // 3c：吊物離座時吊鉤的位置（算離座後水平移動了多少）
         string lastCmd = CraneLogic.None;
 
         public CraneProfile Profile => profile;
@@ -150,8 +151,29 @@ namespace PantographSim.Parts.Mechanism
                     lastWritten = hp;
                 }
                 if (lb.HasValue) s.SetFloat(SimIds.CraneLoadBottomY, Mathf.Round(LoadWorldBounds().Value.min.y * 1000f) / 1000f);
+                WriteSafetyMeasures(s, airborne, moving, lb, head);
             });
             wasMoving = moving;
+        }
+
+        /// <summary>
+        /// R1.5b b4 3c：天車安全錯誤（ErrorRules.json，全程監看）讀的量測鍵：頭盔到吊物投影的水平距離、到吊鉤的水平距離、空鉤是否在動、離座後水平移動距離。
+        /// 只在值改變超過 5 mm（或布林改變）時寫，不會每幀都寫。
+        /// </summary>
+        void WriteSafetyMeasures(ISimState s, bool airborne, bool moving, Bounds? lb, Vector3? head)
+        {
+            void F(string key, float v) { v = Mathf.Round(v * 1000f) / 1000f; if (!s.Has(key) || Mathf.Abs(s.GetFloat(key) - v) > 0.005f) s.SetFloat(key, v); }
+            void B(string key, bool v) { if (s.GetBool(key) != v) s.SetBool(key, v); }
+            var hp = hookBlock.position;
+            if (head.HasValue)
+            {
+                F("part.crane.head_to_hook_m", new Vector2(head.Value.x - hp.x, head.Value.z - hp.z).magnitude);
+                if (lb.HasValue) F("part.crane.operator_distance_m", CraneLogic.HorizontalDistance(lb.Value, head.Value));
+            }
+            B("part.crane.empty_hook_moving", moving && !airborne);
+            if (airborne && !liftOffHook.HasValue) liftOffHook = hp;
+            if (!airborne) liftOffHook = null;
+            F("part.crane.horizontal_since_lift_m", liftOffHook.HasValue ? new Vector2(hp.x - liftOffHook.Value.x, hp.z - liftOffHook.Value.z).magnitude : 0f);
         }
 
         void Apply(float trolleyX, float hookY, float bridgeZ)

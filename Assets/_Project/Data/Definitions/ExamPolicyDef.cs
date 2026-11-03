@@ -6,7 +6,7 @@ namespace PantographSim.Data
 {
     /// <summary>
     /// R1.5b K3（組長、驗收組長裁定）：考核政策，放在 Resources/ExamPolicy，數值和模式行為都由資料改，不改程式。
-    /// ・k3Ready＝喀聲回饋已在頭盔試玩確認；false 時考核模式把有 severityBeforeK3 的錯誤（扭力不足）改記那個等級，報告註明。
+    /// ・k3Ready＝喀聲回饋已在頭盔試玩確認；false 時 k3DowngradeModes（練習、考核）把有 severityBeforeK3 的錯誤（扭力不足）改記那個等級，報告註明。
     /// ・扭力不足（觸發 OutOfRangeOnLeave）：holdModes 的模式擋下、顯示 underHint，鎖到位才能往下做；recordModes 的模式放行並記錯；
     ///   deferModes 的模式進行中不跳提示，只進報表。模式名稱＝黑板 training.mode（tutorial／practice／exam）。
     /// </summary>
@@ -16,6 +16,7 @@ namespace PantographSim.Data
         public const string ResourcePath = "ExamPolicy";
         public const string K3Note = "（K3 完成後升為 Critical）";
         public bool k3Ready;
+        [Tooltip("k3Ready=false 時改記 severityBeforeK3 並註明的模式（驗收組長：練習、考核都降）")] public string[] k3DowngradeModes = { "practice", "exam" };
         public string[] holdModes = { "tutorial" };
         public string[] recordModes = { "practice", "exam" };
         public string[] deferModes = { "practice", "exam" };

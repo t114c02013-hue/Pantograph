@@ -105,6 +105,13 @@ namespace PantographSim.Data
         }
 
         /// <summary>紅區（D18、D19）：頭部水平投影在吊物水平投影外擴 margin 的範圍內（和高度無關）。</summary>
+        /// <summary>R1.5b b4 3c：點到吊物投影（包圍盒的 XZ）的水平距離；在投影內＝0。</summary>
+        public static float HorizontalDistance(Bounds loadWorld, Vector3 p)
+        {
+            float dx = Mathf.Max(loadWorld.min.x - p.x, 0f, p.x - loadWorld.max.x), dz = Mathf.Max(loadWorld.min.z - p.z, 0f, p.z - loadWorld.max.z);
+            return Mathf.Sqrt(dx * dx + dz * dz);
+        }
+
         public static bool InRedZone(Bounds loadWorld, float margin, Vector3 head) =>
             head.x >= loadWorld.min.x - margin && head.x <= loadWorld.max.x + margin && head.z >= loadWorld.min.z - margin && head.z <= loadWorld.max.z + margin;
 

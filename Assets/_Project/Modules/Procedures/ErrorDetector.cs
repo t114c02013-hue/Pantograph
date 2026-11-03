@@ -162,12 +162,30 @@ namespace PantographSim.Procedures
             if (s == null || runner.Finished || s.def.errors == null) return;
             var ctx = runner.ContextFor(s);
             foreach (var c in e.Changes) TrackLeave(c.key, s, ctx);
+            WatchGlobal(s);
             foreach (var c in e.Changes)
                 foreach (var rule in ActiveRules(s.def))
                 {
                     if (fired.Contains(rule.errorId)) continue;
                     if (Triggered(rule, c, ctx, s)) Fire(rule, s, c.key);
                 }
+        }
+
+        // ---------- R1.5b b4 3c：全程監看的錯誤（天車安全等）----------
+        readonly Dictionary<string, bool> globalWas = new Dictionary<string, bool>();
+
+        /// <summary>前提 key2 成立且 keys 任一條件成立，由不成立變成立時記一次（同一步同一個 ID 只記一次）。</summary>
+        void WatchGlobal(RuntimeStep s)
+        {
+            foreach (var r in runner.Procedure?.globalErrors ?? Array.Empty<ErrorRule>())
+            {
+                if (r.inputMode == "desktop" && InputMode.XrActive) continue;
+                var ctx = runner.ContextFor(s);
+                bool now = (string.IsNullOrEmpty(r.key2) || ChecklistEval.Done(state, ctx.K(r.key2))) && r.keys.Any(k => ChecklistEval.Done(state, ctx.K(k)));
+                bool was = globalWas.TryGetValue(r.errorId, out var w) && w;
+                globalWas[r.errorId] = now;
+                if (now && !was && !fired.Contains(r.errorId)) Fire(r, s, "global");
+            }
         }
 
         /// <summary>R1.5b K8：目前輸入模式下載入的錯誤規則（inputMode=desktop 的只在桌面模式；VR 讀數自動填入，抄錯讀數不會發生）。</summary>
@@ -211,10 +229,10 @@ namespace PantographSim.Procedures
         {
             if (!fired.Add(r.errorId)) return;
             state.Set("error.last", r.errorId);
-            // R1.5b K3：考核模式且喀聲回饋還沒確認（k3Ready=false），改記 severityBeforeK3，報告註明
+            // R1.5b K3：喀聲回饋還沒確認（k3Ready=false）時，k3DowngradeModes（練習、考核）改記 severityBeforeK3，報告註明
             var severity = r.severity; var what = Format(r.what) + detail;
             string mode = state.Get("training.mode");
-            if (!string.IsNullOrEmpty(r.severityBeforeK3) && mode == "exam" && !(Policy != null && Policy.k3Ready)
+            if (!string.IsNullOrEmpty(r.severityBeforeK3) && Policy != null && !Policy.k3Ready && ExamPolicyDef.In(Policy.k3DowngradeModes, mode)
                 && Enum.TryParse<Severity>(r.severityBeforeK3, out var before))
             { severity = before; what += ExamPolicyDef.K3Note; }
             bool deferred = r.trigger == ErrorTrigger.OutOfRangeOnLeave && ExamPolicyDef.In(Policy?.deferModes, mode);   // 放行，只進報表

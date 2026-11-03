@@ -22,6 +22,8 @@ namespace PantographSim.Editor
         public class ErrorRuleDef
         {
             public string errorId, severity, severityBeforeK3, courses, inputMode, status, owner, source, trigger, note;
+            /// <summary>global＝不分步驟、全程監看（放進 ProcedureDefinition.globalErrors，觸發 WhenCondition）；空白＝掛在 Steps.csv 引用它的步驟。</summary>
+            public string scope;
             /// <summary>觸發條件（ProcedureJson 的 ErrorJson 格式）。有寫就以這份為準（取代 R1 的），並加到 Steps.csv 引用它的步驟。</summary>
             public ErrorJson rule;
             public bool HasRule => rule != null && !string.IsNullOrEmpty(rule.trigger);
@@ -75,7 +77,7 @@ namespace PantographSim.Editor
                 list.Add(d.HasRule ? Build(d, e) : e);
             }
             foreach (var id in stepErrorIds.Where(id => list.All(x => x.errorId != id)))
-                if (defs.TryGetValue(id, out var d) && d.HasRule) list.Add(Build(d, null));
+                if (defs.TryGetValue(id, out var d) && d.HasRule && d.scope != "global") list.Add(Build(d, null));
             foreach (var e in list)
             {
                 var d = defs[e.errorId];
@@ -85,6 +87,16 @@ namespace PantographSim.Editor
             }
             st.errors = list.ToArray();
         }
+
+        /// <summary>這門課全程監看的錯誤（scope=global，依 courses 欄篩選）。</summary>
+        public static ErrorRule[] GlobalErrors(string course, Dictionary<string, ErrorRuleDef> defs) =>
+            defs.Values.Where(d => d.scope == "global" && d.HasRule && InCourse(string.IsNullOrEmpty(d.courses) ? "both" : d.courses, course)).OrderBy(d => d.errorId)
+                .Select(d =>
+                {
+                    var r = Build(d, null);
+                    r.severityBeforeK3 = d.severityBeforeK3 ?? ""; r.inputMode = d.inputMode ?? "";
+                    return r;
+                }).ToArray();
 
         /// <summary>ErrorRules.json 的觸發條件建成 ErrorRule；說明文字沒寫就沿用 R1 的。</summary>
         static ErrorRule Build(ErrorRuleDef d, ErrorRule r1)

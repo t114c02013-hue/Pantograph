@@ -143,7 +143,7 @@ namespace PantographSim.Tests
         }
 
         [Test]
-        public void Practice_ReportShowsBoltAndShortfall_Critical_Deferred()
+        public void Practice_ReportShowsBoltAndShortfall_Deferred()
         {
             var r = new Rig("daily", "STP_CSR_13_Torque_L", "practice");
             try
@@ -151,8 +151,21 @@ namespace PantographSim.Tests
                 r.Run(b => b.EndsWith("bolt_3") ? 21.5f : 25f, 25f);
                 var e = r.Find("ERR_CSR13_Under").Value;
                 StringAssert.Contains("3 號螺栓 21.5 N·m，差 1.5 N·m", e.what, "報表指出哪一顆、差多少");
-                Assert.AreEqual(Severity.Critical, e.severity, "練習模式不降級");
                 Assert.IsTrue(e.deferred, "步驟進行中不提示");
+            }
+            finally { r.Dispose(); }
+        }
+
+        [Test]
+        public void Practice_K3NotReady_RecordsMajor_WithNote()
+        {
+            var r = new Rig("daily", "STP_CSR_13_Torque_L", "practice");
+            try
+            {
+                r.Run(b => b == Bolt1 ? 20f : 25f, 25f);
+                var e = r.Find("ERR_CSR13_Under").Value;
+                Assert.AreEqual(Severity.Major, e.severity, "驗收組長：k3Ready=false 時練習也記 Major");
+                StringAssert.Contains(ExamPolicyDef.K3Note, e.what, "練習的報表也註明");
             }
             finally { r.Dispose(); }
         }

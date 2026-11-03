@@ -19,6 +19,8 @@ namespace PantographSim.Data
         public bool requireFreshWrite;
         [Tooltip("例外：啟用時條件已成立就可以直接完成的小動作（每筆都要寫原因；目前應該是空的）")]
         public AutoCompleteAllowedDef[] autoCompleteAllowed = Array.Empty<AutoCompleteAllowedDef>();
+        [Tooltip("R1.5b b4 3c：不分步驟、全程監看的錯誤（天車安全等，觸發 WhenCondition）；由匯入器從 ErrorRules.json（scope=global）產生")]
+        public ErrorRule[] globalErrors = Array.Empty<ErrorRule>();
     }
 
     [Serializable]
