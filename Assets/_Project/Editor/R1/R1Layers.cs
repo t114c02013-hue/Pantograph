@@ -11,7 +11,7 @@ namespace PantographSim.Editor
     /// </summary>
     public static class R1Layers
     {
-        public static readonly string[] PhysicsLayers = { "Walkable", "Boundary", "LocomotionBlocker", "ContactTarget", "PanAssembly" };   // R1.5a a5：ContactTarget（新互動點的 trigger）、PanAssembly（集電弓整組的 Box）
+        public static readonly string[] PhysicsLayers = { "Walkable", "Boundary", "LocomotionBlocker", "ContactTarget", "PanAssembly", "LoadProbe", "WalkLimit", "Crane" };   // R1.5b：LoadProbe（吊物探測）、WalkLimit（車頂不可見邊牆）   // R1.5a a5：ContactTarget（新互動點的 trigger）、PanAssembly（集電弓整組的 Box）
         public static readonly string[] InteractionLayers = { "ToolWidget", "PanelHandle" };
 
         public static string Ensure()

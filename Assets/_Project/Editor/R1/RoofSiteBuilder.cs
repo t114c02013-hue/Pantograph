@@ -296,27 +296,27 @@ namespace PantographSim.Editor
                 if (r.width > 0.01f && r.height > 0.01f) Col(statics.Contains(o) ? "Blocker_Static" : "Blocker", roof.col, new Vector3(r.xMin, roofY, r.yMin), new Vector3(r.xMax, roofY + d.roofWallHeight, r.yMax), SceneLayers.LocomotionBlocker);
             }
             float gz0 = d.gateCenterZ - d.gateWidth / 2f, gz1 = d.gateCenterZ + d.gateWidth / 2f, wh = roofY + d.roofWallHeight;
-            Col("EdgeWall_+X", roof.col, new Vector3(walkHalf, roofY, z0), new Vector3(walkHalf + 0.05f, wh, zb0), SceneLayers.Boundary);
-            Col("EdgeWall_+X_Base", roof.col, new Vector3(wide, roofY, zb0), new Vector3(wide + 0.05f, wh, zb1), SceneLayers.Boundary);
-            Col("EdgeWall_+X_C", roof.col, new Vector3(walkHalf, roofY, zb1), new Vector3(walkHalf + 0.05f, wh, z1), SceneLayers.Boundary);
-            Col("EdgeWall_-X_A", roof.col, new Vector3(-walkHalf - 0.05f, roofY, z0), new Vector3(-walkHalf, wh, gz0), SceneLayers.Boundary);
-            if (zb0 > gz1) Col("EdgeWall_-X_B", roof.col, new Vector3(-walkHalf - 0.05f, roofY, gz1), new Vector3(-walkHalf, wh, zb0), SceneLayers.Boundary);
+            Col("EdgeWall_+X", roof.col, new Vector3(walkHalf, roofY, z0), new Vector3(walkHalf + 0.05f, wh, zb0), SceneLayers.WalkLimit);
+            Col("EdgeWall_+X_Base", roof.col, new Vector3(wide, roofY, zb0), new Vector3(wide + 0.05f, wh, zb1), SceneLayers.WalkLimit);
+            Col("EdgeWall_+X_C", roof.col, new Vector3(walkHalf, roofY, zb1), new Vector3(walkHalf + 0.05f, wh, z1), SceneLayers.WalkLimit);
+            Col("EdgeWall_-X_A", roof.col, new Vector3(-walkHalf - 0.05f, roofY, z0), new Vector3(-walkHalf, wh, gz0), SceneLayers.WalkLimit);
+            if (zb0 > gz1) Col("EdgeWall_-X_B", roof.col, new Vector3(-walkHalf - 0.05f, roofY, gz1), new Vector3(-walkHalf, wh, zb0), SceneLayers.WalkLimit);
             // 放寬帶前端伸進活動欄開口（Z gz0…gz1）時，那一段的車頂邊在 −roofBaseWalkHalfWidth：固定擋牆（GapBlocker 只管 zb0 以前）
             if (zb0 < gz1)
             {
-                var slice = Col("EdgeWall_-X_GateSlice", roof.col, new Vector3(-wide - 0.05f, roofY, zb0), new Vector3(-wide, wh, gz1), SceneLayers.Boundary);
+                var slice = Col("EdgeWall_-X_GateSlice", roof.col, new Vector3(-wide - 0.05f, roofY, zb0), new Vector3(-wide, wh, gz1), SceneLayers.WalkLimit);
                 // 看得見的擋欄 ENV_GateSliceGuard（model-spec v3.3 §4）：寬度＝擋牆範圍，網格不比 collider 更往開口內伸；沒有 FBX 時用黃黑方塊暫代（高 1.0、厚 0.05）
                 var sb0 = slice.bounds; var at = new Vector3(sb0.center.x, roofY, sb0.center.z);
                 if (AssetDatabase.LoadAssetAtPath<GameObject>($"{GeneratedFolder}/ENV_GateSliceGuard.fbx") != null) Fbx("ENV_GateSliceGuard", null, roof.visual, at);
                 else Box("ENV_GateSliceGuard", roof.visual, at + Vector3.up * (d.gateGuardHeight / 2f), new Vector3(0.05f, d.gateGuardHeight, sb0.size.z), mWarn, collider: false);
             }
-            Col("EdgeWall_-X_Base", roof.col, new Vector3(-wide - 0.05f, roofY, zb0), new Vector3(-wide, wh, zb1), SceneLayers.Boundary);
-            Col("EdgeWall_-X_C", roof.col, new Vector3(-walkHalf - 0.05f, roofY, zb1), new Vector3(-walkHalf, wh, z1), SceneLayers.Boundary);
+            Col("EdgeWall_-X_Base", roof.col, new Vector3(-wide - 0.05f, roofY, zb0), new Vector3(-wide, wh, zb1), SceneLayers.WalkLimit);
+            Col("EdgeWall_-X_C", roof.col, new Vector3(-walkHalf - 0.05f, roofY, zb1), new Vector3(-walkHalf, wh, z1), SceneLayers.WalkLimit);
             foreach (int sgn in new[] { -1, 1 })   // 放寬那段前後的轉角牆
             {
                 float xa = sgn > 0 ? walkHalf : -wide - 0.05f, xb = sgn > 0 ? wide + 0.05f : -walkHalf;
-                if (sgn > 0 || zb0 >= gz1) Col(sgn > 0 ? "EdgeWall_+X_Step0" : "EdgeWall_-X_Step0", roof.col, new Vector3(xa, roofY, zb0 - 0.05f), new Vector3(xb, wh, zb0), SceneLayers.Boundary);   // −X 側前端在活動欄開口內：由 GapBlocker 擋
-                Col(sgn > 0 ? "EdgeWall_+X_Step1" : "EdgeWall_-X_Step1", roof.col, new Vector3(xa, roofY, zb1), new Vector3(xb, wh, zb1 + 0.05f), SceneLayers.Boundary);
+                if (sgn > 0 || zb0 >= gz1) Col(sgn > 0 ? "EdgeWall_+X_Step0" : "EdgeWall_-X_Step0", roof.col, new Vector3(xa, roofY, zb0 - 0.05f), new Vector3(xb, wh, zb0), SceneLayers.WalkLimit);   // −X 側前端在活動欄開口內：由 GapBlocker 擋
+                Col(sgn > 0 ? "EdgeWall_+X_Step1" : "EdgeWall_-X_Step1", roof.col, new Vector3(xa, roofY, zb1), new Vector3(xb, wh, zb1 + 0.05f), SceneLayers.WalkLimit);
             }
             Col("EndWall_-Z", roof.col, new Vector3(-walkHalf, roofY, z0 - 0.05f), new Vector3(walkHalf, wh, z0), SceneLayers.LocomotionBlocker);
             Col("EndWall_+Z", roof.col, new Vector3(-walkHalf, roofY, z1), new Vector3(walkHalf, wh, z1 + 0.05f), SceneLayers.LocomotionBlocker);
@@ -845,21 +845,30 @@ namespace PantographSim.Editor
             t.localScale = s;
         }
 
-        public const string LoadProbeLayer = "LoadProbe";
 
-        /// <summary>D40：台車底面（Crane_Hoist、Crane_Trolley 自己的網格頂點最低 Y）、吊鉤組頂面（Crane_HookBlock 自己的網格頂點最高 Y，不含吊梁等子物件），回傳（間距, 台車底面, 吊鉤組頂面）。</summary>
-        public static (float gap, float hoistBottom, float hookTop) HookTopGap(Transform hookBlock, Transform trolley)
+        /// <summary>
+        /// D40（鐵道，model-spec v3.9 §7.3）：吊鉤正上方最近的天車物體。從 Crane_HookBlock 頂面（自己網格頂點最高）往上 BoxCast，截面＝HookBlock 的水平截面，
+        /// 只打 Crane 層、排除 HookBlock 與 Crane_Rope；回傳（距離, 碰到的物體名稱, 頂面 Y）。沒碰到東西時距離是 +∞。
+        /// </summary>
+        public static (float gap, string hit, float top) HookTopCast(Transform hookBlock)
         {
-            float Ys(Transform t, bool max)
-            {
-                var mf = t.GetComponent<MeshFilter>(); if (mf == null || mf.sharedMesh == null) return max ? float.MinValue : float.MaxValue;
-                var ys = mf.sharedMesh.vertices.Select(v => t.TransformPoint(v).y);
-                return max ? ys.Max() : ys.Min();
-            }
-            var hoist = trolley.GetComponentsInChildren<Transform>(true).FirstOrDefault(x => x.name == "Crane_Hoist");
-            float bottom = Mathf.Min(Ys(trolley, false), hoist != null ? Ys(hoist, false) : float.MaxValue);
-            float top = Ys(hookBlock, true);
-            return (bottom - top, bottom, top);
+            Physics.SyncTransforms();
+            var mf = hookBlock.GetComponent<MeshFilter>();
+            var vs = mf.sharedMesh.vertices.Select(v => hookBlock.TransformPoint(v)).ToList();
+            float top = vs.Max(v => v.y);
+            var half = new Vector3((vs.Max(v => v.x) - vs.Min(v => v.x)) / 2f, 0.001f, (vs.Max(v => v.z) - vs.Min(v => v.z)) / 2f);
+            var c = new Vector3((vs.Max(v => v.x) + vs.Min(v => v.x)) / 2f, top + 0.001f, (vs.Max(v => v.z) + vs.Min(v => v.z)) / 2f);
+            var hits = Physics.BoxCastAll(c, half, Vector3.up, Quaternion.identity, 20f, LayerMask.GetMask(SceneLayers.Crane), QueryTriggerInteraction.Ignore)
+                .Where(h => !h.collider.transform.IsChildOf(hookBlock) && h.collider.name != "Crane_Rope").OrderBy(h => h.distance).ToList();
+            return hits.Count == 0 ? (float.PositiveInfinity, "", top) : (hits[0].distance + 0.001f, hits[0].collider.name, top);
+        }
+
+        /// <summary>D40 檢查：吊鉤正上方最近物體的距離 ≥ CraneProfile.hookTopClearance。</summary>
+        public static bool HookTopOk(Transform hookBlock, CraneProfile p, out string detail)
+        {
+            var (gap, hit, top) = HookTopCast(hookBlock);
+            detail = $"吊鉤 pivot Y {hookBlock.position.y:0.000}、頂面 Y {top:0.000} → 正上方最近 {hit} 距離 {gap:0.000} m（≥ {p.hookTopClearance}）";
+            return gap >= p.hookTopClearance - 1e-3f;
         }
 
         /// <summary>
@@ -872,7 +881,7 @@ namespace PantographSim.Editor
             var rigging = R1Data.Rigging;
             var root = GameObject.Find(PantographAssemblyBuilder.RootName).transform;
             var holes = Enumerable.Range(1, 4).Select(i => root.Find("PAN_Base/BaseHole_" + i)).ToArray();
-            int probeLayer = EnsureLayer(LoadProbeLayer);
+            R1Layers.Ensure(); int probeLayer = LayerMask.NameToLayer(SceneLayers.LoadProbe);
             for (int i = 0; i < 32; i++) Physics.IgnoreLayerCollision(probeLayer, i, !(i == 0 || i == LayerMask.NameToLayer(SceneLayers.Boundary)));   // 寫進專案的碰撞矩陣
             var box = root.GetComponent<BoxCollider>();
             box.isTrigger = true; box.enabled = false; root.gameObject.layer = probeLayer;
@@ -914,17 +923,6 @@ namespace PantographSim.Editor
             sb.AppendLine($"吊運（b2）：LoadProbe 層 {probeLayer}（只和 Default、Boundary 互動）；台架落點 Y {pins[0].position.y:0.000}；對位燈 台架 {standLights.Length}、車頂 {roofLights.Length}；吸附 {rigging.snapRadius} m");
         }
 
-        /// <summary>沒有這個 layer 就加在第一個空的使用者 layer（8 以後）。</summary>
-        static int EnsureLayer(string name)
-        {
-            int existing = LayerMask.NameToLayer(name);
-            if (existing >= 0) return existing;
-            var tm = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
-            var layers = tm.FindProperty("layers");
-            for (int i = 8; i < layers.arraySize; i++)
-                if (string.IsNullOrEmpty(layers.GetArrayElementAtIndex(i).stringValue)) { layers.GetArrayElementAtIndex(i).stringValue = name; tm.ApplyModifiedProperties(); return i; }
-            throw new System.Exception("沒有空的 layer 可以放 " + name);
-        }
 
         /// <summary>
         /// R1.5a a5：天車 ENV_OverheadCrane（env.crane；走行軌道 X craneRunwayEastX／WestX、Z ±craneRunwayHalfLength；橋停在 Z craneParkZ，小車 X craneParkTrolleyX，吊鉤在最高點，不擋站點視線）、
@@ -946,16 +944,23 @@ namespace PantographSim.Editor
             trolley.position = new Vector3(d.craneParkTrolleyX, trolley.position.y, d.craneParkZ);
             var hook = N("Crane_HookBlock");
             hook.position = new Vector3(d.craneParkTrolleyX, bridge.position.y - d.hookTopBelowBridge, d.craneParkZ);
-            // D40（鐵道）：吊鉤上限位＝吊鉤組頂點最高點到台車底面（Crane_Hoist／Crane_Trolley 頂點最低點）留 hookTopClearance；在原本的最高點已經不夠就往下移
+            // D40（鐵道，model-spec v3.9 §7.3）：天車網格加上 Crane 層的 collider（只給吊鉤正上方的 BoxCast 量間距用，天車碰撞停止不算自己）；
+            // 吊鉤上限位＝吊鉤正上方最近的天車物體留 hookTopClearance，原本的最高點不夠就往下移
+            R1Layers.Ensure();
+            int craneLayer = LayerMask.NameToLayer(SceneLayers.Crane);
+            foreach (var mf in crane.GetComponentsInChildren<MeshFilter>(true).Where(m => m.transform != hook && !m.transform.IsChildOf(hook) && m.name != "Crane_Rope"))
+            {
+                if (mf.GetComponent<Collider>() == null) mf.gameObject.AddComponent<BoxCollider>();
+                mf.gameObject.layer = craneLayer;
+            }
             var profile = R1Data.Crane;
-            var (gap, hoistBottom, hookTop) = HookTopGap(hook, trolley);
             float pivot0 = hook.position.y;
-            if (gap < profile.hookTopClearance - 1e-4f) hook.position += Vector3.down * (profile.hookTopClearance - gap);
+            var (gap0, hit0, _) = HookTopCast(hook);
+            if (gap0 < profile.hookTopClearance - 1e-4f) hook.position += Vector3.down * (profile.hookTopClearance - gap0);
             profile.hookYMax = Mathf.Round(hook.position.y * 1000f) / 1000f; EditorUtility.SetDirty(profile);
             hook.position = new Vector3(hook.position.x, profile.hookYMax, hook.position.z);
-            var (gap1, _, hookTop1) = HookTopGap(hook, trolley);
-            if (gap1 < profile.hookTopClearance - 1e-3f) throw new Exception($"D40：吊鉤上限位 {profile.hookYMax} 時吊鉤組頂面到台車底面只有 {gap1:0.000} m（要 ≥ {profile.hookTopClearance}）");
-            sb.AppendLine($"D40 吊鉤上限位：台車底面（Crane_Hoist／Crane_Trolley 頂點最低）Y {hoistBottom:0.000}；吊鉤 pivot 在 {pivot0:0.000} 時吊鉤組頂面（頂點最高）Y {hookTop:0.000}、間距 {gap:0.000} m → hookYMax（pivot）{profile.hookYMax:0.000}，頂面 Y {hookTop1:0.000}、間距 {gap1:0.000} m（≥ {profile.hookTopClearance}）");
+            if (!HookTopOk(hook, profile, out var hookDetail)) throw new Exception("D40：" + hookDetail);
+            sb.AppendLine($"D40 吊鉤上限位：pivot {pivot0:0.000} 時正上方最近 {hit0} 距離 {gap0:0.000} m → hookYMax {profile.hookYMax:0.000}；{hookDetail}");
             var anchor = N("Crane_RopeAnchor"); var rope = N("Crane_Rope");
             float ropeLen = Mathf.Max(0.05f, anchor.position.y - hook.position.y - 0.2f);
             rope.position = new Vector3(hook.position.x, hook.position.y + 0.2f + ropeLen / 2f, hook.position.z);

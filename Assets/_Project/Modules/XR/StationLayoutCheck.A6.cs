@@ -225,6 +225,7 @@ namespace PantographSim.XR
             float bottom = hook.transform.position.y - (root.InverseTransformPoint(hookTarget.position).y - tight.Value.min.y);
             Note(r, "5越障", $"吊鉤最高點 Y {hook.transform.position.y:0.000} → 吊物底面 Y {bottom:0.000}（掛點在 LoweredTightBounds 底面上 {root.InverseTransformPoint(hookTarget.position).y - tight.Value.min.y:0.000} m）");
             // D40：吊鉤最高點只有一個數值（CraneProfile.hookYMax，建置時量測寫回、場景的吊鉤就放在那裡），這裡不再和另一個規格值比對；間距 ≥ hookTopClearance 由建置檢查與 CraneHookTopTests 保證
+            Pend(r, "5越障", $"吊鉤在上限位時吊物底面 Y {bottom:0.000}（≥ {set.liftBottomMinY}，鐵道 6.1）", bottom >= set.liftBottomMinY - Eps);
             var tops = new List<(string, float)>();
             void Top(string label, IEnumerable<Transform> ts)
             {

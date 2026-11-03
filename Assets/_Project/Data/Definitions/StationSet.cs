@@ -73,6 +73,7 @@ namespace PantographSim.Data
         [Tooltip("第16項（D33）：子站點到自己那支螺栓的水平距離上限")] public float subStationBoltMax = 0.60f;
         [Tooltip("D34：車體接地座 X 上限、站點立足圓半徑、跪姿區（站點面向方向往前的深度與半寬）")] public float carBodyGroundMaxX = -1.05f, stationFootRadius = 0.25f, kneelZoneDepth = 0.60f, kneelZoneHalfWidth = 0.25f;
         [Tooltip("第七節 1：吊物底面到路徑下方固定物頂面的最低餘裕")] public float liftObstacleMargin = 0.50f;
+        [Tooltip("第七節 1（鐵道 6.1）：吊鉤在上限位時吊物底面的最低高度 Y")] public float liftBottomMinY = 3.1f;
         [Tooltip("◇ 待定（增補 4 第 9 點、增補 6 第 1 點）：不合格的（檢查項＋物件 ID）完全相等時改列「待定」，不讓建置失敗；每一筆都要有 ruleRef、decidedBy、releaseSegment，缺一項就建置失敗")]
         public PendingRuling[] pendingRulings = Array.Empty<PendingRuling>();
         [Tooltip("增補 6 第 2 點：離不可見牆的量測容差（剛好等於門檻算合格；OverlapCapsule 接觸也算重疊）")] public float wallClearanceTolerance = 0.001f;

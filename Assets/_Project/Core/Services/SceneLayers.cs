@@ -9,12 +9,18 @@ namespace PantographSim.Core
     public static class SceneLayers
     {
         public const string Walkable = "Walkable", Boundary = "Boundary", LocomotionBlocker = "LocomotionBlocker";
+        /// <summary>R1.5b：車頂可走範圍的不可見邊牆（EdgeWall_*、EndWall_*）。和 Boundary 一樣擋角色控制器與傳送射線，但不是實體障礙，天車碰撞停止不算它（軟體工程裁定：用 layer 排除，不用名稱比對）。</summary>
+        public const string WalkLimit = "WalkLimit";
+        /// <summary>R1.5b b2：吊物探測 collider（PAN_Root 的整體 Box，只在 Lifted 時開）。</summary>
+        public const string LoadProbe = "LoadProbe";
+        /// <summary>R1.5b D40：天車本體（橋架、台車、捲揚機、軌道）的 collider，只給吊鉤正上方的 BoxCast 用。</summary>
+        public const string Crane = "Crane";
 
         /// <summary>點選、指物件用：排除 Boundary 與 LocomotionBlocker。</summary>
         public static int InteractMask => ~LayerMask.GetMask(Boundary, LocomotionBlocker);
 
         /// <summary>傳送拋物線：Walkable＋Boundary（沒有這些圖層時打全部）。</summary>
-        public static int TeleportMask { get { int m = LayerMask.GetMask(Walkable, Boundary); return m == 0 ? ~0 : m; } }
+        public static int TeleportMask { get { int m = LayerMask.GetMask(Walkable, Boundary, WalkLimit); return m == 0 ? ~0 : m; } }
 
         /// <summary>站點落點、目前樓層判斷：只打 Walkable。</summary>
         public static int WalkableMask { get { int m = LayerMask.GetMask(Walkable); return m == 0 ? ~0 : m; } }

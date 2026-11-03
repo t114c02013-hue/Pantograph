@@ -14,7 +14,7 @@ PF_CarbonStrip_R ← CarbonStrip_1：尺寸 1.102 × 0.016 × 0.074 m
 PF_StripBolt：M8×25 六角頭 對邊 13 mm、高 5.3 mm；墊圈 Ø16×1.6 mm；螺桿 Ø8×25 mm（示例值）
 螺栓位置：距端 3 cm、距中心線 ±2.5 cm，編號 1 左外、2 右內、3 右外、4 左內（外＝斜面側）
 
-圖層：已存在
+圖層：新增 WalkLimit=14、Crane=15
 場景：肘側滑板 (0.000, 0.675, 0.150)、4 支螺栓、托架遮罩
 場景：外側滑板 (0.000, 0.675, -0.150)、4 支螺栓、托架遮罩
 降弓位置檢測：檢測點 (0.000, 0.708, 0.000)、容許 1 cm、全程行程 182 cm
@@ -76,7 +76,7 @@ LoweredTightBounds（PAN_Root 局部，排除可拆件）：(-0.825, 0.000, -1.0
 駕駛室：控制盤 (-0.69, -1.30, -30.00)（盤面朝 +X）、指示燈複本、弓頭監視畫面（Assets/_Project/Content/Textures/RT_PanHeadMonitor.renderTexture）
 台架（G2）：支撐座 1.103 × 1.804 m（BaseHole 間距 0.973 × 1.624 ＋ (0.13, 0.18)）；外框 1.967 × 2.565 m（FBX 原本 2.00 × 2.60）
 地面維修區：X -13.5…-5.5、Z -5…5、地面 -3.65；台架中心 (-9.5, 0)、頂面 Y -2.90；工作檯 (-12.5, 0)；零件盒位置 Anchor_PartsTray_Maint (-12.5, -1.4)
-D40 吊鉤上限位：台車底面（Crane_Hoist／Crane_Trolley 頂點最低）Y 7.000；吊鉤 pivot 在 5.850 時吊鉤組頂面（頂點最高）Y 6.050、間距 0.950 m → hookYMax（pivot）5.850，頂面 Y 6.050、間距 0.950 m（≥ 0.3）
+D40 吊鉤上限位：pivot 5.850 時正上方最近 Crane_Bridge 距離 0.549 m → hookYMax 5.850；吊鉤 pivot Y 5.850、頂面 Y 6.050 → 正上方最近 Crane_Bridge 距離 0.549 m（≥ 0.3）
 吊梁 ENV_LiftingBeam（G2）：梁長 1.233 m（沿 X）、吊耳間距 1.033 m
 天車機構（b1）：上限位 Y 5.850、小車 X -15…2、橋架 Z -15…15、安全規則 2 條
 天車：軌道 X 3／-16、Z ±15，停在 Z 12，吊鉤 Y 5.85；遙控器在掛座 (-3.06, 1.20, -2.95)；吊帶 4 條在 (-6.5, -3.8)；工具袋在工作檯上
@@ -104,7 +104,7 @@ VR：右搖桿平滑移動 1 m/s（車頂上限 1）、死區 0.15、CharacterCo
 VR：腰包 env.waist_pouch 在 XR Origin 局部 (0.18, 0.95, 0.05)（右腰）
 平台：去駕駛室光圈 mk.platform.to_cab (-2.200, 0.000, -0.450)（r 0.25）
 VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、接地端子旁、活動欄與平台掛點、車頂（肘側滑板）（車頂開放才解鎖）、車頂（外側滑板）（車頂開放才解鎖）、車頂工具箱與零件盒（車頂開放才解鎖）、天車遙控器掛座旁、台架北側、台架東側、台架南側、台架西側、備品架前（日常）、待報廢箱前（日常）、車頂拆裝座（−X 側）（車頂開放才解鎖）、車頂拆裝座（+X 側）（車頂開放才解鎖）、底座螺栓 1 前（車頂開放才解鎖）、底座螺栓 2 前（車頂開放才解鎖）、底座螺栓 3 前（車頂開放才解鎖）、底座螺栓 4 前（車頂開放才解鎖）
-站點檢查：結果：21 站，201 過／0 待定／0 不合格（全過）
+站點檢查：結果：21 站，202 過／0 待定／0 不合格（全過）
 ・tp.cab：(-0.190, -2.350, -30.000)
 ・tp.platform.lift：(-2.200, 0.000, -0.050)
 ・tp.platform.rack：(-2.410, 0.000, -2.400)
@@ -196,6 +196,7 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ✔ 【第5項】npc.rigging_lead（吊運中）(-5.00, -3.50) 離吊運路徑 ±1 m 2.50 m、不在吊物禁區內
 ✔ 【第5項】npc.guard（吊運中）(-6.00, -4.30) 離吊運路徑 ±1 m 3.30 m、不在吊物禁區內
 ✔ 【第5項】npc.work_leader（吊運中）(-7.00, -4.30) 離吊運路徑 ±1 m 3.30 m、不在吊物禁區內
+✔ 【第5越障項】吊鉤在上限位時吊物底面 Y 3.390（≥ 3.1，鐵道 6.1）
 ✔ 【第5越障項】防墜器門架頂 頂面 Y 2.640，餘裕 0.750 m（≥ 0.5）
 ✔ 【第5越障項】桿架上直立的長桿頂 頂面 Y 1.305，餘裕 2.085 m（≥ 0.5）
 ✔ 【第5越障項】平台護欄 頂面 Y 1.100，餘裕 2.290 m（≥ 0.5）
@@ -370,7 +371,7 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ✔ 【第20項】防墜器 → tp.roof.base_e.n D 環（站姿 1.35 m）不碰集電弓與絕緣子
 ✔ 【第20項】防墜器 → tp.roof.base_w.n D 環（跪姿 0.9 m）不碰集電弓與絕緣子
 ✔ 【第20項】防墜器 → tp.roof.base_w.n D 環（站姿 1.35 m）不碰集電弓與絕緣子
-VR：76 個互動點加上 XRInteractableBridge
+VR：77 個互動點加上 XRInteractableBridge
 場景已存檔：Assets/_Project/Content/Scenes/SC_CarbonStripSlice.unity（Build Settings 第 0 位）
 場景互動物件 95 個：env.bolt_tray_L, env.bolt_tray_R, env.crane, env.crane_pendant, env.panto_stand, env.panto_stand.clamp_1, env.panto_stand.clamp_2, env.panto_stand.tool_tray, env.parts_tray, env.pole_rack, env.roof_strip_mat, env.roof_toolbox, env.sling_1, env.sling_2, env.sling_3, env.sling_4, env.socket_seat_10, env.socket_seat_13, env.socket_seat_13_38, env.socket_seat_17, env.socket_seat_19, env.socket_seat_24, env.spare_shelf.slot_1, env.spare_shelf.slot_2, env.spare_shelf.slot_3, env.tool_bag, env.tool_bag.bolt_pouch, env.tool_rack, env.tool_rack.slot_1, env.tool_rack.slot_2, env.tool_rack.slot_3, env.tool_rack.slot_4, env.tool_rack.slot_5, env.tool_rack.slot_6, env.tool_rack.slot_7, env.tool_rack.slot_8, env.tool_rack.slot_9, env.waist_pouch, env.work_order, ip.cab.breaker, ip.cab.cylinder_power, ip.cab.pan_indicator, ip.cab.pan_indicator_repeat, ip.cab.panel, ip.cab.raise_button, ip.cab.raise_switch, ip.carbon_strip_L.bolt_1, ip.carbon_strip_L.bolt_2, ip.carbon_strip_L.bolt_3, ip.carbon_strip_L.bolt_4, ip.carbon_strip_L.bracket, ip.carbon_strip_L.install_check, ip.carbon_strip_L.install_target, ip.carbon_strip_L.measure_left, ip.carbon_strip_L.measure_mid, ip.carbon_strip_L.measure_right, ip.carbon_strip_L.outward, ip.carbon_strip_R.bolt_1, ip.carbon_strip_R.bolt_2, ip.carbon_strip_R.bolt_3, ip.carbon_strip_R.bolt_4, ip.carbon_strip_R.bracket, ip.carbon_strip_R.install_check, ip.carbon_strip_R.install_target, ip.carbon_strip_R.measure_left, ip.carbon_strip_R.measure_mid, ip.carbon_strip_R.measure_right, ip.carbon_strip_R.outward, ip.depot.detector_tester, ip.depot.ground_terminal, ip.depot.platform_anchor, ip.pan_assy.ctrl_connector, ip.pan_assy.hold_down, ip.pan_assy.hv_terminal, ip.pan_assy.lift_point_1, ip.pan_assy.lift_point_2, ip.pan_assy.lift_point_3, ip.pan_assy.lift_point_4, ip.pan_head.ground_clamp, ip.pan_head.lower_check, ip.pan_head.lower_target, ip.roof.anchor, ip.roof.carbody_ground, ip.roof.hv_cable_ground, part.carbon_strip_L, part.carbon_strip_R, part.crane.hook, part.pan_assy, part.pan_assy.hv_bolt_1, part.pan_assy.hv_bolt_2, part.pan_base.bolt_1, part.pan_base.bolt_2, part.pan_base.bolt_3, part.pan_base.bolt_4, part.pan_head
 資料檢查：

@@ -77,7 +77,7 @@ namespace PantographSim.XR
             var r = new SceneResult();
             Physics.SyncTransforms();
             int walk = SceneLayers.WalkableMask;
-            int invisible = LayerMask.GetMask(SceneLayers.Boundary, SceneLayers.LocomotionBlocker);
+            int invisible = LayerMask.GetMask(SceneLayers.Boundary, SceneLayers.LocomotionBlocker, SceneLayers.WalkLimit);
             int solid = ~(walk | invisible | LayerMask.GetMask("UI", "Ignore Raycast"));
             var pts = points.ToDictionary(p => p.PointId);
             foreach (var s in set.stations.Where(x => x != null))
@@ -224,7 +224,7 @@ namespace PantographSim.XR
 
         static bool Visible(Vector3 eye, Vector3 to, Transform target)
         {
-            int mask = ~(SceneLayers.WalkableMask | LayerMask.GetMask(SceneLayers.Boundary, SceneLayers.LocomotionBlocker, "UI", "Ignore Raycast"));
+            int mask = ~(SceneLayers.WalkableMask | LayerMask.GetMask(SceneLayers.Boundary, SceneLayers.LocomotionBlocker, SceneLayers.WalkLimit, "UI", "Ignore Raycast"));
             foreach (var h in Physics.RaycastAll(eye, (to - eye).normalized, Vector3.Distance(eye, to) - 0.02f, mask, QueryTriggerInteraction.Ignore))
                 if (!h.transform.IsChildOf(target) && !target.IsChildOf(h.transform) && !IsTarget(h.collider)) return false;   // 互動物件（例：工具箱的掛位）不算遮擋
             return true;

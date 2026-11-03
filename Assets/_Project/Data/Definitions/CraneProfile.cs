@@ -25,8 +25,6 @@ namespace PantographSim.Data
         [Header("紅區、晃動、遙控器")]
         [Tooltip("紅區＝吊物水平投影外擴（m，D18）")] public float redZoneMargin = 1.0f;
         [Tooltip("視覺晃動最大角度（度）與停車後衰減到 0 的秒數")] public float swayMaxDeg = 3f, swayDecaySeconds = 1.5f;
-        [Tooltip("碰撞停止不算的 collider（名稱開頭）：只給學員移動用的不可見牆，不是實體障礙（車體、護欄、門架、台架、絕緣子照算）")]
-        public string[] invisibleWallPrefixes = { "EdgeWall_", "EndWall_", "Edge_", "GapBlocker", "Blocker", "StepCollision", "Walkable" };
         [Tooltip("Btn_Speed2 的發光顏色與標籤：微動／高速（軟體工程裁定）")] public Color speedFineColor = new Color(0.2f, 0.85f, 0.3f), speedFastColor = new Color(1f, 0.55f, 0.1f);
         public string speedFineLabel = "微動", speedFastLabel = "高速";
         [Tooltip("左握把在掛座這個半徑（m）內才是拿起／掛回")] public float pendantDockRadius = 0.3f;

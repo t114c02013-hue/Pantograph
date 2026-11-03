@@ -183,11 +183,11 @@ namespace PantographSim.Parts.Mechanism
             bool ignoreSeats = rigging != null && float.TryParse(s.Get("part.crane.drop_distance"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var drop) && drop <= rigging.ignoreDistance;
             Physics.SyncTransforms();   // 這一幀剛移動過 Transform
             var (c, half, rot) = LoadBox();
-            foreach (var col in Physics.OverlapBox(c, half, rot, ~0, QueryTriggerInteraction.Ignore))
+            int mask = ~LayerMask.GetMask(SceneLayers.Walkable, SceneLayers.LocomotionBlocker, SceneLayers.WalkLimit, SceneLayers.LoadProbe, SceneLayers.Crane);   // 學員移動用的地板與不可見牆不是實體障礙（用 layer 排除）
+            foreach (var col in Physics.OverlapBox(c, half, rot, mask, QueryTriggerInteraction.Ignore))
             {
                 if (col.transform.IsChildOf(load) || col.transform.IsChildOf(transform)) continue;   // 吊物自己、天車自己
                 if (ignoreSeats && Ignored(col.transform)) continue;
-                if (col.gameObject.layer == LayerMask.NameToLayer(SceneLayers.LocomotionBlocker) || profile.invisibleWallPrefixes.Any(x => col.name.StartsWith(x))) continue;   // 學員移動用的不可見牆
                 if (InCollisionGroup(col.transform)) { LastHit = col.name; return true; }
             }
             return false;

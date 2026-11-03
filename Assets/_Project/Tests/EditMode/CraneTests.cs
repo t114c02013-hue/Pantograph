@@ -292,7 +292,7 @@ namespace PantographSim.Tests
 
 namespace PantographSim.Tests
 {
-    /// <summary>D40（鐵道）：吊鉤升到 hookYMax 時，吊鉤組頂面（頂點最高）到台車底面（Crane_Hoist／Crane_Trolley 頂點最低）≥ hookTopClearance；場景裡吊鉤就在 hookYMax。</summary>
+    /// <summary>D40（鐵道，model-spec v3.9 §7.3）：吊鉤在 hookYMax 時，從 HookBlock 頂面往上 BoxCast（只打 Crane 層）第一個碰到的物體距離 ≥ hookTopClearance；反例：副本把 hookTopClearance 設 0.60 要判不合格。</summary>
     public class CraneHookTopTests
     {
         [Test]
@@ -305,9 +305,52 @@ namespace PantographSim.Tests
                 Transform N(string n) => crane.GetComponentsInChildren<Transform>(true).First(t => t.name == n);
                 var hook = N("Crane_HookBlock");
                 Assert.AreEqual(profile.hookYMax, hook.position.y, 1e-3f, "場景的吊鉤在上限位");
-                var (gap, bottom, top) = PantographSim.Editor.RoofSiteBuilder.HookTopGap(hook, N("Crane_Trolley"));
-                Assert.GreaterOrEqual(gap, profile.hookTopClearance - 1e-3f, $"台車底面 {bottom:0.000}、吊鉤組頂面 {top:0.000}");
+                Assert.IsTrue(PantographSim.Editor.RoofSiteBuilder.HookTopOk(hook, profile, out var detail), detail);
+                var (gap, hit, _) = PantographSim.Editor.RoofSiteBuilder.HookTopCast(hook);
+                Assert.IsNotEmpty(hit, "正上方要碰得到天車物體");
+                var copy = Object.Instantiate(profile);
+                try
+                {
+                    copy.hookTopClearance = 0.60f;
+                    Assert.IsFalse(PantographSim.Editor.RoofSiteBuilder.HookTopOk(hook, copy, out var d2), "間距要求 0.60 時要不合格：" + d2);
+                }
+                finally { Object.DestroyImmediate(copy); }
             });
+        }
+    }
+}
+
+namespace PantographSim.Tests
+{
+    /// <summary>R1.5b 軟體工程確認（1）：0.10 m 的排除只適用 CraneCollisionIgnoreDef 列出的支撐件；剛起吊 0.05 m 時碰到清單外的物件照樣停車並記錯。</summary>
+    public class CraneCollisionTests
+    {
+        [Test]
+        public void JustLifted_HitsUnlistedObject_StopsAndLogs_ListedSupportIgnored()
+        {
+            using (var c = new CraneRig())
+            {
+                var def = ScriptableObject.CreateInstance<RiggingDef>();
+                var group = new GameObject("Collision");
+                try
+                {
+                    c.mech.SetRigging(def);
+                    c.state.Set("part.crane.drop_distance", "0.05");
+                    var seat = new GameObject("StandSeat_1"); seat.transform.SetParent(group.transform); seat.AddComponent<BoxCollider>().size = new Vector3(0.4f, 0.4f, 0.4f);
+                    seat.transform.position = c.load.position + new Vector3(0f, 0.6f, 0f);   // 吊物頂面正上方 0.1 m 的支撐件（清單內）
+                    Physics.SyncTransforms();
+                    c.Cmd("Up"); c.Run(0.6f);
+                    Assert.IsEmpty(c.errors, "清單內的支撐件在 0.10 m 內不算碰撞");
+                    var wall = new GameObject("Rail_Test"); wall.transform.SetParent(group.transform); wall.AddComponent<BoxCollider>().size = new Vector3(3f, 0.1f, 3f);
+                    wall.transform.position = c.load.position + new Vector3(0f, 0.56f, 0f);   // 清單外的物件
+                    Physics.SyncTransforms();
+                    c.Cmd("None"); c.Run(0.1f); c.Cmd("Up"); c.Run(3f);   // 微動 0.5 m/min：3 s 約 2.5 cm，超過到物件的 1 cm
+                    Assert.AreEqual("Collision", c.state.Get(SimIds.CraneState), "清單外的物件照常判碰撞");
+                    Assert.AreEqual("ERR_Crane_Collision", c.errors.Single().errorId);
+                    Assert.AreEqual("Rail_Test", c.errors.Single().text);
+                }
+                finally { Object.DestroyImmediate(group); Object.DestroyImmediate(def); }
+            }
         }
     }
 }
