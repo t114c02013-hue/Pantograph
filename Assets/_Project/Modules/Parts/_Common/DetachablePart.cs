@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using PantographSim.Core;
+using PantographSim.Data;
 using UnityEngine;
 
 namespace PantographSim.Parts.Common
@@ -23,7 +24,10 @@ namespace PantographSim.Parts.Common
         [SerializeField] Transform snapTarget;
         [Tooltip("InstallSnap 吸附半徑（m，第 2 部分 2.3：2 cm）")] [SerializeField] float snapRadius = 0.02f;
         [SerializeField] string initialState = Installed;
-        [Tooltip("用工具拆裝時的工具 ID（例：降弓固定帶 tool.hold_down_strap）；空白＝只能徒手")] [SerializeField] string toolId = "";
+        [Tooltip("用工具拆裝時的工具 ID（例：降弓固定帶 tool.hold_down_strap）；空白＝只能徒手。有工具的零件裝著時空手點＝拉一下確認收緊（R1.5b b4）")] [SerializeField] string toolId = "";
+        [Tooltip("R1.5b b4：拔下後要蓋防塵蓋（控制線接頭，DetachableLogic）")] [SerializeField] bool dustCap;
+
+        public void SetDustCap(bool on) => dustCap = on;
 
         public void Setup(string[] requiresConditions, string[] labels, GameObject[] whenInstalled, GameObject[] whenRemoved, Transform snap, float radius, string initial, string tool = "")
         {
@@ -70,14 +74,21 @@ namespace PantographSim.Parts.Common
         protected override void OnBareHand(ActionRequested e)
         {
             if (e.text == "inspect") return;
+            if (!string.IsNullOrEmpty(toolId) && StateValue == Installed) { DetachableLogic.PullTest(State, Id); return; }   // 用工具拆的：空手拉一下確認收緊
+            if (dustCap && StateValue == Removed && DetachableLogic.CapClick(State, Id)) return;
+            Toggle();
+        }
+
+        void Toggle()
+        {
             if (StateValue == Installed) Remove();
-            else Install(snapTarget != null ? snapTarget.position : transform.position);   // 點選＝放在吸附點
+            else if (Install(snapTarget != null ? snapTarget.position : transform.position) && dustCap) DetachableLogic.ResetCap(State, Id);   // 點選＝放在吸附點
         }
 
         protected override void OnToolAction(ActionPerformed e)
         {
-            if (string.IsNullOrEmpty(toolId) || e.toolId != toolId) return;
-            State.Batch(() => OnBareHand(new ActionRequested { targetId = e.targetId, text = e.text }));
+            if (string.IsNullOrEmpty(toolId) || e.toolId != toolId || e.text == "inspect") return;
+            State.Batch(Toggle);
         }
 
         protected override bool WatchesKey(string key) => key == Id + ".state";

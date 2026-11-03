@@ -209,6 +209,14 @@ namespace PantographSim.Editor
             g.AddComponent<InitialPartState>().Configure(stateKey ?? id + ".state", state);
         }
 
+        /// <summary>R1.5b b4：螺栓要用的套筒讀 SocketCatalog（底座 24、高壓端子 19），找不到就建置失敗。</summary>
+        static void SocketOf(GameObject g, string id)
+        {
+            int mm = ToolSocketSetup.Catalog.SizeFor(id);
+            if (mm <= 0) throw new System.Exception($"SocketCatalog 沒有 {id} 的套筒尺寸");
+            g.GetComponent<FastenerBehaviour>().SetCorrectSocket(mm.ToString());
+        }
+
         static Transform Node(Transform parent, string name, Vector3 pos)
         {
             var t = new GameObject(name).transform; t.SetParent(parent, false); t.position = pos; return t;
@@ -233,6 +241,7 @@ namespace PantographSim.Editor
                 var hole = pBase.Find("BaseHole_" + i);
                 var bolt = Rig("BaseBolt_M16", hole, hole.position, "part.pan_base.bolt_" + i);
                 Part<FastenerBehaviour>(bolt, "part.pan_base.bolt_" + i, $"底座螺栓 {i}", null, "Torqued");
+                SocketOf(bolt, "part.pan_base.bolt_" + i);
                 Trigger(bolt, 0.03f);
             }
             // 吊耳 ip.pan_assy.lift_point_1..4：底架頂面四角往內 0.05（依正負號編號）
@@ -258,6 +267,7 @@ namespace PantographSim.Editor
             for (int i = 0; i < hvBolts.Count; i++)
             {
                 Part<FastenerBehaviour>(hvBolts[i].gameObject, hvIds[i], "高壓端子螺栓", null, "Torqued");
+                SocketOf(hvBolts[i].gameObject, hvIds[i]);
                 Trigger(hvBolts[i].gameObject, 0.015f);
             }
             // a6 v4.3 第 11 點＋增補 2：控制線接頭 ip.pan_assy.ctrl_connector（Mounted；接頭接著 → DustCap_Off 顯示、DustCap_On 隱藏）
@@ -269,6 +279,7 @@ namespace PantographSim.Editor
             plug.rotation = Quaternion.LookRotation(Vector3.right, Vector3.up);
             var ctrlPart = ctrl.gameObject.AddComponent<DetachablePart>(); ctrlPart.Configure("ip.pan_assy.ctrl_connector", "控制線接頭");
             ctrlPart.Setup(null, null, new[] { ctrl.Find("DustCap_Off").gameObject }, new[] { ctrl.Find("DustCap_On").gameObject }, plug, rigging.snapRadius, DetachablePart.Installed);
+            ctrlPart.SetDustCap(true);   // R1.5b b4：RM_02 b 拔下後蓋防塵蓋、IN_10 a 取下
             Trigger(ctrl.gameObject, 0.04f);
             // 分流線：只做外觀
             for (int i = 1; i <= 2; i++) Rig("Shunt_Visual", conn, new Vector3(baseR.center.x + (i == 1 ? -0.3f : 0.3f), baseR.max.y + 0.02f, baseR.max.z - 0.3f), "Shunt_Visual_" + i);

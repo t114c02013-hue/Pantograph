@@ -5,6 +5,7 @@ using NUnit.Framework;
 using PantographSim.Core;
 using PantographSim.Data;
 using PantographSim.Editor;
+using PantographSim.Parts.Common;
 using PantographSim.Procedures;
 using UnityEditor;
 
@@ -50,6 +51,13 @@ namespace PantographSim.Tests
                 Sensors.Register(pc);   // EditMode 不會呼叫 OnEnable
                 var notLowered = StepJsonImporter.LoadAll<SafetyRuleDefinition>(StepJsonImporter.SafetyFolder).First(r => r.kind == SafetyRuleKind.NotLowered);
                 s.SetFloat(SimIds.PanHeadLowerTolerance, notLowered.toleranceCm);   // App 開場寫的（容許值只有一個來源）
+                foreach (var side in new[] { "L", "R" }) s.SetFloat(SimIds.BoltTray(side) + ".bolts", 0);   // BoltTray、BoltPouch 的 OnBound
+                s.SetFloat(FastenerLogic.BoltPouchCount, 0);
+                bus.Subscribe<ActionPerformed>(e =>
+                {
+                    if (e.targetId == FastenerLogic.BoltPouch) PantographSim.Worksite.BoltPouch.Apply(s, e.text);
+                    else if (e.targetId == SimIds.BoltTray("L") || e.targetId == SimIds.BoltTray("R")) PantographSim.Worksite.BoltTray.Apply(s, SimIds.SideOf(e.pointId), e.text, e.pointId);
+                });
             }
 
             float Bottom => crane.load.position.y - crane.load.localScale.y / 2f;
@@ -121,6 +129,25 @@ namespace PantographSim.Tests
             static void Command(string target, string text, string toolId = "") => Sim.Bus.Publish(new ActionRequested { targetId = target, text = text, toolId = toolId });
             int LeadSlot => SlotOf(GroundingLeadLogic.ToolId);
 
+            const string CtrlConnector = "ip.pan_assy.ctrl_connector";
+            static readonly System.Text.RegularExpressions.Regex BoltState = new System.Text.RegularExpressions.Regex(@"^(.+\.bolt_\d+)\.state=(Out|InTray)$");
+            readonly SocketCatalog sockets = AssetDatabase.LoadAssetAtPath<SocketCatalog>("Assets/_Project/Tools/Data/SocketCatalog.asset");
+
+            /// <summary>螺栓轉到脫出（先到鬆開、再到脫出，鬆開順序照記）、收進螺栓盤／零件袋：FastenerLogic（FastenerBehaviour 收到工具動作時呼叫的同一段），套筒讀 SocketCatalog。</summary>
+            void Bolt(string part)
+            {
+                var m = BoltState.Match(part);
+                string id = m.Groups[1].Value, want = m.Groups[2].Value, size = sockets.SizeFor(id).ToString();
+                if (s.Get(id + ".state", FastenerLogic.Tight) == want) return;
+                if (want == FastenerLogic.Out)
+                {
+                    FastenerLogic.Apply(s, Sim.Bus, id, $"rotate:{size}:loosen", FastenerLogic.LoosenedAt, size);
+                    FastenerLogic.Apply(s, Sim.Bus, id, $"rotate:{size}:loosen", FastenerLogic.OutAt, size);
+                }
+                else Assert.IsTrue(FastenerLogic.Apply(s, Sim.Bus, id, "take", 0, size), part);
+                Assert.AreEqual(want, s.Get(id + ".state"), part);
+            }
+
             float now;
             readonly System.Func<float> oldClock;
 
@@ -187,6 +214,9 @@ namespace PantographSim.Tests
                     if (IsLeadPart(part)) Lead(part);
                     else if (part.StartsWith("lockout.key_holder")) { }   // 上鎖時 LockoutTagTool 一起寫
                     else if (part.StartsWith(MeggerLogic.Count + ">=")) Megger();
+                    else if (BoltState.IsMatch(part)) Bolt(part);
+                    else if (part == "ip.pan_assy.hold_down.pull_tested") DetachableLogic.PullTest(s, "ip.pan_assy.hold_down");   // DetachablePart：裝著空手拉一下
+                    else if (part.StartsWith(DetachableLogic.CapKey(CtrlConnector) + "=")) { if (s.Get(DetachableLogic.CapKey(CtrlConnector)) != part.Substring(part.IndexOf('=') + 1)) Assert.IsTrue(DetachableLogic.CapClick(s, CtrlConnector), part); }
                     else if (part.StartsWith("workorder.ir_reading>="))
                     {
                         Command(MeggerLogic.ToolId, "test");

@@ -15,6 +15,8 @@ namespace PantographSim.Parts.Common
         public const string Tight = "Tight", Loosened = "Loosened", Out = "Out", InTray = "InTray", Placed = "Placed", Snug = "Snug", Torqued = "Torqued";
         public const float LoosenedAt = 150f, OutAt = 720f, SnugAt = 360f, OvertightAt = 540f;
         public const string CorrectSocket = "13";
+        /// <summary>R1.5b b4：集電弓底座、高壓端子螺栓收進工具袋的零件袋（碳滑板螺栓照舊進該側螺栓盤）。</summary>
+        public const string BoltPouch = "env.tool_bag.bolt_pouch", BoltPouchCount = BoltPouch + ".count";
 
         public static string StripPrefix(string boltId) => boltId.Substring(0, boltId.LastIndexOf('.'));
         public static string Number(string boltId) => boltId.Substring(boltId.LastIndexOf('_') + 1);
@@ -28,10 +30,13 @@ namespace PantographSim.Parts.Common
         /// 處理工具動作。text：rotate:&lt;套筒&gt;:&lt;loosen|lock&gt;、torque:&lt;設定值&gt;、mark、take、place。回傳是否改變了狀態。
         /// 一批寫入：state、angle_deg、torque_Nm、marked 與順序鍵同時生效（不會出現扭力已到、狀態還不是 Torqued 的中間狀態）。
         /// </summary>
-        public static bool Apply(ISimState s, IEventBus bus, string boltId, string text, float value) =>
-            s.BatchResult(() => ApplyInBatch(s, bus, boltId, text, value));
+        public static bool Apply(ISimState s, IEventBus bus, string boltId, string text, float value) => Apply(s, bus, boltId, text, value, CorrectSocket);
 
-        static bool ApplyInBatch(ISimState s, IEventBus bus, string boltId, string text, float value)
+        /// <summary>R1.5b b4：correctSocket＝這支螺栓要用的套筒（SocketCatalog，建置時寫進 FastenerBehaviour；底座 24、高壓端子 19、碳滑板 13）。</summary>
+        public static bool Apply(ISimState s, IEventBus bus, string boltId, string text, float value, string correctSocket) =>
+            s.BatchResult(() => ApplyInBatch(s, bus, boltId, text, value, correctSocket));
+
+        static bool ApplyInBatch(ISimState s, IEventBus bus, string boltId, string text, float value, string correctSocket)
         {
             var parts = (text ?? "").Split(':');
             string st = s.Get(boltId + ".state", Tight);
@@ -41,14 +46,15 @@ namespace PantographSim.Parts.Common
                 {
                     string size = parts.Length > 1 ? parts[1] : "";
                     string dir = parts.Length > 2 ? parts[2] : "loosen";
-                    if (size != CorrectSocket) { s.SetBool(boltId + ".wrong_socket", true); return false; }
+                    if (size != correctSocket) { s.SetBool(boltId + ".wrong_socket", true); return false; }
                     float deg = System.Math.Abs(value);
-                    if (dir == "loosen" && (st == Tight || st == Loosened || st == Out))
+                    bool tight = st == Tight || (st == Torqued && !IsStripBolt(boltId));   // R1.5b b4：集電弓底座、高壓端子螺栓開場是已上扭力，拆的時候照鎖緊的鬆
+                    if (dir == "loosen" && (tight || st == Loosened || st == Out))
                     {
                         float a = s.GetFloat(boltId + ".angle_deg") + deg;
                         s.SetFloat(boltId + ".angle_deg", a);
                         if (a >= OutAt) s.Set(boltId + ".state", Out);
-                        else if (a >= LoosenedAt && st == Tight) { s.Set(boltId + ".state", Loosened); AppendOrder(s, boltId, "loosen_order"); }
+                        else if (a >= LoosenedAt && tight) { s.Set(boltId + ".state", Loosened); AppendOrder(s, boltId, "loosen_order"); }
                         return true;
                     }
                     if (dir == "lock" && (st == Placed || st == Snug))
@@ -81,7 +87,7 @@ namespace PantographSim.Parts.Common
                     bus?.Publish(new ActionPerformed { targetId = TrayFor(s, boltId), text = "add:bolt", pointId = boltId, time = SimClock.Now });   // 放進該側的螺栓盤
                     return true;
                 case "place":
-                    if (st != InTray || s.GetFloat("tray.bolts") < 1) return false;
+                    if (st != InTray || s.GetFloat(IsStripBolt(boltId) ? "tray.bolts" : BoltPouchCount) < 1) return false;
                     s.Set(boltId + ".state", Placed);
                     s.SetFloat(boltId + ".lock_deg", 0);
                     bus?.Publish(new ActionPerformed { targetId = TrayFor(s, boltId), text = "remove:bolt", pointId = boltId, time = SimClock.Now });   // 從該側的螺栓盤拿
@@ -90,9 +96,12 @@ namespace PantographSim.Parts.Common
             return false;
         }
 
-        // 螺栓一律進該側螺栓盤（BoltTray.OnBound 會寫 env.bolt_tray_<側>.bolts）；場景缺螺栓盤時記 Error，不改送零件盒
+        static bool IsStripBolt(string boltId) => boltId.StartsWith("ip.carbon_strip_");
+
+        // 碳滑板螺栓進該側螺栓盤（BoltTray.OnBound 會寫 env.bolt_tray_<側>.bolts）；場景缺螺栓盤時記 Error，不改送零件盒。集電弓的螺栓進工具袋的零件袋
         static string TrayFor(ISimState s, string boltId)
         {
+            if (!IsStripBolt(boltId)) return BoltPouch;
             string tray = SimIds.BoltTray(SimIds.SideOf(boltId));
             if (!s.Has(tray + ".bolts")) UnityEngine.Debug.LogError($"[FastenerLogic] 場景沒有螺栓盤 {tray}，{boltId} 無法計數");
             return tray;

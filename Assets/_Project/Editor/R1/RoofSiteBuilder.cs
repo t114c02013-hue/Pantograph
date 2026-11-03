@@ -986,7 +986,7 @@ namespace PantographSim.Editor
             res.ids["env.tool_bag"] = pouch.transform;
             BuildToolBagPockets(res, pouch.transform, sb);
             var bolts = pouch.GetComponentsInChildren<Transform>(true).First(x => x.name == "BoltBag");
-            bolts.gameObject.AddComponent<InteractionPointMarker>().Configure("env.tool_bag.bolt_pouch", "零件袋");
+            bolts.gameObject.AddComponent<PantographSim.Worksite.BoltPouch>().Configure("env.tool_bag.bolt_pouch", "零件袋");   // R1.5b b4：集電弓螺栓收進來、裝回時拿（計數）
             res.ids["env.tool_bag.bolt_pouch"] = bolts;
             sb.AppendLine($"天車：軌道 X {d.craneRunwayEastX}／{d.craneRunwayWestX}、Z ±{d.craneRunwayHalfLength}，停在 Z {d.craneParkZ}，吊鉤 Y {hook.position.y:0.00}；遙控器在掛座 {aDock.position:F2}；吊帶 4 條在 ({d.slingRackXZ.x}, {d.slingRackXZ.y})；工具袋在工作檯上");
         }

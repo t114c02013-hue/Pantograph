@@ -217,9 +217,9 @@ periodic,STP_RM_00_SecondGround,c,35,3,"拉線確認完成","ip.roof.hv_cable_gr
 periodic,STP_RM_00_SecondGround,d,36,2,"#2 = 已登記","ground_register.2=registered",b4c:ground_register
 periodic,STP_RM_01_HoldDown,a,37,2,"手持固定帶","tool.active=tool.hold_down_strap",
 periodic,STP_RM_01_HoldDown,b,38,3,"hold_down = Installed","ip.pan_assy.hold_down.state=Installed",
-periodic,STP_RM_01_HoldDown,c,39,3,"拉 ≥ EX 5 cm，狀態不變","ip.pan_assy.hold_down.pull_tested",b4:p5
+periodic,STP_RM_01_HoldDown,c,39,3,"拉 ≥ EX 5 cm，狀態不變","ip.pan_assy.hold_down.pull_tested",
 periodic,STP_RM_02_CtrlDisconnect,a,40,3,"Removed","ip.pan_assy.ctrl_connector.state=Removed",
-periodic,STP_RM_02_CtrlDisconnect,b,41,3,"防塵蓋已蓋上（沒蓋：Minor）","ip.pan_assy.ctrl_connector.cap=on",b4:p5
+periodic,STP_RM_02_CtrlDisconnect,b,41,3,"防塵蓋已蓋上（沒蓋：Minor）","ip.pan_assy.ctrl_connector.cap=on",
 periodic,STP_RM_03_HVDisconnect,a,42,3,"已查看；兩處掛鉤都已掛上","ip.pan_head.ground_clamp.inspected&&isolation.head_clamped&&ip.roof.hv_cable_ground.clamped",b4:p5
 periodic,STP_RM_03_HVDisconnect,b,43,2,"手持標記筆","tool.active=tool.marker",
 periodic,STP_RM_03_HVDisconnect,c,44,3,"記號已畫（沒畫：Minor）","ip.pan_assy.hv_terminal.marked",
@@ -228,18 +228,18 @@ periodic,STP_RM_03_HVDisconnect,e,46,2,"手持套筒扳手","tool.active=tool.so
 periodic,STP_RM_03_HVDisconnect,f,47,2,"套筒 = 19 mm","tool.socket_wrench.size=19",
 periodic,STP_RM_03_HVDisconnect,g1,48,3,"該支 = 脫出","part.pan_assy.hv_bolt_1.state=Out",
 periodic,STP_RM_03_HVDisconnect,g2,48,3,"該支 = 脫出","part.pan_assy.hv_bolt_2.state=Out",
-periodic,STP_RM_03_HVDisconnect,h1,49,3,"零件袋數量 +1","part.pan_assy.hv_bolt_1.state=InTray",b4:p5
-periodic,STP_RM_03_HVDisconnect,h2,49,3,"零件袋數量 +1","part.pan_assy.hv_bolt_2.state=InTray",b4:p5
+periodic,STP_RM_03_HVDisconnect,h1,49,3,"零件袋數量 +1","part.pan_assy.hv_bolt_1.state=InTray",
+periodic,STP_RM_03_HVDisconnect,h2,49,3,"零件袋數量 +1","part.pan_assy.hv_bolt_2.state=InTray",
 periodic,STP_RM_03_HVDisconnect,i,50,3,"Removed（車頂顯示 HV_Cable_Parked）","ip.pan_assy.hv_terminal.state=Removed",
 periodic,STP_RM_04_BaseUnbolt,a,51,2,"套筒 = 24 mm","tool.socket_wrench.size=24",
 periodic,STP_RM_04_BaseUnbolt,b2,52,3,"該支 = 脫出","part.pan_base.bolt_2.state=Out",
 periodic,STP_RM_04_BaseUnbolt,b3,52,3,"該支 = 脫出","part.pan_base.bolt_3.state=Out",
 periodic,STP_RM_04_BaseUnbolt,b1,52,3,"該支 = 脫出","part.pan_base.bolt_1.state=Out",
 periodic,STP_RM_04_BaseUnbolt,b4,52,3,"該支 = 脫出","part.pan_base.bolt_4.state=Out",
-periodic,STP_RM_04_BaseUnbolt,c2,53,3,"零件袋數量 +1","part.pan_base.bolt_2.state=InTray",b4:p5
-periodic,STP_RM_04_BaseUnbolt,c3,53,3,"零件袋數量 +1","part.pan_base.bolt_3.state=InTray",b4:p5
-periodic,STP_RM_04_BaseUnbolt,c1,53,3,"零件袋數量 +1","part.pan_base.bolt_1.state=InTray",b4:p5
-periodic,STP_RM_04_BaseUnbolt,c4,53,3,"零件袋數量 +1","part.pan_base.bolt_4.state=InTray",b4:p5
+periodic,STP_RM_04_BaseUnbolt,c2,53,3,"零件袋數量 +1","part.pan_base.bolt_2.state=InTray",
+periodic,STP_RM_04_BaseUnbolt,c3,53,3,"零件袋數量 +1","part.pan_base.bolt_3.state=InTray",
+periodic,STP_RM_04_BaseUnbolt,c1,53,3,"零件袋數量 +1","part.pan_base.bolt_1.state=InTray",
+periodic,STP_RM_04_BaseUnbolt,c4,53,3,"零件袋數量 +1","part.pan_base.bolt_4.state=InTray",
 periodic,STP_RM_04_BaseUnbolt,d,54,2,"掛位 6 = 在袋","rack.slot_6=on_rack",
 periodic,STP_RM_05_CraneRiggingCheck,a,55,2,"ctrl.crane.power = true","ctrl.crane.power",
 periodic,STP_RM_05_CraneRiggingCheck,b,56,3,"estop 由 true 變回 false","ctrl.crane.estop=false&&ctrl.crane.estop_tested",b4:p5
@@ -445,7 +445,7 @@ periodic,STP_IN_09_HVReconnect,c,170,2,"扭力扳手套筒 = 19 mm，設定值 =
 periodic,STP_IN_09_HVReconnect,d1,171,2,"EX 46–54 N·m","part.pan_assy.hv_bolt_1.state=Torqued",
 periodic,STP_IN_09_HVReconnect,d2,171,2,"EX 46–54 N·m","part.pan_assy.hv_bolt_2.state=Torqued",
 periodic,STP_IN_09_HVReconnect,e,172,3,"在袋","rack.slot_13=on_rack",
-periodic,STP_IN_10_CtrlReconnect,a,173,3,"防塵蓋 = 已取下","ip.pan_assy.ctrl_connector.cap=off",b4:p5
+periodic,STP_IN_10_CtrlReconnect,a,173,3,"防塵蓋 = 已取下","ip.pan_assy.ctrl_connector.cap=off",
 periodic,STP_IN_10_CtrlReconnect,b,174,3,"Mounted","ip.pan_assy.ctrl_connector.state=Installed",
 periodic,STP_IN_11_RemoveHoldDown,a,175,3,"Removed","ip.pan_assy.hold_down.state=Removed",
 periodic,STP_IN_11_RemoveHoldDown,b,176,2,"掛位 10 = 在袋（比照 RM_04 d）","rack.slot_10=on_rack",

@@ -12,10 +12,13 @@ namespace PantographSim.Parts.Common
         [SerializeField] Transform visual;
         [SerializeField] GameObject markLine;
         [SerializeField] float riseAtOut = 0.025f;
+        [Tooltip("R1.5b b4：這支螺栓要用的套筒 mm（SocketCatalog，建置時寫入）")] [SerializeField] string correctSocket = FastenerLogic.CorrectSocket;
+
+        public void SetCorrectSocket(string sizeMm) => correctSocket = sizeMm;
 
         protected override void OnBound() => FastenerLogic.Initialize(State, Id);
 
-        protected override void OnToolAction(ActionPerformed e) => FastenerLogic.Apply(State, Bus, Id, e.text, e.value);
+        protected override void OnToolAction(ActionPerformed e) => FastenerLogic.Apply(State, Bus, Id, e.text, e.value, correctSocket);
 
         protected override void RefreshVisual()
         {
@@ -24,7 +27,7 @@ namespace PantographSim.Parts.Common
             bool shown = st != FastenerLogic.InTray;
             visual.gameObject.SetActive(shown);
             float rise = 0f;
-            if (st == FastenerLogic.Tight || st == FastenerLogic.Loosened || st == FastenerLogic.Out)
+            if (st == FastenerLogic.Tight || st == FastenerLogic.Loosened || st == FastenerLogic.Out || st == FastenerLogic.Torqued)
                 rise = Mathf.Clamp01(State.GetFloat(Id + ".angle_deg") / FastenerLogic.OutAt) * riseAtOut;
             else if (st == FastenerLogic.Placed)
                 rise = (1f - Mathf.Clamp01(State.GetFloat(Id + ".lock_deg") / FastenerLogic.SnugAt)) * riseAtOut;
