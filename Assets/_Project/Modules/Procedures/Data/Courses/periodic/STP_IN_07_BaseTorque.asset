@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_IN_07_BaseTorque
+  m_EditorClassIdentifier: 
+  stepId: STP_IN_07_BaseTorque
+  title: "\u5E95\u5EA7\u87BA\u6813\u626D\u529B"
+  instruction: "\u5E95\u5EA7\u87BA\u6813\u626D\u529B"
+  toolHint: 
+  targetHint: 
+  targetIds:
+  - env.tool_rack.slot_6
+  - env.tool_rack.slot_13
+  - env.tool_bag.socket_case
+  - tool.torque_wrench_l
+  - part.pan_base.bolt_1
+  - part.pan_base.bolt_3
+  - part.pan_base.bolt_2
+  - part.pan_base.bolt_4
+  requiredToolId: 
+  completion:
+    rid: 8951035174947913846
+  errors: []
+  hints:
+    text: 
+    why: 
+    checklist:
+    - "\u628A\u5957\u7B52\u6273\u624B\u6536\u56DE\u5DE5\u5177\u888B|rack.slot_6=on_rack"
+    - "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u5927\u626D\u529B\u6273\u624B|tool.active=tool.torque_wrench_l"
+    - "\u5F9E\u5957\u7B52\u76D2\u62FF 24 mm \u5957\u7B52\u88DD\u4E0A\u5927\u626D\u529B\u6273\u624B\uFF0C\u4E26\u628A\u626D\u529B\u8A2D\u70BA
+      100 N\xB7m|tool.torque_wrench_l.setting=100"
+    - "\u628A\u5E95\u5EA7\u87BA\u6813 1 \u4E0A\u626D\u529B\u5230\u5580\u8072\uFF0C\u4E26\u756B\u9632\u9B06\u6A19\u8A18|part.pan_base.bolt_1.state=Torqued&&part.pan_base.bolt_1.marked"
+    - "\u628A\u5E95\u5EA7\u87BA\u6813 3 \u4E0A\u626D\u529B\u5230\u5580\u8072\uFF0C\u4E26\u756B\u9632\u9B06\u6A19\u8A18|part.pan_base.bolt_3.state=Torqued&&part.pan_base.bolt_3.marked"
+    - "\u628A\u5E95\u5EA7\u87BA\u6813 2 \u4E0A\u626D\u529B\u5230\u5580\u8072\uFF0C\u4E26\u756B\u9632\u9B06\u6A19\u8A18|part.pan_base.bolt_2.state=Torqued&&part.pan_base.bolt_2.marked"
+    - "\u628A\u5E95\u5EA7\u87BA\u6813 4 \u4E0A\u626D\u529B\u5230\u5580\u8072\uFF0C\u4E26\u756B\u9632\u9B06\u6A19\u8A18|part.pan_base.bolt_4.state=Torqued&&part.pan_base.bolt_4.marked"
+    highlightIds: []
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u628A\u5957\u7B52\u6273\u624B\u6536\u56DE\u5DE5\u5177\u888B"
+    why: 
+    targetId: env.tool_rack.slot_6
+    toolId: tool.socket_wrench
+    condition: rack.slot_6=on_rack
+    standPointId: tp.roof.base_w
+  - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u5927\u626D\u529B\u6273\u624B"
+    why: 
+    targetId: env.tool_rack.slot_13
+    toolId: tool.torque_wrench_l
+    condition: tool.active=tool.torque_wrench_l
+    standPointId: tp.roof.base_w
+  - text: "\u5F9E\u5957\u7B52\u76D2\u62FF 24 mm \u5957\u7B52\u88DD\u4E0A\u5927\u626D\u529B\u6273\u624B\uFF0C\u4E26\u628A\u626D\u529B\u8A2D\u70BA
+      100 N\xB7m"
+    why: 
+    targetId: "env.tool_bag.socket_case;tool.torque_wrench_l\uFF08\xB1 \u9215\uFF09"
+    toolId: tool.torque_wrench_l
+    condition: tool.torque_wrench_l.setting=100
+    standPointId: tp.roof.base_w
+  - text: "\u628A\u5E95\u5EA7\u87BA\u6813 1 \u4E0A\u626D\u529B\u5230\u5580\u8072\uFF0C\u4E26\u756B\u9632\u9B06\u6A19\u8A18"
+    why: 
+    targetId: part.pan_base.bolt_1
+    toolId: tool.torque_wrench_l
+    condition: part.pan_base.bolt_1.state=Torqued&&part.pan_base.bolt_1.marked
+    standPointId: tp.roof.base_w.s
+  - text: "\u628A\u5E95\u5EA7\u87BA\u6813 3 \u4E0A\u626D\u529B\u5230\u5580\u8072\uFF0C\u4E26\u756B\u9632\u9B06\u6A19\u8A18"
+    why: 
+    targetId: part.pan_base.bolt_3
+    toolId: tool.torque_wrench_l
+    condition: part.pan_base.bolt_3.state=Torqued&&part.pan_base.bolt_3.marked
+    standPointId: tp.roof.base_e.n
+  - text: "\u628A\u5E95\u5EA7\u87BA\u6813 2 \u4E0A\u626D\u529B\u5230\u5580\u8072\uFF0C\u4E26\u756B\u9632\u9B06\u6A19\u8A18"
+    why: 
+    targetId: part.pan_base.bolt_2
+    toolId: tool.torque_wrench_l
+    condition: part.pan_base.bolt_2.state=Torqued&&part.pan_base.bolt_2.marked
+    standPointId: tp.roof.base_e.s
+  - text: "\u628A\u5E95\u5EA7\u87BA\u6813 4 \u4E0A\u626D\u529B\u5230\u5580\u8072\uFF0C\u4E26\u756B\u9632\u9B06\u6A19\u8A18"
+    why: 
+    targetId: part.pan_base.bolt_4
+    toolId: tool.torque_wrench_l
+    condition: part.pan_base.bolt_4.state=Torqued&&part.pan_base.bolt_4.marked
+    standPointId: tp.roof.base_w.n
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 94
+  refSecondsExam: 59
+  references:
+    version: 2
+    RefIds:
+    - rid: 8951035174947913846
+      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        conditions:
+        - rack.slot_6=on_rack
+        - tool.active=tool.torque_wrench_l
+        - tool.torque_wrench_l.setting=100
+        - part.pan_base.bolt_1.state=Torqued&&part.pan_base.bolt_1.marked
+        - part.pan_base.bolt_3.state=Torqued&&part.pan_base.bolt_3.marked
+        - part.pan_base.bolt_2.state=Torqued&&part.pan_base.bolt_2.marked
+        - part.pan_base.bolt_4.state=Torqued&&part.pan_base.bolt_4.marked

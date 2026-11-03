@@ -1,0 +1,108 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_LF_06_SecureOnStand
+  m_EditorClassIdentifier: 
+  stepId: STP_LF_06_SecureOnStand
+  title: "\u53F0\u67B6\u56FA\u5B9A\u4E26\u5378\u540A\u5E36"
+  instruction: "\u53F0\u67B6\u56FA\u5B9A\u4E26\u5378\u540A\u5E36"
+  toolHint: 
+  targetHint: 
+  targetIds:
+  - env.panto_stand.clamp_1
+  - env.panto_stand.clamp_2
+  - ip.pan_assy.lift_point_1
+  - ip.pan_assy.lift_point_2
+  - ip.pan_assy.lift_point_3
+  - ip.pan_assy.lift_point_4
+  - env.crane_pendant
+  requiredToolId: 
+  completion:
+    rid: 8951035174947913760
+  errors: []
+  hints:
+    text: 
+    why: 
+    checklist:
+    - "\u9396\u4E0A\u53F0\u67B6\u593E\u5177 1|env.panto_stand.clamp_1.state=Locked"
+    - "\u9396\u4E0A\u53F0\u67B6\u593E\u5177 2|env.panto_stand.clamp_2.state=Locked"
+    - "\u5F9E\u540A\u8033 1 \u5378\u4E0B\u540A\u5E36|ip.pan_assy.lift_point_1.state=Free"
+    - "\u5F9E\u540A\u8033 2 \u5378\u4E0B\u540A\u5E36|ip.pan_assy.lift_point_2.state=Free"
+    - "\u5F9E\u540A\u8033 3 \u5378\u4E0B\u540A\u5E36|ip.pan_assy.lift_point_3.state=Free"
+    - "\u5F9E\u540A\u8033 4 \u5378\u4E0B\u540A\u5E36|ip.pan_assy.lift_point_4.state=Free"
+    - "\u6309\u4F4F\u4E0A\u5347\uFF0C\u628A\u540A\u9264\u79FB\u958B|part.crane.beam_above_pan_m>=1.0"
+    highlightIds: []
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u9396\u4E0A\u53F0\u67B6\u593E\u5177 1"
+    why: 
+    targetId: env.panto_stand.clamp_1
+    toolId: 
+    condition: env.panto_stand.clamp_1.state=Locked
+    standPointId: tp.stand.w
+  - text: "\u9396\u4E0A\u53F0\u67B6\u593E\u5177 2"
+    why: 
+    targetId: env.panto_stand.clamp_2
+    toolId: 
+    condition: env.panto_stand.clamp_2.state=Locked
+    standPointId: tp.stand.w
+  - text: "\u5F9E\u540A\u8033 1 \u5378\u4E0B\u540A\u5E36"
+    why: 
+    targetId: ip.pan_assy.lift_point_1
+    toolId: 
+    condition: ip.pan_assy.lift_point_1.state=Free
+    standPointId: tp.stand.w
+  - text: "\u5F9E\u540A\u8033 2 \u5378\u4E0B\u540A\u5E36"
+    why: 
+    targetId: ip.pan_assy.lift_point_2
+    toolId: 
+    condition: ip.pan_assy.lift_point_2.state=Free
+    standPointId: tp.stand.w
+  - text: "\u5F9E\u540A\u8033 3 \u5378\u4E0B\u540A\u5E36"
+    why: 
+    targetId: ip.pan_assy.lift_point_3
+    toolId: 
+    condition: ip.pan_assy.lift_point_3.state=Free
+    standPointId: tp.stand.w
+  - text: "\u5F9E\u540A\u8033 4 \u5378\u4E0B\u540A\u5E36"
+    why: 
+    targetId: ip.pan_assy.lift_point_4
+    toolId: 
+    condition: ip.pan_assy.lift_point_4.state=Free
+    standPointId: tp.stand.w
+  - text: "\u6309\u4F4F\u4E0A\u5347\uFF0C\u628A\u540A\u9264\u79FB\u958B"
+    why: 
+    targetId: env.crane_pendant
+    toolId: 
+    condition: part.crane.beam_above_pan_m>=1.0
+    standPointId: tp.stand.w
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 65
+  refSecondsExam: 38
+  references:
+    version: 2
+    RefIds:
+    - rid: 8951035174947913760
+      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        conditions:
+        - env.panto_stand.clamp_1.state=Locked
+        - env.panto_stand.clamp_2.state=Locked
+        - ip.pan_assy.lift_point_1.state=Free
+        - ip.pan_assy.lift_point_2.state=Free
+        - ip.pan_assy.lift_point_3.state=Free
+        - ip.pan_assy.lift_point_4.state=Free
+        - part.crane.beam_above_pan_m>=1.0

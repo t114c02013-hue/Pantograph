@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_WC_03_RemoveGround
+  m_EditorClassIdentifier: 
+  stepId: STP_WC_03_RemoveGround
+  title: "\u62C6\u63A5\u5730\u68D2"
+  instruction: "\u62FF\u63A5\u5730\u68D2\uFF0C\u5148\u9EDE\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u53D6\u4E0B\uFF0C\u518D\u9EDE\u5E73\u53F0\u63A5\u5730\u7AEF\u5B50\u53D6\u4E0B\u3002"
+  toolHint: "\u63A5\u5730\u68D2"
+  targetHint: "\u5F13\u982D\u63A5\u5730\u639B\u9EDE \u2192 \u5E73\u53F0\u63A5\u5730\u7AEF\u5B50"
+  targetIds:
+  - ip.pan_head.ground_clamp
+  - ip.depot.ground_terminal
+  requiredToolId: tool.grounding_rod
+  completion:
+    rid: 1000
+  errors: []
+  hints:
+    text: "\u62FF\u63A5\u5730\u68D2\uFF0C\u5148\u9EDE\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u53D6\u4E0B\uFF0C\u518D\u9EDE\u5E73\u53F0\u7AEF\u5B50\u53D6\u4E0B\u3002"
+    why: "\u5148\u62C6\u7AEF\u5B50\u6642\uFF0C\u63A5\u5730\u68D2\u53E6\u4E00\u7AEF\u9084\u63A5\u5728\u5F13\u982D\uFF0C\u82E5\u6709\u96FB\u6703\u7D93\u904E\u4F60\u7684\u624B\u3002"
+    checklist:
+    - "\u53D6\u4E0B\u5F13\u982D\u7AEF\u639B\u9264|isolation.head_clamped=false"
+    - "\u9B06\u958B\u63A5\u5730\u7AEF\u5B50\u7684\u593E\u5B50|isolation.terminal_clamped=false"
+    - "\u628A\u63A5\u5730\u687F\u653E\u56DE\u687F\u67B6|rack.slot_3=on_rack"
+    - "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u92B7\u865F #1|ground_register.1=cancelled"
+    highlightIds:
+    - ip.pan_head.ground_clamp
+    - ip.depot.ground_terminal
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u53D6\u4E0B\u5F13\u982D\u7AEF\u639B\u9264"
+    why: 
+    targetId: ip.pan_head.ground_clamp
+    toolId: tool.grounding_rod
+    condition: isolation.head_clamped=false
+    standPointId: tp.platform.ground
+  - text: "\u9B06\u958B\u63A5\u5730\u7AEF\u5B50\u7684\u593E\u5B50"
+    why: 
+    targetId: ip.depot.ground_terminal
+    toolId: tool.grounding_rod
+    condition: isolation.terminal_clamped=false
+    standPointId: tp.platform.ground
+  - text: "\u628A\u63A5\u5730\u687F\u653E\u56DE\u687F\u67B6"
+    why: 
+    targetId: "env.tool_rack.slot_3\uFF08env.pole_rack\uFF09"
+    toolId: tool.grounding_rod
+    condition: rack.slot_3=on_rack
+    standPointId: tp.platform.ground
+  - text: "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u92B7\u865F #1"
+    why: 
+    targetId: env.work_order.ground_register
+    toolId: 
+    condition: ground_register.1=cancelled
+    standPointId: tp.platform.ground
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 35
+  refSecondsExam: 23
+  references:
+    version: 2
+    RefIds:
+    - rid: 1000
+      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        rules:
+        - rid: 1001
+        - rid: 1002
+    - rid: 1001
+      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        rules:
+        - rid: 1003
+        - rid: 1004
+        - rid: 1005
+    - rid: 1002
+      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        conditions:
+        - ground_register.1=cancelled
+    - rid: 1003
+      type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        key: isolation.head_clamped
+        value: false
+    - rid: 1004
+      type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        key: isolation.terminal_clamped
+        value: false
+    - rid: 1005
+      type: {class: OrderedSequence, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        key: isolation.removal_order
+        expected: head,terminal

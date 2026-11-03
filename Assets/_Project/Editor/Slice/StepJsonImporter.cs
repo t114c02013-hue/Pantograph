@@ -80,7 +80,7 @@ namespace PantographSim.Editor
             return sb.ToString();
         }
 
-        static T Save<T>(T obj, string path) where T : ScriptableObject
+        internal static T Save<T>(T obj, string path) where T : ScriptableObject
         {
             Directory.CreateDirectory(Path.GetDirectoryName(path));
             var existing = AssetDatabase.LoadAssetAtPath<T>(path);

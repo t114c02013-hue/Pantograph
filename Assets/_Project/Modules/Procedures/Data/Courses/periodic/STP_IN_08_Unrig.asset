@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_IN_08_Unrig
+  m_EditorClassIdentifier: 
+  stepId: STP_IN_08_Unrig
+  title: "\u5378\u540A\u5E36"
+  instruction: "\u5378\u540A\u5E36"
+  toolHint: 
+  targetHint: 
+  targetIds:
+  - ip.pan_assy.lift_point_1
+  - ip.pan_assy.lift_point_4
+  - ip.pan_assy.lift_point_2
+  - ip.pan_assy.lift_point_3
+  requiredToolId: 
+  completion:
+    rid: 8951035174947913847
+  errors: []
+  hints:
+    text: 
+    why: 
+    checklist:
+    - "\u5F9E\u540A\u8033 1 \u5378\u4E0B\u540A\u5E36|ip.pan_assy.lift_point_1.state=Free"
+    - "\u5F9E\u540A\u8033 4 \u5378\u4E0B\u540A\u5E36|ip.pan_assy.lift_point_4.state=Free"
+    - "\u5F9E\u540A\u8033 2 \u5378\u4E0B\u540A\u5E36|ip.pan_assy.lift_point_2.state=Free"
+    - "\u5F9E\u540A\u8033 3 \u5378\u4E0B\u540A\u5E36|ip.pan_assy.lift_point_3.state=Free"
+    highlightIds: []
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u5F9E\u540A\u8033 1 \u5378\u4E0B\u540A\u5E36"
+    why: 
+    targetId: ip.pan_assy.lift_point_1
+    toolId: 
+    condition: ip.pan_assy.lift_point_1.state=Free
+    standPointId: tp.roof.base_w.s
+  - text: "\u5F9E\u540A\u8033 4 \u5378\u4E0B\u540A\u5E36"
+    why: 
+    targetId: ip.pan_assy.lift_point_4
+    toolId: 
+    condition: ip.pan_assy.lift_point_4.state=Free
+    standPointId: tp.roof.base_w.n
+  - text: "\u5F9E\u540A\u8033 2 \u5378\u4E0B\u540A\u5E36"
+    why: 
+    targetId: ip.pan_assy.lift_point_2
+    toolId: 
+    condition: ip.pan_assy.lift_point_2.state=Free
+    standPointId: tp.roof.base_e.s
+  - text: "\u5F9E\u540A\u8033 3 \u5378\u4E0B\u540A\u5E36"
+    why: 
+    targetId: ip.pan_assy.lift_point_3
+    toolId: 
+    condition: ip.pan_assy.lift_point_3.state=Free
+    standPointId: tp.roof.base_e.n
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 41
+  refSecondsExam: 26
+  references:
+    version: 2
+    RefIds:
+    - rid: 8951035174947913847
+      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        conditions:
+        - ip.pan_assy.lift_point_1.state=Free
+        - ip.pan_assy.lift_point_4.state=Free
+        - ip.pan_assy.lift_point_2.state=Free
+        - ip.pan_assy.lift_point_3.state=Free

@@ -1,0 +1,177 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_CSR_04_Measure_R
+  m_EditorClassIdentifier: 
+  stepId: STP_CSR_04_Measure_R
+  title: "\u91CF\u5916\u5074\u6ED1\u677F\u4E09\u9EDE"
+  instruction: "\u7528\u5361\u5C3A\u4F9D\u5E8F\u9EDE\u5916\u5074\u6ED1\u677F\u7684\u5DE6\u3001\u4E2D\u3001\u53F3\u4E09\u500B\u91CF\u6E2C\u9EDE\uFF0C\u628A\u8B80\u6578\u6284\u5230\u4F5C\u696D\u55AE\uFF0C\u6309\u300C\u9001\u51FA\u9019\u689D\u7684\u8B80\u6578\u300D\u3002"
+  toolHint: "\u6578\u4F4D\u5361\u5C3A"
+  targetHint: "\u5916\u5074\u6ED1\u677F\u9802\u9762\u4E09\u500B\u91CF\u6E2C\u9EDE"
+  targetIds:
+  - ip.carbon_strip_{side}.measure_*
+  - env.work_order
+  requiredToolId: tool.caliper
+  completion:
+    rid: 1000
+  errors:
+  - errorId: ERR_CSR04_OnlyMid
+    severity: 1
+    what: "\u6C92\u6709\u4E09\u9EDE\u90FD\u91CF\u5C31\u9001\u51FA\u8B80\u6578\uFF08\u4F8B\u5982\u53EA\u91CF\u4E2D\u9593\uFF09\u3002"
+    why: "\u6ED1\u677F\u5E38\u5E38\u5169\u7AEF\u78E8\u5F97\u6BD4\u8F03\u591A\uFF0C\u53EA\u91CF\u4E00\u9EDE\u6703\u6F0F\u6389\u6700\u8584\u8655\uFF0C\u8A72\u63DB\u7684\u6ED1\u677F\u88AB\u653E\u904E\u3002"
+    fix: "\u5DE6\u3001\u4E2D\u3001\u53F3\u4E09\u9EDE\u90FD\u91CF\uFF0C\u4E09\u500B\u8B80\u6578\u90FD\u6284\u9032\u4F5C\u696D\u55AE\u518D\u9001\u51FA\u3002"
+    trigger: 5
+    key: workorder.reading.{side}.submitted
+    key2: 
+    keys:
+    - ip.carbon_strip_{side}.measure_left.measured
+    - ip.carbon_strip_{side}.measure_mid.measured
+    - ip.carbon_strip_{side}.measure_right.measured
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+  - errorId: ERR_CSR04_CopyError
+    severity: 0
+    what: "\u4F5C\u696D\u55AE\u4E0A\u7684\u8B80\u6578\u548C\u5361\u5C3A\u91CF\u5230\u7684\u4E0D\u4E00\u6A23\u3002"
+    why: "\u6284\u932F\u6703\u8B93\u5224\u5B9A\u8207\u7D00\u9304\u5931\u771F\u3002"
+    fix: "\u5C0D\u7167\u5361\u5C3A\u87A2\u5E55\u91CD\u65B0\u586B\u5BEB\uFF08\u5DEE\u8DDD\u8981\u5728
+      0.05 mm \u5167\uFF09\u3002"
+    trigger: 6
+    key: workorder.reading.{side}.left.mismatch
+    key2: 
+    keys: []
+    value: true
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+  - errorId: ERR_CSR04_CopyError
+    severity: 0
+    what: "\u4F5C\u696D\u55AE\u4E0A\u7684\u8B80\u6578\u548C\u5361\u5C3A\u91CF\u5230\u7684\u4E0D\u4E00\u6A23\u3002"
+    why: "\u6284\u932F\u6703\u8B93\u5224\u5B9A\u8207\u7D00\u9304\u5931\u771F\u3002"
+    fix: "\u5C0D\u7167\u5361\u5C3A\u87A2\u5E55\u91CD\u65B0\u586B\u5BEB\uFF08\u5DEE\u8DDD\u8981\u5728
+      0.05 mm \u5167\uFF09\u3002"
+    trigger: 6
+    key: workorder.reading.{side}.mid.mismatch
+    key2: 
+    keys: []
+    value: true
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+  - errorId: ERR_CSR04_CopyError
+    severity: 0
+    what: "\u4F5C\u696D\u55AE\u4E0A\u7684\u8B80\u6578\u548C\u5361\u5C3A\u91CF\u5230\u7684\u4E0D\u4E00\u6A23\u3002"
+    why: "\u6284\u932F\u6703\u8B93\u5224\u5B9A\u8207\u7D00\u9304\u5931\u771F\u3002"
+    fix: "\u5C0D\u7167\u5361\u5C3A\u87A2\u5E55\u91CD\u65B0\u586B\u5BEB\uFF08\u5DEE\u8DDD\u8981\u5728
+      0.05 mm \u5167\uFF09\u3002"
+    trigger: 6
+    key: workorder.reading.{side}.right.mismatch
+    key2: 
+    keys: []
+    value: true
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+  hints:
+    text: "\u540C\u8098\u5074\uFF1A\u62FF\u5361\u5C3A\u9EDE\u4E09\u500B\u91CF\u6E2C\u9EDE\uFF0C\u7167\u6284\u8B80\u6578\u5230\u4F5C\u696D\u55AE\u3002"
+    why: "\u5169\u689D\u90FD\u8981\u91CF\uFF0C\u624D\u80FD\u5224\u65B7\u8981\u4E0D\u8981\u4E00\u8D77\u63DB\u3002"
+    checklist:
+    - "\u91CF\u5916\u5074\u6ED1\u677F\u5DE6\u5074\u9EDE|ip.carbon_strip_R.measure_left.measured"
+    - "\u91CF\u5916\u5074\u6ED1\u677F\u4E2D\u9EDE|ip.carbon_strip_R.measure_mid.measured"
+    - "\u91CF\u5916\u5074\u6ED1\u677F\u53F3\u5074\u9EDE|ip.carbon_strip_R.measure_right.measured"
+    - "\u4E09\u500B\u8B80\u6578\u586B\u5165\u4F5C\u696D\u55AE|workorder.reading.R.submitted"
+    - "\u628A\u6E38\u6A19\u5361\u5C3A\u6536\u56DE\u5DE5\u5177\u888B|tool.active="
+    highlightIds:
+    - ip.carbon_strip_{side}.measure_*
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u91CF\u5916\u5074\u6ED1\u677F\u5DE6\u5074\u9EDE"
+    why: 
+    targetId: ip.carbon_strip_R.measure_left
+    toolId: tool.caliper
+    condition: ip.carbon_strip_R.measure_left.measured
+    standPointId: tp.roof.outer
+  - text: "\u91CF\u5916\u5074\u6ED1\u677F\u4E2D\u9EDE"
+    why: 
+    targetId: ip.carbon_strip_R.measure_mid
+    toolId: tool.caliper
+    condition: ip.carbon_strip_R.measure_mid.measured
+    standPointId: tp.roof.outer
+  - text: "\u91CF\u5916\u5074\u6ED1\u677F\u53F3\u5074\u9EDE"
+    why: 
+    targetId: ip.carbon_strip_R.measure_right
+    toolId: tool.caliper
+    condition: ip.carbon_strip_R.measure_right.measured
+    standPointId: tp.roof.outer
+  - text: "\u4E09\u500B\u8B80\u6578\u586B\u5165\u4F5C\u696D\u55AE"
+    why: 
+    targetId: env.work_order.readings_R
+    toolId: 
+    condition: workorder.reading.R.submitted
+    standPointId: tp.roof.outer
+  - text: "\u628A\u6E38\u6A19\u5361\u5C3A\u6536\u56DE\u5DE5\u5177\u888B"
+    why: 
+    targetId: env.tool_rack.slot_5
+    toolId: tool.caliper
+    condition: tool.active=
+    standPointId: tp.roof.outer
+  presetDone: 0
+  side: R
+  presetStates: []
+  valueTags:
+  - "\u91CF\u6E2C\u9EDE\u8DDD\u7AEF 15 cm=\u793A\u4F8B\u503C"
+  - "\u6284\u5BEB\u5BB9\u5DEE 0.05 mm=\u793A\u4F8B\u503C"
+  refSecondsTutorial: 60
+  refSecondsExam: 35
+  references:
+    version: 2
+    RefIds:
+    - rid: 1000
+      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        rules:
+        - rid: 1001
+        - rid: 1002
+    - rid: 1001
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        keys:
+        - ip.carbon_strip_{side}.measure_left.measured
+        - ip.carbon_strip_{side}.measure_mid.measured
+        - ip.carbon_strip_{side}.measure_right.measured
+        - workorder.reading.{side}.submitted
+    - rid: 1002
+      type: {class: ReadingMatches, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        recordKeys:
+        - workorder.reading.{side}.left
+        - workorder.reading.{side}.mid
+        - workorder.reading.{side}.right
+        readingKeys:
+        - ip.carbon_strip_{side}.measure_left.reading
+        - ip.carbon_strip_{side}.measure_mid.reading
+        - ip.carbon_strip_{side}.measure_right.reading
+        tolerance: 0.05

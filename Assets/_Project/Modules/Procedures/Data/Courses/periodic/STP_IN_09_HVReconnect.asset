@@ -1,0 +1,109 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_IN_09_HVReconnect
+  m_EditorClassIdentifier: 
+  stepId: STP_IN_09_HVReconnect
+  title: "\u63A5\u56DE\u9AD8\u58D3\u7AEF\u5B50"
+  instruction: "\u63A5\u56DE\u9AD8\u58D3\u7AEF\u5B50"
+  toolHint: 
+  targetHint: 
+  targetIds:
+  - ip.pan_assy.hv_terminal
+  - part.pan_assy.hv_bolt_1
+  - part.pan_assy.hv_bolt_2
+  - env.tool_bag.socket_case
+  - tool.torque_wrench_l
+  - env.tool_rack.slot_13
+  requiredToolId: 
+  completion:
+    rid: 8951035174947913848
+  errors: []
+  hints:
+    text: 
+    why: 
+    checklist:
+    - "\u5C0D\u6E96\u8A18\u865F\u63A5\u4E0A\u9AD8\u58D3\u7AEF\u5B50|ip.pan_assy.hv_terminal.state=Installed"
+    - "\u5F9E\u96F6\u4EF6\u888B\u62FF\u7AEF\u5B50\u87BA\u6813 1 \u653E\u56DE|part.pan_assy.hv_bolt_1.state=Placed"
+    - "\u5F9E\u96F6\u4EF6\u888B\u62FF\u7AEF\u5B50\u87BA\u6813 2 \u653E\u56DE|part.pan_assy.hv_bolt_2.state=Placed"
+    - "\u5F9E\u5957\u7B52\u76D2\u62FF 19 mm \u5957\u7B52\u88DD\u4E0A\u5927\u626D\u529B\u6273\u624B\uFF0C\u4E26\u628A\u626D\u529B\u8A2D\u70BA
+      50 N\xB7m|tool.torque_wrench_l.setting=50"
+    - "\u628A\u7AEF\u5B50\u87BA\u6813 1 \u9396\u5230\u5580\u8072\uFF0F\u9707\u52D5\u9583\u8272|part.pan_assy.hv_bolt_1.state=Torqued"
+    - "\u628A\u7AEF\u5B50\u87BA\u6813 2 \u9396\u5230\u5580\u8072\uFF0F\u9707\u52D5\u9583\u8272|part.pan_assy.hv_bolt_2.state=Torqued"
+    - "\u628A\u5927\u626D\u529B\u6273\u624B\u6536\u56DE\u5DE5\u5177\u888B|rack.slot_13=on_rack"
+    highlightIds: []
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u5C0D\u6E96\u8A18\u865F\u63A5\u4E0A\u9AD8\u58D3\u7AEF\u5B50"
+    why: 
+    targetId: ip.pan_assy.hv_terminal
+    toolId: 
+    condition: ip.pan_assy.hv_terminal.state=Installed
+    standPointId: tp.roof.base_e.n
+  - text: "\u5F9E\u96F6\u4EF6\u888B\u62FF\u7AEF\u5B50\u87BA\u6813 1 \u653E\u56DE"
+    why: 
+    targetId: part.pan_assy.hv_bolt_1
+    toolId: 
+    condition: part.pan_assy.hv_bolt_1.state=Placed
+    standPointId: tp.roof.base_e.n
+  - text: "\u5F9E\u96F6\u4EF6\u888B\u62FF\u7AEF\u5B50\u87BA\u6813 2 \u653E\u56DE"
+    why: 
+    targetId: part.pan_assy.hv_bolt_2
+    toolId: 
+    condition: part.pan_assy.hv_bolt_2.state=Placed
+    standPointId: tp.roof.base_e.n
+  - text: "\u5F9E\u5957\u7B52\u76D2\u62FF 19 mm \u5957\u7B52\u88DD\u4E0A\u5927\u626D\u529B\u6273\u624B\uFF0C\u4E26\u628A\u626D\u529B\u8A2D\u70BA
+      50 N\xB7m"
+    why: 
+    targetId: "env.tool_bag.socket_case;tool.torque_wrench_l\uFF08\xB1 \u9215\uFF09"
+    toolId: tool.torque_wrench_l
+    condition: tool.torque_wrench_l.setting=50
+    standPointId: tp.roof.base_e.n
+  - text: "\u628A\u7AEF\u5B50\u87BA\u6813 1 \u9396\u5230\u5580\u8072\uFF0F\u9707\u52D5\u9583\u8272"
+    why: 
+    targetId: part.pan_assy.hv_bolt_1
+    toolId: tool.torque_wrench_l
+    condition: part.pan_assy.hv_bolt_1.state=Torqued
+    standPointId: tp.roof.base_e.n
+  - text: "\u628A\u7AEF\u5B50\u87BA\u6813 2 \u9396\u5230\u5580\u8072\uFF0F\u9707\u52D5\u9583\u8272"
+    why: 
+    targetId: part.pan_assy.hv_bolt_2
+    toolId: tool.torque_wrench_l
+    condition: part.pan_assy.hv_bolt_2.state=Torqued
+    standPointId: tp.roof.base_e.n
+  - text: "\u628A\u5927\u626D\u529B\u6273\u624B\u6536\u56DE\u5DE5\u5177\u888B"
+    why: 
+    targetId: env.tool_rack.slot_13
+    toolId: tool.torque_wrench_l
+    condition: rack.slot_13=on_rack
+    standPointId: tp.roof.base_e.n
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 78
+  refSecondsExam: 48
+  references:
+    version: 2
+    RefIds:
+    - rid: 8951035174947913848
+      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        conditions:
+        - ip.pan_assy.hv_terminal.state=Installed
+        - part.pan_assy.hv_bolt_1.state=Placed
+        - part.pan_assy.hv_bolt_2.state=Placed
+        - tool.torque_wrench_l.setting=50
+        - part.pan_assy.hv_bolt_1.state=Torqued
+        - part.pan_assy.hv_bolt_2.state=Torqued
+        - rack.slot_13=on_rack

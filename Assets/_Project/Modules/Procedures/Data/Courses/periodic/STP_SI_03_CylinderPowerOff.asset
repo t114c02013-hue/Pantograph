@@ -1,0 +1,96 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_SI_03_CylinderPowerOff
+  m_EditorClassIdentifier: 
+  stepId: STP_SI_03_CylinderPowerOff
+  title: "\u65B7\u958B\u96FB\u52D5\u7F38\u63A7\u5236\u96FB\u6E90"
+  instruction: "\u628A\u5347\u5F13\u6C23\u7F38\u96FB\u6E90\u5207 OFF\uFF0C\u6309\u4E00\u6B21\u5347\u5F13\u9215\u78BA\u8A8D\u5F13\u9AD4\u4E0D\u6703\u52D5\u3002\u672C\u5207\u7247\u5DF2\u9810\u5148\u5B8C\u6210\u3002"
+  toolHint: 
+  targetHint: "\u63A7\u5236\u76E4 \u2192 \u5347\u5F13\u6C23\u7F38\u96FB\u6E90"
+  targetIds:
+  - ip.cab.cylinder_power
+  requiredToolId: 
+  completion:
+    rid: 1000
+  errors:
+  - errorId: ERR_SI03_PowerOn
+    severity: 2
+    what: "\u5347\u5F13\u6C23\u7F38\u96FB\u6E90\u6C92\u6709\u5207\u65B7\u3002"
+    why: "\u6B98\u58D3\u6216\u8AA4\u64CD\u4F5C\u6703\u8B93\u5F13\u9AD4\u7A81\u7136\u5347\u8D77\uFF0C\u593E\u50B7\u624B\u6216\u628A\u4EBA\u9802\u8D77\u3002"
+    fix: "\u5207\u65B7\u6C23\u7F38\u96FB\u6E90\u5F8C\uFF0C\u6309\u4E00\u6B21\u5347\u5F13\u9215\u78BA\u8A8D\u5F13\u9AD4\u5B8C\u5168\u4E0D\u52D5\u3002"
+    trigger: 6
+    key: cab.cylinder_power
+    key2: 
+    keys: []
+    value: on
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+  hints:
+    text: 
+    why: 
+    checklist:
+    - "\u628A\u96FB\u52D5\u7F38\u96FB\u6E90\u5207\u5230 OFF|cab.cylinder_power=off"
+    - "\u6309\u5347\u5F13\u9215\u78BA\u8A8D\u5F13\u982D\u4E0D\u52D5|cab.raise_test_done"
+    - "\u628A\u639B\u724C\u7D44\u6536\u9032\u8170\u5305|rack.slot_1=in_pouch&&lockout.key_holder=trainee"
+    highlightIds: []
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u628A\u96FB\u52D5\u7F38\u96FB\u6E90\u5207\u5230 OFF"
+    why: 
+    targetId: ip.cab.cylinder_power
+    toolId: 
+    condition: cab.cylinder_power=off
+    standPointId: tp.cab
+  - text: "\u6309\u5347\u5F13\u9215\u78BA\u8A8D\u5F13\u982D\u4E0D\u52D5"
+    why: 
+    targetId: ip.cab.raise_button
+    toolId: 
+    condition: cab.raise_test_done
+    standPointId: tp.cab
+  - text: "\u628A\u639B\u724C\u7D44\u6536\u9032\u8170\u5305"
+    why: 
+    targetId: env.waist_pouch
+    toolId: tool.lockout_tag
+    condition: rack.slot_1=in_pouch&&lockout.key_holder=trainee
+    standPointId: tp.cab
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 40
+  refSecondsExam: 25
+  references:
+    version: 2
+    RefIds:
+    - rid: 1000
+      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        rules:
+        - rid: 1001
+        - rid: 1002
+    - rid: 1001
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        keys: []
+    - rid: 1002
+      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        conditions:
+        - cab.cylinder_power=off
+        - cab.raise_test_done
+        - rack.slot_1=in_pouch&&lockout.key_holder=trainee

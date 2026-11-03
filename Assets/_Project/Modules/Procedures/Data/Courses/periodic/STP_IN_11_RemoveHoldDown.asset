@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_IN_11_RemoveHoldDown
+  m_EditorClassIdentifier: 
+  stepId: STP_IN_11_RemoveHoldDown
+  title: "\u62C6\u964D\u5F13\u56FA\u5B9A\u5E36"
+  instruction: "\u62C6\u964D\u5F13\u56FA\u5B9A\u5E36"
+  toolHint: 
+  targetHint: 
+  targetIds:
+  - ip.pan_assy.hold_down
+  - env.tool_rack.slot_10
+  requiredToolId: 
+  completion:
+    rid: 8951035174947913850
+  errors: []
+  hints:
+    text: 
+    why: 
+    checklist:
+    - "\u89E3\u958B\u964D\u5F13\u56FA\u5B9A\u5E36|ip.pan_assy.hold_down.state=Removed"
+    - "\u628A\u56FA\u5B9A\u5E36\u6536\u56DE\u5DE5\u5177\u888B|rack.slot_10=on_rack"
+    highlightIds: []
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u89E3\u958B\u964D\u5F13\u56FA\u5B9A\u5E36"
+    why: 
+    targetId: ip.pan_assy.hold_down
+    toolId: tool.hold_down_strap
+    condition: ip.pan_assy.hold_down.state=Removed
+    standPointId: tp.roof.base_e.n
+  - text: "\u628A\u56FA\u5B9A\u5E36\u6536\u56DE\u5DE5\u5177\u888B"
+    why: 
+    targetId: env.tool_rack.slot_10
+    toolId: tool.hold_down_strap
+    condition: rack.slot_10=on_rack
+    standPointId: tp.roof.base_e.n
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 25
+  refSecondsExam: 15
+  references:
+    version: 2
+    RefIds:
+    - rid: 8951035174947913850
+      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        conditions:
+        - ip.pan_assy.hold_down.state=Removed
+        - rack.slot_10=on_rack

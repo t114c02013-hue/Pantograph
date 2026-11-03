@@ -1,0 +1,121 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_WC_04_Unlock
+  m_EditorClassIdentifier: 
+  stepId: STP_WC_04_Unlock
+  title: "\u89E3\u9396\u4E26\u8A18\u9304"
+  instruction: "\u7531\u4E0A\u9396\u8005\u672C\u4EBA\u89E3\u9396\u3001\u6062\u5FA9\u96FB\u6E90\uFF0C\u4E26\u5728\u4F5C\u696D\u55AE\u7C3D\u540D\u3002\u672C\u5207\u7247\u5DF2\u9810\u5148\u5B8C\u6210\u3002"
+  toolHint: "\u4E0A\u9396\u639B\u724C\u7D44"
+  targetHint: "\u4E3B\u65B7\u8DEF\u5668\u3001\u5347\u5F13\u958B\u95DC"
+  targetIds:
+  - ip.cab.breaker
+  - ip.cab.raise_switch
+  requiredToolId: tool.lockout_tag
+  completion:
+    rid: 1000
+  errors:
+  - errorId: ERR_WC04_NotSigned
+    severity: 0
+    what: "\u89E3\u9396\u5F8C\u6C92\u6709\u5728\u4F5C\u696D\u55AE\u7C3D\u540D\u3002"
+    why: "\u6C92\u6709\u7D00\u9304\u5C31\u7121\u6CD5\u8FFD\u8E64\u8AB0\u5728\u4EC0\u9EBC\u6642\u5019\u6062\u5FA9\u9001\u96FB\u3002"
+    fix: "\u89E3\u9396\u8005\u672C\u4EBA\u5728\u4F5C\u696D\u55AE\u7C3D\u540D\u3002"
+    trigger: 6
+    key: workorder.unlock_signed
+    key2: 
+    keys: []
+    value: false
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+  hints:
+    text: 
+    why: 
+    checklist:
+    - "\u8ACB\u4F5C\u696D\u8CA0\u8CAC\u4EBA\u548C\u6A5F\u5EE0\u8ABF\u5EA6\u78BA\u8A8D\uFF0C\u653E\u884C\u5FA9\u96FB|hold.4.checklist_done&&hold.4.released"
+    - "\u5F9E\u8170\u5305\u62FF\u51FA\u4E0A\u9396\u639B\u724C\u7D44|tool.active=tool.lockout_tag"
+    - "\u89E3\u9664\u5347\u5F13\u958B\u95DC\u7684\u9396|lockout.raise_switch=open"
+    - "\u89E3\u9664\u4E3B\u65B7\u8DEF\u5668\u7684\u9396|lockout.breaker=open"
+    - "\u6062\u5FA9\u96FB\u52D5\u7F38\u96FB\u6E90|cab.cylinder_power=on"
+    - "\u628A\u639B\u724C\u7D44\u6536\u9032\u8170\u5305|rack.slot_1=in_pouch"
+    highlightIds: []
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u8ACB\u4F5C\u696D\u8CA0\u8CAC\u4EBA\u548C\u6A5F\u5EE0\u8ABF\u5EA6\u78BA\u8A8D\uFF0C\u653E\u884C\u5FA9\u96FB"
+    why: 
+    targetId: npc.work_leader
+    toolId: 
+    condition: hold.4.checklist_done&&hold.4.released
+    standPointId: tp.platform.rack
+  - text: "\u5F9E\u8170\u5305\u62FF\u51FA\u4E0A\u9396\u639B\u724C\u7D44"
+    why: 
+    targetId: env.waist_pouch
+    toolId: tool.lockout_tag
+    condition: tool.active=tool.lockout_tag
+    standPointId: tp.cab
+  - text: "\u89E3\u9664\u5347\u5F13\u958B\u95DC\u7684\u9396"
+    why: 
+    targetId: ip.cab.raise_switch
+    toolId: tool.lockout_tag
+    condition: lockout.raise_switch=open
+    standPointId: tp.cab
+  - text: "\u89E3\u9664\u4E3B\u65B7\u8DEF\u5668\u7684\u9396"
+    why: 
+    targetId: ip.cab.breaker
+    toolId: tool.lockout_tag
+    condition: lockout.breaker=open
+    standPointId: tp.cab
+  - text: "\u6062\u5FA9\u96FB\u52D5\u7F38\u96FB\u6E90"
+    why: 
+    targetId: ip.cab.cylinder_power
+    toolId: 
+    condition: cab.cylinder_power=on
+    standPointId: tp.cab
+  - text: "\u628A\u639B\u724C\u7D44\u6536\u9032\u8170\u5305"
+    why: 
+    targetId: env.waist_pouch
+    toolId: tool.lockout_tag
+    condition: rack.slot_1=in_pouch
+    standPointId: tp.cab
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 70
+  refSecondsExam: 42
+  references:
+    version: 2
+    RefIds:
+    - rid: 1000
+      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        rules:
+        - rid: 1001
+        - rid: 1002
+    - rid: 1001
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        keys: []
+    - rid: 1002
+      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        conditions:
+        - hold.4.checklist_done&&hold.4.released
+        - tool.active=tool.lockout_tag
+        - lockout.raise_switch=open
+        - lockout.breaker=open
+        - cab.cylinder_power=on
+        - rack.slot_1=in_pouch

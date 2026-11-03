@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_LF_01_PreLift
+  m_EditorClassIdentifier: 
+  stepId: STP_LF_01_PreLift
+  title: "\u8D77\u540A\u524D"
+  instruction: "\u8D77\u540A\u524D"
+  toolHint: 
+  targetHint: 
+  targetIds:
+  - ip.pan_head.ground_clamp
+  - ip.depot.ground_terminal
+  - env.tool_rack.slot_3
+  - env.work_order.ground_register
+  - part.crane.hook
+  - npc.rigging_lead
+  requiredToolId: 
+  completion:
+    rid: 8951035174947913755
+  errors: []
+  hints:
+    text: 
+    why: 
+    checklist:
+    - "\u53D6\u4E0B\u5F13\u982D\u7AEF\u7684\u63A5\u5730\u639B\u9264|isolation.head_clamped=false"
+    - "\u9B06\u958B\u63A5\u5730\u7AEF\u5B50\u7684\u593E\u5B50|isolation.terminal_clamped=false&&ip.roof.carbody_ground.clamped"
+    - "\u628A\u63A5\u5730\u687F\u653E\u56DE\u687F\u67B6|rack.slot_3=on_rack"
+    - "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u92B7\u865F #1|ground_register.1=cancelled"
+    - "\u78BA\u8A8D\u540A\u9264\u5728\u5F13\u7684\u6B63\u4E0A\u65B9|part.crane.hook.inspected&&part.crane.hook_cog_offset_cm<=5"
+    - "\u8ACB\u540A\u639B\u6307\u63EE\u78BA\u8A8D\uFF0C\u653E\u884C\u8A66\u540A|hold.2.checklist_done&&hold.2.released"
+    highlightIds: []
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u53D6\u4E0B\u5F13\u982D\u7AEF\u7684\u63A5\u5730\u639B\u9264"
+    why: 
+    targetId: ip.pan_head.ground_clamp
+    toolId: tool.grounding_rod
+    condition: isolation.head_clamped=false
+    standPointId: tp.platform.ground
+  - text: "\u9B06\u958B\u63A5\u5730\u7AEF\u5B50\u7684\u593E\u5B50"
+    why: 
+    targetId: ip.depot.ground_terminal
+    toolId: tool.grounding_rod
+    condition: isolation.terminal_clamped=false&&ip.roof.carbody_ground.clamped
+    standPointId: tp.platform.ground
+  - text: "\u628A\u63A5\u5730\u687F\u653E\u56DE\u687F\u67B6"
+    why: 
+    targetId: "env.tool_rack.slot_3\uFF08\u5728\u687F\u67B6 env.pole_rack\uFF09"
+    toolId: tool.grounding_rod
+    condition: rack.slot_3=on_rack
+    standPointId: tp.platform.ground
+  - text: "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u92B7\u865F #1"
+    why: 
+    targetId: env.work_order.ground_register
+    toolId: 
+    condition: ground_register.1=cancelled
+    standPointId: tp.platform.ground
+  - text: "\u78BA\u8A8D\u540A\u9264\u5728\u5F13\u7684\u6B63\u4E0A\u65B9"
+    why: 
+    targetId: part.crane.hook
+    toolId: 
+    condition: part.crane.hook.inspected&&part.crane.hook_cog_offset_cm<=5
+    standPointId: tp.platform.crane
+  - text: "\u8ACB\u540A\u639B\u6307\u63EE\u78BA\u8A8D\uFF0C\u653E\u884C\u8A66\u540A"
+    why: 
+    targetId: npc.rigging_lead
+    toolId: 
+    condition: hold.2.checklist_done&&hold.2.released
+    standPointId: tp.platform.crane
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 70
+  refSecondsExam: 48
+  references:
+    version: 2
+    RefIds:
+    - rid: 8951035174947913755
+      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        conditions:
+        - isolation.head_clamped=false
+        - isolation.terminal_clamped=false&&ip.roof.carbody_ground.clamped
+        - rack.slot_3=on_rack
+        - ground_register.1=cancelled
+        - part.crane.hook.inspected&&part.crane.hook_cog_offset_cm<=5
+        - hold.2.checklist_done&&hold.2.released

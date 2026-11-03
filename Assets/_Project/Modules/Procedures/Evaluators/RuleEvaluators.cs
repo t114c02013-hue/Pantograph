@@ -117,6 +117,11 @@ namespace PantographSim.Procedures
         protected override bool Eval(ProcedureDone r, EvalContext c) => c.allPreviousDone();
     }
 
+    public class ConditionsAllEvaluator : Evaluator<ConditionsAll>
+    {
+        protected override bool Eval(ConditionsAll r, EvalContext c) => r.conditions.All(x => ChecklistEval.Done(c.state, c.K(x)));
+    }
+
     public class AllOfEvaluator : Evaluator<AllOf>
     {
         protected override bool Eval(AllOf r, EvalContext c) => r.rules.All(x => RuleEvaluators.Evaluate(x, c));
@@ -128,7 +133,7 @@ namespace PantographSim.Procedures
         static readonly Dictionary<Type, ICompletionEvaluator> map = new ICompletionEvaluator[]
         {
             new StateEqualsEvaluator(), new ChecklistAllEvaluator(), new OrderedSequenceEvaluator(), new ValueInRangeEvaluator(),
-            new DecisionEvaluator(), new ReadingMatchesEvaluator(), new ProcedureDoneEvaluator(), new AllOfEvaluator()
+            new DecisionEvaluator(), new ReadingMatchesEvaluator(), new ProcedureDoneEvaluator(), new AllOfEvaluator(), new ConditionsAllEvaluator()
         }.ToDictionary(e => e.RuleType);
 
         public static bool Evaluate(CompletionRule rule, EvalContext ctx)

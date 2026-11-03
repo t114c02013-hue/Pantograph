@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_LF_05_LowerToStand
+  m_EditorClassIdentifier: 
+  stepId: STP_LF_05_LowerToStand
+  title: "\u964D\u5230\u53F0\u67B6"
+  instruction: "\u964D\u5230\u53F0\u67B6"
+  toolHint: 
+  targetHint: 
+  targetIds:
+  - env.crane_pendant
+  - env.panto_stand
+  requiredToolId: 
+  completion:
+    rid: 8951035174947913759
+  errors: []
+  hints:
+    text: 
+    why: 
+    checklist:
+    - "\u964D\u5230\u53F0\u67B6\u4E0A\u65B9 0.1 m \u505C\u4F4F|part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1"
+    - "\u5C0D\u4F4D\u71C8\u4EAE\u7DA0\u5F8C\u6162\u6162\u653E\u4E0B|part.pan_assy.state=OnStand"
+    highlightIds: []
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u964D\u5230\u53F0\u67B6\u4E0A\u65B9 0.1 m \u505C\u4F4F"
+    why: 
+    targetId: env.crane_pendant
+    toolId: 
+    condition: part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1
+    standPointId: tp.platform.crane
+  - text: "\u5C0D\u4F4D\u71C8\u4EAE\u7DA0\u5F8C\u6162\u6162\u653E\u4E0B"
+    why: 
+    targetId: env.panto_stand
+    toolId: 
+    condition: part.pan_assy.state=OnStand
+    standPointId: tp.platform.crane
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 40
+  refSecondsExam: 28
+  references:
+    version: 2
+    RefIds:
+    - rid: 8951035174947913759
+      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        conditions:
+        - part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1
+        - part.pan_assy.state=OnStand

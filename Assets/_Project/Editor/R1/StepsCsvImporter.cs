@@ -11,7 +11,7 @@ namespace PantographSim.Editor
     /// 這一部分只做解析與展開（純函式，ImporterTests 直接測）：templateN（n=1→4、n=1,3,2,4、side=L,R、interleave=a+b，可用分號組合）、
     /// {side}／{n} 代換、課程（both／periodic／daily）與 *_daily 欄、依 n 或側別的站點對照表。完成條件對應與資產產生在後面的部分。
     /// </summary>
-    public static class StepsCsvImporter
+    public static partial class StepsCsvImporter
     {
         public const string SourceFolder = "Assets/_Project/Data/Source";
         public static string SubActionsPath => SourceFolder + "/SubActions.csv";

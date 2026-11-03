@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_IN_03_Transfer
+  m_EditorClassIdentifier: 
+  stepId: STP_IN_03_Transfer
+  title: "\u540A\u904B\u5230\u8ECA\u9802\u4E0A\u65B9"
+  instruction: "\u540A\u904B\u5230\u8ECA\u9802\u4E0A\u65B9"
+  toolHint: 
+  targetHint: 
+  targetIds:
+  - env.crane_pendant
+  requiredToolId: 
+  completion:
+    rid: 8951035174947913841
+  errors: []
+  hints:
+    text: 
+    why: 
+    checklist:
+    - "\u6309\u4F4F\u4E0A\u5347\u5230\u8D8A\u969C\u9AD8\u5EA6|part.crane.load_bottom_y>=3.1"
+    - "\u6309\u4F4F\u6A6B\u79FB\u5230\u8ECA\u9802\u5E95\u5EA7\u6B63\u4E0A\u65B9|part.pan_assy.roof_offset_cm<=5"
+    highlightIds: []
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u6309\u4F4F\u4E0A\u5347\u5230\u8D8A\u969C\u9AD8\u5EA6"
+    why: 
+    targetId: env.crane_pendant
+    toolId: 
+    condition: part.crane.load_bottom_y>=3.1
+    standPointId: tp.platform.crane
+  - text: "\u6309\u4F4F\u6A6B\u79FB\u5230\u8ECA\u9802\u5E95\u5EA7\u6B63\u4E0A\u65B9"
+    why: 
+    targetId: env.crane_pendant
+    toolId: 
+    condition: part.pan_assy.roof_offset_cm<=5
+    standPointId: tp.platform.crane
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 80
+  refSecondsExam: 55
+  references:
+    version: 2
+    RefIds:
+    - rid: 8951035174947913841
+      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        conditions:
+        - part.crane.load_bottom_y>=3.1
+        - part.pan_assy.roof_offset_cm<=5

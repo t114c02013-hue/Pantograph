@@ -44,6 +44,9 @@ namespace PantographSim.Data
     /// <summary>前面所有步驟都已完成。</summary>
     [Serializable] public class ProcedureDone : CompletionRule { }
 
+    /// <summary>R1.5b b4：條件字串（ChecklistEval 格式，和小動作的 condition 相同）全部成立。匯入器給 v6 新增的小動作用。</summary>
+    [Serializable] public class ConditionsAll : CompletionRule { public string[] conditions = Array.Empty<string>(); }
+
     /// <summary>全部子條件都成立。</summary>
     [Serializable] public class AllOf : CompletionRule
     {

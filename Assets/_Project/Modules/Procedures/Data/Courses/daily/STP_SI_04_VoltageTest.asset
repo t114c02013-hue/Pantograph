@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_SI_04_VoltageTest
+  m_EditorClassIdentifier: 
+  stepId: STP_SI_04_VoltageTest
+  title: "\u9A57\u96FB"
+  instruction: "\u62FF\u9A57\u96FB\u5668\uFF0C\u5148\u9EDE\u300C\u9A57\u96FB\u5668\u81EA\u6AA2\u5668\u300D\u78BA\u8A8D\u7DA0\u71C8\u8207\u55F6\u8072\uFF0C\u518D\u9EDE\u5F13\u982D\u63A5\u5730\u639B\u9EDE\uFF0C\u78BA\u8A8D\u986F\u793A\u300C\u7121\u96FB\u300D\u3002"
+  toolHint: "\u9A57\u96FB\u5668\uFF08\u5DE5\u5177\u67B6\u7B2C 2 \u683C\uFF09"
+  targetHint: "\u5DE5\u5177\u53F0\u4E0A\u7684\u9A57\u96FB\u5668\u81EA\u6AA2\u5668
+    \u2192 \u5F13\u982D\u63A5\u5730\u639B\u9EDE"
+  targetIds:
+  - ip.depot.detector_tester
+  - ip.pan_head.ground_clamp
+  requiredToolId: tool.voltage_detector
+  completion:
+    rid: 1000
+  errors:
+  - errorId: ERR_SI04_NoSelfTest
+    severity: 2
+    what: "\u9A57\u96FB\u5668\u6C92\u6709\u5148\u81EA\u6AA2\u5C31\u76F4\u63A5\u91CF\u6E2C\u3002"
+    why: "\u9A57\u96FB\u5668\u82E5\u6545\u969C\u6703\u4E00\u76F4\u986F\u793A\u300C\u7121\u96FB\u300D\uFF0C\u4F60\u6703\u5728\u5E36\u96FB\u72C0\u614B\u4E0B\u4F5C\u696D\u3002"
+    fix: "\u6BCF\u6B21\u9A57\u96FB\u524D\u5148\u5728\u81EA\u6AA2\u5668\u4E0A\u78BA\u8A8D\u7DA0\u71C8\u8207\u55F6\u8072\uFF0C\u518D\u91CF\u6E2C\u5F13\u982D\u3002"
+    trigger: 2
+    key: isolation.voltage_measured
+    key2: tool.voltage_detector.selftest
+    keys: []
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 1
+  hints:
+    text: "\u5148\u81EA\u6AA2\u3001\u5F8C\u91CF\u6E2C\u3002\u81EA\u6AA2\u901A\u904E\u6703\u4EAE\u7DA0\u71C8\u4E26\u55F6\u4E00\u8072\u3002"
+    why: "\u9A57\u96FB\u5668\u58DE\u4E86\u4E5F\u6703\u986F\u793A\u300C\u7121\u96FB\u300D\uFF0C\u5148\u81EA\u6AA2\u624D\u77E5\u9053\u5B83\u662F\u597D\u7684\u3002"
+    checklist:
+    - "\u5230\u687F\u67B6\u62FF\u8D77\u9A57\u96FB\u687F|tool.active=tool.voltage_detector"
+    - "\u9EDE\u81EA\u6AA2\u5668\uFF0C\u78BA\u8A8D\u4EAE\u7DA0\u71C8|tool.voltage_detector.selftest"
+    - "\u9EDE\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u9A57\u96FB|isolation.voltage_tested"
+    - "\u628A\u9A57\u96FB\u687F\u653E\u56DE\u687F\u67B6|tool.active="
+    highlightIds:
+    - ip.depot.detector_tester
+    - ip.pan_head.ground_clamp
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u5230\u687F\u67B6\u62FF\u8D77\u9A57\u96FB\u687F"
+    why: 
+    targetId: "env.tool_rack.slot_2\uFF08env.pole_rack\uFF09"
+    toolId: tool.voltage_detector
+    condition: tool.active=tool.voltage_detector
+    standPointId: tp.platform.ground
+  - text: "\u9EDE\u81EA\u6AA2\u5668\uFF0C\u78BA\u8A8D\u4EAE\u7DA0\u71C8"
+    why: 
+    targetId: ip.depot.detector_tester
+    toolId: tool.voltage_detector
+    condition: tool.voltage_detector.selftest
+    standPointId: tp.platform.ground
+  - text: "\u9EDE\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u9A57\u96FB"
+    why: 
+    targetId: ip.pan_head.ground_clamp
+    toolId: tool.voltage_detector
+    condition: isolation.voltage_tested
+    standPointId: tp.platform.ground
+  - text: "\u628A\u9A57\u96FB\u687F\u653E\u56DE\u687F\u67B6"
+    why: 
+    targetId: "env.tool_rack.slot_2\uFF08env.pole_rack\uFF09"
+    toolId: tool.voltage_detector
+    condition: tool.active=
+    standPointId: tp.platform.ground
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 45
+  refSecondsExam: 25
+  references:
+    version: 2
+    RefIds:
+    - rid: 1000
+      type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        key: isolation.voltage_tested
+        value: true

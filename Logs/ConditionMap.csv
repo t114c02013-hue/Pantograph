@@ -1,0 +1,498 @@
+﻿course,stepId,subId,line,layer,condition,rule,owner
+daily,STP_SI_00_PreWork,a,2,2,"停放煞車、止輪器、「檢修中・禁止動車」牌 3／3 已查看並勾選","env.work_order.anti_roll_check.checked_count>=3",b4c:si00
+daily,STP_SI_00_PreWork,b,3,2,"股道、車號、作業內容、時段、調度核准欄 5 欄都已查看","env.work_order.permit.viewed_count>=5",b4c:si00
+daily,STP_SI_00_PreWork,c,4,3,"高壓、高處墜落、吊掛、夾手、墜物 5／5 已勾，已簽名","env.work_order.tbm.checked_count>=5&&env.work_order.tbm.signed",b4c:si00
+daily,STP_SI_00_PreWork,d,5,3,"安全帽（下巴帶已扣）、安全鞋、工作手套 = 穿戴；絕緣手套充氣檢查完成、放在身上","ppe.helmet=worn&&ppe.helmet_strap=fastened&&ppe.safety_shoes=worn&&ppe.work_gloves=worn&&ppe.insulating_gloves=carried&&ppe.insulating_gloves.inflate_checked",b4c:ppe
+daily,STP_SI_00_PreWork,e,6,2,"卡尺、扭力扳手 2 張標籤都已查看，2／2 勾「有效」","env.work_order.calibration_check.valid_count>=2",b4c:si00
+daily,STP_SI_00_PreWork,f,7,3,"上鎖掛牌組 = 在腰包","rack.slot_1=in_pouch",
+daily,STP_SI_01_ConfirmLowered,a,8,1,"放開時 lower_check 與 lower_target 距離 ≤ EX 1 cm","part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm",
+daily,STP_SI_01_ConfirmLowered,b,9,1,"弓頭已確認","part.pan_head.inspected",
+daily,STP_SI_01_ConfirmLowered,c,10,1,"指示燈 = 降弓且已確認","ip.cab.pan_indicator.checked",
+daily,STP_SI_02_LockOut,a,11,2,"手持上鎖掛牌組","tool.active=tool.lockout_tag",
+daily,STP_SI_02_LockOut,b,12,3,"主斷路器 = OFF","cab.breaker=off",b4:p5
+daily,STP_SI_02_LockOut,c,13,3,"主斷路器 = 已上鎖＋掛牌","lockout.breaker=locked",
+daily,STP_SI_02_LockOut,d,14,3,"升弓開關 = 已上鎖＋掛牌，鑰匙帶在身上","lockout.raise_switch=locked&&lockout.key_holder=trainee",
+daily,STP_SI_03_CylinderPowerOff,a,15,3,"電動缸電源 = OFF","cab.cylinder_power=off",b4:p5
+daily,STP_SI_03_CylinderPowerOff,b,16,3,"已按下且弓頭位置不變","cab.raise_test_done",b4:p5
+daily,STP_SI_03_CylinderPowerOff,c,17,3,"上鎖掛牌組 = 在腰包，鑰匙在身上","rack.slot_1=in_pouch&&lockout.key_holder=trainee",
+daily,STP_SI_04_VoltageTest,a,18,1,"手持驗電桿（雙手）","tool.active=tool.voltage_detector",
+daily,STP_SI_04_VoltageTest,b,19,1,"自檢通過","tool.voltage_detector.selftest",
+daily,STP_SI_04_VoltageTest,c,20,1,"顯示「無電」","isolation.voltage_tested",
+daily,STP_SI_04_VoltageTest,d,21,1,"掛位 2 = 在架","tool.active=",
+daily,STP_SI_05_Grounding,a,22,1,"手持接地桿（雙手），掛位 3 = 使用中","tool.active=tool.grounding_rod",
+daily,STP_SI_05_Grounding,b,23,1,"接地夾 = 已夾上","isolation.terminal_clamped",
+daily,STP_SI_05_Grounding,c,24,1,"拉線確認完成","isolation.pull_tested",
+daily,STP_SI_05_Grounding,d,25,1,"掛鉤 = 已掛上（接地棒留在場上）","isolation.head_clamped",
+daily,STP_SI_05_Grounding,e,26,2,"#1 = 已登記","ground_register.1=registered",b4c:ground_register
+daily,STP_SI_06_RoofEntry,a,27,3,"已穿戴，掛位 4 = 使用中","rack.slot_4=in_use",
+daily,STP_SI_06_RoofEntry,b,30,3,"平台掛點 = 已扣","harness.platform",
+daily,STP_SI_06_RoofEntry,c,31,2,"9／9 已點過（日常版清單：11 項去掉第 8、10 項，第 5 項為架空線停電並掛接地器）、hold.1.released = true、sign_start 已簽","env.work_order.roof_entry_check.checked_count>=9&&hold.1.released&&workorder.sign_start",b4c:holdpoint
+daily,STP_SI_06_RoofEntry,d,32,3,"兩個掛點都扣著","harness.roof&&harness.platform",
+daily,STP_SI_06_RoofEntry,e,33,3,"只剩車頂掛點扣著","harness.roof&&harness.platform=false",
+daily,STP_CSR_01_CheckIsolation,a,81,3,"核對作業單上 SI 各項的狀態：SI_00–06 各項都已完成；有一項沒完成就不能過","workorder.si_all_done",b4:p3
+daily,STP_CSR_01_CheckIsolation,b,82,3,"三處都已查看，異常欄已勾選「無異常」或「有異常」","env.work_order.anomaly.checked",b4:p5
+daily,STP_CSR_02_ZeroCaliper,a,83,1,"手持卡尺","tool.active=tool.caliper",
+daily,STP_CSR_02_ZeroCaliper,b,84,1,"量爪間距 = 0","tool.caliper.jaw=0",
+daily,STP_CSR_02_ZeroCaliper,c,85,1,"顯示 0.00 mm","tool.caliper.zeroed",
+daily,STP_CSR_03_Measure_L,a,86,1,"讀數已取得","ip.carbon_strip_L.measure_left.measured",
+daily,STP_CSR_03_Measure_L,b,87,1,"讀數已取得","ip.carbon_strip_L.measure_mid.measured",
+daily,STP_CSR_03_Measure_L,c,88,1,"讀數已取得","ip.carbon_strip_L.measure_right.measured",
+daily,STP_CSR_03_Measure_L,d,89,1,"三格都與讀數相差 ≤ 0.05 mm","workorder.reading.L.submitted",
+daily,STP_CSR_04_Measure_R,a,90,1,"讀數已取得","ip.carbon_strip_R.measure_left.measured",
+daily,STP_CSR_04_Measure_R,b,91,1,"讀數已取得","ip.carbon_strip_R.measure_mid.measured",
+daily,STP_CSR_04_Measure_R,c,92,1,"讀數已取得","ip.carbon_strip_R.measure_right.measured",
+daily,STP_CSR_04_Measure_R,d,93,1,"三格都與讀數相差 ≤ 0.05 mm","workorder.reading.R.submitted",
+daily,STP_CSR_04_Measure_R,e,94,1,"掛位 5 = 在袋","tool.active=",
+daily,STP_CSR_05_Decide,a,95,1,"選項符合判定原則（預設數值下為「兩條都換」）","workorder.decision",
+daily,STP_CSR_06_Loosen_L,a,96,1,"手持套筒扳手","tool.active=tool.socket_wrench",
+daily,STP_CSR_06_Loosen_R,a,96,1,"手持套筒扳手","tool.active=tool.socket_wrench",
+daily,STP_CSR_06_Loosen_L,b,97,1,"套筒 = 13 mm（EX）","tool.socket_wrench.size=13",
+daily,STP_CSR_06_Loosen_R,b,97,1,"套筒 = 13 mm（EX）","tool.socket_wrench.size=13",
+daily,STP_CSR_06_Loosen_L,c,98,1,"方向 = 鬆","tool.socket_wrench.dir=loosen",
+daily,STP_CSR_06_Loosen_R,c,98,1,"方向 = 鬆","tool.socket_wrench.dir=loosen",
+daily,STP_CSR_06_Loosen_L,d1,99,1,"該支累計 180° ± 30°","ip.carbon_strip_L.bolt_1.angle_deg>=150",
+daily,STP_CSR_06_Loosen_L,d2,99,1,"該支累計 180° ± 30°","ip.carbon_strip_L.bolt_2.angle_deg>=150",
+daily,STP_CSR_06_Loosen_L,d3,99,1,"該支累計 180° ± 30°","ip.carbon_strip_L.bolt_3.angle_deg>=150",
+daily,STP_CSR_06_Loosen_L,d4,99,1,"該支累計 180° ± 30°","ip.carbon_strip_L.bolt_4.angle_deg>=150",
+daily,STP_CSR_06_Loosen_R,d1,99,1,"該支累計 180° ± 30°","ip.carbon_strip_R.bolt_1.angle_deg>=150",
+daily,STP_CSR_06_Loosen_R,d2,99,1,"該支累計 180° ± 30°","ip.carbon_strip_R.bolt_2.angle_deg>=150",
+daily,STP_CSR_06_Loosen_R,d3,99,1,"該支累計 180° ± 30°","ip.carbon_strip_R.bolt_3.angle_deg>=150",
+daily,STP_CSR_06_Loosen_R,d4,99,1,"該支累計 180° ± 30°","ip.carbon_strip_R.bolt_4.angle_deg>=150",
+daily,STP_CSR_07_RemoveBolts_L,a1,100,1,"該支 = 脫出","ip.carbon_strip_L.bolt_1.angle_deg>=720",
+daily,STP_CSR_07_RemoveBolts_L,a2,100,1,"該支 = 脫出","ip.carbon_strip_L.bolt_2.angle_deg>=720",
+daily,STP_CSR_07_RemoveBolts_L,a3,100,1,"該支 = 脫出","ip.carbon_strip_L.bolt_3.angle_deg>=720",
+daily,STP_CSR_07_RemoveBolts_L,a4,100,1,"該支 = 脫出","ip.carbon_strip_L.bolt_4.angle_deg>=720",
+daily,STP_CSR_07_RemoveBolts_R,a1,100,1,"該支 = 脫出","ip.carbon_strip_R.bolt_1.angle_deg>=720",
+daily,STP_CSR_07_RemoveBolts_R,a2,100,1,"該支 = 脫出","ip.carbon_strip_R.bolt_2.angle_deg>=720",
+daily,STP_CSR_07_RemoveBolts_R,a3,100,1,"該支 = 脫出","ip.carbon_strip_R.bolt_3.angle_deg>=720",
+daily,STP_CSR_07_RemoveBolts_R,a4,100,1,"該支 = 脫出","ip.carbon_strip_R.bolt_4.angle_deg>=720",
+daily,STP_CSR_07_RemoveBolts_L,b1,101,1,"螺栓盤螺栓數 +1","ip.carbon_strip_L.bolt_1.state=InTray",
+daily,STP_CSR_07_RemoveBolts_L,b2,101,1,"螺栓盤螺栓數 +1","ip.carbon_strip_L.bolt_2.state=InTray",
+daily,STP_CSR_07_RemoveBolts_L,b3,101,1,"螺栓盤螺栓數 +1","ip.carbon_strip_L.bolt_3.state=InTray",
+daily,STP_CSR_07_RemoveBolts_L,b4,101,1,"螺栓盤螺栓數 +1","ip.carbon_strip_L.bolt_4.state=InTray",
+daily,STP_CSR_07_RemoveBolts_R,b1,101,1,"螺栓盤螺栓數 +1","ip.carbon_strip_R.bolt_1.state=InTray",
+daily,STP_CSR_07_RemoveBolts_R,b2,101,1,"螺栓盤螺栓數 +1","ip.carbon_strip_R.bolt_2.state=InTray",
+daily,STP_CSR_07_RemoveBolts_R,b3,101,1,"螺栓盤螺栓數 +1","ip.carbon_strip_R.bolt_3.state=InTray",
+daily,STP_CSR_07_RemoveBolts_R,b4,101,1,"螺栓盤螺栓數 +1","ip.carbon_strip_R.bolt_4.state=InTray",
+daily,STP_CSR_07_RemoveBolts_L,c,102,1,"掛位 6 = 在袋","tool.active=",
+daily,STP_CSR_07_RemoveBolts_R,c,102,1,"掛位 6 = 在袋","tool.active=",
+daily,STP_CSR_08_RemoveStrip_L,a,103,1,"滑板 = 已拆下","part.carbon_strip_L.state=Removed",
+daily,STP_CSR_08_RemoveStrip_R,a,103,1,"滑板 = 已拆下","part.carbon_strip_R.state=Removed",
+daily,STP_CSR_08_RemoveStrip_L,b,104,3,"暫放墊上有該條舊滑板（1 條）","part.carbon_strip_L.state=OnMat",b4:p4
+daily,STP_CSR_08_RemoveStrip_R,b,104,3,"暫放墊上有該條舊滑板（1 條）","part.carbon_strip_R.state=OnMat",b4:p4
+daily,STP_CSR_09_CleanBracket_L,a,105,1,"手持清潔布","tool.active=tool.cleaning_cloth",
+daily,STP_CSR_09_CleanBracket_R,a,105,1,"手持清潔布","tool.active=tool.cleaning_cloth",
+daily,STP_CSR_09_CleanBracket_L,b,106,1,"清除率 ≥ EX 95 %","ip.carbon_strip_L.bracket.clean_ratio>=0.95",
+daily,STP_CSR_09_CleanBracket_R,b,106,1,"清除率 ≥ EX 95 %","ip.carbon_strip_R.bracket.clean_ratio>=0.95",
+daily,STP_CSR_09_CleanBracket_L,c,107,1,"掛位 8 = 在袋","tool.active=",
+daily,STP_CSR_09_CleanBracket_R,c,107,1,"掛位 8 = 在袋","tool.active=",
+daily,STP_CSR_09_CleanBracket_L,d,108,3,"待報廢箱有該條舊滑板，暫放墊是空的","part.carbon_strip_L.state=InTray&&env.roof_strip_mat.count<=0",b4:p4
+daily,STP_CSR_09_CleanBracket_R,d,108,3,"待報廢箱有該條舊滑板，暫放墊是空的","part.carbon_strip_R.state=InTray&&env.roof_strip_mat.count<=0",b4:p4
+daily,STP_CSR_10_CheckNew_L,a,109,1,"三條標籤都看過","spare.L.viewed_count>=3",
+daily,STP_CSR_10_CheckNew_R,a,109,1,"三條標籤都看過","spare.R.viewed_count>=3",
+daily,STP_CSR_10_CheckNew_L,b,110,1,"已旋轉檢視一圈","env.spare_shelf.slot_2.flipped",
+daily,STP_CSR_10_CheckNew_R,b,110,1,"已旋轉檢視一圈","env.spare_shelf.slot_2.flipped",
+daily,STP_CSR_10_CheckNew_L,c,111,1,"手持卡尺","tool.active=tool.caliper",
+daily,STP_CSR_10_CheckNew_R,c,111,1,"手持卡尺","tool.active=tool.caliper",
+daily,STP_CSR_10_CheckNew_L,d,112,1,"讀數 EX 12.0 ± 0.2 mm","env.spare_shelf.slot_2.measured",
+daily,STP_CSR_10_CheckNew_R,d,112,1,"讀數 EX 12.0 ± 0.2 mm","env.spare_shelf.slot_2.measured",
+daily,STP_CSR_10_CheckNew_L,e,113,1,"掛位 5 = 在袋","tool.active=",
+daily,STP_CSR_10_CheckNew_R,e,113,1,"掛位 5 = 在袋","tool.active=",
+daily,STP_CSR_10_CheckNew_L,f,114,1,"手持新滑板，且為正確型號、無裂紋","spare.L.picked",
+daily,STP_CSR_10_CheckNew_R,f,114,1,"手持新滑板，且為正確型號、無裂紋","spare.R.picked",
+daily,STP_CSR_10_CheckNew_L,g,115,3,"兩欄和所選備品標籤一致","env.work_order.part_trace.matches_spare",b4:p4
+daily,STP_CSR_10_CheckNew_R,g,115,3,"兩欄和所選備品標籤一致","env.work_order.part_trace.matches_spare",b4:p4
+daily,STP_CSR_11_Install_L,a,116,1,"新滑板位於托架上方","part.carbon_strip_L.over_bracket",
+daily,STP_CSR_11_Install_R,a,116,1,"新滑板位於托架上方","part.carbon_strip_R.over_bracket",
+daily,STP_CSR_11_Install_L,b,117,1,"方向 = 斜面／箭頭朝弓頭外側","part.carbon_strip_L.new_orientation=out",
+daily,STP_CSR_11_Install_R,b,117,1,"方向 = 斜面／箭頭朝弓頭外側","part.carbon_strip_R.new_orientation=out",
+daily,STP_CSR_11_Install_L,c,118,1,"install_check 與 install_target 距離 ≤ EX 0.5 cm，吸附成功","part.carbon_strip_L.state=NewMounted && part.carbon_strip_L.install_distance_cm<=0.5",
+daily,STP_CSR_11_Install_R,c,118,1,"install_check 與 install_target 距離 ≤ EX 0.5 cm，吸附成功","part.carbon_strip_R.state=NewMounted && part.carbon_strip_R.install_distance_cm<=0.5",
+daily,STP_CSR_12_PreTighten_L,a,119,1,"手持套筒扳手（13 mm）","tool.active=tool.socket_wrench",
+daily,STP_CSR_12_PreTighten_R,a,119,1,"手持套筒扳手（13 mm）","tool.active=tool.socket_wrench",
+daily,STP_CSR_12_PreTighten_L,b1,120,1,"該支 = 已放入，螺栓盤螺栓數 −1","ip.carbon_strip_L.bolt_1.state=Placed",
+daily,STP_CSR_12_PreTighten_L,b2,120,1,"該支 = 已放入，螺栓盤螺栓數 −1","ip.carbon_strip_L.bolt_2.state=Placed",
+daily,STP_CSR_12_PreTighten_L,b3,120,1,"該支 = 已放入，螺栓盤螺栓數 −1","ip.carbon_strip_L.bolt_3.state=Placed",
+daily,STP_CSR_12_PreTighten_L,b4,120,1,"該支 = 已放入，螺栓盤螺栓數 −1","ip.carbon_strip_L.bolt_4.state=Placed",
+daily,STP_CSR_12_PreTighten_R,b1,120,1,"該支 = 已放入，螺栓盤螺栓數 −1","ip.carbon_strip_R.bolt_1.state=Placed",
+daily,STP_CSR_12_PreTighten_R,b2,120,1,"該支 = 已放入，螺栓盤螺栓數 −1","ip.carbon_strip_R.bolt_2.state=Placed",
+daily,STP_CSR_12_PreTighten_R,b3,120,1,"該支 = 已放入，螺栓盤螺栓數 −1","ip.carbon_strip_R.bolt_3.state=Placed",
+daily,STP_CSR_12_PreTighten_R,b4,120,1,"該支 = 已放入，螺栓盤螺栓數 −1","ip.carbon_strip_R.bolt_4.state=Placed",
+daily,STP_CSR_12_PreTighten_L,c,121,1,"方向 = 鎖","tool.socket_wrench.dir=lock",
+daily,STP_CSR_12_PreTighten_R,c,121,1,"方向 = 鎖","tool.socket_wrench.dir=lock",
+daily,STP_CSR_12_PreTighten_L,d1,122,1,"該支 = 貼合","ip.carbon_strip_L.bolt_1.state=Snug",
+daily,STP_CSR_12_PreTighten_L,d2,122,1,"該支 = 貼合","ip.carbon_strip_L.bolt_2.state=Snug",
+daily,STP_CSR_12_PreTighten_L,d3,122,1,"該支 = 貼合","ip.carbon_strip_L.bolt_3.state=Snug",
+daily,STP_CSR_12_PreTighten_L,d4,122,1,"該支 = 貼合","ip.carbon_strip_L.bolt_4.state=Snug",
+daily,STP_CSR_12_PreTighten_R,d1,122,1,"該支 = 貼合","ip.carbon_strip_R.bolt_1.state=Snug",
+daily,STP_CSR_12_PreTighten_R,d2,122,1,"該支 = 貼合","ip.carbon_strip_R.bolt_2.state=Snug",
+daily,STP_CSR_12_PreTighten_R,d3,122,1,"該支 = 貼合","ip.carbon_strip_R.bolt_3.state=Snug",
+daily,STP_CSR_12_PreTighten_R,d4,122,1,"該支 = 貼合","ip.carbon_strip_R.bolt_4.state=Snug",
+daily,STP_CSR_12_PreTighten_L,e,123,1,"掛位 6 = 在袋","tool.active=",
+daily,STP_CSR_12_PreTighten_R,e,123,1,"掛位 6 = 在袋","tool.active=",
+daily,STP_CSR_13_Torque_L,a,124,1,"手持扭力扳手","tool.active=tool.torque_wrench",
+daily,STP_CSR_13_Torque_R,a,124,1,"手持扭力扳手","tool.active=tool.torque_wrench",
+daily,STP_CSR_13_Torque_L,b,125,1,"扭力扳手套筒 = 13 mm，設定值 = 25 N·m（EX）；套錯擋下並提示「套筒尺寸不對」","tool.torque_wrench.setting=25",
+daily,STP_CSR_13_Torque_R,b,125,1,"扭力扳手套筒 = 13 mm，設定值 = 25 N·m（EX）；套錯擋下並提示「套筒尺寸不對」","tool.torque_wrench.setting=25",
+daily,STP_CSR_13_Torque_L,c1,126,1,"該支實際扭力 23–27 N·m（EX）","ip.carbon_strip_L.bolt_1.state=Torqued",
+daily,STP_CSR_13_Torque_L,c2,126,1,"該支實際扭力 23–27 N·m（EX）","ip.carbon_strip_L.bolt_2.state=Torqued",
+daily,STP_CSR_13_Torque_L,c3,126,1,"該支實際扭力 23–27 N·m（EX）","ip.carbon_strip_L.bolt_3.state=Torqued",
+daily,STP_CSR_13_Torque_L,c4,126,1,"該支實際扭力 23–27 N·m（EX）","ip.carbon_strip_L.bolt_4.state=Torqued",
+daily,STP_CSR_13_Torque_R,c1,126,1,"該支實際扭力 23–27 N·m（EX）","ip.carbon_strip_R.bolt_1.state=Torqued",
+daily,STP_CSR_13_Torque_R,c2,126,1,"該支實際扭力 23–27 N·m（EX）","ip.carbon_strip_R.bolt_2.state=Torqued",
+daily,STP_CSR_13_Torque_R,c3,126,1,"該支實際扭力 23–27 N·m（EX）","ip.carbon_strip_R.bolt_3.state=Torqued",
+daily,STP_CSR_13_Torque_R,c4,126,1,"該支實際扭力 23–27 N·m（EX）","ip.carbon_strip_R.bolt_4.state=Torqued",
+daily,STP_CSR_13_Torque_L,d,127,1,"掛位 7 = 在袋","tool.active=",
+daily,STP_CSR_13_Torque_R,d,127,1,"掛位 7 = 在袋","tool.active=",
+daily,STP_CSR_14_Mark_L,a,128,1,"手持標記筆","tool.active=tool.marker",
+daily,STP_CSR_14_Mark_R,a,128,1,"手持標記筆","tool.active=tool.marker",
+daily,STP_CSR_14_Mark_L,b1,129,1,"該支有標記線","ip.carbon_strip_L.bolt_1.marked",
+daily,STP_CSR_14_Mark_L,b2,129,1,"該支有標記線","ip.carbon_strip_L.bolt_2.marked",
+daily,STP_CSR_14_Mark_L,b3,129,1,"該支有標記線","ip.carbon_strip_L.bolt_3.marked",
+daily,STP_CSR_14_Mark_L,b4,129,1,"該支有標記線","ip.carbon_strip_L.bolt_4.marked",
+daily,STP_CSR_14_Mark_R,b1,129,1,"該支有標記線","ip.carbon_strip_R.bolt_1.marked",
+daily,STP_CSR_14_Mark_R,b2,129,1,"該支有標記線","ip.carbon_strip_R.bolt_2.marked",
+daily,STP_CSR_14_Mark_R,b3,129,1,"該支有標記線","ip.carbon_strip_R.bolt_3.marked",
+daily,STP_CSR_14_Mark_R,b4,129,1,"該支有標記線","ip.carbon_strip_R.bolt_4.marked",
+daily,STP_CSR_14_Mark_L,c,130,1,"掛位 9 = 在袋","tool.active=",
+daily,STP_CSR_14_Mark_R,c,130,1,"掛位 9 = 在袋","tool.active=",
+daily,STP_CSR_15_HeightCheck,a,131,1,"手持卡尺","tool.active=tool.caliper",
+daily,STP_CSR_15_HeightCheck,b,132,1,"讀數已取得","ip.carbon_strip_L.measure_mid.new_measured",
+daily,STP_CSR_15_HeightCheck,c,133,1,"讀數已取得","ip.carbon_strip_R.measure_mid.new_measured",
+daily,STP_CSR_15_HeightCheck,d,134,1,"兩格與讀數相差 ≤ 0.05 mm，差值 ≤ EX 1.0 mm","workorder.height_diff",
+daily,STP_CSR_15_HeightCheck,e,135,1,"掛位 5 = 在袋","tool.active=",
+daily,STP_WC_01a_ToolCountRoof,a,182,3,"工具袋 5–9 號都在袋","rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack",
+daily,STP_WC_01a_ToolCountRoof,b,183,3,"兩個螺栓盤、零件袋、暫放墊都空，車頂沒有遺留螺栓或滑板","env.bolt_tray_L.count<=0&&env.bolt_tray_R.count<=0&&env.tool_bag.bolt_pouch.count<=0&&env.roof_strip_mat.count<=0&&roof.leftover_count<=0",b4:p5
+daily,STP_WC_01a_ToolCountRoof,c,184,3,"已確認","workorder.toolcount_confirmed",
+daily,STP_WC_02_LeaveRoof,a,185,3,"兩個掛點都扣著","harness.roof&&harness.platform",
+daily,STP_WC_02_LeaveRoof,b,186,3,"只剩平台掛點扣著","harness.platform&&harness.roof=false",
+daily,STP_WC_02_LeaveRoof,c,187,3,"人在平台，兩個掛鉤都收在胸前扣環，安全帶仍穿著","player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use",b4d
+daily,STP_WC_03_RemoveGround,a,191,1,"掛鉤 = 已取下","isolation.head_clamped=false",
+daily,STP_WC_03_RemoveGround,b,192,1,"接地夾 = 已鬆開","isolation.terminal_clamped=false",
+daily,STP_WC_03_RemoveGround,c,193,1,"掛位 3 = 在架","rack.slot_3=on_rack",
+daily,STP_WC_03_RemoveGround,d,194,2,"#1 = 已銷號","ground_register.1=cancelled",b4c:ground_register
+daily,STP_WC_01b_ToolCountPlatform,a,199,3,"桿架 2、3 號都在架","rack.slot_2=on_rack&&rack.slot_3=on_rack",
+daily,STP_WC_01b_ToolCountPlatform,b,200,3,"#1 已銷號，和桿架實物一致","ground_register.1=cancelled&&rack.slot_3=on_rack",b4c:ground_register
+daily,STP_WC_01b_ToolCountPlatform,c,201,3,"已確認","workorder.toolcount_platform_confirmed",b4:p5
+daily,STP_WC_04_Unlock,a0,208,2,"停留點 4 清單 3 項全部點過（#1 已銷號且桿架 slot_3 在架；人員已離開車頂；工具清點完成），hold.4.released = true","hold.4.checklist_done&&hold.4.released",b4c:holdpoint
+daily,STP_WC_04_Unlock,a,209,2,"手持上鎖掛牌組","tool.active=tool.lockout_tag",
+daily,STP_WC_04_Unlock,b,210,3,"升弓開關 = 未上鎖","lockout.raise_switch=open",
+daily,STP_WC_04_Unlock,c,211,3,"主斷路器 = 未上鎖","lockout.breaker=open",
+daily,STP_WC_04_Unlock,d,212,3,"電動缸電源 = ON","cab.cylinder_power=on",b4:p5
+daily,STP_WC_04_Unlock,e,213,3,"上鎖掛牌組 = 在腰包（WC_06 c 才歸還工具架）","rack.slot_1=in_pouch",
+daily,STP_WC_04_Unlock,f,214,3,"已簽名","workorder.sign_end",
+daily,STP_WC_06_Handover,a,220,3,"作業單各欄（讀數、判定、新品履歷、接地登記、異常欄）都已填，作業負責人已簽","workorder.all_filled&&npc.work_leader.signed",b4c:holdpoint
+daily,STP_WC_06_Handover,b,221,3,"檢查員 NPC 核對扭力標記、量測值、高低差後判「可出車」（日常沒有升弓試驗）","npc.inspector.verdict=pass",b4c:holdpoint
+daily,STP_WC_06_Handover,c,222,2,"掛位 1、4 = 在架","rack.slot_1=on_rack&&rack.slot_4=on_rack",
+periodic,STP_SI_00_PreWork,a,2,2,"停放煞車、止輪器、「檢修中・禁止動車」牌 3／3 已查看並勾選","env.work_order.anti_roll_check.checked_count>=3",b4c:si00
+periodic,STP_SI_00_PreWork,b,3,2,"股道、車號、作業內容、時段、調度核准欄 5 欄都已查看","env.work_order.permit.viewed_count>=5",b4c:si00
+periodic,STP_SI_00_PreWork,c,4,3,"高壓、高處墜落、吊掛、夾手、墜物 5／5 已勾，已簽名","env.work_order.tbm.checked_count>=5&&env.work_order.tbm.signed",b4c:si00
+periodic,STP_SI_00_PreWork,d,5,3,"安全帽（下巴帶已扣）、安全鞋、工作手套 = 穿戴；絕緣手套充氣檢查完成、放在身上","ppe.helmet=worn&&ppe.helmet_strap=fastened&&ppe.safety_shoes=worn&&ppe.work_gloves=worn&&ppe.insulating_gloves=carried&&ppe.insulating_gloves.inflate_checked",b4c:ppe
+periodic,STP_SI_00_PreWork,e,6,2,"卡尺、扭力扳手、高阻計 3 張標籤都已查看，3／3 勾「有效」","env.work_order.calibration_check.valid_count>=3",b4c:si00
+periodic,STP_SI_00_PreWork,f,7,3,"上鎖掛牌組 = 在腰包","rack.slot_1=in_pouch",
+periodic,STP_SI_01_ConfirmLowered,a,8,1,"放開時 lower_check 與 lower_target 距離 ≤ EX 1 cm","part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm",
+periodic,STP_SI_01_ConfirmLowered,b,9,1,"弓頭已確認","part.pan_head.inspected",
+periodic,STP_SI_01_ConfirmLowered,c,10,1,"指示燈 = 降弓且已確認","ip.cab.pan_indicator.checked",
+periodic,STP_SI_02_LockOut,a,11,2,"手持上鎖掛牌組","tool.active=tool.lockout_tag",
+periodic,STP_SI_02_LockOut,b,12,3,"主斷路器 = OFF","cab.breaker=off",b4:p5
+periodic,STP_SI_02_LockOut,c,13,3,"主斷路器 = 已上鎖＋掛牌","lockout.breaker=locked",
+periodic,STP_SI_02_LockOut,d,14,3,"升弓開關 = 已上鎖＋掛牌，鑰匙帶在身上","lockout.raise_switch=locked&&lockout.key_holder=trainee",
+periodic,STP_SI_03_CylinderPowerOff,a,15,3,"電動缸電源 = OFF","cab.cylinder_power=off",b4:p5
+periodic,STP_SI_03_CylinderPowerOff,b,16,3,"已按下且弓頭位置不變","cab.raise_test_done",b4:p5
+periodic,STP_SI_03_CylinderPowerOff,c,17,3,"上鎖掛牌組 = 在腰包，鑰匙在身上","rack.slot_1=in_pouch&&lockout.key_holder=trainee",
+periodic,STP_SI_04_VoltageTest,a,18,1,"手持驗電桿（雙手）","tool.active=tool.voltage_detector",
+periodic,STP_SI_04_VoltageTest,b,19,1,"自檢通過","tool.voltage_detector.selftest",
+periodic,STP_SI_04_VoltageTest,c,20,1,"顯示「無電」","isolation.voltage_tested",
+periodic,STP_SI_04_VoltageTest,d,21,1,"掛位 2 = 在架","tool.active=",
+periodic,STP_SI_05_Grounding,a,22,1,"手持接地桿（雙手），掛位 3 = 使用中","tool.active=tool.grounding_rod",
+periodic,STP_SI_05_Grounding,b,23,1,"接地夾 = 已夾上","isolation.terminal_clamped",
+periodic,STP_SI_05_Grounding,c,24,1,"拉線確認完成","isolation.pull_tested",
+periodic,STP_SI_05_Grounding,d,25,1,"掛鉤 = 已掛上（接地棒留在場上）","isolation.head_clamped",
+periodic,STP_SI_05_Grounding,e,26,2,"#1 = 已登記","ground_register.1=registered",b4c:ground_register
+periodic,STP_SI_06_RoofEntry,a,27,3,"已穿戴，掛位 4 = 使用中","rack.slot_4=in_use",
+periodic,STP_SI_06_RoofEntry,a2,28,3,"掛位 12 = 使用中，短接地線 = 隨身","rack.slot_12=in_use&&tool.grounding_lead.carried",b4:p5
+periodic,STP_SI_06_RoofEntry,a3,29,3,"遙控器 = 隨身","env.crane_pendant.state=Held",
+periodic,STP_SI_06_RoofEntry,b,30,3,"平台掛點 = 已扣","harness.platform",
+periodic,STP_SI_06_RoofEntry,c,31,2,"11／11 已點過、hold.1.released = true（作業負責人與監護人 npc.guard 都放行）、sign_start 已簽","env.work_order.roof_entry_check.checked_count>=11&&hold.1.released&&workorder.sign_start",b4c:holdpoint
+periodic,STP_SI_06_RoofEntry,d,32,3,"兩個掛點都扣著","harness.roof&&harness.platform",
+periodic,STP_SI_06_RoofEntry,e,33,3,"只剩車頂掛點扣著","harness.roof&&harness.platform=false",
+periodic,STP_RM_00_SecondGround,a,34,3,"已夾上","ip.roof.carbody_ground.clamped",b4:p5
+periodic,STP_RM_00_SecondGround,b,35,3,"已掛上","ip.roof.hv_cable_ground.clamped",b4:p5
+periodic,STP_RM_00_SecondGround,c,36,3,"拉線確認完成","ip.roof.hv_cable_ground.pull_tested",b4:p5
+periodic,STP_RM_00_SecondGround,d,37,2,"#2 = 已登記","ground_register.2=registered",b4c:ground_register
+periodic,STP_RM_01_HoldDown,a,38,2,"手持固定帶","tool.active=tool.hold_down_strap",
+periodic,STP_RM_01_HoldDown,b,39,3,"hold_down = Installed","ip.pan_assy.hold_down.state=Installed",
+periodic,STP_RM_01_HoldDown,c,40,3,"拉 ≥ EX 5 cm，狀態不變","ip.pan_assy.hold_down.pull_tested",b4:p5
+periodic,STP_RM_02_CtrlDisconnect,a,41,3,"Removed","ip.pan_assy.ctrl_connector.state=Removed",
+periodic,STP_RM_02_CtrlDisconnect,b,42,3,"防塵蓋已蓋上（沒蓋：Minor）","ip.pan_assy.ctrl_connector.cap=on",b4:p5
+periodic,STP_RM_03_HVDisconnect,a,43,3,"已查看；兩處掛鉤都已掛上","ip.pan_head.ground_clamp.inspected&&isolation.head_clamped&&ip.roof.hv_cable_ground.clamped",b4:p5
+periodic,STP_RM_03_HVDisconnect,b,44,2,"手持標記筆","tool.active=tool.marker",
+periodic,STP_RM_03_HVDisconnect,c,45,3,"記號已畫（沒畫：Minor）","ip.pan_assy.hv_terminal.marked",
+periodic,STP_RM_03_HVDisconnect,d,46,2,"掛位 9 = 在袋","rack.slot_9=on_rack",
+periodic,STP_RM_03_HVDisconnect,e,47,2,"手持套筒扳手","tool.active=tool.socket_wrench",
+periodic,STP_RM_03_HVDisconnect,f,48,2,"套筒 = 19 mm","tool.socket_wrench.size=19",
+periodic,STP_RM_03_HVDisconnect,g1,49,3,"該支 = 脫出","part.pan_assy.hv_bolt_1.state=Out",
+periodic,STP_RM_03_HVDisconnect,g2,49,3,"該支 = 脫出","part.pan_assy.hv_bolt_2.state=Out",
+periodic,STP_RM_03_HVDisconnect,h1,50,3,"零件袋數量 +1","part.pan_assy.hv_bolt_1.state=InTray",b4:p5
+periodic,STP_RM_03_HVDisconnect,h2,50,3,"零件袋數量 +1","part.pan_assy.hv_bolt_2.state=InTray",b4:p5
+periodic,STP_RM_03_HVDisconnect,i,51,3,"Removed（車頂顯示 HV_Cable_Parked）","ip.pan_assy.hv_terminal.state=Removed",
+periodic,STP_RM_04_BaseUnbolt,a,52,2,"套筒 = 24 mm","tool.socket_wrench.size=24",
+periodic,STP_RM_04_BaseUnbolt,b2,53,3,"該支 = 脫出","part.pan_base.bolt_2.state=Out",
+periodic,STP_RM_04_BaseUnbolt,b3,53,3,"該支 = 脫出","part.pan_base.bolt_3.state=Out",
+periodic,STP_RM_04_BaseUnbolt,b1,53,3,"該支 = 脫出","part.pan_base.bolt_1.state=Out",
+periodic,STP_RM_04_BaseUnbolt,b4,53,3,"該支 = 脫出","part.pan_base.bolt_4.state=Out",
+periodic,STP_RM_04_BaseUnbolt,c2,54,3,"零件袋數量 +1","part.pan_base.bolt_2.state=InTray",b4:p5
+periodic,STP_RM_04_BaseUnbolt,c3,54,3,"零件袋數量 +1","part.pan_base.bolt_3.state=InTray",b4:p5
+periodic,STP_RM_04_BaseUnbolt,c1,54,3,"零件袋數量 +1","part.pan_base.bolt_1.state=InTray",b4:p5
+periodic,STP_RM_04_BaseUnbolt,c4,54,3,"零件袋數量 +1","part.pan_base.bolt_4.state=InTray",b4:p5
+periodic,STP_RM_04_BaseUnbolt,d,55,2,"掛位 6 = 在袋","rack.slot_6=on_rack",
+periodic,STP_RM_05_CraneRiggingCheck,a,56,2,"ctrl.crane.power = true","ctrl.crane.power",
+periodic,STP_RM_05_CraneRiggingCheck,b,57,3,"estop 由 true 變回 false","ctrl.crane.estop=false&&ctrl.crane.estop_tested",b4:p5
+periodic,STP_RM_05_CraneRiggingCheck,c,58,3,"Hook_AttachPoint 與 COG 水平差 ≤ EX 5 cm；吊梁底面在車頂上方 EX 1.2–1.6 m；吊鉤移動時，人不在吊鉤 0.5 m 內","part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_roof_m>=1.2&&part.crane.beam_above_roof_m<=1.6&&part.crane.person_clear",b4:p5
+periodic,STP_RM_05_CraneRiggingCheck,d,59,3,"兩處都已查看並勾選","part.crane.hook.inspected&&env.lift_beam.inspected",b4:p5
+periodic,STP_RM_05_CraneRiggingCheck,f1,60,3,"inspected = true；有割傷就判為「不合格」","env.sling_1.inspected&&env.sling_1.verdict_correct",b4:p5
+periodic,STP_RM_05_CraneRiggingCheck,f2,60,3,"inspected = true；有割傷就判為「不合格」","env.sling_2.inspected&&env.sling_2.verdict_correct",b4:p5
+periodic,STP_RM_05_CraneRiggingCheck,f3,60,3,"inspected = true；有割傷就判為「不合格」","env.sling_3.inspected&&env.sling_3.verdict_correct",b4:p5
+periodic,STP_RM_05_CraneRiggingCheck,f4,60,3,"inspected = true；有割傷就判為「不合格」","env.sling_4.inspected&&env.sling_4.verdict_correct",b4:p5
+periodic,STP_RM_06_Rig,a1,61,3,"Rigged","ip.pan_assy.lift_point_1.state=Rigged",
+periodic,STP_RM_06_Rig,a4,61,3,"Rigged","ip.pan_assy.lift_point_4.state=Rigged",
+periodic,STP_RM_06_Rig,a2,61,3,"Rigged","ip.pan_assy.lift_point_2.state=Rigged",
+periodic,STP_RM_06_Rig,a3,61,3,"Rigged","ip.pan_assy.lift_point_3.state=Rigged",
+periodic,STP_RM_06_Rig,b,62,3,"已查看","env.rigging.inspected",b4:p5
+periodic,STP_RM_07_LeaveRoof,a,63,3,"兩個都扣著","harness.roof&&harness.platform",
+periodic,STP_RM_07_LeaveRoof,b,64,3,"只剩平台掛點，人在平台","harness.platform&&harness.roof=false&&player.zone=platform",b4d
+periodic,STP_RM_07_LeaveRoof,c,65,3,"兩個掛鉤都收在胸前扣環，安全帶仍穿著","harness.hooks_stowed&&rack.slot_4=in_use",b4:p5
+periodic,STP_LF_01_PreLift,a,66,3,"已取下","isolation.head_clamped=false",
+periodic,STP_LF_01_PreLift,b,67,3,"已鬆開（第二支的夾子仍在）","isolation.terminal_clamped=false&&ip.roof.carbody_ground.clamped",b4:p5
+periodic,STP_LF_01_PreLift,c,68,2,"掛位 3 = 在架","rack.slot_3=on_rack",
+periodic,STP_LF_01_PreLift,c2,69,2,"#1 = 已銷號","ground_register.1=cancelled",b4c:ground_register
+periodic,STP_LF_01_PreLift,d,70,3,"已查看；水平差 ≤ EX 5 cm","part.crane.hook.inspected&&part.crane.hook_cog_offset_cm<=5",b4:p5
+periodic,STP_LF_01_PreLift,e,71,2,"停留點 2 清單全部點過，hold.2.released = true（清單含吊帶角度 ≤ 45°）","hold.2.checklist_done&&hold.2.released",b4c:holdpoint
+periodic,STP_LF_02_TrialLift,a,72,3,"離座 0.08–0.15 m，停住 ≥ EX 3 s","part.crane.drop_distance>=0.08&&part.crane.drop_distance<=0.15&&part.crane.still_s>=3",b4:p5
+periodic,STP_LF_02_TrialLift,b,73,3,"已查看；傾斜 ≤ EX 3°","part.pan_assy.inspected&&part.pan_assy.tilt_deg<=3",b4:p5
+periodic,STP_LF_03_Clearance,a,74,3,"吊物底面 ≥ Y 3.1","part.crane.load_bottom_y>=3.1",
+periodic,STP_LF_04_Traverse,a,75,3,"PAN_Root 原點（底架底面中心）與台架中心水平差 ≤ EX 5 cm","part.pan_assy.stand_offset_cm<=5",b4:p5
+periodic,STP_LF_05_LowerToStand,a,76,3,"底面離定位銷頂 0.05–0.15 m，停 ≥ EX 1 s","part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1",b4:p5
+periodic,STP_LF_05_LowerToStand,b,77,2,"part.pan_assy.state = OnStand","part.pan_assy.state=OnStand",
+periodic,STP_LF_06_SecureOnStand,a1,78,3,"鎖","env.panto_stand.clamp_1.state=Locked",
+periodic,STP_LF_06_SecureOnStand,a2,78,3,"鎖","env.panto_stand.clamp_2.state=Locked",
+periodic,STP_LF_06_SecureOnStand,b1,79,3,"Free","ip.pan_assy.lift_point_1.state=Free",
+periodic,STP_LF_06_SecureOnStand,b2,79,3,"Free","ip.pan_assy.lift_point_2.state=Free",
+periodic,STP_LF_06_SecureOnStand,b3,79,3,"Free","ip.pan_assy.lift_point_3.state=Free",
+periodic,STP_LF_06_SecureOnStand,b4,79,3,"Free","ip.pan_assy.lift_point_4.state=Free",
+periodic,STP_LF_06_SecureOnStand,c,80,3,"吊梁底面高於弓頂 EX 1.0 m","part.crane.beam_above_pan_m>=1.0",b4:p5
+periodic,STP_CSR_01_CheckIsolation,b,82,3,"三處都已查看，異常欄已勾選「無異常」或「有異常」","env.work_order.anomaly.checked",b4:p5
+periodic,STP_CSR_02_ZeroCaliper,a,83,1,"手持卡尺","tool.active=tool.caliper",
+periodic,STP_CSR_02_ZeroCaliper,b,84,1,"量爪間距 = 0","tool.caliper.jaw=0",
+periodic,STP_CSR_02_ZeroCaliper,c,85,1,"顯示 0.00 mm","tool.caliper.zeroed",
+periodic,STP_CSR_03_Measure_L,a,86,1,"讀數已取得","ip.carbon_strip_L.measure_left.measured",
+periodic,STP_CSR_03_Measure_L,b,87,1,"讀數已取得","ip.carbon_strip_L.measure_mid.measured",
+periodic,STP_CSR_03_Measure_L,c,88,1,"讀數已取得","ip.carbon_strip_L.measure_right.measured",
+periodic,STP_CSR_03_Measure_L,d,89,1,"三格都與讀數相差 ≤ 0.05 mm","workorder.reading.L.submitted",
+periodic,STP_CSR_04_Measure_R,a,90,1,"讀數已取得","ip.carbon_strip_R.measure_left.measured",
+periodic,STP_CSR_04_Measure_R,b,91,1,"讀數已取得","ip.carbon_strip_R.measure_mid.measured",
+periodic,STP_CSR_04_Measure_R,c,92,1,"讀數已取得","ip.carbon_strip_R.measure_right.measured",
+periodic,STP_CSR_04_Measure_R,d,93,1,"三格都與讀數相差 ≤ 0.05 mm","workorder.reading.R.submitted",
+periodic,STP_CSR_05_Decide,a,95,1,"選項符合判定原則（預設數值下為「兩條都換」）","workorder.decision",
+periodic,STP_CSR_06_Loosen_L,a,96,1,"手持套筒扳手","tool.active=tool.socket_wrench",
+periodic,STP_CSR_06_Loosen_R,a,96,1,"手持套筒扳手","tool.active=tool.socket_wrench",
+periodic,STP_CSR_06_Loosen_L,b,97,1,"套筒 = 13 mm（EX）","tool.socket_wrench.size=13",
+periodic,STP_CSR_06_Loosen_R,b,97,1,"套筒 = 13 mm（EX）","tool.socket_wrench.size=13",
+periodic,STP_CSR_06_Loosen_L,c,98,1,"方向 = 鬆","tool.socket_wrench.dir=loosen",
+periodic,STP_CSR_06_Loosen_R,c,98,1,"方向 = 鬆","tool.socket_wrench.dir=loosen",
+periodic,STP_CSR_06_Loosen_L,d1,99,1,"該支累計 180° ± 30°","ip.carbon_strip_L.bolt_1.angle_deg>=150",
+periodic,STP_CSR_06_Loosen_L,d2,99,1,"該支累計 180° ± 30°","ip.carbon_strip_L.bolt_2.angle_deg>=150",
+periodic,STP_CSR_06_Loosen_L,d3,99,1,"該支累計 180° ± 30°","ip.carbon_strip_L.bolt_3.angle_deg>=150",
+periodic,STP_CSR_06_Loosen_L,d4,99,1,"該支累計 180° ± 30°","ip.carbon_strip_L.bolt_4.angle_deg>=150",
+periodic,STP_CSR_06_Loosen_R,d1,99,1,"該支累計 180° ± 30°","ip.carbon_strip_R.bolt_1.angle_deg>=150",
+periodic,STP_CSR_06_Loosen_R,d2,99,1,"該支累計 180° ± 30°","ip.carbon_strip_R.bolt_2.angle_deg>=150",
+periodic,STP_CSR_06_Loosen_R,d3,99,1,"該支累計 180° ± 30°","ip.carbon_strip_R.bolt_3.angle_deg>=150",
+periodic,STP_CSR_06_Loosen_R,d4,99,1,"該支累計 180° ± 30°","ip.carbon_strip_R.bolt_4.angle_deg>=150",
+periodic,STP_CSR_07_RemoveBolts_L,a1,100,1,"該支 = 脫出","ip.carbon_strip_L.bolt_1.angle_deg>=720",
+periodic,STP_CSR_07_RemoveBolts_L,a2,100,1,"該支 = 脫出","ip.carbon_strip_L.bolt_2.angle_deg>=720",
+periodic,STP_CSR_07_RemoveBolts_L,a3,100,1,"該支 = 脫出","ip.carbon_strip_L.bolt_3.angle_deg>=720",
+periodic,STP_CSR_07_RemoveBolts_L,a4,100,1,"該支 = 脫出","ip.carbon_strip_L.bolt_4.angle_deg>=720",
+periodic,STP_CSR_07_RemoveBolts_R,a1,100,1,"該支 = 脫出","ip.carbon_strip_R.bolt_1.angle_deg>=720",
+periodic,STP_CSR_07_RemoveBolts_R,a2,100,1,"該支 = 脫出","ip.carbon_strip_R.bolt_2.angle_deg>=720",
+periodic,STP_CSR_07_RemoveBolts_R,a3,100,1,"該支 = 脫出","ip.carbon_strip_R.bolt_3.angle_deg>=720",
+periodic,STP_CSR_07_RemoveBolts_R,a4,100,1,"該支 = 脫出","ip.carbon_strip_R.bolt_4.angle_deg>=720",
+periodic,STP_CSR_07_RemoveBolts_L,b1,101,1,"螺栓盤螺栓數 +1","ip.carbon_strip_L.bolt_1.state=InTray",
+periodic,STP_CSR_07_RemoveBolts_L,b2,101,1,"螺栓盤螺栓數 +1","ip.carbon_strip_L.bolt_2.state=InTray",
+periodic,STP_CSR_07_RemoveBolts_L,b3,101,1,"螺栓盤螺栓數 +1","ip.carbon_strip_L.bolt_3.state=InTray",
+periodic,STP_CSR_07_RemoveBolts_L,b4,101,1,"螺栓盤螺栓數 +1","ip.carbon_strip_L.bolt_4.state=InTray",
+periodic,STP_CSR_07_RemoveBolts_R,b1,101,1,"螺栓盤螺栓數 +1","ip.carbon_strip_R.bolt_1.state=InTray",
+periodic,STP_CSR_07_RemoveBolts_R,b2,101,1,"螺栓盤螺栓數 +1","ip.carbon_strip_R.bolt_2.state=InTray",
+periodic,STP_CSR_07_RemoveBolts_R,b3,101,1,"螺栓盤螺栓數 +1","ip.carbon_strip_R.bolt_3.state=InTray",
+periodic,STP_CSR_07_RemoveBolts_R,b4,101,1,"螺栓盤螺栓數 +1","ip.carbon_strip_R.bolt_4.state=InTray",
+periodic,STP_CSR_08_RemoveStrip_L,a,103,1,"滑板 = 已拆下","part.carbon_strip_L.state=Removed",
+periodic,STP_CSR_08_RemoveStrip_R,a,103,1,"滑板 = 已拆下","part.carbon_strip_R.state=Removed",
+periodic,STP_CSR_08_RemoveStrip_L,b,104,3,"待報廢箱有該條舊滑板","part.carbon_strip_L.state=InTray",
+periodic,STP_CSR_08_RemoveStrip_R,b,104,3,"待報廢箱有該條舊滑板","part.carbon_strip_R.state=InTray",
+periodic,STP_CSR_09_CleanBracket_L,a,105,1,"手持清潔布","tool.active=tool.cleaning_cloth",
+periodic,STP_CSR_09_CleanBracket_R,a,105,1,"手持清潔布","tool.active=tool.cleaning_cloth",
+periodic,STP_CSR_09_CleanBracket_L,b,106,1,"清除率 ≥ EX 95 %","ip.carbon_strip_L.bracket.clean_ratio>=0.95",
+periodic,STP_CSR_09_CleanBracket_R,b,106,1,"清除率 ≥ EX 95 %","ip.carbon_strip_R.bracket.clean_ratio>=0.95",
+periodic,STP_CSR_10_CheckNew_L,a,109,1,"三條標籤都看過","spare.L.viewed_count>=3",
+periodic,STP_CSR_10_CheckNew_R,a,109,1,"三條標籤都看過","spare.R.viewed_count>=3",
+periodic,STP_CSR_10_CheckNew_L,b,110,1,"已旋轉檢視一圈","env.spare_shelf.slot_2.flipped",
+periodic,STP_CSR_10_CheckNew_R,b,110,1,"已旋轉檢視一圈","env.spare_shelf.slot_2.flipped",
+periodic,STP_CSR_10_CheckNew_L,c,111,1,"手持卡尺","tool.active=tool.caliper",
+periodic,STP_CSR_10_CheckNew_R,c,111,1,"手持卡尺","tool.active=tool.caliper",
+periodic,STP_CSR_10_CheckNew_L,d,112,1,"讀數 EX 12.0 ± 0.2 mm","env.spare_shelf.slot_2.measured",
+periodic,STP_CSR_10_CheckNew_R,d,112,1,"讀數 EX 12.0 ± 0.2 mm","env.spare_shelf.slot_2.measured",
+periodic,STP_CSR_10_CheckNew_L,f,114,1,"手持新滑板，且為正確型號、無裂紋","spare.L.picked",
+periodic,STP_CSR_10_CheckNew_R,f,114,1,"手持新滑板，且為正確型號、無裂紋","spare.R.picked",
+periodic,STP_CSR_10_CheckNew_L,g,115,3,"兩欄和所選備品標籤一致","env.work_order.part_trace.matches_spare",b4:p4
+periodic,STP_CSR_10_CheckNew_R,g,115,3,"兩欄和所選備品標籤一致","env.work_order.part_trace.matches_spare",b4:p4
+periodic,STP_CSR_11_Install_L,a,116,1,"新滑板位於托架上方","part.carbon_strip_L.over_bracket",
+periodic,STP_CSR_11_Install_R,a,116,1,"新滑板位於托架上方","part.carbon_strip_R.over_bracket",
+periodic,STP_CSR_11_Install_L,b,117,1,"方向 = 斜面／箭頭朝弓頭外側","part.carbon_strip_L.new_orientation=out",
+periodic,STP_CSR_11_Install_R,b,117,1,"方向 = 斜面／箭頭朝弓頭外側","part.carbon_strip_R.new_orientation=out",
+periodic,STP_CSR_11_Install_L,c,118,1,"install_check 與 install_target 距離 ≤ EX 0.5 cm，吸附成功","part.carbon_strip_L.state=NewMounted && part.carbon_strip_L.install_distance_cm<=0.5",
+periodic,STP_CSR_11_Install_R,c,118,1,"install_check 與 install_target 距離 ≤ EX 0.5 cm，吸附成功","part.carbon_strip_R.state=NewMounted && part.carbon_strip_R.install_distance_cm<=0.5",
+periodic,STP_CSR_12_PreTighten_L,a,119,1,"手持套筒扳手（13 mm）","tool.active=tool.socket_wrench",
+periodic,STP_CSR_12_PreTighten_R,a,119,1,"手持套筒扳手（13 mm）","tool.active=tool.socket_wrench",
+periodic,STP_CSR_12_PreTighten_L,b1,120,1,"該支 = 已放入，螺栓盤螺栓數 −1","ip.carbon_strip_L.bolt_1.state=Placed",
+periodic,STP_CSR_12_PreTighten_L,b2,120,1,"該支 = 已放入，螺栓盤螺栓數 −1","ip.carbon_strip_L.bolt_2.state=Placed",
+periodic,STP_CSR_12_PreTighten_L,b3,120,1,"該支 = 已放入，螺栓盤螺栓數 −1","ip.carbon_strip_L.bolt_3.state=Placed",
+periodic,STP_CSR_12_PreTighten_L,b4,120,1,"該支 = 已放入，螺栓盤螺栓數 −1","ip.carbon_strip_L.bolt_4.state=Placed",
+periodic,STP_CSR_12_PreTighten_R,b1,120,1,"該支 = 已放入，螺栓盤螺栓數 −1","ip.carbon_strip_R.bolt_1.state=Placed",
+periodic,STP_CSR_12_PreTighten_R,b2,120,1,"該支 = 已放入，螺栓盤螺栓數 −1","ip.carbon_strip_R.bolt_2.state=Placed",
+periodic,STP_CSR_12_PreTighten_R,b3,120,1,"該支 = 已放入，螺栓盤螺栓數 −1","ip.carbon_strip_R.bolt_3.state=Placed",
+periodic,STP_CSR_12_PreTighten_R,b4,120,1,"該支 = 已放入，螺栓盤螺栓數 −1","ip.carbon_strip_R.bolt_4.state=Placed",
+periodic,STP_CSR_12_PreTighten_L,c,121,1,"方向 = 鎖","tool.socket_wrench.dir=lock",
+periodic,STP_CSR_12_PreTighten_R,c,121,1,"方向 = 鎖","tool.socket_wrench.dir=lock",
+periodic,STP_CSR_12_PreTighten_L,d1,122,1,"該支 = 貼合","ip.carbon_strip_L.bolt_1.state=Snug",
+periodic,STP_CSR_12_PreTighten_L,d2,122,1,"該支 = 貼合","ip.carbon_strip_L.bolt_2.state=Snug",
+periodic,STP_CSR_12_PreTighten_L,d3,122,1,"該支 = 貼合","ip.carbon_strip_L.bolt_3.state=Snug",
+periodic,STP_CSR_12_PreTighten_L,d4,122,1,"該支 = 貼合","ip.carbon_strip_L.bolt_4.state=Snug",
+periodic,STP_CSR_12_PreTighten_R,d1,122,1,"該支 = 貼合","ip.carbon_strip_R.bolt_1.state=Snug",
+periodic,STP_CSR_12_PreTighten_R,d2,122,1,"該支 = 貼合","ip.carbon_strip_R.bolt_2.state=Snug",
+periodic,STP_CSR_12_PreTighten_R,d3,122,1,"該支 = 貼合","ip.carbon_strip_R.bolt_3.state=Snug",
+periodic,STP_CSR_12_PreTighten_R,d4,122,1,"該支 = 貼合","ip.carbon_strip_R.bolt_4.state=Snug",
+periodic,STP_CSR_13_Torque_L,a,124,1,"手持扭力扳手","tool.active=tool.torque_wrench",
+periodic,STP_CSR_13_Torque_R,a,124,1,"手持扭力扳手","tool.active=tool.torque_wrench",
+periodic,STP_CSR_13_Torque_L,b,125,1,"扭力扳手套筒 = 13 mm，設定值 = 25 N·m（EX）；套錯擋下並提示「套筒尺寸不對」","tool.torque_wrench.setting=25",
+periodic,STP_CSR_13_Torque_R,b,125,1,"扭力扳手套筒 = 13 mm，設定值 = 25 N·m（EX）；套錯擋下並提示「套筒尺寸不對」","tool.torque_wrench.setting=25",
+periodic,STP_CSR_13_Torque_L,c1,126,1,"該支實際扭力 23–27 N·m（EX）","ip.carbon_strip_L.bolt_1.state=Torqued",
+periodic,STP_CSR_13_Torque_L,c2,126,1,"該支實際扭力 23–27 N·m（EX）","ip.carbon_strip_L.bolt_2.state=Torqued",
+periodic,STP_CSR_13_Torque_L,c3,126,1,"該支實際扭力 23–27 N·m（EX）","ip.carbon_strip_L.bolt_3.state=Torqued",
+periodic,STP_CSR_13_Torque_L,c4,126,1,"該支實際扭力 23–27 N·m（EX）","ip.carbon_strip_L.bolt_4.state=Torqued",
+periodic,STP_CSR_13_Torque_R,c1,126,1,"該支實際扭力 23–27 N·m（EX）","ip.carbon_strip_R.bolt_1.state=Torqued",
+periodic,STP_CSR_13_Torque_R,c2,126,1,"該支實際扭力 23–27 N·m（EX）","ip.carbon_strip_R.bolt_2.state=Torqued",
+periodic,STP_CSR_13_Torque_R,c3,126,1,"該支實際扭力 23–27 N·m（EX）","ip.carbon_strip_R.bolt_3.state=Torqued",
+periodic,STP_CSR_13_Torque_R,c4,126,1,"該支實際扭力 23–27 N·m（EX）","ip.carbon_strip_R.bolt_4.state=Torqued",
+periodic,STP_CSR_14_Mark_L,a,128,1,"手持標記筆","tool.active=tool.marker",
+periodic,STP_CSR_14_Mark_R,a,128,1,"手持標記筆","tool.active=tool.marker",
+periodic,STP_CSR_14_Mark_L,b1,129,1,"該支有標記線","ip.carbon_strip_L.bolt_1.marked",
+periodic,STP_CSR_14_Mark_L,b2,129,1,"該支有標記線","ip.carbon_strip_L.bolt_2.marked",
+periodic,STP_CSR_14_Mark_L,b3,129,1,"該支有標記線","ip.carbon_strip_L.bolt_3.marked",
+periodic,STP_CSR_14_Mark_L,b4,129,1,"該支有標記線","ip.carbon_strip_L.bolt_4.marked",
+periodic,STP_CSR_14_Mark_R,b1,129,1,"該支有標記線","ip.carbon_strip_R.bolt_1.marked",
+periodic,STP_CSR_14_Mark_R,b2,129,1,"該支有標記線","ip.carbon_strip_R.bolt_2.marked",
+periodic,STP_CSR_14_Mark_R,b3,129,1,"該支有標記線","ip.carbon_strip_R.bolt_3.marked",
+periodic,STP_CSR_14_Mark_R,b4,129,1,"該支有標記線","ip.carbon_strip_R.bolt_4.marked",
+periodic,STP_CSR_15_HeightCheck,a,131,1,"手持卡尺","tool.active=tool.caliper",
+periodic,STP_CSR_15_HeightCheck,b,132,1,"讀數已取得","ip.carbon_strip_L.measure_mid.new_measured",
+periodic,STP_CSR_15_HeightCheck,c,133,1,"讀數已取得","ip.carbon_strip_R.measure_mid.new_measured",
+periodic,STP_CSR_15_HeightCheck,d,134,1,"兩格與讀數相差 ≤ 0.05 mm，差值 ≤ EX 1.0 mm","workorder.height_diff",
+periodic,STP_CSR_15_HeightCheck,f,136,3,"掛位 5–9 = 在袋，台架工具盤是空的","rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&env.panto_stand.tool_tray.count<=0",b4:p5
+periodic,STP_IN_01_RigOnStand,a,137,3,"與 COG 水平差 ≤ 5 cm；吊梁底面在弓頂上方 EX 0.6–1.0 m","part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=0.6&&part.crane.beam_above_pan_m<=1.0",b4:p5
+periodic,STP_IN_01_RigOnStand,b1,138,3,"Rigged","ip.pan_assy.lift_point_1.state=Rigged",
+periodic,STP_IN_01_RigOnStand,b2,138,3,"Rigged","ip.pan_assy.lift_point_2.state=Rigged",
+periodic,STP_IN_01_RigOnStand,b3,138,3,"Rigged","ip.pan_assy.lift_point_3.state=Rigged",
+periodic,STP_IN_01_RigOnStand,b4,138,3,"Rigged","ip.pan_assy.lift_point_4.state=Rigged",
+periodic,STP_IN_01_RigOnStand,c1,139,3,"開","env.panto_stand.clamp_1.state=Open",
+periodic,STP_IN_01_RigOnStand,c2,139,3,"開","env.panto_stand.clamp_2.state=Open",
+periodic,STP_IN_01_RigOnStand,d,140,2,"停留點 3 清單全部點過，hold.3.released = true（清單含吊帶角度 ≤ 45°）","hold.3.checklist_done&&hold.3.released",b4c:holdpoint
+periodic,STP_IN_02_TrialLift,a,141,3,"離台 0.1 m，停 ≥ 3 s","part.crane.drop_distance>=0.1&&part.crane.still_s>=3",b4:p5
+periodic,STP_IN_02_TrialLift,b,142,3,"已查看；傾斜 ≤ EX 3°（比照 LF_02 b）","part.pan_assy.inspected&&part.pan_assy.tilt_deg<=3",b4:p5
+periodic,STP_IN_03_Transfer,a,143,3,"吊物底面 ≥ Y 3.1（比照 LF_03 a）","part.crane.load_bottom_y>=3.1",
+periodic,STP_IN_03_Transfer,b,144,3,"PAN_Root 原點（底架底面中心）與 4 個絕緣子的中心水平差 ≤ EX 5 cm","part.pan_assy.roof_offset_cm<=5",b4:p5
+periodic,STP_IN_04_LowerToRoof,a,145,3,"底面離絕緣子頂 0.05–0.15 m，停 ≥ EX 1 s（比照 LF_05 a）","part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1",b4:p5
+periodic,STP_IN_04_LowerToRoof,b,146,3,"part.pan_assy.state = Mounted，BaseHole 與 InsulatorTop 距離 ≤ EX 1 cm","part.pan_assy.state=Mounted&&part.pan_assy.seat_error_cm<=1",b4:p5
+periodic,STP_IN_04b_RegroundPan,a,147,2,"手持驗電桿（雙手）","tool.active=tool.voltage_detector",
+periodic,STP_IN_04b_RegroundPan,b,148,3,"自檢通過","tool.voltage_detector.selftest",
+periodic,STP_IN_04b_RegroundPan,c,149,3,"顯示「無電」","isolation.voltage_tested",
+periodic,STP_IN_04b_RegroundPan,d,150,2,"掛位 2 = 在架","rack.slot_2=on_rack",
+periodic,STP_IN_04b_RegroundPan,e,151,3,"手持接地桿（雙手），掛位 3 = 使用中","tool.active=tool.grounding_rod&&rack.slot_3=in_use",
+periodic,STP_IN_04b_RegroundPan,f,152,3,"已夾上","isolation.terminal_clamped",
+periodic,STP_IN_04b_RegroundPan,g,153,3,"拉線確認完成","isolation.pull_tested",
+periodic,STP_IN_04b_RegroundPan,h,154,3,"已掛上","isolation.head_clamped",
+periodic,STP_IN_04b_RegroundPan,i,155,3,"#1 = 已登記（第二次）","ground_register.1=registered&&ground_register.1.registered_count>=2",b4c:ground_register
+periodic,STP_IN_05_RoofEntry,a,156,3,"掛鉤在手，安全帶仍穿著","harness.hooks_stowed=false&&rack.slot_4=in_use",b4:p5
+periodic,STP_IN_05_RoofEntry,b,157,3,"已扣","harness.platform",
+periodic,STP_IN_05_RoofEntry,c,158,3,"兩個都扣著","harness.roof&&harness.platform",
+periodic,STP_IN_05_RoofEntry,d,159,3,"只剩車頂掛點","harness.roof&&harness.platform=false",
+periodic,STP_IN_06_BasePreTighten,a,160,3,"手持","tool.active=tool.socket_wrench",
+periodic,STP_IN_06_BasePreTighten,b,161,2,"24 mm","tool.socket_wrench.size=24",
+periodic,STP_IN_06_BasePreTighten,c2,162,3,"已入牙；零件袋 −1","part.pan_base.bolt_2.state=Placed",
+periodic,STP_IN_06_BasePreTighten,c3,162,3,"已入牙；零件袋 −1","part.pan_base.bolt_3.state=Placed",
+periodic,STP_IN_06_BasePreTighten,c1,162,3,"已入牙；零件袋 −1","part.pan_base.bolt_1.state=Placed",
+periodic,STP_IN_06_BasePreTighten,c4,162,3,"已入牙；零件袋 −1","part.pan_base.bolt_4.state=Placed",
+periodic,STP_IN_06_BasePreTighten,d1,163,3,"貼合","part.pan_base.bolt_1.state=Snug",
+periodic,STP_IN_06_BasePreTighten,d3,163,3,"貼合","part.pan_base.bolt_3.state=Snug",
+periodic,STP_IN_06_BasePreTighten,d2,163,3,"貼合","part.pan_base.bolt_2.state=Snug",
+periodic,STP_IN_06_BasePreTighten,d4,163,3,"貼合","part.pan_base.bolt_4.state=Snug",
+periodic,STP_IN_07_BaseTorque,a,164,3,"在袋","rack.slot_6=on_rack",
+periodic,STP_IN_07_BaseTorque,b,165,3,"手持","tool.active=tool.torque_wrench_l",
+periodic,STP_IN_07_BaseTorque,c,166,2,"扭力扳手套筒 = 24 mm，設定值 = 100 N·m（EX）；套錯擋下並提示「套筒尺寸不對」","tool.torque_wrench_l.setting=100",
+periodic,STP_IN_07_BaseTorque,d1,167,3,"EX 92–108 N·m，順序正確（對角順序）；喀聲後防鬆標記已畫（扳手未響前畫不上去）","part.pan_base.bolt_1.state=Torqued&&part.pan_base.bolt_1.marked",
+periodic,STP_IN_07_BaseTorque,d3,167,3,"EX 92–108 N·m，順序正確（對角順序）；喀聲後防鬆標記已畫（扳手未響前畫不上去）","part.pan_base.bolt_3.state=Torqued&&part.pan_base.bolt_3.marked",
+periodic,STP_IN_07_BaseTorque,d2,167,3,"EX 92–108 N·m，順序正確（對角順序）；喀聲後防鬆標記已畫（扳手未響前畫不上去）","part.pan_base.bolt_2.state=Torqued&&part.pan_base.bolt_2.marked",
+periodic,STP_IN_07_BaseTorque,d4,167,3,"EX 92–108 N·m，順序正確（對角順序）；喀聲後防鬆標記已畫（扳手未響前畫不上去）","part.pan_base.bolt_4.state=Torqued&&part.pan_base.bolt_4.marked",
+periodic,STP_IN_08_Unrig,a1,168,3,"Free（比照 LF_06 b）","ip.pan_assy.lift_point_1.state=Free",
+periodic,STP_IN_08_Unrig,a4,168,3,"Free（比照 LF_06 b）","ip.pan_assy.lift_point_4.state=Free",
+periodic,STP_IN_08_Unrig,a2,168,3,"Free（比照 LF_06 b）","ip.pan_assy.lift_point_2.state=Free",
+periodic,STP_IN_08_Unrig,a3,168,3,"Free（比照 LF_06 b）","ip.pan_assy.lift_point_3.state=Free",
+periodic,STP_IN_09_HVReconnect,a,169,3,"Mounted，記號對齊","ip.pan_assy.hv_terminal.state=Installed",
+periodic,STP_IN_09_HVReconnect,b1,170,3,"已放入","part.pan_assy.hv_bolt_1.state=Placed",
+periodic,STP_IN_09_HVReconnect,b2,170,3,"已放入","part.pan_assy.hv_bolt_2.state=Placed",
+periodic,STP_IN_09_HVReconnect,c,171,2,"扭力扳手套筒 = 19 mm，設定值 = 50 N·m（EX）；套錯擋下並提示「套筒尺寸不對」","tool.torque_wrench_l.setting=50",
+periodic,STP_IN_09_HVReconnect,d1,172,2,"EX 46–54 N·m","part.pan_assy.hv_bolt_1.state=Torqued",
+periodic,STP_IN_09_HVReconnect,d2,172,2,"EX 46–54 N·m","part.pan_assy.hv_bolt_2.state=Torqued",
+periodic,STP_IN_09_HVReconnect,e,173,3,"在袋","rack.slot_13=on_rack",
+periodic,STP_IN_10_CtrlReconnect,a,174,3,"防塵蓋 = 已取下","ip.pan_assy.ctrl_connector.cap=off",b4:p5
+periodic,STP_IN_10_CtrlReconnect,b,175,3,"Mounted","ip.pan_assy.ctrl_connector.state=Installed",
+periodic,STP_IN_11_RemoveHoldDown,a,176,3,"Removed","ip.pan_assy.hold_down.state=Removed",
+periodic,STP_IN_11_RemoveHoldDown,b,177,2,"掛位 10 = 在袋（比照 RM_04 d）","rack.slot_10=on_rack",
+periodic,STP_WC_03a_RemoveGroundRoof,a,178,3,"電纜端子端已取下（先於 b）","ip.roof.hv_cable_ground.clamped=false",b4:p5
+periodic,STP_WC_03a_RemoveGroundRoof,b,179,3,"夾具已鬆開","ip.roof.carbody_ground.clamped=false",b4:p5
+periodic,STP_WC_03a_RemoveGroundRoof,c,180,3,"短接地線 = 隨身（比照 SI_06 a2）","tool.grounding_lead.carried",b4:p5
+periodic,STP_WC_03a_RemoveGroundRoof,d,181,2,"#2 = 已銷號","ground_register.2=cancelled",b4c:ground_register
+periodic,STP_WC_01a_ToolCountRoof,a,182,3,"工具袋 5–9 號、13 號（大扭力扳手）和固定帶都在袋","rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&rack.slot_13=on_rack&&rack.slot_10=on_rack",
+periodic,STP_WC_01a_ToolCountRoof,b,183,3,"零件袋與台架旁 L、R 螺栓盤都是空的，待報廢箱有 2 條舊滑板（CSR_05 判合格時為 0），車頂無遺留","env.tool_bag.bolt_pouch.count<=0&&env.bolt_tray_L.count<=0&&env.bolt_tray_R.count<=0&&env.parts_tray.strip_count_ok&&roof.leftover_count<=0",b4:p5
+periodic,STP_WC_01a_ToolCountRoof,c,184,3,"已確認","workorder.toolcount_confirmed",
+periodic,STP_WC_02_LeaveRoof,a,185,3,"兩個掛點都扣著","harness.roof&&harness.platform",
+periodic,STP_WC_02_LeaveRoof,b,186,3,"只剩平台掛點扣著","harness.platform&&harness.roof=false",
+periodic,STP_WC_02_LeaveRoof,c,187,3,"人在平台，兩個掛鉤都收在胸前扣環，安全帶仍穿著","player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use",b4d
+periodic,STP_WC_02_LeaveRoof,d,188,2,"掛位 12 = 在架","rack.slot_12=on_rack",
+periodic,STP_RT_01_CraneStow,a,189,3,"吊鉤在停放位置","part.crane.hook.parked",b4:p4
+periodic,STP_RT_01_CraneStow,b,190,3,"power = false，遙控器 = 在掛座","ctrl.crane.power=false&&env.crane_pendant.state=Docked",
+periodic,STP_WC_03b_RemoveGroundPlatform,a,195,3,"掛鉤 = 已取下（比照 WC_03 a）","isolation.head_clamped=false",
+periodic,STP_WC_03b_RemoveGroundPlatform,b,196,3,"接地夾 = 已鬆開（比照 WC_03 b）","isolation.terminal_clamped=false",
+periodic,STP_WC_03b_RemoveGroundPlatform,c,197,2,"掛位 3 = 在架（比照 WC_03 c）","rack.slot_3=on_rack",
+periodic,STP_WC_03b_RemoveGroundPlatform,d,198,2,"#1 = 已銷號","ground_register.1=cancelled",b4c:ground_register
+periodic,STP_WC_01b_ToolCountPlatform,a,199,3,"工具架 slot_11、12（slot_1 掛牌組在腰包、slot_4 安全帶穿在身上，WC_06 c 歸還） 與桿架 slot_2、3 都在架","rack.slot_11=on_rack&&rack.slot_12=on_rack&&rack.slot_2=on_rack&&rack.slot_3=on_rack",
+periodic,STP_WC_01b_ToolCountPlatform,b,200,3,"接地登記 #1、#2 都已銷號，和 a 的實物一致","ground_register.1=cancelled&&ground_register.2=cancelled",b4c:ground_register
+periodic,STP_WC_01b_ToolCountPlatform,c,201,3,"已確認","workorder.toolcount_platform_confirmed",b4:p5
+periodic,STP_RT_02_InsulationTest,a,202,2,"手持高阻計","tool.active=tool.megger",
+periodic,STP_RT_02_InsulationTest,b,203,3,"兩端都已接上","tool.megger.connected_count>=2",b4:p5
+periodic,STP_RT_02_InsulationTest,c,204,3,"讀值 ≥ EX 100 MΩ，已記在作業單","workorder.ir_reading>=100",b4:p5
+periodic,STP_RT_02_InsulationTest,d,205,3,"掛位 11 = 在架，手持接地桿","rack.slot_11=on_rack&&tool.active=tool.grounding_rod",
+periodic,STP_RT_02_InsulationTest,e,206,3,"放電 ≥ EX 3 s","ip.pan_head.ground_clamp.discharge_s>=3",b4:p5
+periodic,STP_RT_02_InsulationTest,f,207,2,"掛位 3 = 在架","rack.slot_3=on_rack",
+periodic,STP_WC_04_Unlock,a0,208,2,"停留點 4 清單全部點過，hold.4.released = true（接地登記欄 2 列都已銷號，且桿架 slot_3、工具架 slot_12 實物在架；人員已離開車頂；工具清點完成；絕緣電阻合格且已放電）","hold.4.checklist_done&&hold.4.released",b4c:holdpoint
+periodic,STP_WC_04_Unlock,a,209,2,"手持上鎖掛牌組","tool.active=tool.lockout_tag",
+periodic,STP_WC_04_Unlock,b,210,3,"升弓開關 = 未上鎖","lockout.raise_switch=open",
+periodic,STP_WC_04_Unlock,c,211,3,"主斷路器 = 未上鎖","lockout.breaker=open",
+periodic,STP_WC_04_Unlock,d,212,3,"電動缸電源 = ON","cab.cylinder_power=on",b4:p5
+periodic,STP_WC_04_Unlock,e,213,3,"上鎖掛牌組 = 在腰包（WC_06 c 才歸還工具架）","rack.slot_1=in_pouch",
+periodic,STP_WC_05_RaiseTest,a,215,3,"已查看","part.crane.hook.inspected&&part.pan_assy.inspected",b4:p5
+periodic,STP_WC_05_RaiseTest,b,216,3,"弓頭升到頂","part.pan_head.pose=Raised",
+periodic,STP_WC_05_RaiseTest,c,217,3,"指示燈 = 升弓且已確認","ip.cab.pan_indicator.checked&&ip.cab.pan_indicator.shows=升弓",
+periodic,STP_WC_05_RaiseTest,d,218,3,"放開時 lower_check 與 lower_target 距離 ≤ EX 1 cm（比照 SI_01 a）","part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm",
+periodic,STP_WC_05_RaiseTest,e,219,3,"已簽名","workorder.sign_end",
+periodic,STP_WC_06_Handover,a,220,3,"作業單各欄（讀數、判定、新品履歷、絕緣電阻、接地登記、異常欄）都已填，作業負責人已簽","workorder.all_filled&&npc.work_leader.signed",b4c:holdpoint
+periodic,STP_WC_06_Handover,b,221,3,"檢查員 NPC 核對扭力標記、量測值、升弓試驗結果後判「可出車」","npc.inspector.verdict=pass",b4c:holdpoint
+periodic,STP_WC_06_Handover,c,222,2,"掛位 1、4 = 在架","rack.slot_1=on_rack&&rack.slot_4=on_rack",

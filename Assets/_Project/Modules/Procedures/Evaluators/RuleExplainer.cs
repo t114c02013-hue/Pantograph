@@ -44,6 +44,9 @@ namespace PantographSim.Procedures
                 case ChecklistAll ca:
                     foreach (var k in ca.keys.Select(x => c.K(x))) if (!c.state.GetBool(k)) list.Add(Item("ChecklistAll", c, k));
                     return;
+                case ConditionsAll cond:
+                    foreach (var x in cond.conditions.Select(x => c.K(x))) if (!ChecklistEval.Done(c.state, x)) list.Add(Item("ConditionsAll", c, KeysOf(x).ToArray()));
+                    return;
                 case ValueInRange vr:
                     foreach (var k in ValueInRangeEvaluator.Expand(vr.key, vr.count, c))
                         if (!c.state.Has(k) || !ValueInRangeEvaluator.InRange(c.state.GetFloat(k), vr.min, vr.max)) list.Add(Item("ValueInRange", c, k));

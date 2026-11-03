@@ -1,0 +1,171 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_CSR_10_CheckNew_L
+  m_EditorClassIdentifier: 
+  stepId: STP_CSR_10_CheckNew_L
+  title: "\u6AA2\u67E5\u65B0\u6ED1\u677F\uFF08\u8098\u5074\uFF09"
+  instruction: "\u5230\u5099\u54C1\u67B6\u770B\u4E09\u689D\u5099\u54C1\u7684\u6A19\u7C64\uFF0C\u7FFB\u9762\u6AA2\u67E5\u6709\u6C92\u6709\u88C2\u7D0B\uFF0C\u7528\u5361\u5C3A\u91CF\u578B\u865F\u76F8\u7B26\u90A3\u689D\u7684\u4E2D\u9EDE\uFF0C\u78BA\u8A8D\u5F8C\u6309\u300C\u9078\u7528\u6B64\u5099\u54C1\u300D\u3002"
+  toolHint: "\u6578\u4F4D\u5361\u5C3A\uFF1B\u6AA2\u8996\u5099\u54C1\u7528\u5F92\u624B"
+  targetHint: "\u5099\u54C1\u67B6\u4E0A\u7684\u4E09\u689D\u5099\u54C1"
+  targetIds:
+  - env.spare_shelf.slot_*
+  requiredToolId: tool.caliper
+  completion:
+    rid: 1000
+  errors:
+  - errorId: ERR_CSR10_WrongType
+    severity: 2
+    what: "\u9078\u4E86\u578B\u865F\u4E0D\u7B26\u7684\u5099\u54C1\u3002"
+    why: "\u578B\u865F\u4E0D\u540C\u7684\u6ED1\u677F\u5C3A\u5BF8\u3001\u6750\u8CEA\u6216\u96FB\u6D41\u5BB9\u91CF\u4E0D\u540C\uFF0C\u88DD\u4E0A\u6703\u63A5\u89F8\u4E0D\u826F\u751A\u81F3\u65B7\u88C2\u3002"
+    fix: "\u6838\u5C0D\u6A19\u7C64\u578B\u865F\u8207\u4F5C\u696D\u55AE\uFF08CS-1100-74A\uFF09\u5B8C\u5168\u4E00\u81F4\u518D\u9078\u7528\u3002"
+    trigger: 6
+    key: spare.{side}.pick_result
+    key2: 
+    keys: []
+    value: wrong_type
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 1
+  - errorId: ERR_CSR10_Cracked
+    severity: 2
+    what: "\u9078\u4E86\u6709\u88C2\u7D0B\u7684\u5099\u54C1\u3002"
+    why: "\u6709\u88C2\u7D0B\u7684\u78B3\u6ED1\u677F\u5728\u884C\u99DB\u4E2D\u53EF\u80FD\u65B7\u88C2\uFF0C\u9020\u6210\u5F13\u7DB2\u4E8B\u6545\u3002"
+    fix: "\u9078\u7528\u524D\u4E00\u5B9A\u7FFB\u9762\u6AA2\u67E5\uFF0C\u6709\u88C2\u7D0B\u7684\u4E0D\u80FD\u4F7F\u7528\u3002"
+    trigger: 6
+    key: spare.{side}.pick_result
+    key2: 
+    keys: []
+    value: cracked
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 1
+  - errorId: ERR_CSR10_NotMeasured
+    severity: 0
+    what: "\u6C92\u6709\u5148\u91CF\u65B0\u6ED1\u677F\u539A\u5EA6\u5C31\u8981\u9078\u7528\u3002"
+    why: "\u65B0\u54C1\u539A\u5EA6\u4E0D\u5C0D\uFF08\u4E0D\u826F\u54C1\u6216\u62FF\u932F\uFF09\u6703\u9020\u6210\u5169\u689D\u9AD8\u4F4E\u5DEE\u3002"
+    fix: "\u5148\u7528\u5361\u5C3A\u91CF\u9019\u689D\u5099\u54C1\u7684\u4E2D\u9EDE\uFF0C\u78BA\u8A8D
+      12.0 \xB1 0.2 mm \u518D\u9078\u7528\u3002"
+    trigger: 6
+    key: spare.{side}.pick_result
+    key2: 
+    keys: []
+    value: not_measured
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+  hints:
+    text: "\u5F92\u624B\u9EDE\u5099\u54C1\u770B\u6A19\u7C64\u3001\u7FFB\u9762\uFF1B\u5230\u8ECA\u9802\u5DE5\u5177\u7BB1\u7B2C
+      5 \u683C\u62FF\u5361\u5C3A\u9EDE\u5099\u54C1\u91CF\u539A\u5EA6\uFF1B\u78BA\u8A8D\u5F8C\u6309\u300C\u9078\u7528\u6B64\u5099\u54C1\u300D\u3002"
+    why: "\u578B\u865F\u932F\u6216\u6709\u88C2\u7D0B\u7684\u6ED1\u677F\u88DD\u4E0A\u53BB\uFF0C\u884C\u99DB\u4E2D\u53EF\u80FD\u65B7\u88C2\u3002"
+    checklist:
+    - "\u67E5\u770B\u5099\u54C1\u67B6\u4E09\u689D\u6A19\u7C64|spare.L.viewed_count>=3"
+    - "\u65CB\u8F49\u6AA2\u67E5\u6709\u7121\u88C2\u7D0B|env.spare_shelf.slot_2.flipped"
+    - "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u6E38\u6A19\u5361\u5C3A|tool.active=tool.caliper"
+    - "\u91CF\u9078\u5B9A\u65B0\u6ED1\u677F\u7684\u4E2D\u9EDE|env.spare_shelf.slot_2.measured"
+    - "\u628A\u6E38\u6A19\u5361\u5C3A\u6536\u56DE\u5DE5\u5177\u888B|tool.active="
+    - "\u62FF\u8D77\u9078\u5B9A\u7684\u65B0\u6ED1\u677F|spare.L.picked"
+    - "\u5728\u4F5C\u696D\u55AE\u8A18\u4E0B\u65B0\u54C1\u6599\u865F\u548C\u5E8F\u865F|env.work_order.part_trace.matches_spare"
+    highlightIds:
+    - env.spare_shelf.slot_*
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u67E5\u770B\u5099\u54C1\u67B6\u4E09\u689D\u6A19\u7C64"
+    why: 
+    targetId: env.spare_shelf
+    toolId: 
+    condition: spare.L.viewed_count>=3
+    standPointId: tp.platform.parts
+  - text: "\u65CB\u8F49\u6AA2\u67E5\u6709\u7121\u88C2\u7D0B"
+    why: 
+    targetId: "env.spare_shelf\uFF08\u9078\u5B9A\u7684\u5099\u54C1\uFF09"
+    toolId: 
+    condition: env.spare_shelf.slot_2.flipped
+    standPointId: tp.platform.parts
+  - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u6E38\u6A19\u5361\u5C3A"
+    why: 
+    targetId: env.tool_rack.slot_5
+    toolId: tool.caliper
+    condition: tool.active=tool.caliper
+    standPointId: tp.platform.parts
+  - text: "\u91CF\u9078\u5B9A\u65B0\u6ED1\u677F\u7684\u4E2D\u9EDE"
+    why: 
+    targetId: consumable.carbon_strip.measure_mid
+    toolId: tool.caliper
+    condition: env.spare_shelf.slot_2.measured
+    standPointId: tp.platform.parts
+  - text: "\u628A\u6E38\u6A19\u5361\u5C3A\u6536\u56DE\u5DE5\u5177\u888B"
+    why: 
+    targetId: env.tool_rack.slot_5
+    toolId: tool.caliper
+    condition: tool.active=
+    standPointId: tp.platform.parts
+  - text: "\u62FF\u8D77\u9078\u5B9A\u7684\u65B0\u6ED1\u677F"
+    why: 
+    targetId: "env.spare_shelf\uFF08\u9078\u5B9A\u7684\u5099\u54C1\uFF09"
+    toolId: 
+    condition: spare.L.picked
+    standPointId: tp.platform.parts
+  - text: "\u5728\u4F5C\u696D\u55AE\u8A18\u4E0B\u65B0\u54C1\u6599\u865F\u548C\u5E8F\u865F"
+    why: 
+    targetId: env.work_order.part_trace
+    toolId: 
+    condition: env.work_order.part_trace.matches_spare
+    standPointId: tp.platform.parts
+  presetDone: 0
+  side: L
+  presetStates: []
+  valueTags:
+  - "\u578B\u865F CS-1100-74A=\u793A\u4F8B\u503C"
+  - "\u65B0\u54C1 12.0\xB10.2 mm=\u793A\u4F8B\u503C"
+  refSecondsTutorial: 85
+  refSecondsExam: 52
+  references:
+    version: 2
+    RefIds:
+    - rid: 1000
+      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        rules:
+        - rid: 1001
+        - rid: 1002
+    - rid: 1001
+      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        rules:
+        - rid: 1003
+        - rid: 1004
+    - rid: 1002
+      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        conditions:
+        - env.work_order.part_trace.matches_spare
+    - rid: 1003
+      type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        key: spare.{side}.picked
+        value: true
+    - rid: 1004
+      type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        key: spare.{side}.measured_ok
+        value: true

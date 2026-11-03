@@ -1,0 +1,80 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_RM_00_SecondGround
+  m_EditorClassIdentifier: 
+  stepId: STP_RM_00_SecondGround
+  title: "\u639B\u77ED\u63A5\u5730\u7DDA"
+  instruction: "\u639B\u77ED\u63A5\u5730\u7DDA"
+  toolHint: 
+  targetHint: 
+  targetIds:
+  - ip.roof.carbody_ground
+  - ip.roof.hv_cable_ground
+  - env.work_order.ground_register
+  requiredToolId: 
+  completion:
+    rid: 8951035174947913747
+  errors: []
+  hints:
+    text: 
+    why: 
+    checklist:
+    - "\u5728 \u2212X \u9EDE\u628A\u593E\u5177\u593E\u4E0A\u8ECA\u9AD4\u63A5\u5730\u5EA7|ip.roof.carbody_ground.clamped"
+    - "\u63DB\u5230 +X \u9EDE\uFF0C\u7528\u77ED\u7D55\u7DE3\u687F\u639B\u4E0A\u96FB\u7E9C\u7AEF\u5B50|ip.roof.hv_cable_ground.clamped"
+    - "\u5728 +X \u9EDE\u62C9\u4E00\u4E0B\u63A5\u5730\u7DDA\u78BA\u8A8D|ip.roof.hv_cable_ground.pull_tested"
+    - "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u767B\u8A18 #2 \u77ED\u63A5\u5730\u7DDA|ground_register.2=registered"
+    highlightIds: []
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u5728 \u2212X \u9EDE\u628A\u593E\u5177\u593E\u4E0A\u8ECA\u9AD4\u63A5\u5730\u5EA7"
+    why: 
+    targetId: ip.roof.carbody_ground
+    toolId: tool.grounding_lead
+    condition: ip.roof.carbody_ground.clamped
+    standPointId: tp.roof.base_w
+  - text: "\u63DB\u5230 +X \u9EDE\uFF0C\u7528\u77ED\u7D55\u7DE3\u687F\u639B\u4E0A\u96FB\u7E9C\u7AEF\u5B50"
+    why: 
+    targetId: ip.roof.hv_cable_ground
+    toolId: tool.grounding_lead
+    condition: ip.roof.hv_cable_ground.clamped
+    standPointId: tp.roof.base_e.n
+  - text: "\u5728 +X \u9EDE\u62C9\u4E00\u4E0B\u63A5\u5730\u7DDA\u78BA\u8A8D"
+    why: 
+    targetId: ip.roof.hv_cable_ground
+    toolId: tool.grounding_lead
+    condition: ip.roof.hv_cable_ground.pull_tested
+    standPointId: tp.roof.base_e.n
+  - text: "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u767B\u8A18 #2 \u77ED\u63A5\u5730\u7DDA"
+    why: 
+    targetId: env.work_order.ground_register
+    toolId: 
+    condition: ground_register.2=registered
+    standPointId: tp.roof.base_e.n
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 50
+  refSecondsExam: 34
+  references:
+    version: 2
+    RefIds:
+    - rid: 8951035174947913747
+      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        conditions:
+        - ip.roof.carbody_ground.clamped
+        - ip.roof.hv_cable_ground.clamped
+        - ip.roof.hv_cable_ground.pull_tested
+        - ground_register.2=registered

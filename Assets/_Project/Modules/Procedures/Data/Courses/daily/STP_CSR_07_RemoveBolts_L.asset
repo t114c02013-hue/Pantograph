@@ -1,0 +1,151 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_CSR_07_RemoveBolts_L
+  m_EditorClassIdentifier: 
+  stepId: STP_CSR_07_RemoveBolts_L
+  title: "\u53D6\u4E0B\u87BA\u6813\uFF08\u8098\u5074\uFF09"
+  instruction: "\u7E7C\u7E8C\u7528\u5957\u7B52\u6273\u624B\u628A\u6BCF\u652F\u87BA\u6813\u8F49\u5230\u812B\u51FA\uFF08\u7D04\u5169\u5708\uFF09\uFF0C\u518D\u9EDE\u87BA\u6813\u628A\u5B83\u653E\u9032\u96F6\u4EF6\u76D2\u3002"
+  toolHint: "\u5957\u7B52\u6273\u624B"
+  targetHint: "\u9019\u689D\u6ED1\u677F\u4E0A\u7684 4 \u652F\u87BA\u6813 \u2192 \u96F6\u4EF6\u76D2"
+  targetIds:
+  - ip.carbon_strip_{side}.bolt_*
+  requiredToolId: tool.socket_wrench
+  completion:
+    rid: 1000
+  errors:
+  - errorId: ERR_CSR07_NotCollected
+    severity: 1
+    what: "\u87BA\u6813\u6C92\u6709\u5168\u90E8\u6536\u9032\u96F6\u4EF6\u76D2\u3002"
+    why: "\u6563\u843D\u5728\u8ECA\u9802\u7684\u87BA\u6813\u6703\u6389\u843D\u3001\u907A\u5931\uFF0C\u6216\u88AB\u907A\u7559\u5728\u8ECA\u9802\u9020\u6210\u7570\u7269\u5371\u96AA\u3002"
+    fix: "\u6BCF\u652F\u87BA\u6813\u812B\u51FA\u5F8C\u7ACB\u523B\u9EDE\u5B83\u6536\u9032\u96F6\u4EF6\u76D2\u3002"
+    trigger: 6
+    key: part.carbon_strip_{side}.remove_blocked
+    key2: 
+    keys: []
+    value: bolts
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+  hints:
+    text: "\u7E7C\u7E8C\u8F49\u5230\u87BA\u6813\u812B\u51FA\uFF08\u7D04\u5169\u5708\uFF09\uFF0C\u518D\u9EDE\u4E00\u4E0B\u87BA\u6813\u5C31\u6536\u9032\u96F6\u4EF6\u76D2\u3002"
+    why: "\u62C6\u4E0B\u7684\u87BA\u6813\u7ACB\u523B\u6536\u597D\uFF0C\u624D\u4E0D\u6703\u6389\u843D\u6216\u907A\u7559\u5728\u8ECA\u9802\u3002"
+    checklist:
+    - "\u628A 1 \u865F\u87BA\u6813\u8F49\u5230\u812B\u51FA|ip.carbon_strip_L.bolt_1.angle_deg>=720"
+    - "\u628A 1 \u865F\u87BA\u6813\u653E\u9032\u87BA\u6813\u76E4|ip.carbon_strip_L.bolt_1.state=InTray"
+    - "\u628A 2 \u865F\u87BA\u6813\u8F49\u5230\u812B\u51FA|ip.carbon_strip_L.bolt_2.angle_deg>=720"
+    - "\u628A 2 \u865F\u87BA\u6813\u653E\u9032\u87BA\u6813\u76E4|ip.carbon_strip_L.bolt_2.state=InTray"
+    - "\u628A 3 \u865F\u87BA\u6813\u8F49\u5230\u812B\u51FA|ip.carbon_strip_L.bolt_3.angle_deg>=720"
+    - "\u628A 3 \u865F\u87BA\u6813\u653E\u9032\u87BA\u6813\u76E4|ip.carbon_strip_L.bolt_3.state=InTray"
+    - "\u628A 4 \u865F\u87BA\u6813\u8F49\u5230\u812B\u51FA|ip.carbon_strip_L.bolt_4.angle_deg>=720"
+    - "\u628A 4 \u865F\u87BA\u6813\u653E\u9032\u87BA\u6813\u76E4|ip.carbon_strip_L.bolt_4.state=InTray"
+    - "\u628A\u5957\u7B52\u6273\u624B\u6536\u56DE\u5DE5\u5177\u888B|tool.active="
+    highlightIds:
+    - ip.carbon_strip_{side}.bolt_*
+    - env.parts_tray
+    showBoltNumbers: 1
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u628A 1 \u865F\u87BA\u6813\u8F49\u5230\u812B\u51FA"
+    why: 
+    targetId: ip.carbon_strip_L.bolt_1
+    toolId: tool.socket_wrench
+    condition: ip.carbon_strip_L.bolt_1.angle_deg>=720
+    standPointId: tp.roof.inner
+  - text: "\u628A 1 \u865F\u87BA\u6813\u653E\u9032\u87BA\u6813\u76E4"
+    why: 
+    targetId: env.bolt_tray_L
+    toolId: 
+    condition: ip.carbon_strip_L.bolt_1.state=InTray
+    standPointId: tp.roof.inner
+  - text: "\u628A 2 \u865F\u87BA\u6813\u8F49\u5230\u812B\u51FA"
+    why: 
+    targetId: ip.carbon_strip_L.bolt_2
+    toolId: tool.socket_wrench
+    condition: ip.carbon_strip_L.bolt_2.angle_deg>=720
+    standPointId: tp.roof.inner
+  - text: "\u628A 2 \u865F\u87BA\u6813\u653E\u9032\u87BA\u6813\u76E4"
+    why: 
+    targetId: env.bolt_tray_L
+    toolId: 
+    condition: ip.carbon_strip_L.bolt_2.state=InTray
+    standPointId: tp.roof.inner
+  - text: "\u628A 3 \u865F\u87BA\u6813\u8F49\u5230\u812B\u51FA"
+    why: 
+    targetId: ip.carbon_strip_L.bolt_3
+    toolId: tool.socket_wrench
+    condition: ip.carbon_strip_L.bolt_3.angle_deg>=720
+    standPointId: tp.roof.inner
+  - text: "\u628A 3 \u865F\u87BA\u6813\u653E\u9032\u87BA\u6813\u76E4"
+    why: 
+    targetId: env.bolt_tray_L
+    toolId: 
+    condition: ip.carbon_strip_L.bolt_3.state=InTray
+    standPointId: tp.roof.inner
+  - text: "\u628A 4 \u865F\u87BA\u6813\u8F49\u5230\u812B\u51FA"
+    why: 
+    targetId: ip.carbon_strip_L.bolt_4
+    toolId: tool.socket_wrench
+    condition: ip.carbon_strip_L.bolt_4.angle_deg>=720
+    standPointId: tp.roof.inner
+  - text: "\u628A 4 \u865F\u87BA\u6813\u653E\u9032\u87BA\u6813\u76E4"
+    why: 
+    targetId: env.bolt_tray_L
+    toolId: 
+    condition: ip.carbon_strip_L.bolt_4.state=InTray
+    standPointId: tp.roof.inner
+  - text: "\u628A\u5957\u7B52\u6273\u624B\u6536\u56DE\u5DE5\u5177\u888B"
+    why: 
+    targetId: env.tool_rack.slot_6
+    toolId: tool.socket_wrench
+    condition: tool.active=
+    standPointId: tp.roof.inner
+  presetDone: 0
+  side: L
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 70
+  refSecondsExam: 40
+  references:
+    version: 2
+    RefIds:
+    - rid: 1000
+      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        rules:
+        - rid: 1001
+        - rid: 1002
+        - rid: 1003
+        - rid: 1004
+    - rid: 1001
+      type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        key: ip.carbon_strip_{side}.bolt_1.state
+        value: InTray
+    - rid: 1002
+      type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        key: ip.carbon_strip_{side}.bolt_2.state
+        value: InTray
+    - rid: 1003
+      type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        key: ip.carbon_strip_{side}.bolt_3.state
+        value: InTray
+    - rid: 1004
+      type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        key: ip.carbon_strip_{side}.bolt_4.state
+        value: InTray

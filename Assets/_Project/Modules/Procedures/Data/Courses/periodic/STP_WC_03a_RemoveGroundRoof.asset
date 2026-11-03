@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_WC_03a_RemoveGroundRoof
+  m_EditorClassIdentifier: 
+  stepId: STP_WC_03a_RemoveGroundRoof
+  title: "\u8ECA\u9802\u62C6 #2 \u77ED\u63A5\u5730\u7DDA"
+  instruction: "\u8ECA\u9802\u62C6 #2 \u77ED\u63A5\u5730\u7DDA"
+  toolHint: 
+  targetHint: 
+  targetIds:
+  - ip.roof.hv_cable_ground
+  - ip.roof.carbody_ground
+  - tool.safety_harness
+  - env.work_order.ground_register
+  requiredToolId: 
+  completion:
+    rid: 8951035174947913851
+  errors: []
+  hints:
+    text: 
+    why: 
+    checklist:
+    - "\u7528\u77ED\u7D55\u7DE3\u687F\u53D6\u4E0B\u96FB\u7E9C\u7AEF\u5B50\u7AEF|ip.roof.hv_cable_ground.clamped=false"
+    - "\u9B06\u958B\u8ECA\u9AD4\u63A5\u5730\u5EA7\u7684\u593E\u5177|ip.roof.carbody_ground.clamped=false"
+    - "\u628A\u77ED\u63A5\u5730\u7DDA\u639B\u56DE\u5B89\u5168\u5E36\u5DE5\u5177\u74B0|tool.grounding_lead.carried"
+    - "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u92B7\u865F #2|ground_register.2=cancelled"
+    highlightIds: []
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u7528\u77ED\u7D55\u7DE3\u687F\u53D6\u4E0B\u96FB\u7E9C\u7AEF\u5B50\u7AEF"
+    why: 
+    targetId: ip.roof.hv_cable_ground
+    toolId: tool.grounding_lead
+    condition: ip.roof.hv_cable_ground.clamped=false
+    standPointId: tp.roof.base_e.n
+  - text: "\u9B06\u958B\u8ECA\u9AD4\u63A5\u5730\u5EA7\u7684\u593E\u5177"
+    why: 
+    targetId: ip.roof.carbody_ground
+    toolId: tool.grounding_lead
+    condition: ip.roof.carbody_ground.clamped=false
+    standPointId: tp.roof.base_w
+  - text: "\u628A\u77ED\u63A5\u5730\u7DDA\u639B\u56DE\u5B89\u5168\u5E36\u5DE5\u5177\u74B0"
+    why: 
+    targetId: "tool.safety_harness\uFF08\u5DE5\u5177\u74B0\uFF09"
+    toolId: tool.grounding_lead
+    condition: tool.grounding_lead.carried
+    standPointId: tp.roof.base_w
+  - text: "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u92B7\u865F #2"
+    why: 
+    targetId: env.work_order.ground_register
+    toolId: 
+    condition: ground_register.2=cancelled
+    standPointId: tp.roof.base_w
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 35
+  refSecondsExam: 23
+  references:
+    version: 2
+    RefIds:
+    - rid: 8951035174947913851
+      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        conditions:
+        - ip.roof.hv_cable_ground.clamped=false
+        - ip.roof.carbody_ground.clamped=false
+        - tool.grounding_lead.carried
+        - ground_register.2=cancelled

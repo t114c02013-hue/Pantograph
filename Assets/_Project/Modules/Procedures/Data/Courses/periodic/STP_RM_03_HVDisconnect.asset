@@ -1,0 +1,143 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_RM_03_HVDisconnect
+  m_EditorClassIdentifier: 
+  stepId: STP_RM_03_HVDisconnect
+  title: "\u62C6\u9AD8\u58D3\u96FB\u7E9C\u7AEF\u5B50"
+  instruction: "\u62C6\u9AD8\u58D3\u96FB\u7E9C\u7AEF\u5B50"
+  toolHint: 
+  targetHint: 
+  targetIds:
+  - ip.pan_head.ground_clamp
+  - ip.roof.hv_cable_ground
+  - env.tool_rack.slot_9
+  - ip.pan_assy.hv_terminal
+  - env.tool_rack.slot_6
+  - env.tool_bag.socket_case
+  - tool.socket_wrench
+  - part.pan_assy.hv_bolt_1
+  - env.tool_bag.bolt_pouch
+  - part.pan_assy.hv_bolt_2
+  requiredToolId: 
+  completion:
+    rid: 8951035174947913750
+  errors: []
+  hints:
+    text: 
+    why: 
+    checklist:
+    - "\u78BA\u8A8D\u5169\u652F\u63A5\u5730\u68D2\u90FD\u639B\u8457|ip.pan_head.ground_clamp.inspected&&isolation.head_clamped&&ip.roof.hv_cable_ground.clamped"
+    - "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u6A19\u8A18\u7B46|tool.active=tool.marker"
+    - "\u5728\u7AEF\u5B50\u8207\u7AEF\u5B50\u5EA7\u756B\u5C0D\u4F4D\u8A18\u865F|ip.pan_assy.hv_terminal.marked"
+    - "\u628A\u6A19\u8A18\u7B46\u6536\u56DE\u5DE5\u5177\u888B|rack.slot_9=on_rack"
+    - "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u5957\u7B52\u6273\u624B|tool.active=tool.socket_wrench"
+    - "\u63DB\u4E0A 19 mm \u5957\u7B52|tool.socket_wrench.size=19"
+    - "\u628A\u7AEF\u5B50\u87BA\u6813 1 \u8F49\u5230\u812B\u51FA|part.pan_assy.hv_bolt_1.state=Out"
+    - "\u628A\u87BA\u6813 1 \u6536\u9032\u96F6\u4EF6\u888B|part.pan_assy.hv_bolt_1.state=InTray"
+    - "\u628A\u7AEF\u5B50\u87BA\u6813 2 \u8F49\u5230\u812B\u51FA|part.pan_assy.hv_bolt_2.state=Out"
+    - "\u628A\u87BA\u6813 2 \u6536\u9032\u96F6\u4EF6\u888B|part.pan_assy.hv_bolt_2.state=InTray"
+    - "\u53D6\u4E0B\u7AEF\u5B50\uFF0C\u653E\u5230\u505C\u653E\u4F4D|ip.pan_assy.hv_terminal.state=Removed"
+    highlightIds: []
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u78BA\u8A8D\u5169\u652F\u63A5\u5730\u68D2\u90FD\u639B\u8457"
+    why: 
+    targetId: ip.pan_head.ground_clamp;ip.roof.hv_cable_ground
+    toolId: 
+    condition: ip.pan_head.ground_clamp.inspected&&isolation.head_clamped&&ip.roof.hv_cable_ground.clamped
+    standPointId: tp.roof.base_e.n
+  - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u6A19\u8A18\u7B46"
+    why: 
+    targetId: env.tool_rack.slot_9
+    toolId: tool.marker
+    condition: tool.active=tool.marker
+    standPointId: tp.roof.base_e.n
+  - text: "\u5728\u7AEF\u5B50\u8207\u7AEF\u5B50\u5EA7\u756B\u5C0D\u4F4D\u8A18\u865F"
+    why: 
+    targetId: ip.pan_assy.hv_terminal
+    toolId: tool.marker
+    condition: ip.pan_assy.hv_terminal.marked
+    standPointId: tp.roof.base_e.n
+  - text: "\u628A\u6A19\u8A18\u7B46\u6536\u56DE\u5DE5\u5177\u888B"
+    why: 
+    targetId: env.tool_rack.slot_9
+    toolId: tool.marker
+    condition: rack.slot_9=on_rack
+    standPointId: tp.roof.base_e.n
+  - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u5957\u7B52\u6273\u624B"
+    why: 
+    targetId: env.tool_rack.slot_6
+    toolId: tool.socket_wrench
+    condition: tool.active=tool.socket_wrench
+    standPointId: tp.roof.base_e.n
+  - text: "\u63DB\u4E0A 19 mm \u5957\u7B52"
+    why: 
+    targetId: "env.tool_bag.socket_case;tool.socket_wrench\uFF08\u5957\u7B52\uFF09"
+    toolId: tool.socket_wrench
+    condition: tool.socket_wrench.size=19
+    standPointId: tp.roof.base_e.n
+  - text: "\u628A\u7AEF\u5B50\u87BA\u6813 1 \u8F49\u5230\u812B\u51FA"
+    why: 
+    targetId: part.pan_assy.hv_bolt_1
+    toolId: tool.socket_wrench
+    condition: part.pan_assy.hv_bolt_1.state=Out
+    standPointId: tp.roof.base_e.n
+  - text: "\u628A\u87BA\u6813 1 \u6536\u9032\u96F6\u4EF6\u888B"
+    why: 
+    targetId: env.tool_bag.bolt_pouch
+    toolId: 
+    condition: part.pan_assy.hv_bolt_1.state=InTray
+    standPointId: tp.roof.base_e.n
+  - text: "\u628A\u7AEF\u5B50\u87BA\u6813 2 \u8F49\u5230\u812B\u51FA"
+    why: 
+    targetId: part.pan_assy.hv_bolt_2
+    toolId: tool.socket_wrench
+    condition: part.pan_assy.hv_bolt_2.state=Out
+    standPointId: tp.roof.base_e.n
+  - text: "\u628A\u87BA\u6813 2 \u6536\u9032\u96F6\u4EF6\u888B"
+    why: 
+    targetId: env.tool_bag.bolt_pouch
+    toolId: 
+    condition: part.pan_assy.hv_bolt_2.state=InTray
+    standPointId: tp.roof.base_e.n
+  - text: "\u53D6\u4E0B\u7AEF\u5B50\uFF0C\u653E\u5230\u505C\u653E\u4F4D"
+    why: 
+    targetId: ip.pan_assy.hv_terminal
+    toolId: 
+    condition: ip.pan_assy.hv_terminal.state=Removed
+    standPointId: tp.roof.base_e.n
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 100
+  refSecondsExam: 60
+  references:
+    version: 2
+    RefIds:
+    - rid: 8951035174947913750
+      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        conditions:
+        - ip.pan_head.ground_clamp.inspected&&isolation.head_clamped&&ip.roof.hv_cable_ground.clamped
+        - tool.active=tool.marker
+        - ip.pan_assy.hv_terminal.marked
+        - rack.slot_9=on_rack
+        - tool.active=tool.socket_wrench
+        - tool.socket_wrench.size=19
+        - part.pan_assy.hv_bolt_1.state=Out
+        - part.pan_assy.hv_bolt_1.state=InTray
+        - part.pan_assy.hv_bolt_2.state=Out
+        - part.pan_assy.hv_bolt_2.state=InTray
+        - ip.pan_assy.hv_terminal.state=Removed

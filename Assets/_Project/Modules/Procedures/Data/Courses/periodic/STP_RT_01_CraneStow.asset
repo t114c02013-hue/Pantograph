@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_RT_01_CraneStow
+  m_EditorClassIdentifier: 
+  stepId: STP_RT_01_CraneStow
+  title: "\u5929\u8ECA\u6B78\u4F4D"
+  instruction: "\u5929\u8ECA\u6B78\u4F4D"
+  toolHint: 
+  targetHint: 
+  targetIds:
+  - env.crane_pendant
+  requiredToolId: 
+  completion:
+    rid: 8951035174947913856
+  errors: []
+  hints:
+    text: 
+    why: 
+    checklist:
+    - "\u6309\u4F4F\u4E0A\u5347\uFF0C\u628A\u540A\u9264\u79FB\u5230\u505C\u653E\u4F4D\u7F6E|part.crane.hook.parked"
+    - "\u95DC\u9059\u63A7\u5668\u96FB\u6E90\u9470\u5319\uFF0C\u628A\u9059\u63A7\u5668\u639B\u56DE\u639B\u5EA7|ctrl.crane.power=false&&env.crane_pendant.state=Docked"
+    highlightIds: []
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u6309\u4F4F\u4E0A\u5347\uFF0C\u628A\u540A\u9264\u79FB\u5230\u505C\u653E\u4F4D\u7F6E"
+    why: 
+    targetId: env.crane_pendant
+    toolId: 
+    condition: part.crane.hook.parked
+    standPointId: tp.platform.crane
+  - text: "\u95DC\u9059\u63A7\u5668\u96FB\u6E90\u9470\u5319\uFF0C\u628A\u9059\u63A7\u5668\u639B\u56DE\u639B\u5EA7"
+    why: 
+    targetId: "env.crane_pendant\uFF08Key_Power\uFF09;env.crane_pendant\uFF08PendantDock\uFF09"
+    toolId: 
+    condition: ctrl.crane.power=false&&env.crane_pendant.state=Docked
+    standPointId: tp.platform.crane
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 35
+  refSecondsExam: 25
+  references:
+    version: 2
+    RefIds:
+    - rid: 8951035174947913856
+      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        conditions:
+        - part.crane.hook.parked
+        - ctrl.crane.power=false&&env.crane_pendant.state=Docked

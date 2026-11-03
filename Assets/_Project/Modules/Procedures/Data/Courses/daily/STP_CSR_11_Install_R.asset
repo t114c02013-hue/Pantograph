@@ -1,0 +1,88 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_CSR_11_Install_R
+  m_EditorClassIdentifier: 
+  stepId: STP_CSR_11_Install_R
+  title: "\u5B89\u88DD\u65B0\u6ED1\u677F\uFF08\u5916\u5074\uFF09"
+  instruction: "\u65B0\u6ED1\u677F\u62FF\u5728\u624B\u4E0A\uFF0C\u6309 R \u8F49\u5411\u8B93\u659C\u9762\uFF08\u7BAD\u982D\uFF09\u671D\u5916\uFF0C\u7136\u5F8C\u9EDE\u6258\u67B6\u653E\u4E0B\uFF0C4
+    \u500B\u87BA\u6813\u5B54\u5C0D\u9F4A\u5C31\u6703\u5438\u9644\u3002"
+  toolHint: "\u5F92\u624B\uFF1BR \u9375\u8F49\u5411"
+  targetHint: "\u9019\u689D\u6ED1\u677F\u7684\u6258\u67B6"
+  targetIds:
+  - ip.carbon_strip_{side}.bracket
+  - part.carbon_strip_{side}
+  requiredToolId: 
+  completion:
+    rid: 1000
+  errors:
+  - errorId: ERR_CSR11_Reversed
+    severity: 2
+    what: "\u65B0\u6ED1\u677F\u88DD\u53CD\u4E86\uFF08\u659C\u9762\u671D\u5167\uFF09\u3002"
+    why: "\u659C\u9762\u662F\u8B93\u67B6\u7A7A\u7DDA\u5E73\u9806\u6ED1\u5165\u7684\u5C0E\u89D2\uFF0C\u88DD\u53CD\u6703\u8B93\u7DDA\u649E\u4E0A\u76F4\u89D2\u908A\uFF0C\u9020\u6210\u522E\u7DDA\u3001\u8DF3\u5F13\u3002"
+    fix: "\u6309 R \u8F49 180\xB0\uFF0C\u8B93\u300C\u6B64\u5074\u671D\u5916\u300D\u7684\u659C\u9762\u671D\u5411\u5F13\u982D\u5916\u5074\u518D\u653E\u4E0B\u3002"
+    trigger: 6
+    key: part.carbon_strip_{side}.install_result
+    key2: 
+    keys: []
+    value: WrongOrientation
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 1
+  hints:
+    text: "\u6309 R \u8F49\u5230\u7BAD\u982D\u671D\u5916\uFF0C\u518D\u5F92\u624B\u9EDE\u6258\u67B6\u653E\u4E0B\u3002"
+    why: "\u659C\u9762\u662F\u8B93\u67B6\u7A7A\u7DDA\u5E73\u9806\u6ED1\u5165\u7684\u5C0E\u89D2\uFF0C\u88DD\u53CD\u6703\u522E\u7DDA\u3001\u8DF3\u5F13\u3002"
+    checklist:
+    - "\u628A\u65B0\u6ED1\u677F\u79FB\u5230\u6258\u67B6\u4E0A\u65B9|part.carbon_strip_R.over_bracket"
+    - "\u8F49\u52D5\u624B\u8155\u628A\u65B0\u6ED1\u677F\u7FFB\u9762\uFF0C\u8B93\u7BAD\u982D\u671D\u5916|part.carbon_strip_R.new_orientation=out"
+    - "\u5C0D\u6E96\u87BA\u6813\u5B54\u653E\u4E0B|part.carbon_strip_R.state=NewMounted
+      && part.carbon_strip_R.install_distance_cm<=0.5"
+    highlightIds:
+    - ip.carbon_strip_{side}.bracket
+    showBoltNumbers: 0
+    showOutwardArrow: 1
+  subActions:
+  - text: "\u628A\u65B0\u6ED1\u677F\u79FB\u5230\u6258\u67B6\u4E0A\u65B9"
+    why: 
+    targetId: ip.carbon_strip_R.bracket
+    toolId: 
+    condition: part.carbon_strip_R.over_bracket
+    standPointId: tp.roof.outer
+  - text: "\u8F49\u52D5\u624B\u8155\u628A\u65B0\u6ED1\u677F\u7FFB\u9762\uFF0C\u8B93\u7BAD\u982D\u671D\u5916"
+    why: 
+    targetId: "consumable.carbon_strip\uFF08\u624B\u6301\u65B0\u6ED1\u677F\uFF09"
+    toolId: 
+    condition: part.carbon_strip_R.new_orientation=out
+    standPointId: tp.roof.outer
+  - text: "\u5C0D\u6E96\u87BA\u6813\u5B54\u653E\u4E0B"
+    why: 
+    targetId: ip.carbon_strip_R.install_target
+    toolId: 
+    condition: part.carbon_strip_R.state=NewMounted && part.carbon_strip_R.install_distance_cm<=0.5
+    standPointId: tp.roof.outer
+  presetDone: 0
+  side: R
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 27
+  refSecondsExam: 20
+  references:
+    version: 2
+    RefIds:
+    - rid: 1000
+      type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        key: part.carbon_strip_{side}.state
+        value: NewMounted

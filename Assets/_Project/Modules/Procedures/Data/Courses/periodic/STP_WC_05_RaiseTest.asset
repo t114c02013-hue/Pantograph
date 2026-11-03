@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
+  m_Name: STP_WC_05_RaiseTest
+  m_EditorClassIdentifier: 
+  stepId: STP_WC_05_RaiseTest
+  title: "\u5347\u5F13\u8A66\u9A57"
+  instruction: "\u5347\u5F13\u8A66\u9A57"
+  toolHint: 
+  targetHint: 
+  targetIds:
+  - part.crane.hook
+  - part.pan_assy
+  - ui.lift_controller
+  - ip.cab.pan_indicator
+  - env.work_order.sign_end
+  requiredToolId: 
+  completion:
+    rid: 8951035174947913863
+  errors: []
+  hints:
+    text: 
+    why: 
+    checklist:
+    - "\u67E5\u770B\u8ECA\u9802\u6DE8\u7A7A\u3001\u540A\u9264\u5DF2\u79FB\u958B|part.crane.hook.inspected&&part.pan_assy.inspected"
+    - "\u6309\u4F4F \u25B2 \u5347\u5230\u9802\uFF08\u7D04 15 s\uFF09|part.pan_head.pose=Raised"
+    - "\u78BA\u8A8D\u5F13\u4F4D\u6307\u793A\u71C8 = \u5347\u5F13|ip.cab.pan_indicator.checked&&ip.cab.pan_indicator.shows=\u5347\u5F13"
+    - "\u6309\u4F4F \u25BC \u964D\u56DE\u7DA0\u6846|part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm"
+    - "\u5728\u4F5C\u696D\u55AE\u7C3D\u540D\u5B8C\u5DE5|workorder.sign_end"
+    highlightIds: []
+    showBoltNumbers: 0
+    showOutwardArrow: 0
+  subActions:
+  - text: "\u67E5\u770B\u8ECA\u9802\u6DE8\u7A7A\u3001\u540A\u9264\u5DF2\u79FB\u958B"
+    why: 
+    targetId: part.crane.hook;part.pan_assy
+    toolId: 
+    condition: part.crane.hook.inspected&&part.pan_assy.inspected
+    standPointId: tp.platform.lift
+  - text: "\u6309\u4F4F \u25B2 \u5347\u5230\u9802\uFF08\u7D04 15 s\uFF09"
+    why: 
+    targetId: ui.lift_controller
+    toolId: 
+    condition: part.pan_head.pose=Raised
+    standPointId: tp.platform.lift
+  - text: "\u78BA\u8A8D\u5F13\u4F4D\u6307\u793A\u71C8 = \u5347\u5F13"
+    why: 
+    targetId: ip.cab.pan_indicator
+    toolId: 
+    condition: "ip.cab.pan_indicator.checked&&ip.cab.pan_indicator.shows=\u5347\u5F13"
+    standPointId: tp.platform.lift
+  - text: "\u6309\u4F4F \u25BC \u964D\u56DE\u7DA0\u6846"
+    why: 
+    targetId: ui.lift_controller
+    toolId: 
+    condition: part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm
+    standPointId: tp.platform.lift
+  - text: "\u5728\u4F5C\u696D\u55AE\u7C3D\u540D\u5B8C\u5DE5"
+    why: 
+    targetId: env.work_order.sign_end
+    toolId: 
+    condition: workorder.sign_end
+    standPointId: tp.platform.lift
+  presetDone: 0
+  side: 
+  presetStates: []
+  valueTags: []
+  refSecondsTutorial: 60
+  refSecondsExam: 40
+  references:
+    version: 2
+    RefIds:
+    - rid: 8951035174947913863
+      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+      data:
+        conditions:
+        - part.crane.hook.inspected&&part.pan_assy.inspected
+        - part.pan_head.pose=Raised
+        - "ip.cab.pan_indicator.checked&&ip.cab.pan_indicator.shows=\u5347\u5F13"
+        - part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm
+        - workorder.sign_end
