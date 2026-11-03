@@ -19,13 +19,14 @@ def build(ctx, p):
     return [("ENV_PlatformKit", root)]
 
 
-def build_gate_slice_guard(ctx, p, width):
+def build_gate_slice_guard(ctx, p, width, height=1.0):
     """a6 增補 7 第 8 點（建模 A model-spec v3.3 §4）：活動欄開口側的擋欄 ENV_GateSliceGuard（只出外觀，collider 由 Unity 的方塊負責）。
     兩支端柱＋上橫桿（頂 1.0 m）＋中橫桿（0.5 m）＋踢腳板（高 0.10、厚 0.01）；0.04 m 方管；寬度＝擋牆範圍（不足 0.3 m 只做一支柱＋短橫桿）。
     黃黑相間：每段 0.10 m 交替指黃／黑色格（材質沿用 Paint，不新增材質；斜條用水平色段近似）；踢腳板純黃。原點在底面中心，長軸沿 Unity Z（Blender Y）。"""
     import bmesh
     from common import add_box, mesh_object
-    H, mid, kick, t = 1.0, 0.5, 0.10, 0.04
+    H, kick, t = height, 0.10, 0.04
+    mid = H / 2
     root = box(ctx, "ENV_GateSliceGuard", (0.12, 0.12, 0.01), (0, 0, 0.005), "Paint", "dark")   # 立柱底座 0.12 × 0.12 × 0.01（夾在車頂邊上）
     posts = [0.0] if width < 0.3 else [-width / 2 + t / 2, width / 2 - t / 2]
 
@@ -58,5 +59,6 @@ _build_platform = build
 
 
 def build(ctx, p):   # noqa: F811
-    w = p.get("gateSliceGuard", {}).get("width", 0.0)
-    return _build_platform(ctx, p) + ([("ENV_GateSliceGuard", build_gate_slice_guard(ctx, p, w))] if w > 0.001 else [])
+    g = p.get("gateSliceGuard", {})
+    w = g.get("width", 0.0)
+    return _build_platform(ctx, p) + ([("ENV_GateSliceGuard", build_gate_slice_guard(ctx, p, w, g.get("height", 1.0)))] if w > 0.001 else [])

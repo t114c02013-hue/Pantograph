@@ -102,6 +102,7 @@ namespace PantographSim.Data
         [Tooltip("a6 增補 4（鐵道 D35）：吊鉤最高點 Y 的規格值（實測 5.53 合格，不調模型參數）與容許差")] public float craneHookTopSpecY = 5.53f, craneHookTopTolerance = 0.02f;
         [Tooltip("增補 7 E3(1)：降弓整組 LoweredTightBounds（PAN_Root 局部、頂點算法、排除可拆件；建置時寫入）")] public Bounds panLoweredTightBounds;
         [Tooltip("增補 7 第 8 點（組長）：活動欄開口（車頂側）最小淨寬")] public float gateMinWidth = 0.60f;
+        [Tooltip("R1.5b F1（資深軟體 B）：活動欄開口側擋欄 ENV_GateSliceGuard 的高度與第 22 項的容許差（高度、寬度都用這個容差）")] public float gateGuardHeight = 1.00f, gateGuardTolerance = 0.01f;
         [Tooltip("a6 G2：台架支撐座＝BaseHole 的 X、Z 間距各加這個值")] public Vector2 standSeatMarginXZ = new Vector2(0.13f, 0.18f);
         [Tooltip("台架四周淨空（地面黃色走道線畫在這裡）")] public float standClearance = 1.2f;
         [Tooltip("tp.stand.* 離台架邊")] public float standStationOffset = 0.6f;
@@ -201,7 +202,7 @@ namespace PantographSim.Data
                 $"\"thickness\": {F(roofStripMatThickness)}, \"rimWidth\": {F(roofStripMatRimWidth)}, \"rimHeight\": {F(roofStripMatRimHeight)} }}",
                 $"\"ctrlConnector\": {{ \"bodySize\": [{F(ctrlConnectorBodySize.x)}, {F(ctrlConnectorBodySize.y)}, {F(ctrlConnectorBodySize.z)}], \"socketDiameter\": {F(ctrlSocketDiameter)}, \"socketLength\": {F(ctrlSocketLength)}, " +
                 $"\"capDiameter\": {F(ctrlCapDiameter)}, \"capLength\": {F(ctrlCapLength)} }}",
-                $"\"gateSliceGuard\": {{ \"width\": {F(GateSliceWidth)} }}",
+                $"\"gateSliceGuard\": {{ \"width\": {F(GateSliceWidth)}, \"height\": {F(gateGuardHeight)} }}",
                 $"\"holdDownStrap\": {{ \"strapWidth\": {F(strapWidth)}, \"strapThickness\": {F(strapThickness)}, \"armHalfWidth\": {F(strapArmHalfWidth)}, " +
                 $"\"buckleSize\": [{F(strapBuckleSize.x)}, {F(strapBuckleSize.y)}, {F(strapBuckleSize.z)}], \"rollDiameter\": {F(strapRollDiameter)} }}",
             });

@@ -8,7 +8,9 @@ namespace PantographSim.Editor
 {
     /// <summary>
     /// R1 的資料資產（不存在就用預設值建立；已存在就照用，不覆寫）：RoofSceneDef、StationSet＋8 個 StationDef、RoofAccessRule、HeightProfile、LocomotionSettings。
-    /// 數值都是 EX，之後只改資產。
+    /// 數值都是 EX。
+    /// 注意（R1.5b 資深軟體 B）：ApplyR15a、ApplyA6 等「可以重跑」的方法每次建置都會把這裡寫的值覆寫進資產，在 Inspector 手改的值下次建置就被蓋掉；
+    /// 要改數值就改這個檔（或 R1.5b 起的 CSV 資料），不要只改資產。ToolSocketSetup.Apply 同理。
     /// </summary>
     public static class R1Data
     {
@@ -186,7 +188,7 @@ namespace PantographSim.Editor
             // 增補 7（D38、D39）：第 21 項門檻與要算的扳手（底座螺栓 CSV v2.9：RM_04 b、IN_06 d 套筒扳手，IN_07 d 大扭力扳手）
             set.wrenchSweepMinClearance = 0.02f; set.wrenchRadialStep = 0.05f;
             set.wrenchSweepTools = new[] { "tool.socket_wrench", "tool.torque_wrench_l" };
-            d.craneHookTopTolerance = 0.02f; d.gateMinWidth = 0.60f; EditorUtility.SetDirty(d);
+            d.craneHookTopTolerance = 0.02f; d.gateMinWidth = 0.60f; d.gateGuardHeight = 1.00f; d.gateGuardTolerance = 0.01f; EditorUtility.SetDirty(d);
             set.partClearRadius = new[]
             {
                 new PartClearRadius { partGroup = "PanHead", radius = 0.20f, scope = PartClearScope.RoofOnly },

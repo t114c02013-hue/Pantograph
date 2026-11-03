@@ -308,7 +308,7 @@ namespace PantographSim.Editor
                 // 看得見的擋欄 ENV_GateSliceGuard（model-spec v3.3 §4）：寬度＝擋牆範圍，網格不比 collider 更往開口內伸；沒有 FBX 時用黃黑方塊暫代（高 1.0、厚 0.05）
                 var sb0 = slice.bounds; var at = new Vector3(sb0.center.x, roofY, sb0.center.z);
                 if (AssetDatabase.LoadAssetAtPath<GameObject>($"{GeneratedFolder}/ENV_GateSliceGuard.fbx") != null) Fbx("ENV_GateSliceGuard", null, roof.visual, at);
-                else Box("ENV_GateSliceGuard", roof.visual, at + Vector3.up * 0.5f, new Vector3(0.05f, 1.0f, sb0.size.z), mWarn, collider: false);
+                else Box("ENV_GateSliceGuard", roof.visual, at + Vector3.up * (d.gateGuardHeight / 2f), new Vector3(0.05f, d.gateGuardHeight, sb0.size.z), mWarn, collider: false);
             }
             Col("EdgeWall_-X_Base", roof.col, new Vector3(-wide - 0.05f, roofY, zb0), new Vector3(-wide, wh, zb1), SceneLayers.Boundary);
             Col("EdgeWall_-X_C", roof.col, new Vector3(-walkHalf - 0.05f, roofY, zb1), new Vector3(-walkHalf, wh, z1), SceneLayers.Boundary);

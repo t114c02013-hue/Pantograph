@@ -161,10 +161,11 @@ namespace PantographSim.Tests
                 Assert.IsNotEmpty(rs, "擋欄要有啟用中的 MeshRenderer");
                 var gb = rs[0].bounds; foreach (var r in rs) gb.Encapsulate(r.bounds);
                 var wall = Named(scene, "EdgeWall_-X_GateSlice").GetComponent<Collider>().bounds;
-                Assert.AreEqual(1.00f, gb.size.y, 0.01f, "高 1.00");
-                Assert.LessOrEqual(gb.min.z, wall.min.z + 0.01f); Assert.GreaterOrEqual(gb.max.z, wall.max.z - 0.01f);
-                Assert.GreaterOrEqual(gb.min.z, wall.min.z - 0.01f, "網格不比 collider 更往開口內伸");
-                Assert.GreaterOrEqual(wall.min.z - (Def.gateCenterZ - Def.gateWidth / 2f), 0.65f - 0.001f, "開口淨寬 ≥ 0.65");
+                float tol = Def.gateGuardTolerance;
+                Assert.AreEqual(Def.gateGuardHeight, gb.size.y, tol, "高＝gateGuardHeight");
+                Assert.LessOrEqual(gb.min.z, wall.min.z + tol); Assert.GreaterOrEqual(gb.max.z, wall.max.z - tol);
+                Assert.GreaterOrEqual(gb.min.z, wall.min.z - tol, "網格不比 collider 更往開口內伸");
+                Assert.GreaterOrEqual(wall.min.z - (Def.gateCenterZ - Def.gateWidth / 2f), Def.gateMinWidth - 0.001f, "開口淨寬 ≥ gateMinWidth");
             });
         }
 

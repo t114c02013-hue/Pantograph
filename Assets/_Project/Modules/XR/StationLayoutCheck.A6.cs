@@ -667,8 +667,9 @@ namespace PantographSim.XR
             if (gr.Count == 0) { Miss(r, "22", "ENV_GateSliceGuard（看得見的擋欄）"); return; }
             var gb = gr[0].bounds; foreach (var x in gr) gb.Encapsulate(x.bounds);
             var sb = slice.bounds;
-            bool covers = gb.min.z <= sb.min.z + 0.01f && gb.max.z >= sb.max.z - 0.01f && gb.min.z >= sb.min.z - 0.01f;   // 寬和擋牆差 ≤ 0.01、網格不比 collider 更往開口內伸
-            Pend(r, "22", $"擋欄 ENV_GateSliceGuard 高 {gb.size.y:0.000}（1.00 ± 0.01）、Z {gb.min.z:0.000}…{gb.max.z:0.000}（擋牆 {sb.min.z:0.000}…{sb.max.z:0.000}）", Mathf.Abs(gb.size.y - 1f) <= 0.01f && covers, "EdgeWall_-X_GateSlice");
+            float tol = d.gateGuardTolerance;
+            bool covers = gb.min.z <= sb.min.z + tol && gb.max.z >= sb.max.z - tol && gb.min.z >= sb.min.z - tol;   // 寬和擋牆差 ≤ 容差、網格不比 collider 更往開口內伸
+            Pend(r, "22", $"擋欄 ENV_GateSliceGuard 高 {gb.size.y:0.000}（{d.gateGuardHeight} ± {tol}）、Z {gb.min.z:0.000}…{gb.max.z:0.000}（擋牆 {sb.min.z:0.000}…{sb.max.z:0.000}）", Mathf.Abs(gb.size.y - d.gateGuardHeight) <= tol + Eps && covers, "EdgeWall_-X_GateSlice");
         }
 
         /// <summary>第17項：暫放墊整塊在 |X| ≤ stripMatMaxAbsX、離最近車頂站點 ≥ stripMatStationMin、不在活動欄開口到各車頂站點的直線動線上（範圍讀資料：物件存檔時是 inactive）。</summary>

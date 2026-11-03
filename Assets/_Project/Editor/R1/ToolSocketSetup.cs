@@ -9,7 +9,7 @@ namespace PantographSim.Editor
 {
     /// <summary>
     /// a6 增補 7（鐵道 D39，torque-wrench-sockets.md v1.3 §6.5、§7）：套筒目錄 SocketCatalog、兩支扭力扳手與套筒扳手的 ToolDefinition 欄位、
-    /// 螺栓用哪顆套筒（FastenerDef.socketId 的對照）、tool_sockets.json（Blender 讀的單一來源）＋雜湊。可以重跑（每次寫同樣的值）。
+    /// 螺栓用哪顆套筒（FastenerDef.socketId 的對照）、tool_sockets.json（Blender 讀的單一來源）＋雜湊。可以重跑（每次寫同樣的值）：每次建置都覆寫套筒目錄與這三支扳手的 ToolDefinition 欄位，在 Inspector 手改會被蓋掉，改數值要改這裡。
     /// 數值是規格表的值（EX 的照抄），之後只改這裡的資料或資產。
     /// shortcut: tool.torque_wrench_l 的 ToolDefinition 放在 Assets/_Project/Tools（不在 R1 的工具清單裡，不進工具列、不影響 25 步）, R1.5b b4c 把它接進工具袋 slot_13 時搬進工具清單
     /// </summary>
