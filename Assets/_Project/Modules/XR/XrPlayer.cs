@@ -24,6 +24,10 @@ namespace PantographSim.XR
         [SerializeField] XrTeleport teleport;
         [SerializeField] XrCoach coach;
         [SerializeField] float maxDistance = 30f, grabRadius = 0.15f, trayRadius = 0.3f, pouchRadius = 0.15f;
+        [Tooltip("D31：胸前扣環、工具環的握把半徑（RoofSceneDef.bodyRingRadius，建置時寫入）")] [SerializeField] float bodyRingRadius = 0.08f;
+
+        /// <summary>R1.5b b4（D31）：建置時寫入胸前扣環、工具環的握把半徑。</summary>
+        public void SetBodyRingRadius(float r) => bodyRingRadius = r;
 
         XRInputMapper mapper;
         XrControllerInput input;
@@ -260,6 +264,10 @@ namespace PantographSim.XR
             grabPickedThisPress = false;
             if (!S.GetBool("training.running") || S.GetBool("training.paused")) return;
             string active = S.Get(SimIds.ActiveTool);
+            // D31：手空著伸到胸前扣環按握把＝掛鉤收起／取下；伸到工具環＝拿下短接地線（和桌面版按鈕同一個請求）
+            bool empty = string.IsNullOrEmpty(active) && string.IsNullOrEmpty(S.Get("hand.item"));
+            if (empty && Near(BodyRings.ChestRing, bodyRingRadius)) { var (t, x) = BodyRings.ChestRingRequest(S); Send(t, x); grabPickedThisPress = true; return; }
+            if (empty && S.GetBool(BodyRings.LeadCarried) && Near(BodyRings.ToolRing, bodyRingRadius)) { var (t, x) = BodyRings.ToolRingRequest(S); Send(t, x); grabPickedThisPress = true; return; }
             // D30：手伸到腰包按握把＝從腰包拿出上鎖掛牌組（手要空著）
             if (string.IsNullOrEmpty(active) && string.IsNullOrEmpty(S.Get("hand.item")) && Near("env.waist_pouch", pouchRadius)) { Send("env.waist_pouch", "click"); grabPickedThisPress = true; return; }
             int slot = SlotOf(hoveredId);
@@ -284,6 +292,7 @@ namespace PantographSim.XR
                 int k = SlotOfTool(active);
                 if (k > 0 && (SlotOf(hoveredId) == k || Near("env.tool_rack.slot_" + k, grabRadius)))
                     Sim.Bus.Publish(new ToolReturnRequested { targetId = "env.tool_rack.slot_" + k, value = k, time = SimClock.Now });
+                else if (active == BodyRings.ToolGroundingLead && Near(BodyRings.ToolRing, bodyRingRadius)) { var (t, x) = BodyRings.ToolRingRequest(S); Send(t, x); }   // D31：短接地線掛回安全帶工具環
                 else if (Near("env.waist_pouch", pouchRadius)) Send("env.waist_pouch", "click");   // D30：上鎖掛牌組收進腰包（不是腰包的工具由 ToolBelt 提示）
                 else Send("tool.belt", "release:" + (S.Get(XrViewHeight.FloorKey) == "Roof" ? "roof" : "ground"));   // 防墜繫繩：車頂垂掛並記 Major、地面放下（crane-procedure 6.3）
                 return;

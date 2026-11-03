@@ -31,6 +31,27 @@ namespace PantographSim.Tests
             }
         }
 
+        /// <summary>桌面版「胸前扣環」「工具環」按鈕和 VR 伸手按握把送出同一個請求（BodyRings）：點一下收起／取下、掛上／拿下。</summary>
+        [Test]
+        public void BodyRingRequests_DesktopAndXr_Toggle()
+        {
+            using (var b = new BeltRig())
+            {
+                void Press(System.Func<ISimState, (string target, string text)> req) { var (t, x) = req(b.s); Send(t, x); }
+                b.s.SetBool(HarnessLogic.Platform, true);
+                Press(BodyRings.ChestRingRequest);
+                Assert.IsTrue(b.s.GetBool(HarnessLogic.Stowed), "收起");
+                Press(BodyRings.ChestRingRequest);
+                Assert.IsFalse(b.s.GetBool(HarnessLogic.Stowed), "再按一次：取下");
+
+                b.belt.ClickSlot(BeltRig.Table.FindTool(GroundingLeadLogic.ToolId).slot);
+                Press(BodyRings.ToolRingRequest);
+                Assert.IsTrue(b.s.GetBool(GroundingLeadLogic.Carried), "拿著短接地線按：掛上工具環");
+                Press(BodyRings.ToolRingRequest);
+                Assert.AreEqual(GroundingLeadLogic.ToolId, b.s.Get(SimIds.ActiveTool), "手空著按：拿下");
+            }
+        }
+
         [Test]
         public void GroundingLead_RingClampRemove_CannotReturnWhileInstalled()
         {
@@ -51,7 +72,7 @@ namespace PantographSim.Tests
                 Send(GroundingLeadLogic.Cable, "click", GroundingLeadLogic.ToolId);
                 Send(GroundingLeadLogic.ToolId, "pulltest");
                 Assert.IsTrue(b.s.GetBool(GroundingLeadLogic.PullTestedKey));
-                Assert.AreEqual(RackLogic.InUse, b.Slot(slot), "兩端接上：留在場上");
+                Assert.AreEqual(RackLogic.InUse, b.Slot(slot), "兩端接上、拉線確認後：留在場上");
                 Assert.AreEqual("", b.s.Get(SimIds.ActiveTool));
 
                 b.belt.ClickSlot(slot);

@@ -13,7 +13,7 @@ namespace PantographSim.Tools
         {
             if (!GroundingLeadLogic.IsPoint(e.targetId)) { base.OnClick(e); return; }
             if (!Ask(e.targetId, "use")) return;
-            Perform(e.targetId, GroundingLeadLogic.Toggle(State, e.targetId, Hotkey));
+            Perform(e.targetId, GroundingLeadLogic.Toggle(State, e.targetId));
         }
 
         public override void OnCommand(string command)
@@ -21,7 +21,7 @@ namespace PantographSim.Tools
             string msg = null;
             if (command == "ring") msg = GroundingLeadLogic.HangOnRing(State, Hotkey);
             else if (command == "take") msg = GroundingLeadLogic.Take(State, Hotkey);
-            else if (command == "pulltest" && Ask(GroundingLeadLogic.Cable, "pulltest")) msg = GroundingLeadLogic.PullTest(State);
+            else if (command == "pulltest" && Ask(GroundingLeadLogic.Cable, "pulltest")) msg = GroundingLeadLogic.PullTest(State, Hotkey);
             if (msg != null) State.Set("ui.toast", msg);
         }
     }

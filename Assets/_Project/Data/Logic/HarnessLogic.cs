@@ -8,7 +8,7 @@ namespace PantographSim.Data
     /// </summary>
     public static class HarnessLogic
     {
-        public const string Roof = "harness.roof", Platform = "harness.platform", Stowed = "harness.hooks_stowed", Count = "harness.hooks_count";
+        public const string Roof = "harness.roof", Platform = "harness.platform", Stowed = BodyRings.HooksStowed, Count = "harness.hooks_count";
 
         /// <summary>解開掛鉤收到胸前扣環（在平台）。還扣在車頂防墜器上不能收（車頂上要一直扣著）。回傳 null＝成功，否則是提示。</summary>
         public static string StowHooks(ISimState s)

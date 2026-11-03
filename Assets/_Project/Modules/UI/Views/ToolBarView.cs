@@ -30,6 +30,8 @@ namespace PantographSim.UI
             buttons.Clear();
             Add("", "手", "放回");
             AddPouch();
+            chestBg = AddBody("扣", "胸前扣環", () => BodyRings.ChestRingRequest(Sim.State));   // R1.5b b4（D31）：和 VR 伸手到胸前相同
+            ringBg = AddBody("環", "工具環", () => BodyRings.ToolRingRequest(Sim.State));
             slotKeys.Clear();
             foreach (var entry in list.Split(';'))
             {
@@ -52,6 +54,21 @@ namespace PantographSim.UI
             var nm = Ui.Text(b.transform, "腰包", 16, Ui.Muted, TextAnchor.LowerCenter);
             Ui.Stretch(nm.rectTransform, 2, 50, 2, 6);
             pouchBg = b.GetComponent<Image>();
+        }
+
+        Image chestBg, ringBg;
+
+        /// <summary>D31：胸前扣環、工具環按鈕（請求由 BodyRings 依狀態算，桌面與 VR 相同）。</summary>
+        Image AddBody(string key, string name, System.Func<(string target, string text)> request)
+        {
+            var b = Ui.Button(root, "", 16, () => { var (t, x) = request(); Ui.Send(t, x); });
+            Ui.Size(b, 88, 88);
+            Object.Destroy(Ui.LabelOf(b).gameObject);
+            var num = Ui.Text(b.transform, key, 34, Color.white, TextAnchor.UpperCenter, FontStyle.Bold);
+            Ui.Stretch(num.rectTransform, 2, 4, 2, 34);
+            var nm = Ui.Text(b.transform, name, 16, Ui.Muted, TextAnchor.LowerCenter);
+            Ui.Stretch(nm.rectTransform, 2, 50, 2, 6);
+            return b.GetComponent<Image>();
         }
 
         void Add(string toolId, string key, string name)
@@ -77,6 +94,8 @@ namespace PantographSim.UI
             string active = s.Get(SimIds.ActiveTool);
             float blink = Ui.Blink(6f);
             if (pouchBg != null) pouchBg.color = slotKeys.Exists(k => s.Get(k) == SimIds.RackInPouch) ? Ui.ButtonOn : Ui.ButtonBg;   // 腰包裡有東西＝亮
+            if (chestBg != null) chestBg.color = s.GetBool(BodyRings.HooksStowed) ? Ui.ButtonOn : Ui.ButtonBg;   // 掛鉤收在胸前＝亮
+            if (ringBg != null) ringBg.color = s.GetBool(BodyRings.LeadCarried) ? Ui.ButtonOn : Ui.ButtonBg;     // 短接地線掛在工具環＝亮
             foreach (var (id, bg, num, name) in buttons)
             {
                 bool isActive = id == active;

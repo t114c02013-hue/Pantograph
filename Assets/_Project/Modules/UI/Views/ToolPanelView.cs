@@ -43,7 +43,7 @@ namespace PantographSim.UI
             var img = Ui.Panel(safe, "ToolPanel");
             root = Ui.Place(img.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, Bottom), new Vector2(FullWidth, 0));
             Ui.VStack(img.gameObject, 16, 8);
-            BuildVoltage(); BuildGrounding(); BuildCaliper(); BuildSocket(); BuildTorque(); BuildCloth(); BuildSimple(SimIds.ToolMarker, "標記筆", "依 1→2→3→4 點已鎖到扭力的螺栓，畫上跨螺栓頭與托架的紅色標記線。");
+            BuildVoltage(); BuildGrounding(); BuildLead(); BuildCaliper(); BuildSocket(); BuildTorque(); BuildCloth(); BuildSimple(SimIds.ToolMarker, "標記筆", "依 1→2→3→4 點已鎖到扭力的螺栓，畫上跨螺栓頭與托架的紅色標記線。");
             BuildSimple(SimIds.ToolLockout, "上鎖掛牌組", "本切片已預先完成上鎖掛牌，可在控制盤面板查看狀態。");
             BuildSimple(SimIds.ToolHarness, "安全帶", "本切片已預先完成安全帶改扣。");
             message = Ui.Text(root, "", 21, Ui.Accent);
@@ -100,6 +100,24 @@ namespace PantographSim.UI
                 string F(bool on, string t) => on ? Ui.Tint("● " + t, Ui.Ok) : Ui.Tint("○ " + t, Ui.Muted);
                 status.text = $"{F(s.GetBool(SimIds.TerminalClamped), "平台端子已夾")}　{F(s.GetBool(SimIds.PullTested), "拉線已確認")}　{F(s.GetBool(SimIds.HeadClamped), "弓頭已掛")}";
                 pull.interactable = s.GetBool(SimIds.TerminalClamped) && !s.GetBool(SimIds.PullTested);
+            });
+        }
+
+        /// <summary>R1.5b b4：攜帶式短接地線（#2）：拉線確認、掛回工具環。</summary>
+        void BuildLead()
+        {
+            var p = Panel(BodyRings.ToolGroundingLead, "攜帶式短接地線");
+            var status = Ui.Text(p, "", 23);
+            var row = Row(p);
+            var pull = Btn(row, "拉線確認", () => Ui.Send(BodyRings.ToolGroundingLead, "pulltest"), 160);
+            Btn(row, "掛回安全帶工具環", () => Ui.Send(BodyRings.ToolGroundingLead, "ring"), 220);
+            Help(row, "掛接：車體接地座 → 電纜端子 → 拉線　拆除：電纜端子 → 車體接地座");
+            refreshers.Add(s =>
+            {
+                string F(bool on, string t) => on ? Ui.Tint("● " + t, Ui.Ok) : Ui.Tint("○ " + t, Ui.Muted);
+                bool cable = s.GetBool("ip.roof.hv_cable_ground.clamped");
+                status.text = $"{F(s.GetBool("ip.roof.carbody_ground.clamped"), "車體接地座已夾")}　{F(cable, "電纜端子已掛")}　{F(s.GetBool("ip.roof.hv_cable_ground.pull_tested"), "拉線已確認")}";
+                pull.interactable = cable && !s.GetBool("ip.roof.hv_cable_ground.pull_tested");
             });
         }
 

@@ -216,6 +216,16 @@ namespace PantographSim.Editor.XR
             if (bagT != null)
                 rigGo.AddComponent<XrCarryContainer>().Setup(rig, bagT, rd.toolBagHeadOffset, true, rd.carryOpenRange, bagT.GetComponentsInChildren<Transform>(true).Where(x => x.name.StartsWith("Label_")).Select(x => x.gameObject).ToArray());
             rigGo.AddComponent<XrCarryContainer>().Setup(rig, pouch.transform, rd.waistPouchHeadOffset, false, rd.carryOpenRange, null);
+            // R1.5b b4（D31）：安全帶胸前收納扣環、安全帶工具環（同樣跟著頭的 yaw；位置、大小、握把半徑都在 RoofSceneDef）
+            foreach (var (id, name, label, headOffset) in new[] { (BodyRings.ChestRing, "ChestRing", "胸前收納扣環（安全帶掛鉤）", rd.chestRingHeadOffset), (BodyRings.ToolRing, "HarnessToolRing", "安全帶工具環（短接地線）", rd.toolRingHeadOffset) })
+            {
+                var ring = SliceModelBuilder.Prim(PrimitiveType.Cube, name, rigGo.transform, Vector3.zero, Vector3.one * rd.bodyRingSize, mats["panel"]);
+                ring.GetComponent<BoxCollider>().isTrigger = true;
+                ring.AddComponent<PantographSim.Parts.Common.InteractionPointMarker>().Configure(id, label);
+                rigGo.AddComponent<XrCarryContainer>().Setup(rig, ring.transform, headOffset, false, rd.bodyRingRadius, null);
+                sb.AppendLine($"VR：{label} {id}：頭部偏移 {headOffset:F2}、邊長 {rd.bodyRingSize}、握把半徑 {rd.bodyRingRadius}");
+            }
+            player.SetBodyRingRadius(rd.bodyRingRadius);
             rigGo.SetActive(false);
             BuildToCabMarker(xrRoot.transform, mats, lineMat, sb);
             sb.AppendLine("VR：站點 " + string.Join("、", points.Select(p => p.Label + (string.IsNullOrEmpty(p.LockKey) ? "" : "（車頂開放才解鎖）"))));
