@@ -932,6 +932,17 @@ namespace PantographSim.Editor
             res.ids[PantographSim.Parts.Mechanism.PanAssyRigging.HookId] = latch;
             var rig = root.GetComponent<PantographSim.Parts.Mechanism.PanAssyRigging>() ?? root.gameObject.AddComponent<PantographSim.Parts.Mechanism.PanAssyRigging>();
             rig.Setup(rigging, crane, holes, pins, tops, standLights, roofLights, box);
+            rig.SetRoof(d);   // R1.5b b4：吊梁離車頂高度
+            // R1.5b b4（RM_05 d、RM_06 b）：吊梁銘牌 env.lift_beam、四條吊帶整組 env.rigging（吊梁下方一段，跟著吊鉤走；ContactTarget 層，LoadProbe 不碰，不擋下方吊耳）；查看＝指著停一下（InspectLogic）
+            var beam = crane.Beam;
+            if (beam.GetComponentInChildren<Collider>() == null) beam.gameObject.AddComponent<BoxCollider>();
+            beam.gameObject.AddComponent<InteractionPointMarker>().Configure("env.lift_beam", "吊梁（銘牌荷重）");
+            res.ids["env.lift_beam"] = beam;
+            var rigBox = new GameObject("RiggingInspect").transform; rigBox.SetParent(beam, false); rigBox.position = beam.position + Vector3.down * (rigging.inspectBoxOffset + rigging.inspectBoxSize.y / 2f);
+            var rc = rigBox.gameObject.AddComponent<BoxCollider>(); rc.size = rigging.inspectBoxSize;
+            rigBox.gameObject.layer = LayerMask.NameToLayer("ContactTarget");
+            rigBox.gameObject.AddComponent<InteractionPointMarker>().Configure("env.rigging", "四條吊帶");
+            res.ids["env.rigging"] = rigBox;
             sb.AppendLine($"吊運（b2）：LoadProbe 層 {probeLayer}（只和 Default、Boundary 互動）；台架落點 Y {pins[0].position.y:0.000}；對位燈 台架 {standLights.Length}、車頂 {roofLights.Length}；吸附 {rigging.snapRadius} m");
         }
 

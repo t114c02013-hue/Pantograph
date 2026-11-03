@@ -97,6 +97,7 @@ namespace PantographSim.UI
             views.Add(new ControlsStripView());
             views.Add(new WorkOrderView());     // 對話框：遮罩蓋住其他面板
             views.Add(new ControlPanelView());
+            views.Add(new SlingVerdictView());   // R1.5b b4（RM_05 f）
             views.Add(new PromptViews());
             views.Add(new TaskCardView());
             views.Add(new TutorialView());

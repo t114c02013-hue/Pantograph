@@ -332,6 +332,35 @@ namespace PantographSim.UI
         }
     }
 
+    /// <summary>R1.5b b4（RM_05 f）：看過吊帶之後判「可用／不可用」（InspectLogic 打開，ui.sling_inspect＝吊帶 ID）。</summary>
+    public class SlingVerdictView : View
+    {
+        RectTransform dim;
+        Text title;
+
+        protected override void OnBuild(RectTransform safe)
+        {
+            var (d, card) = Modal.Create(safe, "SlingVerdict", new Vector2(560, 260));
+            dim = d;
+            Ui.VStack(card.gameObject, 24, 10, false);
+            title = Ui.Text(card, "", 28, Color.white, TextAnchor.UpperLeft, FontStyle.Bold);
+            Ui.Text(card, "看標籤和有沒有割傷、破損", 21, Ui.Muted);
+            var row = Ui.Rect(card, "Verdict"); Ui.HStack(row.gameObject, 12);
+            Ui.Size(Ui.Button(row, "可用", 22, () => Send("verdict:ok"), Ui.ButtonOn), 200, 54);
+            Ui.Size(Ui.Button(row, "不可用（割傷／破損）", 22, () => Send("verdict:ng")), 260, 54);
+        }
+
+        void Send(string verdict) { var id = Sim.State?.Get("ui.sling_inspect"); if (!string.IsNullOrEmpty(id)) Ui.Send(id, verdict); }
+
+        public override void Refresh(ISimState s)
+        {
+            string id = s.Get("ui.sling_inspect");
+            bool show = !string.IsNullOrEmpty(id) && s.GetBool("training.running");
+            Ui.SetActive(dim, show);
+            if (show) title.text = "吊帶 " + id.Substring(id.LastIndexOf('_') + 1) + " 檢查";
+        }
+    }
+
     /// <summary>駕駛室控制盤（點場景中的控制盤開啟）。</summary>
     public class ControlPanelView : View
     {

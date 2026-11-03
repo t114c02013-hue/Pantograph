@@ -28,6 +28,8 @@ namespace PantographSim.App
         [Tooltip("預設課程（Courses.json 的 defaultCourse；b4c 做完前是 r1）")] [SerializeField] string defaultCourse = SimIds.CourseR1;
         [Tooltip("選單上 R1 的名稱、各課程後面的註記（例「開發中」），都讀 Courses.json")] [SerializeField] string r1Title = "", courseNotes = "";
         CourseDef course;
+        [Tooltip("R1.5b b4：吊帶判定的答案（RiggingDef.defectiveSlings）")] [SerializeField] RiggingDef rigging;
+        public void SetRigging(RiggingDef r) => rigging = r;
 
         EventBus bus;
         SimState state;
@@ -116,7 +118,16 @@ namespace PantographSim.App
         void Start() => RegisterPoseSource();
 
         /// <summary>卡關偵測：每 0.5 s 只讀地檢查目前步驟（不推進步驟；見 ProcedureRunner.Poll）。重播時 runner 沒有開始，不作用。</summary>
-        void Update() => runner?.Poll(Time.time);
+        string dwellId = ""; float dwellT;
+        ToolRulesDef toolRules;
+
+        void Update()
+        {
+            runner?.Poll(Time.time);
+            if (state == null) return;
+            toolRules = toolRules != null ? toolRules : ToolRulesDef.Load();
+            (dwellId, dwellT) = InspectLogic.Dwell(state, dwellId, dwellT, Time.deltaTime, toolRules);   // R1.5b b4：指著停一下＝查看（桌面、VR 同一套）
+        }
 
         /// <summary>學員位姿來源：VR＝XR Rig，桌面＝桌面攝影機（兩者都實作 IPoseSource）。</summary>
         void RegisterPoseSource()
@@ -180,6 +191,10 @@ namespace PantographSim.App
                 scoring.Start(Time.time);
                 // 等機構套用情境姿態、檢測點寫出實際距離後才開始判定（否則第一個小動作會用到上一個姿態的距離）
                 StartCoroutine(StartRunnerAfterPoseSettles());
+            }
+            else if (e.targetId.StartsWith(InspectLogic.SlingPrefix) && (e.text == "verdict:ok" || e.text == "verdict:ng"))
+            {
+                InspectLogic.SlingVerdict(state, e.targetId, e.text == "verdict:ok", rigging);   // R1.5b b4（RM_05 f）：吊帶可用／不可用
             }
             else if (e.targetId == "app.fault" && !runner.Started && (course?.faults ?? new CourseDef.FaultOption[0]).Any(f => f.key == e.text))
             {

@@ -1,8 +1,6 @@
-periodic：True，啟用時條件已成立、靠 version 規則擋下（沒有這條規則就會自動完成）的小動作 8 個：
+periodic：True，啟用時條件已成立、靠 version 規則擋下（沒有這條規則就會自動完成）的小動作 6 個：
 STP_LF_01_PreLift d：part.crane.hook.inspected&&part.crane.hook_cog_offset_cm<=5
-STP_LF_05_LowerToStand a：part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1
 STP_IN_02_TrialLift b：part.pan_assy.inspected&&part.pan_assy.tilt_deg<=3
-STP_IN_04_LowerToRoof a：part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1
 STP_IN_04b_RegroundPan b：tool.voltage_detector.selftest
 STP_IN_04b_RegroundPan c：isolation.voltage_tested
 STP_IN_04b_RegroundPan g：isolation.pull_tested

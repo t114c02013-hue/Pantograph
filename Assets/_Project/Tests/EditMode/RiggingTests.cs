@@ -152,6 +152,84 @@ namespace PantographSim.Tests
             });
         }
 
+        /// <summary>R1.5b b4：吊運量測鍵（吊鉤與重心水平差、吊梁離車頂／弓頂、人員淨空、停住秒數、傾斜、對位偏差、座落誤差）由場景機制寫，車頂 → 台架 → 車頂一路驗。</summary>
+        [Test]
+        public void RoundTrip_Measures_HookCog_Beam_Still_Tilt_Offsets_SeatError()
+        {
+            StationTests.WithScene(scene =>
+            {
+                var L = new LiftScene(scene);
+                try
+                {
+                    var p0 = L.root.position;
+                    var rd = AssetDatabase.LoadAssetAtPath<RoofSceneDef>("Assets/_Project/Modules/Worksite/Data/RoofSceneDef.asset");
+                    L.Release(); L.RigAll(); L.Latch(); L.HookOverCog();
+                    L.rig.Tick(L.s);
+                    Assert.LessOrEqual(L.s.GetFloat("part.crane.hook_cog_offset_cm", 99f), 5f, "吊鉤在重心正上方（RM_05 c、LF_01 d）");
+                    Assert.Greater(L.s.GetFloat("part.crane.beam_above_roof_m"), 0f, "吊梁在車頂上方");
+                    Assert.IsTrue(L.s.Has("part.crane.beam_above_pan_m"), "吊梁離弓頂");
+                    Assert.IsTrue(L.s.GetBool("part.crane.person_clear"), "沒有人在吊鉤下方");
+                    Assert.IsTrue(L.Hold("Up", false, () => L.s.GetFloat(PanAssyRigging.DropDistanceKey, 0f) >= 0.1f, 120f), "試吊離座 0.1 m：" + L.Diag);
+                    for (int i = 0; i < 160; i++) L.Tick(0.02f, "None");   // 停住 3.2 s
+                    Assert.GreaterOrEqual(L.s.GetFloat("part.crane.still_s"), 3f, "停住秒數（LF_02 a）");
+                    Assert.LessOrEqual(L.s.GetFloat("part.pan_assy.tilt_deg", 99f), 3f, "吊起時傾斜（LF_02 b）");
+                    Assert.IsTrue(L.Hold("Up", true, () => L.s.Get(SimIds.CraneState) == "LimitUp", 120f), L.Diag);
+                    Move(L, new Vector3(rd.standCenterXZ.x, 0f, rd.standCenterXZ.y));
+                    Assert.LessOrEqual(L.s.GetFloat("part.pan_assy.stand_offset_cm", 99f), 5f, "對準台架中心（LF_04 a）");
+                    Assert.IsTrue(L.Hold("Down", true, () => L.s.GetFloat(PanAssyRigging.DropDistanceKey, 99f) < 0.25f, 120f), L.Diag);
+                    Assert.IsTrue(L.Hold("Down", false, () => L.State == "OnStand", 60f), L.Diag);
+                    Assert.LessOrEqual(L.s.GetFloat("part.pan_assy.seat_error_cm", 99f), 2f, "吸附到台架：孔位誤差 ≤ 吸附半徑");
+                    for (int k = 1; k <= 2; k++) L.rig.Operate(L.s, "env.panto_stand.clamp_" + k);
+                    for (int k = 1; k <= 2; k++) L.rig.Operate(L.s, "env.panto_stand.clamp_" + k);
+                    L.Tick(0.02f, "None");
+                    Assert.IsTrue(L.Hold("Up", true, () => L.s.Get(SimIds.CraneState) == "LimitUp", 120f), L.Diag);
+                    Move(L, new Vector3(p0.x, 0f, p0.z));
+                    Assert.LessOrEqual(L.s.GetFloat("part.pan_assy.roof_offset_cm", 99f), 5f, "對準 4 個絕緣子中心（IN_03 b）");
+                    Assert.IsTrue(L.Hold("Down", true, () => L.s.GetFloat(PanAssyRigging.DropDistanceKey, 99f) < 0.25f, 120f), L.Diag);
+                    Assert.IsTrue(L.Hold("Down", false, () => L.State == "Mounted", 60f), L.Diag);
+                    Assert.LessOrEqual(L.s.GetFloat("part.pan_assy.seat_error_cm", 99f), 1f, "放到絕緣子上：BaseHole 與 InsulatorTop ≤ 1 cm（IN_04 b）");
+                }
+                finally { L.Dispose(); }
+            });
+        }
+
+        [Test]
+        public void EStop_PressThenReset_RecordsTested()
+        {
+            var s = new SimState(new EventBus());
+            CraneControl.PressEStop(s);
+            Assert.IsFalse(s.GetBool(CraneControl.EStopTestedKey), "只按下還不算");
+            CraneControl.PressEStop(s);
+            Assert.IsFalse(s.GetBool(SimIds.CraneEStop));
+            Assert.IsTrue(s.GetBool(CraneControl.EStopTestedKey), "按下再復歸＝急停測試過（RM_05 b）");
+        }
+
+        [Test]
+        public void Inspect_DwellThenRecorded_SlingVerdictCheckedAgainstData()
+        {
+            var s = new SimState(new EventBus());
+            var rules = ToolRulesDef.Load();
+            var def = ScriptableObject.CreateInstance<RiggingDef>(); def.defectiveSlings = new[] { 3 };
+            (string id, float t) d = ("", 0f);
+            s.Set(InspectLogic.HoverKey, "env.sling_3");
+            d = InspectLogic.Dwell(s, d.id, d.t, 0.1f, rules);
+            d = InspectLogic.Dwell(s, d.id, d.t, rules.inspectDwellSeconds / 2f, rules);
+            Assert.IsFalse(s.GetBool("env.sling_3.inspected"), "還沒停夠久");
+            d = InspectLogic.Dwell(s, d.id, d.t, rules.inspectDwellSeconds, rules);
+            Assert.IsTrue(s.GetBool("env.sling_3.inspected"));
+            Assert.AreEqual("env.sling_3", s.Get(InspectLogic.SlingVerdictUi), "看過吊帶：打開可用／不可用");
+            InspectLogic.SlingVerdict(s, "env.sling_3", true, def);
+            Assert.IsFalse(s.GetBool("env.sling_3.verdict_correct"), "有割傷判可用：不對");
+            InspectLogic.SlingVerdict(s, "env.sling_3", false, def);
+            Assert.IsTrue(s.GetBool("env.sling_3.verdict_correct"));
+            s.Set(InspectLogic.HoverKey, "part.crane.hook");
+            d = InspectLogic.Dwell(s, d.id, d.t, 0.1f, rules);
+            d = InspectLogic.Dwell(s, d.id, d.t, rules.inspectDwellSeconds, rules);
+            Assert.IsTrue(s.GetBool("part.crane.hook.inspected"), "吊鉤：指著停一下＝查看（不會切換舌片）");
+            Assert.IsFalse(s.GetBool(PanAssyRigging.LatchedKey));
+            Object.DestroyImmediate(def);
+        }
+
         /// <summary>除錯情境：車頂 → 台架（吸附、鎖夾具、卸吊帶）→ 車頂（吸附、上扭力後 Fastened），全程沒有碰撞，最後回到原位。</summary>
         [Test]
         public void RoundTrip_RoofToStandAndBack()

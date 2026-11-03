@@ -20,7 +20,7 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | b4:p5 | 兩門課跑到結算（b4 第 5 部分；機制沒有指定段落，做的時候回報） |
 | b4:p3b | 扭力類錯誤與 K3 降級（b4 第 3b 部分） |
 
-## 小動作（共 71 列）
+## 小動作（共 49 列）
 
 | 步驟 | 小動作 | 課程 | 完成條件 | owner |
 |---|---|---|---|---|
@@ -73,28 +73,6 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_CSR_10_CheckNew_L | g | periodic | `env.work_order.part_trace.matches_spare_L` | b4:p4 |
 | STP_CSR_10_CheckNew_R | g | periodic | `env.work_order.part_trace.matches_spare_R` | b4:p4 |
 | STP_RT_01_CraneStow | a | periodic | `part.crane.hook.parked` | b4:p4 |
-| STP_RM_03_HVDisconnect | a | periodic | `ip.pan_head.ground_clamp.inspected&&isolation.head_clamped&&ip.roof.hv_cable_ground.clamped` | b4:p5 |
-| STP_RM_05_CraneRiggingCheck | b | periodic | `ctrl.crane.estop=false&&ctrl.crane.estop_tested` | b4:p5 |
-| STP_RM_05_CraneRiggingCheck | c | periodic | `part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_roof_m>=1.2&&part.crane.beam_above_roof_m<=1.6&&part.crane.person_clear` | b4:p5 |
-| STP_RM_05_CraneRiggingCheck | d | periodic | `part.crane.hook.inspected&&env.lift_beam.inspected` | b4:p5 |
-| STP_RM_05_CraneRiggingCheck | f1 | periodic | `env.sling_1.inspected&&env.sling_1.verdict_correct` | b4:p5 |
-| STP_RM_05_CraneRiggingCheck | f2 | periodic | `env.sling_2.inspected&&env.sling_2.verdict_correct` | b4:p5 |
-| STP_RM_05_CraneRiggingCheck | f3 | periodic | `env.sling_3.inspected&&env.sling_3.verdict_correct` | b4:p5 |
-| STP_RM_05_CraneRiggingCheck | f4 | periodic | `env.sling_4.inspected&&env.sling_4.verdict_correct` | b4:p5 |
-| STP_RM_06_Rig | b | periodic | `env.rigging.inspected` | b4:p5 |
-| STP_LF_01_PreLift | d | periodic | `part.crane.hook.inspected&&part.crane.hook_cog_offset_cm<=5` | b4:p5 |
-| STP_LF_02_TrialLift | a | periodic | `part.crane.drop_distance>=0.08&&part.crane.drop_distance<=0.15&&part.crane.still_s>=3` | b4:p5 |
-| STP_LF_02_TrialLift | b | periodic | `part.pan_assy.inspected&&part.pan_assy.tilt_deg<=3` | b4:p5 |
-| STP_LF_04_Traverse | a | periodic | `part.pan_assy.stand_offset_cm<=5` | b4:p5 |
-| STP_LF_05_LowerToStand | a | periodic | `part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1` | b4:p5 |
-| STP_LF_06_SecureOnStand | c | periodic | `part.crane.beam_above_pan_m>=1.0` | b4:p5 |
-| STP_IN_01_RigOnStand | a | periodic | `part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=crane.rig_height_lower_m&&part.crane.beam_above_pan_m<=crane.rig_height_upper_m` | b4:p5 |
-| STP_IN_02_TrialLift | a | periodic | `part.crane.drop_distance>=0.1&&part.crane.still_s>=3` | b4:p5 |
-| STP_IN_02_TrialLift | b | periodic | `part.pan_assy.inspected&&part.pan_assy.tilt_deg<=3` | b4:p5 |
-| STP_IN_03_Transfer | b | periodic | `part.pan_assy.roof_offset_cm<=5` | b4:p5 |
-| STP_IN_04_LowerToRoof | a | periodic | `part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1` | b4:p5 |
-| STP_IN_04_LowerToRoof | b | periodic | `part.pan_assy.state=Mounted&&part.pan_assy.seat_error_cm<=1` | b4:p5 |
-| STP_WC_05_RaiseTest | a | periodic | `part.crane.hook.inspected&&part.pan_assy.inspected` | b4:p5 |
 
 ## 場景裡還沒有的目標（ConditionTables.json 的 pendingTargets）
 
@@ -105,8 +83,6 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | npc.rigging_lead | b4c:holdpoint |
 | npc.inspector | b4c:holdpoint |
 | env.ppe_station | b4c:ppe |
-| env.lift_beam | b4:p5 |
-| env.rigging | b4:p5 |
 | Crane_HookBlock/Hook_Latch | b4:p5 |
 | env.roof_strip_mat.slot_old | b4:p4 |
 | env.spare_shelf | b4:p4 |

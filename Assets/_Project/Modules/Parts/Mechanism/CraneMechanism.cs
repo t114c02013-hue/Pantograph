@@ -42,6 +42,10 @@ namespace PantographSim.Parts.Mechanism
         /// <summary>上一次碰撞停止撞到的 collider 名稱（寫進 ErrorDetected.text，回放和報表看得到撞到什麼）。</summary>
         public string LastHit { get; private set; } = "";
         public Transform Load => load;
+        /// <summary>R1.5b b4：吊鉤、吊梁（量吊鉤與重心水平差、吊梁離車頂／弓頂高度用）。</summary>
+        public Transform HookBlock => hookBlock;
+        public Transform Beam => swayPivot;
+        float stillSeconds;
         public Vector3 HookPosition => hookBlock.position;
 
         public void Setup(CraneProfile p, Transform bridgeT, Transform trolleyT, Transform hookT, Transform anchorT, Transform ropeT, Transform swayT, SafetyRuleDefinition[] safety)
@@ -167,6 +171,9 @@ namespace PantographSim.Parts.Mechanism
                 }
                 if (lb.HasValue) s.SetFloat(SimIds.CraneLoadBottomY, Mathf.Round(LoadWorldBounds().Value.min.y * 1000f) / 1000f);
                 WriteSafetyMeasures(s, airborne, moving, lb, head);
+                stillSeconds = moving ? 0f : stillSeconds + dt;   // R1.5b b4：試吊、放下時停住幾秒（LF_02 a、LF_05 a、IN_02 a、IN_04 a）
+                float still = Mathf.Floor(stillSeconds * 10f) / 10f;
+                if (!s.Has("part.crane.still_s") || Mathf.Abs(s.GetFloat("part.crane.still_s") - still) >= 0.1f - 1e-4f) s.SetFloat("part.crane.still_s", still);
             });
             wasMoving = moving;
         }
@@ -186,6 +193,8 @@ namespace PantographSim.Parts.Mechanism
                 if (lb.HasValue) F("part.crane.operator_distance_m", CraneLogic.HorizontalDistance(lb.Value, head.Value));
             }
             B("part.crane.empty_hook_moving", moving && !airborne);
+            // R1.5b b4（RM_05 c）：吊鉤移動時人不在吊鉤下方（頭的水平投影離吊鉤超過紅區外擴）
+            B("part.crane.person_clear", !head.HasValue || new Vector2(head.Value.x - hp.x, head.Value.z - hp.z).magnitude > profile.redZoneMargin);
             if (airborne && !liftOffHook.HasValue) liftOffHook = hp;
             if (!airborne) liftOffHook = null;
             F("part.crane.horizontal_since_lift_m", liftOffHook.HasValue ? new Vector2(hp.x - liftOffHook.Value.x, hp.z - liftOffHook.Value.z).magnitude : 0f);

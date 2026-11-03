@@ -220,7 +220,7 @@ periodic,STP_RM_01_HoldDown,b,38,3,"hold_down = Installed","ip.pan_assy.hold_dow
 periodic,STP_RM_01_HoldDown,c,39,3,"拉 ≥ EX 5 cm，狀態不變","ip.pan_assy.hold_down.pull_tested",
 periodic,STP_RM_02_CtrlDisconnect,a,40,3,"Removed","ip.pan_assy.ctrl_connector.state=Removed",
 periodic,STP_RM_02_CtrlDisconnect,b,41,3,"防塵蓋已蓋上（沒蓋：Minor）","ip.pan_assy.ctrl_connector.cap=on",
-periodic,STP_RM_03_HVDisconnect,a,42,3,"已查看；兩處掛鉤都已掛上","ip.pan_head.ground_clamp.inspected&&isolation.head_clamped&&ip.roof.hv_cable_ground.clamped",b4:p5
+periodic,STP_RM_03_HVDisconnect,a,42,3,"已查看；兩處掛鉤都已掛上","ip.pan_head.ground_clamp.inspected&&isolation.head_clamped&&ip.roof.hv_cable_ground.clamped",
 periodic,STP_RM_03_HVDisconnect,b,43,2,"手持標記筆","tool.active=tool.marker",
 periodic,STP_RM_03_HVDisconnect,c,44,3,"記號已畫（沒畫：Minor）","ip.pan_assy.hv_terminal.marked",
 periodic,STP_RM_03_HVDisconnect,d,45,2,"掛位 9 = 在袋","rack.slot_9=on_rack",
@@ -242,18 +242,18 @@ periodic,STP_RM_04_BaseUnbolt,c1,53,3,"零件袋數量 +1","part.pan_base.bolt_1
 periodic,STP_RM_04_BaseUnbolt,c4,53,3,"零件袋數量 +1","part.pan_base.bolt_4.state=InTray",
 periodic,STP_RM_04_BaseUnbolt,d,54,2,"掛位 6 = 在袋","rack.slot_6=on_rack",
 periodic,STP_RM_05_CraneRiggingCheck,a,55,2,"ctrl.crane.power = true","ctrl.crane.power",
-periodic,STP_RM_05_CraneRiggingCheck,b,56,3,"estop 由 true 變回 false","ctrl.crane.estop=false&&ctrl.crane.estop_tested",b4:p5
-periodic,STP_RM_05_CraneRiggingCheck,c,57,3,"Hook_AttachPoint 與 COG 水平差 ≤ EX 5 cm；吊梁底面在車頂上方 EX 1.2–1.6 m；吊鉤移動時，人不在吊鉤 0.5 m 內","part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_roof_m>=1.2&&part.crane.beam_above_roof_m<=1.6&&part.crane.person_clear",b4:p5
-periodic,STP_RM_05_CraneRiggingCheck,d,58,3,"兩處都已查看並勾選","part.crane.hook.inspected&&env.lift_beam.inspected",b4:p5
-periodic,STP_RM_05_CraneRiggingCheck,f1,59,3,"inspected = true；有割傷就判為「不合格」","env.sling_1.inspected&&env.sling_1.verdict_correct",b4:p5
-periodic,STP_RM_05_CraneRiggingCheck,f2,59,3,"inspected = true；有割傷就判為「不合格」","env.sling_2.inspected&&env.sling_2.verdict_correct",b4:p5
-periodic,STP_RM_05_CraneRiggingCheck,f3,59,3,"inspected = true；有割傷就判為「不合格」","env.sling_3.inspected&&env.sling_3.verdict_correct",b4:p5
-periodic,STP_RM_05_CraneRiggingCheck,f4,59,3,"inspected = true；有割傷就判為「不合格」","env.sling_4.inspected&&env.sling_4.verdict_correct",b4:p5
+periodic,STP_RM_05_CraneRiggingCheck,b,56,3,"estop 由 true 變回 false","ctrl.crane.estop=false&&ctrl.crane.estop_tested",
+periodic,STP_RM_05_CraneRiggingCheck,c,57,3,"Hook_AttachPoint 與 COG 水平差 ≤ EX 5 cm；吊梁底面在車頂上方 EX 1.2–1.6 m；吊鉤移動時，人不在吊鉤 0.5 m 內","part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_roof_m>=1.2&&part.crane.beam_above_roof_m<=1.6&&part.crane.person_clear",
+periodic,STP_RM_05_CraneRiggingCheck,d,58,3,"兩處都已查看並勾選","part.crane.hook.inspected&&env.lift_beam.inspected",
+periodic,STP_RM_05_CraneRiggingCheck,f1,59,3,"inspected = true；有割傷就判為「不合格」","env.sling_1.inspected&&env.sling_1.verdict_correct",
+periodic,STP_RM_05_CraneRiggingCheck,f2,59,3,"inspected = true；有割傷就判為「不合格」","env.sling_2.inspected&&env.sling_2.verdict_correct",
+periodic,STP_RM_05_CraneRiggingCheck,f3,59,3,"inspected = true；有割傷就判為「不合格」","env.sling_3.inspected&&env.sling_3.verdict_correct",
+periodic,STP_RM_05_CraneRiggingCheck,f4,59,3,"inspected = true；有割傷就判為「不合格」","env.sling_4.inspected&&env.sling_4.verdict_correct",
 periodic,STP_RM_06_Rig,a1,60,3,"Rigged","ip.pan_assy.lift_point_1.state=Rigged",
 periodic,STP_RM_06_Rig,a4,60,3,"Rigged","ip.pan_assy.lift_point_4.state=Rigged",
 periodic,STP_RM_06_Rig,a2,60,3,"Rigged","ip.pan_assy.lift_point_2.state=Rigged",
 periodic,STP_RM_06_Rig,a3,60,3,"Rigged","ip.pan_assy.lift_point_3.state=Rigged",
-periodic,STP_RM_06_Rig,b,61,3,"已查看","env.rigging.inspected",b4:p5
+periodic,STP_RM_06_Rig,b,61,3,"已查看","env.rigging.inspected",
 periodic,STP_RM_07_LeaveRoof,a,62,3,"兩個都扣著","harness.roof&&harness.platform",
 periodic,STP_RM_07_LeaveRoof,b,63,3,"只剩平台掛點，人在平台","harness.platform&&harness.roof=false&&player.zone=platform",b4d
 periodic,STP_RM_07_LeaveRoof,c,64,3,"兩個掛鉤都收在胸前扣環，安全帶仍穿著","harness.hooks_stowed&&rack.slot_4=in_use",
@@ -261,13 +261,13 @@ periodic,STP_LF_01_PreLift,a,65,3,"已取下","isolation.head_clamped=false",
 periodic,STP_LF_01_PreLift,b,66,3,"已鬆開（第二支的夾子仍在）","isolation.terminal_clamped=false&&ip.roof.carbody_ground.clamped",
 periodic,STP_LF_01_PreLift,c,67,2,"掛位 3 = 在架","rack.slot_3=on_rack",
 periodic,STP_LF_01_PreLift,c2,68,2,"#1 = 已銷號","ground_register.1=cancelled",b4c:ground_register
-periodic,STP_LF_01_PreLift,d,69,3,"已查看；水平差 ≤ EX 5 cm","part.crane.hook.inspected&&part.crane.hook_cog_offset_cm<=5",b4:p5
+periodic,STP_LF_01_PreLift,d,69,3,"已查看；水平差 ≤ EX 5 cm","part.crane.hook.inspected&&part.crane.hook_cog_offset_cm<=5",
 periodic,STP_LF_01_PreLift,e,70,2,"停留點 2 清單全部點過，hold.2.released = true（清單含吊帶角度 ≤ 45°）","hold.2.checklist_done&&hold.2.released",b4c:holdpoint
-periodic,STP_LF_02_TrialLift,a,71,3,"離座 0.08–0.15 m，停住 ≥ EX 3 s","part.crane.drop_distance>=0.08&&part.crane.drop_distance<=0.15&&part.crane.still_s>=3",b4:p5
-periodic,STP_LF_02_TrialLift,b,72,3,"已查看；傾斜 ≤ EX 3°","part.pan_assy.inspected&&part.pan_assy.tilt_deg<=3",b4:p5
+periodic,STP_LF_02_TrialLift,a,71,3,"離座 0.08–0.15 m，停住 ≥ EX 3 s","part.crane.drop_distance>=0.08&&part.crane.drop_distance<=0.15&&part.crane.still_s>=3",
+periodic,STP_LF_02_TrialLift,b,72,3,"已查看；傾斜 ≤ EX 3°","part.pan_assy.inspected&&part.pan_assy.tilt_deg<=3",
 periodic,STP_LF_03_Clearance,a,73,3,"吊物底面 ≥ Y 3.1","part.crane.load_bottom_y>=3.1",
-periodic,STP_LF_04_Traverse,a,74,3,"PAN_Root 原點（底架底面中心）與台架中心水平差 ≤ EX 5 cm","part.pan_assy.stand_offset_cm<=5",b4:p5
-periodic,STP_LF_05_LowerToStand,a,75,3,"底面離定位銷頂 0.05–0.15 m，停 ≥ EX 1 s","part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1",b4:p5
+periodic,STP_LF_04_Traverse,a,74,3,"PAN_Root 原點（底架底面中心）與台架中心水平差 ≤ EX 5 cm","part.pan_assy.stand_offset_cm<=5",
+periodic,STP_LF_05_LowerToStand,a,75,3,"底面離定位銷頂 0.05–0.15 m，停 ≥ EX 1 s","part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1",
 periodic,STP_LF_05_LowerToStand,b,76,2,"part.pan_assy.state = OnStand","part.pan_assy.state=OnStand",
 periodic,STP_LF_06_SecureOnStand,a1,77,3,"鎖","env.panto_stand.clamp_1.state=Locked",
 periodic,STP_LF_06_SecureOnStand,a2,77,3,"鎖","env.panto_stand.clamp_2.state=Locked",
@@ -275,7 +275,7 @@ periodic,STP_LF_06_SecureOnStand,b1,78,3,"Free","ip.pan_assy.lift_point_1.state=
 periodic,STP_LF_06_SecureOnStand,b2,78,3,"Free","ip.pan_assy.lift_point_2.state=Free",
 periodic,STP_LF_06_SecureOnStand,b3,78,3,"Free","ip.pan_assy.lift_point_3.state=Free",
 periodic,STP_LF_06_SecureOnStand,b4,78,3,"Free","ip.pan_assy.lift_point_4.state=Free",
-periodic,STP_LF_06_SecureOnStand,c,79,3,"吊梁底面高於弓頂 EX 1.0 m","part.crane.beam_above_pan_m>=1.0",b4:p5
+periodic,STP_LF_06_SecureOnStand,c,79,3,"吊梁底面高於弓頂 EX 1.0 m","part.crane.beam_above_pan_m>=1.0",
 periodic,STP_CSR_01_CheckIsolation,b,81,3,"三處都已查看，異常欄已勾選「無異常」或「有異常」","env.work_order.anomaly.checked",
 periodic,STP_CSR_02_ZeroCaliper,a,82,1,"手持卡尺","tool.active=tool.caliper",
 periodic,STP_CSR_02_ZeroCaliper,b,83,1,"量爪間距 = 0","tool.caliper.jaw=0",
@@ -390,7 +390,7 @@ periodic,STP_CSR_15_HeightCheck,b,131,1,"讀數已取得","ip.carbon_strip_L.mea
 periodic,STP_CSR_15_HeightCheck,c,132,1,"讀數已取得","ip.carbon_strip_R.measure_mid.new_measured",
 periodic,STP_CSR_15_HeightCheck,d,133,1,"兩格與讀數相差 ≤ 0.05 mm，差值 ≤ EX 1.0 mm","workorder.height_diff",
 periodic,STP_CSR_15_HeightCheck,f,135,3,"掛位 5–9 = 在袋，台架工具盤是空的","rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&env.panto_stand.tool_tray.count<=0",
-periodic,STP_IN_01_RigOnStand,a,136,3,"與 COG 水平差 ≤ 5 cm；吊梁底面在弓頂上方 EX 0.55–0.75 m（D42：吊帶要鬆才掛得上吊耳；上限 = 拉直高度 − 0.06 m，以實測為準）","part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=crane.rig_height_lower_m&&part.crane.beam_above_pan_m<=crane.rig_height_upper_m",b4:p5
+periodic,STP_IN_01_RigOnStand,a,136,3,"與 COG 水平差 ≤ 5 cm；吊梁底面在弓頂上方 EX 0.55–0.75 m（D42：吊帶要鬆才掛得上吊耳；上限 = 拉直高度 − 0.06 m，以實測為準）","part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=crane.rig_height_lower_m&&part.crane.beam_above_pan_m<=crane.rig_height_upper_m",
 periodic,STP_IN_01_RigOnStand,b1,137,3,"Rigged","ip.pan_assy.lift_point_1.state=Rigged",
 periodic,STP_IN_01_RigOnStand,b2,137,3,"Rigged","ip.pan_assy.lift_point_2.state=Rigged",
 periodic,STP_IN_01_RigOnStand,b3,137,3,"Rigged","ip.pan_assy.lift_point_3.state=Rigged",
@@ -398,12 +398,12 @@ periodic,STP_IN_01_RigOnStand,b4,137,3,"Rigged","ip.pan_assy.lift_point_4.state=
 periodic,STP_IN_01_RigOnStand,c1,138,3,"開","env.panto_stand.clamp_1.state=Open",
 periodic,STP_IN_01_RigOnStand,c2,138,3,"開","env.panto_stand.clamp_2.state=Open",
 periodic,STP_IN_01_RigOnStand,d,139,2,"停留點 3 清單全部點過，hold.3.released = true（清單含吊帶角度 ≤ 45°）","hold.3.checklist_done&&hold.3.released",b4c:holdpoint
-periodic,STP_IN_02_TrialLift,a,140,3,"離台 0.1 m，停 ≥ 3 s","part.crane.drop_distance>=0.1&&part.crane.still_s>=3",b4:p5
-periodic,STP_IN_02_TrialLift,b,141,3,"已查看；傾斜 ≤ EX 3°（比照 LF_02 b）","part.pan_assy.inspected&&part.pan_assy.tilt_deg<=3",b4:p5
+periodic,STP_IN_02_TrialLift,a,140,3,"離台 0.1 m，停 ≥ 3 s","part.crane.drop_distance>=0.1&&part.crane.still_s>=3",
+periodic,STP_IN_02_TrialLift,b,141,3,"已查看；傾斜 ≤ EX 3°（比照 LF_02 b）","part.pan_assy.inspected&&part.pan_assy.tilt_deg<=3",
 periodic,STP_IN_03_Transfer,a,142,3,"吊物底面 ≥ Y 3.1（比照 LF_03 a）","part.crane.load_bottom_y>=3.1",
-periodic,STP_IN_03_Transfer,b,143,3,"PAN_Root 原點（底架底面中心）與 4 個絕緣子的中心水平差 ≤ EX 5 cm","part.pan_assy.roof_offset_cm<=5",b4:p5
-periodic,STP_IN_04_LowerToRoof,a,144,3,"底面離絕緣子頂 0.05–0.15 m，停 ≥ EX 1 s（比照 LF_05 a）","part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1",b4:p5
-periodic,STP_IN_04_LowerToRoof,b,145,3,"part.pan_assy.state = Mounted，BaseHole 與 InsulatorTop 距離 ≤ EX 1 cm","part.pan_assy.state=Mounted&&part.pan_assy.seat_error_cm<=1",b4:p5
+periodic,STP_IN_03_Transfer,b,143,3,"PAN_Root 原點（底架底面中心）與 4 個絕緣子的中心水平差 ≤ EX 5 cm","part.pan_assy.roof_offset_cm<=5",
+periodic,STP_IN_04_LowerToRoof,a,144,3,"底面離絕緣子頂 0.05–0.15 m，停 ≥ EX 1 s（比照 LF_05 a）","part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1",
+periodic,STP_IN_04_LowerToRoof,b,145,3,"part.pan_assy.state = Mounted，BaseHole 與 InsulatorTop 距離 ≤ EX 1 cm","part.pan_assy.state=Mounted&&part.pan_assy.seat_error_cm<=1",
 periodic,STP_IN_04b_RegroundPan,a,146,2,"手持驗電桿（雙手）","tool.active=tool.voltage_detector",
 periodic,STP_IN_04b_RegroundPan,b,147,3,"自檢通過","tool.voltage_detector.selftest",
 periodic,STP_IN_04b_RegroundPan,c,148,3,"顯示「無電」","isolation.voltage_tested",
@@ -517,7 +517,7 @@ periodic,STP_WC_04_Unlock,a,242,2,"手持上鎖掛牌組","tool.active=tool.lock
 periodic,STP_WC_04_Unlock,b,243,3,"升弓開關 = 未上鎖","lockout.raise_switch=open",
 periodic,STP_WC_04_Unlock,c,244,3,"主斷路器 = 未上鎖；放開後掛牌組自動收回腰包（WC_06 c 才歸還工具架）","lockout.breaker=open&&rack.slot_1=in_pouch",
 periodic,STP_WC_04_Unlock,d,245,3,"電動缸電源 = ON","cab.cylinder_power=on",
-periodic,STP_WC_05_RaiseTest,a,247,3,"已查看","part.crane.hook.inspected&&part.pan_assy.inspected",b4:p5
+periodic,STP_WC_05_RaiseTest,a,247,3,"已查看","part.crane.hook.inspected&&part.pan_assy.inspected",
 periodic,STP_WC_05_RaiseTest,b,248,3,"弓頭升到頂","part.pan_head.pose=Raised",
 periodic,STP_WC_05_RaiseTest,c,249,3,"指示燈 = 升弓且已確認","ip.cab.pan_indicator.checked&&ip.cab.pan_indicator.shows=升弓",
 periodic,STP_WC_05_RaiseTest,d,250,3,"放開時 lower_check 與 lower_target 距離 ≤ EX 1 cm（比照 SI_01 a）","part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm",

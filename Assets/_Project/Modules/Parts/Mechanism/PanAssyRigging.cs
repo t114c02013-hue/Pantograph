@@ -32,6 +32,9 @@ namespace PantographSim.Parts.Mechanism
         [SerializeField] Renderer[] standLights = new Renderer[0], roofLights = new Renderer[0];
         [SerializeField] BoxCollider probe;
         [SerializeField] Transform homeParent;   // 放下（吸附）後回到原本的父物件
+        [Tooltip("R1.5b b4：車頂斷面（吊梁離車頂高度用）")] [SerializeField] RoofSceneDef roof;
+
+        public void SetRoof(RoofSceneDef r) => roof = r;
         [SerializeField] Color lightOk = new Color(0.2f, 0.9f, 0.3f), lightBad = new Color(0.95f, 0.2f, 0.15f);
 
         bool subscribed;
@@ -130,6 +133,7 @@ namespace PantographSim.Parts.Mechanism
                 else { upBlocked = true; block = string.Join("、", missing); }
             }
             var (pins, dist, height, roof) = Target();
+            WriteMeasures(s, st, dist, roof);
             if (st == Lifted)
             {
                 s.SetFloat(DropDistanceKey, Mathf.Round(height * 1000f) / 1000f);
@@ -150,6 +154,40 @@ namespace PantographSim.Parts.Mechanism
                 s.Set("part.pan_assy.lift_block", block);
             });
         }
+
+        /// <summary>
+        /// R1.5b b4：吊運的量測（只在值變動超過顯示精度時寫）：吊鉤掛點與重心水平差 hook_cog_offset_cm、吊梁底面離車頂 beam_above_roof_m／離弓頂 beam_above_pan_m、
+        /// 吊起時傾斜 tilt_deg、PAN_Root 原點到台架中心 stand_offset_cm／到 4 個絕緣子中心 roof_offset_cm、放下後孔位到落點的最大差 seat_error_cm。
+        /// </summary>
+        void WriteMeasures(ISimState s, string st, float[] dist, bool roof)
+        {
+            void F(string key, float v, float step) { v = Mathf.Round(v / step) * step; if (!s.Has(key) || Mathf.Abs(s.GetFloat(key) - v) >= step - 1e-5f) s.SetFloat(key, v); }
+            float Flat(Vector3 a, Vector3 b) => new Vector2(a.x - b.x, a.z - b.z).magnitude;
+            Vector3 Avg(Transform[] ts) { var p = Pos(ts); return p.Count == 0 ? transform.position : p.Aggregate(Vector3.zero, (a, b) => a + b) / p.Count; }
+            var cog = transform.Find("PAN_Base/COG");
+            var attach = crane != null && crane.HookBlock != null ? crane.HookBlock.GetComponentsInChildren<Transform>(true).FirstOrDefault(x => x.name == "Hook_AttachPoint") : null;
+            if (cog != null && attach != null) F("part.crane.hook_cog_offset_cm", Flat(attach.position, cog.position) * 100f, 0.1f);
+            if (crane != null && crane.Beam != null)
+            {
+                var rs = crane.Beam.GetComponentsInChildren<Renderer>();
+                if (rs.Length > 0)
+                {
+                    float beamBottom = rs.Min(r => r.bounds.min.y);
+                    var hp = crane.HookBlock.position;
+                    F("part.crane.beam_above_roof_m", beamBottom - RoofY(hp.x), 0.01f);
+                    var head = transform.Find("PAN_Head") ?? transform;
+                    var hr = head.GetComponentsInChildren<Renderer>();
+                    if (hr.Length > 0) F("part.crane.beam_above_pan_m", beamBottom - hr.Max(r => r.bounds.max.y), 0.01f);
+                }
+            }
+            if (st == Lifted) F("part.pan_assy.tilt_deg", Vector3.Angle(transform.up, Vector3.up), 0.1f);
+            if (standPins.Length > 0 && standPins[0] != null) F("part.pan_assy.stand_offset_cm", Flat(transform.position, Avg(standPins)) * 100f, 0.1f);
+            if (roofTops.Length > 0 && roofTops[0] != null) F("part.pan_assy.roof_offset_cm", Flat(transform.position, Avg(roofTops)) * 100f, 0.1f);
+            if ((st == Mounted || st == OnStand) && dist.Length > 0) F("part.pan_assy.seat_error_cm", dist.Max() * 100f, 0.1f);
+        }
+
+        /// <summary>車頂面高度（RoofSceneDef 的車頂斷面）。</summary>
+        float RoofY(float x) => roof != null ? roof.RoofSurfaceY(x) : 0f;
 
         static bool FixingsReleased(ISimState s) =>
             s.Get("ip.pan_assy.ctrl_connector.state") == "Removed" && s.Get("ip.pan_assy.hv_terminal.state") == "Removed" &&

@@ -20,6 +20,8 @@ namespace PantographSim.Data
         [Tooltip("R1.5b b4 RT_02 絕緣測試（示例值）：讀值（MΩ）、接地還掛著時的讀值、放電要接觸多久（秒，D43：5）")] public float meggerReadingMOhm = 500f, meggerGroundedReadingMOhm = 0f, dischargeSeconds = 5f;
         [Tooltip("D43：合格下限（MΩ，≥ 合格）、可選故障「絕緣子髒汙」開啟且還沒擦淨時的讀值、絕緣子擦淨的清除率")] public float irPassMinMOhm = 100f, meggerFaultReadingMOhm = 20f, insulatorCleanRatio = 0.95f;
         [Tooltip("D43：報表註明")] public string irPassNote = "100 MΩ 下限待高鐵 SOP 確認";
+        [Tooltip("R1.5b b4：查看＝指著停多久（秒）；哪些東西用這種查看（吊鉤、吊梁、吊帶、吊具、集電弓、接地掛點）")] public float inspectDwellSeconds = 1.0f;
+        public string[] dwellInspectIds = { "part.crane.hook", "env.lift_beam", "env.sling_1", "env.sling_2", "env.sling_3", "env.sling_4", "env.rigging", "part.pan_assy", "ip.pan_head.ground_clamp" };
         [Tooltip("D43：讀值 0（接地還掛著）時三種模式都只提示、不記分")] public string groundedHint = "接地還掛著，請確認 #1、#2 都已拆除並銷號後再量";
 
         public static ToolRulesDef Load() => Resources.Load<ToolRulesDef>(ResourcePath);

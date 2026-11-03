@@ -46,6 +46,9 @@ namespace PantographSim.Data
         public string[] collisionIgnorePrefixes = { "StandSeat", "InsulatorTop_", "InsulatorCollision" };   // StandSeat＝定位銷 StandSeat_n 和支撐座 StandSeatBlock
         public float ignoreDistance = 0.10f;
         [Tooltip("吊物底面離落點這麼近（m）就算放下（吸附或擋住下降）")] public float seatTolerance = 0.005f;
+        [Tooltip("R1.5b b4（RM_06 b）：「查看四條吊帶」的判定框大小與離吊梁的距離（m；只框吊帶中段，不擋下方吊耳）")] public Vector3 inspectBoxSize = new Vector3(1.2f, 0.4f, 1.2f);
+        public float inspectBoxOffset = 0.05f;
+        [Tooltip("R1.5b b4（RM_05 f）：有割傷、要判「不合格」的吊帶編號（空＝四條都可用）")] public int[] defectiveSlings = new int[0];
 
         /// <summary>把 {n} 展開成 1..4。</summary>
         public static IEnumerable<RigCondition> Expand(IEnumerable<RigCondition> list)

@@ -276,6 +276,7 @@ namespace PantographSim.Editor
                 StepJsonImporter.LoadAll<SafetyRuleDefinition>(StepJsonImporter.SafetyFolder).OrderBy(r => r.ruleId).ToArray(),
                 StepJsonImporter.LoadAll<ScenarioDefinition>(StepJsonImporter.ScenarioFolder).OrderBy(s => s.scenarioId == "SCN_Default" ? "" : s.scenarioId).ToArray(),
                 tools.ToArray());
+            boot.SetRigging(R1Data.Rigging);   // R1.5b b4：吊帶判定
             var coursesFile = StepsCsvImporter.LoadCourses();   // R1.5b b4（5a）：課程選擇，預設與選單文字讀 Courses.json
             boot.SetCourses(StepsCsvImporter.Courses.Select(id => AssetDatabase.LoadAssetAtPath<CourseDef>(StepsCsvImporter.CourseDefPath(id))).Where(x => x != null).ToArray(),
                 coursesFile.defaultCourse, coursesFile.r1Title, StepsCsvImporter.MenuNotes(coursesFile));

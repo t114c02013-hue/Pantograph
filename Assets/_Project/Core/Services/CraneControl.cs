@@ -21,11 +21,18 @@ namespace PantographSim.Core
         /// </summary>
         public static void ToggleFast(ISimState s) { if (s != null) s.SetBool(SimIds.CraneFast, !s.GetBool(SimIds.CraneFast)); }
 
+        public const string EStopTestedKey = "ctrl.crane.estop_tested";
+
         /// <summary>緊急停止：沒鎖時按下＝鎖住；鎖住時再按＝旋轉復歸（之後要重轉電源鑰匙，CraneMechanism 判定）。按下時方向命令一律清掉。</summary>
         public static void PressEStop(ISimState s)
         {
             if (s == null) return;
-            s.Batch(() => { s.SetBool(SimIds.CraneEStop, !s.GetBool(SimIds.CraneEStop)); s.Set(SimIds.CraneCmd, "None"); s.SetBool(SimIds.CraneFast, false); });
+            s.Batch(() =>
+            {
+                bool wasLocked = s.GetBool(SimIds.CraneEStop);
+                s.SetBool(SimIds.CraneEStop, !wasLocked); s.Set(SimIds.CraneCmd, "None"); s.SetBool(SimIds.CraneFast, false);
+                if (wasLocked) s.SetBool(EStopTestedKey, true);   // R1.5b b4（RM_05 b）：按下再復歸＝急停測試過
+            });
         }
 
         /// <summary>電源鑰匙 Key_Power：轉一下切換開／關。</summary>
