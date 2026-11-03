@@ -97,7 +97,8 @@ namespace PantographSim.UI
         readonly Dictionary<string, Text> saved = new Dictionary<string, Text>();
         readonly List<(string id, Text text, string label)> siRows = new List<(string, Text, string)>();
         readonly List<(string value, Image bg)> decisions = new List<(string, Image)>();
-        Text diffText, countText, confirmLabel, signLabel, signHint;
+        readonly List<(string value, Image bg)> anomalyButtons = new List<(string, Image)>();
+        Text diffText, countText, confirmLabel, platformLabel, signLabel, signHint;
         Button signButton;
 
         /// <summary>可以簽名的步驟：SI_06（開工）、WC_04（完工）。其他時候按鈕變灰、不能按，旁邊顯示「開工／完工時才能簽」。</summary>
@@ -179,10 +180,23 @@ namespace PantographSim.UI
             }); Ui.Size(sendNew, 76, 40);
             diffText = Ui.Text(card, "", 17, Ui.Muted);
 
+            // R1.5b b4：CSR_01 b 異常欄、RT_02 c 絕緣電阻（MΩ，示例值 ≥ 100）
+            Ui.Text(card, "異常欄（分流線、托架、絕緣子）　絕緣電阻（MΩ）", 19, Ui.Accent, TextAnchor.UpperLeft, FontStyle.Bold);
+            var an = Ui.Rect(card, "Anomaly"); Ui.HStack(an.gameObject, 6);
+            foreach (var (v, label) in new[] { ("none", "無異常"), ("found", "有異常") })
+            {
+                var ab = Ui.Button(an, label, 19, () => Ui.Send(SimIds.WorkOrder, v, "anomaly")); Ui.Size(ab, 96, 40);
+                anomalyButtons.Add((v, ab.GetComponent<Image>()));
+            }
+            AddField(an, "ir_reading", 92);
+            var sendIr = Ui.Button(an, "送出", 19, () => Submit("ir_reading")); Ui.Size(sendIr, 76, 40);
+
             Ui.Text(card, "收尾清點", 19, Ui.Accent, TextAnchor.UpperLeft, FontStyle.Bold);
             countText = Ui.Text(card, "", 17, Ui.Muted);
             var confirm = Ui.Button(card, "確認工具與零件清點", 20, () => Ui.Send(SimIds.WorkOrder, "true", "toolcount_confirmed"));
             Ui.Size(confirm, -1, 42); confirmLabel = Ui.LabelOf(confirm);
+            var confirmPlatform = Ui.Button(card, "平台清點完成", 20, () => Ui.Send(SimIds.WorkOrder, "true", "toolcount_platform_confirmed"));   // R1.5b b4 WC_01b c
+            Ui.Size(confirmPlatform, -1, 42); platformLabel = Ui.LabelOf(confirmPlatform);
             var signRow = Ui.Rect(card, "SignRow"); Ui.HStack(signRow.gameObject, 10);
             signButton = Ui.Button(signRow, "作業人員簽名", 20, () => Ui.Send(SimIds.WorkOrder, "true", "sign"));   // WorkOrder 依目前步驟寫 sign_start／sign_end
             Ui.Size(signButton, 220, 42); signLabel = Ui.LabelOf(signButton);
@@ -291,6 +305,9 @@ namespace PantographSim.UI
             diffText.text = s.Has("workorder.height_diff") ? $"高低差：{s.GetFloat("workorder.height_diff"):0.00} mm" : "";
             countText.text = $"工具已收回：{(s.GetBool("tools.all_returned") ? Ui.Tint("是", Ui.Ok) : Ui.Tint("否（到工具架掛回）", Ui.Bad))}　零件盒剩螺栓：{s.GetFloat("tray.bolts"):0}　舊滑板：{s.GetFloat("tray.old_strips"):0}";
             confirmLabel.text = s.GetBool("workorder.toolcount_confirmed") ? "✔ 已確認清點" : "確認工具與零件清點";
+            platformLabel.text = s.GetBool("workorder.toolcount_platform_confirmed") ? "✔ 平台清點完成" : "平台清點完成";
+            string anomaly = s.Get("workorder.anomaly");
+            foreach (var (v, bg) in anomalyButtons) bg.color = v == anomaly ? Ui.ButtonOn : Ui.ButtonBg;
             bool canSign = CanSign(s);
             signButton.interactable = canSign;
             signLabel.color = canSign ? Color.white : Ui.Muted;

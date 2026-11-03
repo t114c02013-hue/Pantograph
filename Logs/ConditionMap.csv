@@ -29,7 +29,7 @@ daily,STP_SI_06_RoofEntry,c,30,2,"9／9 已點過（日常版清單：11 項去�
 daily,STP_SI_06_RoofEntry,d,31,3,"兩個掛點都扣著","harness.roof&&harness.platform",
 daily,STP_SI_06_RoofEntry,e,32,3,"只剩車頂掛點扣著","harness.roof&&harness.platform=false",
 daily,STP_CSR_01_CheckIsolation,a,80,3,"核對作業單上 SI 各項的狀態：SI_00–06 各項都已完成；有一項沒完成就不能過","workorder.si_all_done",b4:p3
-daily,STP_CSR_01_CheckIsolation,b,81,3,"三處都已查看，異常欄已勾選「無異常」或「有異常」","env.work_order.anomaly.checked",b4:p5
+daily,STP_CSR_01_CheckIsolation,b,81,3,"三處都已查看，異常欄已勾選「無異常」或「有異常」","env.work_order.anomaly.checked",
 daily,STP_CSR_02_ZeroCaliper,a,82,1,"手持卡尺","tool.active=tool.caliper",
 daily,STP_CSR_02_ZeroCaliper,b,83,1,"量爪間距 = 0","tool.caliper.jaw=0",
 daily,STP_CSR_02_ZeroCaliper,c,84,1,"顯示 0.00 mm","tool.caliper.zeroed",
@@ -170,7 +170,7 @@ daily,STP_WC_03_RemoveGround,c,192,1,"掛位 3 = 在架","rack.slot_3=on_rack",
 daily,STP_WC_03_RemoveGround,d,193,2,"#1 = 已銷號","ground_register.1=cancelled",b4c:ground_register
 daily,STP_WC_01b_ToolCountPlatform,a,198,3,"桿架 2、3 號都在架","rack.slot_2=on_rack&&rack.slot_3=on_rack",
 daily,STP_WC_01b_ToolCountPlatform,b,199,3,"登記欄 #1 已點選確認，且 #1 已銷號，和桿架實物一致","ground_register.1.confirmed&&ground_register.1=cancelled&&rack.slot_3=on_rack",b4c:ground_register
-daily,STP_WC_01b_ToolCountPlatform,c,200,3,"已確認","workorder.toolcount_platform_confirmed",b4:p5
+daily,STP_WC_01b_ToolCountPlatform,c,200,3,"已確認","workorder.toolcount_platform_confirmed",
 daily,STP_WC_04_Unlock,a0,207,2,"停留點 4 清單 3 項全部點過（#1 已銷號且桿架 slot_3 在架；人員已離開車頂；工具清點完成），hold.4.released = true","hold.4.checklist_done&&hold.4.released",b4c:holdpoint
 daily,STP_WC_04_Unlock,a,208,2,"手持上鎖掛牌組","tool.active=tool.lockout_tag",
 daily,STP_WC_04_Unlock,b,209,3,"升弓開關 = 未上鎖","lockout.raise_switch=open",
@@ -276,7 +276,7 @@ periodic,STP_LF_06_SecureOnStand,b2,78,3,"Free","ip.pan_assy.lift_point_2.state=
 periodic,STP_LF_06_SecureOnStand,b3,78,3,"Free","ip.pan_assy.lift_point_3.state=Free",
 periodic,STP_LF_06_SecureOnStand,b4,78,3,"Free","ip.pan_assy.lift_point_4.state=Free",
 periodic,STP_LF_06_SecureOnStand,c,79,3,"吊梁底面高於弓頂 EX 1.0 m","part.crane.beam_above_pan_m>=1.0",b4:p5
-periodic,STP_CSR_01_CheckIsolation,b,81,3,"三處都已查看，異常欄已勾選「無異常」或「有異常」","env.work_order.anomaly.checked",b4:p5
+periodic,STP_CSR_01_CheckIsolation,b,81,3,"三處都已查看，異常欄已勾選「無異常」或「有異常」","env.work_order.anomaly.checked",
 periodic,STP_CSR_02_ZeroCaliper,a,82,1,"手持卡尺","tool.active=tool.caliper",
 periodic,STP_CSR_02_ZeroCaliper,b,83,1,"量爪間距 = 0","tool.caliper.jaw=0",
 periodic,STP_CSR_02_ZeroCaliper,c,84,1,"顯示 0.00 mm","tool.caliper.zeroed",
@@ -468,12 +468,12 @@ periodic,STP_WC_03b_RemoveGroundPlatform,c,196,2,"掛位 3 = 在架（比照 WC_
 periodic,STP_WC_03b_RemoveGroundPlatform,d,197,2,"#1 = 已銷號","ground_register.1=cancelled",b4c:ground_register
 periodic,STP_WC_01b_ToolCountPlatform,a,198,3,"工具架 slot_11、12（slot_1 掛牌組在腰包、slot_4 安全帶穿在身上，WC_06 c 歸還） 與桿架 slot_2、3 都在架","rack.slot_11=on_rack&&rack.slot_12=on_rack&&rack.slot_2=on_rack&&rack.slot_3=on_rack",
 periodic,STP_WC_01b_ToolCountPlatform,b,199,3,"登記欄 #1、#2 兩列都點選確認過，且 接地登記 #1、#2 都已銷號，和 a 的實物一致","ground_register.1.confirmed&&ground_register.2.confirmed&&ground_register.1=cancelled&&ground_register.2=cancelled",b4c:ground_register
-periodic,STP_WC_01b_ToolCountPlatform,c,200,3,"已確認","workorder.toolcount_platform_confirmed",b4:p5
+periodic,STP_WC_01b_ToolCountPlatform,c,200,3,"已確認","workorder.toolcount_platform_confirmed",
 periodic,STP_RT_02_InsulationTest,a,201,2,"手持高阻計","tool.active=tool.megger",
-periodic,STP_RT_02_InsulationTest,b,202,3,"兩端都已接上","tool.megger.connected_count>=2",b4:p5
-periodic,STP_RT_02_InsulationTest,c,203,3,"讀值 ≥ EX 100 MΩ，已記在作業單","workorder.ir_reading>=100",b4:p5
+periodic,STP_RT_02_InsulationTest,b,202,3,"兩端都已接上","tool.megger.connected_count>=2",
+periodic,STP_RT_02_InsulationTest,c,203,3,"讀值 ≥ EX 100 MΩ，已記在作業單","workorder.ir_reading>=100",
 periodic,STP_RT_02_InsulationTest,d,204,3,"掛位 11 = 在架，手持接地桿","rack.slot_11=on_rack&&tool.active=tool.grounding_rod",
-periodic,STP_RT_02_InsulationTest,e,205,3,"放電 ≥ EX 3 s","ip.pan_head.ground_clamp.discharge_s>=3",b4:p5
+periodic,STP_RT_02_InsulationTest,e,205,3,"放電 ≥ EX 3 s","ip.pan_head.ground_clamp.discharge_s>=3",
 periodic,STP_RT_02_InsulationTest,f,206,2,"掛位 3 = 在架","rack.slot_3=on_rack",
 periodic,STP_WC_04_Unlock,a0,207,2,"停留點 4 清單全部點過，hold.4.released = true（接地登記欄 2 列都已銷號，且桿架 slot_3、工具架 slot_12 實物在架；人員已離開車頂；工具清點完成；絕緣電阻合格且已放電）","hold.4.checklist_done&&hold.4.released",b4c:holdpoint
 periodic,STP_WC_04_Unlock,a,208,2,"手持上鎖掛牌組","tool.active=tool.lockout_tag",

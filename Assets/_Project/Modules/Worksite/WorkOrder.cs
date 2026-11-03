@@ -29,7 +29,11 @@ namespace PantographSim.Worksite
 
         static bool IsField(string field) =>
             field.StartsWith("reading.") || field.StartsWith("newmid.") || field.StartsWith("submit.") || field == "decision"
-            || field == SignField || field == SignStart || field == SignEnd || field == "toolcount_confirmed" || field.EndsWith("_signed");
+            || field == SignField || field == SignStart || field == SignEnd || field == "toolcount_confirmed" || field.EndsWith("_signed")
+            || field == AnomalyField || field == IrReadingField || field == PlatformCountField;   // R1.5b b4
+
+        /// <summary>R1.5b b4：CSR_01 b 異常欄（none／found，勾了就寫 env.work_order.anomaly.checked）、RT_02 c 絕緣電阻讀值（MΩ，和高阻計讀值比對）、WC_01b c 平台清點完成。</summary>
+        public const string AnomalyField = "anomaly", IrReadingField = "ir_reading", PlatformCountField = "toolcount_platform_confirmed";
 
         /// <summary>
         /// 「作業人員簽名」按鈕送 sign：依目前步驟寫進對應的格子——SI_06（開工）＝sign_start、WC_04（完工）＝sign_end；
@@ -61,9 +65,10 @@ namespace PantographSim.Worksite
                 written = (value ?? "").Trim();
                 if (field == SignStart) s.SetBool("workorder.si_signed", true);
                 if (field == SignEnd) s.SetBool("workorder.unlock_signed", true);
-                if (field.StartsWith("reading.") || field.StartsWith("newmid."))
+                if (field == AnomalyField) { if (written != "none" && written != "found") return false; s.SetBool("env.work_order.anomaly.checked", true); }
+                if (field.StartsWith("reading.") || field.StartsWith("newmid.") || field == IrReadingField)
                 {
-                    if (!float.TryParse(written, NumberStyles.Float, CultureInfo.InvariantCulture, out var v)) { s.Set("workorder.last_error", "請輸入數字（mm）"); return false; }
+                    if (!float.TryParse(written, NumberStyles.Float, CultureInfo.InvariantCulture, out var v)) { s.Set("workorder.last_error", field == IrReadingField ? "請輸入數字（MΩ）" : "請輸入數字（mm）"); return false; }
                     written = v.ToString("0.00", CultureInfo.InvariantCulture);
                     string readingKey = ReadingKeyFor(field);
                     if (readingKey != null && s.Has(readingKey))
@@ -82,6 +87,7 @@ namespace PantographSim.Worksite
         /// <summary>reading.L.left → ip.carbon_strip_L.measure_left.reading；newmid.R → ip.carbon_strip_R.measure_mid.reading。</summary>
         public static string ReadingKeyFor(string field)
         {
+            if (field == IrReadingField) return "tool.megger.reading";
             var p = field.Split('.');
             if (p[0] == "reading" && p.Length == 3) return $"ip.carbon_strip_{p[1]}.measure_{p[2]}.reading";
             if (p[0] == "newmid" && p.Length == 2) return $"ip.carbon_strip_{p[1]}.measure_mid.reading";

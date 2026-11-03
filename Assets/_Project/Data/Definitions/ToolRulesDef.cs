@@ -17,6 +17,7 @@ namespace PantographSim.Data
         [Tooltip("只提示、不記錯的模式（training.mode）")] public string[] hintOnlyModes = { "tutorial" };
         public string keepHint = "把手伸到工具架／工具袋";
         public string hangingHint = "工具掛在防墜繫繩上垂著：用完要收回工具袋";
+        [Tooltip("R1.5b b4 RT_02 絕緣測試（示例值）：讀值（MΩ）、接地還掛著時的讀值、放電要接觸多久（秒）")] public float meggerReadingMOhm = 500f, meggerGroundedReadingMOhm = 0f, dischargeSeconds = 3f;
 
         public static ToolRulesDef Load() => Resources.Load<ToolRulesDef>(ResourcePath);
     }

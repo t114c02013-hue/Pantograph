@@ -43,7 +43,7 @@ namespace PantographSim.UI
             var img = Ui.Panel(safe, "ToolPanel");
             root = Ui.Place(img.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, Bottom), new Vector2(FullWidth, 0));
             Ui.VStack(img.gameObject, 16, 8);
-            BuildVoltage(); BuildGrounding(); BuildLead(); BuildCaliper(); BuildSocket(); BuildTorque(); BuildCloth(); BuildSimple(SimIds.ToolMarker, "標記筆", "依 1→2→3→4 點已鎖到扭力的螺栓，畫上跨螺栓頭與托架的紅色標記線。");
+            BuildVoltage(); BuildGrounding(); BuildLead(); BuildMegger(); BuildCaliper(); BuildSocket(); BuildTorque(); BuildCloth(); BuildSimple(SimIds.ToolMarker, "標記筆", "依 1→2→3→4 點已鎖到扭力的螺栓，畫上跨螺栓頭與托架的紅色標記線。");
             BuildSimple(SimIds.ToolLockout, "上鎖掛牌組", "本切片已預先完成上鎖掛牌，可在控制盤面板查看狀態。");
             BuildSimple(SimIds.ToolHarness, "安全帶", "本切片已預先完成安全帶改扣。");
             message = Ui.Text(root, "", 21, Ui.Accent);
@@ -100,6 +100,23 @@ namespace PantographSim.UI
                 string F(bool on, string t) => on ? Ui.Tint("● " + t, Ui.Ok) : Ui.Tint("○ " + t, Ui.Muted);
                 status.text = $"{F(s.GetBool(SimIds.TerminalClamped), "平台端子已夾")}　{F(s.GetBool(SimIds.PullTested), "拉線已確認")}　{F(s.GetBool(SimIds.HeadClamped), "弓頭已掛")}";
                 pull.interactable = s.GetBool(SimIds.TerminalClamped) && !s.GetBool(SimIds.PullTested);
+            });
+        }
+
+        /// <summary>R1.5b b4：高阻計（RT_02）：兩條測試線接上後按測試鍵（DC 1000 V），讀值抄到作業單。</summary>
+        void BuildMegger()
+        {
+            const string id = "tool.megger";
+            var p = Panel(id, "高阻計");
+            var status = Ui.Text(p, "", 23);
+            var row = Row(p);
+            var test = Btn(row, "測試鍵（DC 1000 V）", () => Ui.Send(id, "test"), 240);
+            Help(row, "測試線：弓頭接地掛點、車體接地點　測完要用接地桿放電");
+            refreshers.Add(s =>
+            {
+                int n = (int)s.GetFloat("tool.megger.connected_count");
+                status.text = $"測試線 {n}／2　" + (s.Has("tool.megger.reading") ? $"讀值 {Ui.Tint(s.GetFloat("tool.megger.reading").ToString("0") + " MΩ", Color.white)}" : "尚未測試");
+                test.interactable = n >= 2;
             });
         }
 

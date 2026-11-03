@@ -38,6 +38,7 @@ namespace PantographSim.Tests
             public Mechanisms(EventBus bus, SimState state)
             {
                 s = state;
+                oldClock = SimClock.Source; SimClock.Source = () => now;   // 放電計時用腳本自己的時鐘
                 crane = new CraneRig(true, bus, s);
                 belt = new BeltRig(bus, s);
                 restBottomY = Bottom;
@@ -120,6 +121,27 @@ namespace PantographSim.Tests
             static void Command(string target, string text, string toolId = "") => Sim.Bus.Publish(new ActionRequested { targetId = target, text = text, toolId = toolId });
             int LeadSlot => SlotOf(GroundingLeadLogic.ToolId);
 
+            float now;
+            readonly System.Func<float> oldClock;
+
+            /// <summary>高阻計：兩條測試線接上弓頭接地掛點、車體接地點（MeggerTool）。</summary>
+            void Megger()
+            {
+                Hold(MeggerLogic.ToolId);
+                foreach (var p in new[] { MeggerLogic.PanPoint, MeggerLogic.BodyPoint })
+                    if (!s.GetBool("tool.megger.lead." + p)) Command(p, "click", MeggerLogic.ToolId);
+            }
+
+            /// <summary>接地桿碰弓頭接地掛點放電：碰上、時間過 dischargeSeconds（工具每幀 Tick 累計）、移開。</summary>
+            void Discharge()
+            {
+                Hold(SimIds.ToolGroundingRod);
+                Command(MeggerLogic.PanPoint, "click", SimIds.ToolGroundingRod);
+                now += ToolRulesDef.Load().dischargeSeconds + 0.1f;
+                belt.belt.Active.Tick();
+                Command(MeggerLogic.PanPoint, "click", SimIds.ToolGroundingRod);
+            }
+
             /// <summary>上鎖掛牌：手上拿著上鎖掛牌組（從腰包拿出）點主斷路器／升弓開關（LockoutTagTool）。</summary>
             void Lockout(string part)
             {
@@ -164,6 +186,15 @@ namespace PantographSim.Tests
                     var m = Slot.Match(part);
                     if (IsLeadPart(part)) Lead(part);
                     else if (part.StartsWith("lockout.key_holder")) { }   // 上鎖時 LockoutTagTool 一起寫
+                    else if (part.StartsWith(MeggerLogic.Count + ">=")) Megger();
+                    else if (part.StartsWith("workorder.ir_reading>="))
+                    {
+                        Command(MeggerLogic.ToolId, "test");
+                        Assert.IsTrue(PantographSim.Worksite.WorkOrder.Write(s, Sim.Bus, PantographSim.Worksite.WorkOrder.IrReadingField, s.GetFloat(MeggerLogic.Reading).ToString(CultureInfo.InvariantCulture)), part);
+                    }
+                    else if (part.StartsWith(MeggerLogic.DischargeKey + ">=")) Discharge();
+                    else if (part == "env.work_order.anomaly.checked") PantographSim.Worksite.WorkOrder.Write(s, Sim.Bus, PantographSim.Worksite.WorkOrder.AnomalyField, "none");
+                    else if (part == "workorder.toolcount_platform_confirmed") PantographSim.Worksite.WorkOrder.Write(s, Sim.Bus, PantographSim.Worksite.WorkOrder.PlatformCountField, "true");
                     else if (part.StartsWith("lockout.")) Lockout(part);
                     else if (part.StartsWith(CabControlLogic.Breaker + "=")) { if (s.Get(CabControlLogic.Breaker, CabControlLogic.On) != part.Substring(CabControlLogic.Breaker.Length + 1)) Assert.IsNull(CabControlLogic.ToggleBreaker(s), part); }
                     else if (part.StartsWith(CabControlLogic.CylinderPower + "=")) { if (s.Get(CabControlLogic.CylinderPower, CabControlLogic.On) != part.Substring(CabControlLogic.CylinderPower.Length + 1)) Assert.IsNull(CabControlLogic.ToggleCylinderPower(s), part); }
@@ -200,6 +231,7 @@ namespace PantographSim.Tests
 
             public void Dispose()
             {
+                SimClock.Source = oldClock;
                 Sensors.Unregister(pc);
                 UnityEngine.Object.DestroyImmediate(pcRoot);
                 belt.Dispose(); crane.Dispose();

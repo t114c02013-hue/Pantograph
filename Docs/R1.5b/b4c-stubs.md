@@ -20,7 +20,7 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | b4:p5 | 兩門課跑到結算（b4 第 5 部分；機制沒有指定段落，做的時候回報） |
 | b4:p3b | 扭力類錯誤與 K3 降級（b4 第 3b 部分） |
 
-## 小動作（共 86 列）
+## 小動作（共 79 列）
 
 | 步驟 | 小動作 | 課程 | 完成條件 | owner |
 |---|---|---|---|---|
@@ -90,8 +90,6 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_LF_04_Traverse | a | periodic | `part.pan_assy.stand_offset_cm<=5` | b4:p5 |
 | STP_LF_05_LowerToStand | a | periodic | `part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1` | b4:p5 |
 | STP_LF_06_SecureOnStand | c | periodic | `part.crane.beam_above_pan_m>=1.0` | b4:p5 |
-| STP_CSR_01_CheckIsolation | b | daily | `env.work_order.anomaly.checked` | b4:p5 |
-| STP_CSR_01_CheckIsolation | b | periodic | `env.work_order.anomaly.checked` | b4:p5 |
 | STP_CSR_15_HeightCheck | f | periodic | `rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&env.panto_stand.tool_tray.count<=0` | b4:p5 |
 | STP_IN_01_RigOnStand | a | periodic | `part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=crane.rig_height_lower_m&&part.crane.beam_above_pan_m<=crane.rig_height_upper_m` | b4:p5 |
 | STP_IN_02_TrialLift | a | periodic | `part.crane.drop_distance>=0.1&&part.crane.still_s>=3` | b4:p5 |
@@ -104,11 +102,6 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_WC_01a_ToolCountRoof | a | periodic | `env.tool_bag.slot_5.viewed&&env.tool_bag.slot_6.viewed&&env.tool_bag.slot_7.viewed&&env.tool_bag.slot_8.viewed&&env.tool_bag.slot_9.viewed&&env.tool_bag.slot_10.viewed&&env.tool_bag.slot_13.viewed&&rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&rack.slot_13=on_rack&&rack.slot_10=on_rack` | b4:p5 |
 | STP_WC_01a_ToolCountRoof | b | daily | `env.bolt_tray_L.count<=0&&env.bolt_tray_R.count<=0&&env.tool_bag.bolt_pouch.count<=0&&env.roof_strip_mat.count<=0&&roof.leftover_count<=0` | b4:p5 |
 | STP_WC_01a_ToolCountRoof | b | periodic | `env.tool_bag.bolt_pouch.count<=0&&env.bolt_tray_L.count<=0&&env.bolt_tray_R.count<=0&&env.parts_tray.strip_count_ok&&roof.leftover_count<=0` | b4:p5 |
-| STP_WC_01b_ToolCountPlatform | c | daily | `workorder.toolcount_platform_confirmed` | b4:p5 |
-| STP_WC_01b_ToolCountPlatform | c | periodic | `workorder.toolcount_platform_confirmed` | b4:p5 |
-| STP_RT_02_InsulationTest | b | periodic | `tool.megger.connected_count>=2` | b4:p5 |
-| STP_RT_02_InsulationTest | c | periodic | `workorder.ir_reading>=100` | b4:p5 |
-| STP_RT_02_InsulationTest | e | periodic | `ip.pan_head.ground_clamp.discharge_s>=3` | b4:p5 |
 | STP_WC_05_RaiseTest | a | periodic | `part.crane.hook.inspected&&part.pan_assy.inspected` | b4:p5 |
 
 ## 場景裡還沒有的目標（ConditionTables.json 的 pendingTargets）
