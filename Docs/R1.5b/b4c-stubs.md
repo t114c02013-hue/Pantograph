@@ -197,3 +197,9 @@ ErrorRuleTests.PendingTriggers_ListedInStubsDoc 檢查兩邊一致。觸發做�
 | ERR_WC01a_StripOnMat | b4c:strip_carry | Major |
 | ERR_Global_RoofFallZone | b4d | Major |
 | ERR_Global_TeleportWhileAnchored | b4d | Minor |
+
+## 等後面段落才能測的（不是機制）
+
+| 項目 | 由哪一段做 | 說明 |
+|---|---|---|
+| IN_04b h 分段起點的實體狀態 | b4b | 軟體工程裁定（補充 2b）：從 IN 段的 PhaseStartSnapshot 開始時，#1 弓頭端掛鉤要是「已取下」（isolation.head_clamped=false）。檢查的是還原有沒有把實體狀態設對，不是 version；PhaseStartSnapshot 在 b4b 才有 |

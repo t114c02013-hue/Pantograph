@@ -1,16 +1,9 @@
-periodic：True，啟用時條件已成立、靠 version 規則擋下（沒有這條規則就會自動完成）的小動作 15 個：
+periodic：True，啟用時條件已成立、靠 version 規則擋下（沒有這條規則就會自動完成）的小動作 8 個：
 STP_LF_01_PreLift d：part.crane.hook.inspected&&part.crane.hook_cog_offset_cm<=5
 STP_LF_05_LowerToStand a：part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1
-STP_IN_01_RigOnStand a：part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=0.6&&part.crane.beam_above_pan_m<=1.0
 STP_IN_02_TrialLift b：part.pan_assy.inspected&&part.pan_assy.tilt_deg<=3
-STP_IN_03_Transfer a：part.crane.load_bottom_y>=3.1
 STP_IN_04_LowerToRoof a：part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1
 STP_IN_04b_RegroundPan b：tool.voltage_detector.selftest
 STP_IN_04b_RegroundPan c：isolation.voltage_tested
 STP_IN_04b_RegroundPan g：isolation.pull_tested
-STP_IN_05_RoofEntry b：harness.platform
-STP_IN_07_BaseTorque a：rack.slot_6=on_rack
-STP_WC_03a_RemoveGroundRoof c：tool.grounding_lead.carried
-STP_RT_02_InsulationTest f：rack.slot_3=on_rack
 STP_WC_05_RaiseTest a：part.crane.hook.inspected&&part.pan_assy.inspected
-STP_WC_05_RaiseTest d：part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm

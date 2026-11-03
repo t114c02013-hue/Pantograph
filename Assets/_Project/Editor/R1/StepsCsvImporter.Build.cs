@@ -190,6 +190,7 @@ namespace PantographSim.Editor
             var metas = Steps(stepRows, errors);
             var defs = LoadErrorRules();
             CheckErrorRefs(subRows, stepRows, defs, errors);
+            UnityEngine.Object.DestroyImmediate(LoadKeyDefSource(errors));   // 鍵的種類只能是 Event／LiveState
             var t = LoadTables(); var r1 = LoadR1();
             resolved = Resolve(ex, r1, t, errors);
             var toolIds = new HashSet<string>(R1Data.ToolSlots.slots.Select(s => s.toolId));
@@ -250,6 +251,7 @@ namespace PantographSim.Editor
                 AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<ExamPolicyDef>(), policyPath);
             }
             EditorUtility.SetDirty(AssetDatabase.LoadAssetAtPath<ExamPolicyDef>(policyPath));
+            SaveAsset(LoadKeyDefSource(new List<string>()), BlackboardKeysAssetPath);   // 鍵的種類（LiveState／Event）
             const string toolRulesPath = "Assets/_Project/Modules/Tools/_Common/Resources/ToolRules.asset";   // 放開握把的規則（gripReleaseDrops、寬限秒數）
             if (AssetDatabase.LoadAssetAtPath<ToolRulesDef>(toolRulesPath) == null)
             {

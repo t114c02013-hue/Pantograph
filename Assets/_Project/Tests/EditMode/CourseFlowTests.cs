@@ -50,7 +50,7 @@ namespace PantographSim.Tests
                     if (idx < subs.Length)
                     {
                         if (stop != null && stop(st.def.stepId, subs[idx].subId)) return true;
-                        if (ChecklistEval.Done(s, subs[idx].condition)) wouldAuto.Add($"{st.RunId} {subs[idx].subId}：{subs[idx].condition}");
+                        if (ChecklistEval.Done(s, subs[idx].condition)) wouldAuto.Add($"{st.RunId} {subs[idx].subId}：{subs[idx].condition}{(FreshWriteGate.EventKeys(subs[idx].condition).Any() ? "" : "　〔只讀 LiveState：照規則一出現就完成〕")}");
                         Write(s, subs[idx].condition);   // 一個 tick
                         if (runner.Current == st && Sub == idx) Assert.Fail($"{st.RunId} {subs[idx].subId}：寫了條件鍵還是沒完成（{subs[idx].condition}）");
                         CheckNoAuto(st, idx);
@@ -74,7 +74,7 @@ namespace PantographSim.Tests
                 var subs = ProcedureRunner.SubActions(now);
                 int first = now == before ? idx + 1 : 0;
                 for (int i = first; i < System.Math.Min(Sub, subs.Length); i++)
-                    if (!FreshWriteGate.Allowed(prc, now.def.stepId, subs[i].subId))
+                    if (!FreshWriteGate.Allowed(prc, now.def.stepId, subs[i].subId) && FreshWriteGate.EventKeys(subs[i].condition).Any())   // 只讀 LiveState 鍵的照規則可以一出現就完成
                         autoCompleted.Add($"{now.RunId} {subs[i].subId}：啟用的同一個 tick 就完成（鍵 {string.Join(",", RuleExplainer.KeysOf(subs[i].condition))}）");
             }
         }
@@ -161,7 +161,7 @@ namespace PantographSim.Tests
                 Assert.AreEqual(stepId, f.runner.Current.def.stepId);
                 Assert.AreEqual(subId, ProcedureRunner.SubActions(f.runner.Current)[(int)f.s.GetFloat("procedure.sub_index")].subId, "沒有再做動作就不能完成");
                 f.s.SetBool(actionKey, true);   // 再做一次（值本來就是 true，也要寫入）
-                Assert.AreNotEqual(subId, ProcedureRunner.SubActions(f.runner.Current)[(int)f.s.GetFloat("procedure.sub_index")].subId, "再做一次就完成");
+                Assert.IsTrue(f.runner.Current.def.stepId != stepId || ProcedureRunner.SubActions(f.runner.Current)[(int)f.s.GetFloat("procedure.sub_index")].subId != subId, "再做一次就完成（比對步驟＋小動作：下一步的第一個可能接著完成）");
             }
             finally { f.runner.Dispose(); }
         }

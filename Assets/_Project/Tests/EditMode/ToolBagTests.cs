@@ -199,6 +199,30 @@ namespace PantographSim.Tests
             Assert.AreEqual("S2", runner.Current.RunId);
             Assert.AreEqual(1, (int)s.GetFloat("procedure.sub_index"), "「拿出」小動作在進入那一幀就完成");
         }
+
+        /// <summary>R1.5b b4（軟體工程裁定，補充 2b）：version 規則開著，「拿出」只讀 LiveState 鍵（tool.active）：已拿著就同一個 tick 完成，拿的是別的工具不完成。R1 與日常課的 CSR_02 都跑。</summary>
+        [TestCase("R1")]
+        [TestCase("daily")]
+        public void FreshRule_HoldingToolOnEnter_SameTick_OtherToolNot(string source)
+        {
+            foreach (var (held, done) in new[] { (SimIds.ToolCaliper, true), (SimIds.ToolSocket, false) })
+            {
+                var step = source == "R1"
+                    ? ProcedureJsonConverter.BuildStep(PantographSim.Editor.StepsCsvImporter.LoadR1()["STP_CSR_02_ZeroCaliper"])
+                    : AssetDatabase.LoadAssetAtPath<ProcedureDefinition>(PantographSim.Editor.StepsCsvImporter.ProcedurePath("daily")).steps.First(x => x.stepId == "STP_CSR_02_ZeroCaliper");
+                var prc = ScriptableObject.CreateInstance<ProcedureDefinition>();
+                prc.procedureId = "PRC_PreHeld"; prc.steps = new List<StepDefinition> { step }; prc.requireFreshWrite = true;
+                var bus = new EventBus(); var s = new SimState(bus);
+                s.Set(SimIds.ActiveTool, held);   // 進入這一步之前就拿著
+                var runner = new ProcedureRunner(prc, bus, s);
+                try
+                {
+                    runner.Start();
+                    Assert.AreEqual(done ? 1 : 0, (int)s.GetFloat("procedure.sub_index"), $"{source}：拿著 {held} 進入 CSR_02，「手持卡尺」{(done ? "同一個 tick 完成" : "不完成")}");
+                }
+                finally { runner.Dispose(); Object.DestroyImmediate(prc); if (source == "R1") Object.DestroyImmediate(step); }
+            }
+        }
     }
 
     /// <summary>TorqueClickTests（K3）：到扭力時播一次喀聲（替身記錄），沒到不播；資料沒指定 clip 就用內建音效。</summary>

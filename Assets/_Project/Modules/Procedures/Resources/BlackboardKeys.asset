@@ -1,0 +1,201 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a480d2a34c594842bbc920fcfa2de3e, type: 3}
+  m_Name: BlackboardKeys
+  m_EditorClassIdentifier: 
+  keys:
+  - pattern: tool.active
+    kind: 1
+    note: "\u624B\u4E0A\u62FF\u8457\u54EA\u4EF6\u5DE5\u5177"
+  - pattern: tool.socket_wrench.size
+    kind: 1
+    note: "\u5957\u7B52\u6273\u624B\u76EE\u524D\u88DD\u7684\u5957\u7B52"
+  - pattern: tool.socket_wrench.dir
+    kind: 1
+    note: "\u68D8\u8F2A\u65B9\u5411\u9215\u76EE\u524D\u7684\u4F4D\u7F6E"
+  - pattern: tool.torque_wrench.setting
+    kind: 1
+    note: "\u626D\u529B\u6273\u624B\u523B\u5EA6\u76EE\u524D\u7684\u8A2D\u5B9A"
+  - pattern: tool.torque_wrench_l.setting
+    kind: 1
+    note: "\u5927\u626D\u529B\u6273\u624B\u523B\u5EA6\u76EE\u524D\u7684\u8A2D\u5B9A"
+  - pattern: tool.caliper.jaw
+    kind: 1
+    note: "\u5361\u5C3A\u91CF\u722A\u76EE\u524D\u7684\u9593\u8DDD"
+  - pattern: tool.grounding_lead.carried
+    kind: 1
+    note: "\u77ED\u63A5\u5730\u7DDA\u639B\u5728\u5B89\u5168\u5E36\u5DE5\u5177\u74B0\u4E0A"
+  - pattern: tool.megger.connected_count
+    kind: 1
+    note: "\u9AD8\u963B\u8A08\u6E2C\u8A66\u7DDA\u76EE\u524D\u63A5\u4E0A\u5E7E\u7AEF"
+  - pattern: rack.slot_*
+    kind: 1
+    note: "\u639B\u4F4D\uFF1A\u5728\u67B6\uFF0F\u5728\u888B\uFF0F\u5728\u8170\u5305\uFF0F\u4F7F\u7528\u4E2D\uFF0F\u624B\u4E0A"
+  - pattern: isolation.head_clamped
+    kind: 1
+    note: "#1 \u5F13\u982D\u7AEF\u639B\u9264\u6709\u6C92\u6709\u639B\u8457"
+  - pattern: isolation.terminal_clamped
+    kind: 1
+    note: "#1 \u63A5\u5730\u7AEF\u5B50\u593E\u5B50\u6709\u6C92\u6709\u593E\u8457"
+  - pattern: ip.roof.*.clamped
+    kind: 1
+    note: "#2 \u77ED\u63A5\u5730\u7DDA\u5169\u7AEF\u6709\u6C92\u6709\u593E\u8457"
+  - pattern: harness.roof
+    kind: 1
+    note: "\u5B89\u5168\u5E36\u639B\u9264\u6263\u5728\u8ECA\u9802\u639B\u9EDE"
+  - pattern: harness.platform
+    kind: 1
+    note: "\u5B89\u5168\u5E36\u639B\u9264\u6263\u5728\u5E73\u53F0\u639B\u9EDE"
+  - pattern: harness.hooks_stowed
+    kind: 1
+    note: "\u5169\u500B\u639B\u9264\u6536\u5728\u80F8\u524D\u6263\u74B0"
+  - pattern: lockout.*
+    kind: 1
+    note: "\u4E0A\u9396\u639B\u724C\u3001\u9470\u5319\u5728\u8AB0\u8EAB\u4E0A"
+  - pattern: cab.breaker
+    kind: 1
+    note: "\u4E3B\u65B7\u8DEF\u5668\u958B\u95DC\u4F4D\u7F6E"
+  - pattern: cab.cylinder_power
+    kind: 1
+    note: "\u96FB\u52D5\u7F38\u96FB\u6E90\u958B\u95DC\u4F4D\u7F6E"
+  - pattern: ctrl.crane.power
+    kind: 1
+    note: "\u5929\u8ECA\u9059\u63A7\u5668\u96FB\u6E90\u9470\u5319"
+  - pattern: ctrl.crane.estop
+    kind: 1
+    note: "\u7DCA\u6025\u505C\u6B62\u9215\u6709\u6C92\u6709\u6309\u4E0B"
+  - pattern: env.crane_pendant.state
+    kind: 1
+    note: "\u9059\u63A7\u5668\u5728\u639B\u5EA7\u6216\u62FF\u5728\u624B\u4E0A"
+  - pattern: env.panto_stand.clamp_*.state
+    kind: 1
+    note: "\u53F0\u67B6\u593E\u5177\u958B\u6216\u9396"
+  - pattern: ip.pan_assy.*.state
+    kind: 1
+    note: "\u9AD8\u58D3\u7AEF\u5B50\u3001\u63A7\u5236\u7DDA\u63A5\u982D\u3001\u56FA\u5B9A\u5E36\u3001\u540A\u9EDE\u7684\u88DD\u62C6\u72C0\u614B"
+  - pattern: ip.pan_assy.ctrl_connector.cap
+    kind: 1
+    note: "\u9632\u5875\u84CB\u6709\u6C92\u6709\u84CB\u8457"
+  - pattern: ip.pan_assy.hv_terminal.marked
+    kind: 1
+    note: "\u7AEF\u5B50\u4E0A\u770B\u5F97\u5230\u7684\u8A18\u865F"
+  - pattern: ip.carbon_strip_*.bolt_*.state
+    kind: 1
+    note: "\u87BA\u6813\u72C0\u614B"
+  - pattern: ip.carbon_strip_*.bolt_*.angle_deg
+    kind: 1
+    note: "\u87BA\u6813\u8F49\u5230\u7684\u89D2\u5EA6"
+  - pattern: ip.carbon_strip_*.bolt_*.marked
+    kind: 1
+    note: "\u87BA\u6813\u4E0A\u770B\u5F97\u5230\u7684\u9632\u9B06\u6A19\u8A18"
+  - pattern: ip.carbon_strip_*.bracket.clean_ratio
+    kind: 1
+    note: "\u6258\u67B6\u63A5\u89F8\u9762\u76EE\u524D\u4E7E\u6DE8\u7684\u6BD4\u4F8B"
+  - pattern: part.pan_base.bolt_*.state
+    kind: 1
+    note: "\u5E95\u5EA7\u87BA\u6813\u72C0\u614B"
+  - pattern: part.pan_base.bolt_*.marked
+    kind: 1
+    note: "\u5E95\u5EA7\u87BA\u6813\u4E0A\u770B\u5F97\u5230\u7684\u9632\u9B06\u6A19\u8A18"
+  - pattern: part.pan_assy.hv_bolt_*.state
+    kind: 1
+    note: "\u9AD8\u58D3\u7AEF\u5B50\u87BA\u6813\u72C0\u614B"
+  - pattern: part.carbon_strip_*.state
+    kind: 1
+    note: "\u6ED1\u677F\u5728\u54EA\u88E1\uFF08\u88DD\u8457\u3001\u62C6\u4E0B\u3001\u5728\u588A\u4E0A\u3001\u5728\u5F85\u5831\u5EE2\u7BB1\uFF09"
+  - pattern: part.carbon_strip_*.over_bracket
+    kind: 1
+    note: "\u65B0\u6ED1\u677F\u5728\u6258\u67B6\u4E0A\u65B9"
+  - pattern: part.carbon_strip_*.new_orientation
+    kind: 1
+    note: "\u65B0\u6ED1\u677F\u76EE\u524D\u7684\u65B9\u5411"
+  - pattern: part.carbon_strip_*.install_distance_cm
+    kind: 1
+    note: "\u65B0\u6ED1\u677F\u96E2\u5B89\u88DD\u4F4D\u7F6E\u591A\u9060"
+  - pattern: part.pan_assy.state
+    kind: 1
+    note: "\u96C6\u96FB\u5F13\u6574\u7D44\u5728\u54EA\u88E1\uFF08\u8ECA\u9802\u3001\u540A\u8D77\u3001\u53F0\u67B6\uFF09"
+  - pattern: part.pan_assy.tilt_deg
+    kind: 1
+    note: "\u540A\u7269\u76EE\u524D\u7684\u50BE\u659C"
+  - pattern: part.pan_assy.*_offset_cm
+    kind: 1
+    note: "\u540A\u7269\u548C\u843D\u9EDE\u7684\u6C34\u5E73\u5DEE"
+  - pattern: part.pan_assy.seat_error_cm
+    kind: 1
+    note: "\u5E95\u5EA7\u5B54\u548C\u7D55\u7DE3\u5B50\u7684\u8DDD\u96E2"
+  - pattern: part.crane.load_bottom_y
+    kind: 1
+    note: "\u540A\u7269\u5E95\u9762\u9AD8\u5EA6"
+  - pattern: part.crane.drop_distance
+    kind: 1
+    note: "\u540A\u7269\u5E95\u9762\u96E2\u843D\u9EDE\u591A\u9AD8"
+  - pattern: part.crane.hook_cog_offset_cm
+    kind: 1
+    note: "\u540A\u9264\u548C\u91CD\u5FC3\u7684\u6C34\u5E73\u5DEE"
+  - pattern: part.crane.beam_above_*
+    kind: 1
+    note: "\u540A\u6881\u5E95\u9762\u96E2\u8ECA\u9802\u3001\u5F13\u9802\u591A\u9AD8"
+  - pattern: part.crane.person_clear
+    kind: 1
+    note: "\u540A\u9264 0.5 m \u5167\u6C92\u6709\u4EBA"
+  - pattern: part.crane.hook.parked
+    kind: 1
+    note: "\u540A\u9264\u5728\u505C\u653E\u4F4D\u7F6E"
+  - pattern: part.pan_head.pose
+    kind: 1
+    note: "\u5F13\u982D\u5347\u6216\u964D"
+  - pattern: part.pan_head.lower_distance_cm
+    kind: 1
+    note: "\u5F13\u982D\u6AA2\u6E2C\u9EDE\u96E2\u964D\u5F13\u4F4D\u7F6E\u591A\u9060"
+  - pattern: part.pan_head.lower_tolerance_cm
+    kind: 1
+    note: "\uFF08\u6BD4\u8F03\u7528\u7684\u5BB9\u8A31\u503C\uFF09"
+  - pattern: ip.cab.pan_indicator.shows
+    kind: 1
+    note: "\u6307\u793A\u71C8\u73FE\u5728\u4EAE\u7684\u662F\u5347\u5F13\u6216\u964D\u5F13"
+  - pattern: player.zone
+    kind: 1
+    note: "\u5B78\u54E1\u73FE\u5728\u5728\u54EA\u4E00\u5340"
+  - pattern: ppe.helmet
+    kind: 1
+    note: "\u5B89\u5168\u5E3D\u7A7F\u6234"
+  - pattern: ppe.helmet_strap
+    kind: 1
+    note: "\u4E0B\u5DF4\u5E36\u6263\u8457"
+  - pattern: ppe.safety_shoes
+    kind: 1
+    note: "\u5B89\u5168\u978B\u7A7F\u6234"
+  - pattern: ppe.work_gloves
+    kind: 1
+    note: "\u5DE5\u4F5C\u624B\u5957\u7A7F\u6234"
+  - pattern: ppe.insulating_gloves
+    kind: 1
+    note: "\u7D55\u7DE3\u624B\u5957\u5E36\u5728\u8EAB\u4E0A"
+  - pattern: env.bolt_tray_*.count
+    kind: 1
+    note: "\u87BA\u6813\u76E4\u88E1\u73FE\u5728\u6709\u5E7E\u652F"
+  - pattern: env.tool_bag.bolt_pouch.count
+    kind: 1
+    note: "\u96F6\u4EF6\u888B\u88E1\u73FE\u5728\u6709\u5E7E\u652F"
+  - pattern: env.panto_stand.tool_tray.count
+    kind: 1
+    note: "\u53F0\u67B6\u5DE5\u5177\u76E4\u4E0A\u73FE\u5728\u6709\u5E7E\u4EF6"
+  - pattern: env.roof_strip_mat.count
+    kind: 1
+    note: "\u66AB\u653E\u588A\u4E0A\u73FE\u5728\u6709\u5E7E\u689D"
+  - pattern: env.parts_tray.strip_count_ok
+    kind: 1
+    note: "\u5F85\u5831\u5EE2\u7BB1\u88E1\u7684\u6ED1\u677F\u6578\u91CF\u5C0D"
+  - pattern: roof.leftover_count
+    kind: 1
+    note: "\u8ECA\u9802\u4E0A\u73FE\u5728\u6709\u5E7E\u4EF6\u907A\u7559\u7269"
