@@ -1,0 +1,2023 @@
+專案 C:\Huang Tai Hsiang\collector shoes（Unity 2022.3.62f3，OpenXR＋XRI 2.6.5）。教授改良 R1.5b：天車操作、集電弓整組吊運、隨身工具袋、新流程 v6（步驟數與小動作數以附錄 C 為準）、兩種課程與從階段開始。
+你讀不到 /mnt/project-files，所以規格全文都在這份文字裡：第 2 部分是軟體規格，附錄 A 是定期檢修的步驟表 steps-v6 全文，附錄 B 是日常更換的步驟表 CSR_operable_steps 全文，附錄 C 是匯入器唯一讀的 SubActions.csv 和 Steps.csv。標 EX 的是示例值，一律寫在資料裡。
+前提：R1.5a（a0–a6）已收尾。開工前讀 Logs/R1Progress.txt，確認 a6 完成、PanAssyFrameTests 通過。
+
+====================================================================
+0. 共通規則
+====================================================================
+0.1 ponytail（每段都照做）
+- 動手前輸入 /ponytail，改完輸入 /ponytail-review。沒有這些指令就照下面手動做。
+- 選做法的順序：不需要就不做 → 專案已有的就沿用 → Unity／C# 標準功能 → 已裝的套件 → 一行寫得完就寫一行 → 都不行才寫新程式。
+- 紅線，不准動：
+  - asmdef 分層與引用方向
+  - 公開介面與簽章（只有一個實作的介面是擴充點，要保留）
+  - Core 事件名稱、黑板鍵、物件 ID
+  - CompletionRule、ErrorRule、門檻值、ScriptableObject 資料（除非本文要求改）
+  - [SerializeField] 欄位名稱（真要改名，一定加 [FormerlySerializedAs]）
+  - .meta 與 GUID（檔案要搬移，就在 Unity 裡搬）
+  - 輸入驗證、安全規則、硬體校正
+- 看起來沒人呼叫的方法不要刪，除非 grep 過整個 Assets（包含 .unity、.prefab、.asset）都沒有用到。
+- 刻意的簡化要加註解：// shortcut: <上限>, <何時升級>
+
+0.2 分段規則（和 R1 相同）
+- 開工時先讀 Logs/R1Progress.txt 和 git status。上一段如果有沒提交的改動，先修到綠燈再提交，不另開新段。
+- 一段只做一件事。收工要同時符合三件事：Console 0 紅字、EditMode 測試全部通過（數量不少於開工時）、提交一次 commit（訊息寫段號）。三件都做到，才在 R1Progress 加一行「段號 | 完成 | 測試 N/N | 下一段」。
+- 每段收工前，逐項做 7 項「功能不變」檢查：
+  1. 0 紅字、沒有新的 warning
+  2. 測試數量不減少，沒有停用或跳過測試
+  3. 用 git diff 確認公開簽章、事件、黑板鍵、SerializeField、asmdef 都沒變
+  4. 資料檔沒有被改到（除非本文要求）
+  5. 用到的場景和 prefab 沒有 Missing
+  6. 桌面版實際跑一次受影響的步驟
+  7. 純精簡的改動和功能改動分開提交，commit 訊息寫「refactor: 不改行為」
+- 做不到的檢查寫成「未檢查：第 N 項，原因」，不可以假設通過。
+- 每段的回報寫進 Logs/R1.5b-<段號>.txt，格式：
+  段：
+  改動：
+  略過：
+  風險：（沒有就寫「無」）
+  ponytail-review Verdict：
+  測試：N/N，Console 紅字 0
+  功能不變檢查：1–7 的結果
+  未檢查：
+
+0.3 測試規範（沿用）
+- 預期中的 Error／Warning 導到測試記錄器，並斷言確實收到。
+- 預期以外的 Error 讓測試失敗。
+- 跑完 Console 要是 0 紅字。
+
+0.4 座標
+- 原點 O 在弓頭中心正下方的車頂面。+Y 朝上；+Z 沿車長方向、朝肘側；平台在 −X 側。單位是 m。
+- 地面高度一律 Y −3.65。平台面和車頂都在 Y 0。
+
+====================================================================
+1. 段落順序（每段收工規則見第 0 節）
+====================================================================
+| 段 | 內容 | 收工時的檢查 |
+|---|---|---|
+| b1 | CraneMechanism、遙控器（掛在左手）、CraneProfile、碰撞停止、紅區停車、上限位、視覺晃動。用除錯情境吊一個方塊驗證，不接流程 | CraneMechanismTests、CraneRedZoneTests、CraneInputTests |
+| b2 | 吊具、part.pan_assy 狀態機、起吊條件、對位指示燈、放上台架與吊回車頂、TeleportRule。用除錯情境走一次完整往返 | RiggingTests、TeleportRuleTests |
+| b3 | 2.5 m 接地棒和驗電器改成雙手握持（用 XRI 內建的 XRGrabInteractable 多選取加 XRGeneralGrabTransformer：後手握住桿尾，前手握在護環以下；單手也能拿，但桿身會下垂），以及 隨身工具袋（腰間，選單可改左手腕）、ToolSlotDef.homeStorageId、slot_10–12（工具架新增掛位 11 高阻計 tool.megger、12 短接地線 tool.grounding_lead；R1.5a 只建了 1、4，建好後重跑 StationLayoutCheck 第 19 項，掛座不可以和 1、4、11、12 任一掛鉤重疊，間距 ≥ 0.15 m）、防墜繫繩、個人腰包 env.waist_pouch（D30）；移除 R1.5a 暫留的車頂工具箱（env.roof_toolbox）。D26：日常更換也用工具袋，兩門課規則相同 | ToolBagTests、PreHeldToolTests；ToolHomeStorageTests：兩門課的 slot_5–10 homeStorageId 都是 env.tool_bag，場景與資料裡都沒有 env.roof_toolbox 和 tp.roof.shelf（日常滑板改從平台上下，見第 4 節）；D30：slot_1 開始和結束在工具架，作業期間狀態「在腰包」，WC_01b 只清點 4、11、12 和桿架；WaistPouchTests；附錄 B、C 裡出現的「車頂工具箱」只是舊版紀錄，以 D26 為準 |
+| b4 | 匯入附錄 C 的 SubActions.csv（步驟數、小動作數從資料算）、附錄 A 1.3、1.4 的 ErrorRule（第 2 部分 2.6）、CourseDef 覆寫（R1 的 25 步改成「日常更換」課程，車頂螺栓盤、零件盒、備品架的位置由課程擺放） | CraneSafetyTests、CourseOverrideTests（含 D23 的 5 個測試）；兩種課程各從頭跑到結算 |
+| b4c | 組長項目（第 2 部分 3.7）：HoldPointDef 停留點與 NPC（站位依階段，見第 4 節 P4）、個人防護具與手套模式、接地登記欄、一人一鎖、SI_00 限制；日常滑板上下車頂（第 4 節） | HoldPointTests（每個點各測放行、退回、跳過）、PPETests、GroundRegisterTests、StripCarryTests |
+| b4d | 車頂邊兩級判定與扣著車頂掛點時的移動限制（第 4 節 P6），第一批 PlayMode 測試 | RoofEdgePlayModeTests |
+| b4b | startPhase（定期 1–6 與 4b；日常 1、4b 與日 C，D29 v1.1）：每一個 startPhase 的第一步開頭都存一份 PhaseStartSnapshot 並比對，斷言附錄 A 5.3 表與 D29 的起點狀態都成立；分段考核與合格線（見下方「考核」） | PhaseStartTests、ExamTests |
+| b5 | 錄製重播、Logs/V2R15Report.txt、/ponytail-audit、/ponytail-debt（存成 Logs/PonytailDebt_R15.txt）| CraneReplayTests；第 3 節驗收 |
+b1–b3 不依賴步驟資料，可以先做。b4 以後才接流程。順序：b1 → b2 → b3 → b4 → b4c → b4d → b4b → b5。試玩改良（第 4 節）分在 b3、b4c、b4d。
+
+步驟資料要用匯入器產生，不要手動建（b4 做）：
+- R1 的切片只有 144 個小動作。SI_02、SI_03、SI_06、WC_02、WC_04 這幾個預設完成的步驟沒有小動作資料，所以這次要重新產生完整資料。
+- 唯一來源是附錄 C 的 SubActions.csv（步驟計畫逐列檢查過）。把附錄 C 照存成 Assets/_Project/Data/Source/SubActions.csv，一個字都不要改；不要解析附錄 A、B 的 markdown 文字。附錄 A、B 只給你讀懂流程用。之後步驟計畫改版時，只換這個 CSV，再重跑匯入。
+- 欄位：stepId、subId、order、instruction（VR 版指令）、instructionDesktop（桌面版，空白就用 instruction）、targetId、toolId、condition、instruction_daily、targetId_daily、condition_daily（日常更換和定期檢修不同時才填，空白就用前面三欄）、standPointId_periodic、standPointId_daily、courses（both／periodic／daily）、templateN、errorIds（「ID:嚴重度」以分號分隔）、source、inferred（後兩欄只是紀錄，匯入時忽略）。
+- templateN 的寫法：n=1→4（連續）、n=1,3,2,4（指定順序）、side=L,R（雙側）、interleave=a+b（兩列交錯展開）。可以用分號組合，例如 side=L,R;n=1→4;interleave=a+b。
+- 展開後的小動作 ID：範本 d 展開成 d1–d4；交錯的 a、b 展開成 a1 b1 a2 b2…；雙側步驟的 stepId 把 {side} 換成 L、R。R1 的 StepTable 重新編字母的做法（d 變 d–g）作廢，ImporterTests 要驗這個命名。
+- 新增 Editor 選單 Tools/Import Steps。匯入器 StepsCsvImporter 讀這個檔案，產生 StepDefinition 和 SubActionDef 資產：
+  - 步驟的標題、階段、課程、參考時間（教學／考核）、錯誤 ID 與嚴重度，讀附錄 C 的第二個檔 Steps.csv（照存成 Assets/_Project/Data/Source/Steps.csv）。參考時間分四欄：refTeachS_periodic、refExamS_periodic、refTeachS_daily、refExamS_daily，依課程取；雙側步驟拆成 _L、_R 兩列。errorIds 格式是「ID:嚴重度」以分號分隔。
+  - 「n = 1→4」範本（templateN 欄）和 {side}（_L／_R）要展開。
+  - courses 決定這個小動作在哪門課存在；standPointId 依課程取對應欄。日常更換不再查 steps.md。
+  - 完成條件是中文，分三層對應成 CompletionRule（資深軟體 B 審查 S2），依序：
+    1. R1 已有的 144 個小動作：直接沿用既有的 CompletionRule，用「步驟 ID＋步驟內順序」對應。
+    2. 有編號的固定句型（掛位 N、螺栓 N、N／N 已勾）：用資料 ConditionPatternTable 的正規表示式，例如「掛位 (\d+) = 在架」→ StateEquals(env.tool_rack.slot_$1.state, InRack)。
+    3. 其他條件：資料 ConditionExactTable，「條件全文 → CompletionRule」完全比對。
+    沿用 R1 已有的 CompletionRule 類型，有缺的才新增。三層都對不到就失敗。
+  - 錯誤：ErrorRule 資料是唯一定義（第 2 部分 2.6）。CSV 的「ID:嚴重度」只是引用，匯入時比對：ID 沒有定義、嚴重度和 ErrorRule 不同、SubActions 的 errorIds 沒出現在該步的 Steps.errorIds、Steps.courses 和兩個 order 欄是否有值不一致，都算匯入失敗（資深軟體 B 審查 S1）。
+  - 有任何一列對不到規則、目標 ID 在場景裡找不到，或錯誤 ID 沒有定義，匯入就失敗，並把行號和內容全部列出來，不可以填預設值。要修，只能修 ConditionPatternTable 或回報給步驟計畫，不手改產生出來的資產。
+  - 匯入結果要可以重現：同樣的輸入跑兩次，資產內容完全相同。
+- ImporterTests（檢查資料本身的條件，不和任何寫死的總數比對；資深軟體 B 審查 2）：
+  - 沒有重複的 (stepId, subId)；步驟內的 order 連續；Steps.csv 的 orderPeriodic、orderDaily 各自連號。
+  - 小動作的 courses 落在所屬步驟的 courses 之內；每一步在它存在的課程裡至少有一個小動作；{side} 和 side 範本成對出現。
+  - StepTable 匯出的列數等於 CSV 展開後的數量。展開後的總數只寫進 Logs/R1.5b-assembly.txt 對照，不寫進測試。
+  - 每個小動作都要有 CompletionRule，目標 ID 都要存在，standPointId 都找得到站點（不可空白，K9）。
+  - toolId 可以寫多個，用分號分隔（例如 WC_06 c 同時歸還 slot_1 和 slot_4）。每個 ID 都要存在；完成條件照 condition 欄判定，toolId 只用來決定提示哪些工具和檢查有沒有拿錯。ImporterTests 加：分號分隔的每個 toolId 都存在。
+  - D31 安全帶全程穿著：slot_4 背負式安全帶在 SI_06 a 穿上後一直穿在身上，到 WC_06 c 才歸還工具架。新增可互動點 tool.safety_harness 的胸前收納扣環，是 RM_07 c、IN_05 a、WC_02 c 的目標（站點 tp.platform.anchor）：掛鉤從防墜器解開後收到扣環，或從扣環取下再扣上防墜器。掛鉤狀態分成扣在車頂防墜器、扣在平台掛點、收在胸前三種，寫在黑板。在車頂時掛鉤沒扣在防墜器上，照舊記 Critical。起點狀態：定期第二到五段、日 B、日 C 都是安全帶穿在身上；定期第二、四段的掛鉤收在胸前。WC_01b a 的清點不包含 slot_4。
+  - 逐支指定站點（軟體工程決定，2026-11-02）：standPointId 欄可以寫單一站點，或依 templateN 的 n 寫對照表「n1:站點;n2:站點;…」，例如 IN_05 的 `n1:tp.roof.base_w.s;n2:tp.roof.base_e.s;n3:tp.roof.base_e.n;n4:tp.roof.base_w.n`（螺栓順時針編號；D33 起每支螺栓有自己的子站點，實際寫法以 CSV 為準）。展開 d1–d4 時，每一個展開的小動作取自己 n 的站點。規則：寫對照表時必須涵蓋 templateN 的每一個 n，不可只寫一部分；沒有 templateN 的列不可寫對照表；side=L,R 照舊用 _L／_R 分列。ImporterTests 加：對照表涵蓋所有 n、每個站點都存在、匯出的每列 standPointId 都是單一站點。
+  - 展開後的 ID 照上面的命名（d1–d4、a1 b1…）。
+  - SI_04、SI_05 沒有任何小動作的站點是 tp.platform.rack（D25）。
+  - CourseNoPrecompletedStepsTest（K1）：兩門課從頭開始時，除了 startPhase 指定的前段，沒有任何步驟是已完成；SI_02、SI_03、SI_06、WC_02、WC_04 在兩門課都有小動作。
+  - R1 的 144 個小動作用「步驟 ID＋步驟內順序」對應，判定結果要和匯入前相同。抽查 CSR_06、CSR_11、CSR_12 三步。
+  - 舊 ID 對照表：先搜尋 Recordings/ 和存檔裡有沒有舊的字母 ID（例如 CSR_12 的 e–g）。有才產生 Logs/SubActionIdMap.csv（舊 ID → 新 ID），不刪舊錄製；沒有就在回報寫「沒有舊錄製，略過」。
+
+步驟表匯出（b4 做；R1 已有選單 Tools/Export Step Table → Logs/StepTable.csv，UTF-8 BOM，每列一個小動作）：
+- 換成 v6 之後，匯出的列數必須等於 CSV 展開後的總數。列數測試讀資料算，不要寫死步數或小動作數。
+- 新增 textXR、textDesktop 兩欄（K4）。「VR 指令不可出現鍵盤字樣」（按 R、按 E 這類）加進 R1 DataValidator 現有的 textXR 禁用字清單（和「扳機點」「右搖桿」同一份），不另寫檢查器。
+- 新增欄位：course（periodic／daily）、zoneId，以及該課程的 standPointId。兩門課匯出在同一份表，用 course 欄區分。
+- errorIds 欄寫 ErrorRule 資料裡的 ID 和嚴重度。
+
+考核（D21、D22、D29，b4b 做；D29 已由驗收組長裁定）：
+- 合格線和分段寫在資料 ExamDef，不寫死：
+  - 每段：maxCritical 0、maxMajor 1、timeFactor 1.5。
+  - 全程：maxCritical 0、maxMajor 2、timeFactor 1.5。
+  - 分段考的整體（組長裁定）：所有段合計 maxMajor 2，而且同一條錯誤規則不可在兩段以上出現（noRepeatRule = true）。定期 5 段、日常 3 段都照這條。
+  - 參考時間取考核模式的值，用各步加總算出，不寫死總秒數。
+- ExamDef.segments 只引用 startPhase（附錄 A 5.3 與 D29）：
+  - 定期檢修 5 段：一、隔離與拆弓（startPhase 1）；二、吊運與量測判定（3）；三、換滑板（4b，CSR_06 起）；四、吊回安裝（5，IN_01–IN_11）；五、收尾與復電（6，WC_03a–WC_06）。
+  - startPhase 6 的起點狀態（D29）：#1 已重掛並登記、#2 仍掛著、學員在車頂且車頂掛點扣著、吊鉤在弓上方。
+  - 日常更換 3 段（D29 v1.1）：日 A SI_00–CSR_05（startPhase 1）、日 B CSR_06–CSR_15（日常的 4b）、日 C WC_01a–WC_06（日常的收尾起點，起點狀態見附錄 B v5.8）。日常也要有 4b 和日 C 的 PhaseStartSnapshot。
+  - 兩門課都另有「全程」。
+- 分段考：從該段的 PhaseStartSnapshot 開始，做完該段最後一步就結算。錯誤與時間只算本段；各段結果都存下來，算整體。
+- 教學模式的第二側（_R 的 CSR_06–14）只顯示步驟標題（O2），兩門課都適用（D29 v1.1）；卡住超過 3 秒照原本的卡關規則提示。這是共通規則，不放在 CourseDef.overrides。日常第二側的教學參考時間已在 Steps.csv 調降。
+- 結算畫面與報告：
+  - 最上面一行：分段考整體「可以跟班」或「不可以跟班」；全程考寫「可以獨立作業」或「不可以獨立作業」。分段考合格只代表可以跟班，要獨立作業必須通過全程考。
+  - 下面列出各段結果（Critical、Major、Minor 的數量，用時，參考時間 × 1.5，是否合格）、所有段合計 Major、有沒有在兩段以上重複犯的規則（列出規則 ID 和段號）。
+  - 不合格時寫出是哪一條沒過。原有的「Critical 立即不及格」照舊。
+- ExamTests：
+  - 每段三種情況寫成一個參數化測試（[TestCaseSource] 讀 ExamDef 的段落）：剛好合格（Major 1、時間＝1.5 倍）、Major 2 不合格、時間超過 1.5 倍 1 s 不合格。段數從資料來，不寫死。
+  - 全程測 Major 2 合格、Major 3 不合格。
+  - 全程參考時間要等於各段相加（同時檢查各段剛好把所有步驟分完）。
+  - 分段整體（組長的驗收情境）：(d) 每段各犯 1 個不同規則的 Major，每段單獨合格，整體判「不可以跟班」；(e) 第 2 段和第 4 段犯同一條 Major（合計 2），整體也判「不可以跟班」；各段都 0 Major，整體「可以跟班」。日常 3 段同樣測合計和重複規則。
+- 上鎖掛牌組的起點狀態（步驟計畫 v1.7，組長確認）：日 A 和定期第一段在工具架 slot_1；日 B、日 C、定期第二到五段都是「在腰包」。PhaseStartSnapshot 照這個比對，PhaseStartTests 每段各斷言一次。各段時間和列數都從 CSV 算，PhaseStartTests 和 ExamTests 裡不寫死數字。
+- 起點與一致性的三條規則（軟體工程裁定，資深軟體 A 建議）：
+  1. 驗電結果要有持久鍵。開工時先查黑板有沒有記錄「已驗電」的鍵。沒有的話，新增 isolation.voltage_tested（bool），驗電器在接地站驗電通過時設成 true，存進 PhaseStartSnapshot。停留點 1 的放行條件和 ERR_Global_GroundWithoutVoltageTest 都改讀這個鍵，不再從事件推回來。b4c 收工時回報原本有沒有這個鍵、用的是哪一個。
+  2. ProcedureRunner 從 startPhase 還原進度的規則：該段第一個步驟之前的所有小動作都算完成，第一個步驟和之後的都算未完成，兩門課相同。現行做法如果不同，就改成這條。狀態卡的「已放行」等欄位也用同一條規則推出來，不另寫。b4b 收工時回報原本的做法。
+  3. 一致性測試（第五段、日 C）改成黑板全部鍵逐項比對。只排除白名單上的鍵，白名單寫在資料 PhaseSnapshotIgnoreKeys，只能放時間戳和純視覺值（例如外框閃爍、提示動畫），每一筆都要寫原因。下面列的「至少比這幾項」只是最低要求，實際比全部鍵。
+- PhaseStartTests 加一條（資深軟體 A）：每一個 startPhase 載入後，學員的站位等於該段第一個小動作的 standPointId（依課程取欄位）。不另外存一份起點站位資料，附錄 A 5.3 表的站位欄只當說明。
+- PhaseStartTests 加第五段起點一致性（組長裁定）：從第四段起點一路做到 IN_11 結束時存快照，和直接從 startPhase 6 載入的狀態逐項比對，必須完全相同。至少比這幾項：#1、#2 兩支接地的狀態、接地登記欄、車頂安全帶掛點、吊鉤位置、工具袋各掛位、上鎖掛牌組在腰包（D30，tool.lockout_tag 的狀態「在腰包」）。日 C 起點同樣做：從日 B 一路做到 CSR_15 結束存快照，和直接載入日 C 比對，至少比兩支接地（日常只有 #1，#2 應為未掛）、登記欄、車頂安全帶掛點、工具袋、上鎖掛牌組在腰包、暫放墊上沒有滑板。
+
+注意：
+- 遙控器開場掛在平台的 PendantDock，學員用左握把拿起、掛回（第 2 部分 2.1）。拿著時，作業單打開，或左手正在抓任何物件（例如雙手握長桿），遙控器就隱藏，放開後再出現；吊物懸空時不能打開作業單。
+- 依課程跳過的小動作只看附錄 C 的 courses 欄：不在該課程的列就不存在，不算完成，也不計時。CourseDef 不另列跳過清單（資深軟體 B 審查 1）。CourseDef.overrides 只放 CSV 表達不了的（第 2 部分 3.5）：
+  - 架空線（model-spec v2.1 第 8 節）：
+    - ENV_Catenary（env.catenary）在場景裡預設 inactive，載入課程時依 CourseDef 設定 active：日常更換顯示，定期檢修隱藏。
+    - 同一列課程覆寫也控制 ENV_RoofStripMat（env.roof_strip_mat，R1.5a a6 已放、存檔 inactive）、備品架 env.spare_shelf 和待報廢箱 env.parts_tray 的日常擺放點：日常更換顯示或移到平台擺放點，定期檢修隱藏或移到地面工作檯。這一列 R1.5a 還沒有，在 b4 建 CourseDef 時新增，CourseOverrideTests 檢查兩門課各自的 active 和位置。
+    - .gitignore 加 Tools/Blender/**/__pycache__/（a6 合併時 git 刪掉了 11 個 .pyc，這些檔案不該被追蹤）。
+    - 接地器 ip.ocs.earthing_device_1、_2 只能 Inspect，抓不起來。查看的小動作放在哪一步，以附錄 B 為準。
+    - D23 升弓上限：日常更換時，CourseDef 覆寫 LiftProfile 的上限，設成接觸線的接觸高度（EX Y +1.35，等鐵道確認，數值只寫在 CourseDef 資料裡）。弓頭到上限就停，不會穿過接觸線。升降判定本身不改，只改上限資料。定期檢修不覆寫。
+    - D23 天車停駐：日常更換時天車照樣顯示，但停在駐車位、不能操作。模型裡有空節點 Crane_ParkPose（建模 A，model-spec 第 8.3 節）：橋架 Z +14.0、吊車台 X −14.0、吊鉤升到最高 Y +6.35。載入課程時：
+      1. 把橋架、吊車台、吊鉤擺到 Crane_ParkPose 的位置（從節點讀，不在程式裡寫數字）。
+      2. 停用操作：ctrl.crane.power 固定 false，遙控器的任何命令都無效。
+      3. env.crane_pendant 留在 PendantDock，左握把拿不起來（XRGrabInteractable 停用，或 InteractionLayer 不含左手）。
+      4. tp.platform.crane 不開放：不出現在傳送點清單，傳送到那裡會被擋下。
+      定期檢修不覆寫，天車照原本的起始位置。
+    - D23 測試（CourseOverrideTests 裡各一個）：
+      - DailyLiftCapStopsAtContactHeight：日常更換按住升弓 30 s，弓頭最高點 Y 不超過 CourseDef 的上限（容差 1 cm）；定期檢修同樣操作會升到 LiftProfile 原本的上限。
+      - DailyCraneParkedAtParkPose：日常更換載入後，橋架、吊車台、吊鉤位置和 Crane_ParkPose 相差 ≤ 1 cm。
+      - DailyCraneCommandsIgnored：日常更換時送出每一種 ctrl.crane.cmd，天車三軸位置都不變，ctrl.crane.power 仍是 false。
+      - DailyPendantNotGrabbable：日常更換時左握把在掛座 0.3 m 內按下，遙控器仍在掛座，不會隨身。
+      - DailyCraneStationClosed：日常更換時傳送點清單沒有 tp.platform.crane；直接要求傳送到那裡會被擋下，人不動。
+- 收尾順序與桿架（D25，鐵道裁定；以附錄 A、附錄 B 最新版和附錄 C 為準）：
+  - 定期檢修：WC_03a 車頂拆 #2 短接地線（先電纜端子、後車體接地座，#1 仍掛著）→ WC_01a 車頂清點（無遺留物、工具袋、零件袋；件數依 homeStorageId 從資料算）→ WC_02 下車頂 → WC_03b 平台拆 #1 接地棒（先弓頭端、後端子）→ WC_01b 平台清點（工具架＋桿架，接地登記全部銷號）→ RT_02 絕緣測試 → WC_04 解鎖。
+  - 日常更換（只有 #1）：WC_01a → WC_02 → WC_03 → WC_01b → WC_04。
+  - 桿架 env.pole_rack：外側設備帶內緣 (−2.85, ·, +0.60)（試玩 P2 鐵道裁定，R1.5a a6 已移），2.5 m 驗電器、接地棒直立放。不是站點，不受站點間距 ≥ 0.6 m 的限制。slot_2、slot_3 的 ID 不變，homeStorageId 改成 env.pole_rack；slot_1 作業期間在個人腰包 env.waist_pouch（D30，SI_00 f 領取、WC_06 c 歸還）；工具架保留 1、4、11、12。StationLayoutCheck 第 4(d) 項：桿架到 ground 站 ≤ 0.70 m（約 0.65 m，R1.5a a6 已加）。工具架在 (−3.06, ·, −2.40)、tp.platform.rack 在 (−2.41, −2.40)（R1.5a a6 已移）。
+- 站點座標（D27、D28，R1.5a a4、a5 已改）：tp.cab 在 X −0.19、Z −30.0，地板 Y −2.35（D28 取代 D27 的 Z −14.0）；本節車 Z −5.0…+20.0，pantographFromCarEnd 5.0；ip.depot.platform_anchor (−1.86, 1.20, −2.10)；防墜器柱掛鉤 (−1.95, 1.40, −1.55)。舊的 tp.cab 座標（含 D27 的 Z −14.0）和 Y −2.55 都作廢；站點座標以場景裡 R1.5a 改好的值為準，不在程式裡寫數字。SI_04、SI_05 的每個小動作都在 tp.platform.ground（離桿架 0.65 m），不在 tp.platform.rack；附錄 C 已是這樣，ImporterTests 加一條：SI_04、SI_05 沒有任何小動作的站點是 tp.platform.rack。
+- R1.5a a5 留下的三件事（b2 做）：
+  1. 高壓端子、控制線接頭、降弓固定帶改用新的通用元件 DetachablePart（第 2 部分 3.1），不掛碳滑板專用的 RemovableBehaviour。測試 DetachablePartTests：Installed／Removed 寫黑板；requiresIds 沒成立時拿不下來，並用 Explain() 說明缺什麼；InstallSnap 2 cm 內吸附；碳滑板的 RemovableBehaviour 測試照舊通過。
+  2. PAN_Root 的整體 Box collider：不要再整個開啟（會擋到清潔布）。改成一個只在 b1、b2 用的吊物探測 collider：layer 用新的 LoadProbe，isTrigger，碰撞矩陣只和 Environment、Collision 層互動，不和手、工具、清潔布互動。天車碰撞停止（2.2 的 OverlapBox）讀它。吊物不在 Lifted 時關閉。測試：清潔布、手、工具在 LoadProbe 內移動不觸發任何東西；Lifted 時碰到 Collision 層會停車。
+  3. 新節點接上互動 ID（b2 掛元件，b4 匯入時由 ImporterTests「目標 ID 都要存在」檢查）：part.pan_base.bolt_1..4（FastenerBehaviour）、ip.pan_assy.lift_point_1..4（吊耳）、ip.pan_assy.hv_terminal 與 part.pan_assy.hv_bolt_1..2、ip.pan_assy.ctrl_connector、ip.pan_assy.hold_down（DetachablePart；R1.5a 的節點如果還沒有 FBX，就先用 a6 增補 2 的暫代網格）。DetachablePart 依 Installed／Removed 切換子節點的 active，對照寫在資料裡：ctrl_connector 接上時 DustCap_Off、拔開時 DustCap_On，CtrlCable_End 接上的姿態對到 Ctrl_PlugPoint；hold_down 用 HoldDown_Installed／HoldDown_Removed 切換，HoldDown_BuckleBase 固定不動（model-spec 7.7.2）。分流線不掛元件。b2 收工時列出每個節點和它的 ID、元件。
+- 台架外框與吊帶（建模 A v2.2 的 F2、F3、F6；R1.5a a5 已做）：吊帶依 COG 分邊長度、外框頂面在地面上 0.45 m、支撐座 0.75 m。b2 不改這些模型；RiggingTests 用 R1.5a 已有的 StationLayoutCheck 第 11、12 項，不再重寫一份淨空檢查。鋼梯在平台 +Z 端，只是外觀。
+- 對位基準（建模 B F5）：吊物放上台架（LF_04）和吊回車頂（IN_03）的水平對位，用 PAN_Root 原點（底架底面中心），不用 COG。COG 比底架中心往弓頭偏約 0.3 m，用 COG 對位會讓定位銷錯開、永遠放不上去。吊鉤對 COG 照舊（RM_05 c、IN_01 a、ERR_Crane_SideLoad）。附錄 C 已改；附錄 A 原文還寫 COG 的地方，以附錄 C 為準。測試 RiggingTests 加一條：COG 和 PAN_Root 原點錯開 0.3 m 時，PAN_Root 原點對準台架中心就判定通過，而且 4 個定位銷都能對上。
+- 拆接地的錯誤（K2、D25，b4 做，兩條都是 Critical，觸發就擋下動作）：
+  - ERR_WC03_RemoveOrder：拆 #1 時，弓頭端還掛著就先鬆端子；拆 #2 時，電纜端子還掛著就先鬆車體接地座。放進錯誤表，也放進 WC_03（日常）和 WC_03a、WC_03b（定期）的 errorIds。
+  - ERR_Global_GroundRemovedWhileOnRoof：車頂掛點扣著（人在車頂）時拆 #1 的任一端。全域規則，兩門課都適用。
+  - 測試 GroundRemovalTests：兩條各測「觸發並擋下」「正確順序不觸發」；ERR_Global_GroundRemovedWhileOnRoof 另測「下車頂後拆就不觸發」。
+- 套筒、扭力扳手的喀聲（驗收 F3、K3）：鎖到扭力時，除了震動和閃色，還要播一次短的「喀」聲。AudioClip 從資料指定（ToolDef 或 TorqueProfile 加 clickClip 欄）；沒有指定就用內建的短音效，不可以沒聲音。喀聲由同一個「到扭力」事件觸發，不另寫判定。
+  - 指令字串寫「鎖到喀聲／震動閃色」（CSR_13、IN_06、IN_07、IN_09 這類鎖到扭力的小動作都一樣）。
+  - 測試：TorqueClickTests，到扭力時 AudioSource.PlayOneShot 被呼叫一次（用測試替身記錄），沒到扭力不呼叫；資料沒指定 clip 時用內建音效。
+  - K3 放在 b3 做（和工具一起），要在 b4b 考核之前完成。組長把 K3 列為 R1.5b 擋交付的項目：b5 收尾時 TorqueClickTests 沒有全綠，或頭盔試玩聽不到喀聲，R1.5b 就不算完成。
+- 扭力不足的錯誤等級與 K3 旗標（組長裁定）：
+  - 適用：ERR_CSR13_Under（兩門課）、ERR_IN07_Under、ERR_IN09_Under。正式等級都是 Critical。
+  - 只看這一步完成時的最終扭力。同一步內曾經不足，但在完成前補鎖到位，就不記錯。Under 在步驟完成時判定一次，不在過程中判定。
+  - 等級切換用資料旗標，不寫死：ExamPolicyDef.k3Ready（bool，預設 false）；ErrorRule 加選填欄 severityBeforeK3。考核模式且 k3Ready = false 時，這三條改記 severityBeforeK3（Major），報表在該筆錯誤旁註明「K3 完成後升為 Critical」。k3Ready = true，或不是考核模式時，照 Critical 記。
+  - k3Ready 由組長在頭盔試玩確認喀聲後改成 true，只改資料值，不改程式。
+  - 同一步裡 Setting 設錯，最後又扭力不足時，Setting 和 Under 兩條都要記。扭力不足時只記 Under，不另記 MarkMissing；扭力合格但沒畫標記，才記 MarkMissing。
+  - 測試 K3SeverityTests：
+    - k3Ready = false 的考核模式中，CSR_13 最終扭力不足時記 Major，報表有那句註明。
+    - k3Ready = true 時，同一情況記 Critical，報表沒有那句註明。
+    - 教學和練習模式中，不管 k3Ready 是什麼值都記 Critical。
+    - 過程中曾經不足、完成前補到位，不記錯。
+    - Setting 設錯且最後不足，兩條都記。
+    - 不足時沒有 MarkMissing。
+    - IN_07、IN_09 也各測一次。
+- 指令依輸入模式分開（K4）：CSV 的 instruction 是 VR 版，instructionDesktop 是桌面版。CSR_11 b：VR「轉動手腕把新滑板翻面，讓箭頭朝外」，桌面「按 R 讓箭頭朝外」。教學面板依目前輸入模式顯示對應文字。
+- CSR_01（K7）：定期檢修照 O3 跳過。日常更換改成「核對作業單上 SI 各項的狀態」，SI 有一項沒完成就不能過，並記 ERR_CSR01_IsolationIncomplete（Major，新 ID）。測試放在 CourseOverrideTests。
+- 抄錯讀數（K8）：ERR_CSR03_CopyError、ERR_CSR04_CopyError 只在桌面模式啟用。VR 模式讀數是自動填入，這兩條不載入，報表也不列出；報表上註明「僅桌機」。測試：VR 模式載入後 ErrorRule 清單沒有這兩條。
+- 空白站點（K9）：填作業單的小動作（例如 CSR_05、CSR_15 d），standPointId 沿用上一個小動作的站點，直接寫在 CSV，不在程式裡補。
+- 同一個 ID 在場景裡只放一個物件，由課程覆寫決定它擺在哪裡。例如 env.parts_tray、env.bolt_tray_L/R、備品架，都在開始訓練時依課程移到對應的 Anchor。不另外建 env.parts_tray.maint 這類分身，因為判定讀的是原本的 ID。
+- 日常更換課程的步驟資料以附錄 C 為準（附錄 B 只給你讀懂流程）；CSR 部分兩門課共用同一份資料。
+- 附錄 A 寫的 IN_04「BaseHole 與 InsulatorTop ≤ 1 cm」：吸附容差用 2 cm（第 2 部分 2.3）。吸附成立後會對齊到 0，所以兩者不衝突。
+- RM_00 已定案：攜帶式短接地線 tool.grounding_lead（slot_12），上車頂後在 tp.roof.base_w 夾車體接地座 ip.roof.carbody_ground，在 tp.roof.base_e 用短絕緣桿掛電纜端子 ip.roof.hv_cable_ground（附錄 A 第 3 節）。
+
+====================================================================
+2. 軟體規格（crane-software v0.5 第 1–3、5 節）
+====================================================================
+## 1. 設計原則
+
+1. **天車照升降的作法**：遙控器只寫黑板命令鍵，天車機構讀命令並執行。UI 不直接呼叫機構，和 `ctrl.lift.cmd` 同一個模式（W17）。
+2. **控制器按鍵一個都不新增**：遙控器和工具袋都是世界中的實體物件，用手去拿、去按。InputBindingTable 的內容和 R1 相同。
+3. **吊運不用物理引擎**：天車、吊鉤、吊具、集電弓都是 kinematic，用父子關係跟著吊鉤走。判定只讀黑板，畫面上的晃動不影響判定。
+4. **判定改在集電弓局部座標**：所有 CSR 判定都改在 `PAN_Root` 的局部座標中計算。`PAN_Root` 原點在底架底面中心（建模 B）。這是 R1.5a 最大的風險，要最先做。
+5. **不新增 Core 事件**：
+   - 按鈕走 `ActionRequested(Operate)`
+   - 狀態變化走 `StateChanged`
+   - 工具袋拿取、歸還走 `ToolPick/ReturnRequested`
+
+## 2. 天車互動
+
+### 2.1 無線遙控器 env.crane_pendant（D18）
+
+- **不用時**：掛在 tp.platform.crane 旁的 `PendantDock`。
+- **開場**：遙控器掛在平台的 `PendantDock` 上，不在左手（負責人裁定）。
+- **拿起**：在掛座 0.3 m 內按一下左握把，遙控器就附著在左手，之後不必一直握著（沿用 T3 的左手抓取層）。右手食指 poke 按鍵，或用右扳機按。
+- **拿著時**：遙控器附著在左手，和握把無關，所以左握把照常可以抓面板把手（只有在掛座 0.3 m 內才是掛回）。作業單（X）打開時，或左手的 interactor 正在選取任何物件時（例如雙手握 2.5 m 長桿的前手、IN_04b），遙控器隱藏，放開後再出現；吊物懸空時不能打開作業單，並說明原因。步驟表 v1.2 在 SI_06 a3 拿起、RT_01 b 掛回，中間一直帶在身上。
+- **放回**：在掛座 0.3 m 內再按一下左握把，遙控器就掛回掛座，左手恢復原本的功能。不在掛座旁按左握把，對遙控器沒有作用，遙控器不會掉落。
+- **按鍵節點**照 model-spec v2.0：`Btn_Up`、`Btn_Down`、`Btn_East`、`Btn_West`（吊車台 ±X）、`Btn_North`、`Btn_South`（橋架 ±Z）、`Btn_Speed2`、`Btn_EStop`、`Key_Power`。中文標籤放在 `Label_*` 錨點，文字從資料讀。
+- **按住才動，放開就停**（deadman）。同一時間只接受一個方向，同時按兩個就停。
+- **高速**：`Btn_Speed2` 和方向鍵一起按住時用高速，只按方向鍵時是微動。真實遙控器的方向鍵是兩段式，但 poke 做不出半按，所以拆成兩顆鍵。
+- **緊急停止**：`Btn_EStop` 按下後會鎖住，所有命令都無效。要先旋轉復歸，再重新轉 `Key_Power`。
+- **桌面版**：拿起遙控器之後顯示按鍵面板，用滑鼠按住按鍵。
+- **黑板鍵**：
+  - `ctrl.crane.cmd`：None / Up / Down / E / W / N / S
+  - `ctrl.crane.fast`：bool
+  - `ctrl.crane.estop`：bool
+  - `ctrl.crane.power`：bool
+- **操作位置**：起吊和放下都在 tp.platform.crane (−2.40, −3.50) 操作（D18）。
+
+### 2.2 天車機構 CraneMechanism（Parts/Mechanism 層，和升降放在一起）
+
+**移動方式**：照 model-spec v2.0 第 7.3 節的節點，直接移動 Transform：
+- `Crane_Bridge` 只沿 Z 移動。
+- `Crane_Trolley` 只沿 X 移動。
+- `Crane_HookBlock` 的位置由捲揚長度決定。
+- `Crane_Rope` 依兩端距離縮放。
+
+**參數**放在資料 `CraneProfile`，數值照 crane-procedure 2.1 和 6.1：
+
+| 軸 | 高速 | 微動 | 行程 |
+|---|---|---|---|
+| 升降 | 5 m/min | 0.5 m/min | 吊鉤最高 Y +6.35 |
+| 橫行（X） | 15 m/min | EX 1.5 m/min | +2.0 至 −15.0 |
+| 走行（Z） | 20 m/min | EX 2 m/min | −15 至 +15 |
+
+起動和停止各有 EX 0.3 s 的平滑加減速。
+
+**黑板鍵**：
+- `part.crane.hook.pos`：變化超過 1 cm 才寫入；放開按鍵時強制寫入。和升降的作法相同。
+- `part.crane.load_bottom_y`：吊物底面的高度。
+- `part.crane.state`：Idle / Moving / EStop / Collision / LimitUp / RedZoneStop
+
+**其他行為**：
+- 上限位：吊鉤升到最高點就停，寫入 `LimitUp`。
+- 警示燈和蜂鳴器：運轉時開啟，只有視覺和音效。
+- 碰撞停止：每幀用吊物的 `LoweredTightBounds`（建置時用頂點算好、存在 PAN_Root 局部座標，見 pantograph-rigging 12.7 和 a6 第七節）轉成世界座標，對 Collision 層做 `Physics.OverlapBox`。不用 Renderer.bounds，因為斜放的長管會被高估。下降對位到台架或絕緣子時，OverlapBox 排除 StandSeat_1..4 和 InsulatorTop_1..4 的 collider（排除清單寫在資料 CraneCollisionIgnoreDef，只在吊物下降、且離落點 ≤ 0.10 m 時生效），因為定位銷和絕緣子本來就要接觸底架；不採用把 Bounds 底面內縮 1 cm 的做法，內縮會讓其他真的碰撞漏掉（建模 B 12.9 H2，軟體工程選擇）。碰到東西就停車，寫入 `Collision`，並記 `ERR_Crane_Collision`。
+- 晃動只做視覺效果：吊物繞吊鉤做阻尼擺，兩個水平軸各一軸，最大 3°，停車後約 1.5 s 衰減到 0。晃動不寫黑板，判定也不讀它。不另設開關。
+  `// shortcut: 晃動只是視覺，不影響判定, 教授要訓練「停車防擺」時再改成會影響判定的模型`
+
+### 2.3 吊具、對位指示燈
+
+吊梁 `env.lifting_beam` 一開始就是 `Crane_HookBlock` 的子物件，固定在吊鉤上（鐵道的簡化做法）。
+
+| 動作 | 做法 | 黑板 |
+|---|---|---|
+| 天車作業前檢查 | 依序 Inspect 4 項：遙控器、緊急停止、上限位、吊鉤舌片 | `env.crane.precheck_n` |
+| RM_05 檢查吊具 | 對吊梁和 4 條吊帶 Inspect，檢查卡上顯示標籤和外觀。情境可以把其中一條設成「有割傷」 | `env.sling_n.inspected`、`env.sling_n.damaged` |
+| RM_06 掛吊帶 | 對吊耳 `ip.pan_assy.lift_point_n` 做 Operate，吊帶就掛上去；吊帶依兩端距離自動縮放、對準方向。對臂或弓頭做 Operate 會記 ERR_Crane_WrongLiftPoint | `ip.pan_assy.lift_point_n.state = Rigged` |
+| LF_01 舌片 | 吊鉤到位後，對 `Hook_Latch` 做 Operate | `part.crane.hook.latched` |
+| 起吊 | 條件見 3.1。全部成立時，吊鉤上升，集電弓會變成吊梁的子物件。只要缺一項，吊帶會繃緊但集電弓不動，畫面上說明還缺什麼 | `part.pan_assy.state = Lifted` |
+| LF_05 放上台架 | 吊鉤用微動下降。當 `LocatingHole_n` 和台架定位銷的水平距離都在 2 cm 內，就吸附到台架上（鐵道確認：定位銷有導角） | `part.pan_assy.state = OnStand` |
+| LF_06 台架夾具 | 對 2 個夾具做 Operate | `env.panto_stand.clamp_n` |
+| 卸吊具 | 對每個吊耳再做一次 Operate | `ip.pan_assy.lift_point_n.state = Free` |
+| IN_ 吊回車頂 | 和放上台架相同，改為對準 `InsulatorTop_n` | `part.pan_assy.state = Mounted` |
+
+- **對位指示燈**（取代地面指揮人員）：吊物在目標上方 0.3 m 以內時，台架或絕緣子旁的 4 顆燈各對應 1 支銷。每支銷在 2 cm 內時那顆燈亮綠，否則亮紅。指示燈只讀吸附判定用的同一份距離，不另外計算。
+- 吸附容差寫在資料裡，沿用 RemovableBehaviour 的 InstallSnap。
+
+### 2.4 吊物下方紅區（D18、D19）
+
+- 吊物離開支撐後（`part.pan_assy.state == Lifted`），由軟體在地面、平台面和車頂上畫出紅區：吊物水平投影外擴 1.0 m，跟著吊物移動。模型只提供材質格。
+- 頭盔的水平投影進入紅區時：
+  1. 天車**立刻停止**，寫入 `part.crane.state = RedZoneStop`。
+  2. 記 **Critical**（`ERR_Crane_PersonUnderLoad`）。教學模式下說明錯誤，並提供「從這一步重做」；考核模式照 Critical 的共通規則，直接不及格。
+  3. 學員離開紅區之前，遙控器的所有方向鍵都無效。
+- 判定每幀做，只比對水平投影，和高度無關。
+
+### 2.5 傳送限制（D18）
+
+傳送限制寫在資料 `TeleportRule`，和 RoofAccessRule 放在一起，傳送和 B 鍵都讀這一份：
+
+| 條件 | 傳送 |
+|---|---|
+| 吊物懸空（`Lifted`） | **一律不能傳送**，只能平滑移動。只擋下並說明原因，不記錯 |
+| 傳送到 tp.stand.* | `part.pan_assy.state != Lifted` 就開放（吊物沒有懸空就能去，包括剛放上台架、夾具還沒鎖的 LF_06）。懸空的情況已由第一列擋下（資深軟體 A 審查 1） |
+| 傳送到 tp.platform.crane | 吊回時，只在吊物還沒離開台架之前才可以傳送（D18：起吊、放下都在 tp.platform.crane 操作） |
+| 平台 ↔ 地面維修區 | 只能用傳送，相當於走樓梯 |
+
+注意：crane-procedure 6.4 寫的「吊回時從 tp.stand.w 起吊」已經被 D18 補充取代。吊回時，學員要先傳送回 tp.platform.crane，再起吊。
+
+### 2.6 安全規則
+
+錯誤 ID、嚴重度、觸發條件只以附錄 A（steps-v6）第 1.3、1.4 節和各步驟的錯誤欄為準，這裡不另列一份表（資深軟體 A 審查 3）。ErrorRule 資料是唯一定義：R1 已有的 ErrorRule（ERR_SI01_*、ERR_CSR*_* 等照舊），加上 b4 依附錄 A 1.3、1.4 新增的。CSV 的 errorIds（「ID:嚴重度」）只是引用；嚴重度和 ErrorRule 不一致、或 ID 沒有定義，匯入就失敗並列出行號（資深軟體 B 審查 S1）。CraneSafetyTests 讀 ErrorRule 資料逐條測。
+
+- 吊帶損傷：RM_05 檢查卡判合格／不合格（D20，換吊帶在 backlog B5）。v0.3 的 ERR_Crane_DamagedSling 併入 RiggingNotInspected（步驟計畫同意）；回饋文字依原因分兩種：「還沒檢查吊具」「用了判為不合格的吊帶」，文字從資料讀。
+- v0.3 的 NoLockStrap、WrongLiftPoint、OffCenter、UnclampedUnrig、PersonOnRoof 改名為上表 ID，數值照 steps-v6。
+- 試吊：`ValueInRange(part.crane.load_lift_height, 0.08–0.15)` 且停 ≥ 3 s，計時沿用 ContactRouter 的 dwell。
+- 吊物懸空時傳送：只擋不記錯（2.5）。教學模式一律先提示再記錯。虛擬指揮員 backlog B4。
+
+## 3. 集電弓整組移動、場景與工具
+
+### 3.1 狀態與起吊條件
+
+`part.pan_assy.state` 依序是：Mounted → Released → Rigged → Lifted → OnStand → Lifted → Mounted → Fastened。
+
+起吊條件，全部成立才吊得起來：
+
+| 條件 | 黑板 |
+|---|---|
+| 降弓固定帶已裝上（RM_01） | `ip.pan_assy.hold_down.state == Installed` |
+| 控制線已拆下、防塵蓋已蓋上（RM_02） | `ip.pan_assy.ctrl_connector.state == Removed` |
+| 高壓電纜端子已拆下（RM_03） | `ip.pan_assy.hv_terminal.state == Removed` |
+| 4 支底座螺栓都已取出（RM_04） | `part.pan_base.bolt_1..4.state == Out` |
+| 4 個吊點都已掛上（RM_06） | `ip.pan_assy.lift_point_1..4.state == Rigged` |
+| 吊鉤舌片已扣上（LF_01） | `part.crane.hook.latched` |
+
+- **分流線跟著弓一起吊走**，不在起吊條件裡。
+- 元件：底座螺栓、高壓端子螺栓用既有的 `FastenerBehaviour`。hv_terminal、ctrl_connector、hold_down **不用 `RemovableBehaviour`**（R1.5a a5 實測：它是碳滑板專用，掛上會出錯）。R1.5b b2 新增一個小的通用元件 `DetachablePart`：
+  - 只有三件事：狀態（Installed／Removed，寫黑板 `<id>.state`）、InstallSnap 吸附位置（沿用既有 InstallSnap）、可選的 `requiresIds[]`（例如 hv_terminal 要兩支 hv_bolt 都 Out 才能拿下）。
+  - 不改 `RemovableBehaviour` 本身（紅線：公開介面不動）。如果兩者重複的程式超過約 30 行，先在回報寫出來，R2 再考慮合併。`// shortcut: 碳滑板仍用 RemovableBehaviour, R2 視重複程度合併成一個`
+  - 分流線不是互動件，跟著弓一起吊走，不掛元件。
+- 吊回後的步驟：
+  - IN_05 底座螺栓扭力 EX 100 N·m、IN_06 電纜端子扭力 EX 50 N·m、IN_07 拆下固定帶，都用上面同樣的元件。
+  - IN_09 絕緣電阻用 `ValueInRange`，門檻 ≥ EX 100 MΩ。
+- 全域 Critical 規則：
+  - 接地棒還沒掛上就拆 hv_terminal。
+  - 升弓時 hold_down 還裝著。
+- 車頂上拆下的底座螺栓和電纜端子螺栓，放進工具袋的 `BoltBag`（D9 的車頂螺栓盤作廢）。
+
+### 3.2 局部座標（R1.5a 必做）
+
+- 把所有 Parts 子物件搬到 `PAN_Root/PAN_Parts` 底下，名稱和 ID 都不改。
+- 所有判定、量測點、吸附目標、`part.pan_head.pose`，都改在 `PAN_Root` 的局部座標中計算。
+- 升弓和降弓只在狀態是 Mounted 或 Fastened 時有效。E1 照舊；集電弓在台架上時視為降弓。
+- 測試 `PanAssyFrameTests`：把 `PAN_Root` 平移 (+3, −2, +1)、旋轉 90°，再跑一次 CSR 測試流程。所有 `part.*` 黑板值都必須和沒移動時完全相同。這項通過才能進 R1.5b。建模 B 的 `PanAssyHierarchyTests`、`PanAssyIdUnchangedTests` 等也一起納入。
+
+### 3.3 兩區場景（D17、D18）
+
+- 新資料 `ZoneDef`，每個站點和存放處都帶 `zoneId`。
+  - `zone.arrival`（進站區）：股道中心在 X 0，車頂平台面在 Y 0。
+  - `zone.maintenance`（地面維修工作區）：範圍 X −5.5 至 −13.5、Z −5 至 +5，地面高度 Y −3.65。
+- 台架：中心 (−9.5, ·, 0)，頂面 Y −2.90（高 0.75 m），滑板頂面約在地面上 1.13 m。
+  - 四周每邊淨空 ≥ 1.2 m，全區都是 Walkable，學員用 T6 平滑移動繞著台架走。
+  - `tp.stand.n/e/s/w` 只是傳送和 B 鍵的捷徑。CSR 小動作的 standPointId 只決定 B 鍵送到哪裡，不檢查學員有沒有站在站點上。
+- 工作檯（作業單、備品架、零件盒、台架用螺栓盤）放在 X −12.5 附近。
+  - 判定讀的是 `env.bolt_tray_L/R` 這兩個 ID，所以 ID 不改，跟著移到工作檯。
+- 車頂站點 tp.roof.base 兩點**暫定**：(+0.70, +0.60) 面向 −X、(−0.70, +0.60) 面向 +X。等建模 B 給出吊耳和底座位置後再定。
+- RoofAccessRule 只管進站區的車頂。D14 的白名單作廢：防墜器只保護上下車頂。
+
+### 3.4 工具分兩類（D17、D18）
+
+| 類別 | 掛位 | 存放處 |
+|---|---|---|
+| 隨身工具袋 `env.tool_bag` | 5–9（卡尺、套筒扳手＋套筒盒、扭力扳手、清潔布、標記筆）、10 降弓固定帶 tool.hold_down_strap，另有零件袋 `env.tool_bag.bolt_pouch`（模型節點 BoltBag） | 跟著學員走 |
+| 個人腰包 `env.waist_pouch` | 作業期間放 1 上鎖掛牌組（D30：SI_00 f 從工具架 slot_1 領取，狀態「在腰包」；WC_06 c 交接時掛回 slot_1） | 跟著學員走，右腰（工具袋在左腰，選單可對調） |
+| 工具架 `env.tool_rack` | 1 上鎖掛牌組（只在開始和結束時）、4 安全帶、11 高阻計 tool.megger、12 短接地線 tool.grounding_lead | 平台 (−3.06, ·, −2.40)，站點 tp.platform.rack (−2.41, −2.40)（D18、D20、試玩 P3） |
+| 桿架 `env.pole_rack` | 2 驗電器、3 接地棒（2.5 m 長桿，ID 不變，D25） | 外側設備帶內緣 (−2.85, ·, +0.60)，離 tp.platform.ground 0.65 m（試玩 P2） |
+
+**黑板和判定**
+- 黑板鍵沿用 `env.tool_rack.slot_n.state`，新增 slot_10–12（D20），1–9 不改。
+- `InRack` 的意思改成「在它所屬的存放處」；每個掛位屬於哪個存放處，寫在資料 `ToolSlotDef.homeStorageId`。
+- WC_01a／WC_01b 清點：每個掛位是否在位，一律依 `ToolSlotDef.homeStorageId` 判定（工具袋、工具架 env.tool_rack、桿架 env.pole_rack，D25），件數從資料算，規格和測試都不寫件數或掛位編號。
+
+**工具袋操作（負責人裁定，不新增按鍵）**
+- 位置：預設掛在腰間，也可以從選單改成掛在左手腕。
+  - 腰間位置由頭部推估：頭下方 0.65 m、偏右前方 0.2 m。只跟著頭的水平方向轉（yaw），低頭、抬頭或歪頭時不跟著動。袋子的 pivot 在背面中心，口袋開口朝 +Y。
+- 拿取：右手伸進工具袋範圍內，按右握把，就會拿出目前指著的那一格（`Pocket_5..9`，固定帶的格子請建模 A 補 Pocket_10）。
+- 放回：拿著工具放進工具袋範圍內，放開右握把就收回。
+- 標籤：手在工具袋範圍內時，袋子算是「打開」，每格上方顯示工具名稱，文字從資料讀。
+- 事件：拿取和放回都送既有的 `ToolPick/ReturnRequested`。
+- 桌面版：沿用現有工具列。工具袋的掛位隨時可以點；其他掛位要靠近它的 homeStorageId 存放處（工具架或桿架）才能點。
+
+**防墜繫繩（crane-procedure 6.3）**
+- 在車頂上放開工具、但沒有放回工具袋時：工具會掛在 `Lanyard_Anchor_n` 的繫繩上垂著，不會掉下去，並記 Major `ERR_Tool_NotStowedOnRoof`。
+- 在地面工作區放開工具時：工具落在地面或台架上，不記錯，但 WC_01 清點時要收回。
+- 同區抓取規則（學員和物件要在同一區）照舊，但工具袋例外。
+
+### 3.5 兩種課程與從階段開始（D19、D20）
+
+- 主課程「集電弓定期檢修」是預設；「日常更換」是現有的車頂原地更換。兩者共用同一份步驟資料。
+- 兩門課的差異只放兩個地方：
+  - **SubActions.csv**（附錄 C）：小動作在哪門課存在（courses 欄；跳過的小動作就是不在該課程的列，CourseDef 不另列跳過清單，資深軟體 B 審查 1）、每門課的站點（standPointId_periodic／_daily）、日常的文字／目標／條件差異（*_daily 欄）。
+  - **`CourseDef.overrides`**，只放 CSV 表達不了的：
+    1. 物件擺放：`env.bolt_tray_L/R`、待報廢箱、備品架的 Anchor（依課程選一組）。
+    2. onPass 跳轉（CSR_05 合格：定期檢修 → IN_01，日常 → WC_01a）。
+    3. 架空線與升弓上限（D23）：日常更換顯示 env.catenary；LiftProfile 上限覆寫成接觸線的接觸高度（EX Y +1.35，等鐵道確認）。定期檢修不覆寫。
+    4. 天車停駐（D23）：日常更換時天車照樣顯示，擺到模型空節點 Crane_ParkPose（橋架 Z +14.0、吊車台 X −14.0、吊鉤 Y +6.35，model-spec 8.3），ctrl.crane.power 固定 false、命令一律無效，env.crane_pendant 拿不起來，tp.platform.crane 不開放。
+  教學模式第二側（CSR_06_R–14_R）只顯示步驟標題是兩門課共通的規則（D29 v1.1），不是覆寫。
+  D23 的 5 個測試（CourseOverrideTests）：DailyLiftCapStopsAtContactHeight、DailyCraneParkedAtParkPose、DailyCraneCommandsIgnored、DailyPendantNotGrabbable、DailyCraneStationClosed。
+  不複製 CSR 步驟。D10 的車頂共用站點和移位規則留給日常模式。日常更換的步驟以附錄 C 為準。
+- 考核（D21、D22、D29）：定期檢修分 5 段（startPhase 1、3、4b、5、6），日常更換分 3 段（日 A SI_00–CSR_05、日 B CSR_06–CSR_15 即日常的 4b、日 C WC_01a–WC_06）。分段整體：合計 Major ≤ 2、同一規則不可在兩段出現。每段 0 Critical、Major ≤ 1、≤ 1.5 倍；全程 0 Critical、Major ≤ 2、≤ 1.5 倍。分段、合格線、參考時間都寫在 ExamDef 資料，參考時間由資料加總。
+- `startPhase`（D20）：每個階段都能當起點。做法是**沿用 SimState.Snapshot**，不手寫每階段的起始狀態：
+  - 一個 EditMode「完整流程」測試照正常順序跑完，在每一個 startPhase 的第一步開頭都存一份 Snapshot，存成資料 `PhaseStartSnapshot`（每課程每個 startPhase 一份：定期 1–6 加 4b，日常 1、4b 和日 C；資深軟體 B 審查 3）。ExamDef.segments 只引用 startPhase，不另寫步驟 ID。
+  - 從某階段開始 = Restore 那份 Snapshot，場景物件依黑板狀態擺好（集電弓位置由 `part.pan_assy.state` 決定）。
+  - 步驟資料或判定改了，重跑那個測試就會重新產生；測試同時比對舊檔，不一致就失敗，提醒要更新。
+- 前一步已經拿著下一步要的工具：步驟開始時本來就會立即評估一次（R1 已做「重評估到穩定，最多 8 次」），所以「拿出」會直接完成。加一個測試 `PreHeldToolTests` 確認。
+
+### 3.7 組長審查項目（D21，steps-v6 1.4–1.6）：只加 UI 和判定，不加新機構
+
+- **停留確認點**：新資料 `HoldPointDef { id, releaserIds[], checklist: CompletionRule[], blocks[] }`，清單項目全部用既有的 CompletionRule 寫，NPC 不另外寫判定。
+  - 請求放行：逐項評估清單。全部成立時，寫 `hold.{n}.released = true`；有一項不成立就退回，並用 `Explain()` 說明是哪一項沒過（R1 已經做好 Explain()）。
+  - `blocks[]` 列出放行前會被擋下的動作，例如扣車頂掛點、起吊上升超過 0.05 m、解鎖。擋下的做法和 E1 一樣，由 Safety 攔截 `ActionRequested` 或 `ctrl.*` 命令，再記 ERR_Global_HoldPointSkipped。
+- **NPC**（npc.work_leader、npc.rigging_lead、npc.inspector）：靜態人物，可以被 Inspect。點了會開出確認清單 UI。不做 AI、不做路徑移動。依步驟顯示或隱藏（例如檢查員只在 WC_06 出現）。機廠調度沒有實體，用手腕選單的「對講機」開同一個清單 UI。
+- **個人防護具**：`env.ppe_station` 上的每件防護具 Operate 一次就算「已穿戴」，寫入 `ppe.helmet`、`ppe.chinstrap`、`ppe.shoes`、`ppe.gloves_mode`。不做穿戴動畫。
+  - 手套用手腕選單切換 Work 和 Insulating。手腕選單是 UI，不佔控制器按鍵。
+  - ERR_Global_NoInsulatingGloves 用碰觸點清單判定：在 ContactRouter 送出 engage 時檢查 `ppe.gloves_mode`。
+- **接地登記欄**：`env.work_order.ground_register` 是作業單上的兩列，填寫方式沿用作業單現有的欄位。位置、時間、學員名字自動帶入。
+- **一人一鎖**：上鎖時記下 `lockout.owner`；鑰匙是一個 bool 鍵，表示鑰匙在學員身上。WC_04 解鎖時，兩者都要成立。
+- **SI_00 前的限制**：「靠近車輛」用進站區的一個 trigger 範圍判定。在 SI_00 完成之前，進入範圍、拿工具或操作升降都會記 ERR_Global_StartWithoutPermit。
+- 考核分段的起點見 3.5（D29）。
+
+### 3.6 錄製
+
+- `ctrl.crane.*`、`part.crane.*`、`part.pan_assy.*`、`ip.pan_assy.*` 都是黑板鍵，現有的錄製已經涵蓋，格式不改。
+- 吊鉤位置照升降的作法，變化超過 1 cm 才寫入。晃動只是視覺效果，不會重播。
+
+## 5. 新增測試（EditMode）
+
+| 測試 | 內容 |
+|---|---|
+| PanAssyFrameTests | 3.2 |
+| CraneMechanismTests | 按住才動、放開就停；同時按兩個方向就停；高速與微動的速度正確；緊急停止會鎖住、要復歸；上限位；碰撞時停車並記錯 |
+| CraneRedZoneTests | 紅區外擴 1.0 m 的範圍正確；進入紅區時停車並記 Critical；在紅區內按鍵無效；離開後可以再操作 |
+| CraneInputTests | 遙控器只寫 `ctrl.crane.*`，不引用 CraneMechanism；InputBindingTable 和 R1 相同 |
+| RiggingTests | 起吊條件 6 項，每項單獨缺少時都吊不起來，並說明缺什麼；全部成立時吊得起來；吸附在 2 cm 內成立、2.1 cm 不成立；對位指示燈和吸附判定一致 |
+| TeleportRuleTests | 2.5 表格的每一列，各測一次允許、一次擋下 |
+| CraneSafetyTests | 讀匯入後的 ErrorRule 資料，每條規則各測一次會觸發、一次不會觸發；測試裡不列 ID，新增規則自動涵蓋 |
+| ToolBagTests | 工具袋的掛位在任何區都能拿、能還；其他掛位要靠近它的 homeStorageId 存放處；InRack 依 homeStorageId 判定；WC_01a／b 清點結果依資料算，不寫件數；腰間位置只跟水平方向轉；車頂放開工具會垂掛並記 Major（ERR_Tool_NotStowedOnRoof），地面放開不記錯；左手拿著遙控器時仍能雙手握長桿，握住時遙控器隱藏 |
+| CourseOverrideTests | 每門課的小動作集合，等於 SubActions.csv 依 courses 篩選後的結果；兩門課的其他差異只有 CourseDef.overrides 列出的類別（不寫類別數）；加 D23 的 5 個測試 |
+| PhaseStartTests | 每一個 startPhase 的 PhaseStartSnapshot，都和完整流程跑到該處的黑板相同；從該處開始能跑到結算。定期 startPhase 6 另外斷言 D29 的起點狀態：#1 已重掛並登記、#2 仍掛著、學員在車頂且車頂掛點扣著、吊鉤在弓上方 |
+| PreHeldToolTests | 進入一步時已拿著該步要的工具，「拿出」小動作在同一幀完成 |
+| CraneReplayTests | 錄一段吊運再重播，吊鉤位置和 `part.pan_assy.state` 的時間序列都相同 |
+
+
+====================================================================
+3. 驗收（寫進 Logs/V2R15Report.txt，給 terry 戴頭盔驗）
+====================================================================
+1. 定期檢修課程從 SI_00 一路做到 WC_06，不卡關，0 紅字。
+2. 日常更換課程從 SI_00 做到 WC_06，不卡關。上鎖、斷電、扣安全帶、解鎖都要親手做，沒有預設完成的步驟（K1）。
+3. 每個階段都能單獨開始，而且能跑到結算。
+4. 遙控器按住才動、放開就停；緊急停止會鎖住；同時按兩個方向會停。
+5. 吊物懸空時：不能傳送、不能開作業單；走進紅區時天車立刻停止並記 Critical；靠太近記 Major。
+6. 對位燈 4 顆都亮綠時才吸附；放上台架、鎖好夾具、卸下吊具之後，才可以傳送到台架站點。
+7. 繞台架走一圈都碰得到滑板，滑板頂面約在腰到胸的高度。
+8. 工具袋：右手伸到腰間、按握把就能拿出工具；放回後放開握把就收回；袋子上看得到每一格的名稱。在車頂放開工具時，工具會掛在繩子上，並記 Major（ERR_Tool_NotStowedOnRoof）。
+9. 錯誤規則每條都有觸發情境（附錄 A 第 1.3、1.4 節），回報中逐條列出觸發結果。
+9a. 收尾照 D25 順序：在車頂時拆 #1 會被擋下並記 Critical；拆接地順序反了會被擋下並記 Critical（ERR_WC03_RemoveOrder）。驗電器、接地棒從桿架拿、放回桿架。
+9c. 鎖到扭力時聽得到「喀」一聲，同時震動閃色；VR 模式 CSR_11 b 的指令是「轉動手腕…讓箭頭朝外」，沒有鍵盤字樣。
+9d. 日常更換載入後，天車停在駐車位，遙控器拿不起來，傳送點沒有 tp.platform.crane；升弓到接觸高度就停（D23）。
+9b. 每一段考核（定期 5 段、日常 3 段，從 ExamDef 讀）和全程考核各跑一次；報表最上面有「可以跟班／不可以跟班」，組長的 (d)、(e) 兩種情況都判「不可以跟班」，合格與不合格的情況都要出現，結算顯示正確。
+10. 測試總數，以及比 R1.5a 收尾時多出的數量。
+
+====================================================================
+4. 試玩改良（驗收組長試玩前回饋 P1、P2、P4、P5、P6；鐵道已裁定座標與門檻）
+====================================================================
+## 總表
+
+| # | 做法（一句話） | 放在 R1.5b 哪一段 | 新增或修改的測試 |
+|---|---|---|---|
+| P1 | 升降盒左側一個「去駕駛室」光圈，駕駛室裡一個「回平台」點，回來落在 tp.platform.lift 面向集電弓；駕駛室有弓頭監視畫面 | b4c（光圈的場景物件在 R1.5a a6） | CabShuttleTests、PanMonitorTests |
+| P2 | 長桿不和場景做物理碰撞，穿過時輕震一次；桿架移到 ground 站後方 0.65 m，原地轉身就拿得到 | b3（桿架位置在 R1.5a a6） | PoleNoCollisionTests |
+| P4 | NPC 站位和台詞從資料讀（鐵道座標），放行或退回時轉向學員 | b4c | HoldPointTests 加 2 條；StationLayoutCheck 加第 15 項 |
+| P5 | 教學模式在下一站顯示光圈和腳印，練習與考核關閉；傳送後面向作業物件 | b4c | NextStationHintTests、TeleportFacingTests |
+| P6 | 兩級：0.80 < \|X\| ≤ 1.19 警示帶畫紅線並輕震，\|X\| > 1.19 持續 ≥ 1 s 記 Major；扣著車頂掛點時不能離開可走範圍；底架兩側局部放寬到 1.0 | 新段 b4d（接在 b4c 後） | RoofEdgePlayModeTests（第一批 PlayMode 測試） |
+| D30 | 上鎖掛牌組作業期間放個人腰包（SI_00 領取、WC_06 歸還）；日常課程扣著防墜器時可傳送到 parts、scrap；防墜器繩子視覺長約 5 m | b3（腰包）、b4d（白名單） | WaistPouchTests；RoofEdgePlayModeTests 加 1 條 |
+| 日常滑板 | 新舊滑板一次一條手拿上下車頂；舊滑板可暫放車頂暫放墊；平台備品架、待報廢箱；拿著滑板不能傳送；放在墊子以外記 Major | b4c | StripCarryTests |
+| 狀態卡 | 分段起點顯示 7 欄「目前狀態」卡，文字從起點快照產生；只有教學模式顯示下一步 | b4c | PhaseStartCardTests | 資深軟體 A 核對 ⚠ 欄 |
+| 螺栓換位 | 車頂底座站點之間按 B 叫出選單，學員自己選下一站；教學模式只用光圈提示 | b4c | BoltHopTests |
+| 吊耳換位 | 掛、卸吊帶要在各吊耳自己的子站點，四個吊耳順序不計分 | b4c | BoltHopTests |
+| 防墜說明 | 教學模式 SI_06 上車頂前確認單最後加一行說明（不計分） | b4c | HoldPointTests 加 1 條 |
+| 吊運前提 | 遙控器只在 tp.platform.crane 1.0 m 內有效；停留點 2→LF_06、3→IN_04 期間車頂入口封閉 | b4c | CraneLiftLockTests |
+
+## P1 駕駛室來回
+
+- 兩個新站點，用既有 StationDef 和 TP_Marker，不另寫傳送：
+  - 「去駕駛室」光圈 `mk.platform.to_cab`：升降盒左側 (−2.20, 0, −0.45) 的地面光圈，是標記不是站點，不受站點間距 0.6 m 的限制。學員站進光圈（頭部投影在半徑 0.25 m 內）時出現面板按鈕「去駕駛室」，按了傳送到 tp.cab (−0.19, −2.35, −30.0)，面向控制盤。
+  - 「回平台」：駕駛室控制盤旁的按鈕，傳送到 tp.platform.lift (−2.20, 0, 0.00)，落地面向 O（+X），視線穿過升降盒看到弓頭和綠框。
+  - 只做這一對，不在其他地方開捷徑。座標寫在 StationDef／標記資料裡。
+- 弓頭監視畫面：駕駛室控制盤上方放一個小螢幕，畫面來源是一台固定 Camera 拍弓頭和綠色目標框，輸出到 256×256 的 RenderTexture。
+  - 只有學員在駕駛室時才開這台 Camera，其他時間關掉，不吃效能。
+  - 畫面要拍得到綠色目標框（鐵道），學員看畫面就知道弓有沒有降到位。教學模式才在畫面上疊一行字「弓位：已降到位／未到位」（讀 SI_01 的同一個黑板鍵，不另寫判定）；練習和考核只顯示畫面和綠框（組長確認）。
+- 測試：
+  - CabShuttleTests：站進光圈才出現按鈕；按「去駕駛室」到 tp.cab 且面向控制盤；按「回平台」到 tp.platform.lift 且面向 O（yaw 誤差 ≤ 5°）；吊物懸空時兩個按鈕都照 TeleportRule 擋下。
+  - PanMonitorTests：學員進駕駛室時 Camera 開，離開時關；教學模式下黑板「已降到位」改變時畫面文字跟著變；練習和考核模式沒有這行字，但畫面和綠框都在。
+
+## P2 長桿不卡、不彈
+
+- 2.5 m 驗電器和接地棒拿在手上時，桿身 collider 換到新 layer `HeldPole`。
+  - Layer 碰撞矩陣：HeldPole 和 Environment、Boundary、Walkable、護欄、門架、防墜器柱都不碰撞。只和互動點的觸發器（接地端子、弓頭接地掛點、自檢器）有接觸。
+  - XRGrabInteractable 的 movementType 用 Instantaneous，桿子完全跟著手，不會被推開。
+  - 放回桿架後 collider 換回原本的 layer。
+- 穿過場景時：桿身另掛一個 trigger collider。進入場景物件時，兩手各送一次輕震（振幅 0.2、0.05 s），同一個物件 0.3 s 內不重複。不記錯，也不顯示文字。
+- 互動判定照舊走 ContactRouter，桿頭碰到互動點才算，桿身穿過護欄不算碰到任何東西。
+- 「從拿桿到驗電、掛接地都不用移腳」（鐵道確認可行）：桿架移到 (−2.85, ·, +0.60)，離 ground 站 0.65 m，原地向後轉身就拿得到；接地端子和驗電器自檢器在靠車側護欄 (−1.81, ·, +0.60) 附近，離站點約 0.4 m；弓頭接地掛點約 1.77 m（2.5 m 長桿可及）。場景改動見 R1.5a-supplement-a6.txt。
+- 測試 PoleNoCollisionTests：
+  - 拿著長桿把桿身移進護欄 collider：桿子位置等於手的目標位置（誤差 ≤ 1 mm），沒有被推開。
+  - 同一個物件進入時輕震 1 次，0.3 s 內再進入不重複。
+  - 桿身穿過護欄時，ContactRouter 沒有送出任何 engage。
+  - 放回桿架後 layer 換回原值。
+
+## P4 NPC 站位與放行
+
+- NPC 站位寫進 HoldPointDef 的 NPC 資料：`standPose`（位置、朝向）和 `lines`（放行、退回時說的話）。程式裡不寫座標和台詞。鐵道裁定的值（EX，用語是推估的現場說法）：
+
+| NPC | standPose (X, Y, Z) | 朝向 | 停留點 | lines |
+|---|---|---|---|
+| npc.guard 監護人 | (−3.00, 0, −1.00) | +X | 1（和作業負責人一起放行）；學員在車頂時一直在這裡 | 「隔離、驗電、接地確認完成，監護人就位，可以登頂。」 |
+| npc.work_leader 作業負責人 | (−3.00, 0, −0.30) | +X | 1、4 | 1：「許可單、危害告知、接地登記確認，准予登頂。」4：「接地全數拆除銷號，人員撤離，絕緣測試合格，向調度申請送電。」 |
+| npc.rigging_lead 吊掛指揮 | 只在吊運中出現：地面 (−5.0, −3.65, −3.5) | 朝吊運路徑 | 2、3；放上台架時 | 2 試吊前：「吊具、吊點確認，固定帶已裝，禁區淨空，試吊！」試吊後：「平衡良好，起吊。」放上台架：「慢降……停，對位。」3：「吊具確認，禁區淨空，試吊！」 |
+
+- standPose 依階段（鐵道「NPC 吊運中退避位置 v2」，舊的 (−3.00, −3.20)、平台 +Z 端和 (−9.5, −4.0) 都作廢）：
+  - 平時：上表監護人、作業負責人的位置。吊掛指揮不出現。
+  - 吊運中，從停留點 2 放行到 LF_06（吊物在台架鎖好夾具），以及從停留點 3 放行到 IN_04（吊物放回絕緣子）：三人都在地面 Y −3.65。吊掛指揮 (−5.0, −3.5)，監護人 (−6.0, −4.3) 朝台架，作業負責人 (−7.0, −4.3) 朝台架。
+  - 吊運開始時，NPC 淡出 0.3 s 後在地面位置淡入；吊運結束時淡回平時位置。不做走路動畫。
+  - 只有定期課程有吊運；日常課程的 NPC 一律在平時位置。
+  - 資料：HoldPointDef 的 NPC 資料改成 `poses: [{ phase: normal|lifting, position, yaw }]`，進入和離開 lifting 的時機用停留點放行和 LF_06／IN_04 完成兩個事件，不另寫判定。
+| 機廠調度 | 不出現人物，只用手腕選單的對講機 | — | 4 | 「調度了解，○○股道解除封鎖，准予送電。」 |
+
+- 吊掛指揮是同一個 ID，整段吊運都站在同一個地面位置（同一個 ID 只放一個物件）。監護人 npc.guard 是新 ID，請步驟計畫確認是否已在停留點 1 的 releaserIds 裡。
+- 放行或退回時，NPC 只轉頭和身體的 yaw 面向學員頭部，0.5 s 轉完，說完話再轉回原本的朝向。不走動、不做 AI。
+- StationLayoutCheck 第 15 項，依階段檢查（R1.5a a6 先用資料裡的站位檢查；b4c 建好 NPC 後改用 NPC 實體的 Bounds 檢查，不合格就建置失敗）：
+  - 平時：NPC 不在活動欄開口前 0.4 m 內；和所有站點、設備（工具架、桿架、升降盒、PendantDock、去駕駛室光圈、日常課程的備品架和待報廢箱）都 ≥ 0.6 m；NPC 面向的前方 0.6 m 內不能有設備（組長確認）。
+  - 吊運中：三人都不在吊物禁區（Z ±2.25）和吊運路徑兩側 1.0 m 內；彼此 ≥ 0.6 m；到工作檯、台架四周 1.2 m 淨空帶、鋼梯 Bounds 都 ≥ 0.6 m。
+  - 用目前座標先算過：吊運中三點離禁區 1.25 m 以上，指揮到監護人約 1.3 m，監護人到負責人 1.0 m（鐵道）。原本吊掛指揮離 PendantDock 0.43 m 的問題，因為改站地面已經解除。
+- 測試（加進 HoldPointTests）：
+  - NpcFacesStudentOnRelease：放行時 NPC 的 yaw 轉到朝向學員（誤差 ≤ 10°），說完話後轉回原朝向。
+  - NpcLinesFromData：放行和退回時顯示的文字等於資料裡的 lines，換資料就換字。
+  - NpcPhasePoses：定期課程停留點 2 放行後，三個 NPC 都在 lifting 的位置；LF_06 完成後回到平時位置；停留點 3 到 IN_04 同樣；日常課程整個流程都在平時位置。
+
+## P5 教學模式的下一站提示
+
+- 下一站 = 目前小動作在本課程的 standPointId（附錄 C 已有，兩門課各一欄），不需要另外的資料。
+- 顯示：沿用 R1 的 TP_Marker「目前步驟」外觀（綠色、會脈動）。另外加一條從學員腳下到那個站點的地面腳印線，只畫直線，最多 8 個腳印，學員離站點 < 1.0 m 就隱藏。
+- 依模式開關：寫在資料 `ModeDef.showNextStation`。教學模式 true，練習和考核 false。
+- 三種特殊情況（步驟計畫提醒）：
+  1. 吊物懸空（Lifted）時，下一站就是學員現在的位置，不顯示腳印（懸空時本來就不能傳送）。
+  2. 扣著車頂掛點時，如果下一站在平台或地面（例如 tp.platform.rack、tp.platform.ground），提示不直接指向那一站，而是依序提示「換扣平台掛點 → 解開車頂掛點 → 下車頂」，做完才指向那一站。傳送照 P6 擋下。
+  3. 分段考或從中間的 startPhase 開始時，第一個下一站取該段第一個小動作的站點（教學模式從中間開始也一樣）。
+- 腳印不只畫直線（組長確認）：下一站在別的區（平台、車頂、地面維修區、駕駛室）時，先指到轉換點，到了轉換點再指向最後的站點。
+  - 轉換點寫在資料 `ZoneTransitionDef { fromZone, toZone, waypointId }`，不在程式裡寫：
+    - 平台 ↔ 車頂：活動欄開口中心 (−1.81, −1.00)（上車頂前還要先完成換扣，照上面第 2 點）。
+    - 平台 → 駕駛室：去駕駛室光圈 mk.platform.to_cab；駕駛室 → 平台：「回平台」按鈕。
+    - 平台 ↔ 地面維修區：平台 +Z 端的鋼梯口（只是標示位置），旁邊顯示「用傳送到地面」；兩區之間照舊用傳送。
+  - 同一區內才畫直線腳印。區內有擋住的東西（護欄、台架）時，不另做尋路，直線穿過去也可以，因為同一區內傳送永遠可用。
+  - `// shortcut: 同區只畫直線、不做尋路, 試玩發現有人被擋住再加 NavMesh`
+- 傳送後面向作業物件：傳送落地時，yaw 轉向目前小動作的 targetId 的位置；沒有 targetId（例如填作業單）就用 StationDef 原本的朝向。只轉 yaw，不轉頭的俯仰。
+  - 頭盔裡的實際朝向不能強制，所以是轉 XR Origin，讓頭盔前方對準物件。
+- 測試：
+  - NextStationHintTests：下一站在別的區時先指到轉換點，到了轉換點才指最後的站點（平台→車頂、平台→駕駛室、平台→地面各測一次）；教學模式下小動作換站點時，提示移到新站點；練習和考核模式完全不顯示；學員走到 1.0 m 內時腳印線隱藏；吊物懸空時不顯示腳印；扣著車頂掛點而下一站在平台時，提示的是換扣與下車頂；從 startPhase 3 開始時，第一個提示是 LF_01 第一個小動作的站點。
+  - TeleportFacingTests：傳送到 tp.stand.s 做 CSR_06 時，頭盔前方和螺栓的水平夾角 ≤ 5°；沒有 targetId 時用 StationDef 的朝向。
+
+## P6 車頂邊
+
+R1 已有：車頂邊 0.5 m 內是墜落區，不是 Walkable，平滑移動走不進去；房間規模實際走進去時，畫面四周變紅並提示，但不記分。這次改成：
+
+- 兩級判定（鐵道裁定；D13 之後車頂可走範圍 |X| ≤ 0.80，車頂邊在 |X| 1.69），門檻寫在 RoofAccessRule：
+  - 可走範圍 |X| ≤ 0.80：正常。底架兩側局部放寬到 |X| ≤ 1.0（D36：Z 從 −0.75 到底架後緣 +0.15，實測約 −0.75 到 +1.9；底架站點都在 |X| 0.85，建置腳本從模型推導），這一段的警示帶從 1.0 開始；墜落區門檻 1.19 不變（建模 A model-spec 第 3、7.7 節，鐵道同意）。放寬範圍寫在 RoofAccessRule 的資料裡，以區段表示，不在程式裡寫座標。
+  - 警示帶 0.80 < |X| ≤ 1.19（1.19 = 車頂邊 1.69 − 0.5）：頭部投影進入時，地面紅線（從 |X| 0.80 開始畫，貼在車頂面上方的細長面）和兩手輕震一次。每次進入只震一次，不記錯。離開 0.2 m 後紅線淡出。
+  - 墜落區 |X| > 1.19，或越過車頂邊：頭部投影進入並持續 ≥ 1 s，記 Major，錯誤 ID 是 ERR_Global_RoofFallZone（Major，步驟計畫定名，附錄 A 1.4）。同一次進入只記一次；回到警示帶以內 2 s 後再進入，才算新的一次。畫面變紅和「請退回」提示照 R1。
+  - 平台和車頂之間的間隙 0.12 m：只有活動欄開口的跨板可以過，其他位置頭部投影越過間隙也算墜落區。
+- 扣著車頂掛點時不能離開車頂範圍（R1 第 3.2 節寫「R2 才真的擋」，這次就做）：
+  - 傳送：車頂掛點扣著時，傳送到白名單以外的站點會擋下，顯示「先解開車頂掛點」，並記 ERR_Global_TeleportWhileAnchored（Minor）。白名單寫在 CourseDef 資料（D30）：車頂各站和 tp.platform.anchor（換扣要在那裡做）；日常課程另加 tp.platform.parts、tp.platform.scrap（滑板往返）。白名單內傳送不記錯。
+  - 防墜器繩子的視覺長度約 5 m（資料值，D30；現場是 6–10 m 自動收縮式），只影響外觀。
+  - 平滑移動：活動欄照舊關著，走不出去。
+  - 房間規模：不能硬擋，所以走出車頂範圍時，照上面「跨進墜落區」記 Major。
+  - 「只擋進入、不擋離開」那條規則照舊適用於車頂開放規則本身；這裡擋的是「人還扣在車頂掛點上卻要離開」，兩者不衝突。
+- 測試 RoofEdgePlayModeTests（PlayMode，新增 Tests/PlayMode 的 asmdef，只引用測試要用的組件，不動既有 asmdef 分層）。用程式直接移動 XR Origin 和頭部 Transform 模擬，不需要頭盔：
+  1. 頭部移到 |X| = 1.00（警示帶）：紅線出現、震動 1 次，ErrorLog 沒有新錯誤。
+  2. 頭部在 |X| = 1.25 停 0.5 s 後退回：不記錯。
+  2a. 頭部在 |X| = 1.25 停 1.2 s：記 Major 1 次；停在裡面 5 s 仍然只有 1 次；退回警示帶 2 s 後再進去停 1.2 s，變成 2 次。
+  2b. 頭部從活動欄開口以外的地方越過平台和車頂的間隙：照墜落區記錯。
+  3. 扣著車頂掛點時要求傳送到 tp.platform.rack：被擋下、人不動、顯示提示、記 Minor 1 次；解開後同一個傳送成功。傳送到 tp.platform.anchor：扣著也成功、不記錯。
+  4. 扣著車頂掛點時用平滑移動往活動欄走：被擋住，位置不越過車頂範圍。
+  5. 人在平台、沒扣車頂掛點：靠近平台邊緣不出現車頂紅線，也不記錯。
+  6. 頭部在底架旁 (−0.85, Z 底架中心) 的 tp.roof.base_w：沒有紅線、不震動；移到 (−0.95, Z −1.0)（放寬段外）：出現紅線。
+  6a. 底架站點用最遠的螺栓驗證（組長裁定選 (a)；D33 之後改成每個子站點對 1 支螺栓）：學員在 tp.roof.base_w.s／.n、base_e.s／.n 四個子站點各蹲下一次（頭部高度用資料的蹲姿高度），右手移到該子站點對應的那支底座螺栓的互動點，頭部照資料的「伸手時頭部偏移」往螺栓方向移動。斷言頭部 |X| ≤ 1.10，ErrorLog 沒有 RoofFallZone。超過 1.10 就改用備案 (b)（底架作業區改用腰部投影判定），回報數值，不要自己改門檻。
+  - StationLayoutCheck 第 16 項（D33 改寫，R1.5a a6 增補 2）：每個子站點只對 1 支螺栓，螺栓在正前方 ≤ 0.60 m、±30° 內，螺栓的 |X| 小於站點的 |X|（學員往車中心伸手）。
+  7. 日常課程扣著車頂掛點時傳送到 tp.platform.parts：成功、不記錯；傳送到 tp.platform.rack：擋下、記 Minor 1 次。定期課程傳送到 tp.platform.parts：擋下（定期課程沒有這個站點，照「站點不存在」處理）。
+- terry 清單第 7 項（車頂邊防墜）就用這組 PlayMode 測試加上頭盔試玩驗收。
+
+## D30 上鎖掛牌組放個人腰包（b3）
+
+- 新增 env.waist_pouch，掛在學員右腰（工具袋 env.tool_bag 在左腰，選單可對調）。用和工具袋同一個隨身容器元件，不另寫一套。
+- slot_1 上鎖掛牌組在工具架上的掛位保留，是開始和結束時的位置（homeStorageId 仍是 env.tool_rack）。SI_00 f 從 slot_1 領取收進腰包，tool.lockout_tag 的狀態變成新的值「在腰包」。SI_02 a、SI_03 c、WC_04 a、WC_04 e 都是從腰包拿出或收回腰包（targetId env.waist_pouch），不回工具架。WC_06 c 交接時掛回 slot_1（條件「掛位 1 = 在架」只在這一列）。現場作法是進場領用個人上鎖包。
+- 「在腰包」算已收好：在車頂或平台時，ERR_Tool_NotStowedOnRoof 不會因為掛牌組不在工具架而觸發。WC_01b 只清點 4、11、12 和桿架。
+- 測試 WaistPouchTests：開始時 slot_1 在工具架；SI_00 f 完成後狀態是「在腰包」；SI_03 c 收回腰包算收好、不記錯；WC_06 c 掛回後掛位 1 = 在架；日 B、日 C、定期第二到五段的起點狀態都是「在腰包」。ToolHomeStorageTests 檢查 WC_01b 的清點清單是 4、11、12 和桿架。
+
+## 日常滑板上下車頂（b4c，鐵道裁定，組長同意；v5 依組長三點裁定改）
+
+- 只在日常課程。滑板一次拿一條，手拿著從平台經活動欄跨板上下車頂。
+- 每一側的順序：CSR_08 拆下舊滑板 → 放上車頂暫放墊 → CSR_09 清潔托架 → 拿起舊滑板帶回平台，放進待報廢箱 → CSR_10 在平台備品架挑選並檢查新滑板（核對型號、料號、序號，L9）→ 帶上車頂 → CSR_11 安裝。每側往返 1 趟，兩側合計 2 趟。新滑板拿上來就直接安裝，不放墊子。
+- 車頂暫放墊 env.roof_strip_mat（只在日常課程）：中心 (0.00, 0.01, −1.10)，長邊沿 X，1.20 × 0.30 m，墊厚 1 cm，邊框寬 2 cm、高出墊面 2 cm（框頂 Y 0.03），黑色橡膠；prefab ENV_RoofStripMat，只在日常課程 active。範圍 X −0.60 到 +0.60、Z −1.25 到 −0.95，在站點 (0, −0.65) 正後方，前緣離站點 0.30 m。墊子是地墊，踩上去不算錯，也不是 Walkable 的洞。一次最多放 1 條，只放舊滑板。
+- 平台物件（課程覆寫把同一個 ID 移到日常擺放點，R1.5a a6 已放擺放點）：備品架 env.spare_shelf (−3.06, 1.0, +1.45)、待報廢箱 env.parts_tray 紅色 (−3.06, 0.5, +2.85)；站點 tp.platform.parts (−2.41, +1.60)、tp.platform.scrap (−2.41, +2.85)。定期課程把這兩個物件擺到地面工作檯。
+- 不保留 tp.roof.shelf（鐵道和組長決定，也符合 terry 不把工作檯放車頂的要求）。R1.5b 刪掉 tp.roof.shelf、車頂支架，以及 R1 留在車頂的備品架、零件盒位置。
+- 規則（數值寫在資料）：
+  - 手上拿著滑板時不能傳送，要走過去。按傳送會擋下並顯示「拿著滑板要走過去」，不記錯。組長試玩後覺得太慢，可以把資料改成允許傳送到 tp.platform.parts、tp.platform.scrap，但通過活動欄開口一律要走。
+  - 拿滑板通過活動欄時，安全帶必須扣著車頂防墜器（D14 的規則照舊）。
+  - 滑板放在暫放墊以外的車頂位置（放開後停在車頂面上）：記 Major，錯誤 ID 是 ERR_Global_StripReleasedOnRoof（Major，只在日常，步驟計畫定名）。把新滑板放上墊子也記這條。放到暫放墊（只限舊滑板）、CSR_11 c 吸附到弓頭安裝位、待報廢箱、備品架都不算。
+  - 墊子上已經有 1 條時再放第 2 條：同樣記 ERR_Global_StripReleasedOnRoof。
+  - WC_01a 車頂清點時墊子上還有滑板：記 ERR_WC01a_StripOnMat（Major，步驟計畫已定，CSR v5.9）。
+  - 判定用墊子上方的 trigger（墊子範圍、高 0.10 m），滑板的 Bounds 中心在 trigger 內就算在墊子上。不另寫物理判定。
+  - ID 對應：env.roof_strip_mat.slot_old 對到模型節點 StripMat_Slot_Old，是 CSR_08 b（日常）和 CSR_09 d 的 targetId，舊滑板放上去時吸附到這裡。墊子只有 StripMat_Slot_Old 這一個錨點，在墊子中心（建模 A 已刪 Slot_New）。新滑板放到墊子上任何位置，都記 ERR_Global_StripReleasedOnRoof。
+  - 螺栓等小零件放工具袋的零件袋，不另外搬運。
+- 活動欄開口（組長裁定，開口剩 0.65 m 也接受）：開口最小寬 0.60 m 寫在資料裡，跨板要對齊開口，EdgeWall_-X_GateSlice 要做成看得見的欄杆或警示條，這三項寫在 R1.5a 增補 7。這裡 StripCarryTests 加一條：拿著 1.1 m 的滑板（長邊順著走的方向）走過開口，不卡住、不震動、不記錯。
+- 組長頭盔試玩清單（b5）加一項：日常課程拿 1.1 m 滑板，實際從平台經活動欄開口走上車頂、再走回來一次，確認不卡、不需要斜著拿。
+- 測試 StripCarryTests：拿著滑板按傳送被擋下、人不動、不記錯；放下滑板後同一個傳送成功；舊滑板放上暫放墊不記錯；新滑板放上暫放墊記 Major；CSR_11 c 吸附到位的放下不記錯；放在墊子以外的車頂面記 Major 1 次；墊子上有 1 條時再放 1 條記 Major；WC_01a 時墊子上有滑板記 ERR_WC01a_StripOnMat；放進待報廢箱不記錯；定期課程場景裡沒有暫放墊；ToolHomeStorageTests 檢查場景和資料裡都沒有 tp.roof.shelf。
+
+## 分段起點「目前狀態」卡（b4c，負責人同意；內容來源是任務規劃 B 的 phase-start-card.md）
+
+- 適用：不是從頭開始的段落，也就是定期第二到五段（startPhase 3、4b、5、6）和日 B、日 C。定期第一段和日 A 不顯示。
+- 出現方式：場景淡入後，卡片出現在視線正前方約 1 m，用扳機點「開始」關閉，關閉之後才開始計時。之後按 Y 或從左手腕面板可以叫回；卡片打開時暫停計時。
+- 固定 7 欄，每欄一行，不超過 12 個字，依序是：位置、接地、安全帶、天車、手上、身上、已放行。
+- 卡片文字全部從 PhaseStartSnapshot 產生，不寫死：每一欄有一張「黑板值 → 句子」的對照表（資料 PhaseStartCardDef）。例如接地 #1 的狀態和登記欄 → 「#1 平台接地棒：掛著、已登記」；tool.lockout_tag = 在腰包 → 「上鎖鑰匙在腰包」。句子用 phase-start-card.md 的寫法；標 ⚠ 待核的欄位，由資深軟體 A 核對 snapshot 後定案。
+- 各欄讀的來源（資深軟體 A 核對，phase-start-card-check-A.md 第 4 節）：
+  - 位置：該段第一個小動作的 standPointId（依課程取 _periodic／_daily），不讀 snapshot；載入時學員就放在這裡。
+  - 接地：#1、#2 兩支接地的狀態，加上 ground_register 兩列（已登記／已銷號）。日常課程的 #2 顯示「沒有」。
+  - 安全帶：車頂掛點、平台掛點是否扣著，以及 slot_4 的狀態。
+  - 天車：part.pan_assy.state、台架夾具 clamp_n、part.crane.hook.pos（寫成「弓上方約 N m」或「已移開」）。日常課程固定顯示「停在駐車位」。
+  - 手上：tool.held（右手）、遙控器狀態（隨身或在掛座）、ctrl.crane.power。
+  - 身上：工具袋 slot_5–10 各掛位、tool.lockout_tag（在腰包）、上鎖鑰匙。
+  - 已放行：hold.1–4.released。
+  - PPE 和 RoofAccessRule 狀態不上卡片，但一致性測試照樣要比對。
+  - 資深軟體 A 建議加第 8 欄「現場」（暫放墊、待報廢箱、螺栓盤、作業單），等組長決定。決定前維持 7 欄；欄位數寫在 PhaseStartCardDef，之後加欄只改資料。
+- 「下一步」只在教學模式顯示，內容是該段第一個小動作的 instruction。練習和考核模式不顯示。
+- 教學模式在卡片關閉後，接地 #1、#2 和吊鉤的外框各閃 1 s。
+- 測試 PhaseStartCardTests：
+  - 每一段的卡片 7 欄都等於從 snapshot 和對照表算出的文字。改 snapshot，文字就跟著變。
+  - 定期第一段和日 A 不出現卡片。
+  - 考核和練習模式沒有「下一步」這一行，教學模式有，而且等於第一個小動作的 instruction。
+  - 卡片打開時考核計時不走，關閉後才開始。
+  - 每欄不超過 12 個字。
+
+## 底座螺栓 B 鍵換位（b4c，組長裁定，bolt-hop-proposal.md）
+
+- 只限車頂底座站點之間：tp.roof.base_w、base_e、base_w.s、base_e.s、base_e.n、base_w.n。學員站在其中一點時，按 B 會叫出選單，列出其他 5 點，並用螺栓編號標示（例如「base_e.n（螺栓 3）」）。學員選哪一點就傳送到哪一點，落地時面向該點對應的作業物件（P5 TeleportFacing）。不在底座站點時，B 鍵維持原本的功能。
+- 三種模式的操作方式都一樣，都不自動傳送，也不替學員選下一站。
+  - 教學模式：用 P5 的下一站光圈標出下一支螺栓所在的子站點。選單不預選、不排序。
+  - 練習和考核模式：不給任何提示。
+  - 選錯順序去鎖，照原本的順序錯誤判定（例如 ERR_IN06_TightenBeforeAllThreaded、扭力順序錯誤）。換位本身不記錯。
+- 扣著車頂防墜器時照 D30 白名單，所有車頂站點都在白名單內，不記 ERR_Global_TeleportWhileAnchored。TeleportRule 的其他擋法照舊：吊物懸空時擋、吊運中車頂封閉時擋。
+- 換位設定寫在資料 TeleportShortcutDef { zoneId: roof.base, stationIds: [上面 6 點] }，程式裡不寫站點。
+- 參考時間用傳送後的實測值，由任務規劃 A 填進 Steps.csv，程式不寫死。
+- 測試 BoltHopTests：
+  - 在 base_w.s 按 B 出現 5 個選項，選 base_e.n 就到 base_e.n，面向螺栓 3（誤差 ≤ 5°）。
+  - 三種模式都不會自動傳送，選單也不預選。
+  - 教學模式的光圈指向 CSV 下一個小動作的站點；練習和考核模式沒有光圈。
+  - 扣著車頂防墜器換位，不記錯。
+  - 不在底座站點時，按 B 不會出現換位選單。
+  - 吊物懸空時，換位被擋下。
+  - 選錯順序去鎖時，照原本的順序錯誤記錄；換位本身不記錯。
+
+## 底座螺栓的站位要求和四輪順序（b4c，組長同意 D33 補充三）
+
+- 站位要求：拆底座螺栓（RM_04 b）和 100 N·m 上扭力（IN_07 d）時，學員必須在該螺栓自己的子站點，也就是頭部水平投影離子站點 ≤ 0.35 m，而且螺栓在頭部面向 ±30° 內。不符合時擋下這個動作（扳手不轉、螺栓狀態不變），並提示「跪在正前方」，不記錯。
+  - 哪些小動作要檢查，寫在資料 StandPointGateDef { stepId, subId, radius 0.35, angle 30 }，目前只有上面兩列。程式不寫死步驟 ID。
+  - 手鎖（IN_06 c）和預鎖（IN_06 d）在側邊站點 base_w／base_e 做，不做這項檢查。
+- 底座螺栓的施力方式（組長條件，鐵道 D36 補充二、三）：
+  - 扭力扳手照真實長度做：把手到套筒 ≥ 0.45 m（ToolDef 資料）。用棘輪，每次擺 30–45°（資料 TorqueProfile.strokeMin／strokeMax）。
+  - 選套筒要考（組長裁定，三種模式都判）：
+    - 學員從套筒盒 env.tool_bag.socket_case（模型 SocketCase）自己拿套筒，裝到這一步要用的扳手上，扳手不會自動換套筒。用到套筒的有：RM_03 f、RM_04 a、IN_06 b 的套筒扳手，以及 IN_07 c、IN_09 c、CSR_13 b 的扭力扳手（CSV v2.8 已列出）。
+    - 正確答案寫在資料 FastenerDef.sizeMm，只寫尺寸，不寫哪一顆套筒：底座 M16 是 24、高壓端子 M12 是 19、碳滑板 M8 是 13。這個欄位只用來判斷對錯，不會自動幫學員套上。
+      - 判定：學員目前裝在手上這支扳手的套筒，sizeMm ≠ 螺栓的 FastenerDef.sizeMm 才記 WrongSocket。
+      - 方頭在吸附時已經檢查過了（方頭不合就裝不上），所以 WrongSocket 只比尺寸。
+      - 例如碳滑板：CSR_06／12 用套筒扳手裝 socket.13（1/2"），CSR_13 用小扭力扳手裝 socket.13_38（3/8"），兩種都對到 13，都不記錯。
+      - R1.5a a6 留下的 FastenerDef.socketId 在 b3 改成 sizeMm，並把舊欄位刪掉；SocketDef.fits 也刪掉（和 sizeMm 重複）。建置檢查第 12 項改成：「換上 N mm」那一步，工具的 sockets[] 有 sizeMm = N 的套筒，而且目標螺栓的 FastenerDef.sizeMm = N。第 21 項改成：照 wrenchSweepTools 逐支扳手，到那支的 sockets[] 裡找 sizeMm 相同的套筒，讀它的 heightM。改完第 21 項要重跑，結果應該和改之前一樣。
+    - 套錯尺寸去接螺栓：擋下（扳手不轉、螺栓狀態不變），提示「套筒尺寸不對」，記該步的 WrongSocket，等級 Minor。錯誤 ID 照 CSV 那一列：ERR_IN07／IN09／CSR13／RM03／RM04／IN06_WrongSocket。同一步只記 1 次。
+    - 教學模式在 SocketCase 的 24、19 格旁邊顯示「24 mm」「19 mm」字樣；練習和考核模式不顯示。
+    - 目前裝的是哪一顆，記在黑板 tool.torque_wrench.socket 和 tool.torque_wrench_l.socket。選錯套筒照這裡的 WrongSocket 規則判定，不沿用 R1 的 E11。套筒的模型和 prefab 結構等建模 A、B 對齊後，寫在 R1.5a 增補 7。
+  - 扭力扳手分兩支（鐵道 D39，組長裁定）：
+    - 大支 1/2" 是 tool.torque_wrench_l（新 ID），量程 40–200 N·m，配 24、19 mm 套筒。小支 3/8" 是 tool.torque_wrench（沿用 R1 的 ID），量程 10–60 N·m，配 13 mm 套筒（建模 B torque-wrench-sockets.md v1.2）。
+    - 方頭不合（3/8" 套筒掛大支，或 1/2" 套筒掛小支）：套筒不會吸附上去，提示「方頭尺寸不符」，不記分。這是裝不上，不是選錯套筒。
+    - 套筒是「種類」：裝上後套筒盒裡那一格仍然顯示，換下的套筒自動回盒；同一顆尺寸可以同時裝在套筒扳手和大扭力扳手上（建模 B v1.3 §7）。套筒扳手 tool.socket_wrench 也是 1/2"，有 10、13、17、19、24 五顆。
+    - 套筒扳手正式 prefab（b3 做，建模 B torque-wrench-sockets.md v1.4 §8）：
+      - 網格：建模 B 的 gen_torque_wrench.py 加一組 type: ratchet 參數，輸出 TL_SocketWrench.fbx。推估尺寸：全長 0.26 m、頭寬 0.040、頭厚 0.022、1/2" 方頭。Poke_Ratchet 撥桿是獨立小件。
+      - PF_SocketWrench 的節點：Attach_Grip、Visual、Poke_Ratchet、Socket_Mount（方頭根部中心，−Y 朝套筒口）、COL_Body、Tip。Tip 在掛上套筒後停用，改讀套筒的 Tip。
+      - 套用到場景：沿用 R1 的 ID tool.socket_wrench 和 slot_6。舊的網格和舊的套筒顯示方式都換掉，改成在 Socket_Mount 下掛 TL_Socket_* prefab，和扭力扳手同一套做法。R1 的「套筒選單」（CSR_06 b）留著當備援，選完一樣是掛 prefab。
+      - handleLengthM 先填 0.19（EX）。最後以網格實測的 Attach_Grip 到 Socket_Mount 的距離為準，建置檢查第 5 項要求誤差在 2 mm 內。改完重跑第 21 項，半徑變短，淨空只會變大。
+      - 重跑 R1 的換套筒測試：停 0.15 s 會換，0.1 s 不換。另外重跑 CSR_06、07、12 的流程測試。
+      - 這一輪如果來不及：最少要保留 R1 物件，在 Socket_Mount 改掛 TL_Socket_*，handleLengthM 填 R1 物件實測的值。b3 回報時要寫做到哪一種。
+    - 量程寫在各自 ToolDef 的 rangeNm 欄位，扭力設定面板的範圍就讀這個欄位，程式裡不寫數字。
+    - 設定扭力時超出這支扳手的量程：刻度轉不過去，停在量程端點。提示「超出此扳手量程，請換 3/8" 小支」或「超出此扳手量程，請換 1/2" 大支」，記該步的 WrenchRange（ERR_*_WrenchRange，Minor，三種模式都判，ID 照 CSV），同一步只記 1 次。
+    - 不另外加重：例如用大支停在 40 N·m 去鎖 M8，照現有的 Over／Under 扭力判定和它們各自的等級處理。
+    - 教學模式在兩支扳手的握把上標示量程，練習和考核模式不標。
+    - 套筒和扳手的模型、prefab 結構，等建模 A、B 定案後寫在 R1.5a 增補 7。
+  - 施力方向一律往學員身體拉：鎖緊時把手在學員右前方，起鬆時在左前方。
+  - 鎖緊時把手的起始方向（資料 StationDef.wrenchStartDir）：w.s 是 +X−Z 斜向，e.s 是 +X+Z 斜向，w.n 是 −Z，e.n 是 +Z。起鬆時方向相反。
+  - 判定（軟體工程決定）：一次擺動從握把起點量到終點，用頭部的水平投影量手的距離。
+    - 有效擺動要同時符合：終點離頭 ≤ 0.35 m；起點離頭 ≤ 0.50 m；擺動過程中手離頭的距離有變小（往身體拉）；擺角在 30–45° 之間。
+    - 在 .s，手大約從 0.45 m 收到 0.25 m；在 .n，手在身旁，一直都在 0.35 m 內。兩種用同一套規則判，不分站點寫程式。
+    - 往外推（距離變大），或終點超過 0.35 m：不算施力，顯示「往身體拉」或「靠近一點再用力」。只提示，不記分。
+    - 擺動時把手掃到絕緣子 collider（鐵道 D38）：這一次擺動照常判定，顯示「扳手勿碰絕緣子」，不記分，ErrorLog 不記錯。提示文字寫在資料裡。把手高度＝螺栓頭頂＋套筒高（ToolDef.sockets），由 R1.5a 增補 7 建好。
+  - 測試（加進 BoltHopTests）：
+    - 在 .s 從 0.45 拉到 0.25 m、擺 40°：算一次有效施力。
+    - 終點在 0.40 m：不算。
+    - 往外推：不算，有提示，ErrorLog 沒有新錯誤。
+    - 擺 20°：不算。
+    - 在 .n 手在身旁擺 35°：算。
+    - 起始方向不符合 wrenchStartDir（例如在 w.s 從左前方開始鎖緊）：不算，提示方向。
+    - 擺動時把手碰到絕緣子 collider：出現「扳手勿碰絕緣子」提示，擺動判定不受影響，ErrorLog 沒有新錯誤，分數不變。
+    - 裝 19 mm 套筒去鎖 M16 底座螺栓：被擋下，螺栓狀態不變，提示「套筒尺寸不對」，記 1 次 WrongSocket（Minor）。同一步再試一次，不會再記。換成 24 mm 後正常。
+    - 三種模式都會記 WrongSocket；只有教學模式的 SocketCase 有尺寸字樣。
+    - 碳滑板 M8：CSR_12 用套筒扳手加 socket.13、CSR_13 用小扭力扳手加 socket.13_38，兩步都不記 WrongSocket；CSR_12 改用套筒扳手裝 socket.17，記 1 次 WrongSocket。
+    - 用大支設定 25 N·m：刻度停在 40，提示換小支，記 1 次 WrenchRange（Minor）；同一步再試不再記。換小支設定 25 N·m 正常。
+    - 用大支停在 40 N·m 鎖 M8：不記 WrenchRange，照 Over 判定。
+    - 教學模式握把有量程字樣，練習和考核沒有。
+    - 13 mm 套筒（3/8"）碰大支：不吸附，有提示，ErrorLog 沒有新錯誤。
+- 四輪順序各自判定：拆（RM_04 b）、手鎖（IN_06 c）、預鎖（IN_06 d）、扭力（IN_07 d）各自照自己那一列的 templateN 順序判定。上一輪的順序錯誤不會延續到下一輪，每一輪都從頭比對。順序錯誤照現行規則記錄。
+- 測試（加進 BoltHopTests）：
+  - 站在 base_w 對螺栓 1 上扭力，被擋下並提示，不記錯，螺栓狀態不變；換位到 base_w.s 後同一動作成功。
+  - 在 base_w.s 但面向偏 45°，被擋下。
+  - 手鎖在 base_w 做，不被擋。
+  - 拆的那輪順序錯 1 次，手鎖那輪照正確順序做，手鎖不記錯。
+
+## 吊耳的站位要求，換位順序不計分（b4c，組長裁定 P7 例外）
+
+- 掛吊帶（RM_06 a）和卸吊帶（IN_08 a）時，學員必須在該吊耳自己的子站點，子站點照 SubActions.csv 那一列的 per-n 對照（吊耳 1 在 base_w.s、2 在 base_e.s、3 在 base_e.n、4 在 base_w.n）。判定和底座螺栓一樣：頭部水平投影離子站點 ≤ 0.35 m，吊耳在頭部面向 ±30° 內。
+  - 不符合時擋下這個動作（吊帶不掛上也不卸下，狀態不變），提示「走到吊耳 {n} 旁邊再掛」，不記錯。不能站在一個點伸手處理遠處的吊耳。
+  - 寫法：StandPointGateDef 加兩列（STP_RM_06_Rig a、STP_IN_08_Unrig a，radius 0.35，angle 30）。程式和螺栓共用同一段判定，不另寫。
+  - 只有目標是吊耳時才檢查。掛到臂上的 ERR_Crane_RiggedOnArm 照原規則記錄。
+- 換位順序不計分：這兩列的四個吊耳可以任意順序做，做完四個就算完成，不記順序錯誤。
+  - 寫法：資料 UnorderedTemplateDef { stepId, subId } 列出這兩列；CSV 裡的 n=1,4,2,3 只當教學模式光圈提示的建議順序。匯入時檢查這份清單裡的每一列都存在而且有 templateN，不存在就匯入失敗。
+  - 底座螺栓四輪仍照原本的順序判定，不受影響。
+- 參考時間：RM_06、IN_08 各加 6 s 換位時間，由步驟計畫改 Steps.csv；程式不寫死，總時數照 CSV 重新計算。
+- 測試（加進 BoltHopTests）：
+  - 站在 base_w.s 掛吊耳 4，被擋下並提示，不記錯，吊帶狀態不變；換位到 base_w.n 後同一動作成功。
+  - 在 base_e.n 但面向偏 45° 掛吊耳 3，被擋下。
+  - 照 2、1、4、3 的順序，各在自己的子站點掛完四個：步驟完成，ErrorLog 沒有順序錯誤。
+  - 卸吊帶（IN_08 a）站在 base_e.n 卸吊耳 2，被擋下；換到 base_e.s 成功。
+  - 匯入測試：UnorderedTemplateDef 指向不存在的列時匯入失敗。
+
+## 防墜說明（b4c，組長要求）
+
+- 教學模式在 SI_06 上車頂前的確認單最後一行加一句說明，不計分：「現場會用車頂上方的防墜軌道，讓掛點跟著你移動；本模擬為了讓天車通過，簡化成門架防墜器。」
+- 文字寫在資料裡（HoldPointDef 確認單的 teachNote），練習和考核模式不顯示。
+- HoldPointTests 加 1 條：教學模式停留點 1 的確認單最後一行等於 teachNote，練習和考核模式沒有這一行。
+
+## 吊運期間的兩個前提（b4c，組長裁定，NPC 淡出的條件）
+
+- 遙控器只在學員站在 tp.platform.crane 周圍 1.0 m 內時有作用（頭部水平投影，半徑寫在資料）。離開這個範圍，天車所有動作立即停止，回到範圍內要重新按住才會動。
+- 從停留點 2 放行到 LF_06 完成、從停留點 3 放行到 IN_04 完成這兩段期間，車頂入口封閉：活動欄關閉並上鎖，傳送到任何車頂站點擋下，平滑移動進不去。顯示「吊運中，車頂封閉」，不記錯。用 RoofAccessRule 加一個條件，不另寫一套。
+- ERR_Crane_PersonOnRoof（Critical）保留，作為最後一道防線。
+- 兩個前提都成立，吊運期間學員一定在平台上，所以 NPC 可以照 P4 淡出到地面。
+- 測試 CraneLiftLockTests：頭部離 tp.platform.crane 1.05 m 時按遙控器，天車不動；移動中走出 1.0 m，天車在同一幀停止；停留點 2 放行後傳送到車頂站點被擋下、活動欄是上鎖狀態；LF_06 完成後同一個傳送成功；停留點 3 到 IN_04 同樣；日常課程不受影響。
+
+
+====================================================================
+附錄 A：steps-v6.md 全文（步驟計畫最新版，資料以此為準）
+====================================================================
+（註：附錄 A 是原文照貼。文中提到的 CSR_operable_steps 舊版號（v5.6、v5.7），一律指附錄 B 的最新版。）
+# 步驟表 v6：集電弓定期檢修（天車吊卸、台架更換碳滑板、吊回安裝）
+
+步驟計畫 **v2.9**，2026-11-02（v2.9：D39 扭力扳手大小兩支；v2.8：D38 扭力扳手選套筒；v2.7：D36 底架站點 X ±0.85；v2.6：起吊前確認加吊帶角度；v2.5：固定件錯誤等級；v2.4：IN_07 加防鬆標記；v2.3：D33 補充三，各輪站點與順序定案；v2.2：SI_06 教學說明加防墜軌道一行；v2.1：D34 車體接地座移到外肩；v2.0：D33 底座螺栓子站點；v1.9：D32 遙控器掛座位置；v1.8：D31 安全帶一直穿著；v1.7：D30 個人上鎖包、底座螺栓編號與換邊；v1.1：RM_00 改為上車頂後用短接地線；v1.2：統一 ID、遙控器改從掛座拿取與掛回；v1.3：組長審查 L1–L11，D21；v1.4：精簡與四段考核，D22；v1.5：收尾順序與桿架，D25；v1.6：考核 5 段，D29；吊物對位改用 PAN_Root，建模 B F5）。D20–D29 裁定，以及鐵道對 Q1–Q5、Q9 和 L1–L11 的回覆都已納入。
+- 依據：decisions.md D16–D25、leader-review.md、leader-optimize.md 與 leader-optimize-reply.md（D22 精簡）、rail-leader-check.md（鐵道，L1–L11 現場作法以此為準）、crane-procedure.md v2（鐵道，以第 6 節為準）、pantograph-rigging.md（建模 B）、crane-software.md v0.1、model-spec.md 第 7 節、CSR_operable_steps.md v5.4。
+- 所有數值都是**示例值（EX）**。第 8 節列出的 Q 等鐵道或負責人確認。
+- 本版取代 steps-delta.md，方案 A 不採用。
+
+v2.9 相對 v2.8 的修改（D39，鐵道與組長）：
+- 扭力扳手分大小兩支（D39，鐵道；工具 ID 依 torque-wrench-sockets.md v1.2 定案：小支沿用 tool.torque_wrench，10–60 N·m；大支 tool.torque_wrench_l，40–200 N·m）：
+  - 大支 tool.torque_wrench_l（1/2"，配 24／19 mm）：IN_07、IN_09。放在工具袋新掛位 **slot_13**（只有定期檢修有）。WC_01a 清點加 13 號。
+  - 小支 tool.torque_wrench（3/8"，配 13 mm）：CSR_13，鎖 25 N·m。沿用 slot_7（兩門課）。
+  - 新錯誤 ERR_IN07_WrenchRange、ERR_IN09_WrenchRange、ERR_CSR13_WrenchRange（Minor，三種模式都判；組長）：設定的扭力超出量程時刻度轉不過去，提示換扳手，同一步只記 1 次。Over／Under 照原規則，不另外加重。教學模式在握把上標示量程。
+  - RM_04、IN_06 d 在本表用的是套筒扳手（拆和預鎖），不是扭力扳手，所以工具 ID 不改。如果鐵道的意思是這兩步也要用大扭力扳手，請再告訴我。
+  - 小動作數、時間都不變。
+
+v2.8 相對 v2.7 的修改（D38，鐵道與組長）：
+- 扭力扳手要自己裝套筒。不另加小動作，把它併進「設定扭力」那一個小動作：學員從工具袋的套筒盒 env.tool_bag.socket_case（模型 SocketCase）拿對的套筒裝上，再設扭力。
+  - IN_07 c：24 mm，100 N·m。IN_09 c：19 mm，50 N·m。CSR_13 b：13 mm，25 N·m（兩門課）。
+  - 這三個小動作的參考時間每次 +3 s（教學、考核都加）。
+- 新錯誤 ERR_IN07_WrongSocket、ERR_IN09_WrongSocket、ERR_CSR13_WrongSocket（Minor，三種模式都判）：套錯擋下並提示「套筒尺寸不對」，同一步只記 1 次。
+- 套筒扳手原本就有「換上 X mm 套筒」的小動作（RM_03 f、RM_04 a、IN_06 b），目標加上套筒盒，並補上 ERR_RM03_WrongSocket、ERR_RM04_WrongSocket、ERR_IN06_WrongSocket（Minor，規則同上），時間不變。CSR_06 b 原本就有 ERR_CSR06_WrongSocket。
+- 教學模式在套筒盒上標出各格尺寸（24／19／13 mm），練習和考核不標。
+- 時間：全程教學 3521 → **3533 s**，考核 2292 → **2304 s**；第三段 990／697 → **996／703**（CSR_13 兩側），第四段 704／441 → **710／447**（IN_07、IN_09）。小動作數不變（312）。各步秒數以 Steps.csv 為準。
+
+v2.7 相對 v2.6 的修改（D36，鐵道；組長同意，.s 有條件接受）：
+- 底架站點 X 全改 ±0.85，取代 v1.7、v2.0 的座標：
+  - tp.roof.base_w／base_e (∓0.85, 0.836)
+  - tp.roof.base_w.n／base_e.n (∓0.85, 1.648)
+  - tp.roof.base_w.s／base_e.s (∓0.85, −0.55)，斜向正對 1、2 號螺栓，約 0.68 m（a6：原 .s 站在降弓後的羊角範圍內）。
+- 吊耳：RM_06 a、IN_08 a 改用子站點，1 號 w.s、2 號 e.s、3 號 e.n、4 號 w.n；順序 1、4、2、3（鐵道確認：從平台側先做）；這只是教學提示的建議順序，四個吊耳的順序不計分（軟體 UnorderedTemplateDef）。RM_06 b 改在 base_e.n。
+- 高壓端子：RM_03、IN_09 全部改在 base_e.n（a6：base_e 到端子 1.20 m 搆不到）。IN_08 最後停在 e.n，可以直接接 IN_09。
+- 接地座（RM_00 a、WC_03a b）照舊在 base_w。RM_00 b 掛電纜端改在 base_e.n（鐵道確認），c 拉線確認、d 登記 #2 也在同一站做。
+- 底座螺栓的 5 列只用站點名稱，不用改。小動作數不變。
+- RM_01 綁固定帶改在 base_e.n 做（D36 補充四；綁點到 e.n 約 0.72 m；條件是頭部 |X| ≤ 1.0，裝置實測超過 1.0 m 就改回 base_e）。RM_02、IN_10、IN_11 也改在 base_e.n（D36 補充五，同樣條件）：RM_00 b 到 RM_03、IN_09 到 IN_11 都在 e.n 一次做完。WC_03a a 取下電纜端是 RM_00 b 的反向動作，也改在 e.n；第五段起點改成 tp.roof.base_e.n。
+- 吊耳換位也算 P7 例外（組長：每個吊耳都在自己的子站點完成）：RM_06 45/28 → **51/34**，IN_08 35/20 → **41/26**。全程教學 3509 → **3521 s**、考核 2280 → **2292 s**；第一段 **917／575**，第四段 **704／441**。
+
+v2.6 相對 v2.5 的修改（D36 補充，鐵道）：
+- 停留點 2（LF_01 e）、3（IN_01 d）的起吊前確認清單加一項「吊帶角度 ≤ 45°」（吊帶改成 1.25 m）。併入現有的確認小動作，小動作數和時間都不變。
+
+v2.5 相對 v2.4 的修改（組長裁定，小動作與時間不變）：
+- 固定件錯誤等級（組長裁定）：
+  - ERR_CSR13_Under 改 **Critical**（兩門課）。條件：(1) 只看步驟完成時的最終扭力，同一步內發現不足、補鎖到位不記錯；(2) K3 喀聲回饋做好之前，考核模式先記 Major，報表註明「K3 完成後升為 Critical」。CSV 寫的是目標等級 Critical，暫時降級由軟體依 K3 旗標處理。
+  - IN_09 高壓端子新增：ERR_IN09_Under **Critical**；ERR_IN09_Setting、ERR_IN09_Over、ERR_IN09_Misaligned（沒對準記號就接上）Major。
+  - IN_10 新增 ERR_IN10_NotConnected（Major）；IN_11 新增 ERR_IN11_StrapLeft（Major）。WC_05 升弓試驗時會發現，所以不列 Critical。
+  - 預鎖（IN_06、CSR_12）維持 Major。
+  - 凡是用扭力扳手判定的 Under（ERR_CSR13_Under、ERR_IN07_Under、ERR_IN09_Under）都套用上面兩個條件：只看步驟完成時的最終扭力；K3 做好之前考核先記 Major，報表註明「K3 完成後升為 Critical」（組長）。
+
+v2.4 相對 v2.3 的修改（D33 補充四，鐵道）：
+- IN_07 d 改成「把底座螺栓 {n} 上扭力到喀聲，並畫防鬆標記」，比照日常課程滑板螺栓：扳手響了才畫得上去，不另加小動作。
+- 新 Major：ERR_IN07_MarkMissing，WC_06 b 檢查員核對時，有螺栓缺防鬆標記就記。
+- 補上 IN_07 原本漏掉的扭力錯誤 ID，比照 CSR_13，都是 Major：ERR_IN07_Setting（扭力設定不是 100 N·m）、ERR_IN07_Under（扭力不足）、ERR_IN07_Over（扭力過大）、ERR_IN07_Order（沒照對角順序）。
+- **ERR_IN07_Under 改 Critical**（組長：底座螺栓固定 120 kg 的集電弓，扭力不足出車會打壞架空線；沒上扭力也記 Under）。Over、Setting、Order、MarkMissing 維持 Major。Setting 設錯、導致最後扭力不足時，Setting 和 Under 同時記。
+- 「沒上扭力」和「缺標記」分開記（組長）：沒上扭力或扭力不足時記 ERR_IN07_Under，而且因為扳手沒響，標記也畫不上去；這種情況只記 Under，不再另記 MarkMissing。上了扭力但沒畫標記，才記 MarkMissing。
+- RM_04 c 維持把螺栓收進零件袋，不用螺栓盤。
+- 子站點換位算 P7 例外，計入參考時間（組長；B 鍵換位每次約 2 s）：RM_04 90/55 → **96/61**，IN_07 85/50 → **91/56**。
+- 全程：教學 3497 → **3509 s**，考核 2268 → **2280 s**；第一段 905／563 → **911／569**，第四段 692／429 → **698／435**。小動作數不變（312）。
+
+v2.3 相對 v2.2 的修改（D33 補充三，鐵道定案；取代 v2.0 和 12:12 的改法）：
+
+| 輪次 | 站點 | 順序 |
+| --- | --- | --- |
+| RM_04 b、c 拆 | 子站點 | 2→3→1→4 |
+| IN_06 c 用手轉入 | base_w／base_e | 2→3→1→4 |
+| IN_06 d 預鎖 | base_w／base_e | 1→3→2→4 |
+| IN_07 d 100 N·m 扭力 | 子站點 | 1→3→2→4 |
+
+- 子站點：n1 base_w.s、n2 base_e.s、n3 base_e.n、n4 base_w.n。側邊站點：1、4 在 base_w，2、3 在 base_e。
+- 其他小動作的站點：RM_04 a 在 base_e.s、d 在 base_w.n；IN_06 a、b 在 base_e；IN_07 a–c 在 base_w。
+- 第 3、6 節表格裡的順序與站點文字以本表為準。小動作數、時間都不變。
+
+v2.2 相對 v2.1 的修改（組長裁定）：
+- SI_06 c 上車頂前確認單，教學模式在最後加一行說明，不計分（見第 2 節 SI_06）。小動作、判定、時間都不變。
+
+v2.1 相對 v2.0 的修改（D34，鐵道）：
+- 車體接地座 ip.roof.carbody_ground 移到外肩 (−1.15, +0.43)，#2 接地線沿 Z +0.43 走。RM_00 a、WC_03a b 照舊在 tp.roof.base_w 做，距離約 0.45 m；RT_02 b 在 tp.platform.ground 接測試線，距離約 1.06 m，都搆得到。
+- 降弓固定帶繞的是上臂（RM_01 b 原文就是上臂，沒有改）。v1.7 寫的綁點座標只是約略位置，以建模實際節點為準。
+- 小動作、站點、時間都不變，CSV 不用改。
+
+v2.0 相對 v1.9 的修改（D33，鐵道）：
+- 底座螺栓改用車頂子站點，每支螺栓都在學員正前方 0.46 m（Z 以裝置實測的螺栓 Z 為準），面朝 ±X：
+  - 1 號 tp.roof.base_w.s (−0.95, ≈+0.03)、2 號 tp.roof.base_e.s (+0.95, ≈+0.03)、3 號 tp.roof.base_e.n (+0.95, ≈+1.65)、4 號 tp.roof.base_w.n (−0.95, ≈+1.65)。
+  - 對角 1→3→2→4 的路線是 w.s → e.n → e.s → w.n。
+- 套用在 RM_04 b、c，IN_06 c、d，IN_07 d：CSV 對照表改成 `n1:tp.roof.base_w.s;n2:tp.roof.base_e.s;n3:tp.roof.base_e.n;n4:tp.roof.base_w.n`。拆、用手轉入、預鎖、上扭力全部照 D33 路線 1→3→2→4（RM_04 b、c 和 IN_06 c 由 2、3、1、4 改過來，v1.7 的「先做完一側」作廢）。
+- 同一步裡的其他小動作，就在相鄰螺栓的子站點做：RM_04 a、IN_06 a、b 在 base_w.s；RM_04 d、IN_07 a–c 在 base_w.n。
+- tp.roof.base_w／base_e 保留給吊耳、接頭和固定帶。
+- 小動作數、參考時間都不變。
+
+v1.9 相對 v1.8 的修改（D32，鐵道）：
+- 遙控器掛座 PendantDock 移到 (−3.06, 1.20, −2.95)，在工具架旁。SI_06 a3 改在 tp.platform.rack 拿遙控器，和 a、a2 同一站。RT_01 b 照舊在 tp.platform.crane 原地掛回（距掛座 0.85 m）。
+- 小動作數、參考時間都不變。
+
+v1.8 相對 v1.7 的修改（D31，鐵道）：
+- 背負式安全帶從 SI_06 a 穿上，一直穿到 WC_06 交接才歸還工具架，中途不卸下。
+  - RM_07 c 改成「解開掛鉤，收到胸前扣環」，在 tp.platform.anchor 做。
+  - IN_05 a 改成「從胸前扣環取下掛鉤，準備重新扣上防墜器」，在 tp.platform.anchor 做。
+  - WC_02 c 改成「解開掛鉤，收到胸前扣環」，在 tp.platform.anchor 做（兩門課）。
+  - WC_06 c 改成「把個人上鎖包和安全帶歸還工具架」（掛位 1、4 = 在架）。
+  - WC_01b a 的工具架清點只剩 slot_11、12（日常只清點桿架）。
+  - 第二段、第四段起點：安全帶穿在身上，掛鉤收在胸前扣環。
+- 小動作數、參考時間都不變（定期 312，教學 3497 s、考核 2268 s）。
+
+v1.7 相對 v1.6 的修改（D30，鐵道 11/02，負責人審過）：
+- **個人上鎖包（D30）**：上鎖掛牌組 slot_1 改成個人腰包，鑰匙帶在身上。
+  - 新增 SI_00 f「到工具架領取個人上鎖包，掛在腰間」。
+  - SI_02 a 改成「從腰包拿出上鎖掛牌組」，在 tp.cab 做。腰包新 ID：env.waist_pouch（掛牌組的 homeStorageId）。
+  - SI_03 c 改成「把掛牌組收進腰包」，在 tp.cab 原地做，不回工具架。
+  - WC_04 a 改成「從腰包拿出」，WC_04 e 改成「收進腰包」，都在 tp.cab 做。
+  - 新增 WC_06 c「把個人上鎖包歸還工具架」（tp.platform.rack，掛位 1 = 在架）。
+  - WC_01b a 的工具架清點不含 slot_1（那時還在腰包）。
+- **底座螺栓編號（鐵道）**：從上方看順時針，1 (−X,−Z)、2 (+X,−Z)、3 (+X,+Z)、4 (−X,+Z)。tp.roof.base_w（−X 點）搆得到 1、4，tp.roof.base_e（+X 點）搆得到 2、3。兩點之間被臂和弓頭擋住，平滑移動要繞約 4.8 m，所以換邊一律傳送。建模請照這個編號命名 part.pan_base.bolt_1..4。
+  - RM_04 b、c：照 2、3（base_e）→（傳送）→ 1、4（base_w）的順序拆；a 在 base_e、d 在 base_w，做完直接接 RM_05。
+  - 高壓端子在 X +0.30，從 base_w 搆不到（鐵道）：RM_03 拆電纜、IN_09 接電纜全部改在 base_e 做；RM_00 d 登記 #2 也在 base_e 做。控制線接頭 ip.pan_assy.ctrl_connector（a6 實測 (+0.50, 0.63, +0.95)，離 base_e 0.46 m）、降弓固定帶 ip.pan_assy.hold_down（繞上臂，D34）綁點 a6 實測 (+0.29, 0.63, +1.20)，離 base_e 0.76 m，都在 +X 側（鐵道定位，建模 A 加節點），所以 RM_01、RM_02、IN_10、IN_11 也在 base_e 做：RM_00 b 到 RM_04 前半、IN_08 後半到 IN_11 都不用換邊。順序變成 RM_00 b、c、d → RM_03 都在 base_e，IN_08 做完停在 base_e 正好接 IN_09。
+  - IN_06 c：4 支先用手轉入到入牙，順序 2、3（base_e）→（傳送）→ 1、4（base_w），做完人在 base_w，正好接 d（任務規劃 A 建議）。IN_06 a、b 在 base_e 做（上車頂後直接到 base_e）。
+  - IN_06 d、IN_07 d：對角 1 → 3 → 2 → 4。站點依序是 w →（傳送）→ e、e →（傳送）→ w，每一輪傳送 2 次。
+  - 吊耳 ip.pan_assy.lift_point_1..4 用同一套順時針編號和分站點（鐵道）：RM_06 a 掛吊帶、IN_08 a 卸吊帶都照 1、4 →（傳送）→ 2、3；RM_06 b 查看吊帶扭轉就在 base_e 做。RM_05 f 查看吊帶維持在車頂 base_w、掛設之前做（鐵道可接受；建議改到平台先查看的做法列入 backlog）。
+  - 新 Major：ERR_IN06_TightenBeforeAllThreaded，4 支還沒全部入牙就開始預鎖（鐵道：底座會偏斜，孔位對不上）。
+  - CSV 的 templateN 已改好；standPointId 用軟體定的對照表寫法 `n1:tp.roof.base_w;n2:tp.roof.base_e;n3:tp.roof.base_e;n4:tp.roof.base_w`。
+- **底架站點座標**：tp.roof.base −X／+X 兩點是 (∓0.95, Z_base)。依 model-spec，Z_base 是底架中心，a5 實測 +0.836。負責人訊息寫的是 +0.60，model-spec 說明用 +0.60 時同側 +Z 螺栓距離會超標，所以以 model-spec 為準。可走帶在這一段放寬到 |X| ≤ 1.0。
+- 日常更換的滑板改成手拿往返，並加車頂暫放墊（CSR v5.9），定期檢修不受影響。
+- 第五段（startPhase 6）起點站點改成 tp.roof.base_e（資深軟體 A 核對）。
+- 步驟 58 不變，小動作 310 → **312**；參考時間：教學 3481 → **3497 s**，考核 2258 → **2268 s**。第一段 897／558 → **905／563**，第五段 430／272 → **438／277**。
+
+v1.6 相對 v1.5 的修改（小動作、判定、數量、參考時間都不變）：
+- D29：定期考核改 **5 段**，在 IN_11 之後、WC_03a 之前再切一刀；第五段起點是 startPhase 6（第 5.3 節）。
+- 建模 B F5：LF_04 a、IN_03 b 的對位基準改成 PAN_Root 原點（底架底面中心）。吊鉤仍對 COG（RM_05 c、IN_01 a、ERR_Crane_SideLoad 不變）。
+- 日常更換也在 CSR_06 切成日 A／日 B（CSR_operable_steps v5.8）。
+- 試玩 P6：新增 ERR_Global_RoofFallZone（Major）、ERR_Global_TeleportWhileAnchored（Minor，擋下），見第 1.4 節。
+
+v1.5 相對 v1.4 的修改（D25，驗收組長 K4–K6，鐵道裁定）：
+- 收尾順序（K5，原則是「車頂的東西在車頂收，平台的接地等人下來再拆」）：WC_03a 車頂拆 #2 → WC_01a 車頂清點 → WC_02 下車頂 → RT_01 天車歸位 → WC_03b 平台拆 #1 → WC_01b 平台清點 → RT_02 絕緣測試 → WC_04 解鎖 → WC_05 → WC_06（第 7 節）。
+- **新增 IN_04b 驗電並重掛 #1**：D25 要求拆 #2 時 #1 仍掛著。v1.4 的 #1 在 LF_01 隨弓取下後就沒再掛，所以吊回放下後、上車頂前，要在平台先驗電，再把 #1 掛回弓頭並重新登記，共 9 個小動作（第 6 節）。時間點和驗電都經鐵道確認。
+- 新 Critical：ERR_Global_GroundRemovedWhileOnRoof，車頂掛點扣著時拆 #1（第 1.4 節）。
+- 桿架（K6）：驗電桿 slot_2、接地桿 slot_3 改放外側護欄桿架 env.pole_rack（**新 ID**，(−3.16, ·, +0.60)，離 tp.platform.ground 0.96 m）。SI_04、SI_05、LF_01 c、RT_02 d、f 的取用和歸還都改到桿架，ID 不變。工具架只留 1、4、11、12。
+- K4：CSR_11 b 的 VR 指令改成「轉動手腕讓箭頭朝外」，桌面模式才是按 R（第 5.4 節）。
+- 步驟 55 → **58**，小動作 294 → **310**；參考時間：教學 3351 → **3481 s**，考核 2178 → **2258 s**。
+
+v1.4 相對 v1.3 的修改（D22，精簡提案照 leader-optimize-reply.md）：
+- O1：定期檢修在台架作業時，工具用完放在**台架工具盤** env.panto_stand.tool_tray（**新 ID**）。CSR 的 14 個「收回」小動作在定期檢修跳過，CSR_15 新增 f，一次把工具全部收回工具袋（第 5.4 節）。日常更換在車頂照舊每次收回。
+- O2：教學模式下，第二側（_R）的 CSR_06–14 只顯示步驟標題，不逐一提示小動作。卡住時照卡關規則提示，判定照舊。
+- O3：定期檢修跳過 CSR_01 a，保留 b（L7 異常檢查）。
+- O4：SI_06 的 c（鄰線檢查表）、c2（停留點 1）、f（簽名開工）合併成新的 c「上車頂前確認單」，共 11 項（第 2 節）。工具箱會議留在 SI_00。
+- O5：RM_05 的 d（安全舌片）、e（吊梁銘牌）合併成 d。
+- O6 不採用，接地登記照 v1.3 保留按一下。
+- O8：考核改成 **4 段**，在 CSR_06 切開，合格線依 D22（第 5.3 節）。
+- 小動作 311 → **294**；參考時間：教學 3614 → **3351 s**，考核 2232 → **2178 s**。步驟數仍是 55。
+
+v1.3 相對 v1.2 的修改（組長審查 L1–L11，D21；現場作法照 rail-leader-check.md）：
+- 新增 **SI_00 開工準備**，是整個流程的第一步：防溜與禁動（L11）、作業許可單（L1）、工具箱會議（L1）、個人防護具（L2）、量具校正（L6）。
+- 新增 **4 個停留確認點**（L3），由 NPC 放行（第 1.5 節）：上車頂前（SI_06 c2）、拆弓起吊前（LF_01 e）、吊回起吊前（IN_01 d）、復電前（WC_04 a0）。
+- 新增**接地登記欄**（L4）：SI_05 e 登記 #1、RM_00 d 登記 #2、LF_01 c2 銷號 #1、WC_03 d 銷號 #2。復電前沒全部銷號就擋下並記 Critical。
+- 一人一鎖（L5）、絕緣手套（L2）只加判定，不加小動作（第 1.6 節）。
+- L7 異常檢查（CSR_01 b）、L8 待報廢箱（CSR_08 b 改文字）、L9 新品履歷（CSR_10 g）、L10 完工交接（新增 **WC_06**）。
+- 車頂放開工具沒收回工具袋，由 Minor 改成 **Major**（組長 3.3、鐵道同意）。
+- 考核分三段（D21，第 5.3 節）。
+- 步驟 53 → **55**，小動作 293 → **311**；參考時間：教學 3375 → **3614 s**，考核 2083 → **2232 s**。
+
+v1.0 相對 v0.2 的修改（鐵道回覆）：
+- Q1「先掛後拆」：新增 RM_00，上車頂後用短接地線把車體接地座接到電纜端子（v1.1）；原本弓頭那支在 LF_01 取下。
+- Q2：空鉤下降只能用微動；吊鉤移動時有人在鉤下 0.5 m 內，記 Major，不停車。
+- Q3：tp.roof.base_w 分成兩點。
+- Q4：絕緣電阻改量高壓側對車體接地點，量完要放電。
+- Q5、Q9 照預設。
+
+v0.2 相對 v0.1 的修改：
+- 依鐵道 v2 調整順序：天車與吊具檢查改成 RM_05，在車頂做；掛吊帶改成 RM_06；離開車頂改成 RM_07；LF 重新編號為 01–06。
+- 遙控器：無線、左手拿、右手按住按鍵才會動（D18）。
+- 車頂拆下的螺栓收進工具袋的零件袋，不再用車頂螺栓盤（D18）。
+- 台架改到地面維修工作區，台架站點改成 tp.stand.n／e／s／w（D18）。
+- 吊運時的傳送規則照 D18。
+- 升弓試驗改名為 WC_05。
+- 加入 D19：兩種課程共用 CSR 資料。
+
+## 0. 總覽
+
+| 階段 | 步驟 | 區域與站點 |
+| --- | --- | --- |
+| 1 隔離 | **SI_00 開工準備**、SI_01–SI_06（SI_06 多 a2、a3；c 改成上車頂前確認單） | 進站區：平台、駕駛室 |
+| 2 拆弓與掛吊具 | **RM_00（短接地線）**、RM_01–RM_07 | 進站區車頂 tp.roof.base_w（預設）或 base_e；RM_07 回到平台 |
+| 3 吊運 | LF_01–LF_06 | tp.platform.ground → tp.platform.crane → 地面維修工作區 tp.stand.w |
+| 4 台架換滑板 | CSR_01–CSR_15（小動作與判定沿用，D19 兩種課程共用） | 維修工作區台架四周，可以自由走動 |
+| 5 吊回安裝 | IN_01–IN_11（含 **IN_04b 重掛 #1**） | tp.stand.w → tp.platform.crane → 車頂 tp.roof.base_w |
+| 6 復電試驗與收尾 | **WC_03a → WC_01a → WC_02 → RT_01 → WC_03b → WC_01b** → RT_02 → WC_04 → WC_05 → WC_06 | 車頂 → 平台 → 駕駛室 → 平台 |
+
+- 步驟數由 25 增為 **58**；小動作展開後由 166 增為 **310**（定期檢修，第 9 節）。
+- 參考時間合計：教學 **3533 s（約 59 分）**，考核 **2304 s（約 38 分）**（v2.8）。考核分 5 段（D29），每段教學 ≤ 16.5 分、考核 ≤ 12 分（第 5.3 節）。
+
+## 1. 共通規則
+
+### 1.1 工具（D17、D18）
+- **隨身工具袋** env.tool_bag 放掛位 5–9（卡尺、套筒扳手與套筒、扭力扳手、清潔布、標記筆），另有：
+  - 降弓固定帶 tool.hold_down_strap（slot_10，D20）
+  - 零件袋 env.tool_bag.bolt_pouch（新 ID）
+- **工作檯／工具架**在進站區平台 tp.platform.rack，放掛位 1、4（上鎖掛牌組、安全帶）；驗電桿 slot_2、接地桿 slot_3 是 2.5 m 長桿（D24），直立放在外側護欄的**桿架** env.pole_rack（**新 ID**，(−3.16, ·, +0.60)，離 tp.platform.ground 0.96 m，D25）。工具架另放高阻計 tool.megger（slot_11，D20）和攜帶式短接地線 tool.grounding_lead（slot_12，**新 ID**；一端夾具、一端 0.6–1.0 m 短絕緣桿）。
+- 拿取與歸還：右手伸到袋子按握把就是拿出，放回袋子再放開就是收回（負責人定案）。
+  - 小動作的 ID、目標（env.tool_rack.slot_5…9）、完成條件都不變，只改文字：「到○○拿起△△」一律改成「從工具袋拿出△△」，「放回○○」一律改成「把△△收回工具袋」。
+- 工具有防墜繫繩（D18）：
+  - 在車頂放開工具、沒有收回袋子：工具掛在繩上垂著，記 **Major**「工具未收回工具袋」，錯誤 ID 為 ERR_Tool_NotStowedOnRoof（v1.3 由 Minor 改，墜物風險；crane-procedure 6.3 同步）。
+  - 在地面工作區放開：不記錯。定期檢修的台架作業時，工具用完放在台架工具盤 env.panto_stand.tool_tray，CSR_15 f 一次收回工具袋（v1.4，O1）。
+- 前一步結束時手上已經拿著下一步要用的工具，下一步的「拿出」小動作就直接完成，因為它本來就是判定「手持○○」的狀態。
+- 固定工具照「每趟順手還一件、拿一件」安排，例如 WC_02 c 掛回安全帶和 WC_02 d 掛回短接地線是同一趟；RT_02 d 放回高阻計時順手拿接地棒放電。
+
+### 1.2 天車操作（D18）
+- 遙控器 env.crane_pendant（ID 不改，外形是無線手持）：
+  - 左手拿，右手 poke 按鍵，**按住才動、放開就停**。
+  - 同時按兩個方向就停。
+  - 緊急停止按下後會鎖住，要旋轉復歸、重轉鑰匙。
+- 傳送規則：
+  - 吊物懸空時不能傳送，只能平滑移動。
+  - 吊物放上台架、夾具鎖好、吊具卸下之後，才開放傳送到 tp.stand.*。
+  - 吊物還沒離開台架之前，才可以傳送回 tp.platform.crane。
+- 對位指示：4 支定位銷都在 EX 2 cm 以內時亮綠燈，代替指揮手勢。
+
+### 1.3 吊運錯誤（軟體 ErrorRule，吊物離座後持續檢查）
+
+| 錯誤 | 嚴重度 | 觸發 |
+| --- | --- | --- |
+| ERR_Crane_PersonUnderLoad | Critical | 頭盔投影進入紅區（吊物投影外擴 1.0 m），**天車立即停止**；離開紅區後才能再操作（D18） |
+| ERR_Crane_PersonOnRoofDuringLift | Critical | 車頂掛點還扣著，或人在車頂可走區時起吊。**新 ID** |
+| ERR_Crane_RiggingNotInspected | Critical | RM_05 還沒完成就起吊，**或**掛著判為「不合格」的吊帶起吊（D20，不另開 ID；回饋文字依原因區分） |
+| ERR_Crane_HoldDownMissing | Critical | 降弓固定帶（RM_01）還沒裝就掛吊具或起吊。**新 ID** |
+| ERR_Crane_RiggedOnArm | Critical | 吊帶在吊耳以外的地方（臂、弓頭）放開。**新 ID** |
+| ERR_Crane_Collision | Critical | 吊物撞到車體、護欄、門架或台架 |
+| ERR_Crane_LowClearance | Major | 橫移時吊物底面 < Y 3.1（鐵道 6.1）。真的撞到時由 ERR_Crane_Collision 記 Critical |
+| ERR_Crane_OperatorTooClose | Major | 吊物懸空時，操作者離吊物投影 < 2 m（鐵道 2.2）；進入紅區則由 PersonUnderLoad 記 Critical |
+| ERR_Crane_NoTrialLift | Major | 沒有試吊（LF_02、IN_02）就升高超過 EX 0.3 m 或水平移動 |
+| ERR_Crane_SideLoad | Major | 起吊時吊鉤和 COG 的水平差 > EX 5 cm。**新 ID** |
+| ERR_Crane_LiftWhileFixed | Major | 底座螺栓、高壓電纜或控制線還沒拆就起吊，連續拉 3 s 才算 |
+| ERR_Crane_UnrigBeforeClamp | Major | 台架夾具還沒鎖就卸吊帶。**新 ID** |
+| ERR_Crane_UnderMovingHook | Major | 空鉤移動時，頭盔投影在吊鉤 0.5 m 以內，不停車（鐵道 Q2）。**新 ID** |
+| ERR_Crane_FastLowerEmptyHook | Minor | 空鉤靠近車頂或台架時沒有切到微動（吊梁底面離作業面 < EX 2 m 時用高速下降）。**新 ID** |
+
+### 1.4 全域安全規則（補充）
+- 集電弓在台架上時視為已降弓，E1 不擋（軟體 3.2）。
+- RM_03 拆高壓電纜之前，**兩支接地棒都必須掛著**：弓頭的接地棒，以及車頂電纜端點的短接地線（RM_00）。沒有第二支就拆，記 Critical，錯誤 ID 為 ERR_Global_HVDisconnectWithoutSecondGround（**新 ID**，鐵道 Q1「先掛後拆」）。
+- WC_05 升弓時：
+  - 固定帶還沒拆，記 Critical，錯誤 ID 為 ERR_Global_RaiseWithHoldDown（**新 ID**）。
+  - 吊鉤還在弓上方 EX 3 m 以內，記 Critical，錯誤 ID 為 ERR_Global_RaiseUnderHook（**新 ID**）。
+- v1.3 新增（L1–L5），都是**新 ID**：
+
+| 錯誤 | 嚴重度 | 觸發 |
+| --- | --- | --- |
+| ERR_Global_StartWithoutPermit | Critical | SI_00 還沒完成就操作升降控制器、拿任何工具或靠近車輛（L1） |
+| ERR_Global_NoHelmet | Critical | 進入任何步驟時沒戴安全帽，或在車頂、吊運時安全帽下巴帶沒扣（L2） |
+| ERR_Global_PPEMissing | Major | 漏戴安全鞋或工作手套（L2）。背負式安全帶由 SI_06 管制，不重複記 |
+| ERR_Global_NoInsulatingGloves | Critical | SI_04 c、SI_05 b–d、RM_00 a–c、LF_01 a–b、IN_04b c、f–h、WC_03a a–b、WC_03b a–b、RT_02 b、c、e 碰觸時，手套狀態不是「絕緣手套」（L2，鐵道；RT_02 為 Q10 回覆） |
+| ERR_Global_HoldPointSkipped | Critical | 停留確認點還沒放行就做下一個動作：扣車頂掛點、起吊（上升超過 EX 0.05 m）、解鎖（L3） |
+| ERR_Global_HoldPointRejected | Major | 請求放行時清單有一項實際狀態不成立，NPC 退回（L3）。修好再請求即可，同一點不重複記 |
+| ERR_Global_GroundNotCleared | Critical | WC_04 解鎖時，接地登記欄還有沒銷號的列，或登記和實物不符（L4）。動作擋下 |
+| ERR_Global_GroundNotRegistered | Major | 掛上接地後離開該步驟還沒登記，或拆下後離開該步驟還沒銷號（L4） |
+| ERR_WC03_RemoveOrder | Critical，擋下 | 拆接地順序反了：#1 弓頭端未拆先鬆端子（WC_03b）；#2 電纜端子未拆先鬆車體接地座（WC_03a）（K2；日常更換的 WC_03 同用） |
+| ERR_Global_RoofFallZone | Major | 頭盔投影進入墜落區並持續 ≥ 1 s：人在車頂時 \|X\| > 1.19 m（車頂邊），或從活動欄以外的地方越過平台與車頂的間隙；離邊 0.5 m 起先出現紅線加輕震提示，不記錯（P6，v1.6 新增） |
+| ERR_Global_TeleportWhileAnchored | Minor，擋下 | 車頂掛點還扣著時，要傳送到非車頂站點（除 tp.platform.anchor 換扣外），擋下傳送並提示先換扣（P6，v1.6 新增） |
+| ERR_Global_StripReleasedOnRoof | Major（只在日常） | 在車頂把滑板（新或舊）放開，而且不是放在暫放墊 env.roof_strip_mat 上；或把新滑板放上暫放墊；或墊上已有 1 條還再放。CSR_11 c 吸附到 install_target 的放下不算。拿著滑板時傳送擋下並提示，不記錯（v1.7，CSR v5.9） |
+| ERR_WC01a_StripOnMat | Major（只在日常） | WC_01a 車頂清點時暫放墊上還有滑板（v1.7，CSR v5.9） |
+| ERR_Global_GroundHangOrder | Critical | 掛接地順序反了，先掛設備端（弓頭或電纜端子）再接接地端：SI_05、RM_00、IN_04b（v1.5 補 ID） |
+| ERR_Global_HarnessUnclipped | Critical | 換扣時先解再扣，有一刻兩個掛點都沒扣：SI_06、RM_07、IN_05、WC_02（v1.5 補 ID） |
+| ERR_SI02_TagWithoutLock／ERR_SI02_RaiseSwitchUnlocked | Critical | SI_02 只掛牌沒上鎖／漏鎖升弓開關（v1.5 補 ID，v5.6 同） |
+| ERR_SI03_CylinderPowerOn | Critical | 沒斷電動缸電源就離開駕駛室（v1.5 補 ID） |
+| ERR_RT02_IRFail | Critical（考核）／提示（教學） | RT_02 讀值 < EX 100 MΩ 仍要進 WC_04（v1.5 補 ID） |
+| ERR_Global_GroundWithoutVoltageTest | Critical | IN_04b 還沒驗電（c）就夾端子或掛弓頭（D25，鐵道；v1.5 新增） |
+| ERR_Global_GroundRemovedWhileOnRoof | Critical | 車頂掛點還扣著（人在車頂）時取下 #1 弓頭端掛鉤（D25，v1.5 新增） |
+| ERR_Global_KeyLeftUnattended | Minor | 上鎖鑰匙離開學員身上（例如放到工作檯）。教學模式另外跳提示（L5） |
+
+### 1.5 角色與停留確認點（L3，鐵道用語）
+
+模擬是單人作業，以下角色由 NPC 或系統代表。學員要學的是「這個點要找誰」，不是自己放行。
+
+| 角色 | 職責（模擬中） | 位置 |
+| --- | --- | --- |
+| 作業負責人 | 主持工具箱會議；停留點 1、4 放行；WC_06 簽核 | 平台，tp.platform.rack 旁 |
+| 監護人（npc.guard） | 停留點 1 和作業負責人一起放行；之後一直站在平台 (−3.00, −1.00) 監看，不動手（P4） | 平台 |
+| 機廠調度 | 核准作業許可單；停留點 4 和作業負責人一起放行（解除封鎖）；WC_06 後撤牌 | 不在場，用對講機 UI |
+| 吊掛指揮 | 停留點 2、3 放行試吊 | tp.platform.crane 旁 |
+| 檢查員 | WC_06 判定可否出車 | WC_06 時出現在平台 |
+
+停留確認點的共同做法：
+- 學員點 NPC（或對講機），跳出確認清單，逐項點過，再按「請求放行」。
+- NPC 讀實際狀態，全部成立才放行（放行旗標 hold.{n}.released = true）；有一項不成立就退回，說明哪一項，記 ERR_Global_HoldPointRejected。
+- 放行前做下一個動作，擋下並記 ERR_Global_HoldPointSkipped。
+
+| # | 位置 | 放行者 | 清單 |
+| --- | --- | --- | --- |
+| 1 上車頂前 | SI_06 c（上車頂前確認單，第 2 節） | 作業負責人＋監護人 npc.guard（P4） | 上鎖掛牌 2 處、電動缸電源 OFF、驗電無電、接地 #1 已掛並登記、鄰線檢查表、監護人到位 |
+| 2 拆弓起吊前 | LF_01 e | 吊掛指揮 | RM_05 檢查完成、四條吊帶已掛且無扭轉、吊帶角度 ≤ 45°（v2.6）、固定帶已裝、底座螺栓／高壓電纜／控制線已拆、車頂無人、紅區淨空 |
+| 3 吊回起吊前 | IN_01 d | 吊掛指揮 | 四條吊帶已掛、吊帶角度 ≤ 45°（v2.6）、台架夾具已解開、車頂無人、紅區淨空、底座絕緣子上無遺留物 |
+| 4 復電前 | WC_04 a0 | 作業負責人＋機廠調度 | 接地登記欄 2 列都已銷號，且桿架 slot_3、工具架 slot_12 實物在架；人員已離開車頂；工具清點完成；絕緣電阻合格且已放電 |
+
+- 起吊前確認每次起吊都要做，所以 2、3 是同一種點出現兩次（鐵道）。考核四段中，第二段、第四段都從起吊前確認開始。
+
+### 1.6 只加判定的項目（L2、L4、L5）
+- **手套狀態**（L2）：手腕選單切換「工作手套／絕緣手套」，不算小動作。上表 ERR_Global_NoInsulatingGloves 列出的碰觸點要戴絕緣手套；其他步驟兩種都可以。教學模式在這些步驟開始時提示換手套。
+- **接地登記欄** env.work_order.ground_register（L4）：#1 會登記兩次（SI_05 e 登記、LF_01 c2 銷號；IN_04b i 再登記、WC_03b d 銷號），#2 一次（RM_00 d 登記、WC_03a d 銷號）。兩列，#1 平台接地棒（弓頭端，slot_3）、#2 車頂短接地線（電纜端子，slot_12）。登記時自動帶入位置、時間、學員名字；銷號時同樣帶入時間。
+- **一人一鎖**（L5）：掛牌上顯示學員名字。上鎖鑰匙放在學員背包，WC_04 解鎖時檢查「鑰匙在學員身上，而且解鎖者 = 上鎖者」。
+
+## 2. 階段 1：隔離
+SI_01–SI_06 的小動作、站點都照 v5.4（v5.6 起 SI_04、SI_05 的長桿改從桿架拿取與歸還，D25），只有 SI_05 多 e、SI_06 多 a2、a3，且 SI_06 c 改成上車頂前確認單（f 併入）；最前面新增 SI_00。
+
+**STP_SI_00_PreWork** 開工準備（**新步驟**，tp.platform.rack；L11、L1、L2、L6）
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 確認防溜與禁動 3 項 | env.work_order.anti_roll_check（**新 ID**） | — | 停放煞車、止輪器、「檢修中・禁止動車」牌 3／3 已查看並勾選（L11） |
+| b | 確認作業許可單 | env.work_order.permit（**新 ID**） | — | 股道、車號、作業內容、時段、調度核准欄 5 欄都已查看（L1） |
+| c | 工具箱會議：勾 5 項危害並簽名 | env.work_order.tbm（**新 ID**） | — | 高壓、高處墜落、吊掛、夾手、墜物 5／5 已勾，已簽名（L1） |
+| d | 穿戴防護具並做絕緣手套充氣檢查 | env.ppe_station（**新 ID**） | — | 安全帽（下巴帶已扣）、安全鞋、工作手套 = 穿戴；絕緣手套充氣檢查完成、放在身上（L2） |
+| e | 查看量具校正標籤並勾選 | env.work_order.calibration_check（**新 ID**） | — | 卡尺、扭力扳手、高阻計 3 張標籤都已查看，3／3 勾「有效」（L6） |
+| f | 到工具架領取個人上鎖包，掛在腰間（v1.7，D30） | env.tool_rack.slot_1 | tool.lockout_tag | 上鎖掛牌組 = 在腰包 |
+
+- a 放最前面：止輪和禁動牌要在任何人靠近車輛前完成（鐵道）。這版只做「查看並勾選」：止輪器、停放煞車指示、禁動牌在場景裡已就位，學員要逐一看過才能勾。教學模式會框出三處。實際放止輪器的動作列入 backlog。
+- 防護具清單共 5 項（安全帽、安全鞋、工作手套、絕緣手套、背負式安全帶）。前 4 項在 d 完成；背負式安全帶照舊在 SI_06 a 從工具架拿，清單上會顯示「上車頂前穿」。這樣 slot_4 的 ID 和小動作都不必改。
+- 過期量具（例如題庫放一支過期扭力扳手）是 L6 的考題版本，這版不做，列入 backlog。
+- SI_00 完成前做任何作業，記 ERR_Global_StartWithoutPermit（Critical）。
+- 作業許可單的調度核准欄空白時要不要做成「不可開工」的考題：這版不做，列入 backlog。
+
+**SI_05 新增小動作 e**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| e | 在接地登記欄登記 #1 接地棒 | env.work_order.ground_register | — | #1 = 已登記（L4） |
+
+**SI_06 c 改成「上車頂前確認單」**（v1.4，O4：原 c 鄰線檢查表、v1.3 c2 停留點 1、原 f 簽名開工合併；f 刪除）
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| c | 填上車頂前確認單，請作業負責人放行並簽名 | env.work_order.roof_entry_check（**新 ID**，取代 adjacent_checklist）、npc.work_leader（**新 ID**） | — | 11／11 已點過、hold.1.released = true、sign_start 已簽 |
+
+| # | 項目 | NPC 讀的狀態 |
+| --- | --- | --- |
+| **A 隔離** | | |
+| 1 | 主斷路器、升弓開關已上鎖並掛牌，掛牌是本人姓名，鑰匙在身上 | 兩處 = 已上鎖＋掛牌；鑰匙在學員身上 |
+| 2 | 電動缸電源 OFF，按升弓鈕確認弓不動 | SI_03 完成 |
+| 3 | 驗電器自檢後驗電，顯示無電 | SI_04 完成 |
+| 4 | 接地 #1（平台接地棒）已掛並登記 | 接地 #1 已掛，登記欄 #1 已登記 |
+| **B 車頂周邊（原鄰線檢查表）** | | |
+| 5 | 本股道為無架空線檢修庫 | 場景設定（查看） |
+| 6 | 相鄰股道架空線若帶電，車頂作業範圍到帶電部 ≥ EX 2.0 m 或已裝防護隔板；鄰線列車移動前會通知調度並設警示 | 已查看；作業許可單已確認 |
+| 7 | 平台護欄、活動欄、跨板完好；防墜器已做拉測（拉出後鎖止正常） | 已查看；拉測完成 |
+| 8 | 天車停在非作業位置、吊鉤升到最高；遙控器只在你（指定操作者）身上，鑰匙開關在 OFF，沒有其他人能操作天車 | 天車位置、吊鉤高度；遙控器 = 隨身、Key_Power = OFF（ctrl.crane.power = false） |
+| **C 人員與隨身物品** | | |
+| 9 | 安全帽下巴帶已扣；背負式安全帶已穿並扣上平台掛點；手套狀態正確 | ppe 狀態；平台掛點已扣 |
+| 10 | 短接地線、降弓固定帶、天車遙控器都已隨身 | SI_06 a2、a3 完成；固定帶在袋 |
+| 11 | 監護人已到位 | 監護人 NPC 在 tp.platform.anchor |
+
+- 第 5–8 項照鐵道修正（現場一般作法，推估）。第 8 項鐵道原文是「遙控器鑰匙由作業負責人保管」；本流程遙控器在 SI_06 a3 已由學員拿著（v1.2 負責人核可），鐵道確認學員就是指定操作者，由學員保管符合現場要求，但要寫明鑰匙開關在 OFF。
+- SI_06 新順序：a → a2 → a3 → b → **c** → d → e。原 f 簽名開工已併入 c。
+- 教學說明（v2.2，組長；只在教學模式顯示在確認單最後一行，不計分）：「現場會用車頂上方的防墜軌道，讓掛點跟著你移動；本模擬為了讓天車通過，簡化成門架防墜器。」
+- 漏勾，或有一項實際不成立就請求放行：記 ERR_Global_HoldPointRejected（Major）。沒放行就扣車頂掛點：記 ERR_Global_HoldPointSkipped（Critical）。
+
+**SI_06 新增小動作 a2、a3**（插在 a 和 b 之間，其他字母不變）
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a2 | 拿起短接地線，掛在安全帶工具環上 | env.tool_rack.slot_12 | tool.grounding_lead | 掛位 12 = 使用中，短接地線 = 隨身 |
+| a3 | 到掛座拿起天車遙控器，掛在左手 | env.crane_pendant（PendantDock） | — | 遙控器 = 隨身（v1.9，D32：站點 tp.platform.rack，掛座在 (−3.06, 1.20, −2.95)；RT_01 b 在 tp.platform.crane 原地掛回，距掛座 0.85 m） |
+
+- c 在 a3 之後：學員帶著遙控器回到 tp.platform.anchor 做 b、c，作業負責人站在平台上。
+
+- a3 的理由：RM_05 要在車頂用遙控器把空鉤移到弓上方（鐵道 Q2），扣上車頂掛點後就回不了掛座，所以上車頂前拿。之後吊運、吊回都帶在左手，到 RT_01 b 才掛回。
+- a2 的理由：短接地線是大工具，放在平台工具架上。扣上車頂掛點之後就不能回工具架拿（D14 作廢後，車頂掛點扣著時只能去 tp.platform.anchor），所以要在拿安全帶的同一趟帶上去。
+
+## 3. 階段 2：拆弓與掛吊具（車頂，tp.roof.base_w）
+
+**STP_RM_00_SecondGround** 掛短接地線（tp.roof.base_w，鐵道 Q1：先掛後拆）
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 在 −X 點把夾具夾上車體接地座 | ip.roof.carbody_ground（**新 ID**，外肩 (−1.15, ·, +0.43)，v2.1 D34） | tool.grounding_lead | 已夾上 |
+| b | 換到 +X 點，用短絕緣桿掛上電纜端子 | ip.roof.hv_cable_ground | tool.grounding_lead | 已掛上 |
+| c | 在 +X 點拉一下接地線確認 | ip.roof.hv_cable_ground | tool.grounding_lead | 拉線確認完成 |
+| d | 在接地登記欄登記 #2 短接地線 | env.work_order.ground_register | — | #2 = 已登記（L4） |
+
+- 站點：a 在 tp.roof.base_w (−0.95, Z_base)，b、c 在 tp.roof.base_e (+0.95, Z_base)，中間用傳送（v1.7：兩點之間平滑移動要繞約 4.8 m）。接地線長度 ≥ 2.5 m（鐵道）。
+- 順序顛倒（先掛高壓端）記 Critical，和 SI_05 同一條規則。
+- 排在 RM_03 拆電纜之前；這時電纜還接著，弓頭的接地棒和短接地線同時掛著。
+
+
+**STP_RM_01_HoldDown** 裝降弓固定帶
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 從工具袋拿出降弓固定帶 | env.tool_rack.slot_10 | tool.hold_down_strap | 手持固定帶 |
+| b | 把固定帶繞過上臂扣到底架 | ip.pan_assy.hold_down | tool.hold_down_strap | hold_down = Installed |
+| c | 拉一下固定帶，確認收緊 | ip.pan_assy.hold_down | — | 拉 ≥ EX 5 cm，狀態不變 |
+
+**STP_RM_02_CtrlDisconnect** 拆升弓控制線
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 拔下升弓控制線接頭 | ip.pan_assy.ctrl_connector | — | Removed |
+| b | 接頭蓋上防塵蓋 | ip.pan_assy.ctrl_connector（CtrlCap） | — | 防塵蓋已蓋上（沒蓋：Minor） |
+
+**STP_RM_03_HVDisconnect** 拆高壓電纜端子
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 確認兩支接地棒都掛著 | ip.pan_head.ground_clamp、ip.roof.hv_cable_ground | — | 已查看；兩處掛鉤都已掛上 |
+| b | 從工具袋拿出標記筆 | env.tool_rack.slot_9 | tool.marker | 手持標記筆 |
+| c | 在端子與端子座畫對位記號 | ip.pan_assy.hv_terminal | tool.marker | 記號已畫（沒畫：Minor） |
+| d | 把標記筆收回工具袋 | env.tool_rack.slot_9 | tool.marker | 掛位 9 = 在袋 |
+| e | 從工具袋拿出套筒扳手 | env.tool_rack.slot_6 | tool.socket_wrench | 手持套筒扳手 |
+| f | 換上 19 mm 套筒（Q5） | tool.socket_wrench（套筒） | tool.socket_wrench | 套筒 = 19 mm |
+| g | 把端子螺栓 {n} 轉到脫出（n = 1→2） | part.pan_assy.hv_bolt_{n}（**新 ID**） | tool.socket_wrench | 該支 = 脫出 |
+| h | 把螺栓 {n} 收進零件袋（緊接在 g 後） | env.tool_bag.bolt_pouch | — | 零件袋數量 +1 |
+| i | 取下端子，放到停放位 | ip.pan_assy.hv_terminal | — | Removed（車頂顯示 HV_Cable_Parked） |
+
+**STP_RM_04_BaseUnbolt** 拆底座螺栓，絕緣子留在車頂
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 換上 24 mm 套筒（Q5） | tool.socket_wrench（套筒） | tool.socket_wrench | 套筒 = 24 mm |
+| b | 把底座螺栓 {n} 轉到脫出（n = 2、3 在 base_e，傳送後 1、4 在 base_w；v1.7） | part.pan_base.bolt_{n} | tool.socket_wrench | 該支 = 脫出 |
+| c | 把螺栓 {n} 收進零件袋（緊接在 b 後） | env.tool_bag.bolt_pouch | — | 零件袋數量 +1 |
+| d | 把套筒扳手收回工具袋 | env.tool_rack.slot_6 | tool.socket_wrench | 掛位 6 = 在袋 |
+
+**STP_RM_05_CraneRiggingCheck** 天車與吊具作業前檢查（鐵道 RM_05、2.2 第 2 點）
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 轉遙控器電源鑰匙 | env.crane_pendant（Key_Power） | — | ctrl.crane.power = true |
+| b | 按下緊急停止，再旋轉復歸 | env.crane_pendant（Btn_EStop） | — | estop 由 true 變回 false |
+| c | 把吊鉤移到弓正上方，用微動降下 | env.crane_pendant | — | Hook_AttachPoint 與 COG 水平差 ≤ EX 5 cm；吊梁底面在車頂上方 EX 1.2–1.6 m。吊鉤移動時，人不在吊鉤 0.5 m 內（Q2） |
+| d | 查看吊鉤安全舌片與吊梁銘牌荷重，勾選 | Crane_HookBlock/Hook_Latch、env.lift_beam | — | 兩處都已查看並勾選（v1.4，O5：原 d、e 合併） |
+| f | 檢查吊帶 {n} 的標籤和破損（n = 1→4） | env.sling_{n} | — | inspected = true；有割傷就判為「不合格」（Q8） |
+
+**STP_RM_06_Rig** 掛吊帶
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 把吊帶 {n} 掛上吊耳 {n}（n = 1→4） | ip.pan_assy.lift_point_{n} | — | Rigged |
+| b | 查看四條吊帶有沒有扭轉 | env.rigging | — | 已查看 |
+
+**STP_RM_07_LeaveRoof** 所有人離開車頂
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 把安全帶扣上平台掛點 | ip.depot.platform_anchor | tool.safety_harness | 兩個都扣著 |
+| b | 解開車頂掛點 | ip.roof.anchor | tool.safety_harness | 只剩平台掛點，人在平台 |
+| c | 解開掛鉤，收到胸前扣環（v1.8，D31；tp.platform.anchor） | tool.safety_harness（胸前扣環） | tool.safety_harness | 兩個掛鉤都收在胸前扣環，安全帶仍穿著 |
+
+## 4. 階段 3：吊運
+
+**STP_LF_01_PreLift** 起吊前（a–c2 在 tp.platform.ground，d、e 在 tp.platform.crane）
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 取下弓頭端的接地掛鉤 | ip.pan_head.ground_clamp | tool.grounding_rod | 已取下 |
+| b | 鬆開接地端子的夾子 | ip.depot.ground_terminal | tool.grounding_rod | 已鬆開（第二支的夾子仍在） |
+| c | 把接地桿放回桿架 | env.tool_rack.slot_3（在桿架 env.pole_rack） | tool.grounding_rod | 掛位 3 = 在架 |
+| c2 | 在接地登記欄銷號 #1 | env.work_order.ground_register | — | #1 = 已銷號（L4） |
+| d | 確認吊鉤在弓的正上方 | part.crane.hook | — | 已查看；水平差 ≤ EX 5 cm |
+| e | 請吊掛指揮確認，放行試吊 | npc.rigging_lead（**新 ID**） | — | 停留點 2 清單全部點過，hold.2.released = true |
+
+- a–c 的理由：弓頭這一支會跟著弓離開，所以先取下。這時電纜已拆（RM_03），車上高壓側由 RM_00 的第二支接地保護。
+- 沒做 a 就起吊：接地棒會被拖走，記 Critical（ERR_Crane_Collision 也會觸發）。
+
+**STP_LF_02_TrialLift** 試吊（tp.platform.crane）
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 按住上升，離座 0.1 m 後放開 | env.crane_pendant | — | 離座 0.08–0.15 m，停住 ≥ EX 3 s |
+| b | 查看吊物是否水平、有沒有勾到東西 | part.pan_assy | — | 已查看；傾斜 ≤ EX 3° |
+
+**STP_LF_03_Clearance**：a 按住上升到越障高度（吊物底面 ≥ Y 3.1）。
+
+**STP_LF_04_Traverse**：a 按住橫移到台架正上方（PAN_Root 原點，即底架底面中心，與台架中心水平差 ≤ EX 5 cm；v1.6，建模 B F5）。這段吊物懸空，學員只能平滑移動，不能傳送。
+
+**STP_LF_05_LowerToStand**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 降到台架上方 0.1 m 停住 | env.crane_pendant | — | 底面離定位銷頂 0.05–0.15 m，停 ≥ EX 1 s |
+| b | 對位燈亮綠後慢慢放下 | env.panto_stand | — | part.pan_assy.state = OnStand |
+
+**STP_LF_06_SecureOnStand**（tp.stand.w；吊物已經放上台架，可以傳送）
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 鎖上台架夾具 {n}（n = 1→2） | env.panto_stand.clamp_{n}（**新 ID**） | — | 鎖 |
+| b | 從吊耳 {n} 卸下吊帶（n = 1→4） | ip.pan_assy.lift_point_{n} | — | Free |
+| c | 按住上升，把吊鉤移開 | env.crane_pendant | — | 吊梁底面高於弓頂 EX 1.0 m |
+
+## 5. 階段 4：台架換滑板（CSR，D19 兩種課程共用）
+
+### 5.1 一份資料、兩種課程
+- CSR_01–CSR_15 的小動作 ID、目標、判定、錯誤都**不分課程**，只有站點、物件位置、少數條件會依課程覆寫。
+- 小動作文字一律寫成兩種課程都通用的說法（例如「把螺栓放進螺栓盤」），不寫「車頂」或「台架」。
+
+| 項目 | 定期檢修（預設） | 日常更換 |
+| --- | --- | --- |
+| 作業位置 | 台架（地面維修工作區） | 車頂原位 |
+| standPointId | 見 5.2 | steps.md 1.4、1.6（D10 車頂共用點，D19 保留） |
+| 螺栓盤 env.bolt_tray_L／R | 放在台架架體角落、tp.stand.s 旁（Q9） | 放在車頂 D9 位置（日常模式保留） |
+| 待報廢箱（原零件盒，紅色）、備品架 | 地面工作檯（X −12.5）；待報廢箱放在工作檯旁地上，**不和備品架疊放**（L8，rail-layout 2.3 的疊放作廢） | 依 D15 前的平台配置，由軟體依課程擺放；同樣不疊放 |
+| 工具 | 工具袋（D17） | 工具袋（D26：兩門課共同規則；env.roof_toolbox 由 R1.5b 移除）。車頂作業照舊每次收回 |
+| CSR_01 a 的條件 | SI 全部完成，**而且** part.pan_assy.state = OnStand、兩個夾具都已鎖 | SI 全部完成 |
+| CSR_05 判為「合格」 | 跳到 IN_01 | 跳到 WC_01 |
+| CSR 的 14 個「收回」小動作（v1.4，O1） | 跳過；工具放台架工具盤，CSR_15 f 一次收回 | 照做（車頂防墜） |
+| CSR_01 a（v1.4，O3） | 跳過（弓已離車，隔離已在停留點 1 確認） | 照做 |
+| CSR_15 f（v1.4，O1） | 照做 | 跳過 |
+| 教學模式第二側只顯示標題（O2） | 照做 | 照做（D29，v1.6 起） |
+
+- 修改的文字只有工具拿放（第 1.1 節，共 28 條展開後），以及「零件盒」「螺栓盤」的說法（已經是通用說法）。
+- steps-delta 方案 A 的「CSR_07 c 移到 CSR_08 c」**不採用**，兩種課程都不必往返。
+
+### 5.2 定期檢修的 standPointId
+- 台架四邊的傳送點：tp.stand.n、e、s、w（D18）。可以自由走動，站點只用來快速傳送。
+- 兩條滑板沿 X 方向擺，從 −Z 側（tp.stand.s）作業，和日常模式「從外側作業」一致。
+
+| 步驟 | 站點 |
+| --- | --- |
+| CSR_01–CSR_07、CSR_09、CSR_11–CSR_15 | tp.stand.s |
+| CSR_01 a、b；CSR_08 a | tp.stand.s；CSR_08 b 走到工作檯旁放待報廢箱，站點設 tp.stand.w |
+| CSR_10 a–g | tp.stand.w（工作檯上有備品架、可以量備品） |
+
+### 5.3 從某個階段開始、考核分五段（D21、D22、D29）
+- 每個階段都可以當起點，前面的步驟視為已完成，場景直接擺到那個狀態。
+- 資料加一欄 `startPhase`，值為 1–6 或 **4b**（從 CSR_06 開始），場景狀態由軟體擺好。
+- 考核可以全程考，也可以分五段考（D29）。新人結訓用分段考；全程考只用在複訓或認證（D29）。
+  - **每段**：0 個 Critical、Major ≤ 1、該段時間 ≤ 該段參考時間的 1.5 倍。
+  - **全程**：0 個 Critical、Major ≤ 2、總時間 ≤ 參考時間的 1.5 倍（考核 3387 s）。
+  - **分段考五段合計**：0 個 Critical、Major ≤ 2，而且**同一條規則不能在兩段都犯**（驗收組長已確認，見 v2-prof/D29-leader-ruling.md v1.1）。
+
+| 段 | 範圍（startPhase） | 起點狀態 | 參考時間（教學／考核，s） |
+| --- | --- | --- | --- |
+| 一 隔離與拆弓 | SI_00–RM_07（1） | 場景初始狀態 | 917 / 575（v2.7） |
+| 二 吊運與量測判定 | LF_01–CSR_05（3） | 停留點 1 已放行；集電弓在車頂，四條吊帶已掛、固定帶已裝、底座螺栓、高壓電纜、控制線已拆；學員在平台，安全帶穿在身上、掛鉤收在胸前扣環（v1.8），遙控器在左手且電源已開；接地 #1、#2 都已登記；手上不拿工具 | 472 / 302 |
+| 三 換滑板 | CSR_06–CSR_15（4b） | 集電弓在台架上、夾具已鎖；兩條舊滑板讀數已填、判定為「兩條都換」；CSR_01 b 已勾「無異常」；學員在 tp.stand.s，工具都在工具袋，手上不拿工具；吊鉤已移開 | 996 / 703（v2.8） |
+| 四 吊回安裝 | IN_01–IN_11（5） | 集電弓在台架上、夾具已鎖、兩條新滑板已上扭力並畫標記，工具都在工具袋；吊鉤在弓上方 EX 2 m；學員在 tp.stand.w，安全帶穿在身上、掛鉤收在胸前扣環（v1.8），遙控器在左手；接地 #1 已銷號、#2 已登記 | 710 / 447（v2.8） |
+| 五 收尾與復電 | WC_03a–WC_06（6） | 集電弓已裝回底座、底座螺栓已上扭力、高壓端子與控制線已接回、吊帶已卸、固定帶已收回工具袋；吊鉤仍在弓上方（RT_01 才移開）；接地 #1 已重掛並第二次登記、#2 仍掛著並已登記；學員在 tp.roof.base_e.n（v2.7：IN_11 和 WC_03a a 都在 e.n），安全帶扣在車頂掛點，遙控器在左手；工具袋 5–10 都在袋；上鎖掛牌組在腰包（v1.7） | 438 / 277（v1.7） |
+
+- 第二段從 LF_01、第四段從 IN_01 開始，兩段的第一個停留點都是「起吊前確認」（鐵道）。停留點 1 在第一段，停留點 4 在第五段；D25 的收尾順序完整落在第五段。
+- 第三段的教學時間已含 O2（第二側只顯示標題）。最長的一段是第三段（教學 990 s、考核 697 s）。
+- 第五段起點狀態要擺的東西多（兩支接地、登記欄、車頂安全帶、吊鉤），建議軟體加一條測試：從第四段做到 IN_11 結束時的狀態，和直接從 startPhase 6 開始的狀態逐項比對。
+- 分段考時，SI_00 只在第一段做；其他段的作業許可、工具箱會議、防護具都視為已完成，但 ERR_Global_NoHelmet、NoInsulatingGloves 照常判定。
+
+### 5.4 v1.3、v1.4 對 CSR 的修改
+
+| 小動作 | 修改 | 目標互動點 | 完成條件 |
+| --- | --- | --- | --- |
+| **CSR_01 b（新增）** | 查看分流線、托架、絕緣子，在作業單異常欄勾選（L7） | env.work_order.anomaly（**新 ID**） | 三處都已查看，異常欄已勾選「無異常」或「有異常」 |
+| CSR_08 b（改文字） | 把舊滑板放進紅色待報廢箱（L8） | env.parts_tray（ID 不改，外觀改紅色、標「待報廢」） | 待報廢箱有該條舊滑板 |
+| **CSR_10 g（新增）** | 在作業單記下新品料號和序號（L9） | env.work_order.part_trace（**新 ID**） | 兩欄和所選備品標籤一致 |
+| CSR_04 e、07 c、09 c、10 e、12 e、13 d、14 c、15 e（v1.4，O1） | 定期檢修跳過（共 14 條展開後）；工具用完放台架工具盤 | env.panto_stand.tool_tray（**新 ID**） | — |
+| **CSR_15 f（v1.4 新增，O1，只在定期檢修）** | 把台架工具盤上的工具全部收回工具袋 | env.tool_bag | 掛位 5–9 = 在袋，台架工具盤是空的 |
+| CSR_01 a（v1.4，O3） | 定期檢修跳過 | — | — |
+
+- CSR_01 b 在預設情境選「無異常」。勾「有異常」時，教學模式提示「停止作業、回報作業負責人」並結束本次訓練。分流線斷股的異常情境本身列入 backlog（L7，鐵道建議當第一個）。
+- 舊品序號這版不記（鐵道 L9 建議也記），列入 backlog。
+- 其他提到「零件盒」的文字（WC_01 b 等）一律改成「待報廢箱」，ID 不改。
+- CSR_01 b、CSR_08 b、CSR_10 g 兩種課程都適用；O1、O3 的跳過只在定期檢修。
+- 「拿出」小動作保留：它判定的是「手上拿的工具」，已經拿著就自動完成（1.1）；從台架工具盤拿起也算。
+- **CSR_11 b（v1.5，K4）**：VR 指令改成「轉動手腕讓箭頭朝外」，桌面模式才是「按 R 讓箭頭朝外」；完成條件不變。兩種課程都適用。
+- 教學模式第二側（O2）：CSR_06_R–CSR_14_R 只顯示步驟標題；學員卡住時，照卡關規則顯示該小動作的提示。
+
+## 6. 階段 5：吊回安裝
+
+**STP_IN_01_RigOnStand**（tp.stand.w）
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 按住按鍵，把吊鉤移到台架上方並降下 | env.crane_pendant | — | 與 COG 水平差 ≤ 5 cm；吊梁底面在弓頂上方 EX 0.6–1.0 m |
+| b | 把吊帶 {n} 掛上吊耳 {n}（n = 1→4） | ip.pan_assy.lift_point_{n} | — | Rigged |
+| c | 解開台架夾具 {n}（n = 1→2） | env.panto_stand.clamp_{n} | — | 開 |
+| d | 請吊掛指揮確認，放行試吊 | npc.rigging_lead | — | 停留點 3 清單全部點過，hold.3.released = true（在 tp.platform.crane 做，傳送回去後再請求） |
+
+**STP_IN_02_TrialLift**：IN_01 d 已在 tp.platform.crane 放行（吊物還在台架上，可以傳送過去），接著做 a 離台 0.1 m 停 ≥ 3 s、b 查看是否水平。
+
+**STP_IN_03_Transfer**（tp.platform.crane）：a 按住上升到越障高度；b 按住橫移到車頂底座正上方（PAN_Root 原點與 4 個絕緣子中心水平差 ≤ EX 5 cm；v1.6，建模 B F5）。
+
+**STP_IN_04_LowerToRoof**（tp.platform.crane）：a 降到絕緣子上方 0.1 m 停住；b 對位燈亮綠後慢慢放下（part.pan_assy.state = Mounted，BaseHole 與 InsulatorTop 距離 ≤ EX 1 cm）。
+
+**STP_IN_04b_RegroundPan** 驗電並重掛 #1 接地桿（**v1.5 新步驟**，tp.platform.ground；D25，鐵道確認）
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 到桿架拿起驗電桿 | env.tool_rack.slot_2（env.pole_rack） | tool.voltage_detector | 手持驗電桿（雙手） |
+| b | 點自檢器確認亮綠燈 | ip.depot.detector_tester | tool.voltage_detector | 自檢通過 |
+| c | 從平台點弓頭接地掛點 | ip.pan_head.ground_clamp | tool.voltage_detector | 顯示「無電」 |
+| d | 把驗電桿放回桿架 | env.tool_rack.slot_2（env.pole_rack） | tool.voltage_detector | 掛位 2 = 在架 |
+| e | 到桿架拿起接地桿 | env.tool_rack.slot_3（env.pole_rack） | tool.grounding_rod | 手持接地桿（雙手），掛位 3 = 使用中 |
+| f | 把接地夾夾上接地端子 | ip.depot.ground_terminal | tool.grounding_rod | 已夾上 |
+| g | 拉一下接地線確認 | ip.depot.ground_terminal | tool.grounding_rod | 拉線確認完成 |
+| h | 把掛鉤掛上弓頭接地點 | ip.pan_head.ground_clamp | tool.grounding_rod | 已掛上 |
+| i | 在接地登記欄再登記 #1 | env.work_order.ground_register | — | #1 = 已登記（第二次） |
+
+- 理由：D25 規定車頂拆 #2（WC_03a）時 #1 仍要掛著，所以弓一裝回就要先接地，再上車頂碰它。
+- **掛接地前一定先驗電**（鐵道）：即使弓還沒接電纜、理論上沒電，也照停電作業通則驗電，養成每次都驗的習慣。a–d 和 SI_04 相同，e–h 和 SI_05 相同。
+- 錯誤比照 SI_04、SI_05：未自檢就驗（Critical）、先掛弓頭端（Critical）、沒做拉線確認（Major）。另外新增「沒驗電就掛接地」，記 ERR_Global_GroundWithoutVoltageTest（Critical，**新 ID**）。
+- 驗電桿和接地桿都在桿架上，不會增加往返。遙控器照舊掛在左手；做完再到 tp.platform.rack 做 IN_05。
+
+**STP_IN_05_RoofEntry**（tp.platform.rack → tp.platform.anchor；IN_04b 之後）
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 從胸前扣環取下掛鉤，準備重新扣上防墜器（v1.8，D31；tp.platform.anchor） | tool.safety_harness（胸前扣環） | tool.safety_harness | 掛鉤在手，安全帶仍穿著 |
+| b | 扣上平台掛點 | ip.depot.platform_anchor | tool.safety_harness | 已扣 |
+| c | 扣上車頂掛點 | ip.roof.anchor | tool.safety_harness | 兩個都扣著 |
+| d | 解開平台掛點 | ip.depot.platform_anchor | tool.safety_harness | 只剩車頂掛點 |
+
+**STP_IN_06_BasePreTighten**（tp.roof.base_w）
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 從工具袋拿出套筒扳手 | env.tool_rack.slot_6 | tool.socket_wrench | 手持 |
+| b | 換上 24 mm 套筒 | tool.socket_wrench（套筒） | tool.socket_wrench | 24 mm |
+| c | 從零件袋拿底座螺栓 {n}，用手轉入到入牙（n = 2、3 在 base_e，傳送後 1、4 在 base_w；v1.7） | part.pan_base.bolt_{n} | — | 已入牙；零件袋 −1 |
+| d | 4 支都入牙後，把底座螺栓 {n} 鎖到貼合（對角 n = 1→3→2→4，站點 w → e → e → w；v1.7） | part.pan_base.bolt_{n} | tool.socket_wrench | 貼合；沒全部入牙就開始預鎖記 ERR_IN06_TightenBeforeAllThreaded（Major） |
+
+**STP_IN_07_BaseTorque**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 把套筒扳手收回工具袋 | env.tool_rack.slot_6 | tool.socket_wrench | 在袋 |
+| b | 從工具袋拿出扭力扳手 | env.tool_rack.slot_7 | tool.torque_wrench | 手持 |
+| c | 把扭力設為 100 N·m | tool.torque_wrench（± 鈕） | tool.torque_wrench | 100（EX，Q5） |
+| d | 把底座螺栓 {n} 鎖到喀聲（對角 n = 1→3→2→4，站點 w → e → e → w；v1.7） | part.pan_base.bolt_{n} | tool.torque_wrench | EX 92–108 N·m，順序正確 |
+
+**STP_IN_08_Unrig**：a 從吊耳 {n} 卸下吊帶（n = 1→4）。底座螺栓上完扭力才卸；吊鉤留在原處，到 RT_01 再移開。
+
+**STP_IN_09_HVReconnect**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 對準記號接上高壓端子 | ip.pan_assy.hv_terminal | — | Mounted，記號對齊 |
+| b | 從零件袋拿端子螺栓 {n} 放回（n = 1→2） | part.pan_assy.hv_bolt_{n} | — | 已放入 |
+| c | 把扭力設為 50 N·m | tool.torque_wrench（± 鈕） | tool.torque_wrench | 50（EX，Q5） |
+| d | 把端子螺栓 {n} 鎖到喀聲（n = 1→2） | part.pan_assy.hv_bolt_{n} | tool.torque_wrench | EX 46–54 N·m |
+| e | 把扭力扳手收回工具袋 | env.tool_rack.slot_7 | tool.torque_wrench | 在袋 |
+
+**STP_IN_10_CtrlReconnect**：a 取下防塵蓋；b 插回升弓控制線接頭（Mounted）。
+
+**STP_IN_11_RemoveHoldDown**：a 解開降弓固定帶（Removed）；b 把固定帶收回工具袋。
+
+## 7. 階段 6：復電試驗與收尾
+
+| 步驟 | 內容 | 和 v5.4 比較 |
+| --- | --- | --- |
+| **WC_03a_RemoveGroundRoof**（tp.roof.base_w，v1.5 由 WC_03 改名） | a 在 tp.roof.base_e 用短絕緣桿取下電纜端子端；b 換到 tp.roof.base_w 鬆開車體接地座的夾具；c 把短接地線掛回安全帶工具環；d 在接地登記欄銷號 #2 | 拆 #2 短接地線。先拆高壓端，再拆車體端，反過來擋下並記 ERR_WC03_RemoveOrder（Critical，K2）。這時 #1 仍掛在弓頭（IN_04b） |
+| **WC_01a_ToolCountRoof**（tp.roof.base_w，v1.5 由 WC_01 拆出） | a 清點工具袋；b 查看零件袋、車頂無遺留，並看台架螺栓盤與待報廢箱的狀態；c 按「車頂清點完成」 | a 的條件：工具袋 5–9 號和固定帶都在袋。b 的條件：零件袋與台架旁 L、R 螺栓盤都是空的，待報廢箱有 2 條舊滑板（CSR_05 判合格時為 0），車頂無遺留；用狀態判定，教學模式會列出各處狀態 |
+| WC_02_LeaveRoof | a、b 照舊；**c（v1.8，D31）**解開掛鉤收到胸前扣環，安全帶不脫；**d**：把短接地線掛回工具架（slot_12） | — |
+| **RT_01_CraneStow**（tp.platform.crane） | a 按住上升，把吊鉤移到停放位置；b 關遙控器電源鑰匙，把遙控器掛回掛座 | b 的完成條件：power = false，遙控器 = 在掛座。v1.5 移到 WC_03b 之前，下車頂後先收天車 |
+| **WC_03b_RemoveGroundPlatform**（tp.platform.ground，v1.5 新步驟） | a 取下弓頭端掛鉤；b 鬆開接地端子的夾子；c 把接地桿放回桿架（slot_3）；d 在接地登記欄銷號 #1 | 先弓頭端、後端子，反過來擋下並記 ERR_WC03_RemoveOrder（Critical，K2）。車頂掛點還扣著時做 a，記 ERR_Global_GroundRemovedWhileOnRoof（Critical） |
+| **WC_01b_ToolCountPlatform**（tp.platform.rack，v1.5 由 WC_01 拆出） | a 清點工具架與桿架；b 核對接地登記欄；c 按「平台清點完成」 | a 的條件：工具架 slot_11、12 與桿架 slot_2、3 都在架（slot_1 在腰包、slot_4 穿在身上，WC_06 c 才歸還）。b 的條件：接地登記 #1、#2 都已銷號，和 a 的實物一致 |
+| **RT_02_InsulationTest**（tp.platform.ground） | a 從工具架拿高阻計（工具架離 ground 站 0.4 m）；b 用絕緣測試線接弓頭接地掛點（高壓側）和車體接地點 ip.roof.carbody_ground（**新 ID**）；c 按測試鍵（DC 1000 V），讀值 ≥ EX 100 MΩ，記在作業單；d 把高阻計放回工具架，到桿架拿起接地桿（slot_3）；e 桿頭碰弓頭接地掛點放電 ≥ EX 3 s；f 把接地桿放回桿架 | 新增，對應鐵道 IN_09，共 6 個小動作。要拆掉接地後才量得出來，所以排在 WC_03b 之後。量完沒放電就進 WC_04，記 Major，錯誤 ID 為 ERR_Global_NoDischargeAfterIR（**新 ID**）。讀值不合格時，教學模式提示，考核模式記 Critical，不能進 WC_04 |
+| WC_04_Unlock（a–e 照 v5.6） | **a0（v1.3）請作業負責人和機廠調度確認，放行復電**（npc.work_leader＋對講機，停留點 4，hold.4.released = true）；a–e 照 v5.4 | **f 簽名完工移到 WC_05**。a0 在 tp.platform.rack 做，放行後才去駕駛室。接地登記沒全部銷號時，a0 會被退回；就算跳過 a0 直接解鎖，也會擋下並記 ERR_Global_GroundNotCleared |
+| **WC_05_RaiseTest**（tp.platform.lift，即 backlog B1） | a 查看車頂淨空、吊鉤已移開；b 按住 ▲ 升到頂（約 15 s）；c 確認弓位指示燈 = 升弓；d 按住 ▼ 降回綠框；e 在作業單簽名完工（sign_end） | 新增。這條股道沒有架空線，所以做「升到頂再降回」，不做接觸線 |
+| **WC_06_Handover**（tp.platform.rack，v1.3 新增，L10） | a 把作業單送作業負責人簽核（npc.work_leader）；b 請檢查員判定可出車（npc.inspector，**新 ID**）；**c 把個人上鎖包和安全帶歸還工具架**（slot_1、4，v1.7 D30、v1.8 D31） | a 的條件：作業單各欄（讀數、判定、新品履歷、絕緣電阻、接地登記、異常欄）都已填，作業負責人已簽。b 的條件：檢查員 NPC 核對扭力標記、量測值、升弓試驗結果後判「可出車」。結束畫面顯示機廠調度解除封鎖並撤牌。學員要知道「自己簽完名不等於可以出車」 |
+
+## 8. 待確認
+
+| # | 問題 | 預設 | 問誰 |
+| --- | --- | --- | --- |
+| Q1 ✓ 鐵道 | 接地的處理 | 先掛後拆：上車頂後用短接地線（RM_00）接上，LF_01 取下弓頭那支 | — |
+| Q2 ✓ 鐵道 | 空鉤可以在車頂操作 | 可以，但只能用微動，人不能在鉤下 0.5 m 內（Major） | — |
+| Q3 已定（v1.7） | tp.roof.base 的座標 | tp.roof.base_e (+0.95, Z_base) 面向 −X；tp.roof.base_w (−0.95, Z_base) 面向 +X；Z_base = 底架中心（a5 +0.836）。等裝置實測確認距離 | 建模 B |
+| Q4 ✓ 鐵道 | 絕緣電阻 | 量高壓側對車體接地點，DC 1000 V，≥ 100 MΩ，量完放電 | — |
+| Q5 ✓ 鐵道 | 螺栓規格 | M12：19 mm、50 N·m；M16：24 mm、100 N·m；對角 1→3→2→4；滑板螺栓 M8：13 mm、25 N·m | — |
+| Q7 ✓ D20 | 固定帶與高阻計的 ID 和掛位 | tool.hold_down_strap 放 slot_10（工具袋）；tool.megger 放 slot_11（工具架） | 負責人 |
+| Q8 ✓ D20 | 吊帶損傷要不要做成「換吊帶」 | 第一版只判合格／不合格，換吊帶放 backlog B5 | 負責人 |
+| Q9 ✓ D20＋鐵道 | 台架用螺栓盤的位置（磁性盤）。鐵道放在工作檯，離 tp.stand.s 約 3 m，每支螺栓都要走過去 | 改放在台架架體角落，靠近 tp.stand.s | 鐵道、建模 A |
+| Q10 ✓ 鐵道 | RT_02 要不要戴絕緣手套 | 要：RT_02 b、c（DC 1000 V 充到高壓側）、e（放電碰高壓側）都要戴，沒戴記 Critical，同 ERR_Global_NoInsulatingGloves | — |
+| Q11 ✓ 鐵道 | 背負式安全帶算不算 SI_00 防護具 | 照舊在 SI_06 a 穿，SI_00 清單只寫「上車頂前穿」 | — |
+
+## 9. 數量與參考時間（EX）
+
+### 9.1 小動作數（展開後）
+
+| 階段 | 步驟數 | 小動作數 |
+| --- | --- | --- |
+| SI | 7 | 5（SI_00）+ 24 + 1（SI_05 e）+ 2（SI_06 a2、a3）− 1（SI_06 f 併入 c）+ 1（SI_00 f，v1.7）= 32 |
+| RM | 8 | 4（RM_00）+ 3 + 2 + 11 + 10 + 8 + 5 + 3 = 46 |
+| LF | 6 | 6 + 2 + 1 + 1 + 2 + 7 = 19 |
+| CSR | 15 | 127 + 1（CSR_01 b）+ 2（CSR_10 g × 2 側）− 14（O1 收回）+ 1（CSR_15 f）− 1（CSR_01 a）= 116 |
+| IN | 12 | 8 + 2 + 2 + 2 + 9（IN_04b）+ 4 + 10 + 7 + 4 + 7 + 2 + 2 = 59 |
+| WC＋RT | 10 | 4（WC_03a）+ 3（WC_01a）+ 4（WC_02）+ 2（RT_01）+ 4（WC_03b）+ 3（WC_01b）+ 6（RT_02）+ 6（WC_04）+ 5 + 3（WC_06，v1.7 加 c）= 40 |
+| **合計** | **58** | **312** |
+
+- 以上是定期檢修。CSR 共用資料本身仍有 131 條（含 CSR_15 f），日常更換跳過 CSR_15 f，用其他 130 條。
+
+### 9.2 參考時間（教學／考核，秒）
+
+天車速度依 CraneProfile：吊鉤 0.1 m/s，橫移 0.3 m/s；弓到台架距離 9.5 m。
+
+| 步驟 | 秒數 | 步驟 | 秒數 | 步驟 | 秒數 |
+| --- | --- | --- | --- | --- | --- |
+| SI_00 | 98/58（v1.7） | | | | |
+| SI_01 | 45/30 | RM_01 | 40/25 | IN_01 | 82/48 |
+| SI_02 | 55/35 | RM_02 | 25/15 | IN_02 | 25/18 |
+| SI_03 | 40/25 | RM_03 | 100/60 | IN_03 | 80/55 |
+| SI_04 | 50/30 | RM_04 | 96/61（v2.4） | IN_04 | 40/28 |
+| | | | | IN_04b | 80/50 |
+| SI_05 | 62/40 | RM_05 | 90/54 | IN_05 | 40/25 |
+| RM_00 | 50/34（車頂） | RM_06 | 51/34（v2.7） | IN_06 | 100/60 |
+| SI_06 | 85/54 | | | | |
+| | | RM_07 | 30/20 | IN_07 | 91/56（v2.4） |
+| | | LF_01 | 70/48 | IN_08 | 41/26（v2.7） |
+| | | LF_02 | 25/18 | IN_09 | 75/45 |
+| | | LF_03 | 40/30 | IN_10 | 25/15 |
+| | | LF_04 | 50/40 | IN_11 | 25/15 |
+| | | LF_05 | 40/28 | WC_01a | 30/18 |
+| | | | | WC_01b | 25/15 |
+| | | LF_06 | 65/38 | WC_02 | 35/23 |
+| | | | | RT_01 | 35/25 |
+| | | | | WC_03a | 35/23 |
+| | | | | WC_03b | 35/22 |
+| | | | | RT_02 | 70/42 |
+| | | | | WC_04 | 70/42 |
+| | | | | WC_05 | 60/40 |
+| | | | | WC_06 | 43/27（v1.7） |
+
+- CSR（雙側步驟填單側時間）：
+  - 01 17/8、02 30/15、03 60/35、04 55/32、05 20/10、15 60/37。
+  - 06 75/45、07 80/47、08 25/15、09 40/27、10 80/49、11 35/20、12 95/55、13 80/47、14 40/25（單側合計 550/330）。
+  - 第二側教學用 O2 的練習速度，估 380 s。
+  - 合計：教學 242 + 550 + 380 = 1172，考核 137 + 330 × 2 = 797。
+  - v1.4 的差異：O1 每個收回約教學 5 s、考核 3 s，CSR_15 f 加 15／10 s；O3 減 8／4 s；O4 減 20／12 s；O5 減 10／6 s。
+- v1.3 新增的停留點、登記、勾選，每個小動作抓教學 5–15 s、考核 3–10 s；NPC 對話較長的（停留點）抓 15／10 s。
+- v1.5 差異：IN_04b +80／50，WC_01 拆兩段 +15／8，WC_03b +35／22。
+- **全流程：教學 3533 s，考核 2304 s（v2.8）。** 五段：917／575、472／302、996／703、710／447、438／277（第 5.3 節，D29）。
+- 日常模式不用吊運，步驟見 CSR_operable_steps v5.6（SI_00–06＋CSR＋WC_01a、WC_02、WC_03、WC_01b、WC_04、WC_06），其中 CSR 的時間沿用 steps-delta 第 4 節（工具袋取代往返後，用台架版的時間即可）。
+
+## 10. 給其他角色
+- **軟體**：
+  - 新 ID：part.pan_assy.hv_bolt_1..2、env.tool_bag、env.tool_bag.bolt_pouch、env.panto_stand.clamp_1..2、ip.roof.hv_cable_ground、ip.roof.carbody_ground、tool.hold_down_strap（slot_10）、tool.megger（slot_11）、tool.grounding_lead（slot_12）、tp.roof.base_e、tp.roof.base_w。
+  - 新錯誤：見第 1.3 和 1.4 節，以及 RT_02，共 11 條。
+  - 情境：`startPhase`、課程覆寫（第 5.1 節）、條件式小動作（可延後）。
+  - **v1.3 新增**：
+    - 新步驟 SI_00、WC_06；新小動作 SI_05 e、SI_06 c2、RM_00 d、LF_01 c2、LF_01 e、IN_01 d、CSR_01 b、CSR_10 g、WC_03 d、WC_04 a0，共 18 條（展開後）。（v1.4 起 SI_06 c2 併入 c；v1.5 起 WC_03 d 改為 WC_03a d。）
+    - 新 ID：env.work_order.anti_roll_check／permit／tbm／calibration_check／ground_register／anomaly／part_trace、env.ppe_station、npc.work_leader、npc.rigging_lead、npc.inspector、npc.guard（監護人，v1.6 起參與停留點 1 放行，取代 npc.safety_watcher）、黑板鍵 hold.1..4.released、ppe.helmet／ppe.shoes／ppe.work_gloves／ppe.gloves_mode（Work／Insulating）。
+    - 新錯誤 9 條，見第 1.4 節表格。
+    - 「工具未收回工具袋」改成 Major。
+    - 考核三段的起點狀態（第 5.3 節）。
+    - 停留點和接地登記都只需要 UI 和判定，不需要新物理（組長審查第四節）。
+  - **v1.5 新增（D25）**：
+    - 新步驟 IN_04b（9 個小動作，先驗電再掛）、WC_03b、WC_01b；WC_03 改名 WC_03a，WC_01 改名 WC_01a（內容見第 7 節）。順序見第 0 節。
+    - 新 ID：env.pole_rack（slot_2、3 的歸位處，ID 不變）。
+    - 新錯誤 ERR_Global_GroundRemovedWhileOnRoof、ERR_Global_GroundWithoutVoltageTest（都是 Critical）。
+    - CSR_11 b 的 VR 文字（K4）。
+    - 補錯誤 ID（SubActions.csv 審查）：ERR_Global_GroundHangOrder、ERR_Global_HarnessUnclipped、ERR_SI02_*、ERR_SI03_CylinderPowerOn、ERR_RT02_IRFail；LF_01 a–b 拆 #1 也套 ERR_WC03_RemoveOrder 和絕緣手套判定。
+    - 錯誤 ID 補齊：ERR_WC03_RemoveOrder（K2）。CSR 共用的 ERR_CSR01_IsolationIncomplete（K7，只在日常更換）、ERR_CSR03／04_CopyError（K8，僅桌機）寫在 CSR_operable_steps v5.6。
+  - **v1.4 新增（D22）**：
+    - 課程覆寫：14 個收回、CSR_01 a 在定期檢修跳過；CSR_15 f 只在定期檢修出現（5.1 表）。
+    - 新 ID：env.panto_stand.tool_tray、env.work_order.roof_entry_check（取代 adjacent_checklist）。
+    - SI_06 f 刪除，併入新的 c；SI_06 c2 刪除，也併入 c。RM_05 e 刪除，併入 d。
+    - 教學模式第二側只顯示標題（O2）。
+    - startPhase 加 4b；四段考核和全程考核各自的合格線（5.3）。
+- **驗收**：
+  - 每個階段都能單獨跑。
+  - 吊運 10 條錯誤，每條要有觸發情境。
+  - WC_05 的兩條 Critical。
+  - WC_01 用狀態判定。
+  - 兩種課程跑同一份 CSR 資料的結果要相同。
+- **驗收（v1.3、v1.4）**：L1–L5 的錯誤各要一個觸發情境；4 個停留點各測「放行」「退回」「跳過」三種；**四段**考核的起點狀態各跑一次，合格線依 D22（每段 Major ≤ 1，全程 Major ≤ 2）；定期檢修跳過收回、日常更換照做，兩種課程各驗一次。
+- **建模 A（v1.5）**：外側護欄桿架 env.pole_rack（D25 座標），可直立放兩支 2.5 m 長桿。
+- **建模 A（v1.4）**：台架工具盤 env.panto_stand.tool_tray（台架 tp.stand.s 側，伸手可及）。
+- **建模 A（v1.3）**：NPC 4 個站位（作業負責人、監護人、吊掛指揮、檢查員，可用靜態人形）；防護具站 env.ppe_station；止輪器與「檢修中・禁止動車」牌；零件盒改紅色「待報廢箱」，放在工作檯旁地上，不和備品架疊放。
+- **建模 A**：車頂新增節點 ip.roof.carbody_ground（車體接地座），站在 tp.roof.base_w 要搆得到它和電纜端子；平台上的車體接地點 ip.roof.carbody_ground 要在 tp.platform.ground 搆得到的位置（RT_02）。
+
+
+====================================================================
+附錄 B：CSR_operable_steps.md 全文（日常更換課程，步驟計畫最新版）
+====================================================================
+# 碳滑板更換：可操作版步驟表與工具清單（步驟計畫 定稿 v5.13，已與驗收對齊，依模型實況與 terry 實機回饋修正；新增工具架與小動作序列）
+
+來源：維修步驟文件 rev 107（https://claude.ai/code/artifact/416c1b63-979d-4e3d-8ef7-4b02d59e9a19）的 SafetyIsolation、CarbonStripReplace、WorkCompletion，依保養表 m1-2、m1-3 定值。標 EX 的數值是示例，等手冊或廠商圖面確認後只改資料不改程式。
+
+## 0. 共通規則
+
+- 操作方式（桌機）：工具一律到工具架 env.tool_rack 拿取，用完放回原掛位；手上一次只拿一件工具，手上有工具時去拿另一件，提示「先把○○放回工具架」，不記錯。數字鍵 1–9 只用來高亮對應掛位，不能直接切換工具。不需要工具的動作直接點零件、控制盤或作業單。
+- 教學提示一次只顯示一個小動作（第 2.5 節），完成後才顯示下一個。練習與考核模式不顯示小動作，只顯示步驟標題。小動作的完成條件也用來判定步驟內順序；做錯時套用該步的錯誤規則。
+- 每一步都是一筆 StepDefinition：stepId、玩家動作、通過條件、錯誤（Minor / Major / Critical）。Critical 在考核模式直接不及格；教學模式則提示並要求重做。
+- 拿錯工具點零件：記 Minor「工具選擇錯誤」，不改變零件狀態。
+- 雙側流程：CSR 06–14 先做肘側滑板（_L），再做外側滑板（_R），畫面顯示「肘側滑板」「外側滑板」。
+- 全域安全規則（不屬於某一步，所有模式都生效）：弓頭檢測點 ip.pan_head.lower_check 不在降弓目標點 ip.pan_head.lower_target 的容許範圍內（EX 1 cm）、或 STP_SI_01／SI_04／SI_05 未完成時，任何工具或施作動作碰到弓體（part.carbon_strip_*、ip.carbon_strip_*.bolt_*、bracket、PanHead）都擋下動作、記 Critical，畫面說明「做錯什麼、為什麼危險、正確做法」，並提供「從這一步重做」。錯誤 ID：ERR_Global_NotLowered、ERR_Global_NotGrounded。徒手點選零件查看（不拿工具、不改變狀態）不擋。
+- 「檢測點 → 目標點」判定（通用作法，其他零件沿用）：要判定「是否到位」的零件掛一個檢測點（ip.<零件>.<用途>_check），場景放一個目標點（ip.<零件>.<用途>_target，玩家可見時以綠色目標框表示）。通過條件寫成兩點距離 ≤ 容許誤差（以 ValueInRange 讀黑板鍵 <零件>.<用途>_distance_cm）。未到位時錯誤回饋要顯示「還差 X cm」與方向。之後新滑板安裝、螺栓入孔、羊角高度等到位判定都用這個方式，容許值寫在步驟資料，不寫死在程式。
+- 介面約定（給軟體工程對齊）：按 Play 先顯示任務卡（目標、工具清單、安全重點、操作鍵：數字鍵選工具、左鍵點互動點、右鍵轉視角）；每一步都顯示「下一步要做什麼、用什麼工具、點哪裡」；每個錯誤回饋都包含做錯什麼、為什麼、怎麼改；示例值標「示例值」。
+- 3.0 mm 更換基準來自保養表 m1-2，畫面標「保養表值」；其他標 EX 的數值，畫面標「示例值」。
+- 判定原則（保養表 m1-2、m1-3）：任一條滑板三點最小值 ≤ 3.0 mm 就兩條一起換，否則兩條換完會有高低差。兩條一起換這條規則是 EX，屬於訓練政策，可改成單換。
+
+- **v5.13（2026-11-02，D39）**：CSR_13 改用小扭力扳手 tool.torque_wrench（3/8"，配 13 mm），仍放 slot_7。新錯誤 ERR_CSR13_WrenchRange（Minor，三種模式都判；設定扭力超出量程時刻度轉不過去，提示換扳手，同一步只記 1 次）。教學模式在握把上標示量程。日常課程不用大扭力扳手，所以工具袋仍是 5–9 號。小動作數和時間都不變。和 steps-v6 v2.9 一致。
+- **v5.12（2026-11-02，D38）**：扭力扳手要自己裝套筒。CSR_13 b 改成「從套筒盒拿 13 mm 套筒裝上扭力扳手，並把扭力設為 25 N·m」（目標加 env.tool_bag.socket_case），不另加小動作，每次參考時間 +3 s。新錯誤 ERR_CSR13_WrongSocket（Minor，三種模式都判；套錯擋下並提示「套筒尺寸不對」，同一步只記 1 次）。教學模式在套筒盒上標尺寸，練習和考核不標。日常全程：教學 1828 → **1834 s**，考核 1155 → **1161 s**；日 B 980／650 → **986／656**（16.4 分）。小動作數不變（185）。和 steps-v6 v2.8 一致。
+- **v5.11（2026-11-02，組長裁定）**：ERR_CSR13_Under 改 Critical。只看步驟完成時的最終扭力，同一步內補鎖到位不記錯；K3 喀聲回饋做好之前，考核模式先記 Major，報表註明「K3 完成後升為 Critical」。和 steps-v6 v2.5 一致。小動作與時間不變。
+- **v5.10（2026-11-02，D31）**：安全帶從 SI_06 a 穿上，一直穿到 WC_06 交接才歸還。WC_02 c 改成在 tp.platform.anchor「解開掛鉤，收到胸前扣環」；WC_06 c 改成「把個人上鎖包和安全帶歸還工具架」（掛位 1、4 = 在架）；WC_01b a 只清點桿架 2、3 號。小動作數（185）和時間（1828／1155 s）都不變。
+- **v5.9（2026-11-02，負責人審過；依鐵道 playtest/2026-11-02-rail.md 追加節與 D30）**：日常更換的滑板一次手拿一條，經活動欄跨板上下車頂。車頂只有暫放墊 env.roof_strip_mat 可以放舊滑板（鐵道修正，追加節 (1)）。tp.roof.shelf 已從場景移除（model-spec），日常欄不再用它。
+  - 每一側流程：CSR_08 a 拆下舊滑板 → CSR_08 b 平放到車頂暫放墊 → CSR_09 a–c 清潔托架 → **CSR_09 d（新，只在日常）**拿起墊上的舊滑板，走回平台放進紅色待報廢箱（tp.platform.scrap）→ CSR_10 a–g 到備品架核對新滑板（tp.platform.parts，含 L9 料號、序號）→ CSR_11 a 手拿新滑板走回車頂該側站點安裝。每側往返 1 趟，兩側共 2 趟。
+  - 暫放墊 env.roof_strip_mat：橡膠墊 1.2 × 0.3 m，中心 (0.00, 0.01, −1.10)，長邊沿 X，2 cm 邊框（鐵道定案）。一次最多 1 條，只放舊滑板。兩側共用。組長的兩個條件：墊子在可走的平段，不在弧面或墜落區；墊子四周有邊框。
+  - 位置（鐵道）：備品架 env.spare_shelf (−3.06, +1.45)，站點 tp.platform.parts (−2.41, +1.60)；待報廢箱 env.parts_tray（紅色）(−3.06, +2.85)，站點 tp.platform.scrap (−2.41, +2.85)。定期檢修的位置不變。
+  - 規則：
+    - 手上拿著滑板時不能傳送，要用走的；傳送鍵擋下並提示，不記錯。
+    - 拿著滑板通過活動欄時，安全帶要扣在車頂防墜器上（沿用 D14 與 HarnessUnclipped）。
+    - 扣著車頂防墜器時可以去的站點：車頂各站、tp.platform.anchor、tp.platform.parts、tp.platform.scrap（鐵道提案，待負責人確認）。
+    - 新 Major：**ERR_Global_StripReleasedOnRoof**「滑板放在暫放墊以外，有滑落風險」：拿著滑板（新或舊）在車頂放開，而且不是放在暫放墊上，就記；CSR_11 c 吸附到 install_target 的放下不算。新滑板放上暫放墊、或墊上已有 1 條還再放，也記這條。只適用日常。
+    - 新 Major：**ERR_WC01a_StripOnMat**：WC_01a 時暫放墊上還有滑板。
+  - 其他原本在 tp.roof.shelf 的日常小動作，改在作業點做（工具袋在身上，作業單是手持 UI）：CSR_02 b、c → tp.roof.inner；CSR_05 a → tp.roof.outer（接在 CSR_04 之後）；CSR_06 b、c 和 CSR_13 b → 該側站點；WC_01a → tp.roof.inner。螺栓盤留在車頂（負責人）。
+  - WC_01a b 日常改成只看車頂：兩個螺栓盤、零件袋、暫放墊都空，車頂沒有遺留螺栓或滑板。待報廢箱在平台，不再從車頂查看（CSR_08 b 已判定入箱）。
+  - **個人上鎖包（D30，兩門課共用）**：新增 SI_00 f 到工具架領取個人上鎖包掛在腰間；SI_02 a 改成在 tp.cab 從腰包 env.waist_pouch（新 ID）拿出；SI_03 c 改成在 tp.cab 原地收進腰包；WC_04 a、e 改成在 tp.cab 從腰包拿出、收進腰包；新增 WC_06 c 把上鎖包歸還工具架（tp.platform.rack）。WC_01b a 的工具架清點不含 1 號（還在腰包）。
+  - 數量：小動作 181 → **185**（CSR_09 d 兩側、SI_00 f、WC_06 c）；教學 1802 → **1828 s**，考核 1139 → **1155 s**。
+    - 日 A 602／352 → **610／357**（SI_00 f）
+    - 日 B 970／644 → **980／650**（CSR_09 d，16.3 分，仍在 16.5 分內）
+    - 日 C 230／143 → **238／148**（WC_06 c）
+    - 走路時間另由 walk-time-sheet 計。
+  - SubActions.csv、Steps.csv 已同步，日常欄已沒有 tp.roof.shelf。
+  - 日 C 起點補一句：兩條舊滑板在待報廢箱，暫放墊是空的，手上沒有滑板。
+  - v5.7 那條「CSR_10 仍在 tp.roof.shelf」作廢，以本條為準。
+- **v5.8（2026-11-02，D29，驗收組長裁定見 v2-prof/D29-leader-ruling.md v1.1）**：日常更換的考核分 **3 段**；教學模式套用 O2。小動作和判定都不變。
+  - **O2**：教學模式下，第二側（_R）的 CSR_06–14 只顯示步驟標題，卡住時照卡關規則提示。第二側 CSR_06–14 _R 教學時間從 520 s 降到 400 s（CSR_04_Measure_R 不在範圍內）；日常全程教學 1922 → **1802 s**，考核不變（1139 s）。
+  - **日 A**：SI_00–CSR_05，教學 602 s、考核 352 s。從場景初始狀態開始。
+  - **日 B**：CSR_06–CSR_15，教學 970 s（16.2 分）、考核 644 s（10.7 分）。起點是日常的 4b：
+    - 隔離、停留點 1 已完成，接地 #1 已掛並登記。
+    - 學員在車頂 tp.roof.inner，安全帶扣在車頂掛點。
+    - 兩條舊滑板的讀數已填，判定為「兩條都換」；CSR_01 b 已勾「無異常」。
+    - 工具都在工具袋，手上不拿工具。
+  - **日 C**：WC_01a–WC_06（收尾），教學 230 s、考核 143 s。排程時和日 B 放在同一個 VR 區塊。起點狀態：
+    - 兩側新滑板已裝上、上好扭力並畫標記，CSR_15 高低差已填。
+    - 接地 #1 仍掛著，登記欄 #1 為「已登記」（日常沒有 #2）。
+    - 兩條舊滑板在待報廢箱，暫放墊是空的，手上沒有滑板；上鎖掛牌組在腰包（v5.9）。
+    - 學員在車頂 tp.roof.inner，安全帶扣在車頂掛點。
+    - 工具都在工具袋；兩個螺栓盤是空的，待報廢箱有 2 條舊滑板。
+  - 合格線：
+    - 每段：0 個 Critical、Major ≤ 1、時間 ≤ 1.5 倍。
+    - 三段合計：0 個 Critical、Major ≤ 2，而且同一條規則不能在兩段都犯。
+  - 「第一側做完後加休息點」取消（組長）。
+  - 試玩 P6 的兩條全域錯誤也適用日常：ERR_Global_RoofFallZone（Major，頭在車頂 |X| > 1.19 m，或從活動欄以外越過平台與車頂間隙，持續 ≥ 1 s）、ERR_Global_TeleportWhileAnchored（Minor，擋下：扣著車頂掛點時傳送到非車頂站點）。定義見 steps-v6 第 1.4 節。
+- **v5.7（2026-11-02，D26）**：日常更換也用隨身工具袋 env.tool_bag（terry 10/29：小工具放在身上），不用車頂工具箱；env.roof_toolbox 由 R1.5b 移除。
+  - 掛位 5–9 的拿取改成「從工具袋拿出△△」，收回改成「把△△收回工具袋」，完成條件「掛位 N = 在袋」。ID 不變。
+  - 在車頂作業，收回小動作照舊要做（防墜）。WC_01a a 改成清點工具袋。
+  - 工具袋在身上，拿放就在作業點做，不必走回 tp.roof.shelf；CSR_10 仍在 tp.roof.shelf（備品架在那裡）。
+  - 小動作數和參考時間不變（181；1922／1139 s）。
+  - 第 0、1 節、v5.4 紀錄裡的「車頂工具箱」是舊做法，以本條為準。
+- **v5.6（2026-11-02，D25 收尾順序與桿架，驗收組長 K4–K6）**：
+  - 收尾改成 WC_01a 車頂清點 → WC_02 下車頂 → WC_03 平台拆 #1 → WC_01b 平台清點 → WC_04 → WC_06（WC_01 拆成 a、b 兩步）。
+  - 新 Critical：車頂掛點扣著時拆 #1（ERR_Global_GroundRemovedWhileOnRoof）。
+  - 驗電桿 slot_2、接地桿 slot_3 改放外側護欄桿架 env.pole_rack，SI_04、SI_05、WC_03 的取用和歸還改到桿架；工具架只留 1、4。
+  - CSR_11 b 的 VR 文字改成「轉動手腕讓箭頭朝外」（K4）。
+  - 錯誤 ID 補齊（SubActions.csv 審查）：ERR_SI02_TagWithoutLock、ERR_SI02_RaiseSwitchUnlocked、ERR_SI03_CylinderPowerOn、ERR_Global_GroundHangOrder、ERR_Global_HarnessUnclipped。
+  - 錯誤 ID 補齊（K2、K7、K8，和 R1.5b 錯誤表一致）：ERR_WC03_RemoveOrder、ERR_CSR01_IsolationIncomplete；ERR_CSR03_CopyError、ERR_CSR04_CopyError 註明僅桌機。
+  - 步驟 27 → **28**，小動作 178 → **181**；參考時間：教學 1907 → **1922 s**，考核 1131 → **1139 s**。和 steps-v6 v1.5 一致。
+- **v5.5（2026-11-02，D22 O7：新人先練日常更換）**：補上組長審查的管理層項目，內容和 v2-prof/car-body/steps-v6.md v1.4 一致，詳見第 2.6 節。
+  - 新增 SI_00 開工準備、WC_06 完工交接。
+  - SI_06 的 c 和 f 合併成上車頂前確認單。
+  - 停留確認點 2 個：上車頂前、復電前。這門課不吊弓，所以沒有起吊前確認。
+  - 接地登記只有 #1。
+  - CSR_01 b、CSR_08 b、CSR_10 g 和定期檢修共用（D19）。
+  - 步驟 25 → **27**，小動作 166 → **178**，參考時間：教學 1710 → **1907 s**，考核 1010 → **1131 s**。
+- **v5.4（2026-10-21，負責人核可 D8、D9）**：掛位 5–9 移到車頂工具箱（ID 不變，車頂拿放的小動作文字改成「車頂工具箱」）；WC_01 改成兩處清點；新增兩側螺栓盤 env.bolt_tray_{side}，CSR_07 b、CSR_12 b 改用螺栓盤，零件盒只收舊滑板。小動作總數仍是 166。
+- **v5.3（2026-10-21，負責人核可）**：SI_02 e「把掛牌組放回工具架」移到 SI_03 c；WC_04 的 d、e 對調（先恢復電動缸電源，再放回掛牌組）。配合 v2 的駕駛室站點 tp.cab，駕駛室只要去一次。小動作總數仍是 166。
+- **參考時間（v5.2）**：步驟表最後一欄「參考時間（EX 秒）」寫「教學 / 考核」，雙側步驟為單側時間；報表把超過 2 倍的步驟標出。依據見 step-reference-times.md。
+
+## 1. 模型需要拆出的互動件（給軟體工程）
+
+| 互動點 ID | 模型來源 | 用途 |
+| --- | --- | --- |
+| part.carbon_strip_L / _R | CarbonStrip_1 / CarbonStrip_2（長 1.10 m、寬 7.4 cm、厚 1.6 cm）。靠肘關節那條（模型 y≈6 cm）為 _L，請軟體工程確認是 1 還是 2 | 拆下、安裝、量測 |
+| ip.carbon_strip_{side}.measure_left / mid / right | 滑板頂面三點（左端起 EX 15 cm、中點、右端起 EX 15 cm） | 卡尺量測吸附點 |
+| ip.carbon_strip_{side}.bolt_1…4 | **模型沒有，需自行建模**：每條 4 支六角頭螺栓，規格 EX M8 × 25（對應 13 mm 套筒），附平墊圈。位置在滑板兩端，各 2 支，距滑板端 EX 3 cm、距滑板中心線 ±2.5 cm（外排靠斜面、內排靠弓頭中心）。由上往下穿過滑板端部鎖進托架，螺栓頭露在上方好點選 | 鬆、取、預鎖、扭力、畫標記 |
+| ip.carbon_strip_{side}.bracket | StripCarrier_1 / _2 頂面與滑板接觸的區域（羊角與托架是同一個 mesh，不拆） | 清潔（髒污遮罩） |
+| ip.carbon_strip_{side}.pins | 模型沒有，可改用螺栓孔對正當吸附判定，不另建定位銷 | 新滑板吸附對正 |
+| ip.pan_head.ground_clamp | 弓頭接地掛點 | 驗電、掛接地棒 |
+| ip.pan_head.lower_check | 弓頭上的檢測點（建議放在 PanHead 中心頂面） | 降弓到位判定 |
+| ip.pan_head.lower_target | 降弓位置的目標點，顯示為綠色目標框 | 降弓到位判定 |
+| ui.lift_controller | 升降控制器：▲／▼ 按住才動、放開就停。全程（升弓 ↔ 降弓）EX 15 秒；▼ 時進入綠框前 EX 20 cm 減速到約 EX 5 cm/s | SI_01 降弓 |
+| ip.depot.ground_terminal | 平台旁股道接地端子（場景物件，黃綠標誌） | 接地棒先夾這裡 |
+| ip.cab.breaker / ip.cab.raise_switch / ip.cab.cylinder_power | 駕駛室控制盤（可做成 2D 面板） | 上鎖掛牌、斷電動缸電源 |
+| env.work_order | 作業單 UI | 輸入讀數、判定、簽名 |
+| env.roof_strip_mat | 車頂暫放墊（v5.9，日常），橡膠墊 1.2 × 0.3 m，中心 (0.00, 0.01, −1.10)，長邊沿 X，2 cm 邊框 | 一次只放 1 條舊滑板 |
+| env.parts_tray | 紅色待報廢箱。日常在平台 (−3.06, +2.85)，站點 tp.platform.scrap（v5.9） | 只收舊滑板（v5.4） |
+| env.bolt_tray_L / env.bolt_tray_R | 車頂磁性螺栓盤，各側車頂站點旁 0.5 m 內的支架上（v5.4） | 收該側拆下的 4 支螺栓，預鎖時從這裡拿 |
+| env.spare_shelf | 備品架。日常在平台 (−3.06, +1.45)，站點 tp.platform.parts（v5.9） | 3 條備品可選，其中 1 條型號正確 |
+| env.tool_rack.slot_1…9 | **需自行建模**：工具分兩處放（v5.4，負責人核可鐵道工程方案）：掛位 1–4 在平台工具架（v5.6：2、3 號長桿改放外側護欄桿架 env.pole_rack，D25），掛位 5–9 在車頂工具箱 env.roof_toolbox；ID 和判定都不變。9 個掛位依序放 1 上鎖掛牌組、2 驗電器、3 接地棒、4 安全帶、5 游標卡尺、6 套筒扳手、7 扭力扳手、8 清潔布、9 標記筆。掛位要顯示名稱，並有「在架／使用中／空」三種狀態 | 取放工具、WC_01 清點 |
+| ip.cab.pan_indicator / ip.cab.raise_button | 控制盤的弓位指示燈與升弓鈕 | SI_01 確認、SI_03 不動確認 |
+| ip.depot.detector_tester | 平台上的驗電器自檢器 | SI_04 自檢 |
+| ip.depot.platform_anchor / ip.roof.anchor | 平台掛點、車頂掛點 | 安全帶 |
+| ip.carbon_strip_{side}.install_check / install_target | 新滑板上的檢測點與托架上的目標點（檢測點 → 目標點判定，容許 EX 0.5 cm） | CSR_11 安裝到位 |
+
+螺栓編號：1 左外、2 右內、3 右外、4 左內（外 = 靠斜面那排），1→2→3→4 就是對角順序。
+
+## 2. 步驟表
+
+### A. 安全隔離（精簡為 6 步，對應原 SafetyIsolation 01–08）
+
+| stepId | 步驟 | 玩家動作 | 工具 | 通過條件 | 錯誤（嚴重度） | 參考時間（EX 秒） |
+| --- | --- | --- | --- | --- | --- | --- |
+| STP_SI_00_PreWork | 開工準備（v5.5） | 防溜與禁動確認、作業許可單、工具箱會議、防護具、量具校正（第 2.6 節） | 無 | 5 個小動作都完成 | 沒做就開始作業（Critical） | 90 / 53 |
+| STP_SI_01_ConfirmLowered | 降弓並確認 | 場景一律從升弓狀態開始（不另設「升弓未降」情境）。用升降控制器按住 ▼ 讓弓頭緩慢下降（像千斤頂，按住才動、放開就停，按 ▲ 可回升），降到綠色目標框；再點弓頭與控制盤弓位指示燈確認 | 升降控制器（UI） | ip.pan_head.lower_check 與 ip.pan_head.lower_target 距離 ≤ EX 1 cm，且弓頭與指示燈兩處都確認過 | 未到位就確認（Major，回饋顯示還差幾 cm）；只看指示燈沒看弓頭（Major） | 45 / 30 |
+| STP_SI_02_LockOut | 主斷路器與升弓開關上鎖掛牌 | 控制盤上把主斷路器切到 OFF，再用上鎖掛牌組點主斷路器和升弓開關 | tool.lockout_tag | 兩處都是「已上鎖＋掛牌」，鑰匙在玩家身上 | 只掛牌沒上鎖（ERR_SI02_TagWithoutLock）；漏鎖升弓開關（ERR_SI02_RaiseSwitchUnlocked），都是 Critical | 50 / 30 |
+| STP_SI_03_CylinderPowerOff | 斷開電動缸控制電源 | 把 ip.cab.cylinder_power 切到 OFF，再按一次升弓鈕確認弓體不動；最後把上鎖掛牌組放回工具架（v5.3：由 SI_02 移來，駕駛室只去一次） | tool.lockout_tag（歸還） | 電動缸電源 = OFF，且做過一次不動確認 | 沒斷電動缸電源就離開駕駛室（ERR_SI03_CylinderPowerOn，Critical） | 35 / 20 |
+| STP_SI_04_VoltageTest | 驗電 | 先點驗電器自檢器（亮綠燈並嗶聲），再從平台點弓頭接地掛點 | tool.voltage_detector | 自檢在前、量測在後，顯示「無電」 | 未自檢就量（Critical） | 45 / 25 |
+| STP_SI_05_Grounding | 掛接地棒 | 先點平台接地端子，再做「拉線確認」，最後點弓頭接地掛點 | tool.grounding_rod | 順序為端子 → 拉線 → 弓頭 | 先掛弓頭端（ERR_Global_GroundHangOrder，Critical）；沒做拉線確認（Major） | 50 / 30 |
+| STP_SI_06_RoofEntry | 上車頂前確認 | 安全帶點平台掛點；勾完鄰線檢查表 5 項；安全帶改點車頂掛點；作業單簽名 | tool.safety_harness | 5 項全勾、改扣掛點時始終有一個扣著、作業單已簽 | 先解平台掛點再扣車頂掛點（ERR_Global_HarnessUnclipped，Critical）；漏勾（Major） | 75 / 45 |
+
+### B. 碳滑板量測與更換
+
+| stepId | 步驟 | 玩家動作 | 工具 | 通過條件 | 錯誤（嚴重度） | 參考時間（EX 秒） |
+| --- | --- | --- | --- | --- | --- | --- |
+| STP_CSR_01_CheckIsolation | 確認隔離完成 | 打開作業單，逐項核對 SI 各項的狀態（v5.6，K7） | 無 | SI_00–06 各項狀態都已完成 | SI 有一項沒完成就核對通過：擋下，記 ERR_CSR01_IsolationIncomplete（Major） | 10 / 5 |
+| STP_CSR_02_ZeroCaliper | 卡尺歸零 | 拿卡尺，把量爪合攏（滾輪或拖曳），按 ZERO | tool.caliper | 合攏時顯示 0.00 mm | 沒歸零就量（Major，之後讀數全部 +EX 0.30 mm） | 30 / 15 |
+| STP_CSR_03_Measure_L | 量肘側滑板三點 | 卡尺依序點 measure_left / mid / right，讀螢幕數字填入作業單 | tool.caliper | 三點都有量，且填入值與實際讀數相差 ≤ 0.05 mm | 只量中間一點（Major）；抄錯數字（Minor，ERR_CSR03_CopyError，**僅桌機**：VR 讀數自動填入，不載入，K8） | 60 / 35 |
+| STP_CSR_04_Measure_R | 量外側滑板三點 | 同上 | tool.caliper | 同上 | 同上（抄錯為 ERR_CSR04_CopyError，**僅桌機**） | 60 / 35 |
+| STP_CSR_05_Decide | 判定是否更換 | 作業單四選一：「兩條都換／只換肘側／只換外側／合格」 | 無 | 任一條最小值 ≤ 3.0 mm → 「兩條都換」；兩條都 > 3.0 mm → 「合格」，流程跳到 C | 該換未換或用平均值判定（Critical）；只換一條（Major，說明 m1-3 要求兩條無高低差）；不該換卻換（Minor） | 20 / 10 |
+| STP_CSR_06_Loosen_{side} | 依序鬆螺栓 | 套筒扳手選對尺寸，方向設「鬆」，依 1→2→3→4 每支轉半圈 | tool.socket_wrench | 四支都轉滿 180° ± 30°，順序正確 | 套筒尺寸錯（Minor）；順序錯（Minor）；一支直接轉到底（Major） | 60 / 35 |
+| STP_CSR_07_RemoveBolts_{side} | 取下螺栓 | 套筒扳手把每支轉到脫出，把螺栓放進該側螺栓盤 | tool.socket_wrench | 4 支都在 env.bolt_tray_{side} | 螺栓沒收進螺栓盤（Major，掉落動畫） | 70 / 40 |
+| STP_CSR_08_RemoveStrip_{side} | 取下舊滑板 | 點滑板，從選單選「垂直取出」（另一選項是「撬起」），先平放到車頂暫放墊（v5.9；清潔完在 CSR_09 d 帶下去） | 無 | 選「垂直取出」，舊滑板在暫放墊 | 選「撬起」（Major：托架變形提示）；拿著滑板在車頂放開（Major，ERR_Global_StripReleasedOnRoof） | 25 / 15 |
+| STP_CSR_09_CleanBracket_{side} | 清潔托架接觸面 | 拿清潔布在托架上拖曳擦拭 | tool.cleaning_cloth | 碳粉遮罩清除率 ≥ EX 95 % | 沒擦乾淨就裝（Major） | 45 / 30 |
+| STP_CSR_10_CheckNew_{side} | 檢查新滑板 | 在平台 tp.platform.parts 看備品架 3 條備品的標籤，選型號與作業單相符的那條，用卡尺量中點 | tool.caliper | 選中正確型號，量得新品厚度 EX 12.0 ± 0.2 mm、無裂紋 | 選錯型號（Critical）；拿有裂紋的那條（Critical） | 75 / 45 |
+| STP_CSR_11_Install_{side} | 安裝新滑板 | 手拿新滑板走回車頂該側站點（不能傳送），把新滑板拖到托架上，按 R 旋轉讓斜面朝外，對準螺栓孔放下 | 無 | 斜面朝弓頭外側，4 個螺栓孔對齊（吸附成功）。若模型滑板截面左右對稱，就在滑板側面貼「此側朝外」箭頭標籤作為判定依據 | 方向裝反（Critical；所有模式都不吸附，並提示正確方向）；拿著滑板在車頂放開（Major，ERR_Global_StripReleasedOnRoof） | 35 / 20 |
+| STP_CSR_12_PreTighten_{side} | 螺栓預鎖 | 從該側螺栓盤取螺栓放回孔位，套筒扳手方向設「鎖」，依 1→4 鎖到貼合 | tool.socket_wrench | 四支都到「貼合」狀態，順序正確 | 第一支直接鎖死（Major）；順序錯（Major） | 90 / 50 |
+| STP_CSR_13_Torque_{side} | 扭力鎖緊 | 扭力扳手設定 25 N·m，依 1→4 點螺栓並按住滑鼠，聽到「喀」聲或看到「到達設定值」提示就放開 | tool.torque_wrench | 每支實際扭力 EX 25 ± 2 N·m，順序正確 | 設定值錯（Major）；聽到喀聲還繼續加力，超過 27 N·m（Major）；喀聲前放開，低於 23 N·m（Major） | 70 / 40 |
+| STP_CSR_14_Mark_{side} | 畫防鬆標記 | 標記筆依序點四支螺栓 | tool.marker | 四支都有標記線 | 漏畫（Minor） | 40 / 25 |
+| STP_CSR_15_HeightCheck | 量兩條高低差 | 兩側都做完 06–14 後，卡尺量兩條新滑板中點，填入作業單 | tool.caliper | 兩條中點差 ≤ EX 1.0 mm（保養表 m1-3） | 沒做比對或差值超限仍通過（Major） | 50 / 30 |
+
+### C. 收尾（精簡自 WorkCompletion）
+
+| stepId | 步驟 | 玩家動作 | 工具 | 通過條件 | 錯誤（嚴重度） | 參考時間（EX 秒） |
+| --- | --- | --- | --- | --- | --- | --- |
+| STP_WC_01a_ToolCountRoof | 車頂清點（v5.6） | 清點工具袋 5–9 號（D26）、零件盒與兩個螺栓盤、車頂無遺留，按「車頂清點完成」 | 無 | 工具袋 5–9 號在袋；車頂無遺留工具或螺栓；零件盒只剩 2 條舊滑板，兩個螺栓盤都空 | 遺留工具或螺栓（Critical：短路風險） | 30 / 18 |
+| STP_WC_02_LeaveRoof | 下車頂 | 安全帶由車頂掛點改扣平台掛點 | tool.safety_harness | 始終有一個掛點扣著 | 先解再扣（ERR_Global_HarnessUnclipped，Critical） | 30 / 20 |
+| STP_WC_03_RemoveGround | 拆接地棒 | 人下到平台後，先點弓頭接地掛點取下，再點平台接地端子，接地桿放回桿架 | tool.grounding_rod | 順序為弓頭端 → 端子 | 順序顛倒：擋下，記 ERR_WC03_RemoveOrder（Critical，K2）；車頂掛點扣著時拆：ERR_Global_GroundRemovedWhileOnRoof（Critical，v5.6） | 30 / 20 |
+| STP_WC_01b_ToolCountPlatform | 平台清點（v5.6） | 清點工具架 1、4 號與桿架 2、3 號，核對接地登記已銷號，按「平台清點完成」 | 無 | 四處都在架；接地登記 #1 已銷號 | — | 25 / 15 |
+| STP_WC_04_Unlock | 解鎖並記錄 | 控制盤解除升弓開關與主斷路器的鎖，恢復電動缸電源，再把上鎖掛牌組放回工具架，作業單簽名 | tool.lockout_tag | 解鎖者 = 上鎖者，作業單已簽 | 未簽名（Minor） | 60 / 35 |
+| STP_WC_06_Handover | 完工交接（v5.5） | 作業單送作業負責人簽核，再請檢查員判定可出車（第 2.6 節） | 無 | 作業負責人已簽、檢查員判「可出車」 | — | 35 / 22 |
+
+訓練用初始數值（場景預設，可在資料改）：
+- 肘側滑板三點：3.4 / 2.8 / 3.1 mm（最小值 2.8 要換；平均 3.1 會誤判合格；卡尺未歸零 +0.30 後最小值變 3.1，也會誤判合格）。
+- 外側滑板三點：4.2 / 3.8 / 4.0 mm。
+- 預期結果：兩條一起換。考核模式可隨機產生 2.0–6.0 mm。
+
+## 2.5 小動作序列（StepDefinition.subActions）
+
+教學模式一次只顯示一個小動作；指令 ≤ 20 字。標「n = 1→4」的列是範本，軟體端展開成 4 個小動作，依 1、2、3、4 號螺栓的順序。CSR_07 每支螺栓是「轉到脫出 → 放進螺栓盤」兩個小動作交替，共 8 個。帶 {side} 的步驟，_L 和 _R 各跑一次，每一側都從「到車頂工具箱拿起」開始。共 25 步，展開後共 166 個小動作（雙側步驟兩側合計）。
+
+**STP_SI_01_ConfirmLowered**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 按住 ▼ 把弓頭降到綠框 | ui.lift_controller | — | 放開時 lower_check 與 lower_target 距離 ≤ EX 1 cm |
+| b | 點弓頭確認已降下 | part.pan_head | — | 弓頭已確認 |
+| c | 點控制盤弓位指示燈 | ip.cab.pan_indicator | — | 指示燈 = 降弓且已確認 |
+
+**STP_SI_02_LockOut**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 到工具架拿起上鎖掛牌組 | env.tool_rack.slot_1 | tool.lockout_tag | 手持上鎖掛牌組 |
+| b | 把主斷路器切到 OFF | ip.cab.breaker | — | 主斷路器 = OFF |
+| c | 主斷路器上鎖並掛牌 | ip.cab.breaker | tool.lockout_tag | 主斷路器 = 已上鎖＋掛牌 |
+| d | 升弓開關上鎖並掛牌 | ip.cab.raise_switch | tool.lockout_tag | 升弓開關 = 已上鎖＋掛牌，鑰匙進背包 |
+
+**STP_SI_03_CylinderPowerOff**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 把電動缸電源切到 OFF | ip.cab.cylinder_power | — | 電動缸電源 = OFF |
+| b | 按升弓鈕確認弓頭不動 | ip.cab.raise_button | — | 已按下且弓頭位置不變 |
+| c | 把掛牌組放回工具架 | env.tool_rack.slot_1 | tool.lockout_tag | 掛位 1 = 在架 |
+
+**STP_SI_04_VoltageTest**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 到桿架拿起驗電桿 | env.tool_rack.slot_2（env.pole_rack） | tool.voltage_detector | 手持驗電桿（雙手） |
+| b | 點自檢器確認亮綠燈 | ip.depot.detector_tester | tool.voltage_detector | 自檢通過 |
+| c | 從平台點弓頭接地掛點 | ip.pan_head.ground_clamp | tool.voltage_detector | 顯示「無電」 |
+| d | 把驗電桿放回桿架 | env.tool_rack.slot_2（env.pole_rack） | tool.voltage_detector | 掛位 2 = 在架 |
+
+**STP_SI_05_Grounding**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 到桿架拿起接地桿 | env.tool_rack.slot_3（env.pole_rack） | tool.grounding_rod | 手持接地桿（雙手），掛位 3 = 使用中 |
+| b | 把接地夾夾上接地端子 | ip.depot.ground_terminal | tool.grounding_rod | 接地夾 = 已夾上 |
+| c | 拉一下接地線確認 | ip.depot.ground_terminal | tool.grounding_rod | 拉線確認完成 |
+| d | 把掛鉤掛上弓頭接地點 | ip.pan_head.ground_clamp | tool.grounding_rod | 掛鉤 = 已掛上（接地棒留在場上） |
+
+**STP_SI_06_RoofEntry**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 到工具架拿起安全帶 | env.tool_rack.slot_4 | tool.safety_harness | 已穿戴，掛位 4 = 使用中 |
+| b | 把安全帶扣上平台掛點 | ip.depot.platform_anchor | tool.safety_harness | 平台掛點 = 已扣 |
+| c | 勾完鄰線檢查表 5 項 | env.work_order.adjacent_checklist | — | 5／5 已勾 |
+| d | 把安全帶扣上車頂掛點 | ip.roof.anchor | tool.safety_harness | 兩個掛點都扣著 |
+| e | 解開平台掛點 | ip.depot.platform_anchor | tool.safety_harness | 只剩車頂掛點扣著 |
+| f | 在作業單簽名開工 | env.work_order.sign_start | — | 已簽名 |
+
+**STP_CSR_01_CheckIsolation**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 打開作業單逐項核對 SI 狀態 | env.work_order | — | SI_00–06 各項都已完成；有一項沒完成就不能過，並記 ERR_CSR01_IsolationIncomplete（Major，v5.6，K7）。定期檢修跳過本小動作（O3） |
+
+**STP_CSR_02_ZeroCaliper**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 從工具袋拿出游標卡尺 | env.tool_rack.slot_5 | tool.caliper | 手持卡尺 |
+| b | 把量爪完全合攏 | tool.caliper（量爪） | tool.caliper | 量爪間距 = 0 |
+| c | 按 ZERO 鍵歸零 | tool.caliper（ZERO 鍵） | tool.caliper | 顯示 0.00 mm |
+
+**STP_CSR_03_Measure_L**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 量肘側滑板左側點 | ip.carbon_strip_L.measure_left | tool.caliper | 讀數已取得 |
+| b | 量肘側滑板中點 | ip.carbon_strip_L.measure_mid | tool.caliper | 讀數已取得 |
+| c | 量肘側滑板右側點 | ip.carbon_strip_L.measure_right | tool.caliper | 讀數已取得 |
+| d | 把三個讀數填入作業單 | env.work_order.readings_L | — | 三格都與讀數相差 ≤ 0.05 mm |
+
+**STP_CSR_04_Measure_R**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 量外側滑板左側點 | ip.carbon_strip_R.measure_left | tool.caliper | 讀數已取得 |
+| b | 量外側滑板中點 | ip.carbon_strip_R.measure_mid | tool.caliper | 讀數已取得 |
+| c | 量外側滑板右側點 | ip.carbon_strip_R.measure_right | tool.caliper | 讀數已取得 |
+| d | 把三個讀數填入作業單 | env.work_order.readings_R | — | 三格都與讀數相差 ≤ 0.05 mm |
+| e | 把卡尺收回工具袋 | env.tool_rack.slot_5 | tool.caliper | 掛位 5 = 在袋 |
+
+**STP_CSR_05_Decide**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 依最小值選擇判定結果 | env.work_order.decision | — | 選項符合判定原則（預設數值下為「兩條都換」） |
+
+**STP_CSR_06_Loosen_{side}**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 從工具袋拿出套筒扳手 | env.tool_rack.slot_6 | tool.socket_wrench | 手持套筒扳手 |
+| b | 換上 13 mm 套筒 | tool.socket_wrench（套筒選單） | tool.socket_wrench | 套筒 = 13 mm（EX） |
+| c | 方向切到「鬆」 | tool.socket_wrench（方向鈕） | tool.socket_wrench | 方向 = 鬆 |
+| d | 把 {n} 號螺栓鬆半圈（n = 1→4，共 4 個小動作） | ip.carbon_strip_{side}.bolt_{n} | tool.socket_wrench | 該支累計 180° ± 30° |
+
+**STP_CSR_07_RemoveBolts_{side}**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 把 {n} 號螺栓轉到脫出（n = 1→4） | ip.carbon_strip_{side}.bolt_{n} | tool.socket_wrench | 該支 = 脫出 |
+| b | 把 {n} 號螺栓放進螺栓盤（緊接在上一個小動作之後） | env.bolt_tray_{side} | — | 螺栓盤螺栓數 +1 |
+| c | 把套筒扳手收回工具袋 | env.tool_rack.slot_6 | tool.socket_wrench | 掛位 6 = 在袋 |
+
+**STP_CSR_08_RemoveStrip_{side}**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 點舊滑板選「垂直取出」 | part.carbon_strip_{side} | — | 滑板 = 已拆下 |
+| b | 把舊滑板平放到車頂暫放墊（v5.9） | env.roof_strip_mat.slot_old（模型 StripMat_Slot_Old） | — | 暫放墊上有該條舊滑板（1 條） |
+
+**STP_CSR_09_CleanBracket_{side}**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 從工具袋拿出清潔布 | env.tool_rack.slot_8 | tool.cleaning_cloth | 手持清潔布 |
+| b | 來回擦拭托架接觸面 | ip.carbon_strip_{side}.bracket | tool.cleaning_cloth | 清除率 ≥ EX 95 % |
+| c | 把清潔布收回工具袋 | env.tool_rack.slot_8 | tool.cleaning_cloth | 掛位 8 = 在袋 |
+| d | 拿起暫放墊上的舊滑板，經活動欄走回平台，放進紅色待報廢箱（tp.platform.scrap，不能傳送，v5.9，只在日常） | env.roof_strip_mat.slot_old;env.parts_tray | — | 待報廢箱有該條舊滑板，暫放墊是空的 |
+
+**STP_CSR_10_CheckNew_{side}**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 到備品架查看三條標籤（tp.platform.parts，a–g 都在這裡做，v5.9） | env.spare_shelf | — | 三條標籤都看過 |
+| b | 旋轉檢查有無裂紋 | env.spare_shelf（選定的備品） | — | 已旋轉檢視一圈 |
+| c | 從工具袋拿出游標卡尺 | env.tool_rack.slot_5 | tool.caliper | 手持卡尺 |
+| d | 量選定新滑板的中點 | consumable.carbon_strip.measure_mid | tool.caliper | 讀數 EX 12.0 ± 0.2 mm |
+| e | 把卡尺收回工具袋 | env.tool_rack.slot_5 | tool.caliper | 掛位 5 = 在袋 |
+| f | 拿起選定的新滑板 | env.spare_shelf（選定的備品） | — | 手持新滑板，且為正確型號、無裂紋 |
+
+**STP_CSR_11_Install_{side}**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 手拿新滑板經活動欄走回車頂該側站點，移到托架上方（不能傳送，v5.9） | ip.carbon_strip_{side}.bracket | — | 新滑板位於托架上方 |
+| b | VR：轉動手腕讓箭頭朝外；桌面：按 R 讓箭頭朝外（v5.6，K4） | —（VR 手腕旋轉／鍵盤 R） | — | 方向 = 斜面／箭頭朝弓頭外側 |
+| c | 對準螺栓孔放下 | ip.carbon_strip_{side}.install_target | — | install_check 與 install_target 距離 ≤ EX 0.5 cm，吸附成功 |
+
+**STP_CSR_12_PreTighten_{side}**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 從工具袋拿出套筒扳手 | env.tool_rack.slot_6 | tool.socket_wrench | 手持套筒扳手（13 mm） |
+| b | 從螺栓盤拿 {n} 號螺栓放回孔位（n = 1→4） | ip.carbon_strip_{side}.bolt_{n} | — | 該支 = 已放入，螺栓盤螺栓數 −1 |
+| c | 方向切到「鎖」 | tool.socket_wrench（方向鈕） | tool.socket_wrench | 方向 = 鎖 |
+| d | 把 {n} 號螺栓鎖到貼合（n = 1→4） | ip.carbon_strip_{side}.bolt_{n} | tool.socket_wrench | 該支 = 貼合 |
+| e | 把套筒扳手收回工具袋 | env.tool_rack.slot_6 | tool.socket_wrench | 掛位 6 = 在袋 |
+
+**STP_CSR_13_Torque_{side}**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 從工具袋拿出扭力扳手 | env.tool_rack.slot_7 | tool.torque_wrench | 手持扭力扳手 |
+| b | 從套筒盒拿 13 mm 套筒裝上扭力扳手，並把扭力設為 25 N·m（v5.12，D38） | env.tool_bag.socket_case;tool.torque_wrench（設定面板） | tool.torque_wrench | 套筒 = 13 mm，設定值 = 25.0 N·m（EX）；套錯擋下（ERR_CSR13_WrongSocket，Minor） |
+| c | 鎖 {n} 號螺栓到喀聲（n = 1→4） | ip.carbon_strip_{side}.bolt_{n} | tool.torque_wrench | 該支實際扭力 23–27 N·m（EX） |
+| d | 把扭力扳手收回工具袋 | env.tool_rack.slot_7 | tool.torque_wrench | 掛位 7 = 在袋 |
+
+**STP_CSR_14_Mark_{side}**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 從工具袋拿出標記筆 | env.tool_rack.slot_9 | tool.marker | 手持標記筆 |
+| b | 在 {n} 號螺栓畫標記（n = 1→4） | ip.carbon_strip_{side}.bolt_{n} | tool.marker | 該支有標記線 |
+| c | 把標記筆收回工具袋 | env.tool_rack.slot_9 | tool.marker | 掛位 9 = 在袋 |
+
+**STP_CSR_15_HeightCheck**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 從工具袋拿出游標卡尺 | env.tool_rack.slot_5 | tool.caliper | 手持卡尺 |
+| b | 量肘側新滑板中點 | ip.carbon_strip_L.measure_mid | tool.caliper | 讀數已取得 |
+| c | 量外側新滑板中點 | ip.carbon_strip_R.measure_mid | tool.caliper | 讀數已取得 |
+| d | 把兩個讀數填入作業單 | env.work_order.height_check | — | 兩格與讀數相差 ≤ 0.05 mm，差值 ≤ EX 1.0 mm |
+| e | 把卡尺收回工具袋 | env.tool_rack.slot_5 | tool.caliper | 掛位 5 = 在袋 |
+
+**STP_WC_01a_ToolCountRoof**（v5.6，車頂）
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 清點工具袋 | env.tool_bag | — | 工具袋 5–9 號都在袋 |
+| b | 查看兩個螺栓盤、零件袋和暫放墊，車頂無遺留（v5.9：待報廢箱在平台，不在這裡看） | env.bolt_tray_L;env.bolt_tray_R;env.tool_bag.bolt_pouch;env.roof_strip_mat | — | 兩個螺栓盤、零件袋、暫放墊都空，車頂沒有遺留螺栓或滑板（墊上有滑板記 Major，ERR_WC01a_StripOnMat） |
+| c | 按「車頂清點完成」 | env.work_order.toolcount_confirm | — | 已確認 |
+
+**STP_WC_02_LeaveRoof**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 把安全帶扣上平台掛點 | ip.depot.platform_anchor | tool.safety_harness | 兩個掛點都扣著 |
+| b | 解開車頂掛點 | ip.roof.anchor | tool.safety_harness | 只剩平台掛點扣著 |
+| c | 解開掛鉤，收到胸前扣環（v5.10，D31；tp.platform.anchor） | tool.safety_harness（胸前扣環） | tool.safety_harness | 人在平台，兩個掛鉤都收在胸前扣環，安全帶仍穿著 |
+
+**STP_WC_03_RemoveGround**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 取下弓頭端掛鉤 | ip.pan_head.ground_clamp | tool.grounding_rod | 掛鉤 = 已取下 |
+| b | 鬆開接地端子的夾子 | ip.depot.ground_terminal | tool.grounding_rod | 接地夾 = 已鬆開 |
+| c | 把接地桿放回桿架 | env.tool_rack.slot_3（env.pole_rack） | tool.grounding_rod | 掛位 3 = 在架 |
+| d | 在接地登記欄銷號 #1（v5.5） | env.work_order.ground_register | — | #1 = 已銷號 |
+
+**STP_WC_01b_ToolCountPlatform**（v5.6，平台，WC_03 之後）
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 清點工具架與桿架 | env.tool_rack、env.pole_rack | — | 工具架 1、4 號與桿架 2、3 號都在架 |
+| b | 核對接地登記欄 | env.work_order.ground_register | — | #1 已銷號，和桿架實物一致 |
+| c | 按「平台清點完成」 | env.work_order.toolcount_confirm_platform（**新 ID**） | — | 已確認 |
+
+**STP_WC_04_Unlock**
+
+| # | 小動作指令 | 目標互動點 | 工具 | 完成條件 |
+| --- | --- | --- | --- | --- |
+| a | 到工具架拿起上鎖掛牌組 | env.tool_rack.slot_1 | tool.lockout_tag | 手持上鎖掛牌組 |
+| b | 解除升弓開關的鎖 | ip.cab.raise_switch | tool.lockout_tag | 升弓開關 = 未上鎖 |
+| c | 解除主斷路器的鎖 | ip.cab.breaker | tool.lockout_tag | 主斷路器 = 未上鎖 |
+| d | 恢復電動缸電源 | ip.cab.cylinder_power | — | 電動缸電源 = ON |
+| e | 把掛牌組放回工具架 | env.tool_rack.slot_1 | tool.lockout_tag | 掛位 1 = 在架（其他掛位已在 WC_01b 清點，v5.6） |
+| f | 在作業單簽名完工 | env.work_order.sign_end | — | 已簽名 |
+
+## 2.6 v5.5 增補（D22 O7；和 steps-v6 v1.4 一致）
+
+日常更換是新人第一天的課程，所以組長審查的管理層項目也要放進來。以下沒寫到的部分照 v5.4。
+錯誤 ID、角色、停留點的共同做法都和 steps-v6 共用：
+- 錯誤 ID 見第 1.4 節。
+- 角色、停留點共同做法見第 1.5 節。
+- 手套、接地登記、一人一鎖的判定見第 1.6 節。
+
+**STP_SI_00_PreWork**（新步驟，tp.platform.rack）：小動作 a–e 和 steps-v6 第 2 節完全相同。
+- a：防溜與禁動 3 項。
+- b：作業許可單。
+- c：工具箱會議 5 項並簽名。
+- d：防護具與絕緣手套充氣檢查。
+- e：量具校正標籤。這門課沒有高阻計，只查看卡尺、扭力扳手 2 張。
+
+**SI_05 新增 e**：在接地登記欄登記 #1 接地棒（env.work_order.ground_register，#1 = 已登記）。
+
+**SI_06 c 改成「上車頂前確認單」，原 f 併入**：
+- 目標：env.work_order.roof_entry_check、npc.work_leader。
+- 完成條件：9／9 已點過、hold.1.released = true、sign_start 已簽。
+- 清單內容是 steps-v6 的 11 項，去掉第 8 項（天車吊鉤）和第 10 項（短接地線、固定帶、遙控器），共 9 項：
+  1. 上鎖掛牌，鑰匙在身上。
+  2. 電動缸電源 OFF。
+  3. 驗電無電。
+  4. 接地 #1 已掛並登記。
+  5. **本股道架空線已由機廠調度停電，並掛好架空線接地器，調度核准欄已簽**（日常版寫法，鐵道：日常更換在有架空線的股道上做，這項不能刪）。
+  6. 相鄰股道帶電部安全距離 ≥ EX 2.0 m 或有防護隔板；鄰線列車移動前通知調度並設警示。
+  7. 護欄、活動欄、跨板完好；防墜器拉測。
+  8. 防護具與平台掛點。
+  9. 監護人到位。
+- SI_06 新順序：a → b → c → d → e。
+- 第 5 項的場景：日常更換的股道要有架空線，並在場景中顯示架空線接地器（狀態由機廠調度預先完成，學員只查看），交給建模 A。
+
+**WC_03 新增 d**：在接地登記欄銷號 #1（#1 = 已銷號）。v5.6 起，WC_03 在 WC_02 下車頂之後、WC_01b 之前做；車頂掛點扣著時拆記 Critical。
+
+**WC_04 新增 a0**（tp.platform.rack，排在 a 之前）：請作業負責人和機廠調度確認，放行復電（停留點 4，hold.4.released = true）。清單有 3 項：
+- 接地登記 #1 已銷號，桿架 slot_3 實物在架。
+- 人員已離開車頂。
+- 工具清點完成。
+這門課沒有絕緣電阻測試。
+
+**STP_WC_06_Handover**（新步驟，tp.platform.rack，WC_04 之後）：
+- a：把作業單送作業負責人簽核（npc.work_leader）。
+- b：請檢查員判定可出車（npc.inspector）。
+- WC_04 f 簽名完工保留在 WC_04。
+
+**CSR 共用修改**（D19，兩種課程共用一份資料）：
+- CSR_01 b：異常檢查。
+- CSR_08 b：舊滑板放進紅色待報廢箱。
+- CSR_10 g：記錄新品料號和序號。
+- 上面三項在日常更換都要做。
+- 定期檢修專用的覆寫（14 個收回跳過、CSR_01 a 跳過、CSR_15 f）不適用於日常更換。這門課在車頂作業，每次都要收回工具箱。
+
+**判定**（steps-v6 第 1.4 節的錯誤，日常更換適用的部分）：
+- StartWithoutPermit、NoHelmet、PPEMissing、HoldPointSkipped、HoldPointRejected、GroundNotCleared、GroundNotRegistered、KeyLeftUnattended 都適用。
+- NoInsulatingGloves：碰觸點是 SI_04 c、SI_05 b–d、WC_03 a–b。
+- GroundRemovedWhileOnRoof（v5.6）：車頂掛點扣著時取下 #1。
+
+**數量與參考時間**：
+
+| 變動 | 小動作 | 教學 s | 考核 s |
+| --- | --- | --- | --- |
+| v5.4 | 166 | 1710 | 1010 |
+| SI_00 | +5 | +90 | +53 |
+| SI_05 e | +1 | +7 | +5 |
+| SI_06 c 合併 f（停留點 1） | −1 | +10 | +7 |
+| CSR_01 b | +1 | +15 | +7 |
+| CSR_10 g（兩側） | +2 | +20 | +14 |
+| WC_03 d | +1 | +5 | +3 |
+| WC_04 a0（停留點 4） | +1 | +15 | +10 |
+| WC_06 | +2 | +35 | +22 |
+| **v5.5** | **178** | **1907** | **1131** |
+| WC_01 拆成 a、b（v5.6） | +3 | +15 | +8 |
+| **v5.6** | **181** | **1922** | **1131 + 8 = 1139** |
+
+- 這門課約 32 分（教學）、19 分（考核），不分段。
+- step-reference-times.md 的各步數值以上表為準，待下一次校正時一併改寫。
+
+## 3. 工具清單
+
+| tool ID | 名稱 | 用途 | 需要的互動與狀態 | 數值 |
+| --- | --- | --- | --- | --- |
+| tool.lockout_tag | 上鎖掛牌組 | 主斷路器、升弓開關上鎖 | 點開關 → 狀態「已上鎖＋掛牌」；鑰匙進玩家背包；只有持鑰者能解鎖 | — |
+| tool.voltage_detector | 驗電器（絕緣桿式） | 確認弓頭無電 | 兩段式：點自檢器 → LED 綠＋嗶聲（記下自檢時間）；點目標 → 顯示「有電／無電」。本步驟內沒自檢過就量要記錯 | — |
+| tool.grounding_rod | 接地棒 | 弓頭接地 | 兩端：接地夾與掛鉤。點端子 → 夾上；「拉線確認」按鈕或拖曳；點弓頭掛點 → 掛上。拆除依反序 | — |
+| tool.safety_harness | 安全帶 | 平台與車頂移動 | 兩個掛鉤狀態；改扣時檢查任何時刻 ≥ 1 個扣著 | — |
+| tool.caliper | 數位游標卡尺 | 量滑板厚度與高低差 | 量爪開合（滾輪或拖曳）；ZERO 鍵；靠近量測點自動吸附並顯示讀數（0.01 mm，加 ±0.02 mm 隨機雜訊）；未歸零時讀數偏移 EX +0.30 mm；讀數要由玩家抄到作業單 | 解析度 0.01 mm |
+| tool.socket_wrench | 套筒扳手 | 鬆、取、預鎖螺栓 | 套筒尺寸三選一（10 / 13 / 17 mm，正確 EX 13 mm）；方向切換「鬆／鎖」；點螺栓後拖曳或滾輪旋轉，記錄累計角度；螺栓狀態：鎖緊 → 鬆開半圈 → 脫出 → 放回 → 貼合 | 半圈 = 180° |
+| tool.torque_wrench | 扭力扳手（喀聲式） | 鎖到規定扭力 | 設定面板（+/− 0.5 N·m 或直接輸入，範圍 EX 5–50 N·m）；點螺栓按住滑鼠時扭力上升，達設定值時「喀」聲＋震動；放開時記錄實際扭力；超過設定值後繼續按住會往上加 | 規定 EX 25 ± 2 N·m；到達設定值時必須同時有聲音與視覺提示（扳手閃色＋文字「到達設定值」），不能只靠聲音 |
+| tool.cleaning_cloth | 清潔布 | 擦托架接觸面 | 在表面拖曳，以碳粉遮罩的清除率判定 | ≥ EX 95 % |
+| tool.marker | 防鬆標記筆 | 螺栓畫標記 | 點螺栓 → 在螺栓頭與托架畫一條線（貼花） | — |
+| （場景物件）env.parts_tray | 零件盒 | 收舊滑板 | 可放入、取出；顯示數量 | — |
+| （場景物件）env.bolt_tray_L / _R | 磁性螺栓盤 | 收該側螺栓 | 可放入、取出；顯示數量 | — |
+| （場景物件）env.roof_toolbox | 車頂工具箱 | 存放掛位 5–9 與套筒座 | 掛位狀態同工具架 | — |
+| （耗材）consumable.carbon_strip | 新碳滑板 ×3 | 更換用 | 備品架上 3 條：1 條正確型號；1 條型號不符；1 條有裂紋（要旋轉檢視才看得到） | 新品厚度 EX 12.0 mm |
+| （UI）env.work_order | 作業單 | 讀數、判定、簽名 | 欄位：兩條三點讀數、判定選項、兩條中點讀數、上鎖人、簽名 | — |
+
+## 4. 待確認（不擋開發，先用 EX）
+
+1. 滑板固定螺栓模型裡沒有，第 1 節的支數、規格、位置都是 EX，自行建模後以手冊為準再調整。Fastener_L/R（懸吊固定件）不在本流程操作。
+2. 新品厚度、扭力值、高低差容許值，以手冊或廠商圖面為準。
+3. 一條 ≤ 3 mm 時要不要兩條一起換。目前設為一起換。
+
+
