@@ -7,7 +7,7 @@
 升降參數 → Assets/_Project/Modules/Worksite/Data/LiftSettings.asset
 
 套筒目錄 6 顆、螺栓對照 3 筆；扳手 tool.torque_wrench（3/8"、10–60、0.28）、tool.torque_wrench_l（1/2"、40–200、0.45）、tool.socket_wrench（1/2"、把手 0.19）
-R1.5b 步驟資料（SubActions.csv／Steps.csv 展開）：periodic：步驟 67、小動作 308、參考時間 教學 3533 s／考核 2304 s
+R1.5b 步驟資料（SubActions.csv／Steps.csv 展開）：periodic：步驟 67、小動作 345、參考時間 教學 3559 s／考核 2321 s
 daily：步驟 37、小動作 181、參考時間 教學 1834 s／考核 1161 s
 
 PF_CarbonStrip_L ← CarbonStrip_2：尺寸 1.102 × 0.016 × 0.074 m
@@ -115,7 +115,7 @@ VR：胸前收納扣環（安全帶掛鉤） tool.safety_harness.chest_ring：�
 VR：安全帶工具環（短接地線） tool.safety_harness.tool_ring：頭部偏移 (0.12, -0.50, 0.15)、邊長 0.05、握把半徑 0.08
 平台：去駕駛室光圈 mk.platform.to_cab (-2.200, 0.000, -0.450)（r 0.25）
 VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、接地端子旁、活動欄與平台掛點、車頂（肘側滑板）（車頂開放才解鎖）、車頂（外側滑板）（車頂開放才解鎖）、天車遙控器掛座旁、台架北側、台架東側、台架南側、台架西側、備品架前（日常）、待報廢箱前（日常）、車頂拆裝座（−X 側）（車頂開放才解鎖）、車頂拆裝座（+X 側）（車頂開放才解鎖）、底座螺栓 1 前（車頂開放才解鎖）、底座螺栓 2 前（車頂開放才解鎖）、底座螺栓 3 前（車頂開放才解鎖）、底座螺栓 4 前（車頂開放才解鎖）
-站點檢查：結果：20 站，197 過／0 待定／0 不合格（全過）
+站點檢查：結果：20 站，198 過／0 待定／0 不合格（全過）
 ・tp.cab：(-0.190, -2.350, -30.000)
 ・tp.platform.lift：(-2.200, 0.000, -0.050)
 ・tp.platform.rack：(-2.410, 0.000, -2.400)
@@ -294,10 +294,10 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ✔ 【第16項】(i) tp.roof.base_e.s 到不會動零件最近的 底架 0.556 m（≥ 0.25）
 ✔ 【第16項】(e) tp.roof.base_e.n 在 Walkable 上、離 Walkable 邊 ≥ 0.15 m
 ✔ 【第16項】(h) tp.roof.base_e.n 到降弓羊角頂點範圍 X -0.833…0.833、Z -0.187…0.187 1.461 m（≥ 身體半徑 0.2）
-✔ 【第16項】(i) tp.roof.base_e.n 到不會動零件最近的 絕緣子 2 0.287 m（≥ 0.25）
+✔ 【第16項】(i) tp.roof.base_e.n 到不會動零件最近的 絕緣子 2 0.286 m（≥ 0.25）
 ✔ 【第16項】(e) tp.roof.base_w.n 在 Walkable 上、離 Walkable 邊 ≥ 0.15 m
 ✔ 【第16項】(h) tp.roof.base_w.n 到降弓羊角頂點範圍 X -0.833…0.833、Z -0.187…0.187 1.461 m（≥ 身體半徑 0.2）
-✔ 【第16項】(i) tp.roof.base_w.n 到不會動零件最近的 絕緣子 1 0.271 m（≥ 0.25）
+✔ 【第16項】(i) tp.roof.base_w.n 到不會動零件最近的 絕緣子 1 0.270 m（≥ 0.25）
 ✔ 【第16項】(e) tp.roof.base_w 在 Walkable 上、離 Walkable 邊 ≥ 0.15 m
 ✔ 【第16項】(h) tp.roof.base_w 到降弓羊角頂點範圍 X -0.833…0.833、Z -0.187…0.187 0.649 m（≥ 身體半徑 0.2）
 ✔ 【第16項】(i) tp.roof.base_w 到不會動零件最近的 底架 0.276 m（≥ 0.25）
@@ -374,16 +374,17 @@ VR：站點 駕駛室控制盤前、升降操作盒前、平台工具架前、�
 ✔ 【第20項】防墜器 → tp.roof.base_e.n D 環（站姿 1.35 m）不碰集電弓與絕緣子
 ✔ 【第20項】防墜器 → tp.roof.base_w.n D 環（跪姿 0.9 m）不碰集電弓與絕緣子
 ✔ 【第20項】防墜器 → tp.roof.base_w.n D 環（站姿 1.35 m）不碰集電弓與絕緣子
-VR：80 個互動點加上 XRInteractableBridge
+✔ 【第D43項】接地 #1 的接地線到 1 號絕緣子 0.147 m（≥ 0.1）
+VR：84 個互動點加上 XRInteractableBridge
 場景已存檔：Assets/_Project/Content/Scenes/SC_CarbonStripSlice.unity（Build Settings 第 0 位）
-場景互動物件 104 個：env.bolt_tray_L, env.bolt_tray_R, env.catenary, env.crane, env.crane_pendant, env.panto_stand, env.panto_stand.clamp_1, env.panto_stand.clamp_2, env.panto_stand.tool_tray, env.parts_tray, env.pole_rack, env.roof_strip_mat, env.sling_1, env.sling_2, env.sling_3, env.sling_4, env.socket_seat_10, env.socket_seat_13, env.socket_seat_13_38, env.socket_seat_17, env.socket_seat_19, env.socket_seat_24, env.spare_shelf.slot_1, env.spare_shelf.slot_2, env.spare_shelf.slot_3, env.tool_bag, env.tool_bag.bolt_pouch, env.tool_bag.socket_case, env.tool_rack, env.tool_rack.slot_1, env.tool_rack.slot_10, env.tool_rack.slot_11, env.tool_rack.slot_12, env.tool_rack.slot_13, env.tool_rack.slot_2, env.tool_rack.slot_3, env.tool_rack.slot_4, env.tool_rack.slot_5, env.tool_rack.slot_6, env.tool_rack.slot_7, env.tool_rack.slot_8, env.tool_rack.slot_9, env.waist_pouch, env.work_order, ip.cab.breaker, ip.cab.cylinder_power, ip.cab.pan_indicator, ip.cab.pan_indicator_repeat, ip.cab.panel, ip.cab.raise_button, ip.cab.raise_switch, ip.carbon_strip_L.bolt_1, ip.carbon_strip_L.bolt_2, ip.carbon_strip_L.bolt_3, ip.carbon_strip_L.bolt_4, ip.carbon_strip_L.bracket, ip.carbon_strip_L.install_check, ip.carbon_strip_L.install_target, ip.carbon_strip_L.measure_left, ip.carbon_strip_L.measure_mid, ip.carbon_strip_L.measure_right, ip.carbon_strip_L.outward, ip.carbon_strip_R.bolt_1, ip.carbon_strip_R.bolt_2, ip.carbon_strip_R.bolt_3, ip.carbon_strip_R.bolt_4, ip.carbon_strip_R.bracket, ip.carbon_strip_R.install_check, ip.carbon_strip_R.install_target, ip.carbon_strip_R.measure_left, ip.carbon_strip_R.measure_mid, ip.carbon_strip_R.measure_right, ip.carbon_strip_R.outward, ip.depot.detector_tester, ip.depot.ground_terminal, ip.depot.platform_anchor, ip.ocs.earthing_device_1, ip.ocs.earthing_device_2, ip.pan_assy.ctrl_connector, ip.pan_assy.hold_down, ip.pan_assy.hv_terminal, ip.pan_assy.lift_point_1, ip.pan_assy.lift_point_2, ip.pan_assy.lift_point_3, ip.pan_assy.lift_point_4, ip.pan_head.ground_clamp, ip.pan_head.lower_check, ip.pan_head.lower_target, ip.roof.anchor, ip.roof.carbody_ground, ip.roof.hv_cable_ground, part.carbon_strip_L, part.carbon_strip_R, part.crane.hook, part.pan_assy, part.pan_assy.hv_bolt_1, part.pan_assy.hv_bolt_2, part.pan_base.bolt_1, part.pan_base.bolt_2, part.pan_base.bolt_3, part.pan_base.bolt_4, part.pan_head, tool.safety_harness.chest_ring, tool.safety_harness.tool_ring
+場景互動物件 109 個：env.bolt_tray_L, env.bolt_tray_R, env.catenary, env.crane, env.crane_pendant, env.panto_stand, env.panto_stand.clamp_1, env.panto_stand.clamp_2, env.panto_stand.tool_tray, env.parts_tray, env.pole_rack, env.roof_strip_mat, env.sling_1, env.sling_2, env.sling_3, env.sling_4, env.socket_seat_10, env.socket_seat_13, env.socket_seat_13_38, env.socket_seat_17, env.socket_seat_19, env.socket_seat_24, env.spare_shelf.slot_1, env.spare_shelf.slot_2, env.spare_shelf.slot_3, env.tool_bag, env.tool_bag.bolt_pouch, env.tool_bag.socket_case, env.tool_rack, env.tool_rack.slot_1, env.tool_rack.slot_10, env.tool_rack.slot_11, env.tool_rack.slot_12, env.tool_rack.slot_13, env.tool_rack.slot_2, env.tool_rack.slot_3, env.tool_rack.slot_4, env.tool_rack.slot_5, env.tool_rack.slot_6, env.tool_rack.slot_7, env.tool_rack.slot_8, env.tool_rack.slot_9, env.waist_pouch, env.work_order, ip.cab.breaker, ip.cab.cylinder_power, ip.cab.pan_indicator, ip.cab.pan_indicator_repeat, ip.cab.panel, ip.cab.raise_button, ip.cab.raise_switch, ip.carbon_strip_L.bolt_1, ip.carbon_strip_L.bolt_2, ip.carbon_strip_L.bolt_3, ip.carbon_strip_L.bolt_4, ip.carbon_strip_L.bracket, ip.carbon_strip_L.install_check, ip.carbon_strip_L.install_target, ip.carbon_strip_L.measure_left, ip.carbon_strip_L.measure_mid, ip.carbon_strip_L.measure_right, ip.carbon_strip_L.outward, ip.carbon_strip_R.bolt_1, ip.carbon_strip_R.bolt_2, ip.carbon_strip_R.bolt_3, ip.carbon_strip_R.bolt_4, ip.carbon_strip_R.bracket, ip.carbon_strip_R.install_check, ip.carbon_strip_R.install_target, ip.carbon_strip_R.measure_left, ip.carbon_strip_R.measure_mid, ip.carbon_strip_R.measure_right, ip.carbon_strip_R.outward, ip.depot.detector_tester, ip.depot.ground_terminal, ip.depot.platform_anchor, ip.ocs.earthing_device_1, ip.ocs.earthing_device_2, ip.pan_assy.ctrl_connector, ip.pan_assy.hold_down, ip.pan_assy.hv_terminal, ip.pan_assy.lift_point_1, ip.pan_assy.lift_point_2, ip.pan_assy.lift_point_3, ip.pan_assy.lift_point_4, ip.pan_head.ground_clamp, ip.pan_head.lower_check, ip.pan_head.lower_target, ip.roof.anchor, ip.roof.carbody_ground, ip.roof.hv_cable_ground, ip.roof.insulator_1, ip.roof.insulator_2, ip.roof.insulator_3, ip.roof.insulator_4, part.carbon_strip_L, part.carbon_strip_R, part.crane.hook, part.pan_assy, part.pan_assy.hv_bolt_1, part.pan_assy.hv_bolt_2, part.pan_base.bolt_1, part.pan_base.bolt_2, part.pan_base.bolt_3, part.pan_base.bolt_4, part.pan_head, tool.megger.leads, tool.safety_harness.chest_ring, tool.safety_harness.tool_ring
 資料檢查：
 結果：通過
 ✔ 步驟 ID 不重複（25 步）
 ✔ 錯誤規則 43 條皆檢查三段說明
 ✔ 安全規則 8 條
 ✔ 工具 12 個皆有教學
-✔ 所有步驟目標都存在於場景（104 個互動物件）
+✔ 所有步驟目標都存在於場景（109 個互動物件）
 ・STP_CSR_05_Decide：小動作都在原地（B 鍵不傳送）
 ✔ 小動作的站點都在 StationSet（20 站）
 ✔ 兩門課的 VR 指令都沒有鍵盤字樣

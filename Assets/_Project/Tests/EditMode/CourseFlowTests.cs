@@ -136,6 +136,15 @@ namespace PantographSim.Tests
             int LeadSlot => SlotOf(GroundingLeadLogic.ToolId);
 
             const string CtrlConnector = "ip.pan_assy.ctrl_connector";
+            static readonly System.Text.RegularExpressions.Regex InsulatorClean = new System.Text.RegularExpressions.Regex(@"^(ip\.roof\.insulator_\d+)\.clean_ratio>=");
+
+            /// <summary>D43：清潔布擦絕緣子髒汙殼——繞一圈、每一列都掃過（DirtMask 收到 clean:u,v 時呼叫的同一段，16×6、頭尾相接）。</summary>
+            void WipeInsulator(string id)
+            {
+                for (int r = 0; r < 6; r++)
+                    for (int c = 0; c < DirtMask.Cols; c += 2)
+                        DirtMask.Clean(s, id, (c + 0.5f) / DirtMask.Cols, (r + 0.5f) / 6f, 6, true);
+            }
             static readonly System.Text.RegularExpressions.Regex ViewedSlot = new System.Text.RegularExpressions.Regex(@"^env\.tool_bag\.slot_(\d+)\.viewed$");
             static readonly string[] Derived = { ToolCountLogic.TrayCount, ToolCountLogic.Leftover, ToolCountLogic.StripCountOk, FastenerLogic.BoltPouchCount, "env.bolt_tray_L.bolts", "env.bolt_tray_R.bolts" };
             bool counting;
@@ -230,12 +239,16 @@ namespace PantographSim.Tests
                     else if (Derived.Any(part.StartsWith)) { }   // 清點的件數由機制算（ToolBag／BoltPouch／BoltTray），腳本不寫
                     else if (part == "ip.pan_assy.hold_down.pull_tested") DetachableLogic.PullTest(s, "ip.pan_assy.hold_down");   // DetachablePart：裝著空手拉一下
                     else if (part.StartsWith(DetachableLogic.CapKey(CtrlConnector) + "=")) { if (s.Get(DetachableLogic.CapKey(CtrlConnector)) != part.Substring(part.IndexOf('=') + 1)) Assert.IsTrue(DetachableLogic.CapClick(s, CtrlConnector), part); }
-                    else if (part.StartsWith("workorder.ir_reading>="))
-                    {
-                        Command(MeggerLogic.ToolId, "test");
+                    else if (part == MeggerLogic.Measured) Command(MeggerLogic.ToolId, "test");   // D43：按測試鍵（MeggerTool）
+                    else if (InsulatorClean.Match(part) is var ic && ic.Success) WipeInsulator(ic.Groups[1].Value);
+                    else if (part.StartsWith(MeggerLogic.Reading + ">=")) { }   // 讀值由高阻計算
+                    else if (part.StartsWith("workorder.ir_reading>="))   // 照高阻計讀值填作業單（WorkOrder）
                         Assert.IsTrue(PantographSim.Worksite.WorkOrder.Write(s, Sim.Bus, PantographSim.Worksite.WorkOrder.IrReadingField, s.GetFloat(MeggerLogic.Reading).ToString(CultureInfo.InvariantCulture)), part);
-                    }
-                    else if (part.StartsWith(MeggerLogic.DischargeKey + ">=")) Discharge();
+                    else if (part == "workorder.ir_judged" || part == "workorder.ir_judgement=pass")   // 照讀值勾合格／不合格
+                        Assert.IsTrue(PantographSim.Worksite.WorkOrder.Write(s, Sim.Bus, PantographSim.Worksite.WorkOrder.IrJudgementField, MeggerLogic.Pass(s, ToolRulesDef.Load()) ? "pass" : "fail"), part);
+                    else if (part.StartsWith(MeggerLogic.DischargeKey + ">=") || part == MeggerLogic.Discharged) Discharge();
+                    else if (part == MeggerLogic.Count + "<=0")   // 空手拆兩條測試線（MeggerLeads）
+                        foreach (var p in new[] { MeggerLogic.PanPoint, MeggerLogic.BodyPoint }) Assert.IsNull(MeggerLogic.RemoveLead(s, p, ToolRulesDef.Load()), part);
                     else if (part == "env.work_order.anomaly.checked") PantographSim.Worksite.WorkOrder.Write(s, Sim.Bus, PantographSim.Worksite.WorkOrder.AnomalyField, "none");
                     else if (part == "workorder.toolcount_platform_confirmed") PantographSim.Worksite.WorkOrder.Write(s, Sim.Bus, PantographSim.Worksite.WorkOrder.PlatformCountField, "true");
                     else if (part.StartsWith("lockout.")) Lockout(part);
@@ -292,7 +305,7 @@ namespace PantographSim.Tests
             public readonly List<string> wouldAuto = new List<string>();       // 啟用時條件已成立（沒有 version 規則就會自動完成）
             public readonly HashSet<string> driven = new HashSet<string>();     // 走真的機制的小動作（步驟 小動作）
 
-            public Flow(string course)
+            public Flow(string course, params string[] faults)
             {
                 prc = AssetDatabase.LoadAssetAtPath<ProcedureDefinition>(StepsCsvImporter.ProcedurePath(course));
                 Assert.IsNotNull(prc, course + "：要先跑 Tools/Import Steps");
@@ -300,6 +313,7 @@ namespace PantographSim.Tests
                 s = new SimState(bus);
                 mech = new Mechanisms(bus, s);   // 先接機制（開場狀態），再建流程
                 PantographSim.Worksite.CourseApplier.ApplyInitialStates(AssetDatabase.LoadAssetAtPath<CourseDef>(StepsCsvImporter.CourseDefPath(course)), s);   // 課程的開場狀態（主斷路器、電動缸電源開著）
+                foreach (var k in faults) s.SetBool(k, true);   // D43：教官打開的可選故障
                 runner = new ProcedureRunner(prc, bus, s);
             }
 
@@ -343,7 +357,7 @@ namespace PantographSim.Tests
                 var subs = ProcedureRunner.SubActions(now);
                 int first = now == before ? idx + 1 : 0;
                 for (int i = first; i < System.Math.Min(Sub, subs.Length); i++)
-                    if (!FreshWriteGate.Allowed(prc, now.def.stepId, subs[i].subId) && FreshWriteGate.EventKeys(subs[i].condition).Any())   // 只讀 LiveState 鍵的照規則可以一出現就完成
+                    if (!runner.Skipped(subs[i]) && !FreshWriteGate.Allowed(prc, now.def.stepId, subs[i].subId) && FreshWriteGate.EventKeys(subs[i].condition).Any())   // 只讀 LiveState 鍵的照規則可以一出現就完成
                         autoCompleted.Add($"{now.RunId} {subs[i].subId}：啟用的同一個 tick 就完成（鍵 {string.Join(",", RuleExplainer.KeysOf(subs[i].condition))}）");
             }
         }
@@ -386,6 +400,29 @@ namespace PantographSim.Tests
                     }
                     break;
             }
+        }
+
+        /// <summary>D43：定期課打開可選故障「絕緣子髒汙」也能跑完：讀值 20 MΩ 勾不合格、走分支（放電拆線、回報、驗電後掛回 #1、上車頂擦 4 支、下車頂拆 #1、重量 500 MΩ 勾合格）。</summary>
+        [Test]
+        public void Periodic_FaultInsulatorDirty_RunsBranchToEnd()
+        {
+            var f = new Flow("periodic", MeggerLogic.FaultInsulatorDirty);
+            try
+            {
+                Assert.IsTrue(f.Run((st, sub) => st == "STP_RT_02_InsulationTest" && sub == "c3"));
+                Assert.AreEqual(ToolRulesDef.Load().meggerFaultReadingMOhm, f.s.GetFloat(MeggerLogic.Reading), "故障開啟：20 MΩ");
+            }
+            finally { f.Dispose(); }
+            var g = new Flow("periodic", MeggerLogic.FaultInsulatorDirty);
+            try
+            {
+                g.Run();
+                Assert.IsEmpty(g.autoCompleted, string.Join("\n", g.autoCompleted));
+                for (int n = 1; n <= 4; n++) Assert.GreaterOrEqual(g.s.GetFloat(MeggerLogic.InsulatorId(n) + ".clean_ratio"), ToolRulesDef.Load().insulatorCleanRatio, "絕緣子 " + n + " 擦淨");
+                Assert.AreEqual("pass", g.s.Get("workorder.ir_judgement"), "重量後勾合格");
+                Assert.AreEqual(ToolRulesDef.Load().meggerReadingMOhm, g.s.GetFloat(MeggerLogic.Reading));
+            }
+            finally { g.Dispose(); }
         }
 
         [TestCase("periodic")]

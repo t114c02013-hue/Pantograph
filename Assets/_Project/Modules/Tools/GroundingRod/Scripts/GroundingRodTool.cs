@@ -35,7 +35,11 @@ namespace PantographSim.Tools
         public override void Tick()
         {
             if (rules == null) rules = ToolRulesDef.Load();
-            if (rules != null) MeggerLogic.Tick(State, SimClock.Now, rules);
+            if (rules == null) return;
+            MeggerLogic.Tick(State, SimClock.Now, rules);
+            var left = MeggerLogic.TutorialCountdown(State, rules);   // D43：教學顯示放電倒數，練習／考核不顯示
+            if (left.HasValue) { if (System.Math.Abs(State.GetFloat("ui.discharge_countdown", -1f) - left.Value) >= 0.1f) State.SetFloat("ui.discharge_countdown", left.Value); }
+            else if (State.Has("ui.discharge_countdown")) State.Set("ui.discharge_countdown", null);
         }
 
         public override void OnCommand(string command)

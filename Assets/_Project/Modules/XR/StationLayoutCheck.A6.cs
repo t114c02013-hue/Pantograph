@@ -64,6 +64,46 @@ namespace PantographSim.XR
             A6SideNodes(set, pts, root, F, r);
             A6PendantDock(set, pts, F, r);
             A6Lanyard(set, d, pts, root, r);
+            A6GroundLineInsulator(set, F, r);
+        }
+
+        /// <summary>
+        /// R1.5b b4（D43，鐵道）：接地 #1 的接地線（平台接地端子 ip.depot.ground_terminal → 弓頭接地掛點 ip.pan_head.ground_clamp，直線）
+        /// 到 1 號絕緣子（ip.roof.insulator_1 的髒汙殼：軸線＋半徑）的距離 ≥ StationSet.groundLineInsulatorClearance。
+        /// </summary>
+        static void A6GroundLineInsulator(StationSet set, System.Func<string, Transform> F, SceneResult r)
+        {
+            Transform term = F("ip.depot.ground_terminal"), clamp = F(SimIds.GroundClamp), ins = F("ip.roof.insulator_1");
+            if (term == null || clamp == null || ins == null) { Miss(r, "D43", term == null ? "ip.depot.ground_terminal" : clamp == null ? SimIds.GroundClamp : "ip.roof.insulator_1"); return; }
+            var rd = ins.GetComponentInChildren<Renderer>(true);
+            if (rd == null) { Miss(r, "D43", "ip.roof.insulator_1 的髒汙殼網格"); return; }
+            var b = rd.bounds;
+            float radius = Mathf.Max(b.extents.x, b.extents.z);
+            var a0 = new Vector3(b.center.x, b.min.y, b.center.z); var a1 = new Vector3(b.center.x, b.max.y, b.center.z);
+            float gap = SegmentDistance(term.position, clamp.position, a0, a1) - radius;
+            Pend(r, "D43", $"接地 #1 的接地線到 1 號絕緣子 {gap:0.000} m（≥ {set.groundLineInsulatorClearance}）", gap >= set.groundLineInsulatorClearance - Eps);
+        }
+
+        /// <summary>兩條線段的最短距離。</summary>
+        static float SegmentDistance(Vector3 p1, Vector3 q1, Vector3 p2, Vector3 q2)
+        {
+            Vector3 d1 = q1 - p1, d2 = q2 - p2, rr = p1 - p2;
+            float a = Vector3.Dot(d1, d1), e = Vector3.Dot(d2, d2), f = Vector3.Dot(d2, rr), s, t;
+            if (a <= 1e-9f && e <= 1e-9f) return rr.magnitude;
+            if (a <= 1e-9f) { s = 0f; t = Mathf.Clamp01(f / e); }
+            else
+            {
+                float c = Vector3.Dot(d1, rr);
+                if (e <= 1e-9f) { t = 0f; s = Mathf.Clamp01(-c / a); }
+                else
+                {
+                    float bb = Vector3.Dot(d1, d2), den = a * e - bb * bb;
+                    s = den > 1e-9f ? Mathf.Clamp01((bb * f - c * e) / den) : 0f;
+                    t = (bb * s + f) / e;
+                    if (t < 0f) { t = 0f; s = Mathf.Clamp01(-c / a); } else if (t > 1f) { t = 1f; s = Mathf.Clamp01((bb - c) / a); }
+                }
+            }
+            return ((p1 + d1 * s) - (p2 + d2 * t)).magnitude;
         }
 
         // ---------- 共用量測 ----------

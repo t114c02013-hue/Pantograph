@@ -1439,6 +1439,83 @@
       "owner": "",
       "source": "R1",
       "trigger": "解鎖後沒有在作業單簽名。"
+    },
+    {
+      "errorId": "ERR_RT02_WrongJudgement",
+      "severity": "Critical",
+      "severityBeforeK3": "",
+      "courses": "periodic",
+      "inputMode": "",
+      "status": "Defined",
+      "owner": "",
+      "source": "CSV",
+      "trigger": "D43：作業單合格／不合格勾選和讀值不符（≥ EX 100 MΩ 合格，< 100 不合格；100 MΩ 下限待高鐵 SOP 確認）。教學擋下並提示，練習／考核記錯（WorkOrder 寫 workorder.ir_judgement_wrong）",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "workorder.ir_judgement_wrong"
+        ],
+        "why": "低於 100 MΩ 不能申請復電，判錯會讓不合格的弓體帶電。",
+        "fix": "≥ 100 MΩ 勾合格，< 100 MΩ 勾不合格並回報作業負責人。",
+        "what": "絕緣電阻判定勾錯了。"
+      },
+      "scope": "global"
+    },
+    {
+      "errorId": "ERR_RT02_ReadingMismatch",
+      "severity": "Major",
+      "severityBeforeK3": "",
+      "courses": "periodic",
+      "inputMode": "",
+      "status": "Defined",
+      "owner": "",
+      "source": "CSV",
+      "trigger": "D43：作業單的絕緣電阻讀值和高阻計讀值不一致。教學只提示，練習／考核記錯（WorkOrder 寫 workorder.ir_reading.mismatch）",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "workorder.ir_reading.mismatch"
+        ],
+        "why": "紀錄錯了，後面判定和追溯都會錯。",
+        "fix": "照高阻計顯示的讀值填寫。",
+        "what": "作業單的絕緣電阻讀值和高阻計顯示的不一樣。"
+      },
+      "scope": "global"
+    },
+    {
+      "errorId": "ERR_RT02_LeadRemovedBeforeDischarge",
+      "severity": "Major",
+      "severityBeforeK3": "",
+      "courses": "periodic",
+      "inputMode": "",
+      "status": "Defined",
+      "owner": "",
+      "source": "CSV",
+      "trigger": "D43：放電未滿 dischargeSeconds（ToolRulesDef，5 s）就拆絕緣測試線。教學擋下並顯示倒數，練習／考核記錯（MeggerLogic 寫 tool.megger.lead_removed_charged）",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "tool.megger.lead_removed_charged"
+        ],
+        "why": "加壓量測後弓體還帶著電，沒放完電就伸手拆線會觸電。",
+        "fix": "用接地桿碰弓頭接地掛點放電滿 5 秒，再拆測試線。",
+        "what": "放電還沒滿 5 秒就拆下絕緣測試線。"
+      },
+      "scope": "global"
+    },
+    {
+      "errorId": "ERR_RT02_NoReport",
+      "severity": "Major",
+      "severityBeforeK3": "",
+      "courses": "periodic",
+      "inputMode": "",
+      "status": "Defined",
+      "owner": "b4c:holdpoint",
+      "source": "CSV",
+      "trigger": "D43：絕緣電阻不合格（故障 fault.insulator_dirty）時沒有先回報作業負責人就自行處理。回報對象 NPC 在 b4c 停留點一起做"
     }
   ]
 }

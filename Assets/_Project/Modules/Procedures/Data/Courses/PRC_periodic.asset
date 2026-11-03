@@ -426,6 +426,67 @@ MonoBehaviour:
     severityBeforeK3: 
     oncePerRun: 1
     inputMode: 
+  - errorId: ERR_RT02_LeadRemovedBeforeDischarge
+    severity: 1
+    what: "\u653E\u96FB\u9084\u6C92\u6EFF 5 \u79D2\u5C31\u62C6\u4E0B\u7D55\u7DE3\u6E2C\u8A66\u7DDA\u3002"
+    why: "\u52A0\u58D3\u91CF\u6E2C\u5F8C\u5F13\u9AD4\u9084\u5E36\u8457\u96FB\uFF0C\u6C92\u653E\u5B8C\u96FB\u5C31\u4F38\u624B\u62C6\u7DDA\u6703\u89F8\u96FB\u3002"
+    fix: "\u7528\u63A5\u5730\u687F\u78B0\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u653E\u96FB\u6EFF
+      5 \u79D2\uFF0C\u518D\u62C6\u6E2C\u8A66\u7DDA\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - tool.megger.lead_removed_charged
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
+  - errorId: ERR_RT02_ReadingMismatch
+    severity: 1
+    what: "\u4F5C\u696D\u55AE\u7684\u7D55\u7DE3\u96FB\u963B\u8B80\u503C\u548C\u9AD8\u963B\u8A08\u986F\u793A\u7684\u4E0D\u4E00\u6A23\u3002"
+    why: "\u7D00\u9304\u932F\u4E86\uFF0C\u5F8C\u9762\u5224\u5B9A\u548C\u8FFD\u6EAF\u90FD\u6703\u932F\u3002"
+    fix: "\u7167\u9AD8\u963B\u8A08\u986F\u793A\u7684\u8B80\u503C\u586B\u5BEB\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - workorder.ir_reading.mismatch
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
+  - errorId: ERR_RT02_WrongJudgement
+    severity: 2
+    what: "\u7D55\u7DE3\u96FB\u963B\u5224\u5B9A\u52FE\u932F\u4E86\u3002"
+    why: "\u4F4E\u65BC 100 M\u03A9 \u4E0D\u80FD\u7533\u8ACB\u5FA9\u96FB\uFF0C\u5224\u932F\u6703\u8B93\u4E0D\u5408\u683C\u7684\u5F13\u9AD4\u5E36\u96FB\u3002"
+    fix: "\u2265 100 M\u03A9 \u52FE\u5408\u683C\uFF0C< 100 M\u03A9 \u52FE\u4E0D\u5408\u683C\u4E26\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - workorder.ir_judgement_wrong
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   - errorId: ERR_WC03_RemoveOrder
     severity: 2
     what: "\u62C6\u63A5\u5730\u7684\u9806\u5E8F\u53CD\u4E86\uFF1A\u8A2D\u5099\u7AEF\uFF08\u5F13\u982D\u639B\u9264\u3001\u96FB\u7E9C\u7AEF\u5B50\uFF09\u9084\u639B\u8457\u5C31\u5148\u9B06\u63A5\u5730\u7AEF\u3002"

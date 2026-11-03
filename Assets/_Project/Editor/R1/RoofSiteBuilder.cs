@@ -22,6 +22,32 @@ namespace PantographSim.Editor
     public static class RoofSiteBuilder
     {
         const string ToolSlotTablePath = "Assets/_Project/Modules/Worksite/Data/ToolSlotTable.asset";
+
+        /// <summary>
+        /// R1.5b b4（D43，model-spec v3.11 §7.7.1c）：絕緣子髒汙。DirtSurface＝貼傘裙外緣的圓筒殼（外徑比傘裙大 1 mm，圓柱 UV，半透明髒汙材質，原材質不動），
+        /// 遮罩 16×6 格（DirtMask，ip.roof.insulator_n，和底座螺栓同號），COL_Dirt＝Capsule trigger（和托架同一層）。故障 fault.insulator_dirty 開著才顯示。
+        /// </summary>
+        static void BuildInsulatorDirt(Transform insulator, int n, Vector3 center, float radius, float height)
+        {
+            var g = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            g.name = "DirtSurface";
+            g.transform.SetParent(insulator, true);
+            g.transform.position = center;
+            float dia = 2f * (radius + 0.001f);
+            g.transform.localScale = Vector3.one;
+            var ls = insulator.lossyScale;
+            g.transform.localScale = new Vector3(dia / Mathf.Max(ls.x, 1e-4f), height / 2f / Mathf.Max(ls.y, 1e-4f), dia / Mathf.Max(ls.z, 1e-4f));
+            Object.DestroyImmediate(g.GetComponent<Collider>());
+            var col = new GameObject("COL_Dirt").AddComponent<CapsuleCollider>();
+            col.transform.SetParent(g.transform, false);
+            col.isTrigger = true; col.direction = 1; col.radius = 0.5f; col.height = 3f;   // 圓頭伸出殼的上下緣，側面整段都打得到（高度 2 的 capsule 兩端會縮進去，最上、最下兩列擦不到）
+            var r = g.GetComponent<Renderer>(); r.sharedMaterial = SliceModelBuilder.Materials()["dirt"];
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            var mask = g.AddComponent<DirtMask>();
+            mask.Configure("ip.roof.insulator_" + n, $"絕緣子 {n}");
+            mask.SetupSurface(r, 6, "fault.insulator_dirty");
+            g.AddComponent<Highlightable>();
+        }
         public const string PrefabFolder = "Assets/_Project/Modules/Worksite/Prefabs";
         public const string MonitorTexturePath = "Assets/_Project/Content/Textures/RT_PanHeadMonitor.renderTexture";
 
@@ -231,6 +257,7 @@ namespace PantographSim.Editor
                 var mc = icol.AddComponent<MeshCollider>(); mc.sharedMesh = cyl; mc.convex = true;
                 Anchor(insP.anchors, "Anchor_Insulator_" + (i + 1), top, Vector3.zero);
                 d.insulatorPositions[i] = top;
+                BuildInsulatorDirt(ins.transform, i + 1, new Vector3(top.x, roofY + h / 2f, top.z), rad, h);
             }
             EditorUtility.SetDirty(d);
             SavePrefab(insP.root);

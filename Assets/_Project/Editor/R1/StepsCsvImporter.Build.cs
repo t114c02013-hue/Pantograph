@@ -166,7 +166,7 @@ namespace PantographSim.Editor
                 st.presetDone = false; st.presetStates = Array.Empty<string>();
                 st.refSecondsTutorial = course == "periodic" ? m.teachP : m.teachD;
                 st.refSecondsExam = course == "periodic" ? m.examP : m.examD;
-                st.subActions = subs.Select(x => new SubAction { text = x.e.text, why = "", targetId = x.e.targetId, toolId = x.e.toolId, condition = x.rule, standPointId = x.e.standPointId, subId = x.e.subId, textDesktop = x.e.textDesktop == x.e.text ? "" : x.e.textDesktop }).ToArray();
+                st.subActions = subs.Select(x => new SubAction { text = x.e.text, why = "", targetId = x.e.targetId, toolId = x.e.toolId, condition = x.rule, standPointId = x.e.standPointId, subId = x.e.subId, textDesktop = x.e.textDesktop == x.e.text ? "" : x.e.textDesktop, when = x.e.when }).ToArray();
                 st.hints = st.hints ?? new HintSet();
                 st.hints.checklist = subs.Select(x => x.e.text + "|" + x.rule).ToArray();   // 清單跟 v6 小動作（R1 的清單少了新增的列，文字也還是車頂工具箱）
                 var ov = LoadTables().completionOverrides.FirstOrDefault(o => m.stepId.StartsWith(o.step) && InCourse(o.courses, course));
@@ -246,7 +246,7 @@ namespace PantographSim.Editor
                 var savedPrc = SaveAsset(prc, ProcedurePath(kv.Key));
                 var course = ScriptableObject.CreateInstance<CourseDef>();
                 course.courseId = cj.courseId; course.title = cj.title; course.procedure = savedPrc; course.placements = cj.placements; course.onPass = cj.onPass;
-                course.liftCapAboveO = cj.liftCapAboveO; course.contactGapM = cj.contactGapM; course.craneParked = cj.craneParked; course.initialStates = cj.initialStates;
+                course.liftCapAboveO = cj.liftCapAboveO; course.contactGapM = cj.contactGapM; course.craneParked = cj.craneParked; course.initialStates = cj.initialStates; course.faults = cj.faults;
                 SaveAsset(course, CourseDefPath(kv.Key));
                 var rs = resolved.Where(r => r.e.course == kv.Key).ToList();
                 sb.AppendLine($"{kv.Key}：步驟 {saved.Count}、小動作 {rs.Count}（第 1 層 {rs.Count(r => r.layer == 1)}、第 2 層 {rs.Count(r => r.layer == 2)}、第 3 層 {rs.Count(r => r.layer == 3)}；機制待做 {rs.Count(r => r.owner.Length > 0)}）→ {CourseFolder}/{kv.Key}");

@@ -270,6 +270,7 @@ namespace PantographSim.Editor
             interaction.AddComponent<LiftKeys>();
             new GameObject("SliceUI").AddComponent<SliceUI>();
             BuildRecording(sb);
+            new GameObject("MeggerLeads").AddComponent<PantographSim.Worksite.MeggerLeads>().Configure("tool.megger.leads", "絕緣測試線");   // R1.5b b4（D43）：RT_02 e2 空手拆測試線
             var boot = new GameObject("SliceBootstrap").AddComponent<SliceBootstrap>();
             boot.Configure(StepJsonImporter.LoadProcedure(),
                 StepJsonImporter.LoadAll<SafetyRuleDefinition>(StepJsonImporter.SafetyFolder).OrderBy(r => r.ruleId).ToArray(),

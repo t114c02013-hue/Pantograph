@@ -9,7 +9,9 @@ namespace PantographSim.UI
     /// <summary>開場任務卡：目標、工具、安全重點、操作鍵；大的置中「開始」按鈕；下方練習情境。</summary>
     public class TaskCardView : View
     {
-        RectTransform dim, practiceRow, nameDesktop, nameXr, courseRow;
+        RectTransform dim, practiceRow, nameDesktop, nameXr, courseRow, faultRow;
+        string faultsBuiltFor = "";
+        readonly List<(string key, Image bg)> faultButtons = new List<(string, Image)>();
         string coursesBuiltFor = "";
         readonly List<(string id, Image bg)> courseButtons = new List<(string, Image)>();
         Text title, goal, tools, safety, controls, xrName;
@@ -27,6 +29,7 @@ namespace PantographSim.UI
             title = Ui.Text(card, "", 38, Color.white, TextAnchor.UpperCenter, FontStyle.Bold);
             // R1.5b b4：課程選擇（換課程會重新載入場景）
             courseRow = Ui.Rect(card, "CourseRow"); Ui.HStack(courseRow.gameObject, 12).childAlignment = TextAnchor.MiddleCenter;
+            faultRow = Ui.Rect(card, "FaultRow"); Ui.HStack(faultRow.gameObject, 12).childAlignment = TextAnchor.MiddleCenter;   // D43：可選故障（教官開關）
             goal = Ui.Text(card, "", 24);
             tools = Ui.Text(card, "", 23);
             safety = Ui.Text(card, "", 22);
@@ -84,6 +87,23 @@ namespace PantographSim.UI
                 coursesBuiltFor = courses;
             }
             foreach (var (id, bg) in courseButtons) bg.color = id == s.Get(SimIds.CourseId) ? Ui.ButtonOn : Ui.ButtonBg;
+            var faults = s.Get("app.faults.list");
+            if (faults != faultsBuiltFor)
+            {
+                foreach (Transform c in faultRow) Object.Destroy(c.gameObject);
+                faultButtons.Clear();
+                foreach (var entry in faults.Split(';'))
+                {
+                    var f = entry.Split('|');
+                    if (f.Length < 2) continue;
+                    string key = f[0];
+                    var fb = Ui.Button(faultRow, f[1], 20, () => Ui.Send("app.fault", key));
+                    Ui.Size(fb, 330, 52);
+                    faultButtons.Add((key, fb.GetComponent<Image>()));
+                }
+                faultsBuiltFor = faults;
+            }
+            foreach (var (key, bg) in faultButtons) bg.color = s.GetBool(key) ? Ui.ButtonOn : Ui.ButtonBg;   // 開著＝亮
             var list = s.Get("scenarios.list");
             if (list != builtFor)
             {

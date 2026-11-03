@@ -30,10 +30,17 @@ namespace PantographSim.Worksite
         static bool IsField(string field) =>
             field.StartsWith("reading.") || field.StartsWith("newmid.") || field.StartsWith("submit.") || field == "decision"
             || field == SignField || field == SignStart || field == SignEnd || field == "toolcount_confirmed" || field.EndsWith("_signed")
-            || field == AnomalyField || field == IrReadingField || field == PlatformCountField;   // R1.5b b4
+            || field == AnomalyField || field == IrReadingField || field == PlatformCountField || field == IrJudgementField;   // R1.5b b4
 
         /// <summary>R1.5b b4：CSR_01 b 異常欄（none／found，勾了就寫 env.work_order.anomaly.checked）、RT_02 c 絕緣電阻讀值（MΩ，和高阻計讀值比對）、WC_01b c 平台清點完成。</summary>
         public const string AnomalyField = "anomaly", IrReadingField = "ir_reading", PlatformCountField = "toolcount_platform_confirmed";
+        /// <summary>D43：RT_02 c3 絕緣電阻判定（pass／fail）。勾錯：教學擋下並提示，練習／考核照寫並記 workorder.ir_judgement_wrong（ERR_RT02_WrongJudgement）。</summary>
+        public const string IrJudgementField = "ir_judgement";
+
+        static bool Tutorial(ISimState s) => s.Get("training.mode") == "tutorial";
+
+        /// <summary>D43：勾選和高阻計讀值相符（≥ 下限＝pass）。</summary>
+        public static bool JudgementCorrect(ISimState s, string value) => (value == "pass") == PantographSim.Data.MeggerLogic.Pass(s, PantographSim.Data.ToolRulesDef.Load());
 
         /// <summary>
         /// 「作業人員簽名」按鈕送 sign：依目前步驟寫進對應的格子——SI_06（開工）＝sign_start、WC_04（完工）＝sign_end；
@@ -66,13 +73,25 @@ namespace PantographSim.Worksite
                 if (field == SignStart) s.SetBool("workorder.si_signed", true);
                 if (field == SignEnd) s.SetBool("workorder.unlock_signed", true);
                 if (field == AnomalyField) { if (written != "none" && written != "found") return false; s.SetBool("env.work_order.anomaly.checked", true); }
+                if (field == IrJudgementField)
+                {
+                    if (written != "pass" && written != "fail") return false;
+                    bool right = JudgementCorrect(s, written);
+                    if (!right && Tutorial(s)) { s.Set("ui.toast", "低於 100 MΩ，不能申請復電，請回報作業負責人"); return false; }   // 教學擋下
+                    s.SetBool("workorder.ir_judged", true);
+                    if (!right) s.SetBool("workorder.ir_judgement_wrong", true);
+                }
                 if (field.StartsWith("reading.") || field.StartsWith("newmid.") || field == IrReadingField)
                 {
                     if (!float.TryParse(written, NumberStyles.Float, CultureInfo.InvariantCulture, out var v)) { s.Set("workorder.last_error", field == IrReadingField ? "請輸入數字（MΩ）" : "請輸入數字（mm）"); return false; }
                     written = v.ToString("0.00", CultureInfo.InvariantCulture);
                     string readingKey = ReadingKeyFor(field);
                     if (readingKey != null && s.Has(readingKey))
-                        s.SetBool("workorder." + field + ".mismatch", Mathf.Abs(s.GetFloat(readingKey) - v) > Tolerance + 1e-4f);
+                    {
+                        bool mismatch = Mathf.Abs(s.GetFloat(readingKey) - v) > Tolerance + 1e-4f;
+                        if (mismatch && field == IrReadingField && Tutorial(s)) { s.Set("ui.toast", "作業單讀值和高阻計顯示的不一樣，照高阻計讀值填"); return false; }   // D43：教學只提示
+                        s.SetBool("workorder." + field + ".mismatch", mismatch);
+                    }
                 }
                 s.Set("workorder." + field, written);
                 if (field.StartsWith("submit.")) s.SetBool("workorder.reading." + field.Substring(7) + ".submitted", true);

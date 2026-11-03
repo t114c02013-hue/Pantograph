@@ -98,6 +98,7 @@ namespace PantographSim.UI
         readonly List<(string id, Text text, string label)> siRows = new List<(string, Text, string)>();
         readonly List<(string value, Image bg)> decisions = new List<(string, Image)>();
         readonly List<(string value, Image bg)> anomalyButtons = new List<(string, Image)>();
+        readonly List<(string value, Image bg)> judgementButtons = new List<(string, Image)>();
         Text diffText, countText, confirmLabel, platformLabel, signLabel, signHint;
         Button signButton;
 
@@ -190,6 +191,13 @@ namespace PantographSim.UI
             }
             AddField(an, "ir_reading", 92);
             var sendIr = Ui.Button(an, "送出", 19, () => Submit("ir_reading")); Ui.Size(sendIr, 76, 40);
+            var ij = Ui.Rect(card, "IrJudgement"); Ui.HStack(ij.gameObject, 6);   // D43：RT_02 c3
+            Ui.Text(ij, "絕緣電阻判定（≥ 100 MΩ 合格，下限待高鐵 SOP 確認）", 17, Ui.Muted);
+            foreach (var (v, label) in new[] { ("pass", "合格"), ("fail", "不合格") })
+            {
+                var jb = Ui.Button(ij, label, 19, () => Ui.Send(SimIds.WorkOrder, v, "ir_judgement")); Ui.Size(jb, 96, 40);
+                judgementButtons.Add((v, jb.GetComponent<Image>()));
+            }
 
             Ui.Text(card, "收尾清點", 19, Ui.Accent, TextAnchor.UpperLeft, FontStyle.Bold);
             countText = Ui.Text(card, "", 17, Ui.Muted);
@@ -308,6 +316,8 @@ namespace PantographSim.UI
             platformLabel.text = s.GetBool("workorder.toolcount_platform_confirmed") ? "✔ 平台清點完成" : "平台清點完成";
             string anomaly = s.Get("workorder.anomaly");
             foreach (var (v, bg) in anomalyButtons) bg.color = v == anomaly ? Ui.ButtonOn : Ui.ButtonBg;
+            string judged = s.Get("workorder.ir_judgement");
+            foreach (var (v, bg) in judgementButtons) bg.color = v == judged ? Ui.ButtonOn : Ui.ButtonBg;
             bool canSign = CanSign(s);
             signButton.interactable = canSign;
             signLabel.color = canSign ? Color.white : Ui.Muted;

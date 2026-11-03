@@ -47,11 +47,15 @@ namespace PantographSim.Procedures
         /// <summary>小動作完成：條件成立；requireFreshWrite 時還要啟用後有條件鍵被寫過（或列在 autoCompleteAllowed）。</summary>
         bool SubDone(RuntimeStep s, SubAction a)
         {
+            if (Skipped(a)) return true;   // D43：分支小動作，條件不成立就跳過
             bool done = FreshMode ? fresh.Done(state, a.condition, FreshWriteGate.Allowed(procedure, s.def.stepId, a.subId)) : ChecklistEval.Done(state, a.condition);
             if (!done || SubActionHold == null) return done;
             holdReason = SubActionHold(s, a);
             return holdReason == null;
         }
+
+        /// <summary>R1.5b b4（D43）：分支小動作（when）輪到時條件不成立＝跳過。</summary>
+        public bool Skipped(SubAction a) => !string.IsNullOrEmpty(a.when) && !ChecklistEval.Done(state, a.when);
 
         /// <summary>R1.5b K3：條件成立也先不讓這個小動作完成，回傳提示（null＝不擋）。教學模式扭力不足時由 ErrorDetector 提供。</summary>
         public Func<RuntimeStep, SubAction, string> SubActionHold;
@@ -285,7 +289,7 @@ namespace PantographSim.Procedures
             (s.def.subActions ?? Array.Empty<SubAction>()).Select(a => new SubAction
             {
                 text = StateKeys.Expand(TextFor(a), s.side), why = StateKeys.Expand(a.why, s.side), targetId = StateKeys.Expand(a.targetId, s.side), textDesktop = StateKeys.Expand(a.textDesktop ?? "", s.side),
-                toolId = a.toolId, condition = StateKeys.Expand(a.condition, s.side), standPointId = SubAction.ExpandStand(a.standPointId, s.side), subId = a.subId ?? ""
+                toolId = a.toolId, condition = StateKeys.Expand(a.condition, s.side), standPointId = SubAction.ExpandStand(a.standPointId, s.side), subId = a.subId ?? "", when = a.when ?? ""
             }).ToArray();
 
         /// <summary>

@@ -60,9 +60,11 @@ namespace PantographSim.Editor
             public List<int> n = new List<int>();
             public List<string> sides = new List<string>();
             public (string a, string b)? interleave;
+            /// <summary>R1.5b b4（D43）：when=條件（例 fault.insulator_dirty）：只在條件成立時才做的分支小動作。</summary>
+            public string when = "";
         }
 
-        /// <summary>templateN 欄：n=1→4、n=1,3,2,4、side=L,R、interleave=a+b，可用分號組合。格式錯了丟 FormatException。</summary>
+        /// <summary>templateN 欄：n=1→4、n=1,3,2,4、side=L,R、interleave=a+b、when=條件（分支小動作），可用分號組合。格式錯了丟 FormatException。</summary>
         public static Template ParseTemplate(string s)
         {
             var t = new Template();
@@ -78,6 +80,7 @@ namespace PantographSim.Editor
                 }
                 else if (k == "side") t.sides.AddRange(val.Split(',').Select(x => x.Trim()));
                 else if (k == "interleave") { var ab = val.Split('+'); t.interleave = (ab[0].Trim(), ab[1].Trim()); }
+                else if (k == "when") t.when = val.Trim();
                 else throw new FormatException("templateN 不認得的鍵：" + k);
             }
             return t;
@@ -89,7 +92,7 @@ namespace PantographSim.Editor
         public class Expanded
         {
             public Row row;
-            public string course, stepId, side, subId, text, textDesktop, targetId, toolId, condition, standPointId, errorIds;
+            public string course, stepId, side, subId, text, textDesktop, targetId, toolId, condition, standPointId, errorIds, when = "";
             public int n, order;
             /// <summary>把只在某一側展開的列（side=L）也算進去的順序：第 1 層用它對 R1 的位置（R 側少了 CSR_06 b 也不會錯位）。</summary>
             public int fullOrder;
@@ -170,7 +173,7 @@ namespace PantographSim.Editor
                                         subId = src["subId"] + (n > 0 ? n.ToString() : ""),
                                         text = Sub(Pick("instruction"), side, n), textDesktop = Sub(src["instructionDesktop"], side, n),
                                         targetId = Sub(Pick("targetId"), side, n), toolId = Sub(src["toolId"], side, n), condition = Sub(Pick("condition"), side, n),
-                                        standPointId = stand, errorIds = src["errorIds"],
+                                        standPointId = stand, errorIds = src["errorIds"], when = tmpl[src].when,
                                     };
                                     if (string.IsNullOrEmpty(e.textDesktop)) e.textDesktop = e.text;
                                     list.Add(e);

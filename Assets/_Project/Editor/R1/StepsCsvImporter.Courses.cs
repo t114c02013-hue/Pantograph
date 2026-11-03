@@ -24,6 +24,7 @@ namespace PantographSim.Editor
             public float liftCapAboveO, contactGapM;
             public bool craneParked;
             public string[] initialStates = Array.Empty<string>();
+            public CourseDef.FaultOption[] faults = Array.Empty<CourseDef.FaultOption>();
         }
 
         [Serializable]

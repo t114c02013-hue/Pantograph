@@ -171,15 +171,15 @@ daily,STP_WC_03_RemoveGround,d,193,2,"#1 = 已銷號","ground_register.1=cancell
 daily,STP_WC_01b_ToolCountPlatform,a,198,3,"桿架 2、3 號都在架","rack.slot_2=on_rack&&rack.slot_3=on_rack",
 daily,STP_WC_01b_ToolCountPlatform,b,199,3,"登記欄 #1 已點選確認，且 #1 已銷號，和桿架實物一致","ground_register.1.confirmed&&ground_register.1=cancelled&&rack.slot_3=on_rack",b4c:ground_register
 daily,STP_WC_01b_ToolCountPlatform,c,200,3,"已確認","workorder.toolcount_platform_confirmed",
-daily,STP_WC_04_Unlock,a0,207,2,"停留點 4 清單 3 項全部點過（#1 已銷號且桿架 slot_3 在架；人員已離開車頂；工具清點完成），hold.4.released = true","hold.4.checklist_done&&hold.4.released",b4c:holdpoint
-daily,STP_WC_04_Unlock,a,208,2,"手持上鎖掛牌組","tool.active=tool.lockout_tag",
-daily,STP_WC_04_Unlock,b,209,3,"升弓開關 = 未上鎖","lockout.raise_switch=open",
-daily,STP_WC_04_Unlock,c,210,3,"主斷路器 = 未上鎖；放開後掛牌組自動收回腰包（WC_06 c 才歸還工具架）","lockout.breaker=open&&rack.slot_1=in_pouch",
-daily,STP_WC_04_Unlock,d,211,3,"電動缸電源 = ON","cab.cylinder_power=on",
-daily,STP_WC_04_Unlock,f,212,3,"已簽名","workorder.sign_end",
-daily,STP_WC_06_Handover,a,218,3,"作業單各欄（讀數、判定、新品履歷、接地登記、異常欄）都已填，作業負責人已簽","workorder.all_filled&&npc.work_leader.signed",b4c:holdpoint
-daily,STP_WC_06_Handover,b,219,3,"檢查員 NPC 核對扭力標記、量測值、高低差後判「可出車」（日常沒有升弓試驗）","npc.inspector.verdict=pass",b4c:holdpoint
-daily,STP_WC_06_Handover,c,220,2,"掛位 1、4 = 在架","rack.slot_1=on_rack&&rack.slot_4=on_rack",
+daily,STP_WC_04_Unlock,a0,241,2,"停留點 4 清單 3 項全部點過（#1 已銷號且桿架 slot_3 在架；人員已離開車頂；工具清點完成），hold.4.released = true","hold.4.checklist_done&&hold.4.released",b4c:holdpoint
+daily,STP_WC_04_Unlock,a,242,2,"手持上鎖掛牌組","tool.active=tool.lockout_tag",
+daily,STP_WC_04_Unlock,b,243,3,"升弓開關 = 未上鎖","lockout.raise_switch=open",
+daily,STP_WC_04_Unlock,c,244,3,"主斷路器 = 未上鎖；放開後掛牌組自動收回腰包（WC_06 c 才歸還工具架）","lockout.breaker=open&&rack.slot_1=in_pouch",
+daily,STP_WC_04_Unlock,d,245,3,"電動缸電源 = ON","cab.cylinder_power=on",
+daily,STP_WC_04_Unlock,f,246,3,"已簽名","workorder.sign_end",
+daily,STP_WC_06_Handover,a,252,3,"作業單各欄（讀數、判定、新品履歷、接地登記、異常欄）都已填，作業負責人已簽","workorder.all_filled&&npc.work_leader.signed",b4c:holdpoint
+daily,STP_WC_06_Handover,b,253,3,"檢查員 NPC 核對扭力標記、量測值、高低差後判「可出車」（日常沒有升弓試驗）","npc.inspector.verdict=pass",b4c:holdpoint
+daily,STP_WC_06_Handover,c,254,2,"掛位 1、4 = 在架","rack.slot_1=on_rack&&rack.slot_4=on_rack",
 periodic,STP_SI_00_PreWork,a,2,2,"停放煞車、止輪器、「檢修中・禁止動車」牌 3／3 已查看並勾選","env.work_order.anti_roll_check.checked_count>=3",b4c:si00
 periodic,STP_SI_00_PreWork,b,3,2,"股道、車號、作業內容、時段、調度核准欄 5 欄都已查看","env.work_order.permit.viewed_count>=5",b4c:si00
 periodic,STP_SI_00_PreWork,c,4,3,"高壓、高處墜落、吊掛、夾手、墜物 5／5 已勾，已簽名","env.work_order.tbm.checked_count>=5&&env.work_order.tbm.signed",b4c:si00
@@ -471,20 +471,57 @@ periodic,STP_WC_01b_ToolCountPlatform,b,199,3,"登記欄 #1、#2 兩列都點選
 periodic,STP_WC_01b_ToolCountPlatform,c,200,3,"已確認","workorder.toolcount_platform_confirmed",
 periodic,STP_RT_02_InsulationTest,a,201,2,"手持高阻計","tool.active=tool.megger",
 periodic,STP_RT_02_InsulationTest,b,202,3,"兩端都已接上","tool.megger.connected_count>=2",
-periodic,STP_RT_02_InsulationTest,c,203,3,"讀值 ≥ EX 100 MΩ，已記在作業單","workorder.ir_reading>=100",
-periodic,STP_RT_02_InsulationTest,d,204,3,"掛位 11 = 在架，手持接地桿","rack.slot_11=on_rack&&tool.active=tool.grounding_rod",
-periodic,STP_RT_02_InsulationTest,e,205,3,"放電 ≥ EX 3 s","ip.pan_head.ground_clamp.discharge_s>=3",
-periodic,STP_RT_02_InsulationTest,f,206,2,"掛位 3 = 在架","rack.slot_3=on_rack",
-periodic,STP_WC_04_Unlock,a0,207,2,"停留點 4 清單全部點過，hold.4.released = true（接地登記欄 2 列都已銷號，且桿架 slot_3、工具架 slot_12 實物在架；人員已離開車頂；工具清點完成；絕緣電阻合格且已放電）","hold.4.checklist_done&&hold.4.released",b4c:holdpoint
-periodic,STP_WC_04_Unlock,a,208,2,"手持上鎖掛牌組","tool.active=tool.lockout_tag",
-periodic,STP_WC_04_Unlock,b,209,3,"升弓開關 = 未上鎖","lockout.raise_switch=open",
-periodic,STP_WC_04_Unlock,c,210,3,"主斷路器 = 未上鎖；放開後掛牌組自動收回腰包（WC_06 c 才歸還工具架）","lockout.breaker=open&&rack.slot_1=in_pouch",
-periodic,STP_WC_04_Unlock,d,211,3,"電動缸電源 = ON","cab.cylinder_power=on",
-periodic,STP_WC_05_RaiseTest,a,213,3,"已查看","part.crane.hook.inspected&&part.pan_assy.inspected",b4:p5
-periodic,STP_WC_05_RaiseTest,b,214,3,"弓頭升到頂","part.pan_head.pose=Raised",
-periodic,STP_WC_05_RaiseTest,c,215,3,"指示燈 = 升弓且已確認","ip.cab.pan_indicator.checked&&ip.cab.pan_indicator.shows=升弓",
-periodic,STP_WC_05_RaiseTest,d,216,3,"放開時 lower_check 與 lower_target 距離 ≤ EX 1 cm（比照 SI_01 a）","part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm",
-periodic,STP_WC_05_RaiseTest,e,217,3,"已簽名","workorder.sign_end",
-periodic,STP_WC_06_Handover,a,218,3,"作業單各欄（讀數、判定、新品履歷、絕緣電阻、接地登記、異常欄）都已填，作業負責人已簽","workorder.all_filled&&npc.work_leader.signed",b4c:holdpoint
-periodic,STP_WC_06_Handover,b,219,3,"檢查員 NPC 核對扭力標記、量測值、升弓試驗結果後判「可出車」","npc.inspector.verdict=pass",b4c:holdpoint
-periodic,STP_WC_06_Handover,c,220,2,"掛位 1、4 = 在架","rack.slot_1=on_rack&&rack.slot_4=on_rack",
+periodic,STP_RT_02_InsulationTest,c,203,3,"已加壓量測且讀值穩定（正常 EX 500 MΩ；故障開啟時 EX 20 MΩ）。讀值 0 MΩ：三種模式都只提示「接地還掛著，請確認 #1、#2 都已拆除並銷號後再量」，不記分，要求重量","tool.megger.measured",
+periodic,STP_RT_02_InsulationTest,c2,204,3,"作業單讀值和高阻計讀值一致（不一致：教學只提示，練習／考核記 Major）","workorder.ir_reading>=0",
+periodic,STP_RT_02_InsulationTest,c3,205,3,"勾選和讀值相符：≥ EX 100 MΩ 勾合格，< 100 MΩ 勾不合格（100 MΩ 下限待高鐵 SOP 確認）。教學勾錯就擋下並提示「低於 100 MΩ，不能申請復電，請回報作業負責人」","workorder.ir_judged",
+periodic,STP_RT_02_InsulationTest,d,206,3,"掛位 11 = 在架，手持接地桿","rack.slot_11=on_rack&&tool.active=tool.grounding_rod",
+periodic,STP_RT_02_InsulationTest,e,207,3,"桿頭接觸弓頭接地掛點累計 ≥ EX 5 s（D43；教學顯示 5 秒倒數，練習／考核不顯示）","tool.megger.discharged",
+periodic,STP_RT_02_InsulationTest,e2,208,3,"兩端測試線都已拆下；放電未滿 5 s 就伸手拆：教學擋下並顯示倒數不記錯，練習／考核記 Major","tool.megger.connected_count<=0",
+periodic,STP_RT_02_InsulationTest,f,209,2,"掛位 3 = 在架","rack.slot_3=on_rack",
+periodic,STP_RT_02_InsulationTest,r1,210,3,"已回報（放電、拆線之後）；作業負責人指示「掛回接地 #1，清潔絕緣子再重量」","workorder.ir_reported",b4c:holdpoint
+periodic,STP_RT_02_InsulationTest,r2a,211,3,"手持驗電桿（雙手），掛位 2 = in_hand（比照 IN_04b a）","tool.active=tool.voltage_detector&&rack.slot_2=in_hand",
+periodic,STP_RT_02_InsulationTest,r2b,212,3,"自檢通過（比照 IN_04b b）","tool.voltage_detector.selftest",
+periodic,STP_RT_02_InsulationTest,r2c,213,3,"顯示「無電」（比照 IN_04b c）","isolation.voltage_tested",
+periodic,STP_RT_02_InsulationTest,r2d,214,2,"掛位 2 = 在架","rack.slot_2=on_rack",
+periodic,STP_RT_02_InsulationTest,r2e,215,3,"手持接地桿（雙手），掛位 3 = in_hand","tool.active=tool.grounding_rod&&rack.slot_3=in_hand",
+periodic,STP_RT_02_InsulationTest,r2f,216,3,"已夾上（比照 IN_04b f）","isolation.terminal_clamped",
+periodic,STP_RT_02_InsulationTest,r2g,217,3,"拉線確認完成","isolation.pull_tested",
+periodic,STP_RT_02_InsulationTest,r2h,218,3,"已掛上（比照 IN_04b h）","isolation.head_clamped",
+periodic,STP_RT_02_InsulationTest,r2i,219,3,"#1 = 已登記（第三次）","ground_register.1=registered&&ground_register.1.registered_count>=3",b4c:ground_register
+periodic,STP_RT_02_InsulationTest,r3a,220,3,"平台掛點 = 已扣","harness.platform",
+periodic,STP_RT_02_InsulationTest,r3b,221,3,"hold.1.released = true（重走一次：作業負責人確認接地 #1 已掛、監護人到位）","hold.1.checklist_done&&hold.1.released",b4c:holdpoint
+periodic,STP_RT_02_InsulationTest,r3c,222,3,"兩個掛點都扣著","harness.roof&&harness.platform",
+periodic,STP_RT_02_InsulationTest,r3d,223,3,"只剩車頂掛點扣著","harness.roof&&harness.platform=false",
+periodic,STP_RT_02_InsulationTest,r3e,224,3,"手持清潔布，掛位 8 = in_hand","tool.active=tool.cleaning_cloth&&rack.slot_8=in_hand",
+periodic,STP_RT_02_InsulationTest,r3f1,225,3,"該支清除率 ≥ EX 95 %，且已目視繞看一圈（無裂痕）；一側子站點擦完再換另一側","ip.roof.insulator_1.clean_ratio>=0.95&&ip.roof.insulator_1.inspected",
+periodic,STP_RT_02_InsulationTest,r3f4,225,3,"該支清除率 ≥ EX 95 %，且已目視繞看一圈（無裂痕）；一側子站點擦完再換另一側","ip.roof.insulator_4.clean_ratio>=0.95&&ip.roof.insulator_4.inspected",
+periodic,STP_RT_02_InsulationTest,r3f3,225,3,"該支清除率 ≥ EX 95 %，且已目視繞看一圈（無裂痕）；一側子站點擦完再換另一側","ip.roof.insulator_3.clean_ratio>=0.95&&ip.roof.insulator_3.inspected",
+periodic,STP_RT_02_InsulationTest,r3f2,225,3,"該支清除率 ≥ EX 95 %，且已目視繞看一圈（無裂痕）；一側子站點擦完再換另一側","ip.roof.insulator_2.clean_ratio>=0.95&&ip.roof.insulator_2.inspected",
+periodic,STP_RT_02_InsulationTest,r3g,226,3,"掛位 8 = 在袋，工具袋與 WC_01a 清點時相同，車頂無遺留","rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&rack.slot_10=on_rack&&rack.slot_13=on_rack&&roof.leftover_count<=0",
+periodic,STP_RT_02_InsulationTest,r3h,227,3,"人在平台，兩個掛鉤都收在胸前扣環（比照 WC_02 a–c）","player.zone=platform&&harness.hooks_stowed",b4d
+periodic,STP_RT_02_InsulationTest,r4a,228,3,"掛鉤 = 已取下；人員已離開車頂（K5，比照 WC_03b a）","isolation.head_clamped=false&&harness.roof=false",
+periodic,STP_RT_02_InsulationTest,r4b,229,3,"接地夾 = 已鬆開（比照 WC_03b b）","isolation.terminal_clamped=false",
+periodic,STP_RT_02_InsulationTest,r4c,230,2,"掛位 3 = 在架","rack.slot_3=on_rack",
+periodic,STP_RT_02_InsulationTest,r4d,231,3,"#1 = 已銷號（第三次）","ground_register.1=cancelled&&ground_register.1.cancelled_count>=3",b4c:ground_register
+periodic,STP_RT_02_InsulationTest,r5a,232,2,"手持高阻計","tool.active=tool.megger",
+periodic,STP_RT_02_InsulationTest,r5b,233,3,"兩端都已接上","tool.megger.connected_count>=2",
+periodic,STP_RT_02_InsulationTest,r5c,234,3,"讀值穩定，清潔後 EX 500 MΩ","tool.megger.measured&&tool.megger.reading>=100",
+periodic,STP_RT_02_InsulationTest,r5d,235,3,"作業單讀值和高阻計一致","workorder.ir_reading>=0",
+periodic,STP_RT_02_InsulationTest,r5e,236,3,"≥ EX 100 MΩ 且勾合格","workorder.ir_judgement=pass&&tool.megger.reading>=100",
+periodic,STP_RT_02_InsulationTest,r6a,237,3,"掛位 11 = 在架，手持接地桿","rack.slot_11=on_rack&&tool.active=tool.grounding_rod",
+periodic,STP_RT_02_InsulationTest,r6b,238,3,"累計 ≥ EX 5 s","tool.megger.discharged",
+periodic,STP_RT_02_InsulationTest,r6c,239,3,"兩端測試線都已拆下","tool.megger.connected_count<=0",
+periodic,STP_RT_02_InsulationTest,r6d,240,2,"掛位 3 = 在架","rack.slot_3=on_rack",
+periodic,STP_WC_04_Unlock,a0,241,2,"停留點 4 清單全部點過，hold.4.released = true（接地登記欄 2 列都已銷號，且桿架 slot_3、工具架 slot_12 實物在架；人員已離開車頂；工具清點完成；絕緣電阻合格且已放電）","hold.4.checklist_done&&hold.4.released",b4c:holdpoint
+periodic,STP_WC_04_Unlock,a,242,2,"手持上鎖掛牌組","tool.active=tool.lockout_tag",
+periodic,STP_WC_04_Unlock,b,243,3,"升弓開關 = 未上鎖","lockout.raise_switch=open",
+periodic,STP_WC_04_Unlock,c,244,3,"主斷路器 = 未上鎖；放開後掛牌組自動收回腰包（WC_06 c 才歸還工具架）","lockout.breaker=open&&rack.slot_1=in_pouch",
+periodic,STP_WC_04_Unlock,d,245,3,"電動缸電源 = ON","cab.cylinder_power=on",
+periodic,STP_WC_05_RaiseTest,a,247,3,"已查看","part.crane.hook.inspected&&part.pan_assy.inspected",b4:p5
+periodic,STP_WC_05_RaiseTest,b,248,3,"弓頭升到頂","part.pan_head.pose=Raised",
+periodic,STP_WC_05_RaiseTest,c,249,3,"指示燈 = 升弓且已確認","ip.cab.pan_indicator.checked&&ip.cab.pan_indicator.shows=升弓",
+periodic,STP_WC_05_RaiseTest,d,250,3,"放開時 lower_check 與 lower_target 距離 ≤ EX 1 cm（比照 SI_01 a）","part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm",
+periodic,STP_WC_05_RaiseTest,e,251,3,"已簽名","workorder.sign_end",
+periodic,STP_WC_06_Handover,a,252,3,"作業單各欄（讀數、判定、新品履歷、絕緣電阻、接地登記、異常欄）都已填，作業負責人已簽","workorder.all_filled&&npc.work_leader.signed",b4c:holdpoint
+periodic,STP_WC_06_Handover,b,253,3,"檢查員 NPC 核對扭力標記、量測值、升弓試驗結果後判「可出車」","npc.inspector.verdict=pass",b4c:holdpoint
+periodic,STP_WC_06_Handover,c,254,2,"掛位 1、4 = 在架","rack.slot_1=on_rack&&rack.slot_4=on_rack",

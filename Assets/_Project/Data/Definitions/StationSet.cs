@@ -53,6 +53,7 @@ namespace PantographSim.Data
         [Tooltip("a6 第6項：tp.stand.* 的 Y 和地面 groundY 的容許差")] public float standStationYTolerance = 0.02f;
         [Tooltip("a6 第6項：tp.stand.* 到台架邊距離和 standStationOffset 的容許差")] public float standStationOffsetTolerance = 0.05f;
         [Tooltip("a6 第8項：車體接地座到 tp.roof.base_w 的水平距離上限")] public float carBodyGroundMaxDistance = 0.80f;
+        [Tooltip("R1.5b b4（D43，鐵道）：接地 #1 的接地線到 1 號絕緣子至少多遠（m）")] public float groundLineInsulatorClearance = 0.10f;
         [Tooltip("a6 第9項：tp.roof.base_e 到 HV_Cable_End 的水平距離上限")] public float baseECableMaxDistance = 1.30f;
         [Tooltip("a6 第10項(b)：平台鋼梯 ENV_PlatformStair 的 Z 範圍")] public float stairMinZ = 4.0f, stairMaxZ = 10.0f;
         [Tooltip("a6 第11項：降弓整組放上台架後（底架底面除外）到台架外框頂面的垂直距離下限")] public float standFrameMinClearance = 0.30f;

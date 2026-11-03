@@ -104,6 +104,9 @@ namespace PantographSim.App
             state.Set(SimIds.CourseId, course != null ? course.courseId : SimIds.CourseR1);   // 錄影、成績都記 courseId
             state.Set("app.courses.list", string.Join(";", new[] { SimIds.CourseR1 + "|" + r1Title + "|" }.Concat(courses.Where(c => c != null).Select(c => c.courseId + "|" + c.title + "|" + NoteOf(c.courseId)))));
             if (course != null) PantographSim.Worksite.CourseApplier.Apply(course, state);   // 課程覆寫（擺放、天車停駐、升弓上限）
+            var faults = course?.faults ?? new CourseDef.FaultOption[0];   // D43：可選故障，預設值讀資料
+            foreach (var f in faults) state.SetBool(f.key, f.defaultOn);
+            state.Set("app.faults.list", string.Join(";", faults.Select(f => f.key + "|" + f.title)));
             bus.Subscribe<ActionRequested>(OnRequest);
             if (SimSession.IsReplay) SetupReplay();
         }
@@ -177,6 +180,10 @@ namespace PantographSim.App
                 scoring.Start(Time.time);
                 // 等機構套用情境姿態、檢測點寫出實際距離後才開始判定（否則第一個小動作會用到上一個姿態的距離）
                 StartCoroutine(StartRunnerAfterPoseSettles());
+            }
+            else if (e.targetId == "app.fault" && !runner.Started && (course?.faults ?? new CourseDef.FaultOption[0]).Any(f => f.key == e.text))
+            {
+                state.SetBool(e.text, !state.GetBool(e.text));   // D43：教官在任務卡開關可選故障（開始前）
             }
             else if (e.targetId == "app.course" && !runner.Started)
             {

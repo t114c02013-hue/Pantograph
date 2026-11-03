@@ -20,7 +20,7 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | b4:p5 | 兩門課跑到結算（b4 第 5 部分；機制沒有指定段落，做的時候回報） |
 | b4:p3b | 扭力類錯誤與 K3 降級（b4 第 3b 部分） |
 
-## 小動作（共 66 列）
+## 小動作（共 71 列）
 
 | 步驟 | 小動作 | 課程 | 完成條件 | owner |
 |---|---|---|---|---|
@@ -28,6 +28,8 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_SI_06_RoofEntry | c | periodic | `env.work_order.roof_entry_check.checked_count>=11&&hold.1.released&&workorder.sign_start` | b4c:holdpoint |
 | STP_LF_01_PreLift | e | periodic | `hold.2.checklist_done&&hold.2.released` | b4c:holdpoint |
 | STP_IN_01_RigOnStand | d | periodic | `hold.3.checklist_done&&hold.3.released` | b4c:holdpoint |
+| STP_RT_02_InsulationTest | r1 | periodic | `workorder.ir_reported` | b4c:holdpoint |
+| STP_RT_02_InsulationTest | r3b | periodic | `hold.1.checklist_done&&hold.1.released` | b4c:holdpoint |
 | STP_WC_04_Unlock | a0 | daily | `hold.4.checklist_done&&hold.4.released` | b4c:holdpoint |
 | STP_WC_04_Unlock | a0 | periodic | `hold.4.checklist_done&&hold.4.released` | b4c:holdpoint |
 | STP_WC_06_Handover | a | daily | `workorder.all_filled&&npc.work_leader.signed` | b4c:holdpoint |
@@ -46,6 +48,8 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_WC_03b_RemoveGroundPlatform | d | periodic | `ground_register.1=cancelled` | b4c:ground_register |
 | STP_WC_01b_ToolCountPlatform | b | daily | `ground_register.1.confirmed&&ground_register.1=cancelled&&rack.slot_3=on_rack` | b4c:ground_register |
 | STP_WC_01b_ToolCountPlatform | b | periodic | `ground_register.1.confirmed&&ground_register.2.confirmed&&ground_register.1=cancelled&&ground_register.2=cancelled` | b4c:ground_register |
+| STP_RT_02_InsulationTest | r2i | periodic | `ground_register.1=registered&&ground_register.1.registered_count>=3` | b4c:ground_register |
+| STP_RT_02_InsulationTest | r4d | periodic | `ground_register.1=cancelled&&ground_register.1.cancelled_count>=3` | b4c:ground_register |
 | STP_SI_00_PreWork | a | daily | `env.work_order.anti_roll_check.checked_count>=3` | b4c:si00 |
 | STP_SI_00_PreWork | a | periodic | `env.work_order.anti_roll_check.checked_count>=3` | b4c:si00 |
 | STP_SI_00_PreWork | b | daily | `env.work_order.permit.viewed_count>=5` | b4c:si00 |
@@ -62,6 +66,7 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_RM_07_LeaveRoof | b | periodic | `harness.platform&&harness.roof=false&&player.zone=platform` | b4d |
 | STP_WC_02_LeaveRoof | c | daily | `player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use` | b4d |
 | STP_WC_02_LeaveRoof | c | periodic | `player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use` | b4d |
+| STP_RT_02_InsulationTest | r3h | periodic | `player.zone=platform&&harness.hooks_stowed` | b4d |
 | STP_CSR_01_CheckIsolation | a | daily | `workorder.si_all_done` | b4:p3 |
 | STP_CSR_10_CheckNew_L | g | daily | `env.work_order.part_trace.matches_spare_L` | b4:p4 |
 | STP_CSR_10_CheckNew_R | g | daily | `env.work_order.part_trace.matches_spare_R` | b4:p4 |
@@ -108,7 +113,7 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | consumable.carbon_strip | b4:p4 |
 | consumable.carbon_strip.measure_mid | b4:p4 |
 
-## 錯誤規則的觸發條件還沒做（Assets/_Project/Data/Source/ErrorRules.json 的 owner，共 43 條）
+## 錯誤規則的觸發條件還沒做（Assets/_Project/Data/Source/ErrorRules.json 的 owner，共 44 條）
 
 ErrorRuleTests.PendingTriggers_ListedInStubsDoc 檢查兩邊一致。觸發做好時把 owner 清空，再刪掉這裡那一列。
 
@@ -148,6 +153,7 @@ ErrorRuleTests.PendingTriggers_ListedInStubsDoc 檢查兩邊一致。觸發做�
 | ERR_Global_GroundNotRegistered | b4c:ground_register | Major |
 | ERR_Global_HoldPointRejected | b4c:holdpoint | Major |
 | ERR_Global_HoldPointSkipped | b4c:holdpoint | Critical |
+| ERR_RT02_NoReport | b4c:holdpoint | Major |
 | ERR_Global_KeyLeftUnattended | b4c:lockout | Minor |
 | ERR_Global_NoHelmet | b4c:ppe | Critical |
 | ERR_Global_NoInsulatingGloves | b4c:ppe | Critical |

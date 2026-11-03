@@ -1,5 +1,5 @@
 {
-  "_doc": "R1.5b b4 第 4 部分：defaultCourse（App 開場預設課程，b4c 做完前 r1，之後改 daily）、r1Title、menuNote（選單上的註記，b4c 做完後拿掉「開發中」）；CourseDef.overrides（第 2 部分 3.5，只放 SubActions.csv 表達不了的）。placements：id＝場景 ISimObject 的 ID，或「name:物件名稱」；anchor＝場景錨點名稱（空白＝不移動）；active＝顯示與否。onPass：CSR_05 合格跳轉。liftCapAboveO（D23、D41：升弓上限＝接觸線，從 O 點往上量，0＝不覆寫）、contactGapM（滑板頂面停在接觸線下方的視覺間距）、craneParked（D23 天車停駐）、initialStates（開場狀態，鍵=值：主斷路器、電動缸電源開著，學員自己切 OFF）。spareArrangement：備品架 L、R 兩側的排列（負責人裁定 2026-11-03，換到 R 側時補貨並換成 R 排列）。數值都在這裡，程式不寫死。",
+  "_doc": "R1.5b b4 第 4 部分：defaultCourse（App 開場預設課程，b4c 做完前 r1，之後改 daily）、r1Title、menuNote（選單上的註記，b4c 做完後拿掉「開發中」）；CourseDef.overrides（第 2 部分 3.5，只放 SubActions.csv 表達不了的）。placements：id＝場景 ISimObject 的 ID，或「name:物件名稱」；anchor＝場景錨點名稱（空白＝不移動）；active＝顯示與否。onPass：CSR_05 合格跳轉。liftCapAboveO（D23、D41：升弓上限＝接觸線，從 O 點往上量，0＝不覆寫）、contactGapM（滑板頂面停在接觸線下方的視覺間距）、craneParked（D23 天車停駐）、initialStates（開場狀態，鍵=值：主斷路器、電動缸電源開著，學員自己切 OFF）、faults（D43 可選故障：練習／考核由教官在任務卡開關、預設關，教學可開來示範）。spareArrangement：備品架 L、R 兩側的排列（負責人裁定 2026-11-03，換到 R 側時補貨並換成 R 排列）。數值都在這裡，程式不寫死。",
   "defaultCourse": "r1",
   "r1Title": "R1 滑板更換（原 25 步）",
   "r1MenuNote": "",
@@ -22,7 +22,8 @@
       ],
       "onPass": [ { "stepId": "STP_CSR_05_Decide", "key": "workorder.decision", "value": "pass", "jumpTo": "STP_IN_01_RigOnStand" } ],
       "liftCapAboveO": 0, "contactGapM": 0, "craneParked": false,
-      "initialStates": ["cab.breaker=on", "cab.cylinder_power=on"]
+      "initialStates": ["cab.breaker=on", "cab.cylinder_power=on"],
+      "faults": [ { "key": "fault.insulator_dirty", "title": "可選故障：絕緣子髒汙", "defaultOn": false } ]
     },
     {
       "courseId": "daily",

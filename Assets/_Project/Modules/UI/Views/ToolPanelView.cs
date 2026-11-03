@@ -98,7 +98,8 @@ namespace PantographSim.UI
             refreshers.Add(s =>
             {
                 string F(bool on, string t) => on ? Ui.Tint("● " + t, Ui.Ok) : Ui.Tint("○ " + t, Ui.Muted);
-                status.text = $"{F(s.GetBool(SimIds.TerminalClamped), "平台端子已夾")}　{F(s.GetBool(SimIds.PullTested), "拉線已確認")}　{F(s.GetBool(SimIds.HeadClamped), "弓頭已掛")}";
+                status.text = $"{F(s.GetBool(SimIds.TerminalClamped), "平台端子已夾")}　{F(s.GetBool(SimIds.PullTested), "拉線已確認")}　{F(s.GetBool(SimIds.HeadClamped), "弓頭已掛")}"
+                    + (s.Has("ui.discharge_countdown") ? $"\n放電倒數 {s.GetFloat("ui.discharge_countdown"):0.0} 秒" : "");   // D43：只有教學模式會寫倒數
                 pull.interactable = s.GetBool(SimIds.TerminalClamped) && !s.GetBool(SimIds.PullTested);
             });
         }
@@ -111,7 +112,7 @@ namespace PantographSim.UI
             var status = Ui.Text(p, "", 23);
             var row = Row(p);
             var test = Btn(row, "測試鍵（DC 1000 V）", () => Ui.Send(id, "test"), 240);
-            Help(row, "測試線：弓頭接地掛點、車體接地點　測完要用接地桿放電");
+            Help(row, "測試線：弓頭接地掛點、車體接地點　測完要用接地桿放電 5 秒才能空手拆線");
             refreshers.Add(s =>
             {
                 int n = (int)s.GetFloat("tool.megger.connected_count");

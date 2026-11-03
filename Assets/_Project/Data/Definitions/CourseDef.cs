@@ -18,7 +18,17 @@ namespace PantographSim.Data
             public bool active = true;
         }
 
+        /// <summary>R1.5b b4（D43）：可選故障（教官在任務卡開關；預設值在資料）。</summary>
+        [Serializable]
+        public class FaultOption
+        {
+            [Tooltip("黑板鍵，例 fault.insulator_dirty")] public string key;
+            public string title;
+            public bool defaultOn;
+        }
+
         public string courseId, title;
+        [Tooltip("D43：可選故障（只列在有的課程，例 定期的絕緣子髒汙）")] public FaultOption[] faults = Array.Empty<FaultOption>();
         public ProcedureDefinition procedure;
         public Placement[] placements = Array.Empty<Placement>();
         public JumpRule[] onPass = Array.Empty<JumpRule>();
