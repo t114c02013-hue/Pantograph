@@ -118,6 +118,9 @@ namespace PantographSim.Parts.Mechanism
         public void Tick(ISimState s) => Tick(s, Time.deltaTime);
 
         float pullFixed;
+        bool measureRefs;
+        Transform cogT, attachT;
+        Renderer[] beamR = new Renderer[0], headR = new Renderer[0];
 
         /// <summary>一幀；dt＝這一幀的秒數（拉著固定件起吊的累計秒數用）。</summary>
         public void Tick(ISimState s, float dt)
@@ -182,12 +185,19 @@ namespace PantographSim.Parts.Mechanism
             void F(string key, float v, float step) { v = Mathf.Round(v / step) * step; if (!s.Has(key) || Mathf.Abs(s.GetFloat(key) - v) >= step - 1e-5f) s.SetFloat(key, v); }
             float Flat(Vector3 a, Vector3 b) => new Vector2(a.x - b.x, a.z - b.z).magnitude;
             Vector3 Avg(Transform[] ts) { var p = Pos(ts); return p.Count == 0 ? transform.position : p.Aggregate(Vector3.zero, (a, b) => a + b) / p.Count; }
-            var cog = transform.Find("PAN_Base/COG");
-            var attach = crane != null && crane.HookBlock != null ? crane.HookBlock.GetComponentsInChildren<Transform>(true).FirstOrDefault(x => x.name == "Hook_AttachPoint") : null;
+            if (!measureRefs)   // 每幀都會跑：節點與 Renderer 只找一次（VR 90 fps 不要每幀配置陣列）
+            {
+                measureRefs = true;
+                cogT = transform.Find("PAN_Base/COG");
+                attachT = crane != null && crane.HookBlock != null ? crane.HookBlock.GetComponentsInChildren<Transform>(true).FirstOrDefault(x => x.name == "Hook_AttachPoint") : null;
+                beamR = crane != null && crane.Beam != null ? crane.Beam.GetComponentsInChildren<Renderer>() : new Renderer[0];
+                headR = (transform.Find("PAN_Head") ?? transform).GetComponentsInChildren<Renderer>();
+            }
+            var cog = cogT; var attach = attachT;
             if (cog != null && attach != null) F("part.crane.hook_cog_offset_cm", Flat(attach.position, cog.position) * 100f, 0.1f);
             if (crane != null && crane.Beam != null)
             {
-                var rs = crane.Beam.GetComponentsInChildren<Renderer>();
+                var rs = beamR;
                 if (rs.Length > 0)
                 {
                     float beamBottom = rs.Min(r => r.bounds.min.y);
@@ -196,8 +206,7 @@ namespace PantographSim.Parts.Mechanism
                     // 吊梁離作業面（吊鉤在台架附近＝台架頂面，否則＝車頂）：ERR_Crane_FastLowerEmptyHook
                     bool overStand = roofScene != null && new Vector2(hp.x - roofScene.standCenterXZ.x, hp.z - roofScene.standCenterXZ.y).magnitude <= def.standSurfaceRadius;
                     F("part.crane.beam_above_surface_m", beamBottom - (overStand ? roofScene.StandTopY : RoofY(hp.x)), 0.01f);
-                    var head = transform.Find("PAN_Head") ?? transform;
-                    var hr = head.GetComponentsInChildren<Renderer>();
+                    var hr = headR;
                     if (hr.Length > 0) F("part.crane.beam_above_pan_m", beamBottom - hr.Max(r => r.bounds.max.y), 0.01f);
                 }
             }

@@ -120,12 +120,13 @@ namespace PantographSim.App
         /// <summary>卡關偵測：每 0.5 s 只讀地檢查目前步驟（不推進步驟；見 ProcedureRunner.Poll）。重播時 runner 沒有開始，不作用。</summary>
         string dwellId = ""; float dwellT;
         ToolRulesDef toolRules;
+        bool toolRulesLoaded;
 
         void Update()
         {
             runner?.Poll(Time.time);
             if (state == null) return;
-            toolRules = toolRules != null ? toolRules : ToolRulesDef.Load();
+            if (!toolRulesLoaded) { toolRules = ToolRulesDef.Load(); toolRulesLoaded = true; }
             (dwellId, dwellT) = InspectLogic.Dwell(state, dwellId, dwellT, Time.deltaTime, toolRules);   // R1.5b b4：指著停一下＝查看（桌面、VR 同一套）
         }
 

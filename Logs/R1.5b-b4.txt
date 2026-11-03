@@ -1,0 +1,26 @@
+段：R1.5b b4 匯入兩門課（定期檢修 periodic、日常更換 daily）、完成條件與錯誤規則、課程覆寫、兩門課跑到結算、b4:p5 機制。步驟表 steps-v6 v3.5（SubActions 9451b1f8…、Steps 38142c93…；v3.10 已收到、核對，下一段套用）。
+提交：c371e05（1）、cb7927c（2）、8132580（2b）、ea3a19b（2c）、d09c7ee（3a）、4fcfbb4（3b）、eeb5b56（3c）、49b5d3a（3d）、a3c412a（3e）、acd746b（4a）、aebb384（4b）、d2afcda（4c）、3efe448（4d）、0caba19（5a）、3b31dc9（5b）、f7e46a7（5c）、330ea88（5d）、0c32cbf（5e）、5dc4d4a（5f）、43a7817（5g）、7383f55（5h）、56cd9ed（5i）、7326c80＋2d06a19（5j）、149277a（5k）、a9f3830（5l）、f1a3da6（5m）、8f5de4c（5n）。另 80e284c（GitHub 推送準備）。
+改動（第 5 部分；1–4 見各提交）：
+- 課程選擇：任務卡 R1／日常／定期（預設 r1、「開發中」寫在 Courses.json），換課程重新載入場景；錄影與成績記 courseId，回放先載入錄影的課程（舊錄影＝r1）。可選故障在任務卡由教官開關（D43 絕緣子髒汙，預設關）。
+- SR_Ground_RemoveOrder、SR_Ground_Order 標 deprecated（課程裡由 ERR_WC03_RemoveOrder、ERR_Global_GroundHangOrder 取代，R1 照舊）。
+- 機制：D31 胸前扣環；攜帶式短接地線；控制盤開關（主斷路器、電動缸電源、升弓鈕）與上鎖掛牌；作業單異常欄、絕緣電阻、合格／不合格、平台清點；高阻計、放電、空手拆測試線（D43）；集電弓螺栓讀 SocketCatalog 套筒、收進工具袋零件袋；控制線接頭防塵蓋、固定帶拉線確認；清點（掛位讀 ToolSlotTable）、台架工具盤；絕緣子髒汙（DirtSurface、v3.12 計分格建置時烘焙）；吊運量測（吊鉤與重心、吊梁高度、停住秒數、傾斜、對位、座落）、急停測試、指著停一下＝查看、吊帶可用／不可用；錯誤觸發 20 條。
+- 底層：templateN 的 when=（分支小動作）；ChecklistEval「!鍵」；ErrorDetector 也判步驟上的 WhenCondition（只在該步啟用時）；匯入器認得 Deprecated／NotApplicable。
+- 測試：CourseFlowTests 兩門課與故障分支跑到結算（腳本走 ToolBelt、天車、PositionCheck＋LiftControl、FastenerLogic 等真的機制）；新增 CourseSelection、HarnessLead、CabControl、MeggerWorkOrder、PanFastener、ToolCount、InsulatorReach、ErrorTrigger、ErrorOwner 等。
+略過／留給後面：
+- b4:p5 小動作暫代已全部做完；錯誤規則還有 owner 的：b4c（停留點與 NPC、接地登記、PPE、一人一鎖、SI_00、滑板上下車頂、扭力扳手選套筒）、b4d（區域、SI03_CylinderPowerOn）、R2／n/a（裁定不適用）。清單在 Docs/R1.5b/b4c-stubs.md。
+- ERR_SI02_TagWithoutLock 等 v3.10（上鎖掛牌拆開）；RM_05 d 目標改名、吊帶割傷故障、D44 吊帶平台查看、站點搬移都在 v3.10。
+- 胸前扣環、短接地線、控制盤、吊帶判定、清點、擦絕緣子都有 VR 與桌面入口，實機手感留到 R1.5b 收尾試玩。
+風險：
+- CourseFlowTests 裡天車吊運用測試用天車（座面＝吊物原本的高度），台架與車頂的實際高度差在 RiggingTests 用真場景驗。
+- 建置後只還原材質雜訊；5a–5k 之間曾還原 prefab 造成場景參照斷掉（已在 5l 重建並提交相配的 prefab，之後照建置結果提交）。
+ponytail-review（0caba19..8f5de4c）：2 條 Should fix，都已修——PanAssyRigging.WriteMeasures 每幀 Find／GetComponentsInChildren（改成第一次查完存起來）；ToolRules 缺檔時 SliceBootstrap 每幀重讀（加已讀旗標）。結論 Ship。
+測試：EditMode 450/450（收尾提交前 449，另加 BlackboardKeyDefTests 1 條）、PlayMode 3/3，Console 紅字 0（場景建置 0 error）
+功能不變檢查：
+1. 0 紅字、沒有新的 warning：是（建置 log 只有 Unity IPC 連線雜訊）
+2. 測試數量不減少：305 → 450；MeggerWorkOrderTests 依 D43 改寫規則（放下高阻計不收線）時保留並加案例，沒有刪測試
+3. 公開簽章：只新增（FastenerLogic.Apply 加套筒參數的多載、PanAssyRigging.Tick(s, dt) 多載、DirtMask.Clean 多載、CraneMechanism.HookBlock／Beam、SliceBootstrap.SetCourses／SetRigging 等）；SliceSceneBuilder.ToolTypes 改成 public（測試共用）
+4. 資料檔：本段要求的 CSV（v3.3 → v3.5，SHA 逐步核對）、ConditionTables、ErrorRules、Courses、BlackboardKeys、ToolRules 與新資料資產
+5. 場景與 prefab 沒有 Missing：建置成功；StationLayoutCheck 20 站 198 過／0 待定／0 不合格（含 D43 接地線到 1 號絕緣子 0.147 m）
+6. 桌面版 25 步：先用 SliceDryRunTests（EditMode，R1 的 25 步）的結果代替，全過；桌面 RecordingCheckDriver 待 terry 開 Unity 後補跑（上一次今天 13:40：分數 85、只有 E1）
+7. 純精簡和功能改動分開：本段只有功能改動
+未檢查：頭盔實機與桌面實機的操作手感——R1.5b 收尾請 terry 試
