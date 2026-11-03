@@ -20,10 +20,11 @@ namespace PantographSim.Tests
         public readonly List<ErrorDetected> errors = new List<ErrorDetected>();
         public static ToolSlotTable Table => AssetDatabase.LoadAssetAtPath<ToolSlotTable>("Assets/_Project/Modules/Worksite/Data/ToolSlotTable.asset");
 
-        public BeltRig()
+        /// <summary>bus、state：接到別的測試的黑板（CourseFlowTests 走真的拿放）；null＝自己建一個。</summary>
+        public BeltRig(EventBus bus = null, SimState state = null)
         {
             ServiceLocator.Clear();
-            var bus = new EventBus(); s = new SimState(bus);
+            bus = bus ?? new EventBus(); s = state ?? new SimState(bus);
             ServiceLocator.Register<IEventBus>(bus); ServiceLocator.Register<ISimState>(s);
             bus.Subscribe<ErrorDetected>(e => errors.Add(e));
             root = new GameObject("TestBelt"); root.SetActive(false);

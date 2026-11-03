@@ -18,14 +18,158 @@ namespace PantographSim.Tests
     /// </summary>
     public class CourseFlowTests
     {
+        /// <summary>
+        /// R1.5b b4（5b）：腳本走真的機制、不直接寫黑板的鍵（這些都是 LiveState，一成立就完成，所以要靠機制連帶的變化才不會啟用時就成立）：
+        /// 工具拿放 tool.active、rack.slot_N（ToolBelt：拿起＝in_hand、收回＝on_rack、上鎖包進腰包）；吊物底面 part.crane.load_bottom_y（CraneMechanism，吊物懸空時才寫）；
+        /// 離座高度 part.crane.drop_distance：天車真的把吊物移到「座面（吊物原本放著的高度）＋該高度」，同時寫 part.pan_assy.state＝Lifted
+        /// （場景裡由 PanAssyRigging 寫，RiggingTests 的車頂↔台架往返驗證過；drop_distance 本身仍是 b4:p5 暫代）；降弓檢測點 part.pan_head.lower_distance_cm（PositionCheck＋LiftControl 放開時強制量一次）。
+        /// </summary>
+        sealed class Mechanisms : System.IDisposable
+        {
+            readonly SimState s;
+            readonly BeltRig belt;
+            readonly CraneRig crane;
+            readonly UnityEngine.GameObject pcRoot;
+            readonly PantographSim.Parts.Common.PositionCheck pc;
+            readonly UnityEngine.Transform check;
+            readonly float restBottomY;
+            static readonly System.Text.RegularExpressions.Regex Slot = new System.Text.RegularExpressions.Regex(@"^rack\.slot_(\d+)=(on_rack|in_hand|in_use)$");
+
+            public Mechanisms(EventBus bus, SimState state)
+            {
+                s = state;
+                crane = new CraneRig(true, bus, s);
+                belt = new BeltRig(bus, s);
+                restBottomY = Bottom;
+                pcRoot = new UnityEngine.GameObject("TestPanHeadCheck");
+                check = new UnityEngine.GameObject("Check").transform; check.SetParent(pcRoot.transform);
+                pc = pcRoot.AddComponent<PantographSim.Parts.Common.PositionCheck>();
+                pc.Setup(AssetDatabase.LoadAssetAtPath<PositionCheckDefinition>("Assets/_Project/Modules/Parts/_Common/Data/PC_PanHeadLower.asset"), check, null, null, null, null);
+                check.position = pc.TargetWorld + UnityEngine.Vector3.up;   // 開場升弓
+                Sensors.Register(pc);   // EditMode 不會呼叫 OnEnable
+                var notLowered = StepJsonImporter.LoadAll<SafetyRuleDefinition>(StepJsonImporter.SafetyFolder).First(r => r.kind == SafetyRuleKind.NotLowered);
+                s.SetFloat(SimIds.PanHeadLowerTolerance, notLowered.toleranceCm);   // App 開場寫的（容許值只有一個來源）
+            }
+
+            float Bottom => crane.load.position.y - crane.load.localScale.y / 2f;
+            int SlotOf(string toolId) => BeltRig.Table.FindTool(toolId).slot;
+            string SlotState(int n) => s.Get(RackLogic.SlotKey(n), RackLogic.OnRack);
+
+            void Hold(string toolId)
+            {
+                string active = s.Get(SimIds.ActiveTool);
+                if (active == toolId) return;
+                if (active != "") belt.belt.ClickSlot(SlotOf(active));   // 先放回手上那件
+                if (toolId == "") return;
+                int n = SlotOf(toolId);
+                if (SlotState(n) != RackLogic.InPouch) belt.belt.ClickSlot(n);
+                if (SlotState(n) == RackLogic.InPouch) Pouch();   // 上鎖包：從腰包拿出來
+            }
+
+            void Pouch() => Sim.Bus.Publish(new ActionRequested { targetId = ToolSlotTable.WaistPouch, text = "", toolId = "" });
+
+            void Rack(int n, string want)
+            {
+                if (SlotState(n) == want) return;
+                var tool = BeltRig.Table.Find(n).toolId;
+                if (want == RackLogic.OnRack)
+                {
+                    if (s.Get(SimIds.ActiveTool) != tool) Hold("");   // 收回腰包、使用中的工具：手先空出來
+                    belt.belt.ClickSlot(n);
+                }
+                else
+                {
+                    Hold(tool);
+                    if (want == RackLogic.InUse) Sim.Bus.Publish(new ActionRequested { targetId = "tool.belt", text = "deploy", toolId = "" });
+                }
+            }
+
+            /// <summary>吊物底面移到 y（上或下）。</summary>
+            void HoistTo(float y)
+            {
+                if (Bottom < y) Hoist("Up", b => b >= y - 1e-3f); else if (Bottom > y + 1e-3f) Hoist("Down", b => b <= y + 1e-3f);
+            }
+
+            void Hoist(string cmd, System.Func<float, bool> until)
+            {
+                crane.Cmd(cmd, true);
+                for (int i = 0; i < 20000 && !until(Bottom); i++) crane.Run(0.05f, 0.05f);
+                crane.Cmd("Stop"); crane.Run(0.2f, 0.05f);
+                Assert.IsTrue(until(Bottom), $"天車 {cmd} 到不了（吊物底 {Bottom:0.000}、狀態 {s.Get(SimIds.CraneState)}）");
+            }
+
+            const string RaisedPose = "part.pan_head.pose=Raised";
+
+            void RaisePan()
+            {
+                check.position = pc.TargetWorld + UnityEngine.Vector3.up;   // 檢測點離開降弓位置
+                LiftControl.Send(s, "Up");
+                LiftControl.Send(s, "Stop");
+            }
+
+            void LowerPan()
+            {
+                check.position = pc.TargetWorld;   // 弓頭降到降弓位置
+                LiftControl.Send(s, "Down");
+                LiftControl.Send(s, "Stop");       // 放開：PositionCheck 強制量一次
+            }
+
+            /// <summary>一個 tick：機制的動作和其他鍵一批生效（和原本的 Write 一樣）。回傳有沒有走機制。</summary>
+            public bool Write(string condition) { bool used = false; s.Batch(() => used = WriteInBatch(condition)); return used; }
+
+            bool WriteInBatch(string condition)
+            {
+                var rest = new List<string>();
+                float? dropLo = null, dropHi = null;
+                foreach (var part in condition.Split(new[] { "&&" }, System.StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()))
+                {
+                    var m = Slot.Match(part);
+                    if (part.StartsWith(SimIds.ActiveTool + "=")) Hold(part.Substring(SimIds.ActiveTool.Length + 1));
+                    else if (m.Success) Rack(int.Parse(m.Groups[1].Value), m.Groups[2].Value);
+                    else if (part.StartsWith(SimIds.CraneLoadBottomY + ">="))
+                    {
+                        float y = float.Parse(part.Substring(SimIds.CraneLoadBottomY.Length + 2), CultureInfo.InvariantCulture);
+                        Hoist("Up", b => b >= y);
+                    }
+                    else if (part.StartsWith(SimIds.PanHeadLowerDistance + "<=")) LowerPan();
+                    else if (part == RaisedPose) { RaisePan(); rest.Add(part); }   // 弓頭升到頂（姿態鍵在場景裡由 PantographMechanism 寫）
+                    else if (part.StartsWith(PantographSim.Parts.Mechanism.PanAssyRigging.DropDistanceKey))
+                    {
+                        var key = PantographSim.Parts.Mechanism.PanAssyRigging.DropDistanceKey;
+                        float v = float.Parse(part.Substring(key.Length + 2), CultureInfo.InvariantCulture);
+                        if (part.Substring(key.Length, 2) == ">=") dropLo = v; else dropHi = v;
+                        rest.Add(part);
+                    }
+                    else rest.Add(part);
+                }
+                if (dropLo.HasValue || dropHi.HasValue)
+                {
+                    s.Set(PantographSim.Parts.Mechanism.PanAssyRigging.StateKey, PantographSim.Parts.Mechanism.PanAssyRigging.Lifted);   // 吊物懸空（天車才寫吊物底面）
+                    float drop = dropLo.HasValue && dropHi.HasValue ? (dropLo.Value + dropHi.Value) / 2f : dropLo ?? dropHi.Value;
+                    HoistTo(restBottomY + drop);   // 試吊離座、放到定位銷／絕緣子上方
+                }
+                if (rest.Count > 0) CourseFlowTests.Write(s, string.Join("&&", rest));
+                return rest.Count < condition.Split(new[] { "&&" }, System.StringSplitOptions.RemoveEmptyEntries).Length || dropLo.HasValue || dropHi.HasValue;
+            }
+
+            public void Dispose()
+            {
+                Sensors.Unregister(pc);
+                UnityEngine.Object.DestroyImmediate(pcRoot);
+                belt.Dispose(); crane.Dispose();
+            }
+        }
+
         class Flow
         {
             public readonly EventBus bus = new EventBus();
             public readonly SimState s;
             public readonly ProcedureRunner runner;
             public readonly ProcedureDefinition prc;
+            readonly Mechanisms mech;
             public readonly List<string> autoCompleted = new List<string>();   // 啟用同一個 tick 就完成（違規）
             public readonly List<string> wouldAuto = new List<string>();       // 啟用時條件已成立（沒有 version 規則就會自動完成）
+            public readonly HashSet<string> driven = new HashSet<string>();     // 走真的機制的小動作（步驟 小動作）
 
             public Flow(string course)
             {
@@ -33,8 +177,11 @@ namespace PantographSim.Tests
                 Assert.IsNotNull(prc, course + "：要先跑 Tools/Import Steps");
                 Assert.IsTrue(prc.requireFreshWrite, course + "：匯入的課程要開 requireFreshWrite");
                 s = new SimState(bus);
+                mech = new Mechanisms(bus, s);   // 先接機制（開場狀態），再建流程
                 runner = new ProcedureRunner(prc, bus, s);
             }
+
+            public void Dispose() { runner.Dispose(); mech.Dispose(); }
 
             int Sub => (int)s.GetFloat("procedure.sub_index");
 
@@ -51,8 +198,8 @@ namespace PantographSim.Tests
                     {
                         if (stop != null && stop(st.def.stepId, subs[idx].subId)) return true;
                         if (ChecklistEval.Done(s, subs[idx].condition)) wouldAuto.Add($"{st.RunId} {subs[idx].subId}：{subs[idx].condition}{(FreshWriteGate.EventKeys(subs[idx].condition).Any() ? "" : "　〔只讀 LiveState：照規則一出現就完成〕")}");
-                        Write(s, subs[idx].condition);   // 一個 tick
-                        if (runner.Current == st && Sub == idx) Assert.Fail($"{st.RunId} {subs[idx].subId}：寫了條件鍵還是沒完成（{subs[idx].condition}）");
+                        if (mech.Write(subs[idx].condition)) driven.Add(st.def.stepId + " " + subs[idx].subId);   // 一個 tick（工具拿放、天車、降弓走真的機制）
+                        if (runner.Current == st && Sub == idx) Assert.Fail($"{st.RunId} {subs[idx].subId}：寫了條件鍵還是沒完成（{subs[idx].condition}；目前 {string.Join("、", RuleExplainer.KeysOf(subs[idx].condition).Select(k => k + "=" + s.Get(k)))}；提示 {s.Get("ui.toast")}）");
                         CheckNoAuto(st, idx);
                     }
                     else
@@ -128,11 +275,15 @@ namespace PantographSim.Tests
             {
                 f.Run();
                 Assert.IsEmpty(f.autoCompleted, string.Join("\n", f.autoCompleted));
+                // 第 5 部分：這幾個先前只是腳本沒模擬機制連帶的變化，現在要走真的機制（不加例外）
+                if (course == "periodic")
+                    foreach (var sub in new[] { "STP_IN_03_Transfer a", "STP_IN_07_BaseTorque a", "STP_RT_02_InsulationTest f", "STP_WC_05_RaiseTest d" })
+                        Assert.IsTrue(f.driven.Contains(sub), sub + " 要走真的機制");
                 System.IO.Directory.CreateDirectory("Logs");
                 System.IO.File.WriteAllText($"Logs/CourseFlow_{course}.txt",
                     $"{course}：{f.runner.Finished}，啟用時條件已成立、靠 version 規則擋下（沒有這條規則就會自動完成）的小動作 {f.wouldAuto.Count} 個：\n" + string.Join("\n", f.wouldAuto) + "\n");
             }
-            finally { f.runner.Dispose(); }
+            finally { f.Dispose(); }
         }
 
         /// <summary>R1.5b b4（5a）：兩門課從頭跑到結算（ErrorDetector＋Scoring），結算畫面要的分數、Critical／Major／Minor 數都產生出來。</summary>
@@ -157,7 +308,7 @@ namespace PantographSim.Tests
                 System.IO.File.AppendAllText($"Logs/CourseFlow_{course}.txt",
                     $"結算：分數 {result.score}、Critical {result.critical}、Major {result.major}、Minor {result.minor}、通過 {result.passed}\n");
             }
-            finally { scoring.Dispose(); det.Dispose(); f.runner.Dispose(); }
+            finally { scoring.Dispose(); det.Dispose(); f.Dispose(); }
         }
 
         /// <summary>反例：在 SI_04 b 做過自檢後，IN_04b b 啟用時 selftest 已經是 true，不能自動完成；要再點一次自檢器。</summary>
@@ -188,7 +339,7 @@ namespace PantographSim.Tests
                 f.s.SetBool(actionKey, true);   // 再做一次（值本來就是 true，也要寫入）
                 Assert.IsTrue(f.runner.Current.def.stepId != stepId || ProcedureRunner.SubActions(f.runner.Current)[(int)f.s.GetFloat("procedure.sub_index")].subId != subId, "再做一次就完成（比對步驟＋小動作：下一步的第一個可能接著完成）");
             }
-            finally { f.runner.Dispose(); }
+            finally { f.Dispose(); }
         }
 
         [Test]

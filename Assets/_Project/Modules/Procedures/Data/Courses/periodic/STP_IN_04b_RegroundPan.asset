@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba5920db9fb39434dadca23eafa525e9, type: 3}
-  m_Name: STP_IN_04b_RegroundPan
+  m_Name: _import_tmp
   m_EditorClassIdentifier: 
   stepId: STP_IN_04b_RegroundPan
   title: "\u9A57\u96FB\u4E26\u91CD\u639B #1 \u63A5\u5730\u687F"
@@ -36,7 +36,7 @@ MonoBehaviour:
     - "\u9EDE\u81EA\u6AA2\u5668\u78BA\u8A8D\u4EAE\u7DA0\u71C8|tool.voltage_detector.selftest"
     - "\u5F9E\u5E73\u53F0\u9EDE\u5F13\u982D\u63A5\u5730\u639B\u9EDE|isolation.voltage_tested"
     - "\u628A\u9A57\u96FB\u687F\u653E\u56DE\u687F\u67B6|rack.slot_2=on_rack"
-    - "\u5230\u687F\u67B6\u62FF\u8D77\u63A5\u5730\u687F|tool.active=tool.grounding_rod&&rack.slot_3=in_use"
+    - "\u5230\u687F\u67B6\u62FF\u8D77\u63A5\u5730\u687F|tool.active=tool.grounding_rod&&rack.slot_3=in_hand"
     - "\u628A\u63A5\u5730\u593E\u593E\u4E0A\u63A5\u5730\u7AEF\u5B50|isolation.terminal_clamped"
     - "\u62C9\u4E00\u4E0B\u63A5\u5730\u7DDA\u78BA\u8A8D|isolation.pull_tested"
     - "\u628A\u639B\u9264\u639B\u4E0A\u5F13\u982D\u63A5\u5730\u9EDE|isolation.head_clamped"
@@ -52,6 +52,7 @@ MonoBehaviour:
     condition: tool.active=tool.voltage_detector
     standPointId: tp.platform.ground
     subId: a
+    textDesktop: 
   - text: "\u9EDE\u81EA\u6AA2\u5668\u78BA\u8A8D\u4EAE\u7DA0\u71C8"
     why: 
     targetId: ip.depot.detector_tester
@@ -59,6 +60,7 @@ MonoBehaviour:
     condition: tool.voltage_detector.selftest
     standPointId: tp.platform.ground
     subId: b
+    textDesktop: 
   - text: "\u5F9E\u5E73\u53F0\u9EDE\u5F13\u982D\u63A5\u5730\u639B\u9EDE"
     why: 
     targetId: ip.pan_head.ground_clamp
@@ -66,6 +68,7 @@ MonoBehaviour:
     condition: isolation.voltage_tested
     standPointId: tp.platform.ground
     subId: c
+    textDesktop: 
   - text: "\u628A\u9A57\u96FB\u687F\u653E\u56DE\u687F\u67B6"
     why: 
     targetId: "env.tool_rack.slot_2\uFF08env.pole_rack\uFF09"
@@ -73,13 +76,15 @@ MonoBehaviour:
     condition: rack.slot_2=on_rack
     standPointId: tp.platform.ground
     subId: d
+    textDesktop: 
   - text: "\u5230\u687F\u67B6\u62FF\u8D77\u63A5\u5730\u687F"
     why: 
     targetId: "env.tool_rack.slot_3\uFF08env.pole_rack\uFF09"
     toolId: tool.grounding_rod
-    condition: tool.active=tool.grounding_rod&&rack.slot_3=in_use
+    condition: tool.active=tool.grounding_rod&&rack.slot_3=in_hand
     standPointId: tp.platform.ground
     subId: e
+    textDesktop: 
   - text: "\u628A\u63A5\u5730\u593E\u593E\u4E0A\u63A5\u5730\u7AEF\u5B50"
     why: 
     targetId: ip.depot.ground_terminal
@@ -87,6 +92,7 @@ MonoBehaviour:
     condition: isolation.terminal_clamped
     standPointId: tp.platform.ground
     subId: f
+    textDesktop: 
   - text: "\u62C9\u4E00\u4E0B\u63A5\u5730\u7DDA\u78BA\u8A8D"
     why: 
     targetId: ip.depot.ground_terminal
@@ -94,6 +100,7 @@ MonoBehaviour:
     condition: isolation.pull_tested
     standPointId: tp.platform.ground
     subId: g
+    textDesktop: 
   - text: "\u628A\u639B\u9264\u639B\u4E0A\u5F13\u982D\u63A5\u5730\u9EDE"
     why: 
     targetId: ip.pan_head.ground_clamp
@@ -101,6 +108,7 @@ MonoBehaviour:
     condition: isolation.head_clamped
     standPointId: tp.platform.ground
     subId: h
+    textDesktop: 
   - text: "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u518D\u767B\u8A18 #1"
     why: 
     targetId: env.work_order.ground_register
@@ -108,6 +116,7 @@ MonoBehaviour:
     condition: ground_register.1=registered&&ground_register.1.registered_count>=2
     standPointId: tp.platform.ground
     subId: i
+    textDesktop: 
   presetDone: 0
   side: 
   presetStates: []

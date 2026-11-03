@@ -20,11 +20,12 @@ namespace PantographSim.Tests
         public readonly Transform hook, load;
         Vector3? head;
 
-        public CraneRig(bool withLoad = true)
+        /// <summary>bus、st：接到別的測試的黑板（CourseFlowTests 走真的天車）；null＝自己建一個。</summary>
+        public CraneRig(bool withLoad = true, EventBus bus = null, SimState st = null)
         {
             ServiceLocator.Clear();
-            var bus = new EventBus();
-            state = new SimState(bus);
+            bus = bus ?? new EventBus();
+            state = st ?? new SimState(bus);
             ServiceLocator.Register<IEventBus>(bus);
             ServiceLocator.Register<ISimState>(state);
             bus.Subscribe<ErrorDetected>(e => errors.Add(e));

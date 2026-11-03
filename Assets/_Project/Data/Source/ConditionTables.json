@@ -83,7 +83,7 @@
     { "text": "夾具已鬆開", "rule": "ip.roof.carbody_ground.clamped=false", "owner": "b4:p5" },
     { "text": "自檢通過", "rule": "tool.voltage_detector.selftest" },
     { "text": "顯示「無電」", "rule": "isolation.voltage_tested" },
-    { "text": "手持接地桿（雙手），掛位 3 = 使用中", "rule": "tool.active={tool}&&rack.slot_3=in_use" },
+    { "text": "手持接地桿（雙手），掛位 3 = 使用中", "rule": "tool.active={tool}&&rack.slot_3=in_hand", "why": "R1.5b b4（5b）：拿在手上時 ToolBelt 寫 in_hand（in_use＝掛上場後手空著），原本寫 in_use 兩個條件不可能同時成立" },
     { "text": "掛位 11 = 在架，手持接地桿", "rule": "rack.slot_11=on_rack&&tool.active=tool.grounding_rod" },
     { "text": "hold_down = Installed", "rule": "{t0}.state=Installed" },
     { "text": "拉 ≥ EX 5 cm，狀態不變", "rule": "{t0}.pull_tested", "owner": "b4:p5" },
