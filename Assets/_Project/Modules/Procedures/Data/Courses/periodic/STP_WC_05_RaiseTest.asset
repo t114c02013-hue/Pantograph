@@ -25,7 +25,7 @@ MonoBehaviour:
   - env.work_order.sign_end
   requiredToolId: 
   completion:
-    rid: 8951035174947913863
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -46,30 +46,35 @@ MonoBehaviour:
     toolId: 
     condition: part.crane.hook.inspected&&part.pan_assy.inspected
     standPointId: tp.platform.lift
+    subId: a
   - text: "\u6309\u4F4F \u25B2 \u5347\u5230\u9802\uFF08\u7D04 15 s\uFF09"
     why: 
     targetId: ui.lift_controller
     toolId: 
     condition: part.pan_head.pose=Raised
     standPointId: tp.platform.lift
+    subId: b
   - text: "\u78BA\u8A8D\u5F13\u4F4D\u6307\u793A\u71C8 = \u5347\u5F13"
     why: 
     targetId: ip.cab.pan_indicator
     toolId: 
     condition: "ip.cab.pan_indicator.checked&&ip.cab.pan_indicator.shows=\u5347\u5F13"
     standPointId: tp.platform.lift
+    subId: c
   - text: "\u6309\u4F4F \u25BC \u964D\u56DE\u7DA0\u6846"
     why: 
     targetId: ui.lift_controller
     toolId: 
     condition: part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm
     standPointId: tp.platform.lift
+    subId: d
   - text: "\u5728\u4F5C\u696D\u55AE\u7C3D\u540D\u5B8C\u5DE5"
     why: 
     targetId: env.work_order.sign_end
     toolId: 
     condition: workorder.sign_end
     standPointId: tp.platform.lift
+    subId: e
   presetDone: 0
   side: 
   presetStates: []
@@ -79,12 +84,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913863
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - part.crane.hook.inspected&&part.pan_assy.inspected
-        - part.pan_head.pose=Raised
-        - "ip.cab.pan_indicator.checked&&ip.cab.pan_indicator.shows=\u5347\u5F13"
-        - part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm
-        - workorder.sign_end
+        keys: []

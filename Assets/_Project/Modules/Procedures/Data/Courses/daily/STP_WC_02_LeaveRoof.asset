@@ -56,18 +56,21 @@ MonoBehaviour:
     toolId: tool.safety_harness
     condition: harness.roof&&harness.platform
     standPointId: tp.platform.anchor
+    subId: a
   - text: "\u89E3\u958B\u8ECA\u9802\u639B\u9EDE"
     why: 
     targetId: ip.roof.anchor
     toolId: tool.safety_harness
     condition: harness.platform&&harness.roof=false
     standPointId: tp.platform.anchor
+    subId: b
   - text: "\u89E3\u958B\u639B\u9264\uFF0C\u6536\u5230\u80F8\u524D\u6263\u74B0"
     why: 
     targetId: "tool.safety_harness\uFF08\u80F8\u524D\u6263\u74B0\uFF09"
     toolId: tool.safety_harness
     condition: player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use
     standPointId: tp.platform.anchor
+    subId: c
   presetDone: 0
   side: 
   presetStates: []
@@ -78,19 +81,6 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 1000
-      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        rules:
-        - rid: 1001
-        - rid: 1002
-    - rid: 1001
       type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         keys: []
-    - rid: 1002
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        conditions:
-        - harness.roof&&harness.platform
-        - harness.platform&&harness.roof=false
-        - player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use

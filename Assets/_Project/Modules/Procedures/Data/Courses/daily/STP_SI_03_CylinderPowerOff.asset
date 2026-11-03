@@ -56,18 +56,21 @@ MonoBehaviour:
     toolId: 
     condition: cab.cylinder_power=off
     standPointId: tp.cab
+    subId: a
   - text: "\u6309\u5347\u5F13\u9215\u78BA\u8A8D\u5F13\u982D\u4E0D\u52D5"
     why: 
     targetId: ip.cab.raise_button
     toolId: 
     condition: cab.raise_test_done
     standPointId: tp.cab
+    subId: b
   - text: "\u628A\u639B\u724C\u7D44\u6536\u9032\u8170\u5305"
     why: 
     targetId: env.waist_pouch
     toolId: tool.lockout_tag
     condition: rack.slot_1=in_pouch&&lockout.key_holder=trainee
     standPointId: tp.cab
+    subId: c
   presetDone: 0
   side: 
   presetStates: []
@@ -78,19 +81,6 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 1000
-      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        rules:
-        - rid: 1001
-        - rid: 1002
-    - rid: 1001
       type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         keys: []
-    - rid: 1002
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        conditions:
-        - cab.cylinder_power=off
-        - cab.raise_test_done
-        - rack.slot_1=in_pouch&&lockout.key_holder=trainee

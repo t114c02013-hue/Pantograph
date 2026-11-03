@@ -26,7 +26,7 @@ MonoBehaviour:
   - env.work_order.toolcount_confirm
   requiredToolId: 
   completion:
-    rid: 8951035174947913852
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -45,18 +45,21 @@ MonoBehaviour:
     toolId: 
     condition: rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&rack.slot_13=on_rack&&rack.slot_10=on_rack
     standPointId: tp.roof.base_w
+    subId: a
   - text: "\u67E5\u770B\u96F6\u4EF6\u888B\u3001\u8ECA\u9802\u7121\u907A\u7559\uFF0C\u4E26\u770B\u53F0\u67B6\u87BA\u6813\u76E4\u8207\u5F85\u5831\u5EE2\u7BB1\u7684\u72C0\u614B"
     why: 
     targetId: env.tool_bag.bolt_pouch;env.bolt_tray_L;env.bolt_tray_R;env.parts_tray
     toolId: 
     condition: env.tool_bag.bolt_pouch.count<=0&&env.bolt_tray_L.count<=0&&env.bolt_tray_R.count<=0&&env.parts_tray.strip_count_ok&&roof.leftover_count<=0
     standPointId: tp.roof.base_w
+    subId: b
   - text: "\u6309\u300C\u8ECA\u9802\u6E05\u9EDE\u5B8C\u6210\u300D"
     why: 
     targetId: env.work_order.toolcount_confirm
     toolId: 
     condition: workorder.toolcount_confirmed
     standPointId: tp.roof.base_w
+    subId: c
   presetDone: 0
   side: 
   presetStates: []
@@ -66,10 +69,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913852
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&rack.slot_13=on_rack&&rack.slot_10=on_rack
-        - env.tool_bag.bolt_pouch.count<=0&&env.bolt_tray_L.count<=0&&env.bolt_tray_R.count<=0&&env.parts_tray.strip_count_ok&&roof.leftover_count<=0
-        - workorder.toolcount_confirmed
+        keys: []

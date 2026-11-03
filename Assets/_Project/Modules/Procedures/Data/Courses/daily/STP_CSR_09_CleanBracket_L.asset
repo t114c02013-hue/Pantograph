@@ -59,24 +59,28 @@ MonoBehaviour:
     toolId: tool.cleaning_cloth
     condition: tool.active=tool.cleaning_cloth
     standPointId: tp.roof.inner
+    subId: a
   - text: "\u4F86\u56DE\u64E6\u62ED\u6258\u67B6\u63A5\u89F8\u9762"
     why: 
     targetId: ip.carbon_strip_L.bracket
     toolId: tool.cleaning_cloth
     condition: ip.carbon_strip_L.bracket.clean_ratio>=0.95
     standPointId: tp.roof.inner
+    subId: b
   - text: "\u628A\u6E05\u6F54\u5E03\u6536\u56DE\u5DE5\u5177\u888B"
     why: 
     targetId: env.tool_rack.slot_8
     toolId: tool.cleaning_cloth
     condition: tool.active=
     standPointId: tp.roof.inner
+    subId: c
   - text: "\u62FF\u8D77\u66AB\u653E\u588A\u4E0A\u7684\u820A\u6ED1\u677F\uFF0C\u7D93\u6D3B\u52D5\u6B04\u8D70\u5230\u5E73\u53F0\uFF0C\u653E\u9032\u7D05\u8272\u5F85\u5831\u5EE2\u7BB1\uFF08\u62FF\u8457\u6ED1\u677F\u4E0D\u80FD\u50B3\u9001\uFF09"
     why: 
     targetId: env.roof_strip_mat.slot_old;env.parts_tray
     toolId: 
     condition: part.carbon_strip_L.state=InTray&&env.roof_strip_mat.count<=0
     standPointId: tp.platform.scrap
+    subId: d
   presetDone: 0
   side: L
   presetStates: []
@@ -88,20 +92,9 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 1000
-      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        rules:
-        - rid: 1001
-        - rid: 1002
-    - rid: 1001
       type: {class: ValueInRange, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: ip.carbon_strip_{side}.bracket.clean_ratio
         min: 0.95
         max: 1
         count: 0
-    - rid: 1002
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        conditions:
-        - part.carbon_strip_L.state=InTray&&env.roof_strip_mat.count<=0

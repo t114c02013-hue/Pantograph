@@ -26,7 +26,7 @@ MonoBehaviour:
   - env.tool_rack.slot_3
   requiredToolId: 
   completion:
-    rid: 8951035174947913859
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -48,36 +48,42 @@ MonoBehaviour:
     toolId: tool.megger
     condition: tool.active=tool.megger
     standPointId: tp.platform.ground
+    subId: a
   - text: "\u7528\u7D55\u7DE3\u6E2C\u8A66\u7DDA\u63A5\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u548C\u8ECA\u9AD4\u63A5\u5730\u9EDE"
     why: 
     targetId: ip.pan_head.ground_clamp;ip.roof.carbody_ground
     toolId: tool.megger
     condition: tool.megger.connected_count>=2
     standPointId: tp.platform.ground
+    subId: b
   - text: "\u6309\u6E2C\u8A66\u9375\uFF08DC 1000 V\uFF09\uFF0C\u8B80\u503C\u8A18\u5728\u4F5C\u696D\u55AE"
     why: 
     targetId: "tool.megger\uFF08\u6E2C\u8A66\u9375\uFF09;env.work_order.ir_reading"
     toolId: tool.megger
     condition: workorder.ir_reading>=100
     standPointId: tp.platform.ground
+    subId: c
   - text: "\u628A\u9AD8\u963B\u8A08\u653E\u56DE\u5DE5\u5177\u67B6\uFF0C\u5230\u687F\u67B6\u62FF\u8D77\u63A5\u5730\u687F"
     why: 
     targetId: "env.tool_rack.slot_11;env.tool_rack.slot_3\uFF08env.pole_rack\uFF09"
     toolId: tool.megger;tool.grounding_rod
     condition: rack.slot_11=on_rack&&tool.active=tool.grounding_rod
     standPointId: tp.platform.ground
+    subId: d
   - text: "\u687F\u982D\u78B0\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u653E\u96FB"
     why: 
     targetId: ip.pan_head.ground_clamp
     toolId: tool.grounding_rod
     condition: ip.pan_head.ground_clamp.discharge_s>=3
     standPointId: tp.platform.ground
+    subId: e
   - text: "\u628A\u63A5\u5730\u687F\u653E\u56DE\u687F\u67B6"
     why: 
     targetId: "env.tool_rack.slot_3\uFF08env.pole_rack\uFF09"
     toolId: tool.grounding_rod
     condition: rack.slot_3=on_rack
     standPointId: tp.platform.ground
+    subId: f
   presetDone: 0
   side: 
   presetStates: []
@@ -87,13 +93,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913859
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - tool.active=tool.megger
-        - tool.megger.connected_count>=2
-        - workorder.ir_reading>=100
-        - rack.slot_11=on_rack&&tool.active=tool.grounding_rod
-        - ip.pan_head.ground_clamp.discharge_s>=3
-        - rack.slot_3=on_rack
+        keys: []

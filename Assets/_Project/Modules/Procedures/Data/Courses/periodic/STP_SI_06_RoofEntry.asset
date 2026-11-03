@@ -62,42 +62,49 @@ MonoBehaviour:
     toolId: tool.safety_harness
     condition: rack.slot_4=in_use
     standPointId: tp.platform.rack
+    subId: a
   - text: "\u62FF\u8D77\u77ED\u63A5\u5730\u7DDA\uFF0C\u639B\u5728\u5B89\u5168\u5E36\u5DE5\u5177\u74B0\u4E0A"
     why: 
     targetId: env.tool_rack.slot_12
     toolId: tool.grounding_lead
     condition: rack.slot_12=in_use&&tool.grounding_lead.carried
     standPointId: tp.platform.rack
+    subId: a2
   - text: "\u5230\u639B\u5EA7\u62FF\u8D77\u5929\u8ECA\u9059\u63A7\u5668\uFF0C\u639B\u5728\u5DE6\u624B"
     why: 
     targetId: "env.crane_pendant\uFF08PendantDock\uFF09"
     toolId: 
     condition: env.crane_pendant.state=Held
     standPointId: tp.platform.rack
+    subId: a3
   - text: "\u628A\u5B89\u5168\u5E36\u6263\u4E0A\u5E73\u53F0\u639B\u9EDE"
     why: 
     targetId: ip.depot.platform_anchor
     toolId: tool.safety_harness
     condition: harness.platform
     standPointId: tp.platform.anchor
+    subId: b
   - text: "\u586B\u4E0A\u8ECA\u9802\u524D\u78BA\u8A8D\u55AE\uFF0C\u8ACB\u4F5C\u696D\u8CA0\u8CAC\u4EBA\u653E\u884C\u4E26\u7C3D\u540D"
     why: 
     targetId: env.work_order.roof_entry_check;npc.work_leader;npc.guard
     toolId: 
     condition: env.work_order.roof_entry_check.checked_count>=11&&hold.1.released&&workorder.sign_start
     standPointId: tp.platform.anchor
+    subId: c
   - text: "\u628A\u5B89\u5168\u5E36\u6263\u4E0A\u8ECA\u9802\u639B\u9EDE"
     why: 
     targetId: ip.roof.anchor
     toolId: tool.safety_harness
     condition: harness.roof&&harness.platform
     standPointId: tp.platform.anchor
+    subId: d
   - text: "\u89E3\u958B\u5E73\u53F0\u639B\u9EDE"
     why: 
     targetId: ip.depot.platform_anchor
     toolId: tool.safety_harness
     condition: harness.roof&&harness.platform=false
     standPointId: tp.platform.anchor
+    subId: e
   presetDone: 0
   side: 
   presetStates: []
@@ -108,23 +115,6 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 1000
-      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        rules:
-        - rid: 1001
-        - rid: 1002
-    - rid: 1001
       type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         keys: []
-    - rid: 1002
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        conditions:
-        - rack.slot_4=in_use
-        - rack.slot_12=in_use&&tool.grounding_lead.carried
-        - env.crane_pendant.state=Held
-        - harness.platform
-        - env.work_order.roof_entry_check.checked_count>=11&&hold.1.released&&workorder.sign_start
-        - harness.roof&&harness.platform
-        - harness.roof&&harness.platform=false

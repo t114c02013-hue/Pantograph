@@ -21,7 +21,7 @@ MonoBehaviour:
   - env.crane_pendant
   requiredToolId: 
   completion:
-    rid: 8951035174947913758
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -38,6 +38,7 @@ MonoBehaviour:
     toolId: 
     condition: part.pan_assy.stand_offset_cm<=5
     standPointId: tp.platform.crane
+    subId: a
   presetDone: 0
   side: 
   presetStates: []
@@ -47,8 +48,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913758
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - part.pan_assy.stand_offset_cm<=5
+        keys: []

@@ -34,6 +34,19 @@ namespace PantographSim.Procedures
         /// <summary>每個小動作開始時的狀態快照（subSnaps[i]＝第 i 個小動作開始時）。</summary>
         readonly List<Dictionary<string, string>> subSnaps = new List<Dictionary<string, string>>();
         bool evaluating, restoring, evaluateAgain, snapshotPending;
+        readonly FreshWriteGate fresh = new FreshWriteGate();
+        bool FreshMode => procedure != null && procedure.requireFreshWrite;
+
+        /// <summary>啟用第 i 個小動作（記下條件鍵的 version；R1 的程序沒開 requireFreshWrite 時不影響判定）。</summary>
+        void ArmSub(RuntimeStep s, int i)
+        {
+            var subs = SubActions(s);
+            if (i < subs.Length) fresh.Arm(state, subs[i].condition);
+        }
+
+        /// <summary>小動作完成：條件成立；requireFreshWrite 時還要啟用後有條件鍵被寫過（或列在 autoCompleteAllowed）。</summary>
+        bool SubDone(RuntimeStep s, SubAction a) =>
+            FreshMode ? fresh.Done(state, a.condition, FreshWriteGate.Allowed(procedure, s.def.stepId, a.subId)) : ChecklistEval.Done(state, a.condition);
         /// <summary>一次判定裡「狀態又改變→再判定」的上限；超過記 Error。</summary>
         public const int MaxRounds = 8;
 
@@ -81,6 +94,7 @@ namespace PantographSim.Procedures
             if (Started) return;
             Started = true;
             bus.Subscribe<StateChanged>(OnStateChanged);
+            bus.Subscribe<StateTouched>(OnStateTouched);
             bus.Subscribe<RestartStepRequested>(OnRestart);
             bus.Subscribe<ActionRequested>(OnRequest);
             // 預設完成的步驟（SI_02、SI_03、SI_06、WC_02、WC_04）開場不寫任何狀態：流程走到那一步時，
@@ -93,6 +107,7 @@ namespace PantographSim.Procedures
         public void Dispose()
         {
             bus.Unsubscribe<StateChanged>(OnStateChanged);
+            bus.Unsubscribe<StateTouched>(OnStateTouched);
             bus.Unsubscribe<RestartStepRequested>(OnRestart);
             bus.Unsubscribe<ActionRequested>(OnRequest);
         }
@@ -160,6 +175,7 @@ namespace PantographSim.Procedures
                 subSnaps.RemoveRange(idx - 1, subSnaps.Count - (idx - 1));
                 subSnaps.Add(before);
                 state.SetFloat("procedure.sub_index", idx - 1);
+                ArmSub(Current, idx - 1);
                 msg = "已退回上一個小動作";
                 PublishBackState();
             }
@@ -225,6 +241,7 @@ namespace PantographSim.Procedures
                 state.Set("procedure.stall_ids", "");
                 state.SetBool("procedure.stall_hint_shown", false);
             });
+            ArmSub(s, 0);
             allDoneSince = -1f;
             stallReported.Clear();
             snapshot = state.Snapshot();   // 先拍一張（Commit 之後）；狀態穩定後在 Evaluate 結尾換成穩定的那一張
@@ -254,7 +271,7 @@ namespace PantographSim.Procedures
             (s.def.subActions ?? Array.Empty<SubAction>()).Select(a => new SubAction
             {
                 text = StateKeys.Expand(a.text, s.side), why = StateKeys.Expand(a.why, s.side), targetId = StateKeys.Expand(a.targetId, s.side),
-                toolId = a.toolId, condition = StateKeys.Expand(a.condition, s.side), standPointId = SubAction.ExpandStand(a.standPointId, s.side)
+                toolId = a.toolId, condition = StateKeys.Expand(a.condition, s.side), standPointId = SubAction.ExpandStand(a.standPointId, s.side), subId = a.subId ?? ""
             }).ToArray();
 
         /// <summary>
@@ -266,9 +283,10 @@ namespace PantographSim.Procedures
             var subs = SubActions(s);
             int idx = (int)state.GetFloat("procedure.sub_index");
             int start = idx;
-            while (idx < subs.Length && ChecklistEval.Done(state, subs[idx].condition))
+            while (idx < subs.Length && SubDone(s, subs[idx]))
             {
                 idx++;
+                ArmSub(s, idx);
                 if (subSnaps.Count <= idx) subSnaps.Add(state.Snapshot());   // 第 idx 個小動作從現在開始
             }
             if (idx != start) state.SetFloat("procedure.sub_index", idx);
@@ -283,6 +301,13 @@ namespace PantographSim.Procedures
         void OnStateChanged(StateChanged e)
         {
             if (restoring || !e.Any(k => !k.StartsWith("procedure."))) return;
+            Evaluate();
+        }
+
+        /// <summary>同值寫入（例：已經 true 的自檢再點一次）：只有 requireFreshWrite 的程序需要重新判定。</summary>
+        void OnStateTouched(StateTouched e)
+        {
+            if (!FreshMode || restoring || e.keys.All(k => k.StartsWith("procedure."))) return;
             Evaluate();
         }
 
@@ -372,7 +397,7 @@ namespace PantographSim.Procedures
             var subs = SubActions(s);
             int idx = (int)state.GetFloat("procedure.sub_index");
             int would = idx;
-            while (would < subs.Length && ChecklistEval.Done(state, subs[would].condition)) would++;
+            while (would < subs.Length && SubDone(s, subs[would])) { would++; if (FreshMode) break; }   // 只有目前這個有啟用時的 version
             var ctx = ContextFor(s);
             bool rule = RuleEvaluators.Evaluate(s.def.completion, ctx);
             string gateReason = "";

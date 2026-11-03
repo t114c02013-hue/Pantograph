@@ -23,7 +23,7 @@ MonoBehaviour:
   - env.work_order.ground_register
   requiredToolId: 
   completion:
-    rid: 8951035174947913747
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -43,24 +43,28 @@ MonoBehaviour:
     toolId: tool.grounding_lead
     condition: ip.roof.carbody_ground.clamped
     standPointId: tp.roof.base_w
+    subId: a
   - text: "\u63DB\u5230 +X \u9EDE\uFF0C\u7528\u77ED\u7D55\u7DE3\u687F\u639B\u4E0A\u96FB\u7E9C\u7AEF\u5B50"
     why: 
     targetId: ip.roof.hv_cable_ground
     toolId: tool.grounding_lead
     condition: ip.roof.hv_cable_ground.clamped
     standPointId: tp.roof.base_e.n
+    subId: b
   - text: "\u5728 +X \u9EDE\u62C9\u4E00\u4E0B\u63A5\u5730\u7DDA\u78BA\u8A8D"
     why: 
     targetId: ip.roof.hv_cable_ground
     toolId: tool.grounding_lead
     condition: ip.roof.hv_cable_ground.pull_tested
     standPointId: tp.roof.base_e.n
+    subId: c
   - text: "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u767B\u8A18 #2 \u77ED\u63A5\u5730\u7DDA"
     why: 
     targetId: env.work_order.ground_register
     toolId: 
     condition: ground_register.2=registered
     standPointId: tp.roof.base_e.n
+    subId: d
   presetDone: 0
   side: 
   presetStates: []
@@ -70,11 +74,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913747
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - ip.roof.carbody_ground.clamped
-        - ip.roof.hv_cable_ground.clamped
-        - ip.roof.hv_cable_ground.pull_tested
-        - ground_register.2=registered
+        keys: []

@@ -22,7 +22,7 @@ MonoBehaviour:
   - env.tool_rack.slot_10
   requiredToolId: 
   completion:
-    rid: 8951035174947913850
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -40,12 +40,14 @@ MonoBehaviour:
     toolId: tool.hold_down_strap
     condition: ip.pan_assy.hold_down.state=Removed
     standPointId: tp.roof.base_e.n
+    subId: a
   - text: "\u628A\u56FA\u5B9A\u5E36\u6536\u56DE\u5DE5\u5177\u888B"
     why: 
     targetId: env.tool_rack.slot_10
     toolId: tool.hold_down_strap
     condition: rack.slot_10=on_rack
     standPointId: tp.roof.base_e.n
+    subId: b
   presetDone: 0
   side: 
   presetStates: []
@@ -55,9 +57,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913850
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - ip.pan_assy.hold_down.state=Removed
-        - rack.slot_10=on_rack
+        keys: []

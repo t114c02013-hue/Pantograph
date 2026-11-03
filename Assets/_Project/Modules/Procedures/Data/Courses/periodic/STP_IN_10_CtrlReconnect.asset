@@ -21,7 +21,7 @@ MonoBehaviour:
   - ip.pan_assy.ctrl_connector
   requiredToolId: 
   completion:
-    rid: 8951035174947913849
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -39,12 +39,14 @@ MonoBehaviour:
     toolId: 
     condition: ip.pan_assy.ctrl_connector.cap=off
     standPointId: tp.roof.base_e.n
+    subId: a
   - text: "\u63D2\u56DE\u5347\u5F13\u63A7\u5236\u7DDA\u63A5\u982D"
     why: 
     targetId: ip.pan_assy.ctrl_connector
     toolId: 
     condition: ip.pan_assy.ctrl_connector.state=Installed
     standPointId: tp.roof.base_e.n
+    subId: b
   presetDone: 0
   side: 
   presetStates: []
@@ -54,9 +56,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913849
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - ip.pan_assy.ctrl_connector.cap=off
-        - ip.pan_assy.ctrl_connector.state=Installed
+        keys: []

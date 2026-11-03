@@ -1,0 +1,25 @@
+periodic：True，啟用時條件已成立、靠 version 規則擋下（沒有這條規則就會自動完成）的小動作 24 個：
+STP_SI_03_CylinderPowerOff c：rack.slot_1=in_pouch&&lockout.key_holder=trainee
+STP_LF_01_PreLift d：part.crane.hook.inspected&&part.crane.hook_cog_offset_cm<=5
+STP_LF_05_LowerToStand a：part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1
+STP_CSR_06_Loosen_R b：tool.socket_wrench.size=13
+STP_CSR_10_CheckNew_R b：env.spare_shelf.slot_2.flipped
+STP_CSR_10_CheckNew_R d：env.spare_shelf.slot_2.measured
+STP_CSR_10_CheckNew_R g：env.work_order.part_trace.matches_spare
+STP_CSR_13_Torque_R b：tool.torque_wrench.setting=25
+STP_IN_01_RigOnStand a：part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=0.6&&part.crane.beam_above_pan_m<=1.0
+STP_IN_02_TrialLift b：part.pan_assy.inspected&&part.pan_assy.tilt_deg<=3
+STP_IN_03_Transfer a：part.crane.load_bottom_y>=3.1
+STP_IN_04_LowerToRoof a：part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1
+STP_IN_04b_RegroundPan b：tool.voltage_detector.selftest
+STP_IN_04b_RegroundPan c：isolation.voltage_tested
+STP_IN_04b_RegroundPan g：isolation.pull_tested
+STP_IN_05_RoofEntry b：harness.platform
+STP_IN_07_BaseTorque a：rack.slot_6=on_rack
+STP_WC_03a_RemoveGroundRoof c：tool.grounding_lead.carried
+STP_WC_01a_ToolCountRoof a：rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&rack.slot_13=on_rack&&rack.slot_10=on_rack
+STP_WC_01b_ToolCountPlatform b：ground_register.1=cancelled&&ground_register.2=cancelled
+STP_RT_02_InsulationTest f：rack.slot_3=on_rack
+STP_WC_04_Unlock e：rack.slot_1=in_pouch
+STP_WC_05_RaiseTest a：part.crane.hook.inspected&&part.pan_assy.inspected
+STP_WC_05_RaiseTest d：part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm

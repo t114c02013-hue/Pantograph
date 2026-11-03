@@ -1,0 +1,10 @@
+daily：True，啟用時條件已成立、靠 version 規則擋下（沒有這條規則就會自動完成）的小動作 9 個：
+STP_SI_03_CylinderPowerOff c：rack.slot_1=in_pouch&&lockout.key_holder=trainee
+STP_CSR_06_Loosen_R b：tool.socket_wrench.size=13
+STP_CSR_09_CleanBracket_R d：part.carbon_strip_R.state=InTray&&env.roof_strip_mat.count<=0
+STP_CSR_10_CheckNew_R b：env.spare_shelf.slot_2.flipped
+STP_CSR_10_CheckNew_R d：env.spare_shelf.slot_2.measured
+STP_CSR_10_CheckNew_R g：env.work_order.part_trace.matches_spare
+STP_CSR_13_Torque_R b：tool.torque_wrench.setting=25
+STP_WC_01b_ToolCountPlatform b：ground_register.1=cancelled&&rack.slot_3=on_rack
+STP_WC_04_Unlock e：rack.slot_1=in_pouch

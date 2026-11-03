@@ -85,6 +85,16 @@ namespace PantographSim.Core
         }
     }
 
+    /// <summary>
+    /// R1.5b b4：寫入的值和原本相同（沒有 StateChanged），但寫入次數（SimState.Version）加了 1。Commit 後發，keys＝這些鍵。
+    /// 只給「小動作要啟用後真的做了動作」的判定用（例：已經是 true 的自檢再點一次）；其他模組不必理會。
+    /// </summary>
+    public struct StateTouched
+    {
+        public string targetId, pointId, toolId, text; public float value, time; public bool isReplay;
+        public string[] keys;
+    }
+
     public struct StepStarted
     {
         public string targetId, pointId, toolId, text; public float value, time; public bool isReplay;

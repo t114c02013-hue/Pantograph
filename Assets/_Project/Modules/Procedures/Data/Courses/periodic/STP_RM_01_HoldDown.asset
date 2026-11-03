@@ -22,7 +22,7 @@ MonoBehaviour:
   - ip.pan_assy.hold_down
   requiredToolId: 
   completion:
-    rid: 8951035174947913748
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -41,18 +41,21 @@ MonoBehaviour:
     toolId: tool.hold_down_strap
     condition: tool.active=tool.hold_down_strap
     standPointId: tp.roof.base_e.n
+    subId: a
   - text: "\u628A\u56FA\u5B9A\u5E36\u7E5E\u904E\u4E0A\u81C2\u6263\u5230\u5E95\u67B6"
     why: 
     targetId: ip.pan_assy.hold_down
     toolId: tool.hold_down_strap
     condition: ip.pan_assy.hold_down.state=Installed
     standPointId: tp.roof.base_e.n
+    subId: b
   - text: "\u62C9\u4E00\u4E0B\u56FA\u5B9A\u5E36\uFF0C\u78BA\u8A8D\u6536\u7DCA"
     why: 
     targetId: ip.pan_assy.hold_down
     toolId: 
     condition: ip.pan_assy.hold_down.pull_tested
     standPointId: tp.roof.base_e.n
+    subId: c
   presetDone: 0
   side: 
   presetStates: []
@@ -62,10 +65,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913748
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - tool.active=tool.hold_down_strap
-        - ip.pan_assy.hold_down.state=Installed
-        - ip.pan_assy.hold_down.pull_tested
+        keys: []

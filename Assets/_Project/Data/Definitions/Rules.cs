@@ -44,9 +44,6 @@ namespace PantographSim.Data
     /// <summary>前面所有步驟都已完成。</summary>
     [Serializable] public class ProcedureDone : CompletionRule { }
 
-    /// <summary>R1.5b b4：條件字串（ChecklistEval 格式，和小動作的 condition 相同）全部成立。匯入器給 v6 新增的小動作用。</summary>
-    [Serializable] public class ConditionsAll : CompletionRule { public string[] conditions = Array.Empty<string>(); }
-
     /// <summary>全部子條件都成立。</summary>
     [Serializable] public class AllOf : CompletionRule
     {
@@ -100,6 +97,7 @@ namespace PantographSim.Data
         [Tooltip("需要的工具 ID（空白＝徒手或不限）")] public string toolId;
         [Tooltip("完成條件")] public string condition;
         [Tooltip("站點 ID（R1：B 鍵傳到這一站；tp.roof.{side} 依側別展開成 tp.roof.inner／tp.roof.outer）")] public string standPointId;
+        [Tooltip("R1.5b：展開後的小動作 ID（a、d1、b2…；R1 的資料空白）")] public string subId = "";
 
         /// <summary>tp.roof.L → tp.roof.inner、tp.roof.R → tp.roof.outer（肘側／外側）。</summary>
         public static string ExpandStand(string stand, string side)

@@ -23,7 +23,7 @@ MonoBehaviour:
   - ip.roof.anchor
   requiredToolId: 
   completion:
-    rid: 8951035174947913844
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -43,24 +43,28 @@ MonoBehaviour:
     toolId: tool.safety_harness
     condition: harness.hooks_stowed=false&&rack.slot_4=in_use
     standPointId: tp.platform.anchor
+    subId: a
   - text: "\u6263\u4E0A\u5E73\u53F0\u639B\u9EDE"
     why: 
     targetId: ip.depot.platform_anchor
     toolId: tool.safety_harness
     condition: harness.platform
     standPointId: tp.platform.anchor
+    subId: b
   - text: "\u6263\u4E0A\u8ECA\u9802\u639B\u9EDE"
     why: 
     targetId: ip.roof.anchor
     toolId: tool.safety_harness
     condition: harness.roof&&harness.platform
     standPointId: tp.platform.anchor
+    subId: c
   - text: "\u89E3\u958B\u5E73\u53F0\u639B\u9EDE"
     why: 
     targetId: ip.depot.platform_anchor
     toolId: tool.safety_harness
     condition: harness.roof&&harness.platform=false
     standPointId: tp.platform.anchor
+    subId: d
   presetDone: 0
   side: 
   presetStates: []
@@ -70,11 +74,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913844
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - harness.hooks_stowed=false&&rack.slot_4=in_use
-        - harness.platform
-        - harness.roof&&harness.platform
-        - harness.roof&&harness.platform=false
+        keys: []

@@ -24,7 +24,7 @@ MonoBehaviour:
   - env.tool_rack.slot_4
   requiredToolId: 
   completion:
-    rid: 8951035174947913864
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -43,18 +43,21 @@ MonoBehaviour:
     toolId: 
     condition: workorder.all_filled&&npc.work_leader.signed
     standPointId: tp.platform.rack
+    subId: a
   - text: "\u8ACB\u6AA2\u67E5\u54E1\u5224\u5B9A\u53EF\u51FA\u8ECA"
     why: 
     targetId: npc.inspector
     toolId: 
     condition: npc.inspector.verdict=pass
     standPointId: tp.platform.rack
+    subId: b
   - text: "\u628A\u500B\u4EBA\u4E0A\u9396\u5305\u548C\u5B89\u5168\u5E36\u6B78\u9084\u5DE5\u5177\u67B6"
     why: 
     targetId: env.tool_rack.slot_1;env.tool_rack.slot_4
     toolId: tool.lockout_tag;tool.safety_harness
     condition: rack.slot_1=on_rack&&rack.slot_4=on_rack
     standPointId: tp.platform.rack
+    subId: c
   presetDone: 0
   side: 
   presetStates: []
@@ -64,10 +67,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913864
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - workorder.all_filled&&npc.work_leader.signed
-        - npc.inspector.verdict=pass
-        - rack.slot_1=on_rack&&rack.slot_4=on_rack
+        keys: []

@@ -24,7 +24,7 @@ MonoBehaviour:
   - env.work_order.toolcount_confirm_platform
   requiredToolId: 
   completion:
-    rid: 8951035174947913858
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -43,18 +43,21 @@ MonoBehaviour:
     toolId: 
     condition: rack.slot_11=on_rack&&rack.slot_12=on_rack&&rack.slot_2=on_rack&&rack.slot_3=on_rack
     standPointId: tp.platform.rack
+    subId: a
   - text: "\u6838\u5C0D\u63A5\u5730\u767B\u8A18\u6B04"
     why: 
     targetId: env.work_order.ground_register
     toolId: 
     condition: ground_register.1=cancelled&&ground_register.2=cancelled
     standPointId: tp.platform.rack
+    subId: b
   - text: "\u6309\u300C\u5E73\u53F0\u6E05\u9EDE\u5B8C\u6210\u300D"
     why: 
     targetId: env.work_order.toolcount_confirm_platform
     toolId: 
     condition: workorder.toolcount_platform_confirmed
     standPointId: tp.platform.rack
+    subId: c
   presetDone: 0
   side: 
   presetStates: []
@@ -64,10 +67,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913858
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - rack.slot_11=on_rack&&rack.slot_12=on_rack&&rack.slot_2=on_rack&&rack.slot_3=on_rack
-        - ground_register.1=cancelled&&ground_register.2=cancelled
-        - workorder.toolcount_platform_confirmed
+        keys: []

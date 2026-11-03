@@ -24,7 +24,7 @@ MonoBehaviour:
   - ip.pan_assy.lift_point_3
   requiredToolId: 
   completion:
-    rid: 8951035174947913847
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -44,24 +44,28 @@ MonoBehaviour:
     toolId: 
     condition: ip.pan_assy.lift_point_1.state=Free
     standPointId: tp.roof.base_w.s
+    subId: a1
   - text: "\u5F9E\u540A\u8033 4 \u5378\u4E0B\u540A\u5E36"
     why: 
     targetId: ip.pan_assy.lift_point_4
     toolId: 
     condition: ip.pan_assy.lift_point_4.state=Free
     standPointId: tp.roof.base_w.n
+    subId: a4
   - text: "\u5F9E\u540A\u8033 2 \u5378\u4E0B\u540A\u5E36"
     why: 
     targetId: ip.pan_assy.lift_point_2
     toolId: 
     condition: ip.pan_assy.lift_point_2.state=Free
     standPointId: tp.roof.base_e.s
+    subId: a2
   - text: "\u5F9E\u540A\u8033 3 \u5378\u4E0B\u540A\u5E36"
     why: 
     targetId: ip.pan_assy.lift_point_3
     toolId: 
     condition: ip.pan_assy.lift_point_3.state=Free
     standPointId: tp.roof.base_e.n
+    subId: a3
   presetDone: 0
   side: 
   presetStates: []
@@ -71,11 +75,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913847
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - ip.pan_assy.lift_point_1.state=Free
-        - ip.pan_assy.lift_point_4.state=Free
-        - ip.pan_assy.lift_point_2.state=Free
-        - ip.pan_assy.lift_point_3.state=Free
+        keys: []

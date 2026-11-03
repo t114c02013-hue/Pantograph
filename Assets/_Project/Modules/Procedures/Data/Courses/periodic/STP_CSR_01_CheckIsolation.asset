@@ -40,6 +40,7 @@ MonoBehaviour:
     toolId: 
     condition: env.work_order.anomaly.checked
     standPointId: tp.stand.s
+    subId: b
   presetDone: 0
   side: 
   presetStates: []
@@ -54,18 +55,7 @@ MonoBehaviour:
       data:
         rules:
         - rid: 1001
-        - rid: 1002
     - rid: 1001
-      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        rules:
-        - rid: 1003
-    - rid: 1002
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        conditions:
-        - env.work_order.anomaly.checked
-    - rid: 1003
       type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         keys:

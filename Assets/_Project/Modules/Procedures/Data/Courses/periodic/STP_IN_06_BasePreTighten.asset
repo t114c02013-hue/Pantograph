@@ -27,7 +27,7 @@ MonoBehaviour:
   - part.pan_base.bolt_4
   requiredToolId: 
   completion:
-    rid: 8951035174947913845
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -53,60 +53,70 @@ MonoBehaviour:
     toolId: tool.socket_wrench
     condition: tool.active=tool.socket_wrench
     standPointId: tp.roof.base_e
+    subId: a
   - text: "\u63DB\u4E0A 24 mm \u5957\u7B52"
     why: 
     targetId: "env.tool_bag.socket_case;tool.socket_wrench\uFF08\u5957\u7B52\uFF09"
     toolId: tool.socket_wrench
     condition: tool.socket_wrench.size=24
     standPointId: tp.roof.base_e
+    subId: b
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 2 \u5F9E\u96F6\u4EF6\u888B\u62FF\u51FA\uFF0C\u7528\u624B\u8F49\u5165\u5230\u5165\u7259"
     why: 
     targetId: part.pan_base.bolt_2
     toolId: 
     condition: part.pan_base.bolt_2.state=Placed
     standPointId: tp.roof.base_e
+    subId: c2
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 3 \u5F9E\u96F6\u4EF6\u888B\u62FF\u51FA\uFF0C\u7528\u624B\u8F49\u5165\u5230\u5165\u7259"
     why: 
     targetId: part.pan_base.bolt_3
     toolId: 
     condition: part.pan_base.bolt_3.state=Placed
     standPointId: tp.roof.base_e
+    subId: c3
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 1 \u5F9E\u96F6\u4EF6\u888B\u62FF\u51FA\uFF0C\u7528\u624B\u8F49\u5165\u5230\u5165\u7259"
     why: 
     targetId: part.pan_base.bolt_1
     toolId: 
     condition: part.pan_base.bolt_1.state=Placed
     standPointId: tp.roof.base_w
+    subId: c1
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 4 \u5F9E\u96F6\u4EF6\u888B\u62FF\u51FA\uFF0C\u7528\u624B\u8F49\u5165\u5230\u5165\u7259"
     why: 
     targetId: part.pan_base.bolt_4
     toolId: 
     condition: part.pan_base.bolt_4.state=Placed
     standPointId: tp.roof.base_w
+    subId: c4
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 1 \u9396\u5230\u8CBC\u5408"
     why: 
     targetId: part.pan_base.bolt_1
     toolId: tool.socket_wrench
     condition: part.pan_base.bolt_1.state=Snug
     standPointId: tp.roof.base_w
+    subId: d1
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 3 \u9396\u5230\u8CBC\u5408"
     why: 
     targetId: part.pan_base.bolt_3
     toolId: tool.socket_wrench
     condition: part.pan_base.bolt_3.state=Snug
     standPointId: tp.roof.base_e
+    subId: d3
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 2 \u9396\u5230\u8CBC\u5408"
     why: 
     targetId: part.pan_base.bolt_2
     toolId: tool.socket_wrench
     condition: part.pan_base.bolt_2.state=Snug
     standPointId: tp.roof.base_e
+    subId: d2
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 4 \u9396\u5230\u8CBC\u5408"
     why: 
     targetId: part.pan_base.bolt_4
     toolId: tool.socket_wrench
     condition: part.pan_base.bolt_4.state=Snug
     standPointId: tp.roof.base_w
+    subId: d4
   presetDone: 0
   side: 
   presetStates: []
@@ -116,17 +126,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913845
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - tool.active=tool.socket_wrench
-        - tool.socket_wrench.size=24
-        - part.pan_base.bolt_2.state=Placed
-        - part.pan_base.bolt_3.state=Placed
-        - part.pan_base.bolt_1.state=Placed
-        - part.pan_base.bolt_4.state=Placed
-        - part.pan_base.bolt_1.state=Snug
-        - part.pan_base.bolt_3.state=Snug
-        - part.pan_base.bolt_2.state=Snug
-        - part.pan_base.bolt_4.state=Snug
+        keys: []

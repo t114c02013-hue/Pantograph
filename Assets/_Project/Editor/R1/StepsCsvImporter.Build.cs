@@ -29,6 +29,7 @@ namespace PantographSim.Editor
         {
             public Reuse[] reuseExcluded = Array.Empty<Reuse>();
             public Reuse[] reuseTargetChanged = Array.Empty<Reuse>();
+            public AutoCompleteAllowedDef[] autoCompleteAllowed = Array.Empty<AutoCompleteAllowedDef>();
             public Pattern[] patterns = Array.Empty<Pattern>();
             public Exact[] exact = Array.Empty<Exact>();
             public Container[] targetContainers = Array.Empty<Container>();
@@ -145,7 +146,7 @@ namespace PantographSim.Editor
         }
 
         /// <summary>
-        /// 產生一門課的步驟（不存檔）：R1 有的步驟沿用 R1 的完成條件、提示、錯誤，再加上沒沿用的小動作；新步驟的完成條件＝全部小動作條件。
+        /// 產生一門課的步驟（不存檔）：R1 有的步驟沿用 R1 的完成條件、提示、錯誤；新步驟沒有額外的完成條件（小動作依序完成就是完成）。
         /// 標題、參考時間讀 Steps.csv，預設完成一律關掉（K1）。
         /// </summary>
         public static List<StepDefinition> BuildCourse(string course, List<Resolved> resolved, List<StepMeta> metas, Dictionary<string, StepJson> r1)
@@ -162,18 +163,15 @@ namespace PantographSim.Editor
                 st.presetDone = false; st.presetStates = Array.Empty<string>();
                 st.refSecondsTutorial = course == "periodic" ? m.teachP : m.teachD;
                 st.refSecondsExam = course == "periodic" ? m.examP : m.examD;
-                st.subActions = subs.Select(x => new SubAction { text = x.e.text, why = "", targetId = x.e.targetId, toolId = x.e.toolId, condition = x.rule, standPointId = x.e.standPointId }).ToArray();
-                var added = subs.Where(x => x.layer != 1).Select(x => x.rule).ToArray();
+                st.subActions = subs.Select(x => new SubAction { text = x.e.text, why = "", targetId = x.e.targetId, toolId = x.e.toolId, condition = x.rule, standPointId = x.e.standPointId, subId = x.e.subId }).ToArray();
                 st.hints = st.hints ?? new HintSet();
                 st.hints.checklist = subs.Select(x => x.e.text + "|" + x.rule).ToArray();   // 清單跟 v6 小動作（R1 的清單少了新增的列，文字也還是車頂工具箱）
                 if (r1s == null)
                 {
                     st.instruction = m.title;
                     st.targetIds = subs.SelectMany(x => Targets(x.e.targetId)).Distinct().ToArray();
-                    st.completion = new ConditionsAll { conditions = added };
+                    st.completion = new ChecklistAll();   // 小動作依序完成就是完成（同時成立會矛盾：SI_06 d 兩個都扣、e 只剩車頂）
                 }
-                else if (added.Length > 0)
-                    st.completion = new AllOf { rules = new[] { st.completion, new ConditionsAll { conditions = added } }.Where(x => x != null).ToArray() };
                 steps.Add(st);
             }
             return steps;
@@ -227,6 +225,8 @@ namespace PantographSim.Editor
                 var saved = kv.Value.Select(s => StepJsonImporter.Save(s, $"{CourseFolder}/{kv.Key}/{s.stepId}.asset")).ToList();
                 var prc = ScriptableObject.CreateInstance<ProcedureDefinition>();
                 prc.procedureId = "PRC_" + kv.Key; prc.title = kv.Key; prc.steps = saved;
+                prc.requireFreshWrite = true;   // 軟體工程裁定 2026-11-03：小動作要啟用後真的做了動作才算完成
+                prc.autoCompleteAllowed = LoadTables().autoCompleteAllowed;
                 StepJsonImporter.Save(prc, ProcedurePath(kv.Key));
                 var rs = resolved.Where(r => r.e.course == kv.Key).ToList();
                 sb.AppendLine($"{kv.Key}：步驟 {saved.Count}、小動作 {rs.Count}（第 1 層 {rs.Count(r => r.layer == 1)}、第 2 層 {rs.Count(r => r.layer == 2)}、第 3 層 {rs.Count(r => r.layer == 3)}；機制待做 {rs.Count(r => r.owner.Length > 0)}）→ {CourseFolder}/{kv.Key}");

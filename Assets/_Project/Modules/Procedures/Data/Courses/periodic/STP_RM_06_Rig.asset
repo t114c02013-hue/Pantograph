@@ -25,7 +25,7 @@ MonoBehaviour:
   - env.rigging
   requiredToolId: 
   completion:
-    rid: 8951035174947913753
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -46,30 +46,35 @@ MonoBehaviour:
     toolId: 
     condition: ip.pan_assy.lift_point_1.state=Rigged
     standPointId: tp.roof.base_w.s
+    subId: a1
   - text: "\u628A\u540A\u5E36 4 \u639B\u4E0A\u540A\u8033 4"
     why: 
     targetId: ip.pan_assy.lift_point_4
     toolId: 
     condition: ip.pan_assy.lift_point_4.state=Rigged
     standPointId: tp.roof.base_w.n
+    subId: a4
   - text: "\u628A\u540A\u5E36 2 \u639B\u4E0A\u540A\u8033 2"
     why: 
     targetId: ip.pan_assy.lift_point_2
     toolId: 
     condition: ip.pan_assy.lift_point_2.state=Rigged
     standPointId: tp.roof.base_e.s
+    subId: a2
   - text: "\u628A\u540A\u5E36 3 \u639B\u4E0A\u540A\u8033 3"
     why: 
     targetId: ip.pan_assy.lift_point_3
     toolId: 
     condition: ip.pan_assy.lift_point_3.state=Rigged
     standPointId: tp.roof.base_e.n
+    subId: a3
   - text: "\u67E5\u770B\u56DB\u689D\u540A\u5E36\u6709\u6C92\u6709\u626D\u8F49"
     why: 
     targetId: env.rigging
     toolId: 
     condition: env.rigging.inspected
     standPointId: tp.roof.base_e.n
+    subId: b
   presetDone: 0
   side: 
   presetStates: []
@@ -79,12 +84,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913753
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - ip.pan_assy.lift_point_1.state=Rigged
-        - ip.pan_assy.lift_point_4.state=Rigged
-        - ip.pan_assy.lift_point_2.state=Rigged
-        - ip.pan_assy.lift_point_3.state=Rigged
-        - env.rigging.inspected
+        keys: []

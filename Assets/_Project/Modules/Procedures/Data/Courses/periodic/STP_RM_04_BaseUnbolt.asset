@@ -28,7 +28,7 @@ MonoBehaviour:
   - env.tool_rack.slot_6
   requiredToolId: 
   completion:
-    rid: 8951035174947913751
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -54,60 +54,70 @@ MonoBehaviour:
     toolId: tool.socket_wrench
     condition: tool.socket_wrench.size=24
     standPointId: tp.roof.base_e.s
+    subId: a
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 2 \u8F49\u5230\u812B\u51FA"
     why: 
     targetId: part.pan_base.bolt_2
     toolId: tool.socket_wrench
     condition: part.pan_base.bolt_2.state=Out
     standPointId: tp.roof.base_e.s
+    subId: b2
   - text: "\u628A\u87BA\u6813 2 \u6536\u9032\u96F6\u4EF6\u888B"
     why: 
     targetId: env.tool_bag.bolt_pouch
     toolId: 
     condition: part.pan_base.bolt_2.state=InTray
     standPointId: tp.roof.base_e.s
+    subId: c2
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 3 \u8F49\u5230\u812B\u51FA"
     why: 
     targetId: part.pan_base.bolt_3
     toolId: tool.socket_wrench
     condition: part.pan_base.bolt_3.state=Out
     standPointId: tp.roof.base_e.n
+    subId: b3
   - text: "\u628A\u87BA\u6813 3 \u6536\u9032\u96F6\u4EF6\u888B"
     why: 
     targetId: env.tool_bag.bolt_pouch
     toolId: 
     condition: part.pan_base.bolt_3.state=InTray
     standPointId: tp.roof.base_e.n
+    subId: c3
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 1 \u8F49\u5230\u812B\u51FA"
     why: 
     targetId: part.pan_base.bolt_1
     toolId: tool.socket_wrench
     condition: part.pan_base.bolt_1.state=Out
     standPointId: tp.roof.base_w.s
+    subId: b1
   - text: "\u628A\u87BA\u6813 1 \u6536\u9032\u96F6\u4EF6\u888B"
     why: 
     targetId: env.tool_bag.bolt_pouch
     toolId: 
     condition: part.pan_base.bolt_1.state=InTray
     standPointId: tp.roof.base_w.s
+    subId: c1
   - text: "\u628A\u5E95\u5EA7\u87BA\u6813 4 \u8F49\u5230\u812B\u51FA"
     why: 
     targetId: part.pan_base.bolt_4
     toolId: tool.socket_wrench
     condition: part.pan_base.bolt_4.state=Out
     standPointId: tp.roof.base_w.n
+    subId: b4
   - text: "\u628A\u87BA\u6813 4 \u6536\u9032\u96F6\u4EF6\u888B"
     why: 
     targetId: env.tool_bag.bolt_pouch
     toolId: 
     condition: part.pan_base.bolt_4.state=InTray
     standPointId: tp.roof.base_w.n
+    subId: c4
   - text: "\u628A\u5957\u7B52\u6273\u624B\u6536\u56DE\u5DE5\u5177\u888B"
     why: 
     targetId: env.tool_rack.slot_6
     toolId: tool.socket_wrench
     condition: rack.slot_6=on_rack
     standPointId: tp.roof.base_w.n
+    subId: d
   presetDone: 0
   side: 
   presetStates: []
@@ -117,17 +127,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913751
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - tool.socket_wrench.size=24
-        - part.pan_base.bolt_2.state=Out
-        - part.pan_base.bolt_2.state=InTray
-        - part.pan_base.bolt_3.state=Out
-        - part.pan_base.bolt_3.state=InTray
-        - part.pan_base.bolt_1.state=Out
-        - part.pan_base.bolt_1.state=InTray
-        - part.pan_base.bolt_4.state=Out
-        - part.pan_base.bolt_4.state=InTray
-        - rack.slot_6=on_rack
+        keys: []

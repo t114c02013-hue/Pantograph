@@ -26,7 +26,7 @@ MonoBehaviour:
   - env.work_order.ground_register
   requiredToolId: 
   completion:
-    rid: 8951035174947913843
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -51,54 +51,63 @@ MonoBehaviour:
     toolId: tool.voltage_detector
     condition: tool.active=tool.voltage_detector
     standPointId: tp.platform.ground
+    subId: a
   - text: "\u9EDE\u81EA\u6AA2\u5668\u78BA\u8A8D\u4EAE\u7DA0\u71C8"
     why: 
     targetId: ip.depot.detector_tester
     toolId: tool.voltage_detector
     condition: tool.voltage_detector.selftest
     standPointId: tp.platform.ground
+    subId: b
   - text: "\u5F9E\u5E73\u53F0\u9EDE\u5F13\u982D\u63A5\u5730\u639B\u9EDE"
     why: 
     targetId: ip.pan_head.ground_clamp
     toolId: tool.voltage_detector
     condition: isolation.voltage_tested
     standPointId: tp.platform.ground
+    subId: c
   - text: "\u628A\u9A57\u96FB\u687F\u653E\u56DE\u687F\u67B6"
     why: 
     targetId: "env.tool_rack.slot_2\uFF08env.pole_rack\uFF09"
     toolId: tool.voltage_detector
     condition: rack.slot_2=on_rack
     standPointId: tp.platform.ground
+    subId: d
   - text: "\u5230\u687F\u67B6\u62FF\u8D77\u63A5\u5730\u687F"
     why: 
     targetId: "env.tool_rack.slot_3\uFF08env.pole_rack\uFF09"
     toolId: tool.grounding_rod
     condition: tool.active=tool.grounding_rod&&rack.slot_3=in_use
     standPointId: tp.platform.ground
+    subId: e
   - text: "\u628A\u63A5\u5730\u593E\u593E\u4E0A\u63A5\u5730\u7AEF\u5B50"
     why: 
     targetId: ip.depot.ground_terminal
     toolId: tool.grounding_rod
     condition: isolation.terminal_clamped
     standPointId: tp.platform.ground
+    subId: f
   - text: "\u62C9\u4E00\u4E0B\u63A5\u5730\u7DDA\u78BA\u8A8D"
     why: 
     targetId: ip.depot.ground_terminal
     toolId: tool.grounding_rod
     condition: isolation.pull_tested
     standPointId: tp.platform.ground
+    subId: g
   - text: "\u628A\u639B\u9264\u639B\u4E0A\u5F13\u982D\u63A5\u5730\u9EDE"
     why: 
     targetId: ip.pan_head.ground_clamp
     toolId: tool.grounding_rod
     condition: isolation.head_clamped
     standPointId: tp.platform.ground
+    subId: h
   - text: "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u518D\u767B\u8A18 #1"
     why: 
     targetId: env.work_order.ground_register
     toolId: 
     condition: ground_register.1=registered&&ground_register.1.registered_count>=2
     standPointId: tp.platform.ground
+    subId: i
   presetDone: 0
   side: 
   presetStates: []
@@ -108,16 +117,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913843
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - tool.active=tool.voltage_detector
-        - tool.voltage_detector.selftest
-        - isolation.voltage_tested
-        - rack.slot_2=on_rack
-        - tool.active=tool.grounding_rod&&rack.slot_3=in_use
-        - isolation.terminal_clamped
-        - isolation.pull_tested
-        - isolation.head_clamped
-        - ground_register.1=registered&&ground_register.1.registered_count>=2
+        keys: []

@@ -26,7 +26,7 @@ MonoBehaviour:
   - env.tool_rack.slot_13
   requiredToolId: 
   completion:
-    rid: 8951035174947913848
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -50,18 +50,21 @@ MonoBehaviour:
     toolId: 
     condition: ip.pan_assy.hv_terminal.state=Installed
     standPointId: tp.roof.base_e.n
+    subId: a
   - text: "\u5F9E\u96F6\u4EF6\u888B\u62FF\u7AEF\u5B50\u87BA\u6813 1 \u653E\u56DE"
     why: 
     targetId: part.pan_assy.hv_bolt_1
     toolId: 
     condition: part.pan_assy.hv_bolt_1.state=Placed
     standPointId: tp.roof.base_e.n
+    subId: b1
   - text: "\u5F9E\u96F6\u4EF6\u888B\u62FF\u7AEF\u5B50\u87BA\u6813 2 \u653E\u56DE"
     why: 
     targetId: part.pan_assy.hv_bolt_2
     toolId: 
     condition: part.pan_assy.hv_bolt_2.state=Placed
     standPointId: tp.roof.base_e.n
+    subId: b2
   - text: "\u5F9E\u5957\u7B52\u76D2\u62FF 19 mm \u5957\u7B52\u88DD\u4E0A\u5927\u626D\u529B\u6273\u624B\uFF0C\u4E26\u628A\u626D\u529B\u8A2D\u70BA
       50 N\xB7m"
     why: 
@@ -69,24 +72,28 @@ MonoBehaviour:
     toolId: tool.torque_wrench_l
     condition: tool.torque_wrench_l.setting=50
     standPointId: tp.roof.base_e.n
+    subId: c
   - text: "\u628A\u7AEF\u5B50\u87BA\u6813 1 \u9396\u5230\u5580\u8072\uFF0F\u9707\u52D5\u9583\u8272"
     why: 
     targetId: part.pan_assy.hv_bolt_1
     toolId: tool.torque_wrench_l
     condition: part.pan_assy.hv_bolt_1.state=Torqued
     standPointId: tp.roof.base_e.n
+    subId: d1
   - text: "\u628A\u7AEF\u5B50\u87BA\u6813 2 \u9396\u5230\u5580\u8072\uFF0F\u9707\u52D5\u9583\u8272"
     why: 
     targetId: part.pan_assy.hv_bolt_2
     toolId: tool.torque_wrench_l
     condition: part.pan_assy.hv_bolt_2.state=Torqued
     standPointId: tp.roof.base_e.n
+    subId: d2
   - text: "\u628A\u5927\u626D\u529B\u6273\u624B\u6536\u56DE\u5DE5\u5177\u888B"
     why: 
     targetId: env.tool_rack.slot_13
     toolId: tool.torque_wrench_l
     condition: rack.slot_13=on_rack
     standPointId: tp.roof.base_e.n
+    subId: e
   presetDone: 0
   side: 
   presetStates: []
@@ -96,14 +103,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913848
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - ip.pan_assy.hv_terminal.state=Installed
-        - part.pan_assy.hv_bolt_1.state=Placed
-        - part.pan_assy.hv_bolt_2.state=Placed
-        - tool.torque_wrench_l.setting=50
-        - part.pan_assy.hv_bolt_1.state=Torqued
-        - part.pan_assy.hv_bolt_2.state=Torqued
-        - rack.slot_13=on_rack
+        keys: []

@@ -56,12 +56,14 @@ MonoBehaviour:
     toolId: 
     condition: part.carbon_strip_L.state=Removed
     standPointId: tp.roof.inner
+    subId: a
   - text: "\u628A\u820A\u6ED1\u677F\u5E73\u653E\u5230\u8ECA\u9802\u66AB\u653E\u588A"
     why: 
     targetId: env.roof_strip_mat.slot_old
     toolId: 
     condition: part.carbon_strip_L.state=OnMat
     standPointId: tp.roof.inner
+    subId: b
   presetDone: 0
   side: L
   presetStates: []
@@ -78,22 +80,11 @@ MonoBehaviour:
         - rid: 1001
         - rid: 1002
     - rid: 1001
-      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        rules:
-        - rid: 1003
-        - rid: 1004
-    - rid: 1002
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        conditions:
-        - part.carbon_strip_L.state=OnMat
-    - rid: 1003
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: part.carbon_strip_{side}.state
         value: InTray
-    - rid: 1004
+    - rid: 1002
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: part.carbon_strip_{side}.removal

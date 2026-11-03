@@ -82,30 +82,35 @@ MonoBehaviour:
     toolId: tool.caliper
     condition: tool.active=tool.caliper
     standPointId: tp.roof.inner
+    subId: a
   - text: "\u91CF\u8098\u5074\u65B0\u6ED1\u677F\u4E2D\u9EDE"
     why: 
     targetId: ip.carbon_strip_L.measure_mid
     toolId: tool.caliper
     condition: ip.carbon_strip_L.measure_mid.new_measured
     standPointId: tp.roof.inner
+    subId: b
   - text: "\u91CF\u5916\u5074\u65B0\u6ED1\u677F\u4E2D\u9EDE"
     why: 
     targetId: ip.carbon_strip_R.measure_mid
     toolId: tool.caliper
     condition: ip.carbon_strip_R.measure_mid.new_measured
     standPointId: tp.roof.outer
+    subId: c
   - text: "\u5169\u500B\u8B80\u6578\u586B\u5165\u4F5C\u696D\u55AE"
     why: 
     targetId: env.work_order.height_check
     toolId: 
     condition: workorder.height_diff
     standPointId: tp.roof.outer
+    subId: d
   - text: "\u628A\u6E38\u6A19\u5361\u5C3A\u6536\u56DE\u5DE5\u5177\u888B"
     why: 
     targetId: env.tool_rack.slot_5
     toolId: tool.caliper
     condition: tool.active=
     standPointId: tp.roof.outer
+    subId: e
   presetDone: 0
   side: 
   presetStates: []

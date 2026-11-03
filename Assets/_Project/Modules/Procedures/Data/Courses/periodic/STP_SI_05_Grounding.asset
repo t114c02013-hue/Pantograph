@@ -62,30 +62,35 @@ MonoBehaviour:
     toolId: tool.grounding_rod
     condition: tool.active=tool.grounding_rod
     standPointId: tp.platform.ground
+    subId: a
   - text: "\u63A5\u5730\u593E\u593E\u4E0A\u63A5\u5730\u7AEF\u5B50"
     why: 
     targetId: ip.depot.ground_terminal
     toolId: tool.grounding_rod
     condition: isolation.terminal_clamped
     standPointId: tp.platform.ground
+    subId: b
   - text: "\u62C9\u4E00\u4E0B\u63A5\u5730\u7DDA\u78BA\u8A8D"
     why: 
     targetId: ip.depot.ground_terminal
     toolId: tool.grounding_rod
     condition: isolation.pull_tested
     standPointId: tp.platform.ground
+    subId: c
   - text: "\u639B\u9264\u639B\u4E0A\u5F13\u982D\u63A5\u5730\u9EDE"
     why: 
     targetId: ip.pan_head.ground_clamp
     toolId: tool.grounding_rod
     condition: isolation.head_clamped
     standPointId: tp.platform.ground
+    subId: d
   - text: "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u767B\u8A18 #1 \u63A5\u5730\u68D2"
     why: 
     targetId: env.work_order.ground_register
     toolId: 
     condition: ground_register.1=registered
     standPointId: tp.platform.ground
+    subId: e
   presetDone: 0
   side: 
   presetStates: []
@@ -102,22 +107,11 @@ MonoBehaviour:
         - rid: 1001
         - rid: 1002
     - rid: 1001
-      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        rules:
-        - rid: 1003
-        - rid: 1004
-    - rid: 1002
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        conditions:
-        - ground_register.1=registered
-    - rid: 1003
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: isolation.grounded
         value: true
-    - rid: 1004
+    - rid: 1002
       type: {class: OrderedSequence, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: isolation.ground_order

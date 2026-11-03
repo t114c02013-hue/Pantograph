@@ -61,24 +61,28 @@ MonoBehaviour:
     toolId: tool.voltage_detector
     condition: tool.active=tool.voltage_detector
     standPointId: tp.platform.ground
+    subId: a
   - text: "\u9EDE\u81EA\u6AA2\u5668\uFF0C\u78BA\u8A8D\u4EAE\u7DA0\u71C8"
     why: 
     targetId: ip.depot.detector_tester
     toolId: tool.voltage_detector
     condition: tool.voltage_detector.selftest
     standPointId: tp.platform.ground
+    subId: b
   - text: "\u9EDE\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u9A57\u96FB"
     why: 
     targetId: ip.pan_head.ground_clamp
     toolId: tool.voltage_detector
     condition: isolation.voltage_tested
     standPointId: tp.platform.ground
+    subId: c
   - text: "\u628A\u9A57\u96FB\u687F\u653E\u56DE\u687F\u67B6"
     why: 
     targetId: "env.tool_rack.slot_2\uFF08env.pole_rack\uFF09"
     toolId: tool.voltage_detector
     condition: tool.active=
     standPointId: tp.platform.ground
+    subId: d
   presetDone: 0
   side: 
   presetStates: []

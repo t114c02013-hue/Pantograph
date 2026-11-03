@@ -61,42 +61,49 @@ MonoBehaviour:
     toolId: 
     condition: hold.4.checklist_done&&hold.4.released
     standPointId: tp.platform.rack
+    subId: a0
   - text: "\u5F9E\u8170\u5305\u62FF\u51FA\u4E0A\u9396\u639B\u724C\u7D44"
     why: 
     targetId: env.waist_pouch
     toolId: tool.lockout_tag
     condition: tool.active=tool.lockout_tag
     standPointId: tp.cab
+    subId: a
   - text: "\u89E3\u9664\u5347\u5F13\u958B\u95DC\u7684\u9396"
     why: 
     targetId: ip.cab.raise_switch
     toolId: tool.lockout_tag
     condition: lockout.raise_switch=open
     standPointId: tp.cab
+    subId: b
   - text: "\u89E3\u9664\u4E3B\u65B7\u8DEF\u5668\u7684\u9396"
     why: 
     targetId: ip.cab.breaker
     toolId: tool.lockout_tag
     condition: lockout.breaker=open
     standPointId: tp.cab
+    subId: c
   - text: "\u6062\u5FA9\u96FB\u52D5\u7F38\u96FB\u6E90"
     why: 
     targetId: ip.cab.cylinder_power
     toolId: 
     condition: cab.cylinder_power=on
     standPointId: tp.cab
+    subId: d
   - text: "\u628A\u639B\u724C\u7D44\u6536\u9032\u8170\u5305"
     why: 
     targetId: env.waist_pouch
     toolId: tool.lockout_tag
     condition: rack.slot_1=in_pouch
     standPointId: tp.cab
+    subId: e
   - text: "\u5728\u4F5C\u696D\u55AE\u7C3D\u540D\u5B8C\u5DE5"
     why: 
     targetId: env.work_order.sign_end
     toolId: 
     condition: workorder.sign_end
     standPointId: tp.platform.rack
+    subId: f
   presetDone: 0
   side: 
   presetStates: []
@@ -107,23 +114,6 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 1000
-      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        rules:
-        - rid: 1001
-        - rid: 1002
-    - rid: 1001
       type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         keys: []
-    - rid: 1002
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        conditions:
-        - hold.4.checklist_done&&hold.4.released
-        - tool.active=tool.lockout_tag
-        - lockout.raise_switch=open
-        - lockout.breaker=open
-        - cab.cylinder_power=on
-        - rack.slot_1=in_pouch
-        - workorder.sign_end

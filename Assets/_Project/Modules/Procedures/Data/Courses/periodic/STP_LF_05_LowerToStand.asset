@@ -22,7 +22,7 @@ MonoBehaviour:
   - env.panto_stand
   requiredToolId: 
   completion:
-    rid: 8951035174947913759
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -40,12 +40,14 @@ MonoBehaviour:
     toolId: 
     condition: part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1
     standPointId: tp.platform.crane
+    subId: a
   - text: "\u5C0D\u4F4D\u71C8\u4EAE\u7DA0\u5F8C\u6162\u6162\u653E\u4E0B"
     why: 
     targetId: env.panto_stand
     toolId: 
     condition: part.pan_assy.state=OnStand
     standPointId: tp.platform.crane
+    subId: b
   presetDone: 0
   side: 
   presetStates: []
@@ -55,9 +57,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913759
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - part.crane.drop_distance>=0.05&&part.crane.drop_distance<=0.15&&part.crane.still_s>=1
-        - part.pan_assy.state=OnStand
+        keys: []

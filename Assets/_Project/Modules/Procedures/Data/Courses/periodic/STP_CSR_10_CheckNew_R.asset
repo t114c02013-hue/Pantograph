@@ -94,36 +94,42 @@ MonoBehaviour:
     toolId: 
     condition: spare.R.viewed_count>=3
     standPointId: tp.stand.w
+    subId: a
   - text: "\u65CB\u8F49\u6AA2\u67E5\u6709\u7121\u88C2\u7D0B"
     why: 
     targetId: "env.spare_shelf\uFF08\u9078\u5B9A\u7684\u5099\u54C1\uFF09"
     toolId: 
     condition: env.spare_shelf.slot_2.flipped
     standPointId: tp.stand.w
+    subId: b
   - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u6E38\u6A19\u5361\u5C3A"
     why: 
     targetId: env.tool_rack.slot_5
     toolId: tool.caliper
     condition: tool.active=tool.caliper
     standPointId: tp.stand.w
+    subId: c
   - text: "\u91CF\u9078\u5B9A\u65B0\u6ED1\u677F\u7684\u4E2D\u9EDE"
     why: 
     targetId: consumable.carbon_strip.measure_mid
     toolId: tool.caliper
     condition: env.spare_shelf.slot_2.measured
     standPointId: tp.stand.w
+    subId: d
   - text: "\u62FF\u8D77\u9078\u5B9A\u7684\u65B0\u6ED1\u677F"
     why: 
     targetId: "env.spare_shelf\uFF08\u9078\u5B9A\u7684\u5099\u54C1\uFF09"
     toolId: 
     condition: spare.R.picked
     standPointId: tp.stand.w
+    subId: f
   - text: "\u5728\u4F5C\u696D\u55AE\u8A18\u4E0B\u65B0\u54C1\u6599\u865F\u548C\u5E8F\u865F"
     why: 
     targetId: env.work_order.part_trace
     toolId: 
     condition: env.work_order.part_trace.matches_spare
     standPointId: tp.stand.w
+    subId: g
   presetDone: 0
   side: R
   presetStates: []
@@ -142,22 +148,11 @@ MonoBehaviour:
         - rid: 1001
         - rid: 1002
     - rid: 1001
-      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        rules:
-        - rid: 1003
-        - rid: 1004
-    - rid: 1002
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        conditions:
-        - env.work_order.part_trace.matches_spare
-    - rid: 1003
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: spare.{side}.picked
         value: true
-    - rid: 1004
+    - rid: 1002
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: spare.{side}.measured_ok

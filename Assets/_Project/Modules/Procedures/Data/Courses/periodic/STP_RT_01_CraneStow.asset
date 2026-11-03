@@ -21,7 +21,7 @@ MonoBehaviour:
   - env.crane_pendant
   requiredToolId: 
   completion:
-    rid: 8951035174947913856
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -39,12 +39,14 @@ MonoBehaviour:
     toolId: 
     condition: part.crane.hook.parked
     standPointId: tp.platform.crane
+    subId: a
   - text: "\u95DC\u9059\u63A7\u5668\u96FB\u6E90\u9470\u5319\uFF0C\u628A\u9059\u63A7\u5668\u639B\u56DE\u639B\u5EA7"
     why: 
     targetId: "env.crane_pendant\uFF08Key_Power\uFF09;env.crane_pendant\uFF08PendantDock\uFF09"
     toolId: 
     condition: ctrl.crane.power=false&&env.crane_pendant.state=Docked
     standPointId: tp.platform.crane
+    subId: b
   presetDone: 0
   side: 
   presetStates: []
@@ -54,9 +56,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913856
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - part.crane.hook.parked
-        - ctrl.crane.power=false&&env.crane_pendant.state=Docked
+        keys: []

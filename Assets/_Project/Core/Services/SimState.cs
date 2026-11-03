@@ -41,6 +41,7 @@ namespace PantographSim.Core
     public class SimState : ISimState
     {
         readonly Dictionary<string, string> values = new Dictionary<string, string>();
+        readonly Dictionary<string, long> versions = new Dictionary<string, long>();
         readonly IEventBus bus;
 
         // 批次暫存：鍵 → 新值（null＝刪除）；順序＝第一次寫入的順序
@@ -59,6 +60,9 @@ namespace PantographSim.Core
         public static string Format(float value) => value.ToString("0.###", CultureInfo.InvariantCulture);
 
         public bool InBatch => depth > 0;
+
+        /// <summary>R1.5b b4（軟體工程裁定 2026-11-03）：這個鍵生效的寫入次數；值和原本相同也算一次（批次放棄的不算）。小動作用它判斷「啟用後學員真的做了動作」。</summary>
+        public long Version(string key) => versions.TryGetValue(key, out var v) ? v : 0;
 
         public IEnumerable<string> Keys
         {
@@ -100,6 +104,7 @@ namespace PantographSim.Core
             // 不在批次：等於只有一筆的批次
             var change = Apply(key, value, force);
             if (change.HasValue) Publish(new[] { change.Value }, false);
+            else PublishTouched(new[] { key });
         }
 
         public void SetFloat(string key, float value) => Set(key, Format(value));
@@ -119,12 +124,13 @@ namespace PantographSim.Core
             }
             var changed = new List<StateChange>();
             foreach (var key in new List<string>(values.Keys))
-                if (!snapshot.ContainsKey(key)) { changed.Add(new StateChange(key, values[key], null)); values.Remove(key); }
+                if (!snapshot.ContainsKey(key)) { changed.Add(new StateChange(key, values[key], null)); values.Remove(key); versions[key] = Version(key) + 1; }
             foreach (var kv in snapshot)
                 if (!values.TryGetValue(kv.Key, out var v) || v != kv.Value)
                 {
                     changed.Add(new StateChange(kv.Key, values.TryGetValue(kv.Key, out var old) ? old : null, kv.Value));
                     values[kv.Key] = kv.Value;
+                    versions[kv.Key] = Version(kv.Key) + 1;
                 }
             // 全部寫入後才逐鍵通知：每個訂閱者讀到的都是完整的還原狀態
             foreach (var c in changed) Publish(new[] { c }, true);
@@ -174,12 +180,14 @@ namespace PantographSim.Core
                 if (discard) return;
 
                 var changes = new List<StateChange>();
+                var touched = new List<string>();
                 foreach (var key in order)
                 {
                     var c = Apply(key, batch[key], force.Contains(key));
-                    if (c.HasValue) changes.Add(c.Value);
+                    if (c.HasValue) changes.Add(c.Value); else touched.Add(key);
                 }
                 if (changes.Count > 0) Publish(changes, false);
+                if (touched.Count > 0) PublishTouched(touched.ToArray());
             }
             else forced.Clear();
             if (discard || after == null) return;
@@ -189,6 +197,7 @@ namespace PantographSim.Core
         /// <summary>寫入已生效的狀態；回傳變更（沒變且沒有 force 時為 null）。</summary>
         StateChange? Apply(string key, string value, bool force)
         {
+            versions[key] = Version(key) + 1;
             bool had = values.TryGetValue(key, out var old);
             if (had && old == value || !had && value == null) return force && had ? new StateChange(key, old, old, true) : (StateChange?)null;
             if (value == null) values.Remove(key); else values[key] = value;
@@ -204,6 +213,9 @@ namespace PantographSim.Core
                 restored = restored, Changes = changes
             });
         }
+
+        void PublishTouched(string[] keys) =>
+            bus?.Publish(new StateTouched { targetId = keys[0], keys = keys, time = SimClock.Now, isReplay = SimSession.IsReplay });
 
         sealed class Scope : IDisposable
         {
@@ -225,6 +237,9 @@ namespace PantographSim.Core
 
         /// <summary>寫入數值；force＝值沒變也記成一筆變更。</summary>
         public static void SetFloat(this ISimState s, string key, float value, bool force) => s.Set(key, SimState.Format(value), force);
+
+        /// <summary>鍵的寫入次數（SimState 以外的實作一律 0）。</summary>
+        public static long Version(this ISimState s, string key) => s is SimState x ? x.Version(key) : 0;
     }
 
     /// <summary>模擬時間來源；執行期由 App 設成 Time.time，測試時可自訂。</summary>

@@ -56,12 +56,14 @@ MonoBehaviour:
     toolId: 
     condition: part.carbon_strip_R.state=Removed
     standPointId: tp.stand.s
+    subId: a
   - text: "\u628A\u820A\u6ED1\u677F\u653E\u9032\u7D05\u8272\u5F85\u5831\u5EE2\u7BB1"
     why: 
     targetId: env.parts_tray
     toolId: 
     condition: part.carbon_strip_R.state=InTray
     standPointId: tp.stand.w
+    subId: b
   presetDone: 0
   side: R
   presetStates: []
@@ -78,22 +80,11 @@ MonoBehaviour:
         - rid: 1001
         - rid: 1002
     - rid: 1001
-      type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        rules:
-        - rid: 1003
-        - rid: 1004
-    - rid: 1002
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
-      data:
-        conditions:
-        - part.carbon_strip_R.state=InTray
-    - rid: 1003
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: part.carbon_strip_{side}.state
         value: InTray
-    - rid: 1004
+    - rid: 1002
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: part.carbon_strip_{side}.removal

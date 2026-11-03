@@ -30,7 +30,7 @@ MonoBehaviour:
   - part.pan_assy.hv_bolt_2
   requiredToolId: 
   completion:
-    rid: 8951035174947913750
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -57,66 +57,77 @@ MonoBehaviour:
     toolId: 
     condition: ip.pan_head.ground_clamp.inspected&&isolation.head_clamped&&ip.roof.hv_cable_ground.clamped
     standPointId: tp.roof.base_e.n
+    subId: a
   - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u6A19\u8A18\u7B46"
     why: 
     targetId: env.tool_rack.slot_9
     toolId: tool.marker
     condition: tool.active=tool.marker
     standPointId: tp.roof.base_e.n
+    subId: b
   - text: "\u5728\u7AEF\u5B50\u8207\u7AEF\u5B50\u5EA7\u756B\u5C0D\u4F4D\u8A18\u865F"
     why: 
     targetId: ip.pan_assy.hv_terminal
     toolId: tool.marker
     condition: ip.pan_assy.hv_terminal.marked
     standPointId: tp.roof.base_e.n
+    subId: c
   - text: "\u628A\u6A19\u8A18\u7B46\u6536\u56DE\u5DE5\u5177\u888B"
     why: 
     targetId: env.tool_rack.slot_9
     toolId: tool.marker
     condition: rack.slot_9=on_rack
     standPointId: tp.roof.base_e.n
+    subId: d
   - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u5957\u7B52\u6273\u624B"
     why: 
     targetId: env.tool_rack.slot_6
     toolId: tool.socket_wrench
     condition: tool.active=tool.socket_wrench
     standPointId: tp.roof.base_e.n
+    subId: e
   - text: "\u63DB\u4E0A 19 mm \u5957\u7B52"
     why: 
     targetId: "env.tool_bag.socket_case;tool.socket_wrench\uFF08\u5957\u7B52\uFF09"
     toolId: tool.socket_wrench
     condition: tool.socket_wrench.size=19
     standPointId: tp.roof.base_e.n
+    subId: f
   - text: "\u628A\u7AEF\u5B50\u87BA\u6813 1 \u8F49\u5230\u812B\u51FA"
     why: 
     targetId: part.pan_assy.hv_bolt_1
     toolId: tool.socket_wrench
     condition: part.pan_assy.hv_bolt_1.state=Out
     standPointId: tp.roof.base_e.n
+    subId: g1
   - text: "\u628A\u87BA\u6813 1 \u6536\u9032\u96F6\u4EF6\u888B"
     why: 
     targetId: env.tool_bag.bolt_pouch
     toolId: 
     condition: part.pan_assy.hv_bolt_1.state=InTray
     standPointId: tp.roof.base_e.n
+    subId: h1
   - text: "\u628A\u7AEF\u5B50\u87BA\u6813 2 \u8F49\u5230\u812B\u51FA"
     why: 
     targetId: part.pan_assy.hv_bolt_2
     toolId: tool.socket_wrench
     condition: part.pan_assy.hv_bolt_2.state=Out
     standPointId: tp.roof.base_e.n
+    subId: g2
   - text: "\u628A\u87BA\u6813 2 \u6536\u9032\u96F6\u4EF6\u888B"
     why: 
     targetId: env.tool_bag.bolt_pouch
     toolId: 
     condition: part.pan_assy.hv_bolt_2.state=InTray
     standPointId: tp.roof.base_e.n
+    subId: h2
   - text: "\u53D6\u4E0B\u7AEF\u5B50\uFF0C\u653E\u5230\u505C\u653E\u4F4D"
     why: 
     targetId: ip.pan_assy.hv_terminal
     toolId: 
     condition: ip.pan_assy.hv_terminal.state=Removed
     standPointId: tp.roof.base_e.n
+    subId: i
   presetDone: 0
   side: 
   presetStates: []
@@ -126,18 +137,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913750
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - ip.pan_head.ground_clamp.inspected&&isolation.head_clamped&&ip.roof.hv_cable_ground.clamped
-        - tool.active=tool.marker
-        - ip.pan_assy.hv_terminal.marked
-        - rack.slot_9=on_rack
-        - tool.active=tool.socket_wrench
-        - tool.socket_wrench.size=19
-        - part.pan_assy.hv_bolt_1.state=Out
-        - part.pan_assy.hv_bolt_1.state=InTray
-        - part.pan_assy.hv_bolt_2.state=Out
-        - part.pan_assy.hv_bolt_2.state=InTray
-        - ip.pan_assy.hv_terminal.state=Removed
+        keys: []

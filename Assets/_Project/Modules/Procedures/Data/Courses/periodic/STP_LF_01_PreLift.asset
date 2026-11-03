@@ -26,7 +26,7 @@ MonoBehaviour:
   - npc.rigging_lead
   requiredToolId: 
   completion:
-    rid: 8951035174947913755
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -48,36 +48,42 @@ MonoBehaviour:
     toolId: tool.grounding_rod
     condition: isolation.head_clamped=false
     standPointId: tp.platform.ground
+    subId: a
   - text: "\u9B06\u958B\u63A5\u5730\u7AEF\u5B50\u7684\u593E\u5B50"
     why: 
     targetId: ip.depot.ground_terminal
     toolId: tool.grounding_rod
     condition: isolation.terminal_clamped=false&&ip.roof.carbody_ground.clamped
     standPointId: tp.platform.ground
+    subId: b
   - text: "\u628A\u63A5\u5730\u687F\u653E\u56DE\u687F\u67B6"
     why: 
     targetId: "env.tool_rack.slot_3\uFF08\u5728\u687F\u67B6 env.pole_rack\uFF09"
     toolId: tool.grounding_rod
     condition: rack.slot_3=on_rack
     standPointId: tp.platform.ground
+    subId: c
   - text: "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u92B7\u865F #1"
     why: 
     targetId: env.work_order.ground_register
     toolId: 
     condition: ground_register.1=cancelled
     standPointId: tp.platform.ground
+    subId: c2
   - text: "\u78BA\u8A8D\u540A\u9264\u5728\u5F13\u7684\u6B63\u4E0A\u65B9"
     why: 
     targetId: part.crane.hook
     toolId: 
     condition: part.crane.hook.inspected&&part.crane.hook_cog_offset_cm<=5
     standPointId: tp.platform.crane
+    subId: d
   - text: "\u8ACB\u540A\u639B\u6307\u63EE\u78BA\u8A8D\uFF0C\u653E\u884C\u8A66\u540A"
     why: 
     targetId: npc.rigging_lead
     toolId: 
     condition: hold.2.checklist_done&&hold.2.released
     standPointId: tp.platform.crane
+    subId: e
   presetDone: 0
   side: 
   presetStates: []
@@ -87,13 +93,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913755
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - isolation.head_clamped=false
-        - isolation.terminal_clamped=false&&ip.roof.carbody_ground.clamped
-        - rack.slot_3=on_rack
-        - ground_register.1=cancelled
-        - part.crane.hook.inspected&&part.crane.hook_cog_offset_cm<=5
-        - hold.2.checklist_done&&hold.2.released
+        keys: []

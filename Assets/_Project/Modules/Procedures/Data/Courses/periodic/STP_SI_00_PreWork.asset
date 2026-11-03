@@ -27,7 +27,7 @@ MonoBehaviour:
   - env.waist_pouch
   requiredToolId: 
   completion:
-    rid: 8951035174947913728
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -49,36 +49,42 @@ MonoBehaviour:
     toolId: 
     condition: env.work_order.anti_roll_check.checked_count>=3
     standPointId: tp.platform.rack
+    subId: a
   - text: "\u78BA\u8A8D\u4F5C\u696D\u8A31\u53EF\u55AE"
     why: 
     targetId: env.work_order.permit
     toolId: 
     condition: env.work_order.permit.viewed_count>=5
     standPointId: tp.platform.rack
+    subId: b
   - text: "\u5DE5\u5177\u7BB1\u6703\u8B70\uFF1A\u52FE 5 \u9805\u5371\u5BB3\u4E26\u7C3D\u540D"
     why: 
     targetId: env.work_order.tbm
     toolId: 
     condition: env.work_order.tbm.checked_count>=5&&env.work_order.tbm.signed
     standPointId: tp.platform.rack
+    subId: c
   - text: "\u7A7F\u6234\u9632\u8B77\u5177\u4E26\u505A\u7D55\u7DE3\u624B\u5957\u5145\u6C23\u6AA2\u67E5"
     why: 
     targetId: env.ppe_station
     toolId: 
     condition: ppe.helmet=worn&&ppe.helmet_strap=fastened&&ppe.safety_shoes=worn&&ppe.work_gloves=worn&&ppe.insulating_gloves=carried&&ppe.insulating_gloves.inflate_checked
     standPointId: tp.platform.rack
+    subId: d
   - text: "\u67E5\u770B\u91CF\u5177\u6821\u6B63\u6A19\u7C64\u4E26\u52FE\u9078"
     why: 
     targetId: env.work_order.calibration_check
     toolId: 
     condition: env.work_order.calibration_check.valid_count>=3
     standPointId: tp.platform.rack
+    subId: e
   - text: "\u5230\u5DE5\u5177\u67B6\u9818\u53D6\u500B\u4EBA\u4E0A\u9396\u5305\uFF0C\u639B\u5728\u8170\u9593"
     why: 
     targetId: env.tool_rack.slot_1;env.waist_pouch
     toolId: tool.lockout_tag
     condition: rack.slot_1=in_pouch
     standPointId: tp.platform.rack
+    subId: f
   presetDone: 0
   side: 
   presetStates: []
@@ -88,13 +94,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913728
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - env.work_order.anti_roll_check.checked_count>=3
-        - env.work_order.permit.viewed_count>=5
-        - env.work_order.tbm.checked_count>=5&&env.work_order.tbm.signed
-        - ppe.helmet=worn&&ppe.helmet_strap=fastened&&ppe.safety_shoes=worn&&ppe.work_gloves=worn&&ppe.insulating_gloves=carried&&ppe.insulating_gloves.inflate_checked
-        - env.work_order.calibration_check.valid_count>=3
-        - rack.slot_1=in_pouch
+        keys: []

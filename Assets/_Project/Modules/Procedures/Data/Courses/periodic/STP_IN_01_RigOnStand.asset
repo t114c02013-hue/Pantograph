@@ -28,7 +28,7 @@ MonoBehaviour:
   - npc.rigging_lead
   requiredToolId: 
   completion:
-    rid: 8951035174947913839
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -52,48 +52,56 @@ MonoBehaviour:
     toolId: 
     condition: part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=0.6&&part.crane.beam_above_pan_m<=1.0
     standPointId: tp.stand.w
+    subId: a
   - text: "\u628A\u540A\u5E36 1 \u639B\u4E0A\u540A\u8033 1"
     why: 
     targetId: ip.pan_assy.lift_point_1
     toolId: 
     condition: ip.pan_assy.lift_point_1.state=Rigged
     standPointId: tp.stand.w
+    subId: b1
   - text: "\u628A\u540A\u5E36 2 \u639B\u4E0A\u540A\u8033 2"
     why: 
     targetId: ip.pan_assy.lift_point_2
     toolId: 
     condition: ip.pan_assy.lift_point_2.state=Rigged
     standPointId: tp.stand.w
+    subId: b2
   - text: "\u628A\u540A\u5E36 3 \u639B\u4E0A\u540A\u8033 3"
     why: 
     targetId: ip.pan_assy.lift_point_3
     toolId: 
     condition: ip.pan_assy.lift_point_3.state=Rigged
     standPointId: tp.stand.w
+    subId: b3
   - text: "\u628A\u540A\u5E36 4 \u639B\u4E0A\u540A\u8033 4"
     why: 
     targetId: ip.pan_assy.lift_point_4
     toolId: 
     condition: ip.pan_assy.lift_point_4.state=Rigged
     standPointId: tp.stand.w
+    subId: b4
   - text: "\u89E3\u958B\u53F0\u67B6\u593E\u5177 1"
     why: 
     targetId: env.panto_stand.clamp_1
     toolId: 
     condition: env.panto_stand.clamp_1.state=Open
     standPointId: tp.stand.w
+    subId: c1
   - text: "\u89E3\u958B\u53F0\u67B6\u593E\u5177 2"
     why: 
     targetId: env.panto_stand.clamp_2
     toolId: 
     condition: env.panto_stand.clamp_2.state=Open
     standPointId: tp.stand.w
+    subId: c2
   - text: "\u8ACB\u540A\u639B\u6307\u63EE\u78BA\u8A8D\uFF0C\u653E\u884C\u8A66\u540A"
     why: 
     targetId: npc.rigging_lead
     toolId: 
     condition: hold.3.checklist_done&&hold.3.released
     standPointId: tp.platform.crane
+    subId: d
   presetDone: 0
   side: 
   presetStates: []
@@ -103,15 +111,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913839
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=0.6&&part.crane.beam_above_pan_m<=1.0
-        - ip.pan_assy.lift_point_1.state=Rigged
-        - ip.pan_assy.lift_point_2.state=Rigged
-        - ip.pan_assy.lift_point_3.state=Rigged
-        - ip.pan_assy.lift_point_4.state=Rigged
-        - env.panto_stand.clamp_1.state=Open
-        - env.panto_stand.clamp_2.state=Open
-        - hold.3.checklist_done&&hold.3.released
+        keys: []

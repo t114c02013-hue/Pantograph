@@ -21,7 +21,7 @@ MonoBehaviour:
   - env.crane_pendant
   requiredToolId: 
   completion:
-    rid: 8951035174947913841
+    rid: 1000
   errors: []
   hints:
     text: 
@@ -39,12 +39,14 @@ MonoBehaviour:
     toolId: 
     condition: part.crane.load_bottom_y>=3.1
     standPointId: tp.platform.crane
+    subId: a
   - text: "\u6309\u4F4F\u6A6B\u79FB\u5230\u8ECA\u9802\u5E95\u5EA7\u6B63\u4E0A\u65B9"
     why: 
     targetId: env.crane_pendant
     toolId: 
     condition: part.pan_assy.roof_offset_cm<=5
     standPointId: tp.platform.crane
+    subId: b
   presetDone: 0
   side: 
   presetStates: []
@@ -54,9 +56,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035174947913841
-      type: {class: ConditionsAll, ns: PantographSim.Data, asm: PantographSim.Data}
+    - rid: 1000
+      type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
-        conditions:
-        - part.crane.load_bottom_y>=3.1
-        - part.pan_assy.roof_offset_cm<=5
+        keys: []
