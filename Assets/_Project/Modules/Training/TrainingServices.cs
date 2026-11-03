@@ -140,6 +140,7 @@ namespace PantographSim.Training
 
         void OnError(ErrorDetected e)
         {
+            if (e.deferred) return;   // R1.5b K3：只進報表，進行中不跳提示
             // 已有更嚴重的錯誤在畫面上時，不被較輕的蓋掉
             if (state.GetBool("ui.error.active") && Rank(state.Get("ui.error.severity")) > Rank(e.severity.ToString())) return;
             bool blocking = e.severity == Severity.Critical || e.blocks;

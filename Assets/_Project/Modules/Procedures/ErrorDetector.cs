@@ -19,21 +19,79 @@ namespace PantographSim.Procedures
         readonly IEventBus bus;
         readonly ISimState state;
         readonly HashSet<string> fired = new HashSet<string>();
+        /// <summary>R1.5b K3：考核政策（預設讀 Resources/ExamPolicy；測試可換）。</summary>
+        public ExamPolicyDef Policy = ExamPolicyDef.Load();
 
         public ErrorDetector(ProcedureRunner runner, IEventBus bus, ISimState state)
         {
             this.runner = runner; this.bus = bus; this.state = state;
             bus.Subscribe<StateChanged>(OnStateChanged);
             bus.Subscribe<StepStarted>(OnStepStarted);
+            runner.StepCompleting += OnStepCompleting;
+            if (runner.SubActionHold == null) runner.SubActionHold = HoldSubAction;
         }
 
         public void Dispose()
         {
             bus.Unsubscribe<StateChanged>(OnStateChanged);
             bus.Unsubscribe<StepStarted>(OnStepStarted);
+            runner.StepCompleting -= OnStepCompleting;
+            if (runner.SubActionHold == HoldSubAction) runner.SubActionHold = null;
         }
 
-        void OnStepStarted(StepStarted e) => fired.Clear();
+        /// <summary>R1.5b K3：步驟完成時，還沒判的螺栓（最後一顆）判一次；合格卻沒畫標記也在這時判。</summary>
+        void OnStepCompleting(RuntimeStep s)
+        {
+            var ctx = runner.ContextFor(s);
+            foreach (var kv in leaving.ToList()) JudgeLeave(kv.Key, kv.Value, s);
+            leaving.Clear();
+            foreach (var r in ActiveRules(s.def).Where(r => r.trigger == ErrorTrigger.UnsetAtCompletion && !fired.Contains(r.errorId)))
+                if (Enumerable.Range(1, Math.Max(1, r.count)).Any(n =>
+                    {
+                        var k2 = ctx.K(r.key2, n);
+                        return state.Has(k2) && ValueInRangeEvaluator.InRange(state.GetFloat(k2), r.min, r.max) && !state.GetBool(ctx.K(r.key, n));
+                    }))
+                    Fire(r, s, r.key);
+        }
+
+        void OnStepStarted(StepStarted e) { fired.Clear(); leaving.Clear(); }
+
+        // ---------- R1.5b K3：扭力不足（驗收組長裁定）----------
+        /// <summary>每條 OnLeave 規則目前正在鎖的那顆螺栓的鍵（離開時判）。</summary>
+        readonly Dictionary<ErrorRule, string> leaving = new Dictionary<ErrorRule, string>();
+
+        /// <summary>開始鎖另一顆、換工具時，判上一顆的最終扭力；這一顆記成「正在鎖」。</summary>
+        void TrackLeave(string key, RuntimeStep s, EvalContext ctx)
+        {
+            foreach (var r in ActiveRules(s.def).Where(r => r.trigger == ErrorTrigger.OutOfRangeOnLeave))
+            {
+                bool bolt = ValueInRangeEvaluator.Expand(r.key, r.count, ctx).Contains(key);
+                if (leaving.TryGetValue(r, out var prev) && (key == SimIds.ActiveTool || bolt && key != prev)) { JudgeLeave(r, prev, s); leaving.Remove(r); }
+                if (bolt) leaving[r] = key;
+            }
+        }
+
+        void JudgeLeave(ErrorRule r, string key, RuntimeStep s)
+        {
+            if (fired.Contains(r.errorId) || !state.Has(key)) return;
+            float v = state.GetFloat(key);
+            if (v >= r.min - ValueInRangeEvaluator.Epsilon) return;
+            if (!ExamPolicyDef.In(Policy?.recordModes, state.Get("training.mode"))) return;   // 教學模式擋下（HoldSubAction），不記
+            var ci = System.Globalization.CultureInfo.InvariantCulture;
+            string bolt = key.Substring(0, key.LastIndexOf('.'));   // …bolt_3.torque_Nm → 3
+            Fire(r, s, key, $"（{bolt.Substring(bolt.LastIndexOf('_') + 1)} 號螺栓 {v.ToString("0.0", ci)} N·m，差 {(r.min - v).ToString("0.0", ci)} N·m）");
+        }
+
+        /// <summary>教學模式（holdModes）：這個小動作的螺栓扭力不足時不讓它完成，回傳提示（null＝不擋）。給 ProcedureRunner.SubActionHold。</summary>
+        public string HoldSubAction(RuntimeStep s, SubAction a)
+        {
+            if (!ExamPolicyDef.In(Policy?.holdModes, state.Get("training.mode")) || string.IsNullOrEmpty(a.targetId)) return null;
+            var ctx = runner.ContextFor(s);
+            foreach (var r in ActiveRules(s.def).Where(r => r.trigger == ErrorTrigger.OutOfRangeOnLeave))
+                foreach (var k in ValueInRangeEvaluator.Expand(r.key, r.count, ctx).Where(k => k.StartsWith(a.targetId + ".")))
+                    if (state.Has(k) && state.GetFloat(k) < r.min - ValueInRangeEvaluator.Epsilon) return Policy.underHint;
+            return null;
+        }
 
         static bool Matches(string pattern, string id) =>
             pattern.EndsWith("*") ? id.StartsWith(pattern.Substring(0, pattern.Length - 1)) : pattern == id;
@@ -103,6 +161,7 @@ namespace PantographSim.Procedures
             var s = runner.Current;
             if (s == null || runner.Finished || s.def.errors == null) return;
             var ctx = runner.ContextFor(s);
+            foreach (var c in e.Changes) TrackLeave(c.key, s, ctx);
             foreach (var c in e.Changes)
                 foreach (var rule in ActiveRules(s.def))
                 {
@@ -148,14 +207,21 @@ namespace PantographSim.Procedures
                 m => SimIds.IsDistanceKey(m.Groups[1].Value) ? SimIds.CmText(state.GetFloat(m.Groups[1].Value))   // 距離往上進位：不會出現「還差 0.0 cm」
                     : state.GetFloat(m.Groups[1].Value).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture));
 
-        void Fire(ErrorRule r, RuntimeStep s, string target)
+        void Fire(ErrorRule r, RuntimeStep s, string target, string detail = "")
         {
             if (!fired.Add(r.errorId)) return;
             state.Set("error.last", r.errorId);
+            // R1.5b K3：考核模式且喀聲回饋還沒確認（k3Ready=false），改記 severityBeforeK3，報告註明
+            var severity = r.severity; var what = Format(r.what) + detail;
+            string mode = state.Get("training.mode");
+            if (!string.IsNullOrEmpty(r.severityBeforeK3) && mode == "exam" && !(Policy != null && Policy.k3Ready)
+                && Enum.TryParse<Severity>(r.severityBeforeK3, out var before))
+            { severity = before; what += ExamPolicyDef.K3Note; }
+            bool deferred = r.trigger == ErrorTrigger.OutOfRangeOnLeave && ExamPolicyDef.In(Policy?.deferModes, mode);   // 放行，只進報表
             bus.Publish(new ErrorDetected
             {
-                errorId = r.errorId, severity = r.severity, what = Format(r.what), why = Format(r.why), fix = Format(r.fix),
-                stepId = s.RunId, blocks = r.blocks || r.severity == Severity.Critical, targetId = target, time = SimClock.Now
+                errorId = r.errorId, severity = severity, what = what, why = Format(r.why), fix = Format(r.fix),
+                stepId = s.RunId, blocks = !deferred && (r.blocks || severity == Severity.Critical), deferred = deferred, targetId = target, time = SimClock.Now
             });
         }
     }

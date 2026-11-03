@@ -30,6 +30,9 @@ namespace PantographSim.Editor
             public Reuse[] reuseExcluded = Array.Empty<Reuse>();
             public Reuse[] reuseTargetChanged = Array.Empty<Reuse>();
             public AutoCompleteAllowedDef[] autoCompleteAllowed = Array.Empty<AutoCompleteAllowedDef>();
+            public CompletionOverride[] completionOverrides = Array.Empty<CompletionOverride>();
+            /// <summary>R1 步驟的完成條件不能照用時（例：K3 扭力不足要能完成步驟、在完成時判錯），以這份取代。step 是前綴（_L、_R 都套）。</summary>
+            [Serializable] public class CompletionOverride { public string step, courses = "both", why; public RuleJson completion; }
             public Pattern[] patterns = Array.Empty<Pattern>();
             public Exact[] exact = Array.Empty<Exact>();
             public Container[] targetContainers = Array.Empty<Container>();
@@ -166,6 +169,8 @@ namespace PantographSim.Editor
                 st.subActions = subs.Select(x => new SubAction { text = x.e.text, why = "", targetId = x.e.targetId, toolId = x.e.toolId, condition = x.rule, standPointId = x.e.standPointId, subId = x.e.subId }).ToArray();
                 st.hints = st.hints ?? new HintSet();
                 st.hints.checklist = subs.Select(x => x.e.text + "|" + x.rule).ToArray();   // 清單跟 v6 小動作（R1 的清單少了新增的列，文字也還是車頂工具箱）
+                var ov = LoadTables().completionOverrides.FirstOrDefault(o => m.stepId.StartsWith(o.step) && InCourse(o.courses, course));
+                if (ov != null) st.completion = ProcedureJsonConverter.BuildRule(ov.completion);
                 if (r1s == null)
                 {
                     st.instruction = m.title;
@@ -191,7 +196,8 @@ namespace PantographSim.Editor
             CheckTargets(ex, sceneIds, toolIds, t, errors);
             var res = resolved;
             var courses = Courses.ToDictionary(c => c, c => BuildCourse(c, res, metas, r1));
-            foreach (var st in courses.Values.SelectMany(x => x)) ApplyErrorDefs(st, defs, errors);
+            var stepErrors = metas.ToDictionary(m => m.stepId, m => m.errors.Select(x => x.id).ToList());
+            foreach (var st in courses.Values.SelectMany(x => x)) ApplyErrorDefs(st, defs, stepErrors[st.stepId], errors);
             return courses;
         }
 
@@ -227,20 +233,51 @@ namespace PantographSim.Editor
             }
             foreach (var kv in courses)
             {
-                var saved = kv.Value.Select(s => StepJsonImporter.Save(s, $"{CourseFolder}/{kv.Key}/{s.stepId}.asset")).ToList();
+                var saved = kv.Value.Select(s => SaveAsset(s, $"{CourseFolder}/{kv.Key}/{s.stepId}.asset")).ToList();
                 var prc = ScriptableObject.CreateInstance<ProcedureDefinition>();
                 prc.procedureId = "PRC_" + kv.Key; prc.title = kv.Key; prc.steps = saved;
                 prc.requireFreshWrite = true;   // 軟體工程裁定 2026-11-03：小動作要啟用後真的做了動作才算完成
                 prc.autoCompleteAllowed = LoadTables().autoCompleteAllowed;
-                StepJsonImporter.Save(prc, ProcedurePath(kv.Key));
+                SaveAsset(prc, ProcedurePath(kv.Key));
                 var rs = resolved.Where(r => r.e.course == kv.Key).ToList();
                 sb.AppendLine($"{kv.Key}：步驟 {saved.Count}、小動作 {rs.Count}（第 1 層 {rs.Count(r => r.layer == 1)}、第 2 層 {rs.Count(r => r.layer == 2)}、第 3 層 {rs.Count(r => r.layer == 3)}；機制待做 {rs.Count(r => r.owner.Length > 0)}）→ {CourseFolder}/{kv.Key}");
+            }
+            const string policyPath = "Assets/_Project/Modules/Procedures/Resources/ExamPolicy.asset";   // K3：預設 k3Ready=false，組長試玩後改資料
+            if (AssetDatabase.LoadAssetAtPath<ExamPolicyDef>(policyPath) == null)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(policyPath));
+                AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<ExamPolicyDef>(), policyPath);
             }
             AssetDatabase.SaveAssets();
             Directory.CreateDirectory("Logs");
             File.WriteAllText(MapReportPath, MapReport(resolved), new UTF8Encoding(true));
             sb.AppendLine("每列的對應 → " + MapReportPath);
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// 存資產（GUID 不變）：內容沒變不寫；有變時先存到暫存檔，再把檔案內容蓋過去重新匯入。
+        /// 不用 CopySerialized：[SerializeReference] 的圖形改變（例：完成條件 AllOf→OrderedSequence）時，覆寫既有物件後 SaveAssets 會讓 Unity 當掉（2022.3.62f3 實測兩次）。
+        /// </summary>
+        static T SaveAsset<T>(T obj, string path) where T : ScriptableObject
+        {
+            obj.name = Path.GetFileNameWithoutExtension(path);
+            var existing = AssetDatabase.LoadAssetAtPath<T>(path);
+            if (existing == null)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                AssetDatabase.CreateAsset(obj, path);
+                return obj;
+            }
+            string Norm(UnityEngine.Object o) => Regex.Replace(EditorJsonUtility.ToJson(o), "\"(rid|m_Name)\":\\s*(-?\\d+|\"[^\"]*\")", "");
+            if (Norm(obj) == Norm(existing)) { UnityEngine.Object.DestroyImmediate(obj); return existing; }
+            string tmp = Path.GetDirectoryName(path).Replace('\\', '/') + "/_import_tmp.asset";
+            AssetDatabase.CreateAsset(obj, tmp);
+            AssetDatabase.SaveAssets();
+            File.Copy(tmp, path, true);
+            AssetDatabase.DeleteAsset(tmp);
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+            return AssetDatabase.LoadAssetAtPath<T>(path);
         }
 
         public const string MapReportPath = "Logs/ConditionMap.csv";

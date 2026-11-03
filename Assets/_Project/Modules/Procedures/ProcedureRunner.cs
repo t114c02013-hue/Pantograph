@@ -45,8 +45,17 @@ namespace PantographSim.Procedures
         }
 
         /// <summary>小動作完成：條件成立；requireFreshWrite 時還要啟用後有條件鍵被寫過（或列在 autoCompleteAllowed）。</summary>
-        bool SubDone(RuntimeStep s, SubAction a) =>
-            FreshMode ? fresh.Done(state, a.condition, FreshWriteGate.Allowed(procedure, s.def.stepId, a.subId)) : ChecklistEval.Done(state, a.condition);
+        bool SubDone(RuntimeStep s, SubAction a)
+        {
+            bool done = FreshMode ? fresh.Done(state, a.condition, FreshWriteGate.Allowed(procedure, s.def.stepId, a.subId)) : ChecklistEval.Done(state, a.condition);
+            if (!done || SubActionHold == null) return done;
+            holdReason = SubActionHold(s, a);
+            return holdReason == null;
+        }
+
+        /// <summary>R1.5b K3：條件成立也先不讓這個小動作完成，回傳提示（null＝不擋）。教學模式扭力不足時由 ErrorDetector 提供。</summary>
+        public Func<RuntimeStep, SubAction, string> SubActionHold;
+        string holdReason, shownHold;
         /// <summary>一次判定裡「狀態又改變→再判定」的上限；超過記 Error。</summary>
         public const int MaxRounds = 8;
 
@@ -57,6 +66,8 @@ namespace PantographSim.Procedures
         public bool Started { get; private set; }
         public ProcedureDefinition Procedure => procedure;
         public event Action<RuntimeStep> StepBegan;
+        /// <summary>R1.5b K3：步驟就要完成（完成記號還沒寫）。ErrorDetector 在這裡判「只看最後結果」的錯誤。</summary>
+        public event Action<RuntimeStep> StepCompleting;
 
         public ProcedureRunner(ProcedureDefinition procedure, IEventBus bus, ISimState state, IStepGate gate = null)
         {
@@ -283,6 +294,7 @@ namespace PantographSim.Procedures
             var subs = SubActions(s);
             int idx = (int)state.GetFloat("procedure.sub_index");
             int start = idx;
+            holdReason = null;
             while (idx < subs.Length && SubDone(s, subs[idx]))
             {
                 idx++;
@@ -290,6 +302,7 @@ namespace PantographSim.Procedures
                 if (subSnaps.Count <= idx) subSnaps.Add(state.Snapshot());   // 第 idx 個小動作從現在開始
             }
             if (idx != start) state.SetFloat("procedure.sub_index", idx);
+            if (holdReason != shownHold) { state.Set("procedure.gate_reason", holdReason ?? ""); shownHold = holdReason; }   // 擋下的提示（例：扭力不足，請鎖到扳手響）
             PublishBackState();
             return idx >= subs.Length;
         }
@@ -451,6 +464,7 @@ namespace PantographSim.Procedures
 
         void Complete(RuntimeStep s)
         {
+            StepCompleting?.Invoke(s);
             state.SetBool(s.DoneKey, true);
             bus.Publish(new StepCompleted { stepId = s.RunId, side = s.side, time = SimClock.Now });
 

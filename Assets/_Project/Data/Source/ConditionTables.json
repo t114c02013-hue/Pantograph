@@ -16,6 +16,9 @@
     { "step": "STP_CSR_11_Install", "sub": "c", "why": "v6 目標改成 install_target（吸附點），條件不變" }
   ],
   "autoCompleteAllowed": [],
+  "completionOverrides": [
+    { "step": "STP_CSR_13_Torque", "courses": "both", "why": "驗收組長 K3：扭力不足在離開螺栓時判、練習與考核放行，步驟完成不再要求 23–27 N·m（教學模式由 ExamPolicyDef 擋下）；只留順序", "completion": { "type": "OrderedSequence", "key": "ip.carbon_strip_{side}.torque_order", "expected": "1,2,3,4" } }
+  ],
   "patterns": [
     { "re": "^已旋轉檢視一圈（判定對象為 spare\\.(L|R)\\.selected，依側別，不寫死 slot_2）$", "rule": "spare.$1.selected.flipped" },
     { "re": "^讀數 EX 12\\.0 ± 0\\.2 mm（判定對象為 spare\\.(L|R)\\.selected，依側別，不寫死 slot_2）$", "rule": "spare.$1.selected.measured" },

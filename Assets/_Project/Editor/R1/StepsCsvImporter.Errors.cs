@@ -22,6 +22,9 @@ namespace PantographSim.Editor
         public class ErrorRuleDef
         {
             public string errorId, severity, severityBeforeK3, courses, inputMode, status, owner, source, trigger, note;
+            /// <summary>觸發條件（ProcedureJson 的 ErrorJson 格式）。有寫就以這份為準（取代 R1 的），並加到 Steps.csv 引用它的步驟。</summary>
+            public ErrorJson rule;
+            public bool HasRule => rule != null && !string.IsNullOrEmpty(rule.trigger);
         }
 
         [Serializable] class ErrorRulesFile { public ErrorRuleDef[] rules = Array.Empty<ErrorRuleDef>(); }
@@ -63,15 +66,35 @@ namespace PantographSim.Editor
         }
 
         /// <summary>產生的步驟：沿用的錯誤規則以 ErrorRules.json 的嚴重度為準，加上 K3 的 severityBeforeK3、K8 的 inputMode。</summary>
-        public static void ApplyErrorDefs(StepDefinition st, Dictionary<string, ErrorRuleDef> defs, List<string> errors)
+        public static void ApplyErrorDefs(StepDefinition st, Dictionary<string, ErrorRuleDef> defs, IEnumerable<string> stepErrorIds, List<string> errors)
         {
+            var list = new List<ErrorRule>();
             foreach (var e in st.errors ?? Array.Empty<ErrorRule>())
             {
                 if (!defs.TryGetValue(e.errorId, out var d)) { errors.Add($"{st.stepId}：沿用的錯誤 {e.errorId} 在 ErrorRules.json 沒有定義"); continue; }
+                list.Add(d.HasRule ? Build(d, e) : e);
+            }
+            foreach (var id in stepErrorIds.Where(id => list.All(x => x.errorId != id)))
+                if (defs.TryGetValue(id, out var d) && d.HasRule) list.Add(Build(d, null));
+            foreach (var e in list)
+            {
+                var d = defs[e.errorId];
                 e.severity = (Severity)Enum.Parse(typeof(Severity), d.severity);
                 e.severityBeforeK3 = d.severityBeforeK3 ?? "";
                 e.inputMode = d.inputMode ?? "";
             }
+            st.errors = list.ToArray();
+        }
+
+        /// <summary>ErrorRules.json 的觸發條件建成 ErrorRule；說明文字沒寫就沿用 R1 的。</summary>
+        static ErrorRule Build(ErrorRuleDef d, ErrorRule r1)
+        {
+            var j = JsonUtility.FromJson<ErrorJson>(JsonUtility.ToJson(d.rule));
+            j.errorId = d.errorId; j.severity = d.severity;
+            if (string.IsNullOrEmpty(j.what)) j.what = r1?.what ?? d.trigger;
+            if (string.IsNullOrEmpty(j.why)) j.why = r1?.why ?? "";
+            if (string.IsNullOrEmpty(j.fix)) j.fix = r1?.fix ?? "";
+            return ProcedureJsonConverter.BuildError(j);
         }
     }
 }

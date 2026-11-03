@@ -121,6 +121,8 @@ namespace PantographSim.Core
         public string errorId, stepId, what, why, fix;
         public Severity severity;
         public bool blocks;
+        /// <summary>R1.5b K3：步驟進行中不跳提示，只進報表（練習、考核模式的扭力不足）。</summary>
+        public bool deferred;
     }
 
     /// <summary>

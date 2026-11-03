@@ -80,7 +80,7 @@ namespace PantographSim.Tests
         }
 
         /// <summary>寫入讓條件成立的值（ChecklistEval 格式）。</summary>
-        static void Write(ISimState s, string condition) => s.Batch(() =>
+        internal static void Write(ISimState s, string condition) => s.Batch(() =>
         {
             foreach (var part in condition.Split(new[] { "&&" }, System.StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()))
             {

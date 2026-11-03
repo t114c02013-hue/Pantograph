@@ -272,10 +272,20 @@
       "courses": "both",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3b",
+      "owner": "",
       "source": "CSV",
       "trigger": "扭力不足（低於 23 N·m）。",
-      "note": "R1 資料是 Major，CSV（steps-v6）是 Critical，以 CSV 為準（K3 前考核降為 severityBeforeK3）"
+      "note": "R1 資料是 Major，CSV（steps-v6）是 Critical，以 CSV 為準（K3 前考核降為 severityBeforeK3）",
+      "rule": {
+        "trigger": "OutOfRangeOnLeave",
+        "key": "ip.carbon_strip_{side}.bolt_{n}.torque_Nm",
+        "min": 23,
+        "max": 100000,
+        "count": 4,
+        "what": "扭力不足（低於 23 N·m）。",
+        "why": "鎖不緊的螺栓在振動下會鬆脫。",
+        "fix": "在這支螺栓上再施力，鎖到扳手響（或震動）為止。"
+      }
     },
     {
       "errorId": "ERR_CSR13_WrenchRange",
@@ -284,7 +294,7 @@
       "courses": "both",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3b",
+      "owner": "b4:p5",
       "source": "CSV",
       "trigger": "- 新錯誤 ERR_IN07_WrenchRange、ERR_IN09_WrenchRange、ERR_CSR13_WrenchRange（Minor，三種模式都判；組長）：設定的扭力超出量程時刻度轉不過去，提示換扳手，同一步只記 1 次。Over／Under 照原規則，不另外加重。教學模式在握把上標示量程。"
     },
@@ -295,7 +305,7 @@
       "courses": "both",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3b",
+      "owner": "b4:p5",
       "source": "CSV",
       "trigger": "- 新錯誤 ERR_IN07_WrongSocket、ERR_IN09_WrongSocket、ERR_CSR13_WrongSocket（Minor，三種模式都判）：套錯擋下並提示「套筒尺寸不對」，同一步只記 1 次。"
     },
@@ -779,7 +789,7 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3b",
+      "owner": "b4:p5",
       "source": "CSV",
       "trigger": "06 b），目標加上套筒盒，並補上 ERR_RM03_WrongSocket、ERR_RM04_WrongSocket、ERR_IN06_WrongSocket（Minor，規則同上），時間不變。CSR_06 b 原本就有 ERR_CSR06_WrongSocket。"
     },
@@ -790,9 +800,20 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3b",
+      "owner": "",
       "source": "CSV",
-      "trigger": "- 新 Major：ERR_IN07_MarkMissing，WC_06 b 檢查員核對時，有螺栓缺防鬆標記就記。"
+      "trigger": "- 新 Major：ERR_IN07_MarkMissing，WC_06 b 檢查員核對時，有螺栓缺防鬆標記就記。",
+      "rule": {
+        "trigger": "UnsetAtCompletion",
+        "key": "part.pan_base.bolt_{n}.marked",
+        "key2": "part.pan_base.bolt_{n}.torque_Nm",
+        "min": 92,
+        "max": 108,
+        "count": 4,
+        "what": "扭力合格的底座螺栓沒有畫防鬆標記。",
+        "why": "沒有標記，之後巡檢看不出螺栓有沒有鬆動。",
+        "fix": "喀聲後用標記筆在螺栓與底座畫一條線。"
+      }
     },
     {
       "errorId": "ERR_IN07_Order",
@@ -801,9 +822,17 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3b",
+      "owner": "",
       "source": "CSV",
-      "trigger": "ng（扭力設定不是 100 N·m）、ERR_IN07_Under（扭力不足）、ERR_IN07_Over（扭力過大）、ERR_IN07_Order（沒照對角順序）。"
+      "trigger": "ng（扭力設定不是 100 N·m）、ERR_IN07_Under（扭力不足）、ERR_IN07_Over（扭力過大）、ERR_IN07_Order（沒照對角順序）。",
+      "rule": {
+        "trigger": "SequenceMismatch",
+        "key": "part.pan_base.torque_order",
+        "expected": "1,3,2,4",
+        "what": "沒有照對角順序（1→3→2→4）鎖扭力。",
+        "why": "順序不對，底座受力不均、貼合不平。",
+        "fix": "按「從這一步重做」，照對角順序鎖。"
+      }
     },
     {
       "errorId": "ERR_IN07_Over",
@@ -812,9 +841,19 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3b",
+      "owner": "",
       "source": "CSV",
-      "trigger": "Major：ERR_IN07_Setting（扭力設定不是 100 N·m）、ERR_IN07_Under（扭力不足）、ERR_IN07_Over（扭力過大）、ERR_IN07_Order（沒照對角順序）。"
+      "trigger": "Major：ERR_IN07_Setting（扭力設定不是 100 N·m）、ERR_IN07_Under（扭力不足）、ERR_IN07_Over（扭力過大）、ERR_IN07_Order（沒照對角順序）。",
+      "rule": {
+        "trigger": "ValueOutOfRange",
+        "key": "part.pan_base.bolt_{n}.torque_Nm",
+        "min": 0,
+        "max": 108,
+        "count": 4,
+        "what": "底座螺栓扭力過大（超過 108 N·m）。",
+        "why": "過鎖會拉傷螺紋或壓裂絕緣子。",
+        "fix": "按「從這一步重做」，聽到喀聲就立刻放開。"
+      }
     },
     {
       "errorId": "ERR_IN07_Setting",
@@ -823,9 +862,19 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3b",
+      "owner": "",
       "source": "CSV",
-      "trigger": "- 補上 IN_07 原本漏掉的扭力錯誤 ID，比照 CSR_13，都是 Major：ERR_IN07_Setting（扭力設定不是 100 N·m）、ERR_IN07_Under（扭力不足）、ERR_IN07_Over（扭力過大）、ERR_IN07_Order（沒照對角順序）。"
+      "trigger": "- 補上 IN_07 原本漏掉的扭力錯誤 ID，比照 CSR_13，都是 Major：ERR_IN07_Setting（扭力設定不是 100 N·m）、ERR_IN07_Under（扭力不足）、ERR_IN07_Over（扭力過大）、ERR_IN07_Order（沒照對角順序）。",
+      "rule": {
+        "trigger": "ValueOutOfRange",
+        "key": "part.pan_base.bolt_{n}.torque_setting",
+        "min": 99.5,
+        "max": 100.5,
+        "count": 4,
+        "what": "大扭力扳手的設定值不是 100 N·m。",
+        "why": "設定錯，喀聲時的扭力就是錯的。",
+        "fix": "把設定調到 100 N·m 再鎖。"
+      }
     },
     {
       "errorId": "ERR_IN07_Under",
@@ -834,9 +883,19 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3b",
+      "owner": "",
       "source": "CSV",
-      "trigger": "- 適用：ERR_CSR13_Under（兩門課）、ERR_IN07_Under、ERR_IN09_Under。正式等級都是 Critical。"
+      "trigger": "- 適用：ERR_CSR13_Under（兩門課）、ERR_IN07_Under、ERR_IN09_Under。正式等級都是 Critical。",
+      "rule": {
+        "trigger": "OutOfRangeOnLeave",
+        "key": "part.pan_base.bolt_{n}.torque_Nm",
+        "min": 92,
+        "max": 100000,
+        "count": 4,
+        "what": "底座螺栓扭力不足（低於 92 N·m）。",
+        "why": "鎖不緊的螺栓在振動下會鬆脫。",
+        "fix": "在這支螺栓上再施力，鎖到扳手響（或震動）為止。"
+      }
     },
     {
       "errorId": "ERR_IN07_WrenchRange",
@@ -845,7 +904,7 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3b",
+      "owner": "b4:p5",
       "source": "CSV",
       "trigger": "- 新錯誤 ERR_IN07_WrenchRange、ERR_IN09_WrenchRange、ERR_CSR13_WrenchRange（Minor，三種模式都判；組長）：設定的扭力超出量程時刻度轉不過去，提示換扳手，同一步只記 1 次。Over／Under 照原規則，不另外加重。教學模式在握把上標示量程。"
     },
@@ -856,7 +915,7 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3b",
+      "owner": "b4:p5",
       "source": "CSV",
       "trigger": "- 新錯誤 ERR_IN07_WrongSocket、ERR_IN09_WrongSocket、ERR_CSR13_WrongSocket（Minor，三種模式都判）：套錯擋下並提示「套筒尺寸不對」，同一步只記 1 次。"
     },
@@ -878,9 +937,19 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3b",
+      "owner": "",
       "source": "CSV",
-      "trigger": "- IN_09 高壓端子新增：ERR_IN09_Under **Critical**；ERR_IN09_Setting、ERR_IN09_Over、ERR_IN09_Misaligned（沒對準記號就接上）Major。"
+      "trigger": "- IN_09 高壓端子新增：ERR_IN09_Under **Critical**；ERR_IN09_Setting、ERR_IN09_Over、ERR_IN09_Misaligned（沒對準記號就接上）Major。",
+      "rule": {
+        "trigger": "ValueOutOfRange",
+        "key": "part.pan_assy.hv_bolt_{n}.torque_Nm",
+        "min": 0,
+        "max": 54,
+        "count": 2,
+        "what": "高壓端子螺栓扭力過大（超過 54 N·m）。",
+        "why": "過鎖會拉傷端子螺紋。",
+        "fix": "按「從這一步重做」，聽到喀聲就立刻放開。"
+      }
     },
     {
       "errorId": "ERR_IN09_Setting",
@@ -889,9 +958,19 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3b",
+      "owner": "",
       "source": "CSV",
-      "trigger": "- IN_09 高壓端子新增：ERR_IN09_Under **Critical**；ERR_IN09_Setting、ERR_IN09_Over、ERR_IN09_Misaligned（沒對準記號就接上）Major。"
+      "trigger": "- IN_09 高壓端子新增：ERR_IN09_Under **Critical**；ERR_IN09_Setting、ERR_IN09_Over、ERR_IN09_Misaligned（沒對準記號就接上）Major。",
+      "rule": {
+        "trigger": "ValueOutOfRange",
+        "key": "part.pan_assy.hv_bolt_{n}.torque_setting",
+        "min": 49.5,
+        "max": 50.5,
+        "count": 2,
+        "what": "大扭力扳手的設定值不是 50 N·m。",
+        "why": "設定錯，喀聲時的扭力就是錯的。",
+        "fix": "把設定調到 50 N·m 再鎖。"
+      }
     },
     {
       "errorId": "ERR_IN09_Under",
@@ -900,9 +979,19 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3b",
+      "owner": "",
       "source": "CSV",
-      "trigger": "- 適用：ERR_CSR13_Under（兩門課）、ERR_IN07_Under、ERR_IN09_Under。正式等級都是 Critical。"
+      "trigger": "- 適用：ERR_CSR13_Under（兩門課）、ERR_IN07_Under、ERR_IN09_Under。正式等級都是 Critical。",
+      "rule": {
+        "trigger": "OutOfRangeOnLeave",
+        "key": "part.pan_assy.hv_bolt_{n}.torque_Nm",
+        "min": 46,
+        "max": 100000,
+        "count": 2,
+        "what": "高壓端子螺栓扭力不足（低於 46 N·m）。",
+        "why": "鎖不緊的螺栓在振動下會鬆脫。",
+        "fix": "在這支螺栓上再施力，鎖到扳手響（或震動）為止。"
+      }
     },
     {
       "errorId": "ERR_IN09_WrenchRange",
@@ -911,7 +1000,7 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3b",
+      "owner": "b4:p5",
       "source": "CSV",
       "trigger": "- 新錯誤 ERR_IN07_WrenchRange、ERR_IN09_WrenchRange、ERR_CSR13_WrenchRange（Minor，三種模式都判；組長）：設定的扭力超出量程時刻度轉不過去，提示換扳手，同一步只記 1 次。Over／Under 照原規則，不另外加重。教學模式在握把上標示量程。"
     },
@@ -922,7 +1011,7 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3b",
+      "owner": "b4:p5",
       "source": "CSV",
       "trigger": "- 新錯誤 ERR_IN07_WrongSocket、ERR_IN09_WrongSocket、ERR_CSR13_WrongSocket（Minor，三種模式都判）：套錯擋下並提示「套筒尺寸不對」，同一步只記 1 次。"
     },
@@ -955,7 +1044,7 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3b",
+      "owner": "b4:p5",
       "source": "CSV",
       "trigger": "扳手原本就有「換上 X mm 套筒」的小動作（RM_03 f、RM_04 a、IN_06 b），目標加上套筒盒，並補上 ERR_RM03_WrongSocket、ERR_RM04_WrongSocket、ERR_IN06_WrongSocket（Minor，規則同上），時間不變。CSR_06 b 原本就有 ERR_CSR06_WrongSocket。"
     },
@@ -966,7 +1055,7 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4:p3b",
+      "owner": "b4:p5",
       "source": "CSV",
       "trigger": "作（RM_03 f、RM_04 a、IN_06 b），目標加上套筒盒，並補上 ERR_RM03_WrongSocket、ERR_RM04_WrongSocket、ERR_IN06_WrongSocket（Minor，規則同上），時間不變。CSR_06 b 原本就有 ERR_CSR06_WrongSocket。"
     },

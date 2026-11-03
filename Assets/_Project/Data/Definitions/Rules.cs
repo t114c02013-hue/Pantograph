@@ -60,7 +60,9 @@ namespace PantographSim.Data
         WrongTool,         // 對本步目標使用了不是 requiredToolId 的工具
         WrongTarget,       // 對不屬於本步的弓體目標動作
         Incomplete,        // key 變成 true 時，keys 中有尚未 true 的
-        ChoiceEquals       // key 的值等於 value（可限定正確答案為 whenAnswer）
+        ChoiceEquals,      // key 的值等於 value（可限定正確答案為 whenAnswer）
+        OutOfRangeOnLeave,        // R1.5b K3（驗收組長）：學員離開這顆螺栓時判一次（開始鎖下一顆、換工具、步驟完成）：key（bolt_{n} 依 count 展開）的最終值 < min；離開前補到位就不記
+        UnsetAtCompletion         // R1.5b K3：步驟完成時判一次：key2 的值在 [min,max] 之內、但 key 還不是 true（例：扭力合格卻沒畫標記）
     }
 
     [Serializable]
