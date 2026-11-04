@@ -143,6 +143,19 @@ namespace PantographSim.Tests
         static readonly string[] ExpectedErrors = { "ERR_Global_NotLowered", "ERR_Ground_Order", "ERR_CSR03_OnlyMid", "ERR_CSR13_Under", "ERR_WC01_Leftover" };
 
         // ---------- 1. 寫入後讀回一致；截斷在一行中間仍能重建並標成中斷 ----------
+        /// <summary>v3.10 第 8 項：故障處理時間從這一步的時間判定扣掉，別的步驟不受影響。</summary>
+        [Test]
+        public void FaultTime_SubtractedPerStep()
+        {
+            var lines = new List<RecordLine>
+            {
+                new RecordLine { type = "FaultTime", step = "A", data = new Dictionary<string, object> { { "fault", "fault.sling_cut" }, { "seconds", 40.0 } } },
+                new RecordLine { type = "FaultTime", step = "A", data = new Dictionary<string, object> { { "fault", "fault.x" }, { "seconds", 2.5 } } },
+            };
+            Assert.AreEqual(42.5, SummaryBuilder.FaultSeconds(lines, "A"), 1e-6);
+            Assert.AreEqual(0, SummaryBuilder.FaultSeconds(lines, "B"), 1e-6);
+        }
+
         /// <summary>審查建議：舊錄影沒有 rack.slots（掛位清單），回放套快照時保留觀看者自己的（ToolBelt 從 ToolSlotTable 寫），掛位標籤和清點不會空白。</summary>
         [Test]
         public void OldRecording_WithoutRackSlots_KeepsViewerSlotList()

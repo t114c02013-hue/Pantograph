@@ -35,6 +35,7 @@ namespace PantographSim.App
         SimState state;
         ProcedureRunner runner;
         ErrorDetector detector;
+        FaultClock faultClock;
         ModeController mode;
         Scoring scoring;
         HintService hints;
@@ -89,6 +90,7 @@ namespace PantographSim.App
                 gates.Add(safety);
                 runner = new ProcedureRunner(procedure, bus, state, gates);
                 detector = new ErrorDetector(runner, bus, state);
+                faultClock = new FaultClock(runner, bus, state, course?.faults);   // v3.10 第 8 項：故障處理時間另列
                 guard.Add(safety);      // 安全規則優先（Critical）
                 guard.Add(detector);    // 再來是拿錯工具／點錯目標（Minor）
             }
@@ -243,7 +245,7 @@ namespace PantographSim.App
         {
             InputMode.Changed -= OnInputModeChanged;
             bus?.Unsubscribe<ActionRequested>(OnRequest);
-            runner?.Dispose(); detector?.Dispose(); hints?.Dispose(); feedback?.Dispose(); scoring?.Dispose();
+            runner?.Dispose(); detector?.Dispose(); faultClock?.Dispose(); hints?.Dispose(); feedback?.Dispose(); scoring?.Dispose();
             PointerState.OverUi = false; PointerState.ScrollCaptured = false;
         }
     }

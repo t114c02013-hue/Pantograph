@@ -364,6 +364,14 @@ namespace PantographSim.Recording
                 Write("Judgement", currentStep, new Dictionary<string, object> { { "key", key }, { "value", text } });
                 return;
             }
+            // v3.10：故障處理時間（FaultClock 寫「步驟|故障鍵|秒數」）
+            if (key == "fault.time")
+            {
+                var p = (text ?? "").Split('|');
+                if (p.Length == 3 && double.TryParse(p[2], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var sec))
+                    Write("FaultTime", p[0], new Dictionary<string, object> { { "fault", p[1] }, { "seconds", sec } });
+                return;
+            }
             // 同一步重複觸發的錯誤：只記次數（ErrorDetector 寫「步驟|錯誤|本步第 N 次」）
             if (key == "error.repeat")
             {

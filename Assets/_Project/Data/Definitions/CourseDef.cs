@@ -25,6 +25,7 @@ namespace PantographSim.Data
             [Tooltip("黑板鍵，例 fault.insulator_dirty")] public string key;
             public string title;
             public bool defaultOn;
+            [Tooltip("v3.10：故障處理時間從這個小動作啟用起、到這個小動作完成止（不算進時間判定，報表另列；序號展開的 s1i2 算 s1）")] public string timeFrom, timeTo;
         }
 
         public string courseId, title;

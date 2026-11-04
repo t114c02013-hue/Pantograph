@@ -116,6 +116,15 @@ namespace PantographSim.Recording
             else ErrorTable(sb, errors, false);
             sb.Append("</section>");
 
+            // ---- 故障處理時間（v3.10 第 8 項：不算進時間判定）----
+            var faultTimes = Rows(s, "faultTimes").ToList();
+            if (faultTimes.Count > 0)
+            {
+                sb.Append("<section><h2>故障處理時間</h2><p class=\"note\">這段時間另列，不算進步驟時間的判定。</p><table><thead><tr><th>步驟</th><th>故障</th><th>花費</th></tr></thead><tbody>");
+                foreach (var f in faultTimes) sb.Append($"<tr><td>{H(f.Str("stepName"))}{Small(f.Str("step"))}</td><td>{H(f.Str("fault"))}</td><td>{Dur(f.Num("seconds"))}</td></tr>");
+                sb.Append("</tbody></table></section>");
+            }
+
             // ---- 步驟時間 ----
             sb.Append("<section><h2>步驟時間</h2><p class=\"note\">參考時間為示例值（");
             sb.Append(Labels.RefSecondsKind(s.Str("mode")));

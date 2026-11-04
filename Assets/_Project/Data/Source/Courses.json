@@ -23,7 +23,7 @@
       "onPass": [ { "stepId": "STP_CSR_05_Decide", "key": "workorder.decision", "value": "pass", "jumpTo": "STP_IN_01_RigOnStand" } ],
       "liftCapAboveO": 0, "contactGapM": 0, "craneParked": false,
       "initialStates": ["cab.breaker=on", "cab.cylinder_power=on"],
-      "faults": [ { "key": "fault.insulator_dirty", "title": "可選故障：絕緣子髒汙", "defaultOn": false }, { "key": "fault.sling_cut", "title": "可選故障：吊帶割傷（RM／IN 與第幾條開場隨機）", "defaultOn": false } ]
+      "faults": [ { "key": "fault.insulator_dirty", "title": "可選故障：絕緣子髒汙", "defaultOn": false, "timeFrom": "r1", "timeTo": "r6d" }, { "key": "fault.sling_cut", "title": "可選故障：吊帶割傷（RM／IN 與第幾條開場隨機）", "defaultOn": false, "timeFrom": "s1", "timeTo": "s4" } ]
     },
     {
       "courseId": "daily",

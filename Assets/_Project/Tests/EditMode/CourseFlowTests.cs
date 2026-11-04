@@ -447,15 +447,20 @@ namespace PantographSim.Tests
             }
             finally { f.Dispose(); }
             var g = new Flow("periodic", MeggerLogic.FaultInsulatorDirty);
+            var clock = new FaultClock(g.runner, g.bus, g.s, AssetDatabase.LoadAssetAtPath<CourseDef>(StepsCsvImporter.CourseDefPath("periodic")).faults);
+            var times = new List<string>();
+            g.bus.Subscribe<StateChanged>(e => { foreach (var c in e.Changes) if (c.key == FaultClock.Key) times.Add(c.newValue); });
             try
             {
                 g.Run();
+                Assert.AreEqual(1, times.Count, "第 8 項：r1 到 r6d 一段故障處理時間");
+                StringAssert.StartsWith("STP_RT_02_InsulationTest|" + MeggerLogic.FaultInsulatorDirty + "|", times[0]);
                 Assert.IsEmpty(g.autoCompleted, string.Join("\n", g.autoCompleted));
                 for (int n = 1; n <= 4; n++) Assert.GreaterOrEqual(g.s.GetFloat(MeggerLogic.InsulatorId(n) + ".clean_ratio"), ToolRulesDef.Load().insulatorCleanRatio, "絕緣子 " + n + " 擦淨");
                 Assert.AreEqual("pass", g.s.Get("workorder.ir_judgement"), "重量後勾合格");
                 Assert.AreEqual(ToolRulesDef.Load().meggerReadingMOhm, g.s.GetFloat(MeggerLogic.Reading));
             }
-            finally { g.Dispose(); }
+            finally { clock.Dispose(); g.Dispose(); }
         }
 
         /// <summary>v3.10：定期課打開「吊帶割傷」，在 RM（SI_06 平台查看）或 IN（IN_01 台架旁查看）各跑一次到結算：只做抽到那一條的分支（s1–s4），割傷吊帶停用進停用箱、備用吊帶接手，正確操作不記吊帶類錯誤。</summary>
@@ -468,6 +473,9 @@ namespace PantographSim.Tests
             var scoring = new PantographSim.Training.Scoring(f.bus, f.s);
             var errors = new List<ErrorDetected>(); SessionResult? got = null;
             f.bus.Subscribe<ErrorDetected>(e => errors.Add(e)); f.bus.Subscribe<SessionResult>(r => got = r);
+            var clock = new FaultClock(f.runner, f.bus, f.s, AssetDatabase.LoadAssetAtPath<CourseDef>(StepsCsvImporter.CourseDefPath("periodic")).faults);
+            var times = new List<string>();
+            f.bus.Subscribe<StateChanged>(e => { foreach (var c in e.Changes) if (c.key == FaultClock.Key) times.Add(c.newValue); });
             try
             {
                 Assert.AreEqual(where == "RM", f.s.GetBool(SlingLogic.CutKey(index)), "RM 開場就割傷，IN 到 IN_01 才有");
@@ -483,8 +491,10 @@ namespace PantographSim.Tests
                 Assert.IsTrue(f.s.GetBool(SlingLogic.ReplacedKey(index)));
                 Assert.IsFalse(f.s.GetBool(SlingLogic.CutInUse), "割傷吊帶不在吊梁上");
                 Assert.IsEmpty(errors.Where(e => e.errorId.StartsWith("ERR_Sling_")).Select(e => e.errorId).ToList(), "正確操作不記吊帶類錯誤");
+                Assert.AreEqual(1, times.Count, "第 8 項：s1 到 s4 一段故障處理時間");
+                StringAssert.StartsWith(step + "|" + SlingLogic.Fault + "|", times[0]);
             }
-            finally { scoring.Dispose(); det.Dispose(); f.Dispose(); }
+            finally { clock.Dispose(); scoring.Dispose(); det.Dispose(); f.Dispose(); }
         }
 
         [TestCase("periodic")]

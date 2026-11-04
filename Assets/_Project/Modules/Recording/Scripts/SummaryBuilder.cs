@@ -29,6 +29,9 @@ namespace PantographSim.Recording
         public static int RepeatCount(IEnumerable<RecordLine> lines, RecordLine error) =>
             lines.Where(x => x.type == "ErrorRepeated" && x.step == error.step && x.S("errorId") == error.S("errorId")).Select(x => (int)x.N("count")).DefaultIfEmpty(1).Max();
 
+        /// <summary>這一步的故障處理時間（秒）。</summary>
+        public static double FaultSeconds(IEnumerable<RecordLine> lines, string step) => lines.Where(x => x.type == "FaultTime" && x.step == step).Sum(x => x.N("seconds"));
+
         public static string CountNote(int n) => n > 1 ? $"（本步發生 {n} 次）" : "";
 
         public static Dictionary<string, object> Build(Dictionary<string, object> meta, IReadOnlyList<RecordLine> lines, bool rebuiltAfterCrash)
@@ -60,6 +63,8 @@ namespace PantographSim.Recording
             else s["result"] = null;
 
             s["steps"] = Steps(cat, lines, finished, end, mode);
+            s["faultTimes"] = lines.Where(l => l.type == "FaultTime").Select(l => (object)new Dictionary<string, object> { { "step", l.step }, { "stepName", cat.NameOf(l.step) }, { "fault", l.S("fault") }, { "seconds", l.N("seconds") } }).ToList();
+            s["faultSeconds"] = lines.Where(l => l.type == "FaultTime").Sum(l => l.N("seconds"));   // b5 的 1.5 倍判定要先扣這個
             s["errors"] = lines.Where(l => l.type == "ErrorDetected").Select(l => (object)new Dictionary<string, object>
             {
                 { "t", l.t }, { "step", l.step }, { "stepName", cat.NameOf(l.step) }, { "errorId", l.S("errorId") }, { "name", l.S("name", ErrorNames.Of(l.S("errorId"), l.S("what"))) },
@@ -112,10 +117,11 @@ namespace PantographSim.Recording
                 else if (started.Count > 0) { status = "未完成"; seconds = end - started[0].t; }
                 else status = finished ? "略過" : "未完成";
                 float reference = Labels.RefSeconds(st, mode);
-                bool over = reference > 0 && seconds > 2 * reference && !st.presetDone;
+                double faultSeconds = FaultSeconds(lines, st.runId);   // v3.10 第 8 項：故障處理時間不算進時間判定
+                bool over = reference > 0 && seconds - faultSeconds > 2 * reference && !st.presetDone;
                 list.Add(new Dictionary<string, object>
                 {
-                    { "runId", st.runId }, { "name", st.DisplayName }, { "order", st.order }, { "status", status }, { "seconds", seconds }, { "redoCount", redo },
+                    { "runId", st.runId }, { "name", st.DisplayName }, { "order", st.order }, { "status", status }, { "seconds", seconds }, { "faultSeconds", faultSeconds }, { "redoCount", redo },
                     { "refSeconds", reference }, { "over2x", over }, { "startedAt", started.Count > 0 ? (object)started[0].t : null }
                 });
             }

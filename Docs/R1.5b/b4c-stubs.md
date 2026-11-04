@@ -155,3 +155,4 @@ ErrorRuleTests.PendingTriggers_ListedInStubsDoc 檢查兩邊一致。觸發做�
 - PanelViews 作業單「抄自備品 n 的標籤」按鈕寫死 1、2、3，改讀備品架資料（SpareArrangementDef／場景格數）。
 - MarkerView 每幀重新解析 rack.slots，改成值變了才重新解析（快取）。
 - 提醒：吊鉤開場就在停放區時，RT_01 a 一啟用就完成（part.crane.hook.parked 是 LiveState，照規則可以）。
+- b5：考核每段與全程的 1.5 倍時間判定要先扣掉故障處理時間（summary 的 faultSeconds、steps[].faultSeconds；v3.10 第 8 項，FaultClock 已記）。
