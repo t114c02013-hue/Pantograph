@@ -12,14 +12,14 @@
     "fromStepId": "STP_CSR_06_Loosen",
     "toStepId": "STP_CSR_14_Mark",
     "sides": ["L", "R"],
-    "sideLabels": ["肘側滑板", "外側滑板"]
+    "sideLabels": ["靠關節滑板", "外側滑板"]
   },
   "onPass": [
     { "stepId": "STP_CSR_05_Decide", "key": "workorder.decision", "value": "pass", "jumpTo": "STP_WC_01_ToolCount" }
   ],
   "positionChecks": [
     { "checkId": "PC_PanHeadLower", "part": "pan_head", "purpose": "lower", "targetName": "降弓位置", "toleranceCm": 1.0 },
-    { "checkId": "PC_StripInstall_L", "part": "carbon_strip_L", "purpose": "install", "targetName": "肘側滑板安裝位置", "toleranceCm": 0.5 },
+    { "checkId": "PC_StripInstall_L", "part": "carbon_strip_L", "purpose": "install", "targetName": "靠關節滑板安裝位置", "toleranceCm": 0.5 },
     { "checkId": "PC_StripInstall_R", "part": "carbon_strip_R", "purpose": "install", "targetName": "外側滑板安裝位置", "toleranceCm": 0.5 }
   ],
   "lift": { "fullTravelSeconds": 15, "accelSeconds": 0.6, "slowZoneCm": 20, "slowSpeedCmPerSec": 5 },
@@ -212,16 +212,16 @@
       "stepId": "STP_CSR_03_Measure_L",
       "refSeconds": [60, 35],
       "subActions": [
-        { "text": "量肘側滑板左側點", "target": "ip.carbon_strip_L.measure_left", "done": "ip.carbon_strip_L.measure_left.measured", "why": "距端 15 cm", "tool": "tool.caliper", "stand": "tp.roof.inner" },
-        { "text": "量肘側滑板中點", "target": "ip.carbon_strip_L.measure_mid", "done": "ip.carbon_strip_L.measure_mid.measured", "why": "", "tool": "tool.caliper", "stand": "tp.roof.inner" },
-        { "text": "量肘側滑板右側點", "target": "ip.carbon_strip_L.measure_right", "done": "ip.carbon_strip_L.measure_right.measured", "why": "距端 15 cm", "tool": "tool.caliper", "stand": "tp.roof.inner" },
+        { "text": "量靠關節滑板左側點", "target": "ip.carbon_strip_L.measure_left", "done": "ip.carbon_strip_L.measure_left.measured", "why": "距端 15 cm", "tool": "tool.caliper", "stand": "tp.roof.inner" },
+        { "text": "量靠關節滑板中點", "target": "ip.carbon_strip_L.measure_mid", "done": "ip.carbon_strip_L.measure_mid.measured", "why": "", "tool": "tool.caliper", "stand": "tp.roof.inner" },
+        { "text": "量靠關節滑板右側點", "target": "ip.carbon_strip_L.measure_right", "done": "ip.carbon_strip_L.measure_right.measured", "why": "距端 15 cm", "tool": "tool.caliper", "stand": "tp.roof.inner" },
         { "text": "三個讀數填入作業單", "target": "env.work_order", "done": "workorder.reading.L.submitted", "why": "照卡尺讀數抄，誤差 ≤ 0.05", "tool": "", "stand": "tp.roof.inner" }
       ],
       "side": "L",
-      "title": "量測肘側滑板",
-      "instruction": "用卡尺依序點肘側滑板的左、中、右三個量測點，把卡尺上的讀數抄到作業單，按「送出這條的讀數」。",
+      "title": "量測靠關節滑板",
+      "instruction": "用卡尺依序點靠關節滑板的左、中、右三個量測點，把卡尺上的讀數抄到作業單，按「送出這條的讀數」。",
       "toolHint": "數位卡尺",
-      "targetHint": "肘側滑板頂面三個量測點（左距端 15 cm、中點、右距端 15 cm）",
+      "targetHint": "靠關節滑板頂面三個量測點（左距端 15 cm、中點、右距端 15 cm）",
       "requiredToolId": "tool.caliper",
       "targetIds": ["ip.carbon_strip_{side}.measure_*", "env.work_order"],
       "hints": { "text": "拿卡尺點滑板上三個藍色量測點，把卡尺讀數抄進作業單。",

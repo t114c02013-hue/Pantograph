@@ -11,7 +11,7 @@ namespace PantographSim.Worksite
     public class RoofAccess : MonoBehaviour
     {
         [SerializeField] RoofAccessRule rule;
-        bool bound;
+        bool bound, onRoof;
 
         public void Setup(RoofAccessRule r) => rule = r;
         public RoofAccessRule Rule => rule;
@@ -39,8 +39,21 @@ namespace PantographSim.Worksite
 
         void OnState(StateChanged e)
         {
+            if (e.Has(PlatformGate.FloorKey)) CheckEntry(rule, Sim.State, ref onRoof);
             if (e.Has(rule.resultKey)) return;
             Write(rule, Sim.State);
+        }
+
+        /// <summary>進到車頂的那一刻：還沒放行，教學只提示，練習、考核記錯（同一次上車頂一次）。
+        /// shortcut: hold.1.released 還沒有程式在寫，先用 roof.open 當放行, b4c:holdpoint 做好後改讀 hold.1.released。</summary>
+        public static void CheckEntry(RoofAccessRule r, ISimState s, ref bool onRoof)
+        {
+            bool now = s.Get(PlatformGate.FloorKey) == "Roof";
+            if (now == onRoof) return;
+            onRoof = now;
+            bool skipped = now && !s.GetBool(r.resultKey);
+            if (skipped && s.Get("training.mode") == "tutorial") { s.Set("ui.toast", ""); s.Set("ui.toast", r.holdSkippedHint); s.SetFloat("ui.toast_time", Time.time); return; }
+            s.SetBool(r.holdSkippedKey, skipped);
         }
     }
 }

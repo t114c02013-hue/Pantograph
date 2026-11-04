@@ -95,8 +95,8 @@ MonoBehaviour:
     why: "\u5F13\u982D\u6C92\u964D\u5230\u4F4D\u5C31\u78B0\u5F13\u9AD4\uFF0C\u53EF\u80FD\u89F8\u96FB\u6216\u88AB\u593E\u50B7\uFF1B\u6307\u793A\u71C8\u53EF\u80FD\u6545\u969C\uFF0C\u6240\u4EE5\u9084\u8981\u89AA\u773C\u770B\u3002"
     checklist:
     - "\u6309\u4F4F \u25BC \u628A\u5F13\u982D\u964D\u5230\u7DA0\u6846|part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm"
-    - "\u9EDE\u5F13\u982D\uFF0C\u78BA\u8A8D\u5DF2\u964D\u4E0B|part.pan_head.inspected"
-    - "\u9EDE\u63A7\u5236\u76E4\u7684\u5F13\u4F4D\u6307\u793A\u71C8|ip.cab.pan_indicator.checked"
+    - "\u6307\u8457\u5F13\u982D\uFF0C\u78BA\u8A8D\u5DF2\u964D\u4E0B|part.pan_head.inspected"
+    - "\u6307\u8457\u5F13\u4F4D\u6307\u793A\u71C8\u78BA\u8A8D|ip.cab.pan_indicator.checked"
     highlightIds:
     - ip.pan_head.lower_check
     - part.pan_head
@@ -112,7 +112,9 @@ MonoBehaviour:
     standPointId: tp.platform.lift
     subId: a
     textDesktop: 
-  - text: "\u9EDE\u5F13\u982D\uFF0C\u78BA\u8A8D\u5DF2\u964D\u4E0B"
+    hint: 
+    when: 
+  - text: "\u6307\u8457\u5F13\u982D\uFF0C\u78BA\u8A8D\u5DF2\u964D\u4E0B"
     why: 
     targetId: part.pan_head
     toolId: 
@@ -120,7 +122,9 @@ MonoBehaviour:
     standPointId: tp.platform.lift
     subId: b
     textDesktop: "\u9EDE\u5F13\u982D\u78BA\u8A8D\u5DF2\u964D\u4E0B"
-  - text: "\u9EDE\u63A7\u5236\u76E4\u7684\u5F13\u4F4D\u6307\u793A\u71C8"
+    hint: "\u7528\u5C04\u7DDA\u6307\u8457\u5F13\u982D\u6309\u78BA\u8A8D\u3002\u8981\u89AA\u773C\u770B\u5230\u5F13\u982D\u964D\u4E0B\uFF0C\u4E0D\u80FD\u53EA\u770B\u5100\u8868\u3002"
+    when: 
+  - text: "\u6307\u8457\u5F13\u4F4D\u6307\u793A\u71C8\u78BA\u8A8D"
     why: 
     targetId: ip.cab.pan_indicator
     toolId: 
@@ -128,6 +132,8 @@ MonoBehaviour:
     standPointId: tp.platform.lift
     subId: c
     textDesktop: "\u9EDE\u63A7\u5236\u76E4\u5F13\u4F4D\u6307\u793A\u71C8"
+    hint: "\u6307\u793A\u71C8\u5728\u99D5\u99DB\u5BA4\u63A7\u5236\u76E4\u4E0A\u3002\u71C8\u865F\u548C\u5BE6\u7269\u90FD\u5C0D\uFF0C\u624D\u7B97\u78BA\u5B9A\u5DF2\u964D\u5F13\u3002"
+    when: 
   presetDone: 0
   side: 
   presetStates: []

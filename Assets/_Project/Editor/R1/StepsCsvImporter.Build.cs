@@ -166,7 +166,7 @@ namespace PantographSim.Editor
                 st.presetDone = false; st.presetStates = Array.Empty<string>();
                 st.refSecondsTutorial = course == "periodic" ? m.teachP : m.teachD;
                 st.refSecondsExam = course == "periodic" ? m.examP : m.examD;
-                st.subActions = subs.Select(x => new SubAction { text = x.e.text, why = "", targetId = x.e.targetId, toolId = x.e.toolId, condition = x.rule, standPointId = x.e.standPointId, subId = x.e.subId, textDesktop = x.e.textDesktop == x.e.text ? "" : x.e.textDesktop, when = x.e.when }).ToArray();
+                st.subActions = subs.Select(x => new SubAction { text = x.e.text, why = "", hint = x.e.hint, targetId = x.e.targetId, toolId = x.e.toolId, condition = x.rule, standPointId = x.e.standPointId, subId = x.e.subId, textDesktop = x.e.textDesktop == x.e.text ? "" : x.e.textDesktop, when = x.e.when }).ToArray();
                 st.hints = st.hints ?? new HintSet();
                 st.hints.checklist = subs.Select(x => x.e.text + "|" + x.rule).ToArray();   // 清單跟 v6 小動作（R1 的清單少了新增的列，文字也還是車頂工具箱）
                 var ov = LoadTables().completionOverrides.FirstOrDefault(o => m.stepId.StartsWith(o.step) && InCourse(o.courses, course));

@@ -178,9 +178,12 @@ namespace PantographSim.Tests
                 var st = root.AddComponent<XrStations>();   // 沒有 XrTeleport 時 Focus 不動作（XrTeleport 要 XROrigin，測試組件不引用 XR CoreUtils，改測 Decide）
                 s.Set("hint.sub_stand", "");
                 Assert.IsFalse(st.Focus(), "原地：不傳送");
-                Assert.AreEqual(2, XrTeleportPoint.Decide(inner, lift, s), "車頂還沒開放：Locked，不傳送");
-                s.SetBool("roof.open", true);
-                Assert.AreEqual(0, XrTeleportPoint.Decide(inner, lift, s), "開放後：Moved");
+                Assert.AreEqual(0, XrTeleportPoint.Decide(inner, lift, s), "車頂還沒開放也傳得過去（記錯在 RoofAccess）");
+                var keep = XrTeleportPoint.Rule;
+                XrTeleportPoint.Rule = UnityEngine.ScriptableObject.CreateInstance<TeleportRule>();
+                s.Set("part.pan_assy.state", "Lifted");
+                Assert.AreEqual(2, XrTeleportPoint.Decide(inner, lift, s), "吊物懸空：Locked，不傳送");
+                XrTeleportPoint.Rule = keep; s.Set("part.pan_assy.state", "");
                 Assert.AreEqual(1, XrTeleportPoint.Decide(outer, inner, s), "共用落點：已經在那一站，不傳");
                 Assert.AreEqual(3, XrTeleportPoint.Decide(null, inner, s), "站點不存在");
                 Assert.AreEqual(3, (int)XrTeleport.GoResult.Missing, "Decide 的值對應 GoResult");

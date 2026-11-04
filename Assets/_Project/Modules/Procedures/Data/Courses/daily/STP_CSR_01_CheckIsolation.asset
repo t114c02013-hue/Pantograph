@@ -28,14 +28,14 @@ MonoBehaviour:
       \u2714\u3002"
     why: "\u516D\u9805\u9694\u96E2\u90FD\u5B8C\u6210\uFF0C\u624D\u53EF\u4EE5\u958B\u59CB\u78B0\u5F13\u9AD4\u4F5C\u696D\u3002"
     checklist:
-    - "\u6253\u958B\u4F5C\u696D\u55AE\u9010\u9805\u6838\u5C0D SI \u72C0\u614B|workorder.si_checked&&workorder.si_all_done"
-    - "\u67E5\u770B\u5206\u6D41\u7DDA\u3001\u6258\u67B6\u3001\u7D55\u7DE3\u5B50\uFF0C\u5728\u4F5C\u696D\u55AE\u7570\u5E38\u6B04\u52FE\u9078|env.work_order.anomaly.checked"
+    - "\u6838\u5C0D\u4F5C\u696D\u55AE\u4E0A\u7684\u9694\u96E2\u9805\u76EE|workorder.si_checked&&workorder.si_all_done"
+    - "\u67E5\u770B\u5206\u6D41\u7DDA\u3001\u6258\u67B6\u3001\u7D55\u7DE3\u5B50\u4E26\u52FE\u9078|env.work_order.anomaly.checked"
     highlightIds:
     - env.work_order
     showBoltNumbers: 0
     showOutwardArrow: 0
   subActions:
-  - text: "\u6253\u958B\u4F5C\u696D\u55AE\u9010\u9805\u6838\u5C0D SI \u72C0\u614B"
+  - text: "\u6838\u5C0D\u4F5C\u696D\u55AE\u4E0A\u7684\u9694\u96E2\u9805\u76EE"
     why: 
     targetId: env.work_order
     toolId: 
@@ -43,8 +43,9 @@ MonoBehaviour:
     standPointId: tp.roof.inner
     subId: a
     textDesktop: 
+    hint: "\u65B7\u96FB\u3001\u4E0A\u9396\u3001\u9A57\u96FB\u3001\u63A5\u5730\u9019\u5E7E\u9805\u90FD\u8981\u6253\u52FE\u3002\u5C11\u4E00\u9805\u5C31\u4E0D\u80FD\u958B\u59CB\u63DB\u6ED1\u677F\u3002"
     when: 
-  - text: "\u67E5\u770B\u5206\u6D41\u7DDA\u3001\u6258\u67B6\u3001\u7D55\u7DE3\u5B50\uFF0C\u5728\u4F5C\u696D\u55AE\u7570\u5E38\u6B04\u52FE\u9078"
+  - text: "\u67E5\u770B\u5206\u6D41\u7DDA\u3001\u6258\u67B6\u3001\u7D55\u7DE3\u5B50\u4E26\u52FE\u9078"
     why: 
     targetId: env.work_order.anomaly
     toolId: 
@@ -52,6 +53,7 @@ MonoBehaviour:
     standPointId: tp.roof.inner
     subId: b
     textDesktop: 
+    hint: "\u5206\u6D41\u7DDA\u662F\u6ED1\u677F\u65C1\u5C0E\u96FB\u7684\u8EDF\u7DE8\u7E54\u7DDA\u3002\u767C\u73FE\u7570\u5E38\u8981\u5148\u8A18\u4E0B\uFF0C\u518D\u6C7A\u5B9A\u80FD\u4E0D\u80FD\u7E7C\u7E8C\u3002"
     when: 
   presetDone: 0
   side: 

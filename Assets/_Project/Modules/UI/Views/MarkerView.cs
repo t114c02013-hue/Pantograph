@@ -20,7 +20,7 @@ namespace PantographSim.UI
             ("ip.cab.panel", "駕駛室控制盤"), ("ip.cab.pan_indicator", "弓位指示燈"), ("ip.depot.ground_terminal", "平台接地端子"),
             ("ip.pan_head.ground_clamp", "弓頭接地掛點"), ("env.parts_tray", "零件盒"), ("env.work_order", "作業單"),
             ("ip.depot.detector_tester", "驗電器自檢器"), ("env.tool_rack", "工具架"),
-            ("part.carbon_strip_L", "肘側滑板"), ("part.carbon_strip_R", "外側滑板")
+            ("part.carbon_strip_L", "靠關節滑板"), ("part.carbon_strip_R", "外側滑板")
             // 備品不常駐標示：滑鼠／控制器指到哪條才顯示那條的詳細資料（見 HoverText）
         };
         static readonly string[] Circled = { "①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩" };

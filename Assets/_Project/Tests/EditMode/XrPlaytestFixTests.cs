@@ -118,23 +118,20 @@ namespace PantographSim.Tests
             return w;
         }
 
-        /// <summary>規格 v5 第 4 點：撞到邊界沒有目標；別的區域選不到；車頂開放時平台和車頂相連。</summary>
+        /// <summary>terry 試玩：傳送不鎖區域：撞到邊界沒有目標；跨區、車頂還沒開放都選得到。</summary>
         [Test]
         public void Teleport_NotAcrossRail_OnlyConnectedAreas()
         {
-            Assert.IsTrue(XrTeleport.Connected("Platform", "Platform", false));
-            Assert.IsFalse(XrTeleport.Connected("Platform", "Roof", false), "車頂沒開放");
-            Assert.IsTrue(XrTeleport.Connected("Platform", "Roof", true));
-            Assert.IsFalse(XrTeleport.Connected("Platform", "Ground", true), "地面不相連");
             StationTests.WithScene(scene =>
             {
                 Physics.SyncTransforms();
                 var pts = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<XrTeleportPoint>(true)).ToList();
                 var lift = pts.First(p => p.PointId == "tp.platform.lift");
                 var landing = lift.transform.position;
-                Assert.IsNull(XrTeleport.PickTarget(pts, landing, true, 1.6f, "Platform", true), "指向線撞到邊界就沒有目標");
-                var got = XrTeleport.PickTarget(pts, landing, false, 1.6f, "Platform", false);
-                Assert.AreEqual("Platform", got.Floor);
+                Assert.IsNull(XrTeleport.PickTarget(pts, landing, true, 1.6f), "指向線撞到邊界就沒有目標");
+                Assert.AreEqual("Platform", XrTeleport.PickTarget(pts, landing, false, 1.6f).Floor);
+                foreach (var far in new[] { "tp.roof.inner", "tp.stand.s" })
+                    Assert.AreEqual(far, XrTeleport.PickTarget(pts, pts.First(p => p.PointId == far).transform.position, false, 0.1f).PointId, "跨區選得到");
                 var list = new List<Vector3>();
                 var from = new Vector3(Roof.PlatformOuterX + 0.5f, 0.8f, 0f);
                 TeleportArc.Trace(from, new Vector3(-7f, 0f, 0f), -10f, SceneLayers.TeleportMask, list, out bool blocked);

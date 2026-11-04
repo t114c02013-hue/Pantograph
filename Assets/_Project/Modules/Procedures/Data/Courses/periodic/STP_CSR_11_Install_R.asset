@@ -49,7 +49,7 @@ MonoBehaviour:
     why: "\u659C\u9762\u662F\u8B93\u67B6\u7A7A\u7DDA\u5E73\u9806\u6ED1\u5165\u7684\u5C0E\u89D2\uFF0C\u88DD\u53CD\u6703\u522E\u7DDA\u3001\u8DF3\u5F13\u3002"
     checklist:
     - "\u628A\u65B0\u6ED1\u677F\u79FB\u5230\u6258\u67B6\u4E0A\u65B9|part.carbon_strip_R.over_bracket"
-    - "\u8F49\u52D5\u624B\u8155\u628A\u65B0\u6ED1\u677F\u7FFB\u9762\uFF0C\u8B93\u7BAD\u982D\u671D\u5916|part.carbon_strip_R.new_orientation=out"
+    - "\u7FFB\u8F49\u65B0\u6ED1\u677F\uFF0C\u8B93\u7BAD\u982D\u671D\u5F13\u982D\u5916\u5074|part.carbon_strip_R.new_orientation=out"
     - "\u5C0D\u6E96\u87BA\u6813\u5B54\u653E\u4E0B|part.carbon_strip_R.state=NewMounted
       && part.carbon_strip_R.install_distance_cm<=0.5"
     highlightIds:
@@ -65,7 +65,9 @@ MonoBehaviour:
     standPointId: tp.stand.s
     subId: a
     textDesktop: 
-  - text: "\u8F49\u52D5\u624B\u8155\u628A\u65B0\u6ED1\u677F\u7FFB\u9762\uFF0C\u8B93\u7BAD\u982D\u671D\u5916"
+    hint: 
+    when: 
+  - text: "\u7FFB\u8F49\u65B0\u6ED1\u677F\uFF0C\u8B93\u7BAD\u982D\u671D\u5F13\u982D\u5916\u5074"
     why: 
     targetId: "consumable.carbon_strip\uFF08\u624B\u6301\u65B0\u6ED1\u677F\uFF09"
     toolId: 
@@ -73,6 +75,8 @@ MonoBehaviour:
     standPointId: tp.stand.s
     subId: b
     textDesktop: "\u6309 R \u8B93\u7BAD\u982D\u671D\u5916"
+    hint: "\u6ED1\u677F\u4E0A\u6709\u659C\u9762\u548C\u7BAD\u982D\uFF0C\u7BAD\u982D\u8981\u671D\u5F13\u982D\u7684\u5916\u7DE3\u3002\u65B9\u5411\u88DD\u53CD\u662F\u56B4\u91CD\u932F\u8AA4\u3002"
+    when: 
   - text: "\u5C0D\u6E96\u87BA\u6813\u5B54\u653E\u4E0B"
     why: 
     targetId: ip.carbon_strip_R.install_target
@@ -81,6 +85,8 @@ MonoBehaviour:
     standPointId: tp.stand.s
     subId: c
     textDesktop: 
+    hint: 
+    when: 
   presetDone: 0
   side: R
   presetStates: []

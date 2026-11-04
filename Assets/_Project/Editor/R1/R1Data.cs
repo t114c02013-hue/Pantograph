@@ -113,7 +113,7 @@ namespace PantographSim.Editor
                     Station("tp.platform.rack", "平台工具架前", StationFloor.Platform, new Vector2(-2.20f, -2.50f), "env.tool_rack"),
                     Station("tp.platform.ground", "接地端子旁", StationFloor.Platform, new Vector2(-1.95f, 0.30f), "ip.depot.ground_terminal"),
                     Station("tp.platform.anchor", "活動欄與平台掛點", StationFloor.Platform, new Vector2(-2.00f, -1.00f), "ip.depot.platform_anchor"),
-                    Station("tp.roof.inner", "車頂（肘側滑板）", StationFloor.Roof, new Vector2(0.00f, -0.65f), "part.carbon_strip_L", 0f, "roof.open", roofLock),
+                    Station("tp.roof.inner", "車頂（靠關節滑板）", StationFloor.Roof, new Vector2(0.00f, -0.65f), "part.carbon_strip_L", 0f, "roof.open", roofLock),
                     Station("tp.roof.outer", "車頂（外側滑板）", StationFloor.Roof, new Vector2(0.00f, -0.65f), "part.carbon_strip_R", 0f, "roof.open", roofLock, "tp.roof.inner"),
                 };
                 EditorUtility.SetDirty(set);

@@ -92,7 +92,7 @@ namespace PantographSim.Editor
         public class Expanded
         {
             public Row row;
-            public string course, stepId, side, subId, text, textDesktop, targetId, toolId, condition, standPointId, errorIds, when = "";
+            public string course, stepId, side, subId, text, textDesktop, hint, targetId, toolId, condition, standPointId, errorIds, when = "";
             public int n, order;
             /// <summary>把只在某一側展開的列（side=L）也算進去的順序：第 1 層用它對 R1 的位置（R 側少了 CSR_06 b 也不會錯位）。</summary>
             public int fullOrder;
@@ -199,7 +199,7 @@ namespace PantographSim.Editor
                                         {
                                             row = src, course = course, stepId = stepId, side = side, n = n, order = ++order, fullOrder = order + skipped,
                                             subId = src["subId"] + (n > 0 ? n.ToString() : "") + (idx > 0 ? "i" + idx : ""),
-                                            text = Idx(Sub(Pick("instruction"), side, n)), textDesktop = Idx(Sub(src["instructionDesktop"], side, n)),
+                                            text = Idx(Sub(Pick("instruction"), side, n)), textDesktop = Idx(Sub(src["instructionDesktop"], side, n)), hint = Idx(Sub(src["hint"], side, n)),
                                             targetId = Idx(Sub(Pick("targetId"), side, n)), toolId = Sub(src["toolId"], side, n), condition = Idx(Sub(Pick("condition"), side, n)),
                                             standPointId = stand, errorIds = src["errorIds"], when = NormalizeWhen(tmpl[src].when) + (idx > 0 ? "&&" + indexKey + "=" + idx : ""),
                                         };

@@ -49,7 +49,8 @@ namespace PantographSim.XR
         /// <summary>同一點（自己或共用的那一站）。</summary>
         public bool Same(string id) => id == pointId || (!string.IsNullOrEmpty(sharedWith) && id == sharedWith);
 
-        public bool Unlocked(ISimState s) => (string.IsNullOrEmpty(lockKey) || (s != null && s.GetBool(lockKey))) && Rule?.BlockReason(s, pointId) == null;
+        /// <summary>terry 試玩：流程不鎖站點（沒放行就上車頂由 RoofAccess 記錯），只擋 TeleportRule（吊物懸空）。</summary>
+        public bool Unlocked(ISimState s) => Rule?.BlockReason(s, pointId) == null;
 
         /// <summary>B 鍵要不要傳到 target（純函式；值對應 XrTeleport.GoResult：0 Moved、1 AlreadyThere、2 Locked、3 Missing）。</summary>
         public static int Decide(XrTeleportPoint target, XrTeleportPoint current, ISimState s)

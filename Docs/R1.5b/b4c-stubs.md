@@ -99,7 +99,6 @@ ErrorRuleTests.PendingTriggers_ListedInStubsDoc 檢查兩邊一致。觸發做�
 | ERR_Global_GroundNotCleared | b4c:ground_register | Critical |
 | ERR_Global_GroundNotRegistered | b4c:ground_register | Major |
 | ERR_Global_HoldPointRejected | b4c:holdpoint | Major |
-| ERR_Global_HoldPointSkipped | b4c:holdpoint | Critical |
 | ERR_RT02_NoReport | b4c:holdpoint | Major |
 | ERR_Global_KeyLeftUnattended | b4c:lockout | Minor |
 | ERR_Global_NoHelmet | b4c:ppe | Critical |

@@ -39,23 +39,29 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: 
     why: 
     checklist:
-    - "\u628A\u96FB\u52D5\u7F38\u96FB\u6E90\u5207\u5230 OFF|cab.cylinder_power=off"
+    - "\u628A\u5347\u5F13\u96FB\u52D5\u7F38\u96FB\u6E90\u5207\u5230 OFF|cab.cylinder_power=off"
     - "\u6309\u5347\u5F13\u9215\u78BA\u8A8D\u5F13\u982D\u4E0D\u52D5|cab.raise_test_done"
     highlightIds: []
     showBoltNumbers: 0
     showOutwardArrow: 0
   subActions:
-  - text: "\u628A\u96FB\u52D5\u7F38\u96FB\u6E90\u5207\u5230 OFF"
+  - text: "\u628A\u5347\u5F13\u96FB\u52D5\u7F38\u96FB\u6E90\u5207\u5230 OFF"
     why: 
     targetId: ip.cab.cylinder_power
     toolId: 
     condition: cab.cylinder_power=off
     standPointId: tp.cab
     subId: a
+    textDesktop: 
+    hint: "\u96FB\u52D5\u7F38\u662F\u63A8\u52D5\u5F13\u5347\u8D77\u7684\u88DD\u7F6E\uFF0C\u96FB\u6E90\u958B\u95DC\u5728\u63A7\u5236\u76E4\u4E0A\u3002\u5207\u6389\u5B83\uFF0C\u5F13\u5C31\u4E0D\u6703\u88AB\u610F\u5916\u5347\u8D77\u3002"
+    when: 
   - text: "\u6309\u5347\u5F13\u9215\u78BA\u8A8D\u5F13\u982D\u4E0D\u52D5"
     why: 
     targetId: ip.cab.raise_button
@@ -63,6 +69,9 @@ MonoBehaviour:
     condition: cab.raise_test_done
     standPointId: tp.cab
     subId: b
+    textDesktop: 
+    hint: "\u6309\u4E00\u4E0B\u5347\u5F13\u9215\uFF0C\u5F13\u982D\u61C9\u8A72\u5B8C\u5168\u4E0D\u52D5\u3002\u7528\u4F86\u78BA\u8A8D\u96FB\u6E90\u771F\u7684\u5207\u65B7\u4E86\u3002"
+    when: 
   presetDone: 0
   side: 
   presetStates: []

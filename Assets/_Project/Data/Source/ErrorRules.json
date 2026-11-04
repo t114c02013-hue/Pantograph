@@ -830,9 +830,21 @@
       "courses": "both",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4c:holdpoint",
+      "owner": "",
       "source": "CSV",
-      "trigger": "停留確認點還沒放行就做下一個動作：扣車頂掛點、起吊（上升超過 EX 0.05 m）、解鎖（L3）"
+      "trigger": "停留確認點還沒放行就做下一個動作：上車頂、扣車頂掛點、起吊（上升超過 EX 0.05 m）、解鎖（L3）",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "roof.hold_skipped"
+        ],
+        "what": "還沒完成隔離、驗電、接地，也還沒請求放行就上了車頂。",
+        "why": "沒有放行就上車頂，有觸電和墜落的危險。",
+        "fix": "回到平台，完成隔離、驗電、接地，請作業負責人放行後再上車頂。",
+        "oncePerRun": false
+      },
+      "scope": "global"
     },
     {
       "errorId": "ERR_Global_KeyLeftUnattended",

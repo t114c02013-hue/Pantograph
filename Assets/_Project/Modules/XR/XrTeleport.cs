@@ -94,7 +94,7 @@ namespace PantographSim.XR
         {
             if (!aiming || aimOrigin == null) return;
             var landing = TraceArc(out bool blocked);
-            target = PickTarget(points, landing, blocked, snapRadius, Current?.Floor, Sim.State?.GetBool(LiftControl.RoofOpenKey) ?? false);
+            target = PickTarget(points, landing, blocked, snapRadius);
             bool locked = target != null && !target.Unlocked(Sim.State);
             foreach (var p in points) p.ShowMarker(true, p == target, !p.Unlocked(Sim.State), Head);
             if (arc != null)
@@ -114,19 +114,13 @@ namespace PantographSim.XR
             return TeleportArc.Trace(aimOrigin.position, aimOrigin.forward * launchSpeed, floor, SceneLayers.TeleportMask, arcPoints, out blocked);
         }
 
-        /// <summary>試玩修正 第 1 點：拋物線撞到邊界就沒有目標；目標要在目前的區域，或車頂開放時平台和車頂互通（不能隔著欄杆傳送到別區）。currentFloor 空白＝還不在任何站點。</summary>
-        public static XrTeleportPoint PickTarget(IEnumerable<XrTeleportPoint> pts, Vector3 landing, bool blocked, float snapRadius, string currentFloor, bool roofOpen)
+        /// <summary>terry 試玩：拋物線撞到邊界就沒有目標；看得到的可走地面都能傳，不分區域（太遠用 B 鍵或站點標記）。</summary>
+        public static XrTeleportPoint PickTarget(IEnumerable<XrTeleportPoint> pts, Vector3 landing, bool blocked, float snapRadius)
         {
             if (blocked) return null;
-            return pts.Where(p => Flat(p.transform.position - landing).magnitude <= snapRadius && Connected(currentFloor, p.Floor, roofOpen))
+            return pts.Where(p => Flat(p.transform.position - landing).magnitude <= snapRadius)
                       .OrderBy(p => Flat(p.transform.position - landing).magnitude).FirstOrDefault();
         }
-
-        /// <summary>兩個區域有沒有相連（純函式）。</summary>
-        public static bool Connected(string from, string to, bool roofOpen) =>
-            string.IsNullOrEmpty(from) || from == to || (roofOpen && (from == "Platform" && to == "Roof" || from == "Roof" && to == "Platform"));
-
-
 
         static Vector3 Flat(Vector3 v) { v.y = 0f; return v; }
 

@@ -33,7 +33,7 @@ MonoBehaviour:
     why: 
     checklist:
     - "\u9010\u683C\u770B\u904E\u5DE5\u5177\u888B\u4E26\u6E05\u9EDE|env.tool_bag.slot_5.viewed&&env.tool_bag.slot_6.viewed&&env.tool_bag.slot_7.viewed&&env.tool_bag.slot_8.viewed&&env.tool_bag.slot_9.viewed&&rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack"
-    - "\u67E5\u770B\u5169\u500B\u87BA\u6813\u76E4\u3001\u96F6\u4EF6\u888B\u548C\u66AB\u653E\u588A\uFF0C\u8ECA\u9802\u7121\u907A\u7559|env.bolt_tray_L.bolts<=0&&env.bolt_tray_R.bolts<=0&&env.tool_bag.bolt_pouch.count<=0&&env.roof_strip_mat.count<=0&&roof.leftover_count<=0"
+    - "\u78BA\u8A8D\u87BA\u6813\u76E4\u3001\u96F6\u4EF6\u888B\u548C\u66AB\u653E\u588A\u90FD\u6E05\u7A7A|env.bolt_tray_L.bolts<=0&&env.bolt_tray_R.bolts<=0&&env.tool_bag.bolt_pouch.count<=0&&env.roof_strip_mat.count<=0&&roof.leftover_count<=0"
     - "\u6309\u300C\u8ECA\u9802\u6E05\u9EDE\u5B8C\u6210\u300D|workorder.toolcount_confirmed"
     highlightIds: []
     showBoltNumbers: 0
@@ -47,7 +47,9 @@ MonoBehaviour:
     standPointId: tp.roof.inner
     subId: a
     textDesktop: 
-  - text: "\u67E5\u770B\u5169\u500B\u87BA\u6813\u76E4\u3001\u96F6\u4EF6\u888B\u548C\u66AB\u653E\u588A\uFF0C\u8ECA\u9802\u7121\u907A\u7559"
+    hint: 
+    when: 
+  - text: "\u78BA\u8A8D\u87BA\u6813\u76E4\u3001\u96F6\u4EF6\u888B\u548C\u66AB\u653E\u588A\u90FD\u6E05\u7A7A"
     why: 
     targetId: env.bolt_tray_L;env.bolt_tray_R;env.tool_bag.bolt_pouch;env.roof_strip_mat
     toolId: 
@@ -55,6 +57,8 @@ MonoBehaviour:
     standPointId: tp.roof.inner
     subId: b
     textDesktop: 
+    hint: "\u87BA\u6813\u76E4\u3001\u96F6\u4EF6\u888B\u548C\u66AB\u653E\u588A\u90FD\u8981\u662F\u7A7A\u7684\u3002\u8ECA\u9802\u7559\u4E0B\u6771\u897F\uFF0C\u9001\u96FB\u5F8C\u53EF\u80FD\u88AB\u6253\u98DB\u3002"
+    when: 
   - text: "\u6309\u300C\u8ECA\u9802\u6E05\u9EDE\u5B8C\u6210\u300D"
     why: 
     targetId: env.work_order.toolcount_confirm
@@ -63,6 +67,8 @@ MonoBehaviour:
     standPointId: tp.roof.inner
     subId: c
     textDesktop: 
+    hint: 
+    when: 
   presetDone: 0
   side: 
   presetStates: []

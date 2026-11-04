@@ -40,11 +40,14 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: 
     why: 
     checklist:
-    - "\u8ACB\u4F5C\u696D\u8CA0\u8CAC\u4EBA\u548C\u6A5F\u5EE0\u8ABF\u5EA6\u78BA\u8A8D\uFF0C\u653E\u884C\u5FA9\u96FB|hold.4.checklist_done&&hold.4.released"
+    - "\u8ACB\u4F5C\u696D\u8CA0\u8CAC\u4EBA\u540C\u610F\u6062\u5FA9\u9001\u96FB|hold.4.checklist_done&&hold.4.released"
     - "\u5F9E\u8170\u5305\u62FF\u51FA\u4E0A\u9396\u639B\u724C\u7D44|tool.active=tool.lockout_tag"
     - "\u89E3\u9664\u5347\u5F13\u958B\u95DC\u7684\u9396|lockout.raise_switch=open"
     - "\u89E3\u9664\u4E3B\u65B7\u8DEF\u5668\u7684\u9396|lockout.breaker=open&&rack.slot_1=in_pouch"
@@ -53,13 +56,16 @@ MonoBehaviour:
     showBoltNumbers: 0
     showOutwardArrow: 0
   subActions:
-  - text: "\u8ACB\u4F5C\u696D\u8CA0\u8CAC\u4EBA\u548C\u6A5F\u5EE0\u8ABF\u5EA6\u78BA\u8A8D\uFF0C\u653E\u884C\u5FA9\u96FB"
+  - text: "\u8ACB\u4F5C\u696D\u8CA0\u8CAC\u4EBA\u540C\u610F\u6062\u5FA9\u9001\u96FB"
     why: 
     targetId: npc.work_leader
     toolId: 
     condition: hold.4.checklist_done&&hold.4.released
     standPointId: tp.platform.rack
     subId: a0
+    textDesktop: 
+    hint: "\u4F5C\u696D\u8CA0\u8CAC\u4EBA\u6703\u548C\u6A5F\u5EE0\u8ABF\u5EA6\uFF08\u7BA1\u5168\u5EE0\u9001\u96FB\u7684\u4EBA\uFF09\u78BA\u8A8D\u3002\u63A5\u5730\u3001\u4EBA\u54E1\u3001\u5DE5\u5177\u90FD\u78BA\u8A8D\u904E\uFF0C\u624D\u80FD\u9001\u96FB\u3002"
+    when: 
   - text: "\u5F9E\u8170\u5305\u62FF\u51FA\u4E0A\u9396\u639B\u724C\u7D44"
     why: 
     targetId: env.waist_pouch
@@ -67,6 +73,9 @@ MonoBehaviour:
     condition: tool.active=tool.lockout_tag
     standPointId: tp.cab
     subId: a
+    textDesktop: 
+    hint: "\u4EFB\u4E00\u624B\u4F38\u5230\u53F3\u8170\u7684\u8170\u5305\uFF0C\u6309\u63E1\u628A\u62FF\u51FA\u4E0A\u9396\u639B\u724C\u7D44\uFF0C\u6703\u62FF\u5728\u53F3\u624B\u3002"
+    when: 
   - text: "\u89E3\u9664\u5347\u5F13\u958B\u95DC\u7684\u9396"
     why: 
     targetId: ip.cab.raise_switch
@@ -74,6 +83,9 @@ MonoBehaviour:
     condition: lockout.raise_switch=open
     standPointId: tp.cab
     subId: b
+    textDesktop: 
+    hint: 
+    when: 
   - text: "\u89E3\u9664\u4E3B\u65B7\u8DEF\u5668\u7684\u9396"
     why: 
     targetId: ip.cab.breaker
@@ -81,6 +93,9 @@ MonoBehaviour:
     condition: lockout.breaker=open&&rack.slot_1=in_pouch
     standPointId: tp.cab
     subId: c
+    textDesktop: 
+    hint: 
+    when: 
   - text: "\u6062\u5FA9\u96FB\u52D5\u7F38\u96FB\u6E90"
     why: 
     targetId: ip.cab.cylinder_power
@@ -88,6 +103,9 @@ MonoBehaviour:
     condition: cab.cylinder_power=on
     standPointId: tp.cab
     subId: d
+    textDesktop: 
+    hint: 
+    when: 
   presetDone: 0
   side: 
   presetStates: []

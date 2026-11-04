@@ -17,5 +17,7 @@ namespace PantographSim.Data
         [TextArea] public string lockedMessage = "先完成驗電、掛接地，並扣好安全帶";
         [TextArea] public string leaveHookedMessage = "先解開車頂掛點";
         public string resultKey = "roof.open";
+        [Tooltip("還沒放行就上車頂：練習、考核把這個鍵設成 true 記 ERR_Global_HoldPointSkipped（離開車頂時放掉，下次上車頂再記）")] public string holdSkippedKey = "roof.hold_skipped";
+        public string holdSkippedHint = "還沒完成隔離、驗電、接地，也還沒請求放行，不能上車頂";
     }
 }

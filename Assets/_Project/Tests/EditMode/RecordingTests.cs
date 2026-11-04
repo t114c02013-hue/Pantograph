@@ -246,8 +246,8 @@ namespace PantographSim.Tests
             Assert.AreEqual(3, r.critical, "E1、E3、E15 三個 Critical（同一步同一錯誤只算一次）");
             StringAssert.Contains($"<b class=\"big\">{r.score:0}</b> 分", html, "第一頁總分取自 SessionResult");
             StringAssert.Contains($"<b class=\"bad\">{r.critical}</b>", html, "第一頁 Critical 次數");
-            foreach (var name in new[] { "未降弓就碰弓體", "接地順序錯誤（先掛弓頭）", "肘側滑板沒有三點都量", "扭力不足", "工具遺留" }) StringAssert.Contains(name, html);
-            StringAssert.Contains("鎖到規定扭力（肘側）", html, "中文步驟名");
+            foreach (var name in new[] { "未降弓就碰弓體", "接地順序錯誤（先掛弓頭）", "靠關節滑板沒有三點都量", "扭力不足", "工具遺留" }) StringAssert.Contains(name, html);
+            StringAssert.Contains("鎖到規定扭力（靠關節）", html, "中文步驟名");
             StringAssert.Contains("接地棒先掛弓頭", html, "順序對照");
 
             // errors.csv：UTF-8 BOM、每個錯誤都在、Critical（同步同錯只算一次）數量正確
@@ -260,7 +260,7 @@ namespace PantographSim.Tests
             foreach (var id in ExpectedErrors) Assert.IsTrue(rows.Any(x => x.Contains("," + id + ",")), "errors.csv 要有 " + id);
             int criticalUnique = rows.Where(x => x.Contains("（Critical）")).Select(x => x.Split(',')).Select(f => f[3] + "|" + f[5]).Distinct().Count();
             Assert.AreEqual(r.critical, criticalUnique, "errors.csv 的 Critical（每步每錯誤）數＝SessionResult.critical");
-            StringAssert.Contains("鎖到規定扭力（肘側）", File.ReadAllText(Path.Combine(run.folder, "errors.csv"), Encoding.UTF8));
+            StringAssert.Contains("鎖到規定扭力（靠關節）", File.ReadAllText(Path.Combine(run.folder, "errors.csv"), Encoding.UTF8));
             var hints = File.ReadAllText(Path.Combine(run.folder, "hints.csv"), Encoding.UTF8);
             StringAssert.Contains("說明,Help,1", hints);
             StringAssert.Contains("帶我到目標,FocusTarget,1", hints);

@@ -95,6 +95,30 @@ namespace PantographSim.Tests
             }
         }
 
+        /// <summary>terry 試玩：還沒放行就上車頂：練習記 Critical，同一次上車頂只記一次；離開再上再記；教學只提示；放行後不記。</summary>
+        [Test]
+        public void HoldPointSkipped_EnterRoofBeforeRelease()
+        {
+            var rule = ScriptableObject.CreateInstance<RoofAccessRule>();
+            using (var r = new Rig("daily", "STP_SI_06_RoofEntry"))
+            {
+                bool on = false;
+                void Floor(string f) { r.s.Set("xr.floor", f); PantographSim.Worksite.RoofAccess.CheckEntry(rule, r.s, ref on); }
+                r.s.Set("training.mode", "practice");
+                Floor("Roof"); Assert.AreEqual(1, r.Count("ERR_Global_HoldPointSkipped"));
+                Floor("Roof"); Assert.AreEqual(1, r.Count("ERR_Global_HoldPointSkipped"), "同一次只記一次");
+                Floor("Platform"); Assert.IsFalse(r.s.GetBool(rule.holdSkippedKey), "離開車頂放掉");
+                Floor("Roof"); Assert.IsTrue(r.s.GetBool(rule.holdSkippedKey), "再上一次再判（同一步的重複由 ErrorDetector 累計次數）");
+                Floor("Platform");
+                r.s.Set("training.mode", "tutorial");
+                Floor("Roof"); Assert.IsFalse(r.s.GetBool(rule.holdSkippedKey), "教學不記");
+                Assert.AreEqual(rule.holdSkippedHint, r.s.Get("ui.toast"));
+                Floor("Platform");
+                r.s.Set("training.mode", "exam"); r.s.SetBool("roof.open", true);
+                Floor("Roof"); Assert.IsFalse(r.s.GetBool(rule.holdSkippedKey), "放行後不記");
+            }
+        }
+
         [Test]
         public void ChecklistEval_Not()
         {

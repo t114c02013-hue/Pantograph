@@ -10,7 +10,7 @@ namespace PantographSim.Data
         public string fromStepId;
         public string toStepId;
         public string[] sides = { "L", "R" };
-        public string[] sideLabels = { "肘側滑板", "外側滑板" };
+        public string[] sideLabels = { "靠關節滑板", "外側滑板" };
     }
 
     /// <summary>某步驟完成時，若 key 等於 value 就跳到 jumpTo。</summary>

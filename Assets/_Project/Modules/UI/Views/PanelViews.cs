@@ -143,7 +143,7 @@ namespace PantographSim.UI
 
             foreach (var side in new[] { "L", "R" })
             {
-                Ui.Text(card, (side == "L" ? "肘側滑板" : "外側滑板") + "　厚度（mm，照卡尺讀數抄）", 19, Ui.Accent, TextAnchor.UpperLeft, FontStyle.Bold);
+                Ui.Text(card, (side == "L" ? "靠關節滑板" : "外側滑板") + "　厚度（mm，照卡尺讀數抄）", 19, Ui.Accent, TextAnchor.UpperLeft, FontStyle.Bold);
                 var row = Ui.Rect(card, "Row_" + side); Ui.HStack(row.gameObject, 6);
                 for (int i = 0; i < 3; i++)
                 {

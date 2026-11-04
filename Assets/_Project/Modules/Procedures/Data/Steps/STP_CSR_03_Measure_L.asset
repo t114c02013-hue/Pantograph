@@ -13,17 +13,17 @@ MonoBehaviour:
   m_Name: STP_CSR_03_Measure_L
   m_EditorClassIdentifier: 
   stepId: STP_CSR_03_Measure_L
-  title: "\u91CF\u6E2C\u8098\u5074\u6ED1\u677F"
-  instruction: "\u7528\u5361\u5C3A\u4F9D\u5E8F\u9EDE\u8098\u5074\u6ED1\u677F\u7684\u5DE6\u3001\u4E2D\u3001\u53F3\u4E09\u500B\u91CF\u6E2C\u9EDE\uFF0C\u628A\u5361\u5C3A\u4E0A\u7684\u8B80\u6578\u6284\u5230\u4F5C\u696D\u55AE\uFF0C\u6309\u300C\u9001\u51FA\u9019\u689D\u7684\u8B80\u6578\u300D\u3002"
+  title: "\u91CF\u6E2C\u9760\u95DC\u7BC0\u6ED1\u677F"
+  instruction: "\u7528\u5361\u5C3A\u4F9D\u5E8F\u9EDE\u9760\u95DC\u7BC0\u6ED1\u677F\u7684\u5DE6\u3001\u4E2D\u3001\u53F3\u4E09\u500B\u91CF\u6E2C\u9EDE\uFF0C\u628A\u5361\u5C3A\u4E0A\u7684\u8B80\u6578\u6284\u5230\u4F5C\u696D\u55AE\uFF0C\u6309\u300C\u9001\u51FA\u9019\u689D\u7684\u8B80\u6578\u300D\u3002"
   toolHint: "\u6578\u4F4D\u5361\u5C3A"
-  targetHint: "\u8098\u5074\u6ED1\u677F\u9802\u9762\u4E09\u500B\u91CF\u6E2C\u9EDE\uFF08\u5DE6\u8DDD\u7AEF
+  targetHint: "\u9760\u95DC\u7BC0\u6ED1\u677F\u9802\u9762\u4E09\u500B\u91CF\u6E2C\u9EDE\uFF08\u5DE6\u8DDD\u7AEF
     15 cm\u3001\u4E2D\u9EDE\u3001\u53F3\u8DDD\u7AEF 15 cm\uFF09"
   targetIds:
   - ip.carbon_strip_{side}.measure_*
   - env.work_order
   requiredToolId: tool.caliper
   completion:
-    rid: 8951035158582525965
+    rid: 1000
   errors:
   - errorId: ERR_CSR03_OnlyMid
     severity: 1
@@ -44,6 +44,9 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   - errorId: ERR_CSR03_CopyError
     severity: 0
     what: "\u4F5C\u696D\u55AE\u4E0A\u7684\u8B80\u6578\u548C\u5361\u5C3A\u91CF\u5230\u7684\u4E0D\u4E00\u6A23\u3002"
@@ -61,6 +64,9 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   - errorId: ERR_CSR03_CopyError
     severity: 0
     what: "\u4F5C\u696D\u55AE\u4E0A\u7684\u8B80\u6578\u548C\u5361\u5C3A\u91CF\u5230\u7684\u4E0D\u4E00\u6A23\u3002"
@@ -78,6 +84,9 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   - errorId: ERR_CSR03_CopyError
     severity: 0
     what: "\u4F5C\u696D\u55AE\u4E0A\u7684\u8B80\u6578\u548C\u5361\u5C3A\u91CF\u5230\u7684\u4E0D\u4E00\u6A23\u3002"
@@ -95,6 +104,9 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: "\u62FF\u5361\u5C3A\u9EDE\u6ED1\u677F\u4E0A\u4E09\u500B\u85CD\u8272\u91CF\u6E2C\u9EDE\uFF0C\u628A\u5361\u5C3A\u8B80\u6578\u6284\u9032\u4F5C\u696D\u55AE\u3002"
     why: "\u6ED1\u677F\u5E38\u5E38\u5169\u7AEF\u78E8\u5F97\u6BD4\u8F03\u591A\uFF0C\u4E09\u9EDE\u90FD\u91CF\u624D\u627E\u5F97\u5230\u6700\u8584\u8655\u3002"
@@ -109,30 +121,46 @@ MonoBehaviour:
     showBoltNumbers: 0
     showOutwardArrow: 0
   subActions:
-  - text: "\u91CF\u8098\u5074\u6ED1\u677F\u5DE6\u5074\u9EDE"
+  - text: "\u91CF\u9760\u95DC\u7BC0\u6ED1\u677F\u5DE6\u5074\u9EDE"
     why: "\u8DDD\u7AEF 15 cm"
     targetId: ip.carbon_strip_L.measure_left
     toolId: tool.caliper
     condition: ip.carbon_strip_L.measure_left.measured
     standPointId: tp.roof.inner
-  - text: "\u91CF\u8098\u5074\u6ED1\u677F\u4E2D\u9EDE"
+    subId: 
+    textDesktop: 
+    hint: 
+    when: 
+  - text: "\u91CF\u9760\u95DC\u7BC0\u6ED1\u677F\u4E2D\u9EDE"
     why: 
     targetId: ip.carbon_strip_L.measure_mid
     toolId: tool.caliper
     condition: ip.carbon_strip_L.measure_mid.measured
     standPointId: tp.roof.inner
-  - text: "\u91CF\u8098\u5074\u6ED1\u677F\u53F3\u5074\u9EDE"
+    subId: 
+    textDesktop: 
+    hint: 
+    when: 
+  - text: "\u91CF\u9760\u95DC\u7BC0\u6ED1\u677F\u53F3\u5074\u9EDE"
     why: "\u8DDD\u7AEF 15 cm"
     targetId: ip.carbon_strip_L.measure_right
     toolId: tool.caliper
     condition: ip.carbon_strip_L.measure_right.measured
     standPointId: tp.roof.inner
+    subId: 
+    textDesktop: 
+    hint: 
+    when: 
   - text: "\u4E09\u500B\u8B80\u6578\u586B\u5165\u4F5C\u696D\u55AE"
     why: "\u7167\u5361\u5C3A\u8B80\u6578\u6284\uFF0C\u8AA4\u5DEE \u2264 0.05"
     targetId: env.work_order
     toolId: 
     condition: workorder.reading.L.submitted
     standPointId: tp.roof.inner
+    subId: 
+    textDesktop: 
+    hint: 
+    when: 
   presetDone: 0
   side: L
   presetStates: []
@@ -144,13 +172,13 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035158582525965
+    - rid: 1000
       type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         rules:
-        - rid: 8951035158582525966
-        - rid: 8951035158582525967
-    - rid: 8951035158582525966
+        - rid: 1001
+        - rid: 1002
+    - rid: 1001
       type: {class: ChecklistAll, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         keys:
@@ -158,7 +186,7 @@ MonoBehaviour:
         - ip.carbon_strip_{side}.measure_mid.measured
         - ip.carbon_strip_{side}.measure_right.measured
         - workorder.reading.{side}.submitted
-    - rid: 8951035158582525967
+    - rid: 1002
       type: {class: ReadingMatches, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         recordKeys:

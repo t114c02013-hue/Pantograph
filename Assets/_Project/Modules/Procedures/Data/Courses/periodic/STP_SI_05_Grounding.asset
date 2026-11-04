@@ -52,7 +52,7 @@ MonoBehaviour:
     - "\u63A5\u5730\u593E\u593E\u4E0A\u63A5\u5730\u7AEF\u5B50|isolation.terminal_clamped"
     - "\u62C9\u4E00\u4E0B\u63A5\u5730\u7DDA\u78BA\u8A8D|isolation.pull_tested"
     - "\u639B\u9264\u639B\u4E0A\u5F13\u982D\u63A5\u5730\u9EDE|isolation.head_clamped"
-    - "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u767B\u8A18 #1 \u63A5\u5730\u68D2|ground_register.1=registered"
+    - "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u767B\u8A18 #1 \u63A5\u5730\u687F|ground_register.1=registered"
     highlightIds:
     - ip.depot.ground_terminal
     - ip.pan_head.ground_clamp
@@ -67,6 +67,8 @@ MonoBehaviour:
     standPointId: tp.platform.ground
     subId: a
     textDesktop: 
+    hint: "\u8D70\u5230\u687F\u67B6\u524D\uFF0C\u53F3\u624B\u9760\u8FD1\u63A5\u5730\u687F\uFF0C\u6309\u53F3\u63E1\u628A\u62FF\u8D77\u3002"
+    when: 
   - text: "\u63A5\u5730\u593E\u593E\u4E0A\u63A5\u5730\u7AEF\u5B50"
     why: 
     targetId: ip.depot.ground_terminal
@@ -75,6 +77,8 @@ MonoBehaviour:
     standPointId: tp.platform.ground
     subId: b
     textDesktop: "\u628A\u63A5\u5730\u593E\u593E\u4E0A\u63A5\u5730\u7AEF\u5B50"
+    hint: "\u7528\u5C04\u7DDA\u6307\u8457\u5E73\u53F0\u65C1\u7684\u63A5\u5730\u7AEF\u5B50\u6309\u6273\u6A5F\u3002\u4E00\u5B9A\u8981\u5148\u593E\u5730\u7AEF\u3001\u518D\u639B\u5F13\u982D\uFF0C\u9806\u5E8F\u53CD\u4E86\u6703\u6709\u89F8\u96FB\u5371\u96AA\u3002"
+    when: 
   - text: "\u62C9\u4E00\u4E0B\u63A5\u5730\u7DDA\u78BA\u8A8D"
     why: 
     targetId: ip.depot.ground_terminal
@@ -83,6 +87,8 @@ MonoBehaviour:
     standPointId: tp.platform.ground
     subId: c
     textDesktop: 
+    hint: "\u7528\u5C04\u7DDA\u6307\u8457\u5E73\u53F0\u65C1\u7684\u63A5\u5730\u7AEF\u5B50\u6309\u6273\u6A5F\u3002"
+    when: 
   - text: "\u639B\u9264\u639B\u4E0A\u5F13\u982D\u63A5\u5730\u9EDE"
     why: 
     targetId: ip.pan_head.ground_clamp
@@ -91,7 +97,9 @@ MonoBehaviour:
     standPointId: tp.platform.ground
     subId: d
     textDesktop: "\u628A\u639B\u9264\u639B\u4E0A\u5F13\u982D\u63A5\u5730\u9EDE"
-  - text: "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u767B\u8A18 #1 \u63A5\u5730\u68D2"
+    hint: "\u7528\u5C04\u7DDA\u6307\u8457\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u6309\u6273\u6A5F\u3002\u5F13\u982D\u63A5\u5730\u5F8C\uFF0C\u842C\u4E00\u4F86\u96FB\u4E5F\u6703\u5C0E\u5230\u5730\u9762\u3002"
+    when: 
+  - text: "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u767B\u8A18 #1 \u63A5\u5730\u687F"
     why: 
     targetId: env.work_order.ground_register
     toolId: 
@@ -99,6 +107,8 @@ MonoBehaviour:
     standPointId: tp.platform.ground
     subId: e
     textDesktop: 
+    hint: "\u63A5\u5730\u767B\u8A18\u6B04\u5728\u4F5C\u696D\u55AE\u4E0A\u3002\u8A18\u4E0B\u639B\u4E86\u54EA\u652F\u63A5\u5730\uFF0C\u6536\u5DE5\u6642\u624D\u4E0D\u6703\u6F0F\u62C6\u5C31\u9001\u96FB\u3002"
+    when: 
   presetDone: 0
   side: 
   presetStates: []
