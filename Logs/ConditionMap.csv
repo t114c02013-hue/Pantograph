@@ -213,26 +213,26 @@ periodic,STP_SI_06_RoofEntry,a2,29,3,"掛位 12 = 使用中，短接地線 = 隨
 periodic,STP_SI_06_RoofEntry,a3,30,3,"遙控器 = 隨身","env.crane_pendant.state=Held",
 periodic,STP_SI_06_RoofEntry,a4,31,2,"ctrl.crane.power = true","ctrl.crane.power",
 periodic,STP_SI_06_RoofEntry,a5,32,3,"estop 由 true 變回 false","ctrl.crane.estop=false&&ctrl.crane.estop_tested",
-periodic,STP_SI_06_RoofEntry,a6,33,3,"吊梁停在 Crane_InspectPose_Platform：中心 (−2.56, −3.55)，底面離平台面 EX 0.90 m ± 0.1 m；頭和身體不在吊鉤組正下方","part.crane.inspect_pose=platform&&part.crane.under_hook_clear",v310
+periodic,STP_SI_06_RoofEntry,a6,33,3,"吊梁停在 Crane_InspectPose_Platform：中心 (−2.56, −3.55)，底面離平台面 EX 0.90 m ± 0.1 m；頭和身體不在吊鉤組正下方","part.crane.inspect_pose=platform&&part.crane.under_hook_clear",
 periodic,STP_SI_06_RoofEntry,a7,34,3,"estop = true（碰吊具前）","ctrl.crane.estop",
 periodic,STP_SI_06_RoofEntry,a8,35,3,"都已查看並勾選：舌片正常、荷重看得清楚、吊耳和卸扣沒有變形、銷子鎖好；站在吊鉤組旁查看時須已按緊急停止，且身體離吊鉤組外緣 ≥ 0.30 m，頭和身體不可進到吊鉤組正下方（D44 補充、model-spec v3.16 §7.11）","part.crane.hook.inspected&&env.lift_beam.inspected",
 periodic,STP_SI_06_RoofEntry,a92,36,3,"已查看：標籤額定荷重看得清楚；沒有割傷、磨損、燒傷，縫線完好；並判「可用／不可用」，判定和實際狀態一致（故障開啟時 fault.sling_cut.index 那一條有割傷）。割傷判可用：教學擋下並提示，練習／考核記 Critical；可用判不可用：記 Minor，報表註明。碰吊帶時緊急停止未按下：教學擋下並提示「先按遙控器的緊急停止，吊鉤才不會突然動」，練習／考核記 Major 不擋，同一次查看只記 1 次；站在吊鉤組旁查看時須已按緊急停止，且身體離吊鉤組外緣 ≥ 0.30 m，頭和身體不可進到吊鉤組正下方（D44 補充、model-spec v3.16 §7.11）","env.sling_2.inspected&&env.sling_2.verdict",
 periodic,STP_SI_06_RoofEntry,a93,36,3,"已查看：標籤額定荷重看得清楚；沒有割傷、磨損、燒傷，縫線完好；並判「可用／不可用」，判定和實際狀態一致（故障開啟時 fault.sling_cut.index 那一條有割傷）。割傷判可用：教學擋下並提示，練習／考核記 Critical；可用判不可用：記 Minor，報表註明。碰吊帶時緊急停止未按下：教學擋下並提示「先按遙控器的緊急停止，吊鉤才不會突然動」，練習／考核記 Major 不擋，同一次查看只記 1 次；站在吊鉤組旁查看時須已按緊急停止，且身體離吊鉤組外緣 ≥ 0.30 m，頭和身體不可進到吊鉤組正下方（D44 補充、model-spec v3.16 §7.11）","env.sling_3.inspected&&env.sling_3.verdict",
 periodic,STP_SI_06_RoofEntry,a91,36,3,"已查看：標籤額定荷重看得清楚；沒有割傷、磨損、燒傷，縫線完好；並判「可用／不可用」，判定和實際狀態一致（故障開啟時 fault.sling_cut.index 那一條有割傷）。割傷判可用：教學擋下並提示，練習／考核記 Critical；可用判不可用：記 Minor，報表註明。碰吊帶時緊急停止未按下：教學擋下並提示「先按遙控器的緊急停止，吊鉤才不會突然動」，練習／考核記 Major 不擋，同一次查看只記 1 次；站在吊鉤組旁查看時須已按緊急停止，且身體離吊鉤組外緣 ≥ 0.30 m，頭和身體不可進到吊鉤組正下方（D44 補充、model-spec v3.16 §7.11）","env.sling_1.inspected&&env.sling_1.verdict",
 periodic,STP_SI_06_RoofEntry,a94,36,3,"已查看：標籤額定荷重看得清楚；沒有割傷、磨損、燒傷，縫線完好；並判「可用／不可用」，判定和實際狀態一致（故障開啟時 fault.sling_cut.index 那一條有割傷）。割傷判可用：教學擋下並提示，練習／考核記 Critical；可用判不可用：記 Minor，報表註明。碰吊帶時緊急停止未按下：教學擋下並提示「先按遙控器的緊急停止，吊鉤才不會突然動」，練習／考核記 Major 不擋，同一次查看只記 1 次；站在吊鉤組旁查看時須已按緊急停止，且身體離吊鉤組外緣 ≥ 0.30 m，頭和身體不可進到吊鉤組正下方（D44 補充、model-spec v3.16 §7.11）","env.sling_4.inspected&&env.sling_4.verdict",
-periodic,STP_SI_06_RoofEntry,s1i1,37,3,"割傷吊帶改名 env.sling_rejected，已掛停用牌並在停用箱內；放回吊具架 env.rigging_rack 記 Major。【故障計時起點：s1 啟用】","env.sling_rejected.tagged&&env.sling_rejected.state=in_bin",v310
-periodic,STP_SI_06_RoofEntry,s1i2,37,3,"割傷吊帶改名 env.sling_rejected，已掛停用牌並在停用箱內；放回吊具架 env.rigging_rack 記 Major。【故障計時起點：s1 啟用】","env.sling_rejected.tagged&&env.sling_rejected.state=in_bin",v310
-periodic,STP_SI_06_RoofEntry,s1i3,37,3,"割傷吊帶改名 env.sling_rejected，已掛停用牌並在停用箱內；放回吊具架 env.rigging_rack 記 Major。【故障計時起點：s1 啟用】","env.sling_rejected.tagged&&env.sling_rejected.state=in_bin",v310
-periodic,STP_SI_06_RoofEntry,s1i4,37,3,"割傷吊帶改名 env.sling_rejected，已掛停用牌並在停用箱內；放回吊具架 env.rigging_rack 記 Major。【故障計時起點：s1 啟用】","env.sling_rejected.tagged&&env.sling_rejected.state=in_bin",v310
+periodic,STP_SI_06_RoofEntry,s1i1,37,3,"割傷吊帶改名 env.sling_rejected，已掛停用牌並在停用箱內；放回吊具架 env.rigging_rack 記 Major。【故障計時起點：s1 啟用】","env.sling_rejected.tagged&&env.sling_rejected.state=in_bin",
+periodic,STP_SI_06_RoofEntry,s1i2,37,3,"割傷吊帶改名 env.sling_rejected，已掛停用牌並在停用箱內；放回吊具架 env.rigging_rack 記 Major。【故障計時起點：s1 啟用】","env.sling_rejected.tagged&&env.sling_rejected.state=in_bin",
+periodic,STP_SI_06_RoofEntry,s1i3,37,3,"割傷吊帶改名 env.sling_rejected，已掛停用牌並在停用箱內；放回吊具架 env.rigging_rack 記 Major。【故障計時起點：s1 啟用】","env.sling_rejected.tagged&&env.sling_rejected.state=in_bin",
+periodic,STP_SI_06_RoofEntry,s1i4,37,3,"割傷吊帶改名 env.sling_rejected，已掛停用牌並在停用箱內；放回吊具架 env.rigging_rack 記 Major。【故障計時起點：s1 啟用】","env.sling_rejected.tagged&&env.sling_rejected.state=in_bin",
 periodic,STP_SI_06_RoofEntry,s2i1,38,3,"已回報（作業負責人回應「換備用吊帶，查看後再掛」）","rigging.cut_reported",b4c:holdpoint
 periodic,STP_SI_06_RoofEntry,s2i2,38,3,"已回報（作業負責人回應「換備用吊帶，查看後再掛」）","rigging.cut_reported",b4c:holdpoint
 periodic,STP_SI_06_RoofEntry,s2i3,38,3,"已回報（作業負責人回應「換備用吊帶，查看後再掛」）","rigging.cut_reported",b4c:holdpoint
 periodic,STP_SI_06_RoofEntry,s2i4,38,3,"已回報（作業負責人回應「換備用吊帶，查看後再掛」）","rigging.cut_reported",b4c:holdpoint
-periodic,STP_SI_06_RoofEntry,s3,39,3,"備用吊帶已查看並判可用；s2 未做就拿記 Major（吊具架在 crane 站伸手 0.43 m 可及）","env.sling_spare.inspected&&env.sling_spare.verdict=ok",v310
-periodic,STP_SI_06_RoofEntry,s4i1,40,2,"備用吊帶接手 env.sling_1，其餘 3 條不動。【故障計時終點：s4 完成】","env.sling_1.replaced",v310
-periodic,STP_SI_06_RoofEntry,s4i2,40,2,"備用吊帶接手 env.sling_2，其餘 3 條不動。【故障計時終點：s4 完成】","env.sling_2.replaced",v310
-periodic,STP_SI_06_RoofEntry,s4i3,40,2,"備用吊帶接手 env.sling_3，其餘 3 條不動。【故障計時終點：s4 完成】","env.sling_3.replaced",v310
-periodic,STP_SI_06_RoofEntry,s4i4,40,2,"備用吊帶接手 env.sling_4，其餘 3 條不動。【故障計時終點：s4 完成】","env.sling_4.replaced",v310
+periodic,STP_SI_06_RoofEntry,s3,39,3,"備用吊帶已查看並判可用；s2 未做就拿記 Major（吊具架在 crane 站伸手 0.43 m 可及）","env.sling_spare.inspected&&env.sling_spare.verdict=ok",
+periodic,STP_SI_06_RoofEntry,s4i1,40,2,"備用吊帶接手 env.sling_1，其餘 3 條不動。【故障計時終點：s4 完成】","env.sling_1.replaced",
+periodic,STP_SI_06_RoofEntry,s4i2,40,2,"備用吊帶接手 env.sling_2，其餘 3 條不動。【故障計時終點：s4 完成】","env.sling_2.replaced",
+periodic,STP_SI_06_RoofEntry,s4i3,40,2,"備用吊帶接手 env.sling_3，其餘 3 條不動。【故障計時終點：s4 完成】","env.sling_3.replaced",
+periodic,STP_SI_06_RoofEntry,s4i4,40,2,"備用吊帶接手 env.sling_4，其餘 3 條不動。【故障計時終點：s4 完成】","env.sling_4.replaced",
 periodic,STP_SI_06_RoofEntry,a10,41,3,"estop = false（教學提示解除；練習／考核不提示，未解除吊鉤不會動）","ctrl.crane.estop=false",
 periodic,STP_SI_06_RoofEntry,a11,42,3,"吊鉤 pivot ≥ 4.92（吊帶下端 ≥ 3.14，避開防墜門架頂 2.64；model-spec v3.17）；升到 hookYMax 5.850 自動停","part.crane.hook_y>=crane.empty_travel_min_y",
 periodic,STP_SI_06_RoofEntry,b,43,3,"平台掛點 = 已扣","harness.platform",
@@ -411,25 +411,25 @@ periodic,STP_CSR_15_HeightCheck,b,141,1,"讀數已取得","ip.carbon_strip_L.mea
 periodic,STP_CSR_15_HeightCheck,c,142,1,"讀數已取得","ip.carbon_strip_R.measure_mid.new_measured",
 periodic,STP_CSR_15_HeightCheck,d,143,1,"兩格與讀數相差 ≤ 0.05 mm，差值 ≤ EX 1.0 mm","workorder.height_diff",
 periodic,STP_CSR_15_HeightCheck,f,145,3,"掛位 5–9 = 在袋，台架工具盤是空的","rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack&&env.panto_stand.tool_tray.count<=0",
-periodic,STP_IN_01_RigOnStand,a0,146,3,"吊梁停在 Crane_InspectPose_Ground：中心 (−9.50, −3.20)，底面離地面 EX 0.9 m ± 0.1 m，不在弓上方；頭和身體不在吊鉤組正下方","part.crane.inspect_pose=ground&&part.crane.under_hook_clear",v310
+periodic,STP_IN_01_RigOnStand,a0,146,3,"吊梁停在 Crane_InspectPose_Ground：中心 (−9.50, −3.20)，底面離地面 EX 0.9 m ± 0.1 m，不在弓上方；頭和身體不在吊鉤組正下方","part.crane.inspect_pose=ground&&part.crane.under_hook_clear",
 periodic,STP_IN_01_RigOnStand,a1,147,3,"estop = true（碰吊具前）","ctrl.crane.estop",
 periodic,STP_IN_01_RigOnStand,a21,148,3,"已查看：標籤額定荷重看得清楚；沒有割傷、磨損、燒傷，縫線完好；並判「可用／不可用」，判定和實際狀態一致（故障開啟時 fault.sling_cut.index 那一條有割傷）。割傷判可用：教學擋下並提示，練習／考核記 Critical；可用判不可用：記 Minor，報表註明。碰吊帶時緊急停止未按下：教學擋下並提示「先按遙控器的緊急停止，吊鉤才不會突然動」，練習／考核記 Major 不擋，同一次查看只記 1 次；站在吊鉤組旁查看時須已按緊急停止，且身體離吊鉤組外緣 ≥ 0.30 m，頭和身體不可進到吊鉤組正下方（D44 補充、model-spec v3.16 §7.11）","env.sling_1.inspected&&env.sling_1.verdict",
 periodic,STP_IN_01_RigOnStand,a24,148,3,"已查看：標籤額定荷重看得清楚；沒有割傷、磨損、燒傷，縫線完好；並判「可用／不可用」，判定和實際狀態一致（故障開啟時 fault.sling_cut.index 那一條有割傷）。割傷判可用：教學擋下並提示，練習／考核記 Critical；可用判不可用：記 Minor，報表註明。碰吊帶時緊急停止未按下：教學擋下並提示「先按遙控器的緊急停止，吊鉤才不會突然動」，練習／考核記 Major 不擋，同一次查看只記 1 次；站在吊鉤組旁查看時須已按緊急停止，且身體離吊鉤組外緣 ≥ 0.30 m，頭和身體不可進到吊鉤組正下方（D44 補充、model-spec v3.16 §7.11）","env.sling_4.inspected&&env.sling_4.verdict",
 periodic,STP_IN_01_RigOnStand,a22,148,3,"已查看：標籤額定荷重看得清楚；沒有割傷、磨損、燒傷，縫線完好；並判「可用／不可用」，判定和實際狀態一致（故障開啟時 fault.sling_cut.index 那一條有割傷）。割傷判可用：教學擋下並提示，練習／考核記 Critical；可用判不可用：記 Minor，報表註明。碰吊帶時緊急停止未按下：教學擋下並提示「先按遙控器的緊急停止，吊鉤才不會突然動」，練習／考核記 Major 不擋，同一次查看只記 1 次；站在吊鉤組旁查看時須已按緊急停止，且身體離吊鉤組外緣 ≥ 0.30 m，頭和身體不可進到吊鉤組正下方（D44 補充、model-spec v3.16 §7.11）","env.sling_2.inspected&&env.sling_2.verdict",
 periodic,STP_IN_01_RigOnStand,a23,148,3,"已查看：標籤額定荷重看得清楚；沒有割傷、磨損、燒傷，縫線完好；並判「可用／不可用」，判定和實際狀態一致（故障開啟時 fault.sling_cut.index 那一條有割傷）。割傷判可用：教學擋下並提示，練習／考核記 Critical；可用判不可用：記 Minor，報表註明。碰吊帶時緊急停止未按下：教學擋下並提示「先按遙控器的緊急停止，吊鉤才不會突然動」，練習／考核記 Major 不擋，同一次查看只記 1 次；站在吊鉤組旁查看時須已按緊急停止，且身體離吊鉤組外緣 ≥ 0.30 m，頭和身體不可進到吊鉤組正下方（D44 補充、model-spec v3.16 §7.11）","env.sling_3.inspected&&env.sling_3.verdict",
-periodic,STP_IN_01_RigOnStand,s1i1,149,3,"割傷吊帶改名 env.sling_rejected，已掛停用牌並在停用箱內；放回吊具架 env.rigging_rack 記 Major。【故障計時起點：s1 啟用】","env.sling_rejected.tagged&&env.sling_rejected.state=in_bin",v310
-periodic,STP_IN_01_RigOnStand,s1i2,149,3,"割傷吊帶改名 env.sling_rejected，已掛停用牌並在停用箱內；放回吊具架 env.rigging_rack 記 Major。【故障計時起點：s1 啟用】","env.sling_rejected.tagged&&env.sling_rejected.state=in_bin",v310
-periodic,STP_IN_01_RigOnStand,s1i3,149,3,"割傷吊帶改名 env.sling_rejected，已掛停用牌並在停用箱內；放回吊具架 env.rigging_rack 記 Major。【故障計時起點：s1 啟用】","env.sling_rejected.tagged&&env.sling_rejected.state=in_bin",v310
-periodic,STP_IN_01_RigOnStand,s1i4,149,3,"割傷吊帶改名 env.sling_rejected，已掛停用牌並在停用箱內；放回吊具架 env.rigging_rack 記 Major。【故障計時起點：s1 啟用】","env.sling_rejected.tagged&&env.sling_rejected.state=in_bin",v310
+periodic,STP_IN_01_RigOnStand,s1i1,149,3,"割傷吊帶改名 env.sling_rejected，已掛停用牌並在停用箱內；放回吊具架 env.rigging_rack 記 Major。【故障計時起點：s1 啟用】","env.sling_rejected.tagged&&env.sling_rejected.state=in_bin",
+periodic,STP_IN_01_RigOnStand,s1i2,149,3,"割傷吊帶改名 env.sling_rejected，已掛停用牌並在停用箱內；放回吊具架 env.rigging_rack 記 Major。【故障計時起點：s1 啟用】","env.sling_rejected.tagged&&env.sling_rejected.state=in_bin",
+periodic,STP_IN_01_RigOnStand,s1i3,149,3,"割傷吊帶改名 env.sling_rejected，已掛停用牌並在停用箱內；放回吊具架 env.rigging_rack 記 Major。【故障計時起點：s1 啟用】","env.sling_rejected.tagged&&env.sling_rejected.state=in_bin",
+periodic,STP_IN_01_RigOnStand,s1i4,149,3,"割傷吊帶改名 env.sling_rejected，已掛停用牌並在停用箱內；放回吊具架 env.rigging_rack 記 Major。【故障計時起點：s1 啟用】","env.sling_rejected.tagged&&env.sling_rejected.state=in_bin",
 periodic,STP_IN_01_RigOnStand,s2i1,150,3,"已回報（作業負責人回應「換備用吊帶，查看後再掛」）","rigging.cut_reported",b4c:holdpoint
 periodic,STP_IN_01_RigOnStand,s2i2,150,3,"已回報（作業負責人回應「換備用吊帶，查看後再掛」）","rigging.cut_reported",b4c:holdpoint
 periodic,STP_IN_01_RigOnStand,s2i3,150,3,"已回報（作業負責人回應「換備用吊帶，查看後再掛」）","rigging.cut_reported",b4c:holdpoint
 periodic,STP_IN_01_RigOnStand,s2i4,150,3,"已回報（作業負責人回應「換備用吊帶，查看後再掛」）","rigging.cut_reported",b4c:holdpoint
-periodic,STP_IN_01_RigOnStand,s3,151,3,"備用吊帶已查看並判可用；s2 未做就拿記 Major（吊具架在 crane 站伸手 0.43 m 可及）","env.sling_spare.inspected&&env.sling_spare.verdict=ok",v310
-periodic,STP_IN_01_RigOnStand,s4i1,152,2,"備用吊帶接手 env.sling_1，其餘 3 條不動。【故障計時終點：s4 完成】","env.sling_1.replaced",v310
-periodic,STP_IN_01_RigOnStand,s4i2,152,2,"備用吊帶接手 env.sling_2，其餘 3 條不動。【故障計時終點：s4 完成】","env.sling_2.replaced",v310
-periodic,STP_IN_01_RigOnStand,s4i3,152,2,"備用吊帶接手 env.sling_3，其餘 3 條不動。【故障計時終點：s4 完成】","env.sling_3.replaced",v310
-periodic,STP_IN_01_RigOnStand,s4i4,152,2,"備用吊帶接手 env.sling_4，其餘 3 條不動。【故障計時終點：s4 完成】","env.sling_4.replaced",v310
+periodic,STP_IN_01_RigOnStand,s3,151,3,"備用吊帶已查看並判可用；s2 未做就拿記 Major（吊具架在 crane 站伸手 0.43 m 可及）","env.sling_spare.inspected&&env.sling_spare.verdict=ok",
+periodic,STP_IN_01_RigOnStand,s4i1,152,2,"備用吊帶接手 env.sling_1，其餘 3 條不動。【故障計時終點：s4 完成】","env.sling_1.replaced",
+periodic,STP_IN_01_RigOnStand,s4i2,152,2,"備用吊帶接手 env.sling_2，其餘 3 條不動。【故障計時終點：s4 完成】","env.sling_2.replaced",
+periodic,STP_IN_01_RigOnStand,s4i3,152,2,"備用吊帶接手 env.sling_3，其餘 3 條不動。【故障計時終點：s4 完成】","env.sling_3.replaced",
+periodic,STP_IN_01_RigOnStand,s4i4,152,2,"備用吊帶接手 env.sling_4，其餘 3 條不動。【故障計時終點：s4 完成】","env.sling_4.replaced",
 periodic,STP_IN_01_RigOnStand,a3,153,3,"estop = false（教學提示解除；練習／考核不提示）","ctrl.crane.estop=false",
 periodic,STP_IN_01_RigOnStand,a4,154,3,"吊鉤 pivot ≥ 4.92（吊帶下端 ≥ 3.14，避開防墜門架頂 2.64；model-spec v3.17）；升到 hookYMax 5.850 自動停","part.crane.hook_y>=crane.empty_travel_min_y",
 periodic,STP_IN_01_RigOnStand,a,155,3,"與 COG 水平差 ≤ 5 cm；吊梁底面在弓頂上方 EX 0.55–0.75 m（D42：吊帶要鬆才掛得上吊耳；上限 = 拉直高度 − 0.06 m，以實測為準）","part.crane.hook_cog_offset_cm<=5&&part.crane.beam_above_pan_m>=crane.rig_height_lower_m&&part.crane.beam_above_pan_m<=crane.rig_height_upper_m",

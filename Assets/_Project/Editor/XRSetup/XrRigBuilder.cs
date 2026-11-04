@@ -234,7 +234,8 @@ namespace PantographSim.Editor.XR
             mech.SetLift(0f);
             // 第21項（增補 7）：StationSet.wrenchSweepTools 逐支讀 ToolDefinition（handleLengthM、socketIds）＋套筒目錄
             var wrench = new StationLayoutCheck.WrenchSweepInput { tools = StepJsonImporter.LoadTools().Append(ToolSocketSetup.LargeWrench).Where(t => t != null).ToList(), catalog = ToolSocketSetup.Catalog };
-            var check = StationLayoutCheck.CheckScene(stationSet, R1Data.RoofScene, points, T, PanGeometry.SweptFootprints(mech), wrench);
+            var check = StationLayoutCheck.CheckScene(stationSet, R1Data.RoofScene, points, T, PanGeometry.SweptFootprints(mech), wrench,
+                new StationLayoutCheck.InspectInput { rigging = R1Data.Rigging, clearance = R1Data.Crane.inspectClearanceM });   // v3.10 查看站間距
             mech.SetLift(lift);
             // 增補 4 第 9 點：摘要「N 過／M 待定／K 不合格」，有待定或不合格就不寫「全過」
             string summary = $"結果：{points.Length} 站，{check.Summary}" + (check.Ok && check.pending.Count == 0 ? "（全過）" : "");

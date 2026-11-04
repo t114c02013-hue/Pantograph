@@ -49,7 +49,108 @@ MonoBehaviour:
   requiredToolId: 
   completion:
     rid: 1000
-  errors: []
+  errors:
+  - errorId: ERR_Sling_CutJudgedUsable
+    severity: 2
+    what: "\u5272\u50B7\u7684\u540A\u5E36\u5224\u6210\u53EF\u7528\uFF08\u6216\u540A\u639B\u6307\u63EE\u6838\u5C0D\u6642\u5272\u50B7\u540A\u5E36\u9084\u5728\u540A\u6881\u4E0A\uFF09\u3002"
+    why: "\u5272\u50B7\u7684\u540A\u5E36\u540A\u91CD\u6642\u6703\u65B7\uFF0C\u96C6\u96FB\u5F13\u6574\u7D44\u6389\u4E0B\u4F86\u3002"
+    fix: "\u5272\u50B7\u3001\u78E8\u640D\u3001\u71D2\u50B7\u3001\u7E2B\u7DDA\u65B7\u7684\u540A\u5E36\u4E00\u5F8B\u5224\u300C\u4E0D\u53EF\u7528\u300D\uFF0C\u639B\u505C\u7528\u724C\u653E\u9032\u505C\u7528\u7BB1\uFF0C\u63DB\u5099\u7528\u540A\u5E36\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - rigging.cut_judged_usable
+    - rigging.cut_in_use&&procedure.current=STP_LF_01_PreLift
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
+  - errorId: ERR_Sling_FalseReject
+    severity: 0
+    what: "\u6C92\u6709\u7834\u640D\u7684\u540A\u5E36\u5224\u6210\u4E0D\u53EF\u7528\u3002"
+    why: "\u597D\u7684\u540A\u5E36\u88AB\u505C\u7528\uFF0C\u8981\u591A\u63DB\u4E00\u6B21\u540A\u5E36\uFF0C\u4F5C\u696D\u62D6\u6642\u9593\u3002"
+    fix: "\u770B\u6E05\u695A\u6A19\u7C64\u984D\u5B9A\u8377\u91CD\u8207\u6709\u6C92\u6709\u5272\u50B7\u3001\u78E8\u640D\u3001\u71D2\u50B7\u3001\u7E2B\u7DDA\u65B7\uFF0C\u518D\u5224\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - rigging.false_reject
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
+  - errorId: ERR_Sling_NoReport
+    severity: 1
+    what: "\u540A\u5E36\u5272\u50B7\u505C\u7528\u5F8C\u6C92\u6709\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\u5C31\u62FF\u5099\u7528\u540A\u5E36\u3002"
+    why: "\u4F5C\u696D\u8CA0\u8CAC\u4EBA\u4E0D\u77E5\u9053\u540A\u5177\u6709\u554F\u984C\uFF0C\u6C92\u8FA6\u6CD5\u5B89\u6392\u67E5\u770B\u8207\u5F8C\u7E8C\u8655\u7406\u3002"
+    fix: "\u5148\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\u300C\u540A\u5E36\u5272\u50B7\u505C\u7528\u300D\uFF0C\u7B49\u56DE\u61C9\u518D\u53BB\u62FF\u5099\u7528\u540A\u5E36\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - rigging.spare_taken_unreported
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
+  - errorId: ERR_Sling_CutReturnedToRack
+    severity: 1
+    what: "\u5272\u50B7\u7684\u540A\u5E36\u653E\u56DE\u540A\u5177\u67B6\u3002"
+    why: "\u4E0B\u4E00\u500B\u4EBA\u6703\u62FF\u5230\u5272\u50B7\u7684\u540A\u5E36\u4F86\u7528\u3002"
+    fix: "\u639B\u505C\u7528\u724C\uFF0C\u653E\u9032\u7D05\u6846\u505C\u7528\u7BB1\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - rigging.cut_returned_to_rack
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
+  - errorId: ERR_Sling_TouchWithoutEStop
+    severity: 1
+    what: "\u78B0\u540A\u5177\u6642\u9059\u63A7\u5668\u7684\u7DCA\u6025\u505C\u6B62\u6C92\u6309\u4E0B\u3002"
+    why: "\u540A\u9264\u53EF\u80FD\u88AB\u8AA4\u6309\u800C\u7A81\u7136\u79FB\u52D5\uFF0C\u593E\u5230\u624B\u6216\u649E\u5230\u982D\u3002"
+    fix: "\u78B0\u540A\u9264\u3001\u540A\u6881\u3001\u540A\u5E36\u4E4B\u524D\u5148\u6309\u9059\u63A7\u5668\u7684\u7DCA\u6025\u505C\u6B62\uFF0C\u505A\u5B8C\u518D\u89E3\u9664\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - rigging.touch_without_estop
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: 
     why: 

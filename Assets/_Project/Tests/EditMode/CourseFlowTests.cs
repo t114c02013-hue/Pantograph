@@ -147,6 +147,8 @@ namespace PantographSim.Tests
                 for (int i = 0; i < score.Length && !s.GetBool(id + ".wrapped"); i++)
                     if (score[i] == '1') DirtMask.Clean(s, id, (i % def.cols + 0.5f) / def.cols, (i / def.cols + 0.5f) / def.rows, def.rows, true, score, def.faceMask[k], def.cleanRatio);
             }
+            static readonly System.Text.RegularExpressions.Regex SlingVerdict = new System.Text.RegularExpressions.Regex(@"^(env\.sling_(?:\d|spare))\.verdict(?:=ok)?$");
+            static readonly System.Text.RegularExpressions.Regex SlingReplaced = new System.Text.RegularExpressions.Regex(@"^env\.sling_(\d)\.replaced$");
             static readonly System.Text.RegularExpressions.Regex ViewedSlot = new System.Text.RegularExpressions.Regex(@"^env\.tool_bag\.slot_(\d+)\.viewed$");
             static readonly string[] Derived = { ToolCountLogic.TrayCount, ToolCountLogic.Leftover, ToolCountLogic.StripCountOk, FastenerLogic.BoltPouchCount, "env.bolt_tray_L.bolts", "env.bolt_tray_R.bolts" };
             bool counting;
@@ -271,6 +273,19 @@ namespace PantographSim.Tests
                     else if (part.StartsWith(CabControlLogic.Breaker + "=")) { if (s.Get(CabControlLogic.Breaker, CabControlLogic.On) != part.Substring(CabControlLogic.Breaker.Length + 1)) Assert.IsNull(CabControlLogic.ToggleBreaker(s), part); }
                     else if (part.StartsWith(CabControlLogic.CylinderPower + "=")) { if (s.Get(CabControlLogic.CylinderPower, CabControlLogic.On) != part.Substring(CabControlLogic.CylinderPower.Length + 1)) Assert.IsNull(CabControlLogic.ToggleCylinderPower(s), part); }
                     else if (part == CabControlLogic.RaiseTestDone) CabControlLogic.PressRaise(s);   // 控制盤 CabSwitch 呼叫的同一段邏輯
+                    else if (SlingVerdict.Match(part) is var sv && sv.Success)   // v3.10：查看後判可用／不可用（SlingLogic，割傷那一條判不可用）
+                    {
+                        string id = sv.Groups[1].Value; int n = SlingLogic.Number(id);
+                        Assert.IsNull(SlingLogic.Verdict(s, id, n == 0 || !s.GetBool(SlingLogic.CutKey(n)), null), part);
+                    }
+                    else if (part == SlingLogic.Rejected + ".tagged")   // s1：取下割傷吊帶、拿停用牌、掛上（SlingRig 呼叫的同一段）
+                    {
+                        int n = (int)s.GetFloat(SlingLogic.Index);
+                        Assert.IsNull(SlingLogic.Detach(s, n), part); Assert.IsNull(SlingLogic.TakeTag(s), part); Assert.IsNull(SlingLogic.HangTag(s, n), part);
+                    }
+                    else if (part == SlingLogic.Rejected + ".state=" + SlingLogic.InBin) Assert.IsNull(SlingLogic.PutInBin(s), part);
+                    else if (part == SlingLogic.Spare + ".inspected") { s.SetBool(part, true); Assert.IsNull(SlingLogic.TakeSpare(s), part); }   // s3：查看並拿備用吊帶
+                    else if (SlingReplaced.Match(part) is var sr && sr.Success) Assert.IsNull(SlingLogic.HangSpare(s, int.Parse(sr.Groups[1].Value)), part);   // s4
                     else if (part == HarnessLogic.Stowed) { if (!s.GetBool(part)) Command(SimIds.ToolHarness, "stow"); }   // D31 胸前扣環
                     else if (part == HarnessLogic.Stowed + "=false") Command(SimIds.ToolHarness, "take");
                     else if (part.StartsWith(SimIds.ActiveTool + "=")) Hold(part.Substring(SimIds.ActiveTool.Length + 1));
@@ -329,7 +344,9 @@ namespace PantographSim.Tests
                 s = new SimState(bus);
                 mech = new Mechanisms(bus, s);   // 先接機制（開場狀態），再建流程
                 PantographSim.Worksite.CourseApplier.ApplyInitialStates(AssetDatabase.LoadAssetAtPath<CourseDef>(StepsCsvImporter.CourseDefPath(course)), s);   // 課程的開場狀態（主斷路器、電動缸電源開著）
-                foreach (var k in faults) s.SetBool(k, true);   // D43：教官打開的可選故障
+                foreach (var k in faults) { int eq = k.IndexOf('='); if (eq > 0) s.Set(k.Substring(0, eq), k.Substring(eq + 1)); else s.SetBool(k, true); }   // D43：教官打開的可選故障（v3.10：「鍵=值」預設故障參數）
+                SlingLogic.Setup(s, new System.Random(1));   // v3.10：吊帶割傷故障（App 在開始訓練時呼叫的同一段）
+                bus.Subscribe<StepStarted>(e => SlingLogic.OnStepStarted(s, e.stepId));
                 runner = new ProcedureRunner(prc, bus, s);
             }
 
@@ -439,6 +456,35 @@ namespace PantographSim.Tests
                 Assert.AreEqual(ToolRulesDef.Load().meggerReadingMOhm, g.s.GetFloat(MeggerLogic.Reading));
             }
             finally { g.Dispose(); }
+        }
+
+        /// <summary>v3.10：定期課打開「吊帶割傷」，在 RM（SI_06 平台查看）或 IN（IN_01 台架旁查看）各跑一次到結算：只做抽到那一條的分支（s1–s4），割傷吊帶停用進停用箱、備用吊帶接手，正確操作不記吊帶類錯誤。</summary>
+        [TestCase("RM", 2)]
+        [TestCase("IN", 3)]
+        public void Periodic_FaultSlingCut_RunsBranchToSettlement(string where, int index)
+        {
+            var f = new Flow("periodic", SlingLogic.Fault, SlingLogic.Where + "=" + where, SlingLogic.Index + "=" + index);
+            var det = new ErrorDetector(f.runner, f.bus, f.s);
+            var scoring = new PantographSim.Training.Scoring(f.bus, f.s);
+            var errors = new List<ErrorDetected>(); SessionResult? got = null;
+            f.bus.Subscribe<ErrorDetected>(e => errors.Add(e)); f.bus.Subscribe<SessionResult>(r => got = r);
+            try
+            {
+                Assert.AreEqual(where == "RM", f.s.GetBool(SlingLogic.CutKey(index)), "RM 開場就割傷，IN 到 IN_01 才有");
+                scoring.Start(0f);
+                f.Run();
+                Assert.IsEmpty(f.autoCompleted, string.Join("\n", f.autoCompleted));
+                Assert.IsTrue(got.HasValue, "要發結算");
+                string step = where == "RM" ? "STP_SI_06_RoofEntry" : "STP_IN_01_RigOnStand", other = where == "RM" ? "STP_IN_01_RigOnStand" : "STP_SI_06_RoofEntry";
+                foreach (var sub in new[] { "s1i" + index, "s4i" + index }) Assert.IsTrue(f.driven.Contains(step + " " + sub), $"{step} {sub} 要走 SlingLogic");
+                Assert.IsFalse(f.driven.Any(x => x.StartsWith(other + " s")), "另一段的分支跳過");
+                Assert.IsFalse(f.driven.Any(x => x.StartsWith(step + " s1i") && x != step + " s1i" + index), "只做抽到的那一條");
+                Assert.AreEqual(SlingLogic.InBin, f.s.Get(SlingLogic.Rejected + ".state"));
+                Assert.IsTrue(f.s.GetBool(SlingLogic.ReplacedKey(index)));
+                Assert.IsFalse(f.s.GetBool(SlingLogic.CutInUse), "割傷吊帶不在吊梁上");
+                Assert.IsEmpty(errors.Where(e => e.errorId.StartsWith("ERR_Sling_")).Select(e => e.errorId).ToList(), "正確操作不記吊帶類錯誤");
+            }
+            finally { scoring.Dispose(); det.Dispose(); f.Dispose(); }
         }
 
         [TestCase("periodic")]

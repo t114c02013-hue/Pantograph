@@ -126,6 +126,7 @@ namespace PantographSim.Data
         [Tooltip("本輪天車停的位置：橋 Z、小車 X")] public float craneParkZ = 12f, craneParkTrolleyX = 0f;
         [Tooltip("吊鉤最高點（離吊車橋的距離）")] public float hookTopBelowBridge = 1.2f;
         [Tooltip("吊具架（維修區地面）")] public Vector2 slingRackXZ = new Vector2(-6.5f, -3.8f);
+        [Tooltip("v3.10（D44、model-spec v3.17）：平台吊具架 env.rigging_rack 中心（只在定期課；備用吊帶在架中間、停用牌在架左側）、紅框停用箱 env.sling_reject_bin 底面中心")] public Vector3 riggingRackPos = new Vector3(-2.30f, 1.20f, -3.92f), slingRejectBinPos = new Vector3(-3.10f, 0f, -3.85f);
 
         [Header("R1.5a a6（試玩回饋、D30、D32、日常滑板、車頂拆裝座）")]
         [Tooltip("「去駕駛室」地面光圈 mk.platform.to_cab（XZ、半徑）；標記，不是站點")] public Vector2 toCabMarkerXZ = new Vector2(-2.20f, -0.45f);

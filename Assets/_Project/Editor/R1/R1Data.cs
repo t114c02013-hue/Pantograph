@@ -199,6 +199,18 @@ namespace PantographSim.Editor
                 s.zoneId = floor == StationFloor.Ground ? ZoneDef.Maintenance : ZoneDef.Arrival;
                 EditorUtility.SetDirty(s);
             }
+            // v3.10：吊鉤組半徑（上一次建置用頂點量的 RiggingDef.hookBlockRadiusM）> 0.17 m 時 rigging_w 離吊鉤組外緣不到 inspectClearanceM：
+            // 沿 Z 往離開平台查看位置的方向移到剛好 inspectClearanceM（X 不動）。步驟表寫「往 −Z」，但 −Z 會更靠近查看位置 (−2.56, −3.55)，所以照距離規則移。
+            {
+                var rw = set.Find("tp.platform.rigging_w"); var g = Rigging;
+                float need = g.hookBlockRadiusM + Crane.inspectClearanceM;
+                var w = rw.WorldXZ(d); var pose = g.inspectPosePlatformXZ;
+                if ((w - pose).magnitude < need - 1e-4f)
+                {
+                    float dx = w.x - pose.x, nz = pose.y + Mathf.Sign(w.y - pose.y) * Mathf.Sqrt(Mathf.Max(0f, need * need - dx * dx));
+                    rw.positionXZ = new Vector2(rw.positionXZ.x, Mathf.Ceil(nz * 1000f) / 1000f); EditorUtility.SetDirty(rw);
+                }
+            }
             foreach (var (id, label, z) in new[] { ("tp.platform.parts", "備品架前（日常）", 1.60f), ("tp.platform.scrap", "待報廢箱前（日常）", 2.85f) })
             {
                 var s = Add(id, label, StationFloor.Platform);

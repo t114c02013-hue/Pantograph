@@ -110,6 +110,7 @@ namespace PantographSim.App
             foreach (var f in faults) state.SetBool(f.key, f.defaultOn);
             state.Set("app.faults.list", string.Join(";", faults.Select(f => f.key + "|" + f.title)));
             bus.Subscribe<ActionRequested>(OnRequest);
+            bus.Subscribe<StepStarted>(e => { if (!e.isReplay) SlingLogic.OnStepStarted(state, e.stepId); });   // v3.10：where＝IN 的割傷到 IN_01 才出現
             if (SimSession.IsReplay) SetupReplay();
         }
 
@@ -190,6 +191,7 @@ namespace PantographSim.App
                 var scenario = scenarios.FirstOrDefault(s => s.scenarioId == (parts.Length > 1 ? parts[1] : "SCN_Default")) ?? scenarios.FirstOrDefault();
                 mode.Begin(parts[0] == "practice" ? TrainingMode.Practice : TrainingMode.Tutorial, scenario);
                 scoring.Start(Time.time);
+                SlingLogic.Setup(state, new System.Random());   // v3.10：吊帶割傷故障（教官開了才抽 RM／IN 與第幾條）
                 // 等機構套用情境姿態、檢測點寫出實際距離後才開始判定（否則第一個小動作會用到上一個姿態的距離）
                 StartCoroutine(StartRunnerAfterPoseSettles());
             }

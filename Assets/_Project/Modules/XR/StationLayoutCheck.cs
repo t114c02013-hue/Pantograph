@@ -73,6 +73,12 @@ namespace PantographSim.XR
         /// 「0.4 m 內沒有實體碰撞體」只算障礙物：站點要操作的互動物件（ISimObject）不算，螺栓盤另有 0.30–0.50 m 的規則。
         /// </summary>
         public static SceneResult CheckScene(StationSet set, RoofSceneDef d, IEnumerable<XrTeleportPoint> points, System.Func<string, Transform> find, IDictionary<string, Bounds> panFootprints, WrenchSweepInput wrench = null)
+            => CheckScene(set, d, points, find, panFootprints, wrench, null);
+
+        /// <summary>v3.10（D44、model-spec v3.17 §7.11）：查看站間距檢查要的資料——RiggingDef 的查看位置與建置量的吊鉤組半徑、CraneProfile.inspectClearanceM。</summary>
+        public class InspectInput { public RiggingDef rigging; public float clearance; }
+
+        public static SceneResult CheckScene(StationSet set, RoofSceneDef d, IEnumerable<XrTeleportPoint> points, System.Func<string, Transform> find, IDictionary<string, Bounds> panFootprints, WrenchSweepInput wrench, InspectInput inspect)
         {
             var r = new SceneResult();
             Physics.SyncTransforms();
@@ -155,11 +161,25 @@ namespace PantographSim.XR
             if (Mathf.Abs(d.platformFloorY - d.roofFloorY) > set.maxFloorStep) r.bad.Add($"平台與車頂高度差 {Mathf.Abs(d.platformFloorY - d.roofFloorY):0.00} m 超過 {set.maxFloorStep} m");
             if (d.platformGap > set.maxPlatformGap) r.bad.Add($"平台到車頂間隙 {d.platformGap:0.00} m 超過 {set.maxPlatformGap} m");
             CheckA6(set, d, pts, find, r, wrench);
+            if (inspect != null && inspect.rigging != null) InspectStations(pts, inspect, r);
             ApplyPending(set, r);
             return r;
         }
 
         /// <summary>◇ 待定（增補 6 第 1 點）：不合格項目的（檢查項, 物件 ID）和 PendingRuling 完全相等才改列待定；缺裁定紀錄的那筆本身就算不合格。</summary>
+        /// <summary>v3.10：平台吊帶查看站（rigging_w、crane）離平台查看位置、台架旁查看站（rig_e、rig_w）離地面查看位置的吊鉤組外緣 ≥ clearance（站點＝人的位置）。</summary>
+        static void InspectStations(IDictionary<string, XrTeleportPoint> pts, InspectInput inp, SceneResult r)
+        {
+            var g = inp.rigging;
+            foreach (var (id, pose, where) in new[] { ("tp.platform.rigging_w", g.inspectPosePlatformXZ, "平台"), ("tp.platform.crane", g.inspectPosePlatformXZ, "平台"),
+                                                      ("tp.stand.rig_e", g.inspectPoseGroundXZ, "地面"), ("tp.stand.rig_w", g.inspectPoseGroundXZ, "地面") })
+            {
+                if (!pts.TryGetValue(id, out var p)) { Miss(r, "v3.10", id); continue; }
+                float edge = new Vector2(p.transform.position.x - pose.x, p.transform.position.z - pose.y).magnitude - g.hookBlockRadiusM;
+                Pend(r, "v3.10", $"{id} 離{where}查看位置的吊鉤組外緣 {edge:0.000} m（吊鉤組半徑 {g.hookBlockRadiusM:0.000}，要 ≥ {inp.clearance:0.00}）", edge >= inp.clearance - Eps);
+            }
+        }
+
         public static void ApplyPending(StationSet set, SceneResult r)
         {
             foreach (var rule in set.pendingRulings ?? new PendingRuling[0])

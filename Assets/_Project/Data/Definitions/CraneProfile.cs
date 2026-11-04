@@ -30,6 +30,7 @@ namespace PantographSim.Data
         [Tooltip("左握把在掛座這個半徑（m）內才是拿起／掛回")] public float pendantDockRadius = 0.3f;
         [Tooltip("RT_01 a 吊鉤停放區（part.crane.hook.parked）：以 Crane_ParkPose 為中心的水平半徑、吊鉤 pivot 比停放高度低多少以內（m，示例值）")] public float parkZoneRadius = 0.3f, parkZoneBelowY = 0.1f;
         [Tooltip("v3.10（model-spec v3.17）：空吊具水平移動前吊鉤 pivot 要升到這個高度以上（吊帶下端 ≥ 3.14，避開防墜門架頂 2.64）；SI_06 a11、IN_01 a4 讀 crane.empty_travel_min_y")] public float emptyTravelMinHookY = 4.92f;
+        [Tooltip("v3.10（D44 補充、model-spec v3.16 §7.11）：查看吊具時頭離吊鉤組外緣（頂點水平範圍）至少這麼遠（m），也不能在吊鉤組正下方")] public float inspectClearanceM = 0.30f;
         [Tooltip("遙控器按鍵的中文標籤（按鍵節點名 → 文字）")] public string[] buttonLabels =
         {
             "Btn_Up=上升", "Btn_Down=下降", "Btn_East=橫行 +X", "Btn_West=橫行 −X", "Btn_North=走行 +Z", "Btn_South=走行 −Z",

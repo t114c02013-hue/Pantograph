@@ -141,7 +141,7 @@ namespace PantographSim.Parts.Mechanism
             bool lowTravel = load == null && (axis == CraneAxis.Traverse || axis == CraneAxis.Travel) && hookBlock.position.y < profile.emptyTravelMinHookY - 1e-4f;
             if (lowTravel && s.Get("training.mode") == "tutorial")
             {
-                if (cmd != lastLowTravelCmd) s.Set("ui.toast", "空吊梁先升到上限再水平移動，吊帶才不會勾到防墜門架");
+                if (cmd != lastLowTravelCmd) s.Set("ui.toast", "先把吊梁升到最高再移動");
                 axis = CraneAxis.None; dir = 0; lowTravel = false;
             }
             lastLowTravelCmd = cmd;
@@ -217,11 +217,38 @@ namespace PantographSim.Parts.Mechanism
                 if (lb.HasValue) F("part.crane.operator_distance_m", CraneLogic.HorizontalDistance(lb.Value, head.Value));
             }
             B("part.crane.empty_hook_moving", moving && !airborne);
+            // v3.10（D44）：查看吊具時頭到吊鉤組外緣（水平）的距離、是否在吊鉤組正下方（吊鉤組＝吊鉤節點下、吊梁以外的 Renderer）
+            var hb = HookBlockXZ();
+            float edge = head.HasValue ? DistanceToRect(hb, new Vector2(head.Value.x, head.Value.z)) : float.MaxValue;
+            B("part.crane.under_hook_clear", !head.HasValue || edge > 0f || head.Value.y > hookBlock.position.y);
+            B("part.crane.hook_block_clear", edge >= profile.inspectClearanceM - 1e-4f || (head.HasValue && head.Value.y > hookBlock.position.y));
             // R1.5b b4（RM_05 c）：吊鉤移動時人不在吊鉤下方（頭的水平投影離吊鉤超過紅區外擴）
             B("part.crane.person_clear", !head.HasValue || new Vector2(head.Value.x - hp.x, head.Value.z - hp.z).magnitude > profile.redZoneMargin);
             if (airborne && !liftOffHook.HasValue) liftOffHook = hp;
             if (!airborne) liftOffHook = null;
             F("part.crane.horizontal_since_lift_m", liftOffHook.HasValue ? new Vector2(hp.x - liftOffHook.Value.x, hp.z - liftOffHook.Value.z).magnitude : 0f);
+        }
+
+        Renderer[] hookRenderers;
+        /// <summary>吊鉤組的水平範圍（xMin, zMin, xMax, zMax）；沒有 Renderer＝吊鉤節點那一點。</summary>
+        Vector4 HookBlockXZ()
+        {
+            if (hookRenderers == null) hookRenderers = hookBlock.GetComponentsInChildren<Renderer>(true).Where(r => swayPivot == null || !r.transform.IsChildOf(swayPivot)).ToArray();
+            var p = hookBlock.position;
+            var v = new Vector4(p.x, p.z, p.x, p.z);
+            foreach (var r in hookRenderers)
+            {
+                if (r == null || !r.enabled) continue;
+                var b = r.bounds;
+                v = new Vector4(Mathf.Min(v.x, b.min.x), Mathf.Min(v.y, b.min.z), Mathf.Max(v.z, b.max.x), Mathf.Max(v.w, b.max.z));
+            }
+            return v;
+        }
+
+        static float DistanceToRect(Vector4 r, Vector2 p)
+        {
+            float dx = Mathf.Max(r.x - p.x, 0f, p.x - r.z), dz = Mathf.Max(r.y - p.y, 0f, p.y - r.w);
+            return Mathf.Sqrt(dx * dx + dz * dz);
         }
 
         void Apply(float trolleyX, float hookY, float bridgeZ)

@@ -126,10 +126,14 @@ namespace PantographSim.Tests
         {
             Load();
             var table = AssetDatabase.LoadAssetAtPath<ToolSlotTable>("Assets/_Project/Modules/Worksite/Data/ToolSlotTable.asset");
-            var pending = new HashSet<string>(StepsCsvImporter.LoadTables().pendingTargets.Select(p => p.id));   // 還沒做的手持物（例 v3.10 停用牌）列在 pendingTargets，有 owner
-            foreach (var e in expanded)
-                foreach (var t in e.toolId.Split(';').Select(x => x.Trim()).Where(x => x.Length > 0))
-                    Assert.IsTrue(table.FindTool(t) != null || pending.Contains(t), $"{e}：工具 {t} 不存在");
+            var pending = new HashSet<string>(StepsCsvImporter.LoadTables().pendingTargets.Select(p => p.id));   // 還沒做的手持物列在 pendingTargets，有 owner
+            StationTests.WithScene(scene =>
+            {
+                var sceneIds = new HashSet<string>(StepsCsvImporter.SceneIds(scene));   // 現場拿在手上的東西（例 v3.10 停用牌 env.tag_out_of_service）不是工具袋的工具
+                foreach (var e in expanded)
+                    foreach (var t in e.toolId.Split(';').Select(x => x.Trim()).Where(x => x.Length > 0))
+                        Assert.IsTrue(table.FindTool(t) != null || pending.Contains(t) || (t.StartsWith("env.") && sceneIds.Contains(t)), $"{e}：工具 {t} 不存在");
+            });
         }
 
         // ---------- 第 2 部分：完成條件對應、目標、產生的資產 ----------

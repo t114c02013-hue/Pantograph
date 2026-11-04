@@ -22,7 +22,7 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | b4:p5 | 兩門課跑到結算（b4 第 5 部分；v3.10 做完時結案） |
 | v310 | steps-v6 v3.10（吊帶割傷故障、D44 平台查看；這一段做完時清空） |
 
-## 小動作（共 71 列）
+## 小動作（共 51 列）
 
 | 步驟 | 小動作 | 課程 | 完成條件 | owner |
 |---|---|---|---|---|
@@ -77,57 +77,20 @@ ImporterTests.PendingMechanisms_ListedInStubsDoc_EachMapsToItem 檢查這份清�
 | STP_WC_02_LeaveRoof | c | daily | `player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use` | b4d |
 | STP_WC_02_LeaveRoof | c | periodic | `player.zone=platform&&harness.hooks_stowed&&rack.slot_4=in_use` | b4d |
 | STP_RT_02_InsulationTest | r3h | periodic | `player.zone=platform&&harness.hooks_stowed` | b4d |
-| STP_SI_06_RoofEntry | a6 | periodic | `part.crane.inspect_pose=platform&&part.crane.under_hook_clear` | v310 |
-| STP_SI_06_RoofEntry | s1i1 | periodic | `env.sling_rejected.tagged&&env.sling_rejected.state=in_bin` | v310 |
-| STP_SI_06_RoofEntry | s1i2 | periodic | `env.sling_rejected.tagged&&env.sling_rejected.state=in_bin` | v310 |
-| STP_SI_06_RoofEntry | s1i3 | periodic | `env.sling_rejected.tagged&&env.sling_rejected.state=in_bin` | v310 |
-| STP_SI_06_RoofEntry | s1i4 | periodic | `env.sling_rejected.tagged&&env.sling_rejected.state=in_bin` | v310 |
-| STP_SI_06_RoofEntry | s3 | periodic | `env.sling_spare.inspected&&env.sling_spare.verdict=ok` | v310 |
-| STP_SI_06_RoofEntry | s4i1 | periodic | `env.sling_1.replaced` | v310 |
-| STP_SI_06_RoofEntry | s4i2 | periodic | `env.sling_2.replaced` | v310 |
-| STP_SI_06_RoofEntry | s4i3 | periodic | `env.sling_3.replaced` | v310 |
-| STP_SI_06_RoofEntry | s4i4 | periodic | `env.sling_4.replaced` | v310 |
-| STP_IN_01_RigOnStand | a0 | periodic | `part.crane.inspect_pose=ground&&part.crane.under_hook_clear` | v310 |
-| STP_IN_01_RigOnStand | s1i1 | periodic | `env.sling_rejected.tagged&&env.sling_rejected.state=in_bin` | v310 |
-| STP_IN_01_RigOnStand | s1i2 | periodic | `env.sling_rejected.tagged&&env.sling_rejected.state=in_bin` | v310 |
-| STP_IN_01_RigOnStand | s1i3 | periodic | `env.sling_rejected.tagged&&env.sling_rejected.state=in_bin` | v310 |
-| STP_IN_01_RigOnStand | s1i4 | periodic | `env.sling_rejected.tagged&&env.sling_rejected.state=in_bin` | v310 |
-| STP_IN_01_RigOnStand | s3 | periodic | `env.sling_spare.inspected&&env.sling_spare.verdict=ok` | v310 |
-| STP_IN_01_RigOnStand | s4i1 | periodic | `env.sling_1.replaced` | v310 |
-| STP_IN_01_RigOnStand | s4i2 | periodic | `env.sling_2.replaced` | v310 |
-| STP_IN_01_RigOnStand | s4i3 | periodic | `env.sling_3.replaced` | v310 |
-| STP_IN_01_RigOnStand | s4i4 | periodic | `env.sling_4.replaced` | v310 |
 
 ## 場景裡還沒有的目標（ConditionTables.json 的 pendingTargets）
 
 | 目標 | owner |
 |---|---|
-| ip.sling_1.top_eye | v310 |
-| ip.sling_1.tag | v310 |
-| ip.lifting_beam.eye_1 | v310 |
-| ip.sling_2.top_eye | v310 |
-| ip.sling_2.tag | v310 |
-| ip.lifting_beam.eye_2 | v310 |
-| ip.sling_3.top_eye | v310 |
-| ip.sling_3.tag | v310 |
-| ip.lifting_beam.eye_3 | v310 |
-| ip.sling_4.top_eye | v310 |
-| ip.sling_4.tag | v310 |
-| ip.lifting_beam.eye_4 | v310 |
-| env.sling_reject_bin | v310 |
-| env.rigging_rack | v310 |
-| env.sling_spare | v310 |
-| env.tag_out_of_service | v310 |
 | npc.work_leader | b4c:holdpoint |
 | npc.guard | b4c:holdpoint |
 | npc.rigging_lead | b4c:holdpoint |
 | npc.inspector | b4c:holdpoint |
 | env.ppe_station | b4c:ppe |
-| Crane_HookBlock/Hook_Latch | b4:p5 |
 | consumable.carbon_strip | b4c:spare_target |
 | consumable.carbon_strip.measure_mid | b4c:spare_target |
 
-## 錯誤規則的觸發條件還沒做（Assets/_Project/Data/Source/ErrorRules.json 的 owner，共 27 條）
+## 錯誤規則的觸發條件還沒做（Assets/_Project/Data/Source/ErrorRules.json 的 owner，共 22 條）
 
 ErrorRuleTests.PendingTriggers_ListedInStubsDoc 檢查兩邊一致。觸發做好時把 owner 清空，再刪掉這裡那一列。
 
@@ -155,11 +118,6 @@ ErrorRuleTests.PendingTriggers_ListedInStubsDoc 檢查兩邊一致。觸發做�
 | ERR_SI02_RaiseSwitchUnlocked | n/a | Critical |
 | ERR_Crane_RiggedOnArm | R2 | Critical |
 | ERR_IN09_Misaligned | R2 | Major |
-| ERR_Sling_CutJudgedUsable | v310 | Critical |
-| ERR_Sling_CutReturnedToRack | v310 | Major |
-| ERR_Sling_FalseReject | v310 | Minor |
-| ERR_Sling_NoReport | v310 | Major |
-| ERR_Sling_TouchWithoutEStop | v310 | Major |
 
 ## 扭力扳手選套筒（b4c:torque_socket，軟體工程裁定 2026-11-03）
 

@@ -23,7 +23,7 @@
       "onPass": [ { "stepId": "STP_CSR_05_Decide", "key": "workorder.decision", "value": "pass", "jumpTo": "STP_IN_01_RigOnStand" } ],
       "liftCapAboveO": 0, "contactGapM": 0, "craneParked": false,
       "initialStates": ["cab.breaker=on", "cab.cylinder_power=on"],
-      "faults": [ { "key": "fault.insulator_dirty", "title": "可選故障：絕緣子髒汙", "defaultOn": false } ]
+      "faults": [ { "key": "fault.insulator_dirty", "title": "可選故障：絕緣子髒汙", "defaultOn": false }, { "key": "fault.sling_cut", "title": "可選故障：吊帶割傷（RM／IN 與第幾條開場隨機）", "defaultOn": false } ]
     },
     {
       "courseId": "daily",
@@ -36,6 +36,10 @@
         { "id": "name:BoltTray_R_Support", "anchor": "", "active": true },
         { "id": "env.parts_tray", "anchor": "Anchor_ScrapBox_Daily", "active": true },
         { "id": "name:PartsTray_Support", "anchor": "", "active": false },
+        { "id": "name:ENV_RiggingRack", "anchor": "", "active": false },
+        { "id": "name:SpareSling", "anchor": "", "active": false },
+        { "id": "name:OutOfServiceTag", "anchor": "", "active": false },
+        { "id": "name:ENV_SlingRejectBin", "anchor": "", "active": false },
         { "id": "name:SpareShelf", "anchor": "Anchor_SpareShelf_Daily", "active": true },
         { "id": "name:SpareShelf_Support", "anchor": "", "active": false },
         { "id": "env.roof_strip_mat", "anchor": "", "active": true },

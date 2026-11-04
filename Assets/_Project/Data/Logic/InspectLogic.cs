@@ -19,6 +19,8 @@ namespace PantographSim.Data
             if (hover != id) return (hover, 0f);
             if (string.IsNullOrEmpty(hover) || rules == null || !rules.dwellInspectIds.Contains(hover)) return (hover, t);
             float before = t; t += dt;
+            if (before < rules.inspectDwellSeconds && t >= rules.inspectDwellSeconds && SlingLogic.NearHook(hover) && SlingLogic.Touch(s) != null)
+                return (hover, 0f);   // v3.10（D44）：吊鉤組旁的吊具——位置不對或教學沒按急停就不算看過，重新指著再看一次
             if (before < rules.inspectDwellSeconds && t >= rules.inspectDwellSeconds)
                 s.Batch(() =>
                 {
@@ -28,17 +30,7 @@ namespace PantographSim.Data
             return (hover, t);
         }
 
-        /// <summary>吊帶判定：ok＝可用。對不對讀 RiggingDef.defectiveSlings（有割傷＝不合格）。</summary>
-        public static void SlingVerdict(ISimState s, string slingId, bool ok, RiggingDef def)
-        {
-            if (!slingId.StartsWith(SlingPrefix) || !int.TryParse(slingId.Substring(SlingPrefix.Length), out int n)) return;
-            bool defective = def != null && Array.IndexOf(def.defectiveSlings, n) >= 0;
-            s.Batch(() =>
-            {
-                s.Set(slingId + ".verdict", ok ? "ok" : "ng");
-                s.SetBool(slingId + ".verdict_correct", ok != defective);
-                s.Set(SlingVerdictUi, "");
-            });
-        }
+        /// <summary>吊帶判定：ok＝可用。v3.10：讀吊帶實際狀態（故障割傷 env.sling_n.cut，或 RiggingDef.defectiveSlings），記錯與教學擋下見 SlingLogic.Verdict。</summary>
+        public static void SlingVerdict(ISimState s, string slingId, bool ok, RiggingDef def) => SlingLogic.Verdict(s, slingId, ok, def);
     }
 }

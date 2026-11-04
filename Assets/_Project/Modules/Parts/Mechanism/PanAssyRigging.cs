@@ -180,6 +180,9 @@ namespace PantographSim.Parts.Mechanism
         /// R1.5b b4：吊運的量測（只在值變動超過顯示精度時寫）：吊鉤掛點與重心水平差 hook_cog_offset_cm、吊梁底面離車頂 beam_above_roof_m／離弓頂 beam_above_pan_m、
         /// 吊起時傾斜 tilt_deg、PAN_Root 原點到台架中心 stand_offset_cm／到 4 個絕緣子中心 roof_offset_cm、放下後孔位到落點的最大差 seat_error_cm。
         /// </summary>
+        /// <summary>v3.10：空吊梁在哪個查看位置（platform／ground／空白）。</summary>
+        public const string InspectPoseKey = "part.crane.inspect_pose";
+
         void WriteMeasures(ISimState s, string st, float[] dist, bool roof)
         {
             void F(string key, float v, float step) { v = Mathf.Round(v / step) * step; if (!s.Has(key) || Mathf.Abs(s.GetFloat(key) - v) >= step - 1e-5f) s.SetFloat(key, v); }
@@ -208,6 +211,14 @@ namespace PantographSim.Parts.Mechanism
                     F("part.crane.beam_above_surface_m", beamBottom - (overStand ? roofScene.StandTopY : RoofY(hp.x)), 0.01f);
                     var hr = headR;
                     if (hr.Length > 0) F("part.crane.beam_above_pan_m", beamBottom - hr.Max(r => r.bounds.max.y), 0.01f);
+                    // v3.10（D44）：空吊梁停在平台／地面查看位置（SI_06 a6、IN_01 a0）
+                    string pose = "";
+                    if (roofScene != null)
+                    {
+                        bool At(Vector2 xz, float floor) => new Vector2(hp.x - xz.x, hp.z - xz.y).magnitude <= def.inspectPoseXZTol && Mathf.Abs(beamBottom - floor - def.inspectPoseBeamAboveM) <= def.inspectPoseHeightTol;
+                        pose = At(def.inspectPosePlatformXZ, roofScene.platformFloorY) ? "platform" : At(def.inspectPoseGroundXZ, roofScene.groundY) ? "ground" : "";
+                    }
+                    if (s.Get(InspectPoseKey) != pose || !s.Has(InspectPoseKey)) s.Set(InspectPoseKey, pose);
                 }
             }
             if (st == Lifted) F("part.pan_assy.tilt_deg", Vector3.Angle(transform.up, Vector3.up), 0.1f);

@@ -1521,9 +1521,20 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "v310",
+      "owner": "",
       "source": "CSV",
-      "trigger": "吊帶割傷卻判「可用」；或吊掛指揮核對停留點 2／3 時割傷吊帶仍在吊梁上（只記這一條，不另記 HoldPointRejected）。教學擋下並提示（steps-v6 v3.10，D44）"
+      "trigger": "吊帶割傷卻判「可用」；或吊掛指揮核對停留點 2／3 時割傷吊帶仍在吊梁上（只記這一條，不另記 HoldPointRejected）。教學擋下並提示（steps-v6 v3.10，D44）",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "rigging.cut_judged_usable",
+          "rigging.cut_in_use&&procedure.current=STP_LF_01_PreLift"
+        ],
+        "why": "割傷的吊帶吊重時會斷，集電弓整組掉下來。",
+        "fix": "割傷、磨損、燒傷、縫線斷的吊帶一律判「不可用」，掛停用牌放進停用箱，換備用吊帶。",
+        "what": "割傷的吊帶判成可用（或吊掛指揮核對時割傷吊帶還在吊梁上）。"
+      }
     },
     {
       "errorId": "ERR_Sling_FalseReject",
@@ -1532,9 +1543,19 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "v310",
+      "owner": "",
       "source": "CSV",
-      "trigger": "吊帶沒有破損卻判「不可用」（報表註明）（steps-v6 v3.10，D44）"
+      "trigger": "吊帶沒有破損卻判「不可用」（報表註明）（steps-v6 v3.10，D44）",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "rigging.false_reject"
+        ],
+        "why": "好的吊帶被停用，要多換一次吊帶，作業拖時間。",
+        "fix": "看清楚標籤額定荷重與有沒有割傷、磨損、燒傷、縫線斷，再判。",
+        "what": "沒有破損的吊帶判成不可用。"
+      }
     },
     {
       "errorId": "ERR_Sling_NoReport",
@@ -1543,9 +1564,19 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "v310",
+      "owner": "",
       "source": "CSV",
-      "trigger": "吊帶割傷停用後沒有回報作業負責人就去拿備用吊帶（steps-v6 v3.10，D44）"
+      "trigger": "吊帶割傷停用後沒有回報作業負責人就去拿備用吊帶（steps-v6 v3.10，D44）",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "rigging.spare_taken_unreported"
+        ],
+        "why": "作業負責人不知道吊具有問題，沒辦法安排查看與後續處理。",
+        "fix": "先回報作業負責人「吊帶割傷停用」，等回應再去拿備用吊帶。",
+        "what": "吊帶割傷停用後沒有回報作業負責人就拿備用吊帶。"
+      }
     },
     {
       "errorId": "ERR_Sling_CutReturnedToRack",
@@ -1554,9 +1585,19 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "v310",
+      "owner": "",
       "source": "CSV",
-      "trigger": "割傷吊帶放回吊具架（應掛停用牌放進停用箱）（steps-v6 v3.10，D44）"
+      "trigger": "割傷吊帶放回吊具架（應掛停用牌放進停用箱）（steps-v6 v3.10，D44）",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "rigging.cut_returned_to_rack"
+        ],
+        "why": "下一個人會拿到割傷的吊帶來用。",
+        "fix": "掛停用牌，放進紅框停用箱。",
+        "what": "割傷的吊帶放回吊具架。"
+      }
     },
     {
       "errorId": "ERR_Sling_TouchWithoutEStop",
@@ -1565,9 +1606,19 @@
       "courses": "periodic",
       "inputMode": "",
       "status": "Defined",
-      "owner": "v310",
+      "owner": "",
       "source": "CSV",
-      "trigger": "碰吊具（查看吊鉤舌片、吊梁、吊帶，或取下、掛上吊帶）時遙控器緊急停止沒按下。教學擋下並提示「先按遙控器的緊急停止，吊鉤才不會突然動」，練習／考核記錯不擋，同一次查看只記 1 次（steps-v6 v3.10，D44）"
+      "trigger": "碰吊具（查看吊鉤舌片、吊梁、吊帶，或取下、掛上吊帶）時遙控器緊急停止沒按下。教學擋下並提示「先按遙控器的緊急停止，吊鉤才不會突然動」，練習／考核記錯不擋，同一次查看只記 1 次（steps-v6 v3.10，D44）",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "rigging.touch_without_estop"
+        ],
+        "why": "吊鉤可能被誤按而突然移動，夾到手或撞到頭。",
+        "fix": "碰吊鉤、吊梁、吊帶之前先按遙控器的緊急停止，做完再解除。",
+        "what": "碰吊具時遙控器的緊急停止沒按下。"
+      }
     },
     {
       "errorId": "ERR_Crane_EmptyRigLowTravel",

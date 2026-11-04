@@ -945,13 +945,103 @@ namespace PantographSim.Editor
             rigBox.gameObject.layer = LayerMask.NameToLayer("ContactTarget");
             rigBox.gameObject.AddComponent<InteractionPointMarker>().Configure("env.rigging", "四條吊帶");
             res.ids["env.rigging"] = rigBox;
+            BuildSlingFault(res, d, crane, sb);
             sb.AppendLine($"吊運（b2）：LoadProbe 層 {probeLayer}（只和 Default、Boundary 互動）；台架落點 Y {pins[0].position.y:0.000}；對位燈 台架 {standLights.Length}、車頂 {roofLights.Length}；吸附 {rigging.snapRadius} m");
         }
 
 
         /// <summary>
+        /// steps-v6 v3.10（D44、吊帶割傷故障，model-spec v3.17）：四條吊帶掛在吊梁吊耳下（跟著吊鉤走）：每條一個不縮放的根節點 Sling_n，下面是吊帶本體 env.sling_n、
+        /// 上端吊耳 ip.sling_n.top_eye、標籤 ip.sling_n.tag、割傷 Defect_Cut（故障時才開，方向 0／90／180／270° 隨機）；吊梁吊耳 ip.lifting_beam.eye_n。
+        /// 同號規則：1 (−X,−Z)、2 (+X,−Z)、3 (+X,+Z)、4 (−X,+Z)。平台吊具架 env.rigging_rack（備用吊帶 env.sling_spare、停用牌 env.tag_out_of_service）、紅框停用箱 env.sling_reject_bin（箱口 trigger），只在定期課。
+        /// 吊帶的 collider 在 ContactTarget 層（指得到、不擋吊物探測）；吊鉤組不做可抓的 collider。建置時用頂點量吊鉤組半徑寫進 RiggingDef.hookBlockRadiusM。
+        /// shortcut: 割傷是小方塊加紅色材質（不是 6 cm 毛邊裂口網格）、吊帶掛上吊耳後仍是直直垂下（不跟著拉到吊耳）, 建模交付 Defect_Cut 網格與吊帶形變時換掉
+        /// </summary>
+        static void BuildSlingFault(Result res, RoofSceneDef d, PantographSim.Parts.Mechanism.CraneMechanism crane, StringBuilder sb)
+        {
+            int ct = LayerMask.NameToLayer("ContactTarget");
+            Transform Node(string name) => crane.GetComponentsInChildren<Transform>(true).FirstOrDefault(x => x.name == name) ?? throw new System.Exception("天車沒有 " + name);
+            var eyeL = Node("Beam_SlingEye_L"); var eyeR = Node("Beam_SlingEye_R");
+            var red = Mat("slingCut", new Color(0.85f, 0.1f, 0.1f)); var tagMat = Mat("outOfServiceTag", new Color(0.95f, 0.75f, 0.1f));
+            var rng = new System.Random(310);
+            var roots = new Transform[4]; var cuts = new GameObject[4];
+            Transform Unscaled(string name, Transform parent, Vector3 pos)
+            {
+                var t = new GameObject(name).transform; t.SetParent(parent, false);
+                var ls = parent.lossyScale; t.localScale = new Vector3(1f / ls.x, 1f / ls.y, 1f / ls.z);
+                t.position = pos; t.rotation = Quaternion.identity;
+                return t;
+            }
+            void Marker(GameObject g, string id, string label) { g.layer = ct; g.AddComponent<InteractionPointMarker>().Configure(id, label); res.ids[id] = g.transform; }
+            for (int n = 1; n <= 4; n++)
+            {
+                var eye = n == 1 || n == 4 ? eyeL : eyeR;
+                var top = eye.position + new Vector3(0f, -0.05f, n <= 2 ? -0.04f : 0.04f);
+                float len = n == 2 || n == 3 ? PantographAssemblyBuilder.SlingLengths.plusX : PantographAssemblyBuilder.SlingLengths.minusX;
+                var root = Unscaled("Sling_" + n, eye, top);
+                var s = res.ids[SlingLogic.Sling(n)];
+                s.SetParent(root, true);
+                s.position = top + Vector3.down * len / 2f;
+                if (s.GetComponent<Collider>() == null) s.gameObject.AddComponent<BoxCollider>();
+                s.gameObject.layer = ct;
+                Marker(Box("TopEye", root, top, new Vector3(0.08f, 0.08f, 0.08f), red, collider: true, visible: false), SlingLogic.TopEye(n), $"吊帶 {n} 上端吊耳（取下）");
+                Marker(Box("Tag", root, top + Vector3.down * 0.25f, new Vector3(0.08f, 0.10f, 0.08f), tagMat, collider: true, visible: false), SlingLogic.TagPoint(n), $"吊帶 {n} 標籤（掛停用牌）");
+                var eyeMark = Box("BeamEye_" + n, eye, eye.position + new Vector3(0f, 0.02f, n <= 2 ? -0.04f : 0.04f), new Vector3(0.06f, 0.06f, 0.06f), red, collider: true, visible: false);
+                Marker(eyeMark, SlingLogic.BeamEye(n), $"吊梁吊耳 {n}（掛備用吊帶）");
+                var cut = Box("Defect_Cut", root, top + Vector3.down * len * 0.5f + new Vector3(0.012f, 0f, 0f), new Vector3(0.06f, 0.02f, 0.012f), red, collider: false);
+                cut.transform.rotation = Quaternion.Euler(0f, 90f * rng.Next(4), 35f);
+                cut.SetActive(false);
+                roots[n - 1] = root; cuts[n - 1] = cut;
+            }
+
+            // 平台吊具架、停用箱（只在定期課：Courses.json 日常的 placements 關掉）
+            var rack = Box("ENV_RiggingRack", res.env, d.riggingRackPos, new Vector3(0.70f, 0.05f, 0.06f), Mat("riggingRack", new Color(0.35f, 0.38f, 0.42f)));
+            float spareLen = PantographAssemblyBuilder.SlingLengths.minusX;
+            GameObject SlingCopy(string name, Transform parent, Vector3 topPos, bool lying)
+            {
+                var root = Unscaled(name, parent, topPos);
+                var g = Fbx("ENV_Sling", null, root, topPos + Vector3.down * spareLen / 2f);
+                StretchWorld(g.transform, Vector3.up, spareLen);
+                g.transform.position = topPos + Vector3.down * spareLen / 2f;
+                if (lying) root.rotation = Quaternion.Euler(0f, 0f, 90f);
+                return root.gameObject;
+            }
+            var spare = SlingCopy("SpareSling", res.env, d.riggingRackPos + new Vector3(0f, -0.03f, 0f), false);
+            var spareBody = spare.GetComponentInChildren<Renderer>().gameObject;
+            if (spareBody.GetComponent<Collider>() == null) spareBody.AddComponent<BoxCollider>();
+            Marker(spareBody, SlingLogic.Spare, "備用吊帶");
+            var tag = Box("OutOfServiceTag", res.env, d.riggingRackPos + new Vector3(-0.28f, -0.10f, 0f), new Vector3(0.08f, 0.12f, 0.01f), tagMat);
+            Marker(tag, SlingLogic.Tag, "停用牌");
+            var onRack = SlingCopy("RejectedOnRack", res.env, d.riggingRackPos + new Vector3(0.24f, -0.03f, 0f), false);
+            var bin = Box("ENV_SlingRejectBin", res.env, d.slingRejectBinPos + Vector3.up * 0.15f, new Vector3(0.50f, 0.30f, 0.50f), red);
+            Marker(bin, SlingLogic.Bin, "停用箱（紅框）");
+            var opening = Box("Opening", bin.transform, d.slingRejectBinPos + Vector3.up * 0.33f, new Vector3(0.96f, 0.2f, 0.96f), red, collider: true, visible: false);
+            opening.GetComponent<Collider>().isTrigger = true;
+            var inBin = SlingCopy("RejectedInBin", res.env, d.slingRejectBinPos + new Vector3(-0.20f, 0.12f, 0f), true);
+            foreach (var g in new[] { onRack, inBin })
+            {
+                foreach (var c in g.GetComponentsInChildren<Collider>(true)) Object.DestroyImmediate(c);   // 外觀，不能點
+                Box("Defect_Cut", g.transform, g.transform.position + g.transform.rotation * (Vector3.down * spareLen * 0.5f), new Vector3(0.06f, 0.02f, 0.012f), red, collider: false);
+                Box("Tag", g.transform, g.transform.position + g.transform.rotation * (Vector3.down * 0.25f), new Vector3(0.08f, 0.12f, 0.01f), tagMat, collider: false);
+                g.SetActive(false);
+            }
+            var rig = rack.AddComponent<PantographSim.Worksite.SlingRig>();
+            rig.Configure(SlingLogic.Rack, "平台吊具架");
+            rig.Setup(roots, cuts, inBin, onRack, spare, tag);
+            res.ids[SlingLogic.Rack] = rack.transform;
+
+            // 吊鉤組半徑（頂點，吊梁以外）
+            var hook = crane.HookBlock;
+            float radius = 0f;
+            foreach (var r in hook.GetComponentsInChildren<Renderer>(true).Where(r => !r.transform.IsChildOf(crane.Beam)))
+                foreach (var v in PanGeometry.WorldVertices(r)) radius = Mathf.Max(radius, new Vector2(v.x - hook.position.x, v.z - hook.position.z).magnitude);
+            var rigging = R1Data.Rigging; rigging.hookBlockRadiusM = Mathf.Round(radius * 1000f) / 1000f; EditorUtility.SetDirty(rigging);
+            sb.AppendLine($"v3.10 吊帶故障：吊帶 1–4 掛在吊梁吊耳下（長 −X {PantographAssemblyBuilder.SlingLengths.minusX:0.000}、+X {PantographAssemblyBuilder.SlingLengths.plusX:0.000} m）；吊具架 {d.riggingRackPos:F2}、停用箱 {d.slingRejectBinPos:F2}；吊鉤組半徑（頂點）{rigging.hookBlockRadiusM:0.000} m");
+        }
+
+        /// <summary>
         /// R1.5a a5：天車 ENV_OverheadCrane（env.crane；走行軌道 X craneRunwayEastX／WestX、Z ±craneRunwayHalfLength；橋停在 Z craneParkZ，小車 X craneParkTrolleyX，吊鉤在最高點，不擋站點視線）、
-        /// 遙控器 ENV_CraneRemote（env.crane_pendant，掛在 PendantDock，不能拿）、吊具 ENV_Sling（env.sling_1..4，掛在維修區的吊具架）、工具袋 ENV_ToolPouch（env.tool_bag，零件袋 env.tool_bag.bolt_pouch，放在工作檯上）。
+        /// 遙控器 ENV_CraneRemote（env.crane_pendant，掛在 PendantDock，不能拿）、吊具 ENV_Sling（env.sling_1..4；v3.10 起由 BuildSlingFault 移到吊梁吊耳下）、工具袋 ENV_ToolPouch（env.tool_bag，零件袋 env.tool_bag.bolt_pouch，放在工作檯上）。
         /// 都只有模型和節點，沒有邏輯。
         /// </summary>
         static void BuildCraneAndRigging(Result res, RoofSceneDef d, Transform aDock, StringBuilder sb)

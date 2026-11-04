@@ -51,6 +51,9 @@ namespace PantographSim.Data
         [Tooltip("R1.5b b4（ERR_Crane_NoTrialLift）：試吊＝離座這個範圍內（m）停住這麼久（s），示例值")] public float trialDropMin = 0.08f, trialDropMax = 0.15f, trialStillSeconds = 3f;
         [Tooltip("R1.5b b4（ERR_Crane_FastLowerEmptyHook）：吊鉤在台架中心這個水平距離（m）內，作業面算台架頂面")] public float standSurfaceRadius = 1.5f;
         [Tooltip("R1.5b b4（RM_05 f）：有割傷、要判「不合格」的吊帶編號（空＝四條都可用）")] public int[] defectiveSlings = new int[0];
+        [Tooltip("v3.10（D44、model-spec v3.17 §7.10）：空吊梁查看位置 Crane_InspectPose_Platform／_Ground 的中心（吊鉤 XZ）")] public Vector2 inspectPosePlatformXZ = new Vector2(-2.56f, -3.55f), inspectPoseGroundXZ = new Vector2(-9.50f, -3.20f);
+        [Tooltip("v3.10：查看位置吊梁底面離平台面／地面 EX 0.90 ± 0.10 m；中心水平容差（m，示例值：步驟表沒寫）")] public float inspectPoseBeamAboveM = 0.90f, inspectPoseHeightTol = 0.10f, inspectPoseXZTol = 0.15f;
+        [Tooltip("v3.10：建置時用頂點量的吊鉤組水平半徑（m，以吊鉤節點為中心）；StationLayoutCheck 讀它檢查查看站離吊鉤組外緣 ≥ CraneProfile.inspectClearanceM")] public float hookBlockRadiusM = 0.17f;
 
         /// <summary>把 {n} 展開成 1..4。</summary>
         public static IEnumerable<RigCondition> Expand(IEnumerable<RigCondition> list)

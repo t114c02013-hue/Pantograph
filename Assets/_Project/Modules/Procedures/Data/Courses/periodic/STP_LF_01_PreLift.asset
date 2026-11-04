@@ -27,7 +27,28 @@ MonoBehaviour:
   requiredToolId: 
   completion:
     rid: 1000
-  errors: []
+  errors:
+  - errorId: ERR_Sling_CutJudgedUsable
+    severity: 2
+    what: "\u5272\u50B7\u7684\u540A\u5E36\u5224\u6210\u53EF\u7528\uFF08\u6216\u540A\u639B\u6307\u63EE\u6838\u5C0D\u6642\u5272\u50B7\u540A\u5E36\u9084\u5728\u540A\u6881\u4E0A\uFF09\u3002"
+    why: "\u5272\u50B7\u7684\u540A\u5E36\u540A\u91CD\u6642\u6703\u65B7\uFF0C\u96C6\u96FB\u5F13\u6574\u7D44\u6389\u4E0B\u4F86\u3002"
+    fix: "\u5272\u50B7\u3001\u78E8\u640D\u3001\u71D2\u50B7\u3001\u7E2B\u7DDA\u65B7\u7684\u540A\u5E36\u4E00\u5F8B\u5224\u300C\u4E0D\u53EF\u7528\u300D\uFF0C\u639B\u505C\u7528\u724C\u653E\u9032\u505C\u7528\u7BB1\uFF0C\u63DB\u5099\u7528\u540A\u5E36\u3002"
+    trigger: 10
+    key: 
+    key2: 
+    keys:
+    - rigging.cut_judged_usable
+    - rigging.cut_in_use&&procedure.current=STP_LF_01_PreLift
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: 
     why: 
@@ -49,6 +70,8 @@ MonoBehaviour:
     condition: isolation.head_clamped=false
     standPointId: tp.platform.ground
     subId: a
+    textDesktop: 
+    when: 
   - text: "\u9B06\u958B\u63A5\u5730\u7AEF\u5B50\u7684\u593E\u5B50"
     why: 
     targetId: ip.depot.ground_terminal
@@ -56,6 +79,8 @@ MonoBehaviour:
     condition: isolation.terminal_clamped=false&&ip.roof.carbody_ground.clamped
     standPointId: tp.platform.ground
     subId: b
+    textDesktop: 
+    when: 
   - text: "\u628A\u63A5\u5730\u687F\u653E\u56DE\u687F\u67B6"
     why: 
     targetId: "env.tool_rack.slot_3\uFF08\u5728\u687F\u67B6 env.pole_rack\uFF09"
@@ -63,6 +88,8 @@ MonoBehaviour:
     condition: rack.slot_3=on_rack
     standPointId: tp.platform.ground
     subId: c
+    textDesktop: 
+    when: 
   - text: "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u92B7\u865F #1"
     why: 
     targetId: env.work_order.ground_register
@@ -70,6 +97,8 @@ MonoBehaviour:
     condition: ground_register.1=cancelled
     standPointId: tp.platform.ground
     subId: c2
+    textDesktop: 
+    when: 
   - text: "\u78BA\u8A8D\u540A\u9264\u5728\u5F13\u7684\u6B63\u4E0A\u65B9"
     why: 
     targetId: part.crane.hook
@@ -77,6 +106,8 @@ MonoBehaviour:
     condition: part.crane.hook.inspected&&part.crane.hook_cog_offset_cm<=5
     standPointId: tp.platform.crane
     subId: d
+    textDesktop: 
+    when: 
   - text: "\u8ACB\u540A\u639B\u6307\u63EE\u78BA\u8A8D\uFF0C\u653E\u884C\u8A66\u540A"
     why: 
     targetId: npc.rigging_lead
@@ -84,6 +115,8 @@ MonoBehaviour:
     condition: hold.2.checklist_done&&hold.2.released
     standPointId: tp.platform.crane
     subId: e
+    textDesktop: 
+    when: 
   presetDone: 0
   side: 
   presetStates: []
