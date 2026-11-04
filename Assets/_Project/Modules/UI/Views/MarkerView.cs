@@ -80,6 +80,8 @@ namespace PantographSim.UI
             return (rt, arrow, text, bg);
         }
 
+        static bool Close(Vector2 a, Vector2 b) => Mathf.Abs(a.x - b.x) < 170f && Mathf.Abs(a.y - b.y) < 40f;
+
         static bool RackHintActive(ISimState s) =>
             !string.IsNullOrEmpty(s.Get("ui.rack_hint")) && Time.time - s.GetFloat("ui.rack_hint_time") < 4f;
 
@@ -99,6 +101,7 @@ namespace PantographSim.UI
             if (hintOn && !targets.Contains(rackHint)) targets = targets.Concat(new[] { rackHint }).ToArray();
             while (targetPool.Count < targets.Length) targetPool.Add(MakeTarget());
             float bob = Mathf.Sin(Time.unscaledTime * 5f) * 8f;
+            var placed = new List<Vector2>();   // 這一幀「點這裡」標籤的位置：別的標籤要避開
             var half = ui.Safe.rect.size * 0.5f;
             for (int i = 0; i < targetPool.Count; i++)
             {
@@ -115,7 +118,10 @@ namespace PantographSim.UI
                 {
                     // 同一端的兩支螺栓很近，標籤上下錯開
                     float stagger = SimIds.IsBoltId(id) && (id.EndsWith("_1") || id.EndsWith("_3")) ? 64f : 0f;
-                    m.rt.anchoredPosition = local + new Vector2(0, 18 + bob + stagger);
+                    var at = local + new Vector2(0, 18 + stagger);
+                    while (placed.Exists(q => Close(q, at))) at.y += 44f;   // 兩個目標很近時往上疊，不互相蓋住
+                    placed.Add(at);
+                    m.rt.anchoredPosition = at + new Vector2(0, bob);
                     Ui.SetActive(m.arrow, true);
                     m.text.text = hintOn && id == rackHint ? $"▼ 在這裡：{name}"
                         : id.EndsWith("_check") ? $"{num} 用右側控制器把這個點降到綠框"
@@ -139,7 +145,7 @@ namespace PantographSim.UI
             foreach (var kv in labels)
             {
                 bool show = !targetSet.Contains(kv.Key) && reg.TryGetPosition(kv.Key, out var p)
-                            && ui.WorldToSafe(p, out var lp, out bool inside) && inside;
+                            && ui.WorldToSafe(p, out var lp, out bool inside) && inside && !placed.Exists(q => Close(q, lp + new Vector2(0, 26)));
                 Ui.SetActive(kv.Value.rt, show);
                 if (!show) continue;
                 reg.TryGetPosition(kv.Key, out var p2);
@@ -176,7 +182,9 @@ namespace PantographSim.UI
                 hover.rt.anchoredPosition = reg.TryGetPosition(hoverId, out var hp) && ui.WorldToSafe(hp, out var hl, out bool hin) && hin
                     ? hl + new Vector2(0, 40)
                     : ui.MouseInSafe() + new Vector2(0, 28);
-                if (targetSet.Contains(hoverId)) hover.rt.anchoredPosition += new Vector2(0, 90f);   // 不要和「點這裡」疊在一起
+                var hoverAt = hover.rt.anchoredPosition;   // 不要和「點這裡」疊在一起
+                while (placed.Exists(q => Close(q, hoverAt))) hoverAt.y += 44f;
+                hover.rt.anchoredPosition = hoverAt;
             }
         }
 

@@ -11,6 +11,7 @@ namespace PantographSim.Interaction
     /// </summary>
     public class StepFocus : MonoBehaviour
     {
+        [SerializeField] float viewHeight = 1.2f, boltViewHeight = 2.2f;
         [SerializeField] OrbitCameraController orbit;
         [SerializeField] float minSize = 0.45f;
         string currentTargets = "", stepTargets = "";
@@ -75,7 +76,9 @@ namespace PantographSim.Interaction
             foreach (var p in points) b.Encapsulate(p);
             b.size = Vector3.Max(b.size, Vector3.one * minSize);
             var stand = GameObject.Find("StationAnchor_" + Sim.State.Get("hint.sub_stand"));
-            if (stand != null) orbit.Retarget(b, stand.transform.position + Vector3.up * 1.2f); else orbit.Retarget(b);
+            // 螺栓在弓頭上方：從高一點往下看，不會被弓頭框架擋住
+            bool bolt = SimIds.IsBoltId(Sim.State.Get("hint.sub_target"));
+            if (stand != null) orbit.Retarget(b, stand.transform.position + Vector3.up * (bolt ? boltViewHeight : viewHeight)); else orbit.Retarget(b);
         }
 
         static IEnumerable<Vector3> Resolve(string ids)
