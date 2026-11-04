@@ -101,11 +101,14 @@ namespace PantographSim.Editor.XR
             // T2-a：工具握持點 Attach_Tool（握把前下方，不擋扳機與按鍵）；左手 Poke_Tip（控制器前端 r 0.8 cm）按工具上的撥桿、± 鈕、ZERO
             var toolAnchor = new GameObject("Attach_Tool").transform;
             toolAnchor.SetParent(rightT, false);
-            toolAnchor.localPosition = new Vector3(0, -0.01f, 0.06f);
-            new GameObject("Attach_Tool").transform.SetParent(left, false);
+            toolAnchor.localPosition = ModelAnchor(rightT, "Attach_Tool");
+            var leftAnchor = new GameObject("Attach_Tool").transform;
+            leftAnchor.SetParent(left, false);
+            leftAnchor.localPosition = ModelAnchor(left, "Attach_Tool");
             var pokeTip = new GameObject("Poke_Tip");
             pokeTip.transform.SetParent(left, false);
-            pokeTip.transform.localPosition = new Vector3(0, -0.01f, 0.05f);
+            pokeTip.transform.localPosition = ModelAnchor(left, "Poke_Tip");
+            foreach (var c in new[] { left, rightT }) foreach (var n in new[] { "Attach_Tool", "Poke_Tip" }) { var dup = ModelNode(c, n); if (dup != null) Object.DestroyImmediate(dup.gameObject); }   // 同名節點只留控制器上的
             var tipCol = pokeTip.AddComponent<SphereCollider>(); tipCol.radius = 0.008f; tipCol.isTrigger = true;
             // T3：面板把手用 XRDirectInteractor 抓（Interaction Layer PanelHandle）；試玩修正 第 3 點左右手都能抓，射線不抓把手
             int handleMask = InteractionLayerMask.GetMask(XrPanels.HandleLayerName);
@@ -211,6 +214,7 @@ namespace PantographSim.Editor.XR
             }
             player.SetBodyRingRadius(rd.bodyRingRadius);
             rigGo.AddComponent<XrPouchHover>().Setup(rig, player);   // 第 4 點
+            foreach (var v in rigGo.GetComponentsInChildren<XrControllerVisual>(true)) v.Setup(rig, player);   // 第 5 點
             rigGo.SetActive(false);
             BuildToCabMarker(xrRoot.transform, mats, lineMat, sb);
             sb.AppendLine("VR：站點 " + string.Join("、", points.Select(p => p.Label + (string.IsNullOrEmpty(p.LockKey) ? "" : "（車頂開放才解鎖）"))));
@@ -298,6 +302,11 @@ namespace PantographSim.Editor.XR
             return new InputActionProperty(fallback);
         }
 
+        static Transform ModelNode(Transform controller, string node) => controller.GetComponentInChildren<XrControllerVisual>(true).GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == node);
+
+        /// <summary>模型錨點相對控制器的位置。</summary>
+        static Vector3 ModelAnchor(Transform controller, string node) => controller.InverseTransformPoint(ModelNode(controller, node).position);
+
         static Transform Controller(string name, string hand, Transform parent, InputActionAsset starter, Dictionary<string, Material> mats, out ActionBasedController ctrl)
         {
             var go = new GameObject(name);
@@ -316,11 +325,7 @@ namespace PantographSim.Editor.XR
             ctrl.uiPressAction = Prop(starter, map + " Interaction/UI Press", Action("UI Press", "Button", dev + "/{TriggerButton}"));
             ctrl.uiPressActionValue = Prop(starter, map + " Interaction/UI Press Value", Action("UI Press Value", "Axis", dev + "/{Trigger}"));
             ctrl.hapticDeviceAction = Prop(starter, map + "/Haptic Device", new InputAction("Haptic Device", InputActionType.PassThrough, dev + "/{Haptic}"));
-            // 簡易控制器外觀（沒有 Collider，不擋射線）
-            var body = SliceModelBuilder.Prim(PrimitiveType.Cube, "Model", go.transform, new Vector3(0, -0.015f, -0.03f), new Vector3(0.035f, 0.03f, 0.11f), mats["panel"]);
-            NoCollider(body);
-            var ring = SliceModelBuilder.Prim(PrimitiveType.Cylinder, "Ring", go.transform, new Vector3(0, 0.005f, 0.01f), new Vector3(0.06f, 0.006f, 0.06f), mats[hand == "LeftHand" ? "measure" : "tool"]);
-            NoCollider(ring);
+            ControllerVisualBuilder.Mount(go.transform, hand == "LeftHand", ctrl);   // 第 5 點：原廠控制器模型（沒有 Collider，不擋射線）
             return go.transform;
         }
 

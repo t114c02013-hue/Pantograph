@@ -169,6 +169,37 @@ namespace PantographSim.Tests
             });
         }
 
+        /// <summary>第 5 點：按鍵動畫的 t（WebXR 對應）。</summary>
+        [Test]
+        public void Controller_PressAmount()
+        {
+            var b = new XrControllerVisual.Buttons { trigger = .3f, grip = .6f, primary = true, stick = new Vector2(1f, -1f) };
+            Assert.AreEqual(.3f, XrControllerVisual.PressAmount("xr_standard_trigger_pressed_value", b), 1e-4f);
+            Assert.AreEqual(.6f, XrControllerVisual.PressAmount("xr_standard_squeeze_pressed_value", b), 1e-4f);
+            Assert.AreEqual(1f, XrControllerVisual.PressAmount("xr_standard_thumbstick_xaxis_pressed_value", b), 1e-4f);
+            Assert.AreEqual(0f, XrControllerVisual.PressAmount("xr_standard_thumbstick_yaxis_pressed_value", b), 1e-4f);
+            Assert.AreEqual(0f, XrControllerVisual.PressAmount("xr_standard_thumbstick_pressed_value", b), 1e-4f);
+            Assert.AreEqual(1f, XrControllerVisual.PressAmount("x_button_pressed_value", b), 1e-4f);
+            Assert.AreEqual(0f, XrControllerVisual.PressAmount("b_button_pressed_value", b), 1e-4f);
+            Assert.AreEqual(0f, XrControllerVisual.PressAmount("thumbrest_pressed_value", b), 1e-4f);
+        }
+
+        /// <summary>第 5 點：標示讀按鍵表：教學一直顯示、練習按住 Y；只顯示這個情境有作用的按鍵。</summary>
+        [Test]
+        public void Controller_LabelsFollowBindingTable()
+        {
+            Assert.IsTrue(XrControllerVisual.ShowLabels("tutorial", false));
+            Assert.IsFalse(XrControllerVisual.ShowLabels("practice", false));
+            Assert.IsTrue(XrControllerVisual.ShowLabels("practice", true));
+            Assert.AreEqual("RightTrigger", XrControllerVisual.ControlOf("LBL_Trigger", false));
+            Assert.AreEqual("LeftGrip", XrControllerVisual.ControlOf("LBL_Grip", true));
+            Assert.AreEqual("A", XrControllerVisual.ControlOf("LBL_A", false));
+            var t = InputBindingTable.LoadDefault();
+            Assert.AreEqual("", XrControllerVisual.LabelText(t, InputBindingTable.Empty, "A"), "空手 A 沒作用");
+            Assert.AreEqual("", XrControllerVisual.LabelText(t, InputBindingTable.Empty, "LeftTrigger"), "左扳機不在表上");
+            Assert.AreEqual("點／使用", XrControllerVisual.LabelText(t, InputBindingTable.Empty, "RightTrigger"), "只取冒號前");
+        }
+
         /// <summary>第 4 點：取最近的一格；半徑外沒有；左右手都算。</summary>
         [Test]
         public void Pouch_NearestSlot_EitherHand()

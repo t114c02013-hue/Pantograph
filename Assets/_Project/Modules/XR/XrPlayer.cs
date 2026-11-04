@@ -41,6 +41,9 @@ namespace PantographSim.XR
 
         /// <summary>截圖或測試腳本：有值時取代控制器輸入。</summary>
         public static XrFrame? ScriptedFrame;
+        /// <summary>這一幀的按鍵；按鍵表情境（第 5 點：控制器上的標示讀這兩個）。</summary>
+        public XrFrame LastFrame { get; private set; }
+        public string BindingContext => helpContext;
         /// <summary>模擬模式（沒有頭盔的 Editor 截圖）：不讀追蹤狀態。</summary>
         public static bool Simulated;
 
@@ -98,6 +101,7 @@ namespace PantographSim.XR
             if (!bound || !InputMode.XrActive || !S.GetBool(XrStartupSequencer.ReadyKey)) return;   // 開場擺好人和介面才開放輸入
             UpdatePointer();
             var frame = ScriptedFrame ?? input.Read();
+            LastFrame = frame;
             var ctx = Context();
             if (ctx.BindingContext != helpContext) { helpContext = ctx.BindingContext; S.Set("xr.help.keys", XRInputMapper.HelpText(mapper.Bindings, helpContext)); }   // Y 說明卡的按鍵表
             foreach (var cmd in mapper.Map(frame, ctx, Time.unscaledTime)) Execute(cmd);

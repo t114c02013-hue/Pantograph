@@ -1254,6 +1254,7 @@ namespace PantographSim.Editor
                 model.SetActive(false);
                 var label = new GameObject("Label_" + s.slot).AddComponent<TextMesh>();
                 label.transform.SetParent(p, false); label.transform.position = p.position + Vector3.up * 0.09f;
+                var labelFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); label.font = labelFont; label.GetComponent<MeshRenderer>().sharedMaterial = labelFont.material;   // 第 4 點：沒給字型什麼都不會顯示
                 label.text = tool != null ? tool.displayName : s.toolId; label.characterSize = 0.006f; label.fontSize = 48; label.anchor = TextAnchor.LowerCenter; label.color = Color.white;
                 label.gameObject.SetActive(false);   // 手在工具袋範圍內才顯示（XrCarryContainer）
                 res.ids["env.tool_rack.slot_" + s.slot] = p;

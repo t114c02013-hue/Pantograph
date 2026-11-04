@@ -172,6 +172,55 @@ namespace PantographSim.Tests
             XrPlayer.ScriptedFrame = null;
         }
 
+        /// <summary>第 5 點：原廠模型掛在控制器上（Transform 0、錨點和報告一致、方塊拿掉），扳機按到底模型跟著到 max。</summary>
+        [UnityTest]
+        public IEnumerator Controller_ModelMounted_TriggerMoves()
+        {
+            yield return Boot(new Vector3(0f, 1.6f, 0f));
+            tracked = true;
+            yield return WaitReady();
+            var right = Rig.RightHand;
+            var model = right.GetComponentInChildren<XrControllerVisual>(true);
+            Assert.NotNull(model, "右手有模型");
+            Assert.AreEqual("Visual_Offset", model.transform.parent.name);
+            Assert.AreEqual(Vector3.zero, model.transform.localPosition);
+            Assert.AreEqual(Quaternion.identity, model.transform.localRotation);
+            Assert.IsNull(right.Find("Ring"), "舊的方塊和環拿掉");
+            Assert.IsNotNull(Rig.LeftHand.GetComponentInChildren<XrControllerVisual>(true), "左手有模型");
+            var nodes = model.GetComponentsInChildren<Transform>(true);
+            Transform N(string n) => System.Array.Find(nodes, t => t.name == n);
+            var lbl = right.InverseTransformPoint(N("LBL_Trigger").position) * 1000f;
+            Assert.Less((lbl - new Vector3(-12.3f, -48.3f, 58.7f)).magnitude, 1f, "錨點和報告一致（mm）：" + lbl);
+            var b = model.GetComponentInChildren<Renderer>().bounds;
+            foreach (var r in model.GetComponentsInChildren<Renderer>()) if (r.GetComponent<TextMesh>() == null) b.Encapsulate(r.bounds);
+            Assert.Less(b.size.magnitude, 0.4f, "大小是控制器的大小：" + b.size);
+            Assert.Greater(b.size.magnitude, 0.05f, "大小是控制器的大小：" + b.size);
+
+            XrControllerVisual.Scripted = new XrControllerVisual.Buttons { trigger = 1f };
+            yield return null; yield return null;
+            XrControllerVisual.Scripted = null;
+            Assert.Less((N("xr_standard_trigger_pressed_value").localRotation.eulerAngles - N("xr_standard_trigger_pressed_max").localRotation.eulerAngles).magnitude, 0.01f, "扳機到底");
+        }
+
+        /// <summary>第 2 點：頭在 (0, 1.63, 0) 看 +Z，任務卡在頭前 1.0 m、眼下 0.15 m，頭轉動不跟著走，「面板叫回眼前」叫得回來。</summary>
+        [UnityTest]
+        public IEnumerator TaskCard_FrontOfHead_Fixed_Recalled()
+        {
+            yield return Boot(new Vector3(0f, 1.63f, 0f));
+            tracked = true;
+            yield return WaitReady();
+            for (int i = 0; i < 5; i++) yield return null;
+            Assert.IsTrue(Sim.Registry.TryGetTransform("xr.panel.dialog", out var card));
+            Assert.AreEqual(1f, Flat(card.position, Rig.Head.position), 0.02f, "頭前 1.0 m");
+            Assert.AreEqual(Rig.Head.position.y - 0.15f, card.position.y, 0.02f, "眼下 0.15 m");
+            var at = card.position;
+            Rig.Head.Rotate(0f, 90f, 0f, Space.World);
+            for (int i = 0; i < 5; i++) yield return null;
+            Assert.Less((card.position - at).magnitude, 1e-3f, "不跟著視線走");
+            Object.FindObjectOfType<XrPanels>().Recall();
+            Assert.Greater(Vector3.Dot((card.position - Rig.Head.position).normalized, Rig.Head.forward), 0.5f, "叫得回來");
+        }
+
         [UnityTest]
         public IEnumerator HeadOffCentre_StillLandsOnStation()
         {
