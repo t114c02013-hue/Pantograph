@@ -255,12 +255,8 @@ namespace PantographSim.UI
             Ui.Text(card, "若覺得陷進地板或浮起來，請先在 Quest 重新設定地板", 20, Ui.Muted);
             // R1：高度、蹲低視角（T1）與平滑移動、速度、遮罩（T6）；這些設定按了不關選單
             Text Setting(string cmd) { var b = Ui.Button(card, "", 26, () => Ui.Send("xr.menu", cmd)); Ui.Size(b, -1, 66); return Ui.LabelOf(b); }
-            heightLabel = Setting("height"); crouchLabel = Setting("crouch"); moveLabel = Setting("move"); vignetteLabel = Setting("vignette");
+            heightLabel = Setting("height"); crouchLabel = Setting("crouch"); 
             bagLabel = Setting("toolbag_mount"); swapLabel = Setting("carry_swap");   // R1.5b b3：工具袋掛左手腕、工具袋與腰包左右對調
-            var speedRow = Ui.Rect(card, "SpeedRow"); Ui.HStack(speedRow.gameObject, 10);
-            var slower = Ui.Button(speedRow, "速度 −", 26, () => Ui.Send("xr.menu", "speed:-")); Ui.Size(slower, 180, 66);
-            speedLabel = Ui.Text(speedRow, "", 26, Color.white, TextAnchor.MiddleCenter); Ui.Size(speedLabel, 200, 66);
-            var faster = Ui.Button(speedRow, "速度 ＋", 26, () => Ui.Send("xr.menu", "speed:+")); Ui.Size(faster, 180, 66);
             var v = Ui.Button(card, "", 28, () => Ui.Send("rec.video", "toggle", "xr.menu"), new Color(0.6f, 0.12f, 0.1f)); Ui.Size(v, -1, 78);
             videoLabel = Ui.LabelOf(v);
             var cam = Ui.Button(card, "", 24, () => Ui.Send("rec.video", "view:toggle")); Ui.Size(cam, -1, 66);
@@ -269,7 +265,7 @@ namespace PantographSim.UI
             Item("關閉選單（≡）", "close");
         }
 
-        Text videoLabel, camLabel, heightLabel, crouchLabel, moveLabel, vignetteLabel, speedLabel, bagLabel, swapLabel;
+        Text videoLabel, camLabel, heightLabel, crouchLabel, bagLabel, swapLabel;
 
         public override void Refresh(ISimState s)
         {
@@ -278,10 +274,6 @@ namespace PantographSim.UI
             if (!show) return;
             heightLabel.text = "車頂視點：" + (s.Get("xr.height.mode", "Raised") == "Real" ? "真實高度" : "抬高（平視滑板）") + "　<size=20>（點一下切換）</size>";
             crouchLabel.text = "蹲低視角：" + (s.GetBool("xr.crouch") ? "開" : "關") + "　<size=20>（只在車頂有效，也可按左搖桿）</size>";
-            moveLabel.text = "右搖桿平滑移動：" + (!s.Has("xr.move.on") || s.GetBool("xr.move.on") ? "開" : "關");
-            float vg = s.GetFloat("xr.vignette");
-            vignetteLabel.text = "移動遮罩：" + (vg <= 0.01f ? "關" : vg < 0.45f ? "弱" : "強");
-            speedLabel.text = $"{s.GetFloat("xr.move.speed", 1f):0.0} m/s";
             bagLabel.text = "工具袋位置：" + (s.Get("xr.toolbag.mount") == "wrist" ? "左手腕" : "腰間") + "　<size=20>（點一下切換）</size>";
             swapLabel.text = "工具袋／腰包：" + (s.GetBool("xr.carry.swap") ? "工具袋右腰、腰包左腰" : "工具袋左腰、腰包右腰");
             string rec = Ui.RecText(s);
@@ -327,7 +319,7 @@ namespace PantographSim.UI
             "按一下右手<b>扳機</b>（食指）＝使用／點擊",
             "按一下右手<b>握把</b>（中指）＝抓取工具",
             "<b>左搖桿往前推</b>，瞄準地上的圓圈，放開＝傳送",
-            "用<b>右搖桿</b>走到地上的圈（往哪推就往哪走，放開就停）",
+            "<b>左搖桿往前推</b>，傳送到地上的圈",
             "用<b>左握把</b>抓住面板上緣的橘色把手，移一下再放開",
             "<b>左搖桿往左或右撥</b>＝轉 45°",
             "抬起左手，看<b>手腕面板</b>（工具狀態、上一步）",

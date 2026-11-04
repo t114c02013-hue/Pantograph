@@ -16,6 +16,9 @@ namespace PantographSim.Core
         /// <summary>R1.5b D40：天車本體（橋架、台車、捲揚機、軌道）的 collider，只給吊鉤正上方的 BoxCast 用。</summary>
         public const string Crane = "Crane";
 
+        /// <summary>VR 試玩修正 第 1 點：擋手、工具和傳送指向線的實體邊界：護欄、圍牆、車頂邊（頭由 HeadBoundaryPusher 的水平範圍擋）。</summary>
+        public static int BoundaryMask => LayerMask.GetMask(Boundary, WalkLimit);
+
         /// <summary>點選、指物件用：排除 Boundary 與 LocomotionBlocker。</summary>
         public static int InteractMask => ~LayerMask.GetMask(Boundary, LocomotionBlocker);
 

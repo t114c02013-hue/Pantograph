@@ -171,33 +171,12 @@ namespace PantographSim.Editor.XR
             if (pendantT != null && dockGo != null) rigGo.AddComponent<XrCranePendant>().Setup(rig, R1Data.Crane, pendantT, dockGo.transform, rightPoke.transform);
             else sb.AppendLine("⚠ 天車遙控器：找不到 env.crane_pendant 或 PendantDock");
 
-            // T6 右搖桿平滑移動：CharacterController（半徑 0.2、step 0.2、重力）＋XRI 連續移動（方向跟頭、水平、可橫移、死區 0.15、無加速、不做平滑轉向）
+            // 試玩修正 第 1 點：沒有平滑移動與重力；移動靠傳送與真實走動，撞邊界由 HeadBoundaryPusher 擋
             var loco6 = R1Data.Locomotion;
-            var cc = rigGo.AddComponent<CharacterController>();
-            cc.radius = loco6.capsuleRadius; cc.stepOffset = loco6.stepOffset; cc.height = 1.6f; cc.center = new Vector3(0, 0.8f, 0); cc.skinWidth = 0.02f;
-            var moveProv = rigGo.AddComponent<ActionBasedContinuousMoveProvider>();
-            moveProv.system = loco;
-            moveProv.moveSpeed = loco6.speed;
-            moveProv.enableStrafe = true; moveProv.enableFly = false; moveProv.useGravity = true;
-            moveProv.forwardSource = camGo.transform;
-            var moveAction = new InputAction("Move", InputActionType.Value, expectedControlType: "Vector2", processors: $"stickDeadzone(min={loco6.deadzone.ToString(System.Globalization.CultureInfo.InvariantCulture)},max=0.925)");
-            moveAction.AddBinding("<XRController>{RightHand}/{Primary2DAxis}");
-            moveAction.AddBinding("<XRController>{RightHand}/thumbstick");
-            moveProv.rightHandMoveAction = new InputActionProperty(moveAction);
-            moveProv.leftHandMoveAction = new InputActionProperty(new InputAction("Move Left (off)", InputActionType.Value, expectedControlType: "Vector2"));
-            var ccDriver = rigGo.AddComponent<CharacterControllerDriver>();
-            ccDriver.locomotionProvider = moveProv; ccDriver.minHeight = 0.5f; ccDriver.maxHeight = 2.2f;
-            // 暈動遮罩（攝影機前 0.1 m）
-            var vigQuad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            vigQuad.name = "Vignette";
-            NoCollider(vigQuad);
-            vigQuad.transform.SetParent(camGo.transform, false);
-            vigQuad.transform.localPosition = new Vector3(0, 0, 0.1f);
-            vigQuad.transform.localScale = Vector3.one * 0.35f;
-            vigQuad.GetComponent<Renderer>().sharedMaterial = lineMat;
-            var vig = camGo.AddComponent<XrVignette>(); vig.Setup(vigQuad.GetComponent<Renderer>());
-            rigGo.AddComponent<XrLocomotion>().Setup(moveProv, loco6, camGo.transform, rigGo.transform, vig);
-            sb.AppendLine($"VR：右搖桿平滑移動 {loco6.speed} m/s（車頂上限 {loco6.roofMaxSpeed}）、死區 {loco6.deadzone}、CharacterController r {loco6.capsuleRadius}、遮罩 {(loco6.vignetteDefaultOn ? "開" : "關")}");
+            rigGo.AddComponent<HeadBoundaryPusher>().Setup(origin);
+            rigGo.AddComponent<XrLocomotion>().Setup(loco6, camGo.transform, rigGo.transform, teleport);
+            BuildBoundary(sb);
+            sb.AppendLine($"VR：安全網低於地板 {loco6.recoverBelowFloorM} m");
             rigGo.AddComponent<XrViewHeight>().Setup(origin, R1Data.Height, R1Data.Locomotion, fader);
             var coach = rigGo.AddComponent<XrCoach>();
             coach.Setup(rig);
@@ -258,6 +237,17 @@ namespace PantographSim.Editor.XR
         }
 
         /// <summary>a6 第一節 4：「去駕駛室」地面光圈 mk.platform.to_cab（外觀沿用 TP_Marker、藍色）。標記，不是站點；按鈕和傳送是 R1.5b。</summary>
+        /// <summary>試玩修正 第 1 點：頭的活動範圍由場景的 Walkable 產生（外緣往內縮 BoundaryDef.inset）。跨板只算在 open 那一組。</summary>
+        public static void BuildBoundary(StringBuilder sb)
+        {
+            var def = R1Data.Boundary;
+            var walk = Object.FindObjectsOfType<BoxCollider>(true).Where(c => c.gameObject.layer == LayerMask.NameToLayer(SceneLayers.Walkable)).ToList();
+            def.open = BoundaryLogic.Erode(walk.Select(BoundaryLogic.WalkRect).ToList(), def.inset);
+            def.closed = BoundaryLogic.Erode(walk.Where(c => c.name != "Walkable_Bridge").Select(BoundaryLogic.WalkRect).ToList(), def.inset);
+            EditorUtility.SetDirty(def);
+            sb.AppendLine($"VR：頭的活動範圍 {walk.Count} 塊 Walkable → 內縮 {def.inset} m：閘門開 {def.open.Length} 塊、關 {def.closed.Length} 塊");
+        }
+
         static void BuildToCabMarker(Transform parent, Dictionary<string, Material> mats, Material lineMat, StringBuilder sb)
         {
             var d = R1Data.RoofScene;

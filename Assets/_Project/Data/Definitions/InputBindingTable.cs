@@ -54,7 +54,7 @@ namespace PantographSim.Data
         {
             ("Right", "RightTrigger", "Use", "點／使用：空手點零件＝查看；指著面板或升降 ▲▼＝按下；拿著工具＝使用工具"),
             ("Right", "RightGrip", "Grab", "抓／放工具、滑板、螺栓"),
-            ("Right", "RightStick", "Move", "平滑移動"),
+            ("Right", "RightStick", "None", "（無）"),
             ("Right", "RightStickClick", "None", "（無）"),
             ("Right", "A", "ResetTool", "重設手上的工具"),
             ("Right", "B", "FocusTarget", "帶我到目標"),
@@ -64,7 +64,7 @@ namespace PantographSim.Data
             ("Left", "LeftPoke", "ToolPoke", "按工具上的撥桿、± 鈕、ZERO 鍵"),
             ("Left", "X", "ToggleWorkOrder", "開關作業單（左手夾板）"),
             ("Left", "Y", "ToggleHelp", "說明"),
-            ("Left", "Menu", "Menu", "暫停選單：重做本步、面板叫回眼前、重設高度、真實高度／抬高、平滑移動、速度、遮罩、蹲低視角、離開"),
+            ("Left", "Menu", "Menu", "暫停選單：重做本步、面板叫回眼前、重設高度、真實高度／抬高、蹲低視角、離開"),
             ("Left", "LeftWrist", "WristPanel", "手腕面板：上一步（教學模式）、提示開關、面板叫回眼前、工具數值備援鈕"),
         };
 
@@ -79,7 +79,7 @@ namespace PantographSim.Data
             bool tool = context.StartsWith(ToolPrefix);
             switch (control)
             {
-                case "RightStickClick": return false;   // 沒有功能
+                case "RightStick": case "RightStickClick": return false;   // 沒有功能
                 case "A": return tool;                  // 重設工具：彈窗開著（PanelOpen／ErrorOpen）或空手時沒作用
                 case "LeftPoke": return tool;           // 只有拿著工具時，工具上的撥桿、± 鈕、ZERO 才啟用
                 default: return true;                   // 其他鍵在所有情境都有作用

@@ -329,7 +329,7 @@ namespace PantographSim.Editor
                 // 不會動零件的擋牆叫 Blocker_Static：「離不可見牆」不查它，改由第16項 (i) 的 staticPartClearance 保證
                 if (r.width > 0.01f && r.height > 0.01f) Col(statics.Contains(o) ? "Blocker_Static" : "Blocker", roof.col, new Vector3(r.xMin, roofY, r.yMin), new Vector3(r.xMax, roofY + d.roofWallHeight, r.yMax), SceneLayers.LocomotionBlocker);
             }
-            float gz0 = d.gateCenterZ - d.gateWidth / 2f, gz1 = d.gateCenterZ + d.gateWidth / 2f, wh = roofY + d.roofWallHeight;
+            float gz0 = d.gateCenterZ - d.gateWidth / 2f, gz1 = d.gateCenterZ + d.gateWidth / 2f, wh = roofY + d.gapRailHeight;
             Col("EdgeWall_+X", roof.col, new Vector3(walkHalf, roofY, z0), new Vector3(walkHalf + 0.05f, wh, zb0), SceneLayers.WalkLimit);
             Col("EdgeWall_+X_Base", roof.col, new Vector3(wide, roofY, zb0), new Vector3(wide + 0.05f, wh, zb1), SceneLayers.WalkLimit);
             Col("EdgeWall_+X_C", roof.col, new Vector3(walkHalf, roofY, zb1), new Vector3(walkHalf + 0.05f, wh, z1), SceneLayers.WalkLimit);
@@ -352,8 +352,17 @@ namespace PantographSim.Editor
                 if (sgn > 0 || zb0 >= gz1) Col(sgn > 0 ? "EdgeWall_+X_Step0" : "EdgeWall_-X_Step0", roof.col, new Vector3(xa, roofY, zb0 - 0.05f), new Vector3(xb, wh, zb0), SceneLayers.WalkLimit);   // −X 側前端在活動欄開口內：由 GapBlocker 擋
                 Col(sgn > 0 ? "EdgeWall_+X_Step1" : "EdgeWall_-X_Step1", roof.col, new Vector3(xa, roofY, zb1), new Vector3(xb, wh, zb1 + 0.05f), SceneLayers.WalkLimit);
             }
-            Col("EndWall_-Z", roof.col, new Vector3(-walkHalf, roofY, z0 - 0.05f), new Vector3(walkHalf, wh, z0), SceneLayers.LocomotionBlocker);
-            Col("EndWall_+Z", roof.col, new Vector3(-walkHalf, roofY, z1), new Vector3(walkHalf, wh, z1 + 0.05f), SceneLayers.LocomotionBlocker);
+            Col("EndWall_-Z", roof.col, new Vector3(-walkHalf, roofY, z0 - 0.05f), new Vector3(walkHalf, wh, z0), SceneLayers.WalkLimit);
+            Col("EndWall_+Z", roof.col, new Vector3(-walkHalf, roofY, z1), new Vector3(walkHalf, wh, z1 + 0.05f), SceneLayers.WalkLimit);
+            // 試玩修正 第 1 點（規格 v5）：不能有隱形牆，collider 和看得見的護欄一樣高。底架跪著作業的段落用 A 矮欄，其他用 B 一般護欄
+            // shortcut: 暫時用黃色方塊，黃黑斜條、中橫桿、踢腳板和端擋板等建模 A 定段 ID 後換掉
+            foreach (var w in roof.col.GetComponentsInChildren<BoxCollider>(true).Where(c => c.gameObject.layer == L(SceneLayers.WalkLimit) && !c.name.Contains("GateSlice")).ToList())
+            {
+                float railH = w.name.Contains("_Base") || w.name.Contains("_Step") ? d.roofEdgeRailHeight : d.gapRailHeight;
+                var at = w.transform.position; at.y = roofY + railH / 2f;
+                w.transform.position = at; w.size = new Vector3(w.size.x, railH, w.size.z);
+                Box(w.name + "_Rail", roof.visual, at, w.size, Mat("warning", new Color(1f, 0.82f, 0.05f)), collider: false);
+            }
             sb.AppendLine($"車頂：可走區 {walk.Count} 塊（|X|≤{walkHalf:0.00}，底架兩側 Z {zb0:0.000}…{zb1:0.000} 放寬到 |X|≤{wide:0.00}、紅線 {d.roofBaseWarningX:0.00}；挖掉會動的段升降全程頂點範圍外擴 {d.movingCarveInflate} m、母線與避雷器外擴 {m} m、底架與絕緣子頂點範圍外擴 {d.staticCarveInflate} m）；降弓後滑板頂面在車頂上 {res.stripTop:0.000} m");
             foreach (var (o, i) in obstacles.Select((o, i) => (o, i))) sb.AppendLine($"  挖除 {i}：X {o.min.x:0.000}…{o.max.x:0.000}、Z {o.min.z:0.000}…{o.max.z:0.000}");
 
@@ -726,11 +735,13 @@ namespace PantographSim.Editor
             var area = Piece(env, "ENV_MaintenanceArea");
             Box("Floor", area.visual, new Vector3((a.x + b.x) / 2f, gy + 0.005f, (a.y + b.y) / 2f), new Vector3(b.x - a.x, 0.01f, b.y - a.y), Mat("maintFloor", new Color(0.36f, 0.38f, 0.40f)), collider: false);
             Col("Walkable_Maintenance", area.walk, new Vector3(a.x, gy - 0.1f, a.y), new Vector3(b.x, gy + 0.01f, b.y), SceneLayers.Walkable);
-            const float wallH = 1.2f, t = 0.05f;
-            Col("Edge_W", area.col, new Vector3(a.x - t, gy, a.y), new Vector3(a.x, gy + wallH, b.y), SceneLayers.LocomotionBlocker);
-            Col("Edge_E", area.col, new Vector3(b.x, gy, a.y), new Vector3(b.x + t, gy + wallH, b.y), SceneLayers.LocomotionBlocker);
-            Col("Edge_S", area.col, new Vector3(a.x, gy, a.y - t), new Vector3(b.x, gy + wallH, a.y), SceneLayers.LocomotionBlocker);
-            Col("Edge_N", area.col, new Vector3(a.x, gy, b.y), new Vector3(b.x, gy + wallH, b.y + t), SceneLayers.LocomotionBlocker);
+            float wallH = d.gapRailHeight; const float t = 0.05f;
+            Col("Edge_W", area.col, new Vector3(a.x - t, gy, a.y), new Vector3(a.x, gy + wallH, b.y), SceneLayers.WalkLimit);
+            Col("Edge_E", area.col, new Vector3(b.x, gy, a.y), new Vector3(b.x + t, gy + wallH, b.y), SceneLayers.WalkLimit);
+            Col("Edge_S", area.col, new Vector3(a.x, gy, a.y - t), new Vector3(b.x, gy + wallH, a.y), SceneLayers.WalkLimit);
+            Col("Edge_N", area.col, new Vector3(a.x, gy, b.y), new Vector3(b.x, gy + wallH, b.y + t), SceneLayers.WalkLimit);
+            foreach (var (c0, c1) in new[] { (new Vector3(a.x, gy, a.y), new Vector3(a.x, gy, b.y)), (new Vector3(b.x, gy, a.y), new Vector3(b.x, gy, b.y)), (new Vector3(a.x, gy, a.y), new Vector3(b.x, gy, a.y)), (new Vector3(a.x, gy, b.y), new Vector3(b.x, gy, b.y)) })
+                Box("EdgeRail", area.visual, (c0 + c1) / 2f + Vector3.up * wallH / 2f, new Vector3(Mathf.Abs(c1.x - c0.x) + 2f * t, wallH, Mathf.Abs(c1.z - c0.z) + 2f * t), mWarn, collider: false);   // 試玩修正 第 1 點：看得見的邊界
             // 平台和維修區之間的地面通道：只做視覺（兩區用傳送移動）
             Box("Aisle", area.visual, new Vector3((d.PlatformOuterX + b.x) / 2f, gy + 0.004f, (a.y + b.y) / 2f), new Vector3(b.x - d.PlatformOuterX, 0.008f, b.y - a.y), Mat("aisle", new Color(0.46f, 0.48f, 0.50f)), collider: false);
             // 台架外 standClearance 的黃色走道線

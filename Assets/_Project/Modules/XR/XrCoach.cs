@@ -26,7 +26,6 @@ namespace PantographSim.XR
 
         ISimState S => Sim.State;
         int Step => (int)S.GetFloat("xr.tutorial.step");
-        float walkFrom = -1f;
 
         public void Begin()
         {
@@ -64,7 +63,7 @@ namespace PantographSim.XR
             }
         }
 
-        void OnTeleported(XrTeleportPoint p) => Advance(2);
+        void OnTeleported(XrTeleportPoint p) { Advance(3); Advance(2); }   // 先判第 4 項：同一次傳送不會連過兩項
         void OnPanelMoved(PanelMoved e) => Advance(4);   // T3：用左握把抓把手移過面板
 
         void Bind()
@@ -132,10 +131,6 @@ namespace PantographSim.XR
         {
             Bind();
             if (!bound || !InputMode.XrActive) return;
-            // 第 4 項（T6）：用右搖桿走 0.8 m（走到地上的圈）
-            // shortcut: 以累計走 0.8 m 算完成，地上沒有另外放教學用的圈, 教學要指定走到某個點時改成放一個圈並判定頭進入圈內
-            if (S.GetBool("xr.tutorial.active") && Step == 3) { if (walkFrom < 0f) walkFrom = S.GetFloat(XrLocomotion.DistanceKey); else if (S.GetFloat(XrLocomotion.DistanceKey) - walkFrom >= 0.8f) Advance(3); }
-            else walkFrom = -1f;
             // 第 6 項：抬起左手看手腕面板（左手在視線中央附近、0.75 m 內，停 0.4 秒）
             if (S.GetBool("xr.tutorial.active") && Step == 6 && rig != null && rig.Head != null && rig.LeftHand != null)
             {

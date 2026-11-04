@@ -23,11 +23,11 @@ namespace PantographSim.Tests
         }
 
         [Test]
-        public void SameControl_SameFunction_InAllContexts_RightStickOnlyMove()
+        public void SameControl_SameFunction_InAllContexts_RightStickNoFunction()
         {
             foreach (var g in T.rows.GroupBy(r => r.control))
                 Assert.AreEqual(1, g.Select(r => r.functionId).Distinct().Count(), g.Key + " 在不同情境的功能不一樣");
-            Assert.IsTrue(T.rows.Where(r => r.control == "RightStick").All(r => r.functionId == "Move" && r.enabled), "右搖桿所有情境都只有移動");
+            Assert.IsTrue(T.rows.Where(r => r.control == "RightStick").All(r => r.functionId == "None" && !r.enabled), "右搖桿所有情境都只有移動");
         }
 
         [Test]
@@ -66,7 +66,7 @@ namespace PantographSim.Tests
             Assert.IsTrue(swapped.Where(r => r.functionId == "Move").All(r => r.control == "LeftStick" && r.hand == "Left"), "左撇子：移動換到左搖桿");
             Assert.AreEqual("RightTrigger", HandednessMap.Control(HandednessMap.Control("RightTrigger", true), true), "對調兩次回原樣");
             var help = XRInputMapper.HelpText(T, InputBindingTable.Empty);
-            StringAssert.Contains("右搖桿", help); StringAssert.Contains("平滑移動", help);
+            StringAssert.DoesNotContain("右搖桿", help, "試玩修正 第 1 點：右搖桿沒有功能，不列"); StringAssert.DoesNotContain("平滑移動", help);
             StringAssert.DoesNotContain("重設手上的工具", help, "空手時 A 沒作用，不列");
             StringAssert.Contains("重設手上的工具", XRInputMapper.HelpText(T, InputBindingTable.ToolPrefix + SimIds.ToolSocket));
         }

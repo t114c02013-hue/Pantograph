@@ -29,6 +29,7 @@ namespace PantographSim.Data
         public float platformZMin = -4.0f, platformZMax = 4.0f;
         public float platformFloorY = 0f;
         public float guardrailHeight = 1.10f;
+        [Tooltip("試玩修正 第 1 點（規格 v5）：A 車頂矮欄（跪著作業的地方）、B 一般護欄的高度（m）；collider 和看得見的網格一樣高")] public float roofEdgeRailHeight = 0.45f, gapRailHeight = 1.0f;
         public float gateCenterZ = -1.00f, gateWidth = 0.80f;
 
         [Header("其他樓層")]

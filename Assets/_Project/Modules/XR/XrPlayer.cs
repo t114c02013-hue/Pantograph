@@ -356,20 +356,11 @@ namespace PantographSim.XR
         /// <summary>≡ 選單的設定（T1 高度與蹲低視角、T6 平滑移動、速度、遮罩）。回傳是否處理了。</summary>
         bool MenuSetting(string text)
         {
-            var loco = GetComponent<XrLocomotion>();
             var vh = GetComponent<XrViewHeight>();
             switch (text)
             {
-                case "move": S.SetBool(XrLocomotion.OnKey, S.Has(XrLocomotion.OnKey) && !S.GetBool(XrLocomotion.OnKey)); return true;
                 case "toolbag_mount": S.Set(XrCarryContainer.MountKey, S.Get(XrCarryContainer.MountKey) == "wrist" ? "waist" : "wrist"); return true;   // R1.5b b3
                 case "carry_swap": S.SetBool(XrCarryContainer.SwapKey, !S.GetBool(XrCarryContainer.SwapKey)); return true;
-                case "speed:+": case "speed:-":
-                    S.SetFloat(XrLocomotion.SpeedKey, Mathf.Clamp(Mathf.Round((S.GetFloat(XrLocomotion.SpeedKey, 1f) + (text == "speed:+" ? 0.1f : -0.1f)) * 10f) / 10f, 0.6f, 1.5f));
-                    return true;
-                case "vignette":
-                    float v = S.GetFloat(XrLocomotion.VignetteKey);
-                    S.SetFloat(XrLocomotion.VignetteKey, v > 0.45f ? 0.3f : v > 0.01f ? 0f : 0.6f);   // 強 → 弱 → 關 → 強
-                    return true;
                 case "height":
                     var mode = S.Get("xr.height.mode", "Raised") == "Real" ? HeightMode.Raised : HeightMode.Real;
                     S.Set("xr.height.mode", mode.ToString());

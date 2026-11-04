@@ -1,38 +1,31 @@
 ﻿using PantographSim.Core;
 using PantographSim.Data;
 using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
 
 namespace PantographSim.XR
 {
     /// <summary>
-    /// T6 右搖桿平滑移動的設定與監看（移動本身是 XRI ActionBasedContinuousMoveProvider＋CharacterController）：
-    /// ・開關 xr.move.on（預設 LocomotionSettings.smoothMoveDefaultOn）、速度 xr.move.speed（0.6–1.5，車頂上限 roofMaxSpeed）。
-    /// ・遮罩強度 xr.vignette（0＝關）；移動時開啟。
-    /// ・累計平滑移動距離與時間寫 xr.move.distance／xr.move.seconds（每秒一次，給紀錄的 summary.json）。
-    /// ・房間規模走路會繞過 CharacterController：每幀看頭的位置，腳下沒有 Walkable、或車頂沒開放卻在車頂 → 四周變紅並提示，只提示不記分。
+    /// 移動靠站點傳送加真實走動（試玩修正 第 1 點拿掉右搖桿平滑移動；撞邊界由 HeadBoundaryPusher 擋）。這裡只留：
+    /// ・車頂沒開放卻在車頂、腳下沒有可走地板 → 提示（不變暗、不拉回）。
+    /// ・安全網：XR Origin 低於目前站點地板 recoverBelowFloorM → 放回站點並寫 Log；有實體邊界之後正常不會發生。不記錯，原本該記的錯誤照舊。
     /// </summary>
     public class XrLocomotion : MonoBehaviour
     {
-        public const string OnKey = "xr.move.on", SpeedKey = "xr.move.speed", VignetteKey = "xr.vignette";
-        public const string DistanceKey = "xr.move.distance", SecondsKey = "xr.move.seconds", DangerKey = "xr.danger";
-        public const string DangerMessage = "已進入危險區域，請退回";
+        public const string OnKey = "xr.move.on", SpeedKey = "xr.move.speed", DistanceKey = "xr.move.distance", SecondsKey = "xr.move.seconds", DangerKey = "xr.danger";
+        public const string DangerMessage = "已進入危險區域，請退回", RecoveredMessage = "已回到站點";
 
-        [SerializeField] ContinuousMoveProviderBase move;
         [SerializeField] LocomotionSettings settings;
         [SerializeField] Transform head, origin;
-        [SerializeField] XrVignette vignette;
+        [SerializeField] XrTeleport teleport;
 
-        Vector3 lastPos;
-        float distance, seconds, nextWrite;
-        bool init, danger;
+        bool danger;
 
-        public void Setup(ContinuousMoveProviderBase m, LocomotionSettings s, Transform headT, Transform originT, XrVignette v)
+        public void Setup(LocomotionSettings s, Transform headT, Transform originT, XrTeleport tp)
         {
-            move = m; settings = s; head = headT; origin = originT; vignette = v;
+            settings = s; head = headT; origin = originT; teleport = tp;
         }
 
-        /// <summary>這一刻的移動速度（純函式）：車頂上限 roofMax，其他夾在 min–max。</summary>
+        /// <summary>shortcut: 平滑移動拿掉後沒有人呼叫, R1.5b 收尾和 smoothMoveDefaultOn 一起刪。這一刻的移動速度（純函式）：車頂上限 roofMax，其他夾在 min–max。</summary>
         public static float SpeedFor(float wanted, string floor, LocomotionSettings s)
         {
             float v = Mathf.Clamp(wanted, s.minSpeed, s.maxSpeed);
@@ -42,58 +35,31 @@ namespace PantographSim.XR
         /// <summary>頭在危險區（純函式）：腳下沒有可走地板，或車頂沒開放卻站在車頂。</summary>
         public static bool IsDanger(bool overWalkable, string floorUnderHead, bool roofOpen) => !overWalkable || (floorUnderHead == "Roof" && !roofOpen);
 
+        /// <summary>安全網（純函式）：Origin 比站點地板低超過 limit。</summary>
+        public static bool BelowFloor(float originY, float stationY, float limit) => originY < stationY - limit;
+
         void Update()
         {
             var s = Sim.State;
-            if (s == null || settings == null) return;
-            if (!init)
-            {
-                init = true;
-                if (!s.Has(OnKey)) s.SetBool(OnKey, settings.smoothMoveDefaultOn);
-                if (!s.Has(SpeedKey)) s.SetFloat(SpeedKey, settings.speed);
-                if (!s.Has(VignetteKey)) s.SetFloat(VignetteKey, settings.vignetteDefaultOn ? settings.vignetteStrength : 0f);
-                distance = s.GetFloat(DistanceKey); seconds = s.GetFloat(SecondsKey);
-                if (origin != null) lastPos = origin.position;
-            }
-            string floor = s.Get(XrViewHeight.FloorKey);
-            bool on = s.GetBool(OnKey) && !SimSession.IsReplay;
-            if (move != null)
-            {
-                if (move.enabled != on) move.enabled = on;
-                move.moveSpeed = SpeedFor(s.GetFloat(SpeedKey, settings.speed), floor, settings);
-            }
+            if (s == null || settings == null || head == null || !s.GetBool(XrStartupSequencer.ReadyKey)) return;
 
-            // 只算搖桿推動時的水平位移（傳送不算）
-            bool moving = false;
-            if (origin != null)
+            var at = teleport != null ? teleport.Current : null;
+            if (at != null && origin != null && BelowFloor(origin.position.y, at.transform.position.y, settings.recoverBelowFloorM))
             {
-                var d = origin.position - lastPos; d.y = 0f;
-                lastPos = origin.position;
-                if (on && move != null && move.locomotionPhase == LocomotionPhase.Moving && d.magnitude < 0.5f)
-                {
-                    moving = d.sqrMagnitude > 1e-8f;
-                    distance += d.magnitude; seconds += Time.deltaTime;
-                }
-            }
-            if (Time.time >= nextWrite && (distance > 0f || seconds > 0f))
-            {
-                nextWrite = Time.time + 1f;
-                s.Batch(() => { s.SetFloat(DistanceKey, Mathf.Round(distance * 100f) / 100f); s.SetFloat(SecondsKey, Mathf.Round(seconds * 10f) / 10f); });
+                Debug.LogWarning($"[XR] 安全網：XR Origin Y {origin.position.y:0.00} 低於站點 {at.PointId} 地板，放回站點");
+                teleport.TeleportTo(at.transform.position, at.transform.rotation, at, immediate: true);
+                s.Set("ui.toast", ""); s.Set("ui.toast", RecoveredMessage); s.SetFloat("ui.toast_time", Time.time);
             }
 
             // 危險區（只提示）
-            if (head != null)
+            bool over = Physics.Raycast(head.position + Vector3.up * 0.1f, Vector3.down, out var hit, 4f, SceneLayers.WalkableMask, QueryTriggerInteraction.Ignore);
+            bool now = IsDanger(over, over ? XrViewHeight.FloorOf(hit.collider.transform) : "", s.GetBool(LiftControl.RoofOpenKey));
+            if (now != danger)
             {
-                bool over = Physics.Raycast(head.position + Vector3.up * 0.1f, Vector3.down, out var hit, 4f, SceneLayers.WalkableMask, QueryTriggerInteraction.Ignore);
-                bool now = IsDanger(over, over ? XrViewHeight.FloorOf(hit.collider.transform) : "", s.GetBool(LiftControl.RoofOpenKey));
-                if (now != danger)
-                {
-                    danger = now;
-                    s.SetBool(DangerKey, danger);
-                    if (danger) { s.Set("ui.toast", ""); s.Set("ui.toast", DangerMessage); s.SetFloat("ui.toast_time", Time.time); }
-                }
+                danger = now;
+                s.SetBool(DangerKey, danger);
+                if (danger) { s.Set("ui.toast", ""); s.Set("ui.toast", DangerMessage); s.SetFloat("ui.toast_time", Time.time); }
             }
-            if (vignette != null) vignette.Show(danger ? 0.85f : moving ? s.GetFloat(VignetteKey) : 0f, danger);
         }
     }
 }

@@ -82,6 +82,29 @@ namespace PantographSim.Tests
             Assert.Less((Dialog().position - before).magnitude, 1e-3f, "頭轉了，任務卡固定不動");
         }
 
+        /// <summary>第 1 點：沒有重力、不會一直掉；Origin 掉到地板下 1 m 以下就放回站點；頭走出範圍被推回。</summary>
+        [UnityTest]
+        public IEnumerator NoFall_SafetyNetReturnsToStation_HeadPushedBack()
+        {
+            yield return Boot(new Vector3(0f, 1.6f, 0f));
+            tracked = true;
+            yield return WaitReady();
+            var origin = Rig.Head.parent.parent;
+            float y = origin.position.y;
+            for (int i = 0; i < 30; i++) yield return null;
+            Assert.AreEqual(y, origin.position.y, 1e-4f, "沒有重力");
+            origin.position += Vector3.down * 5f;
+            yield return null; yield return null;
+            Assert.AreEqual(y, origin.position.y, 0.01f, "下一個 tick 回到站點");
+
+            var def = Resources.Load<BoundaryDef>(BoundaryDef.ResourceName);
+            var before = Rig.Head.position;
+            origin.position += Vector3.left * 2f;   // 頭走到平台外面
+            yield return null; yield return null;
+            Assert.Less(HeadBoundaryPusher.Push(def.closed, Rig.Head.position).magnitude, 0.01f, "頭被推回範圍內");
+            Assert.AreEqual(before.y, Rig.Head.position.y, 0.01f, "只推水平");
+        }
+
         [UnityTest]
         public IEnumerator HeadOffCentre_StillLandsOnStation()
         {

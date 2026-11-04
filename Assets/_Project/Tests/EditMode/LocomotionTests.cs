@@ -18,7 +18,7 @@ namespace PantographSim.Tests
         {
             Assert.AreEqual(1.0f, L.speed, 1e-4f);
             Assert.IsTrue(L.vignetteDefaultOn);
-            Assert.IsTrue(L.smoothMoveDefaultOn);
+            Assert.IsFalse(L.smoothMoveDefaultOn, "試玩修正 第 1 點：平滑移動拿掉");
             Assert.AreEqual(0.15f, L.deadzone, 1e-4f);
             Assert.AreEqual(0.2f, L.capsuleRadius, 1e-4f);
             Assert.AreEqual(0.2f, L.stepOffset, 1e-4f);
@@ -43,20 +43,16 @@ namespace PantographSim.Tests
         }
 
         [Test]
-        public void Scene_RigHasCharacterControllerAndMoveProvider_RightHandOnly()
+        public void Scene_RigHasNoSmoothMove_NoCharacterController_HasBoundaryPusher()
         {
             StationTests.WithScene(scene =>
             {
                 var all = Object.FindObjectsOfType<MonoBehaviour>(true).Where(m => m.gameObject.scene == scene).ToList();
-                var move = all.FirstOrDefault(m => m.GetType().Name == "ActionBasedContinuousMoveProvider");
-                Assert.IsNotNull(move, "XR Origin 要有連續移動");
-                var cc = move.GetComponent<CharacterController>();
-                Assert.IsNotNull(cc, "XR Origin 要有 CharacterController");
-                Assert.AreEqual(0.2f, cc.radius, 1e-4f); Assert.AreEqual(0.2f, cc.stepOffset, 1e-4f);
-                var so = new SerializedObject(move);
-                Assert.IsTrue(so.FindProperty("m_EnableStrafe").boolValue, "可以橫移");
-                Assert.IsFalse(so.FindProperty("m_EnableFly").boolValue);
-                Assert.IsTrue(so.FindProperty("m_UseGravity").boolValue, "有重力、腳貼地");
+                Assert.IsFalse(all.Any(m => m.GetType().Name.Contains("ContinuousMoveProvider")), "試玩修正 第 1 點：沒有平滑移動");
+                Assert.IsFalse(all.Any(m => m.GetType().Name.Contains("TeleportationArea")), "只有站點，沒有自由落點");
+                Assert.IsFalse(all.Any(m => m.GetType().Name == "CharacterControllerDriver"));
+                Assert.IsEmpty(Object.FindObjectsOfType<CharacterController>(true).Where(c => c.gameObject.scene == scene).ToList(), "規格 v5：不用 CharacterController");
+                Assert.IsNotNull(all.FirstOrDefault(m => m is HeadBoundaryPusher));
                 Assert.IsNotNull(all.FirstOrDefault(m => m is XrLocomotion));
                 Assert.IsFalse(all.Any(m => m.GetType().Name.Contains("SnapTurnProvider") || m.GetType().Name.Contains("ContinuousTurnProvider")), "不做平滑轉向");
             });
