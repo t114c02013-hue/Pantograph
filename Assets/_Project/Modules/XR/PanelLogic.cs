@@ -13,6 +13,14 @@ namespace PantographSim.XR
             return Quaternion.LookRotation(d.sqrMagnitude > 1e-6f ? d.normalized : Vector3.forward, Vector3.up);
         }
 
+        /// <summary>開場任務卡：頭前 distance、比眼睛低 below，只跟頭的水平朝向。</summary>
+        public static Pose InFront(Vector3 eye, Vector3 forward, float distance, float below)
+        {
+            var f = forward; f.y = 0f;
+            f = f.sqrMagnitude < 1e-6f ? Vector3.forward : f.normalized;
+            return new Pose(eye + f * distance + Vector3.down * below, Quaternion.LookRotation(f, Vector3.up));
+        }
+
         /// <summary>叫回眼前：頭前 distance、在視線 ±maxAngle 內（index 依序往左右錯開），比眼睛低 0.15 m，面向頭。</summary>
         public static Pose Recall(Vector3 head, Vector3 headForward, int index, float distance, float maxAngle)
         {

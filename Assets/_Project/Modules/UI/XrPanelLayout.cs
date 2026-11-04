@@ -36,7 +36,7 @@ namespace PantographSim.UI
         RectTransform stepPanel, wristView, gesture, toolPanel, hoverCard, labelsRoot, boardArrow;
         Transform hidden;
         readonly List<Canvas> canvases = new List<Canvas>();
-        float boardYaw, boardShownAt = -1f, followUntil;
+        float boardYaw, boardShownAt = -1f;
         float lastRecenter = -1f;
         bool boardPlaced;
 
@@ -203,7 +203,8 @@ namespace PantographSim.UI
         void PlaceDialog(float t)
         {
             var fwd = FlatForward();
-            var pos = HeadPos + fwd * DialogDistance + Vector3.down * 0.08f;
+            var st = Sim.State;   // 距離、高度是資料（PanelLayout，XrStartupSequencer 寫進黑板；UI 只能引用 Core）
+            var pos = HeadPos + fwd * (st?.GetFloat("xr.dialog.distance", DialogDistance) ?? DialogDistance) + Vector3.down * (st?.GetFloat("xr.dialog.below", 0.08f) ?? 0.08f);
             dialog.transform.position = Vector3.Lerp(dialog.transform.position, pos, t);
             dialog.transform.rotation = Quaternion.Slerp(dialog.transform.rotation, Quaternion.LookRotation(fwd, Vector3.up), t);
         }
@@ -251,19 +252,12 @@ namespace PantographSim.UI
                 if (rec.Length > 0) recDotText.text = rec;
             }
 
-            bool managed = Managed;
+            // 開場的擺放由 XrStartupSequencer 負責；開場之後才打開的對話框（錯誤視窗）開在頭前 1 m，開著時固定不跟頭，可以抓把手移動
             bool open = DialogOpen();
-            if (managed && open && !dialogWasOpen) PlaceDialog(1f);   // T3：錯誤視窗等對話框一定開在頭前 1 m；開著時固定不跟頭，可以抓把手移動
+            if (open && !dialogWasOpen && s.GetBool("xr.ready")) PlaceDialog(1f);
             dialogWasOpen = open;
-            if (!managed)
-            {
-                // 舊配置（沒有 XrPanels 時）：頭轉超過 35° 或走遠才慢慢轉過來
-                var fwd = FlatForward();
-                var toDialog = dialog.transform.position - HeadPos; toDialog.y = 0f;
-                if (Vector3.Angle(fwd, toDialog) > 35f || toDialog.magnitude > DialogDistance * 1.8f) followUntil = Time.unscaledTime + 0.8f;
-                if (Time.unscaledTime < followUntil) PlaceDialog(1f - Mathf.Exp(-4f * Time.unscaledDeltaTime));
-            }
 
+            bool managed = Managed;
             // 提示板：第一次出現在正前方 → 3 秒後箭頭 → 1 秒移到左前方（−35°）
             board.gameObject.SetActive(!s.GetBool("ui.board_hidden"));
             bool stepVisible = stepPanel != null && stepPanel.gameObject.activeSelf;

@@ -56,6 +56,23 @@ namespace PantographSim.XR
             }
         }
 
+        /// <summary>開場（XrStartupSequencer 第 4 步）與重設高度：對話框（任務卡）擺到頭前、提示板擺到目前站點。之後固定不動。</summary>
+        public void PlaceInFront(Vector3 eye, Vector3 forward)
+        {
+            if (entries.Count == 0 && Sim.State != null && Sim.Registry != null && layout != null) Build(Sim.State);
+            station = Sim.State?.Get("xr.point") ?? station;
+            foreach (var e in entries)
+            {
+                if (layout.Find(e.id).openInFront)
+                {
+                    var pose = PanelLogic.InFront(eye, forward, layout.taskCardDistance, layout.taskCardBelowEye);
+                    e.panel.SetPositionAndRotation(pose.position, pose.rotation);
+                }
+                else PlaceForStation(e);
+                FollowHandle(e);
+            }
+        }
+
         void Build(ISimState s)
         {
             foreach (var p in layout.panels)

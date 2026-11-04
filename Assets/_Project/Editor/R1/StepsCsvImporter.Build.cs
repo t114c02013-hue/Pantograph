@@ -247,7 +247,7 @@ namespace PantographSim.Editor
                 var savedPrc = SaveAsset(prc, ProcedurePath(kv.Key));
                 var course = ScriptableObject.CreateInstance<CourseDef>();
                 course.courseId = cj.courseId; course.title = cj.title; course.procedure = savedPrc; course.placements = cj.placements; course.onPass = cj.onPass;
-                course.liftCapAboveO = cj.liftCapAboveO; course.contactGapM = cj.contactGapM; course.craneParked = cj.craneParked; course.initialStates = cj.initialStates; course.faults = cj.faults;
+                course.startStationId = cj.startStationId; course.liftCapAboveO = cj.liftCapAboveO; course.contactGapM = cj.contactGapM; course.craneParked = cj.craneParked; course.initialStates = cj.initialStates; course.faults = cj.faults;
                 SaveAsset(course, CourseDefPath(kv.Key));
                 var rs = resolved.Where(r => r.e.course == kv.Key).ToList();
                 sb.AppendLine($"{kv.Key}：步驟 {saved.Count}、小動作 {rs.Count}（第 1 層 {rs.Count(r => r.layer == 1)}、第 2 層 {rs.Count(r => r.layer == 2)}、第 3 層 {rs.Count(r => r.layer == 3)}；機制待做 {rs.Count(r => r.owner.Length > 0)}）→ {CourseFolder}/{kv.Key}");

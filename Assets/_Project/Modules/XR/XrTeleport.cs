@@ -57,9 +57,15 @@ namespace PantographSim.XR
 
         public XrTeleportPoint Find(string id) => points.FirstOrDefault(p => p.PointId == id);
 
+        /// <summary>開場站點：課程資料（course.start_station），R1 沒有課程就用 StationSet.startStationId。</summary>
+        public XrTeleportPoint StartPoint => Find(Sim.State?.Get(SimIds.CourseStartStation) ?? "") ?? Find(startPointId) ?? points.FirstOrDefault();
+
+        /// <summary>頭離 XR Origin 的高度（追蹤有效時約等於眼高）。</summary>
+        public float HeadHeight => origin != null ? origin.CameraInOriginSpaceHeight : 0f;
+
         public void PlaceAtStart()
         {
-            var p = Find(startPointId) ?? points.FirstOrDefault();
+            var p = StartPoint;
             if (p != null) TeleportTo(p.transform.position, p.transform.rotation, p, immediate: true);
         }
 

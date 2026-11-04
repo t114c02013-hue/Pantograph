@@ -45,8 +45,8 @@ namespace PantographSim.XR
             {
                 var t = pendant.GetComponentsInChildren<Transform>(true).FirstOrDefault(x => x.name == n);
                 if (t == null) continue;
-                var c = t.GetComponent<Collider>() ?? t.gameObject.AddComponent<BoxCollider>();
-                if (c is BoxCollider bc) bc.size = Vector3.Max(bc.size, Vector3.one * 0.02f);
+                var c = t.GetComponent<Collider>();   // 建置時（RoofSiteBuilder）補齊；缺了只略過這一顆，後面的設定照常做
+                if (c == null) { Debug.LogError($"[XR] 天車遙控器 {n} 沒有 Collider，這顆按鍵按不到"); continue; }
                 buttonColliders[n] = c;
             }
             // 中文標籤：Label_<按鍵> 錨點，文字從 CraneProfile.buttonLabels 讀

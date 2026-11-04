@@ -52,9 +52,12 @@ namespace PantographSim.XR
             Activate();
         }
 
+        /// <summary>啟用 XR Origin 讓頭盔開始追蹤；擺人、擺介面、切 VR 模式的順序由 XrStartupSequencer 負責。</summary>
         void Activate()
         {
             if (rigRoot != null) rigRoot.SetActive(true);
+            var ears = rig != null && rig.Eye != null ? rig.Eye.GetComponent<AudioListener>() : null;
+            if (ears != null) ears.enabled = false;   // 切到 VR 之前桌面相機的 AudioListener 還在
             XrPlayer.Simulated = Simulated;
             if (Simulated)
             {
@@ -63,22 +66,17 @@ namespace PantographSim.XR
                 foreach (var c in rigRoot.GetComponentsInChildren<XRBaseController>(true)) c.enabled = false;
             }
             ServiceLocator.Register<IXrRig>(rig);
-            SetupEventSystem();
-            InputMode.SetXr(true);
-            AddRaycasters();
-            if (teleport != null) teleport.PlaceAtStart();
-            if (coach != null) coach.Begin();
-            Status = Simulated ? "VR 版面（模擬，沒有頭盔）" : "VR 模式：" + XRGeneralSettings.Instance.Manager.activeLoader.name;
-            Debug.Log("[XR] " + Status);
-            StartCoroutine(KeepRaycasters());
-            if (!Simulated) StartCoroutine(PlaceAgainWhenTracked());
-        }
-
-        /// <summary>頭盔剛開始追蹤時位置會跳一下：1 秒後再把玩家擺回開場位置（升降面板前），除非已經自己傳送過。</summary>
-        IEnumerator PlaceAgainWhenTracked()
-        {
-            yield return new WaitForSecondsRealtime(1.2f);
-            if (teleport != null && Sim.State != null && Sim.State.Get("xr.point") == "tp.platform") teleport.PlaceAtStart();
+            var sequencer = gameObject.AddComponent<XrStartupSequencer>();
+            StartCoroutine(sequencer.Run(rig, teleport, Simulated, () =>
+            {
+                if (ears != null) ears.enabled = true;
+                SetupEventSystem();
+                InputMode.SetXr(true);
+                AddRaycasters();
+                Status = Simulated ? "VR 版面（模擬，沒有頭盔）" : "VR 模式：" + (XRGeneralSettings.Instance?.Manager?.activeLoader?.name ?? "");
+                Debug.Log("[XR] " + Status);
+                StartCoroutine(KeepRaycasters());
+            }, () => { if (coach != null) coach.Begin(); }));
         }
 
         static void SetupEventSystem()

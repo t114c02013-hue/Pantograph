@@ -1044,6 +1044,8 @@ namespace PantographSim.Editor
         /// 遙控器 ENV_CraneRemote（env.crane_pendant，掛在 PendantDock，不能拿）、吊具 ENV_Sling（env.sling_1..4；v3.10 起由 BuildSlingFault 移到吊梁吊耳下）、工具袋 ENV_ToolPouch（env.tool_bag，零件袋 env.tool_bag.bolt_pouch，放在工作檯上）。
         /// 都只有模型和節點，沒有邏輯。
         /// </summary>
+        public static bool IsPendantControl(Transform t) => t.name.StartsWith("Btn_") || t.name == "Key_Power";
+
         static void BuildCraneAndRigging(Result res, RoofSceneDef d, Transform aDock, StringBuilder sb)
         {
             var env = res.env;
@@ -1103,6 +1105,14 @@ namespace PantographSim.Editor
 
             var remote = Fbx("ENV_CraneRemote", null, env, aDock.position + new Vector3(0.06f, -0.1f, 0f));
             remote.AddComponent<InteractionPointMarker>().Configure("env.crane_pendant", "天車遙控器（掛在掛座）");
+            foreach (var t in remote.GetComponentsInChildren<Transform>(true).Where(IsPendantControl))   // 試玩修正 第 7 點：每顆按鍵的觸發範圍＝網格外擴 0.005 m
+            {
+                var key = t.GetComponent<BoxCollider>();
+                if (key == null) key = t.gameObject.AddComponent<BoxCollider>();
+                key.isTrigger = true;
+                var ls = t.lossyScale;
+                key.size += new Vector3(0.01f / Mathf.Abs(ls.x), 0.01f / Mathf.Abs(ls.y), 0.01f / Mathf.Abs(ls.z));
+            }
             res.ids["env.crane_pendant"] = remote.transform;
 
             var g = d.groundY;

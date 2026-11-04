@@ -29,6 +29,7 @@ namespace PantographSim.Data
         }
 
         public string courseId, title;
+        [Tooltip("VR 開場站點（StationDef.id）")] public string startStationId = "";
         [Tooltip("D43：可選故障（只列在有的課程，例 定期的絕緣子髒汙）")] public FaultOption[] faults = Array.Empty<FaultOption>();
         public ProcedureDefinition procedure;
         public Placement[] placements = Array.Empty<Placement>();

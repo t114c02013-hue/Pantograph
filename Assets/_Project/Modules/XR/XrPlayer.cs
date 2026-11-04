@@ -93,7 +93,7 @@ namespace PantographSim.XR
         void Update()
         {
             Bind();
-            if (!bound || !InputMode.XrActive) return;
+            if (!bound || !InputMode.XrActive || !S.GetBool(XrStartupSequencer.ReadyKey)) return;   // 開場擺好人和介面才開放輸入
             UpdatePointer();
             var frame = ScriptedFrame ?? input.Read();
             var ctx = Context();
@@ -338,7 +338,10 @@ namespace PantographSim.XR
             {
                 case "redo": UiCommands.Issue(UiCommands.RestartStep, "xr.menu"); Sim.Bus.Publish(new RestartStepRequested { time = SimClock.Now }); break;
                 case "mode": Send("app.restart", ""); break;
-                case "recenter": teleport?.Recenter(); break;
+                case "recenter":
+                    var seq = FindObjectOfType<XrStartupSequencer>();
+                    if (seq != null) seq.Reseat(); else teleport?.Recenter();
+                    break;
                 case "recall": break;
                 case "quit":
 #if UNITY_EDITOR

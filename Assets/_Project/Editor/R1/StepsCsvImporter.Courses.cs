@@ -18,7 +18,7 @@ namespace PantographSim.Editor
         [Serializable]
         public class CourseJson
         {
-            public string courseId, title, menuNote = "";
+            public string courseId, title, menuNote = "", startStationId = "";
             public CourseDef.Placement[] placements = Array.Empty<CourseDef.Placement>();
             public JumpRule[] onPass = Array.Empty<JumpRule>();
             public float liftCapAboveO, contactGapM;
@@ -49,6 +49,7 @@ namespace PantographSim.Editor
                 if (cj == null) { errors.Add($"Courses.json 沒有 {c}"); continue; }
                 foreach (var p in cj.placements.Where(p => !p.id.StartsWith("name:") && sceneIds.Count > 0 && !sceneIds.Contains(p.id)))
                     errors.Add($"Courses.json {c}：擺放的 {p.id} 不在場景");
+                if (R1Data.Stations.Find(cj.startStationId) == null) errors.Add($"Courses.json {c}：startStationId「{cj.startStationId}」不是站點");
                 var ids = new HashSet<string>(courses[c].Select(s => s.stepId));
                 foreach (var j in cj.onPass.Where(j => !ids.Contains(j.stepId) || !ids.Contains(j.jumpTo)))
                     errors.Add($"Courses.json {c}：onPass {j.stepId} → {j.jumpTo} 的步驟不在這門課");

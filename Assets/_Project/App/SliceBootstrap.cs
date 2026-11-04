@@ -108,6 +108,7 @@ namespace PantographSim.App
             state.Set(SimIds.CourseId, course != null ? course.courseId : SimIds.CourseR1);   // 錄影、成績都記 courseId
             state.Set("app.courses.list", string.Join(";", new[] { SimIds.CourseR1 + "|" + r1Title + "|" }.Concat(courses.Where(c => c != null).Select(c => c.courseId + "|" + c.title + "|" + NoteOf(c.courseId)))));
             if (course != null) PantographSim.Worksite.CourseApplier.Apply(course, state);   // 課程覆寫（擺放、天車停駐、升弓上限）
+            if (course != null) state.Set(SimIds.CourseStartStation, course.startStationId);   // VR 開場站點
             var faults = course?.faults ?? new CourseDef.FaultOption[0];   // D43：可選故障，預設值讀資料
             foreach (var f in faults) state.SetBool(f.key, f.defaultOn);
             state.Set("app.faults.list", string.Join(";", faults.Select(f => f.key + "|" + f.title)));
