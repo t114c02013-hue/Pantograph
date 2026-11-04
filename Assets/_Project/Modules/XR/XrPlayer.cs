@@ -24,6 +24,7 @@ namespace PantographSim.XR
         [SerializeField] XrTeleport teleport;
         [SerializeField] XrCoach coach;
         [SerializeField] float maxDistance = 30f, grabRadius = 0.15f, trayRadius = 0.3f, pouchRadius = 0.15f;
+        Data.ToolPouchDef pouch;
         [Tooltip("D31：胸前扣環、工具環的握把半徑（RoofSceneDef.bodyRingRadius，建置時寫入）")] [SerializeField] float bodyRingRadius = 0.08f;
 
         /// <summary>R1.5b b4（D31）：建置時寫入胸前扣環、工具環的握把半徑。</summary>
@@ -93,6 +94,7 @@ namespace PantographSim.XR
         void Update()
         {
             Bind();
+            if (pouch == null) pouch = Data.ToolPouchDef.Load();
             if (!bound || !InputMode.XrActive || !S.GetBool(XrStartupSequencer.ReadyKey)) return;   // 開場擺好人和介面才開放輸入
             UpdatePointer();
             var frame = ScriptedFrame ?? input.Read();
@@ -174,6 +176,12 @@ namespace PantographSim.XR
                 case "Grab":
                     if (c.pressed) GrabStart(); else GrabEnd();
                     break;
+                case "PanelGrab":   // 左握把：抓面板把手由 XRI 處理；手在工具袋前就拿、放工具
+                    leftHandActing = true;
+                    if (c.pressed) { if (SlotNearHand() > 0 || Near("env.waist_pouch", SlotRadius)) GrabStart(); }
+                    else if (!string.IsNullOrEmpty(S.Get(SimIds.ActiveTool)) && (SlotNearHand() > 0 || Near("env.waist_pouch", SlotRadius))) GrabEnd();
+                    leftHandActing = false;
+                    break;
                 case "ResetTool":
                     UiCommands.Issue(UiCommands.ResetTool, "xr.A");
                     Sim.Bus.Publish(new ActionRequested { targetId = "tool.belt", text = "reset", toolId = "", time = SimClock.Now });
@@ -249,14 +257,15 @@ namespace PantographSim.XR
             return 0;
         }
 
-        Vector3 HandPos => rig != null && rig.RightHand != null ? rig.RightHand.position : transform.position;
+        bool leftHandActing;   // 第 4 點：左握把也能拿、放工具袋的工具（工具模型仍在右手）
+        Vector3 HandPos => rig == null ? transform.position : leftHandActing && rig.LeftHand != null ? rig.LeftHand.position : rig.RightHand != null ? rig.RightHand.position : transform.position;
+        float SlotRadius => pouch != null ? pouch.slotRadius : grabRadius;
 
         bool Near(string id, float radius) => Sim.Registry != null && Sim.Registry.TryGetPosition(id, out var p) && Vector3.Distance(p, HandPos) <= radius;
 
         int SlotNearHand()
         {
-            foreach (int k in SimIds.RackSlotNumbers(S)) if (Near("env.tool_rack.slot_" + k, grabRadius)) return k;
-            return 0;
+            return XrPouchHover.Nearest(SimIds.RackSlotNumbers(S), k => Sim.Registry != null && Sim.Registry.TryGetPosition("env.tool_rack.slot_" + k, out var p) ? p : (Vector3?)null, new[] { HandPos }, SlotRadius).slot;
         }
 
         void GrabStart()
@@ -269,7 +278,7 @@ namespace PantographSim.XR
             if (empty && Near(BodyRings.ChestRing, bodyRingRadius)) { var (t, x) = BodyRings.ChestRingRequest(S); Send(t, x); grabPickedThisPress = true; return; }
             if (empty && S.GetBool(BodyRings.LeadCarried) && Near(BodyRings.ToolRing, bodyRingRadius)) { var (t, x) = BodyRings.ToolRingRequest(S); Send(t, x); grabPickedThisPress = true; return; }
             // D30：手伸到腰包按握把＝從腰包拿出上鎖掛牌組（手要空著）
-            if (string.IsNullOrEmpty(active) && string.IsNullOrEmpty(S.Get("hand.item")) && Near("env.waist_pouch", pouchRadius)) { Send("env.waist_pouch", "click"); grabPickedThisPress = true; return; }
+            if (string.IsNullOrEmpty(active) && string.IsNullOrEmpty(S.Get("hand.item")) && Near("env.waist_pouch", SlotRadius)) { Send("env.waist_pouch", "click"); grabPickedThisPress = true; return; }
             int slot = SlotOf(hoveredId);
             if (slot == 0) slot = SlotNearHand();
             if (slot > 0 && string.IsNullOrEmpty(active) && string.IsNullOrEmpty(S.Get("hand.item")))
@@ -290,10 +299,10 @@ namespace PantographSim.XR
             if (!string.IsNullOrEmpty(active))
             {
                 int k = SlotOfTool(active);
-                if (k > 0 && (SlotOf(hoveredId) == k || Near("env.tool_rack.slot_" + k, grabRadius)))
+                if (k > 0 && (SlotOf(hoveredId) == k || Near("env.tool_rack.slot_" + k, SlotRadius)))
                     Sim.Bus.Publish(new ToolReturnRequested { targetId = "env.tool_rack.slot_" + k, value = k, time = SimClock.Now });
                 else if (active == BodyRings.ToolGroundingLead && Near(BodyRings.ToolRing, bodyRingRadius)) { var (t, x) = BodyRings.ToolRingRequest(S); Send(t, x); }   // D31：短接地線掛回安全帶工具環
-                else if (Near("env.waist_pouch", pouchRadius)) Send("env.waist_pouch", "click");   // D30：上鎖掛牌組收進腰包（不是腰包的工具由 ToolBelt 提示）
+                else if (Near("env.waist_pouch", SlotRadius)) Send("env.waist_pouch", "click");   // D30：上鎖掛牌組收進腰包（不是腰包的工具由 ToolBelt 提示）
                 else Send("tool.belt", "release:" + (S.Get(XrViewHeight.FloorKey) == "Roof" ? "roof" : "ground"));   // 防墜繫繩：車頂垂掛並記 Major、地面放下（crane-procedure 6.3）
                 return;
             }
@@ -316,7 +325,7 @@ namespace PantographSim.XR
         void OnToolSelected(ToolSelected e)
         {
             ShowHeldModel(e.toolId);
-            if (!string.IsNullOrEmpty(e.toolId)) Haptic(0.45f, 0.08f);   // 抓取工具
+            if (!string.IsNullOrEmpty(e.toolId)) Haptic(pouch != null ? pouch.grabAmplitude : 0.5f, pouch != null ? pouch.grabSeconds : 0.08f);   // 抓取工具
         }
 
         void OnState(StateChanged e)
@@ -456,6 +465,14 @@ namespace PantographSim.XR
         }
 
         // ---------- 震動 ----------
+        /// <summary>左手或右手震動。</summary>
+        public void Haptic(bool left, float amplitude, float duration)
+        {
+            if (!left) { Haptic(amplitude, duration); return; }
+            var dev = UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode.LeftHand);
+            if (dev.isValid) dev.SendHapticImpulse(0, amplitude, duration);
+        }
+
         public void Haptic(float amplitude, float duration)
         {
             if (rightController != null && rightController.SendHapticImpulse(amplitude, duration)) return;

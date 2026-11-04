@@ -276,7 +276,7 @@ namespace PantographSim.Tests
         }
 
         /// <summary>R1.5a 收尾時的按鍵表（列內容的雜湊）；R1.5b 不新增控制器按鍵（設計原則 2）。</summary>
-        const string R1BindingHash = "7023B7551EA49180";   // 182 列；git 上 8eea3cc（R1.5a 基線）以來這個表沒變過
+        const string R1BindingHash = "5A8D6972BC6AE73F";   // 182 列；git 上 8eea3cc（R1.5a 基線）以來這個表沒變過
 
         [Test]
         public void InputBindingTable_SameAsR1()

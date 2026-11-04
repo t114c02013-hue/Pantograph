@@ -139,6 +139,39 @@ namespace PantographSim.Tests
             Assert.Less((after - before).magnitude, 0.01f, "傳送之後相對學員的位置不變");
         }
 
+        /// <summary>第 4 點：手靠近工具袋：訓練沒開始會高亮、震動、提示，拿不到工具；開始後按握把拿出、在格子裡放開放回。</summary>
+        [UnityTest]
+        public IEnumerator Pouch_HoverHintBeforeStart_TakeAndReturnAfter()
+        {
+            yield return Boot(new Vector3(0f, 1.6f, 0f));
+            tracked = true;
+            yield return WaitReady();
+            yield return null;
+            var hover = Object.FindObjectOfType<XrPouchHover>();
+            Assert.IsTrue(Sim.Registry.TryGetPosition("env.tool_rack.slot_6", out var slot));
+            Rig.LeftHand.position = Vector3.zero; Rig.RightHand.position = slot;
+            for (int i = 0; i < 3; i++) yield return null;
+            Assert.IsTrue(Sim.Registry.TryGetPosition("env.tool_rack.slot_6", out slot));
+            Rig.RightHand.position = slot;
+            yield return null;
+            Assert.AreEqual(6f, Sim.State.GetFloat(XrPouchHover.SlotKey), "指到第 6 格");
+            Assert.GreaterOrEqual(hover.HoverCount, 1, "輕震一次");
+            Assert.AreEqual(ToolPouchDef.Load().notStartedHint, Sim.State.Get("ui.toast"), "還沒開始：提示");
+            XrPlayer.ScriptedFrame = new XrFrame { rightGrip = true };
+            yield return null; yield return null;
+            XrPlayer.ScriptedFrame = new XrFrame();
+            yield return null;
+            Assert.AreEqual("", Sim.State.Get(SimIds.ActiveTool), "還沒開始拿不到工具");
+
+            Sim.State.SetBool("training.running", true);
+            XrPlayer.ScriptedFrame = new XrFrame { rightGrip = true };
+            yield return null; yield return null;
+            Assert.AreNotEqual("", Sim.State.Get(SimIds.ActiveTool), "按握把拿出工具");
+            XrPlayer.ScriptedFrame = new XrFrame();
+            yield return null; yield return null;
+            XrPlayer.ScriptedFrame = null;
+        }
+
         [UnityTest]
         public IEnumerator HeadOffCentre_StillLandsOnStation()
         {

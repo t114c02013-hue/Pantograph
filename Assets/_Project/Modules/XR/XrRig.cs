@@ -66,7 +66,7 @@ namespace PantographSim.XR
 
         public XrFrame Read() => new XrFrame
         {
-            rightTrigger = Pressed("RightTrigger"), rightGrip = Pressed("RightGrip"),
+            rightTrigger = Pressed("RightTrigger"), rightGrip = Pressed("RightGrip"), leftGrip = Pressed("LeftGrip"),
             a = Pressed("A"), b = Pressed("B"), x = Pressed("X"), y = Pressed("Y"), menu = Pressed("Menu"), leftStickClick = Pressed("LeftStickClick"),
             leftStick = leftStick.ReadValue<Vector2>(), rightStick = rightStick.ReadValue<Vector2>()
         };

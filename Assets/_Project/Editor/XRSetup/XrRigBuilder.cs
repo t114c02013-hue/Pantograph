@@ -180,6 +180,7 @@ namespace PantographSim.Editor.XR
             rigGo.AddComponent<HeadBoundaryPusher>().Setup(origin);
             rigGo.AddComponent<XrLocomotion>().Setup(loco6, camGo.transform, rigGo.transform, teleport);
             BuildBoundary(sb);
+            var pouchDef = R1Data.ToolPouch;
             sb.AppendLine($"VR：安全網低於地板 {loco6.recoverBelowFloorM} m");
             rigGo.AddComponent<XrViewHeight>().Setup(origin, R1Data.Height, R1Data.Locomotion, fader);
             var coach = rigGo.AddComponent<XrCoach>();
@@ -209,6 +210,7 @@ namespace PantographSim.Editor.XR
                 sb.AppendLine($"VR：{label} {id}：頭部偏移 {headOffset:F2}、邊長 {rd.bodyRingSize}、握把半徑 {rd.bodyRingRadius}");
             }
             player.SetBodyRingRadius(rd.bodyRingRadius);
+            rigGo.AddComponent<XrPouchHover>().Setup(rig, player);   // 第 4 點
             rigGo.SetActive(false);
             BuildToCabMarker(xrRoot.transform, mats, lineMat, sb);
             sb.AppendLine("VR：站點 " + string.Join("、", points.Select(p => p.Label + (string.IsNullOrEmpty(p.LockKey) ? "" : "（車頂開放才解鎖）"))));

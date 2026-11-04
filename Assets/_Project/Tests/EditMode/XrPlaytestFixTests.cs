@@ -169,6 +169,28 @@ namespace PantographSim.Tests
             });
         }
 
+        /// <summary>第 4 點：取最近的一格；半徑外沒有；左右手都算。</summary>
+        [Test]
+        public void Pouch_NearestSlot_EitherHand()
+        {
+            var pos = new Dictionary<int, Vector3> { { 5, new Vector3(0, 1, 0) }, { 6, new Vector3(0.1f, 1, 0) } };
+            var hands = new[] { new Vector3(5, 0, 0), new Vector3(0.08f, 1, 0) };
+            var (slot, hand) = XrPouchHover.Nearest(pos.Keys, k => pos[k], hands, 0.12f);
+            Assert.AreEqual(6, slot, "取最近"); Assert.AreEqual(1, hand, "左手也算");
+            Assert.AreEqual(0, XrPouchHover.Nearest(pos.Keys, k => pos[k], new[] { Vector3.zero }, 0.12f).slot);
+        }
+
+        /// <summary>第 4 點：轉身超過 60° 才跟過來，平常不動。</summary>
+        [Test]
+        public void Pouch_FollowsYawOnlyPastLimit()
+        {
+            bool turning = false;
+            Assert.AreEqual(0f, XrCarryContainer.FollowYaw(0f, 50f, ref turning, 60f, 5f), 1e-4f, "60° 內不動");
+            Assert.AreEqual(5f, XrCarryContainer.FollowYaw(0f, 70f, ref turning, 60f, 5f), 1e-4f, "超過開始跟");
+            Assert.IsTrue(turning);
+            Assert.AreEqual(10f, XrCarryContainer.FollowYaw(5f, 50f, ref turning, 60f, 5f), 1e-4f, "開始跟了就跟到對齊");
+        }
+
         /// <summary>第 0 點：追蹤有效才往下走；頭太低不算；逾時用預設高度。</summary>
         [Test]
         public void StartupGate_WaitsForTracking_ThenTimesOut()

@@ -30,6 +30,7 @@ namespace PantographSim.Editor
         public static CraneProfile Crane => Ensure<CraneProfile>(Folder + "/CraneProfile.asset");
         /// <summary>R1.5b b2：吊運資料（起吊條件、吸附容差、對位燈、下降對位時的碰撞排除）與傳送限制（和 RoofAccessRule 放在一起）。</summary>
         public static RiggingDef Rigging => Ensure<RiggingDef>(Folder + "/RiggingDef.asset");
+        public static ToolPouchDef ToolPouch => Ensure<ToolPouchDef>("Assets/_Project/Modules/XR/Resources/ToolPouchDef.asset");
         public static BoundaryDef Boundary => Ensure<BoundaryDef>("Assets/_Project/Modules/XR/Resources/BoundaryDef.asset");
         public static TeleportRule Teleport => Ensure<TeleportRule>(Folder + "/TeleportRule.asset");
         public static ToolSlotTable ToolSlots => Ensure<ToolSlotTable>(Folder + "/ToolSlotTable.asset");

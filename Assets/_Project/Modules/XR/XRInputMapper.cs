@@ -38,7 +38,7 @@ namespace PantographSim.XR
     /// <summary>一幀的控制器輸入（XrControllerInput 從 Input System 讀；測試或截圖腳本可直接給）。</summary>
     public struct XrFrame
     {
-        public bool rightTrigger, rightGrip, a, b, x, y, menu, leftStickClick;
+        public bool rightTrigger, rightGrip, leftGrip, a, b, x, y, menu, leftStickClick;
         public Vector2 leftStick, rightStick;
 
         public bool Get(string button)
@@ -47,6 +47,7 @@ namespace PantographSim.XR
             {
                 case "RightTrigger": return rightTrigger;
                 case "RightGrip": return rightGrip;
+                case "LeftGrip": return leftGrip;
                 case "A": return a;
                 case "B": return b;
                 case "X": return x;
@@ -122,7 +123,7 @@ namespace PantographSim.XR
                 if (cur == was) continue;
                 string command = bindings.FunctionOf(b.button);   // 功能由按鍵表決定（同一顆鍵在所有情境都一樣）
                 if (string.IsNullOrEmpty(command) || command == "None") continue;
-                if (command == "Use" || command == "Grab") { if (!cur || bindings.Enabled(context, b.button)) list.Add(new XrCommand { command = command, pressed = cur }); }   // 放開一定送，避免卡住
+                if (command == "Use" || command == "Grab" || command == "PanelGrab") { if (!cur || bindings.Enabled(context, b.button)) list.Add(new XrCommand { command = command, pressed = cur }); }   // 放開一定送，避免卡住
                 else if (cur && bindings.Enabled(context, b.button)) list.Add(new XrCommand { command = command, pressed = true });
             }
             MapLeftStick(f.leftStick, list);

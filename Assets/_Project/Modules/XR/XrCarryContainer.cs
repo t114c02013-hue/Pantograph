@@ -1,4 +1,5 @@
 using PantographSim.Core;
+using PantographSim.Data;
 using UnityEngine;
 
 namespace PantographSim.XR
@@ -36,6 +37,20 @@ namespace PantographSim.XR
             return head + yaw * offset;
         }
 
+        ToolPouchDef pouch;
+        float yaw; bool turning;
+
+        /// <summary>第 4 點（純函式）：轉身超過 limit 度才開始跟，跟到對齊才停，平常不晃。</summary>
+        public static float FollowYaw(float current, float head, ref bool turning, float limit, float step)
+        {
+            float d = Mathf.Abs(Mathf.DeltaAngle(current, head));
+            if (d > limit) turning = true;
+            if (!turning) return current;
+            float next = Mathf.MoveTowardsAngle(current, head, step);
+            if (Mathf.Abs(Mathf.DeltaAngle(next, head)) < 1f) turning = false;
+            return next;
+        }
+
         void LateUpdate()
         {
             if (rig == null || container == null || rig.Head == null || !InputMode.XrActive) return;
@@ -48,11 +63,17 @@ namespace PantographSim.XR
             else
             {
                 var h = rig.Head;
-                container.position = WaistPosition(h.position, h.rotation, waistOffset, s != null && s.GetBool(SwapKey));
-                container.rotation = Quaternion.Euler(0f, h.rotation.eulerAngles.y, 0f);   // pivot 在背面中心、開口朝 +Y
+                if (pouch == null) pouch = ToolPouchDef.Load();
+                yaw = FollowYaw(yaw, h.rotation.eulerAngles.y, ref turning, pouch.followAngleDeg, pouch.followSpeedDeg * Time.deltaTime);
+                var turned = Quaternion.Euler(0f, yaw, 0f);
+                container.position = WaistPosition(h.position, turned, waistOffset, s != null && s.GetBool(SwapKey));
+                container.rotation = turned;   // pivot 在背面中心、開口朝 +Y
             }
-            Open = rig.RightHand != null && (rig.RightHand.position - container.position).magnitude <= range;
-            foreach (var l in labels) if (l != null && l.activeSelf != Open) l.SetActive(Open);
+            // 第 4 點：教學模式每一格都顯示名稱，練習只顯示手指到的那一格（XrPouchHover）
+            bool all = s != null && s.Get("training.mode") != "practice";
+            string pointed = s != null ? "Label_" + (int)s.GetFloat(XrPouchHover.SlotKey) : "";
+            Open = pointed != "Label_0";
+            foreach (var l in labels) { if (l == null) continue; bool show = all || l.name == pointed; if (l.activeSelf != show) l.SetActive(show); }
         }
     }
 }
