@@ -62,7 +62,7 @@ namespace PantographSim.Data
             ("Left", "LeftStickClick", "Crouch", "蹲低視角（只在車頂有效）"),
             ("Left", "LeftGrip", "PanelGrab", "抓面板把手、拿放工具袋的工具"),
             ("Left", "LeftPoke", "ToolPoke", "按工具上的撥桿、± 鈕、ZERO 鍵"),
-            ("Left", "X", "ToggleWorkOrder", "開關作業單（左手夾板）"),
+            ("Left", "X", "ToggleWorkOrder", "開關作業單"),
             ("Left", "Y", "ToggleHelp", "說明"),
             ("Left", "Menu", "Menu", "暫停選單：重做本步、面板叫回眼前、重設高度、真實高度／抬高、蹲低視角、離開"),
             ("Left", "LeftWrist", "WristPanel", "手腕面板：上一步（教學模式）、提示開關、面板叫回眼前、工具數值備援鈕"),

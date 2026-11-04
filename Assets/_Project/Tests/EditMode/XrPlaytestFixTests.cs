@@ -185,6 +185,15 @@ namespace PantographSim.Tests
             CollectionAssert.IsEmpty(found);
         }
 
+        /// <summary>第 8 點：滑板工作面舒適高度 1.20 m。</summary>
+        [Test]
+        public void HeightProfile_StripTop_ComfortHeight()
+        {
+            var h = UnityEditor.AssetDatabase.LoadAssetAtPath<HeightProfile>("Assets/_Project/Modules/Worksite/Data/HeightProfile.asset");
+            var p = PostureDef.Load();
+            Assert.AreEqual(p.stripWorkHeight, h.raisedStripTop, p.stripWorkTolerance);
+        }
+
         /// <summary>第 23 項反例：按鈕放在 0.95 不合格；資料開關開著才讓建置失敗。</summary>
         [Test]
         public void HeightCheck_ButtonAt095_Fails()
