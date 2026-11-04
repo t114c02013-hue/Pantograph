@@ -79,6 +79,7 @@ namespace PantographSim.Data
         public string toolId, displayName;
         public int hotkey;
         public string[] parameters = Array.Empty<string>();
+        public string secondaryAction;
         public TutorialPage[] pages = Array.Empty<TutorialPage>();
     }
 
@@ -156,7 +157,7 @@ namespace PantographSim.Data
             {
                 var td = ScriptableObject.CreateInstance<ToolDefinition>();
                 td.name = "TL_" + t.toolId.Replace("tool.", "");
-                td.toolId = t.toolId; td.displayName = t.displayName; td.hotkey = t.hotkey; td.parameters = t.parameters;
+                td.toolId = t.toolId; td.displayName = t.displayName; td.hotkey = t.hotkey; td.parameters = t.parameters; td.secondaryAction = t.secondaryAction;
                 td.tutorial = new ToolTutorialDefinition { pages = t.pages };
                 bundle.tools.Add(td);
             }

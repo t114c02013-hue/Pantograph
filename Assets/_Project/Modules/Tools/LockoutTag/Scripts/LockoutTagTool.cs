@@ -17,6 +17,7 @@ namespace PantographSim.Tools
         public override void OnCommand(string command)
         {
             if (command == "part:" + Lock || command == "part:" + Tag) State.Set(PartKey, command.Substring(5));
+            else if (command == "part:toggle") State.Set(PartKey, State.Get(PartKey, Lock) == Tag ? Lock : Tag);   // 第 6 點：右搖桿按下
         }
 
         public override void OnReset() => State.Set(PartKey, Lock);

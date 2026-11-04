@@ -41,7 +41,7 @@ namespace PantographSim.Editor
             var stations = AssetDatabase.FindAssets("t:StationDef").Select(g => AssetDatabase.LoadAssetAtPath<StationDef>(AssetDatabase.GUIDToAssetPath(g))).Where(x => x != null).GroupBy(x => x.id).ToDictionary(g => g.Key, g => g.First());
             var masks = Object.FindObjectsOfType<DirtMask>(true).Where(m => m.Id.StartsWith("ip.roof.insulator_")).ToDictionary(m => m.Id);
             var d = R1Data.RoofScene;
-            float eyeH = AssetDatabase.LoadAssetAtPath<StationSet>("Assets/_Project/Modules/Worksite/Data/StationSet.asset").eyeHeight;
+            var posture = R1Data.PostureData;
             Physics.SyncTransforms();
             var score = new string[4]; var face = new string[4];
             for (int n = 1; n <= 4; n++)
@@ -53,7 +53,8 @@ namespace PantographSim.Editor
                 var col = mask.GetComponentInChildren<CapsuleCollider>(true);
                 bool wasOn = col.enabled; col.enabled = true; Physics.SyncTransforms();
                 var shoulder = new Vector3(st.positionXZ.x, d.RoofSurfaceY(st.positionXZ.x) + def.shoulderY, st.positionXZ.y);
-                var eye = new Vector3(shoulder.x, d.RoofSurfaceY(st.positionXZ.x) + eyeH, shoulder.z);
+                var eye = new Vector3(shoulder.x, d.RoofSurfaceY(st.positionXZ.x) + posture.standEye, shoulder.z);
+                var kneelEye = new Vector3(shoulder.x, d.RoofSurfaceY(st.positionXZ.x) + posture.kneelEye, shoulder.z);
                 var axis = mask.transform.position;
                 var toward = Vector3.ProjectOnPlane(shoulder - axis, Vector3.up).normalized;
                 var cols = Enumerable.Range(0, def.cols).OrderByDescending(c => Vector3.Dot(Vector3.ProjectOnPlane(CellWorld(mask.transform, c, def.rows / 2, def.cols, def.rows) - axis, Vector3.up).normalized, toward)).Take(def.faceColumns).OrderBy(c => c).ToArray();
@@ -63,7 +64,7 @@ namespace PantographSim.Editor
                     for (int r = 0; r < def.rows; r++)
                     {
                         var cell = CellWorld(mask.transform, c, r, def.cols, def.rows);
-                        if (Reachable(cell, shoulder, def.reach, col) && Hits(eye, cell, col)) m[r * def.cols + c] = '1';
+                        if (Reachable(cell, shoulder, def.reach, col) && (Hits(eye, cell, col) || Hits(kneelEye, cell, col))) m[r * def.cols + c] = '1';   // 第 8.3 點：站或跪任一個看得到
                     }
                 col.enabled = wasOn;
                 score[n - 1] = new string(m); face[n - 1] = string.Join(",", cols);

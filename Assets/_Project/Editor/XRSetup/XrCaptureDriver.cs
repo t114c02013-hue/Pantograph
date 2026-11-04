@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using PantographSim.Core;
+using PantographSim.Data;
 using PantographSim.UI;
 using PantographSim.XR;
 using UnityEditor;
@@ -105,12 +106,14 @@ namespace PantographSim.Editor.XR
 
         static XrRig Rig => ServiceLocator.Get<IXrRig>() as XrRig;
 
-        /// <summary>頭在 XR Origin 上方 1.6 m，看向世界座標 look。</summary>
+        static float eyeHeight;
+
+        /// <summary>頭在 XR Origin 上方 eyeHeight，看向世界座標 look。</summary>
         static void Look(Vector3 look)
         {
             var head = Rig.Head;
             head.parent.localPosition = Vector3.zero;   // Camera Offset（Floor 模式＝0）
-            head.localPosition = new Vector3(0, 1.6f, 0);
+            head.localPosition = new Vector3(0, eyeHeight, 0);
             head.rotation = Quaternion.LookRotation(look - head.position, Vector3.up);
         }
 
@@ -133,7 +136,8 @@ namespace PantographSim.Editor.XR
             while (!Sim.Ready || !InputMode.XrActive || Rig == null) yield return null;
             var tp = UnityEngine.Object.FindObjectOfType<XrTeleport>();
             log.AppendLine("XR 狀態：" + XrModeSwitch.Status);
-            Rig.Head.localPosition = new Vector3(0, 1.6f, 0);
+            eyeHeight = PostureDef.Load().standEye;
+            Rig.Head.localPosition = new Vector3(0, eyeHeight, 0);
             tp.PlaceAtStart();
             foreach (var _ in Wait(0.5f)) yield return null;
             log.AppendLine("Canvas：" + string.Join("、", UnityEngine.Object.FindObjectsOfType<Canvas>(true).Where(c => c.isRootCanvas).Select(c => $"{c.name}({c.renderMode})")));
@@ -207,17 +211,20 @@ namespace PantographSim.Editor.XR
             Shot("rig_xr_hover");
             log.AppendLine("指到：" + S.Get("ui.hover_id") + "　資訊卡：" + InfoCardText.Build(S, Sim.Registry, "env.spare_shelf.slot_2").Replace("\n", " / "));
 
-            // ---- R1：各站點眼高 1.6 m 看面向目標（rig_xr_r1_<站點>）；車頂鎖住、活動欄、面板把手、工具節點 ----
+            // ---- R1：各站點照姿勢的眼高看面向目標（rig_xr_r1_<站點>_<姿勢>）；車頂鎖住、活動欄、面板把手、工具節點 ----
             Sim.Bus.Publish(new ToolReturnRequested { targetId = "env.tool_rack.slot_6", value = 6, time = SimClock.Now });
             S.SetBool("ui.board_hidden", false);
             foreach (var p in tp.Points)
             {
                 tp.TeleportTo(p.transform.position, p.transform.rotation, p, immediate: true);
                 foreach (var _ in Wait(0.4f)) yield return null;
-                Look(Rig.Head.position + Flat(p.transform.forward) * 2f + Vector3.down * 0.9f);
+                var posture = R1Data.Stations.Find(p.PointId)?.posture ?? Posture.Stand;
+                eyeHeight = PostureDef.Load().Eye(posture);
+                Look(p.transform.position + Vector3.up * eyeHeight + Flat(p.transform.forward) * 2f + Vector3.down * 0.9f);
                 Hands(new Vector3(-0.35f, -0.8f, 0.1f), new Vector3(0.3f, -0.8f, 0.1f));
                 foreach (var _ in Wait(0.3f)) yield return null;
-                Shot("rig_xr_r1_" + p.PointId);
+                Shot($"rig_xr_r1_{p.PointId}_{posture.ToString().ToLowerInvariant()}");
+                eyeHeight = PostureDef.Load().standEye;
                 log.AppendLine($"站點 {p.PointId}：{p.transform.position:F3}　視點 {Rig.Head.position:F3}　樓層 {S.Get("xr.floor")}");
             }
             var anchor = tp.Find("tp.platform.anchor");

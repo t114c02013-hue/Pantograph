@@ -202,6 +202,49 @@ namespace PantographSim.Tests
             Assert.Less((N("xr_standard_trigger_pressed_value").localRotation.eulerAngles - N("xr_standard_trigger_pressed_max").localRotation.eulerAngles).magnitude, 0.01f, "扳機到底");
         }
 
+        /// <summary>第 6 點：拿著上鎖掛牌組按右搖桿，鎖和牌切換；高阻計等於按測試鍵；空手沒作用。</summary>
+        [UnityTest]
+        public IEnumerator RightStickClick_ToolSecondary()
+        {
+            yield return Boot(new Vector3(0f, 1.6f, 0f));
+            tracked = true;
+            yield return WaitReady();
+            Sim.State.SetBool("training.running", true);
+            int sent = 0; string text = "", target = "";
+            Sim.Bus.Subscribe<ActionRequested>(e => { if (e.text == SimIds.ToolSecondaryCommand) { sent++; text = e.text; target = e.targetId; } });
+            IEnumerator Click()
+            {
+                Sim.State.SetBool("xr.tutorial.active", false); Sim.State.Set("ui.tutorial.tool", "");   // 第一次拿工具的教學卡
+                yield return null;
+                XrPlayer.ScriptedFrame = new XrFrame { rightStickClick = true };
+                yield return null; yield return null;
+                XrPlayer.ScriptedFrame = new XrFrame();
+                yield return null; yield return null;
+            }
+            XrPlayer.ScriptedFrame = new XrFrame();
+            yield return null;
+            yield return Click();
+            Assert.AreEqual(0, sent, "空手沒作用");
+
+            Sim.State.Set(SimIds.ActiveTool, "tool.lockout_tag");
+            yield return null;
+            string before = Sim.State.Get("tool.lockout_tag.part", "lock");
+            yield return Click();
+            Assert.AreEqual(1, sent);
+            Assert.AreNotEqual(before, Sim.State.Get("tool.lockout_tag.part", "lock"), "鎖和牌切換");
+
+            Sim.State.Set(SimIds.ActiveTool, "tool.megger");
+            yield return null;
+            yield return Click();
+            Assert.AreEqual(2, sent); Assert.AreEqual("tool.megger", target);
+
+            Sim.State.Set(SimIds.ActiveTool, "tool.caliper");
+            yield return null;
+            yield return Click();
+            Assert.AreEqual(2, sent, "其他工具沒作用");
+            XrPlayer.ScriptedFrame = null;
+        }
+
         /// <summary>第 2 點：頭在 (0, 1.63, 0) 看 +Z，任務卡在頭前 1.0 m、眼下 0.15 m，頭轉動不跟著走，「面板叫回眼前」叫得回來。</summary>
         [UnityTest]
         public IEnumerator TaskCard_FrontOfHead_Fixed_Recalled()
@@ -248,7 +291,7 @@ namespace PantographSim.Tests
             yield return WaitReady();   // 等滿 startupTimeoutSec
             for (int i = 0; i < 5; i++) yield return null;   // 開場教學的對話框打開之後才擺回預設眼高
             var floor = Point("tp.platform.lift").y;
-            Assert.AreEqual(floor + Layout.fallbackHeadHeight - Layout.taskCardBelowEye, Dialog().position.y, 0.05f, "用預設眼高擺");
+            Assert.AreEqual(floor + PostureDef.Load().standEye - Layout.taskCardBelowEye, Dialog().position.y, 0.05f, "用預設眼高擺");
 
             Rig.Head.localPosition = new Vector3(0.5f, 1.7f, 0f); headY = 1.7f; tracked = true;
             for (int i = 0; i < 5; i++) yield return null;

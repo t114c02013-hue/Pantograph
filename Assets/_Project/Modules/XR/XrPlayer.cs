@@ -164,7 +164,7 @@ namespace PantographSim.XR
         // ---------- 指令 ----------
         /// <summary>重播中只保留看的功能（傳送、轉向、說明、選單）；會改變場景的按鍵一律不作用。</summary>
         static bool BlockedInReplay(string command) =>
-            SimSession.IsReplay && (command == "Use" || command == "Grab" || command == "ResetTool" || command == "ToolAdjust" || command == "ToggleWorkOrder" || command == "FocusTarget");
+            SimSession.IsReplay && (command == "Use" || command == "Grab" || command == "ResetTool" || command == "ToolAdjust" || command == "ToolSecondary" || command == "ToggleWorkOrder" || command == "FocusTarget");
 
         void Execute(XrCommand c)
         {
@@ -219,6 +219,9 @@ namespace PantographSim.XR
                 case "TeleportAim":
                     if (teleport == null) break;
                     if (c.pressed) teleport.BeginAim(); else teleport.EndAim();
+                    break;
+                case "ToolSecondary":   // 第 6 點：右搖桿按下＝手上工具的第二功能
+                    Send(S.Get(SimIds.ActiveTool), SimIds.ToolSecondaryCommand);
                     break;
                 case "ToolAdjust":
                     if (c.scroll != 0) PointerState.InjectedScroll += c.scroll;

@@ -26,6 +26,7 @@ namespace PantographSim.Data
         public const string ToolBag = "env.tool_bag", ToolRack = "env.tool_rack", PoleRack = "env.pole_rack", WaistPouch = "env.waist_pouch";
 
         public ToolSlotDef[] slots = Array.Empty<ToolSlotDef>();
+        [Tooltip("第 8.6 點：常用的工具（架上的掛點要在 PostureDef.frequentHooks 內）")] public string[] frequentSlots = { "tool.voltage_detector", "tool.grounding_rod", "tool.megger" };
 
         public ToolSlotDef Find(int slot) => slots.FirstOrDefault(s => s != null && s.slot == slot);
         public ToolSlotDef FindTool(string toolId) => slots.FirstOrDefault(s => s != null && s.toolId == toolId);

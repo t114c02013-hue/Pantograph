@@ -22,7 +22,7 @@ namespace PantographSim.Data
             public float frontDistance, frontBelow, frontTiltDeg;
         }
 
-        [Tooltip("VR 開場（XrStartupSequencer）：等頭盔追蹤最多幾秒、頭離地多高才算追蹤有效、逾時用的眼高（m）")] public float startupTimeoutSec = 5f, trackedMinHeadY = 0.5f, fallbackHeadHeight = 1.6f;
+        [Tooltip("VR 開場（XrStartupSequencer）：等頭盔追蹤最多幾秒、頭離地多高才算追蹤有效、逾時用的眼高（m）")] public float startupTimeoutSec = 5f, trackedMinHeadY = 0.5f;
         [Tooltip("任務卡、對話框、錯誤視窗（試玩修正 8.5）：頭前方距離、比眼睛低多少（m）；只跟頭的水平朝向，擺好就固定")] public float taskCardDistance = 1.0f, taskCardBelowEye = 0.15f;
 
         public Panel[] panels =

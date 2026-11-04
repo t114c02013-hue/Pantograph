@@ -55,9 +55,10 @@ namespace PantographSim.XR
                 var p = Probe();
                 gate = Decide(p.tracked, p.headY, Time.realtimeSinceStartup - t0, layout);
             }
-            if (gate == Gate.Timeout) Debug.LogWarning($"[XR] 開場：{layout.startupTimeoutSec:0.#} s 內頭盔追蹤沒有生效，先用預設高度 {layout.fallbackHeadHeight} m 擺放");
+            if (gate == Gate.Timeout) Debug.LogWarning($"[XR] 開場：{layout.startupTimeoutSec:0.#} s 內頭盔追蹤沒有生效，先用預設高度 {PostureDef.Load().standEye} m 擺放");
             else Debug.Log($"[XR] 開場：追蹤有效，啟動後 {Time.realtimeSinceStartup - t0:0.00} s");
 
+            Sim.State?.SetFloat("xr.stand_eye", PostureDef.Load().standEye);
             Sim.State?.SetFloat("xr.dialog.distance", layout.taskCardDistance);
             Sim.State?.SetFloat("xr.dialog.below", layout.taskCardBelowEye);
             enterXr?.Invoke();   // (2)
@@ -82,7 +83,7 @@ namespace PantographSim.XR
             var head = rig != null ? rig.Head : null;
             var st = teleport.StartPoint;
             if (head == null || st == null) return;
-            var eye = fallback ? st.transform.position + Vector3.up * layout.fallbackHeadHeight : head.position;
+            var eye = fallback ? st.transform.position + Vector3.up * PostureDef.Load().standEye : head.position;
             PlacePanels(eye, fallback ? st.transform.forward : head.forward);
         }
 

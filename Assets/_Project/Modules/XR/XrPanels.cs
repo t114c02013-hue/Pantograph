@@ -198,7 +198,7 @@ namespace PantographSim.XR
             else
             {
                 var pos = PanelLogic.FromLocal(st, layout.Find(e.id).offset, 0f).position;
-                pose = new Pose(pos, PanelLogic.FaceHead(pos, st.position + Vector3.up * 1.6f));
+                pose = new Pose(pos, PanelLogic.FaceHead(pos, st.position + Vector3.up * PostureDef.Load().standEye));
             }
             e.panel.SetPositionAndRotation(pose.position, pose.rotation);
         }

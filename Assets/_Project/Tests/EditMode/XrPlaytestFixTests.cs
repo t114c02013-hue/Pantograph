@@ -169,6 +169,54 @@ namespace PantographSim.Tests
             });
         }
 
+        /// <summary>第 8.1 點：五個值都在，程式裡沒有眼高的字面值（其他用途的 1.6 列在下面）。</summary>
+        [Test]
+        public void Posture_ValuesInData_NoEyeLiteral()
+        {
+            var p = PostureDef.Load();
+            Assert.AreEqual(1.63f, p.standEye, 1e-4f); Assert.AreEqual(1.20f, p.kneelEye, 1e-4f); Assert.AreEqual(0.95f, p.crouchEye, 1e-4f);
+            Assert.AreEqual(1.09f, p.standElbow, 1e-4f); Assert.AreEqual(1.43f, p.standShoulder, 1e-4f);
+            Assert.AreEqual(p.kneelEye, p.Eye(Posture.Kneel)); Assert.AreEqual(p.crouchEye, p.Eye(Posture.Crouch));
+            // 這些檔案的 1.6 不是眼高（車頂圓弧、桿長、傳送吸附、相機與模型擺位）
+            var notEye = new[] { "PostureDef.cs", "RoofSceneDef.cs", "PantographRigBuilder.cs", "RoofSiteBuilder.cs", "SliceSceneBuilder.cs", "XrHeldPole.cs", "XrPlayer.cs", "XrTeleport.cs" };
+            var found = System.IO.Directory.GetFiles("Assets/_Project", "*.cs", System.IO.SearchOption.AllDirectories)
+                .Where(f => !f.Replace('\\', '/').Contains("/Tests/") && !notEye.Contains(System.IO.Path.GetFileName(f)))
+                .Where(f => System.Text.RegularExpressions.Regex.IsMatch(System.IO.File.ReadAllText(f), @"(?<![\d.])1\.63?f")).ToList();
+            CollectionAssert.IsEmpty(found);
+        }
+
+        /// <summary>第 23 項反例：按鈕放在 0.95 不合格；資料開關開著才讓建置失敗。</summary>
+        [Test]
+        public void HeightCheck_ButtonAt095_Fails()
+        {
+            var p = ScriptableObject.CreateInstance<PostureDef>();
+            var r = new StationLayoutCheck.SceneResult();
+            StationLayoutCheck.HeightBand(r, p, "按鈕", 1.10f, p.liftButtons);
+            Assert.IsTrue(r.Ok); Assert.AreEqual(0, r.warn.Count);
+            StationLayoutCheck.HeightBand(r, p, "按鈕", 0.95f, p.liftButtons);
+            Assert.IsTrue(r.Ok, "開關關著只列警告"); Assert.AreEqual(1, r.warn.Count);
+            p.enforceHeights = true;
+            StringAssert.Contains("不合格", StationLayoutCheck.HeightBand(r, p, "按鈕", 0.95f, p.liftButtons));
+            Assert.IsFalse(r.Ok, "開關開著建置失敗");
+        }
+
+        /// <summary>第 6 點：右搖桿按下只在有第二功能的工具上有作用；每支工具都在按鍵表上（拿著不在表上的工具扳機握把會失效）。</summary>
+        [Test]
+        public void RightStickClick_OnlyToolsWithSecondary_AllToolsInTable()
+        {
+            var t = InputBindingTable.LoadDefault();
+            Assert.AreEqual("ToolSecondary", t.FunctionOf("RightStickClick"));
+            foreach (var path in UnityEditor.AssetDatabase.FindAssets("t:ToolDefinition").Select(UnityEditor.AssetDatabase.GUIDToAssetPath))
+            {
+                var d = UnityEditor.AssetDatabase.LoadAssetAtPath<ToolDefinition>(path);
+                string ctx = InputBindingTable.ToolPrefix + d.toolId;
+                Assert.IsTrue(t.Enabled(ctx, "RightTrigger"), d.toolId + " 不在按鍵表上");
+                Assert.AreEqual(!string.IsNullOrEmpty(d.secondaryAction), t.Enabled(ctx, "RightStickClick"), d.toolId);
+            }
+            Assert.AreEqual("part:toggle", UnityEditor.AssetDatabase.LoadAssetAtPath<ToolDefinition>("Assets/_Project/Modules/Tools/LockoutTag/Data/TL_lockout_tag.asset").secondaryAction);
+            Assert.IsFalse(t.Enabled(InputBindingTable.Empty, "RightStickClick"), "空手沒作用");
+        }
+
         /// <summary>第 5 點：按鍵動畫的 t（WebXR 對應）。</summary>
         [Test]
         public void Controller_PressAmount()

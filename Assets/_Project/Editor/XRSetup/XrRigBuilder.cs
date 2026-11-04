@@ -62,7 +62,7 @@ namespace PantographSim.Editor.XR
             var camGo = new GameObject("Main Camera");
             camGo.tag = "MainCamera";
             camGo.transform.SetParent(offset, false);
-            camGo.transform.localPosition = new Vector3(0, 1.6f, 0);
+            camGo.transform.localPosition = new Vector3(0, R1Data.PostureData.standEye, 0);
             var cam = camGo.AddComponent<Camera>();
             cam.nearClipPlane = 0.02f; cam.farClipPlane = 200f; cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = new Color(0.55f, 0.65f, 0.75f);
             camGo.AddComponent<AudioListener>();
@@ -223,8 +223,10 @@ namespace PantographSim.Editor.XR
             mech.SetLift(0f);
             // 第21項（增補 7）：StationSet.wrenchSweepTools 逐支讀 ToolDefinition（handleLengthM、socketIds）＋套筒目錄
             var wrench = new StationLayoutCheck.WrenchSweepInput { tools = StepJsonImporter.LoadTools().Append(ToolSocketSetup.LargeWrench).Where(t => t != null).ToList(), catalog = ToolSocketSetup.Catalog };
+            R1Data.ApplyPostures(stationSet);
             var check = StationLayoutCheck.CheckScene(stationSet, R1Data.RoofScene, points, T, PanGeometry.SweptFootprints(mech), wrench,
                 new StationLayoutCheck.InspectInput { rigging = R1Data.Rigging, clearance = R1Data.Crane.inspectClearanceM });   // v3.10 查看站間距
+            System.IO.File.WriteAllLines("Logs/HeightCheck23.txt", StationLayoutCheck.Heights(check, R1Data.PostureData, R1Data.RoofScene, R1Data.ToolSlots, T));   // 第 8.6 點
             mech.SetLift(lift);
             // 增補 4 第 9 點：摘要「N 過／M 待定／K 不合格」，有待定或不合格就不寫「全過」
             string summary = $"結果：{points.Length} 站，{check.Summary}" + (check.Ok && check.pending.Count == 0 ? "（全過）" : "");

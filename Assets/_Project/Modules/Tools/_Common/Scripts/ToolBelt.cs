@@ -93,7 +93,7 @@ namespace PantographSim.Tools
             {
                 // 工具列按鈕或舊的「select」：只高亮掛位；其他是工具自己的介面指令
                 if (e.text == "select") { var t = ById(e.targetId); if (t != null) { if (t == active) ResetActive(); else Hint(t.Hotkey); } }
-                else { var t = ById(e.targetId); if (t != null) Sim.State.Batch(() => t.OnCommand(e.text)); }
+                else { var t = ById(e.targetId); if (t != null) Sim.State.Batch(() => t.OnCommand(e.text == SimIds.ToolSecondaryCommand ? t.Definition?.secondaryAction ?? "" : e.text)); }
                 return;
             }
             // 工具的一次動作＝一批：工具自己的鍵、零件因 ActionPerformed 寫的鍵（螺栓、接地、量測讀數…）一起生效

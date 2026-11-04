@@ -9,6 +9,7 @@ namespace PantographSim.Data
     {
         public string toolId;
         public string displayName;
+        [Tooltip("第 6 點：右搖桿按下送給工具的指令（第二功能）；空白＝沒有")] public string secondaryAction;
         [Tooltip("數字鍵 1–9")] public int hotkey;
         public ToolTutorialDefinition tutorial = new ToolTutorialDefinition();
         [Tooltip("參數 key=value，例 sockets=10,13,17")] public string[] parameters = Array.Empty<string>();

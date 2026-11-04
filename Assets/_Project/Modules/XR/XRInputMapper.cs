@@ -38,7 +38,7 @@ namespace PantographSim.XR
     /// <summary>一幀的控制器輸入（XrControllerInput 從 Input System 讀；測試或截圖腳本可直接給）。</summary>
     public struct XrFrame
     {
-        public bool rightTrigger, rightGrip, leftGrip, a, b, x, y, menu, leftStickClick;
+        public bool rightTrigger, rightGrip, leftGrip, a, b, x, y, menu, leftStickClick, rightStickClick;
         public Vector2 leftStick, rightStick;
 
         public bool Get(string button)
@@ -54,6 +54,7 @@ namespace PantographSim.XR
                 case "Y": return y;
                 case "Menu": return menu;
                 case "LeftStickClick": return leftStickClick;
+                case "RightStickClick": return rightStickClick;
                 default: return false;
             }
         }

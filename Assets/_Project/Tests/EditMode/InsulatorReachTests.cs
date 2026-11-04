@@ -43,14 +43,19 @@ namespace PantographSim.Tests
                     int cells = score.Count(ch => ch == '1');
                     var col = mask.GetComponentInChildren<CapsuleCollider>(true);
                     bool wasOn = col.enabled; col.enabled = true; Physics.SyncTransforms();
-                    var eye = st.position + Vector3.up * set.eyeHeight;
+                    var eyes = new[] { st.position + Vector3.up * PostureDef.Load().standEye, st.position + Vector3.up * PostureDef.Load().kneelEye };   // 第 8.3 點：站或跪任一個看得到
                     int seen = 0;
                     for (int i = 0; i < score.Length; i++)
                     {
                         if (score[i] != '1') continue;
                         var cell = InsulatorDirtBake.CellWorld(mask.transform, i % def.cols, i / def.cols, def.cols, def.rows);
-                        var dir = cell - eye;
-                        if (Physics.Raycast(eye, dir.normalized, out var hit, dir.magnitude + 0.01f, PantographSim.Core.SceneLayers.InteractMask, QueryTriggerInteraction.Collide) && hit.collider == col && (hit.point - cell).magnitude < 0.02f) seen++;
+                        bool anyEye = false;
+                        foreach (var eye in eyes)
+                        {
+                            var dir = cell - eye;
+                            if (Physics.Raycast(eye, dir.normalized, out var hit, dir.magnitude + 0.01f, PantographSim.Core.SceneLayers.InteractMask, QueryTriggerInteraction.Collide) && hit.collider == col && (hit.point - cell).magnitude < 0.02f) anyEye = true;
+                        }
+                        if (anyEye) seen++;
                     }
                     col.enabled = wasOn;
                     sb.AppendLine($"{a.targetId}（{a.subId}）從 {a.standPointId}：計分格 {cells} 格（面向的行 {def.faceMask[n - 1]}），桌面看得到 {seen}/{cells}＝{(cells > 0 ? seen / (float)cells : 0f):P0}");

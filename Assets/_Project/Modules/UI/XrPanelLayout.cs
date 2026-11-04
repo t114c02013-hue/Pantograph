@@ -180,7 +180,7 @@ namespace PantographSim.UI
             t.anchoredPosition = pos;
         }
 
-        Vector3 HeadPos => rig != null && rig.Head != null ? rig.Head.position : Vector3.up * 1.6f;
+        Vector3 HeadPos => rig != null && rig.Head != null ? rig.Head.position : Vector3.up * (Sim.State != null ? Sim.State.GetFloat("xr.stand_eye") : 0f);
 
         Vector3 FlatForward()
         {

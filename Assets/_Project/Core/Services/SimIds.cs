@@ -31,6 +31,9 @@ namespace PantographSim.Core
         public const string WaistPouch = "env.waist_pouch", RackInPouch = "in_pouch";
         /// <summary>審查建議：工具架／工具袋有哪些掛位（ToolBelt 開場從 ToolSlotTable 寫「1,2,…,13」；UI、VR 只能引用 Core，從這裡讀，不寫死 1–9）。</summary>
         public const string RackSlots = "rack.slots";
+        /// <summary>第 6 點：送給手上工具的「第二功能」（ToolBelt 換成 ToolDefinition.secondaryAction）。</summary>
+        public const string ToolSecondaryCommand = "secondary";
+
         public static int[] RackSlotNumbers(ISimState s) =>
             (s?.Get(RackSlots) ?? "").Split(',').Select(x => int.TryParse(x, out var n) ? n : 0).Where(n => n > 0).ToArray();
         /// <summary>R1.5b b4 第 4 部分（課程覆寫）：目前的課程、日常更換時天車停駐（D23）、升弓上限（lift 值）、弓頭到了接觸線（D41）。</summary>

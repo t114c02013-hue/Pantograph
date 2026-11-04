@@ -118,7 +118,7 @@ namespace PantographSim.XR
                 // 面向目標：眼高看得到、水平 ±30°、距離
                 var target = find(s.facingTargetId);
                 if (target == null) { r.Fail("core", s.id, $"{s.id}：找不到面向目標 {s.facingTargetId}"); continue; }
-                var eye = p + Vector3.up * set.eyeHeight;
+                var eye = p + Vector3.up * PostureDef.Load().Eye(s.posture);
                 var to = Center(target);
                 var dir = to - p; dir.y = 0f;
                 if (Vector3.Angle(tp.transform.forward, dir) > set.facingToleranceDeg) r.Fail("core", s.id, $"{s.id}：目標不在正前方 ±{set.facingToleranceDeg}°");
@@ -145,7 +145,7 @@ namespace PantographSim.XR
             }
             if (pts.TryGetValue("tp.platform.lift", out var lift))
             {
-                var eye = lift.transform.position + Vector3.up * set.eyeHeight;
+                var eye = lift.transform.position + Vector3.up * PostureDef.Load().standEye;
                 foreach (var id in new[] { "part.pan_head", "ip.pan_head.lower_target" })
                     if (T(id) is Transform t && !Visible(eye, Center(t), t)) r.bad.Add($"tp.platform.lift：看不到 {id}");
             }
@@ -168,6 +168,36 @@ namespace PantographSim.XR
 
         /// <summary>◇ 待定（增補 6 第 1 點）：不合格項目的（檢查項, 物件 ID）和 PendingRuling 完全相等才改列待定；缺裁定紀錄的那筆本身就算不合格。</summary>
         /// <summary>v3.10：平台吊帶查看站（rigging_w、crane）離平台查看位置、台架旁查看站（rig_e、rig_w）離地面查看位置的吊鉤組外緣 ≥ clearance（站點＝人的位置）。</summary>
+        /// <summary>第 23 項（第 8.6 點）：一個物件的離地高度；不合格時 enforceHeights 開著才讓建置失敗，否則列為待定。回傳報告的一行。</summary>
+        public static string HeightBand(SceneResult r, PostureDef p, string name, float height, Vector2 band)
+        {
+            bool ok = height >= band.x - Eps && height <= band.y + Eps;
+            string line = $"{(ok ? "過" : "不合格")}　{name}：離地 {height:0.000} m（要 {band.x:0.00}–{band.y:0.00}）";
+            if (!ok) (p.enforceHeights ? r.bad : r.warn).Add("第 23 項 " + line);
+            return line;
+        }
+
+        /// <summary>第 23 項：升降盒、監視畫面、工具架和桿架的掛點、遙控器掛座。工具袋不適用。</summary>
+        public static List<string> Heights(SceneResult r, PostureDef p, RoofSceneDef d, ToolSlotTable table, System.Func<string, Transform> find)
+        {
+            var lines = new List<string>();
+            void Band(string name, Transform t, float floor, Vector2 band)
+            {
+                if (t == null) lines.Add("找不到 " + name); else lines.Add(HeightBand(r, p, name, t.position.y - floor, band));
+            }
+            Transform Node(string n) { var g = GameObject.Find(n); return g != null ? g.transform : null; }
+            Band("升降盒按鈕 LiftPanelMount", Node("LiftPanelMount"), d.platformFloorY, p.liftButtons);
+            Band("弓位燈 PanIndicator", Node("PanIndicator"), d.platformFloorY, p.liftLamps);
+            Band("駕駛室監視畫面 PanHeadMonitor", Node("PanHeadMonitor"), d.cabFloorY, p.cabMonitor);
+            Band("遙控器掛座 PendantDock", Node("PendantDock"), d.platformFloorY, p.frequentHooks);
+            foreach (var s in table.slots.Where(x => x != null && x.homeStorageId != ToolSlotTable.ToolBag))
+            {
+                bool frequent = table.frequentSlots.Contains(s.toolId);
+                Band($"掛點 {s.slot} {s.toolId}{(frequent ? "（常用）" : "")}", find("env.tool_rack.slot_" + s.slot), d.platformFloorY, frequent ? p.frequentHooks : p.hooks);
+            }
+            return lines;
+        }
+
         static void InspectStations(IDictionary<string, XrTeleportPoint> pts, InspectInput inp, SceneResult r)
         {
             var g = inp.rigging;

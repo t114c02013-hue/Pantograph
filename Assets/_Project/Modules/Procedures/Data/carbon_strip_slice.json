@@ -807,7 +807,7 @@
         { "title": "操作", "body": "依 1→2→3→4 點每支螺栓，會畫出跨螺栓頭與托架的紅線。" },
         { "title": "為什麼", "body": "巡檢時只要看標記線有沒有錯開，就知道螺栓有沒有鬆動。" }
       ] },
-    { "toolId": "tool.lockout_tag", "displayName": "上鎖掛牌組", "hotkey": 1, "parameters": ["locations=在工具架,手上,在腰包"],
+    { "toolId": "tool.lockout_tag", "displayName": "上鎖掛牌組", "secondaryAction": "part:toggle", "hotkey": 1, "parameters": ["locations=在工具架,手上,在腰包"],
       "pages": [
         { "title": "用途", "body": "鎖住主斷路器與升弓開關，防止別人在你作業時送電或升弓。" },
         { "title": "操作", "body": "拿著上鎖掛牌組點開關，狀態會變成「已上鎖＋掛牌」，鑰匙在你身上。" },
@@ -819,7 +819,7 @@
         { "title": "操作", "body": "從工具袋拿出，點上臂的綁點綁上；吊回安裝後解開收回工具袋。" },
         { "title": "為什麼", "body": "沒綁就吊，弓在空中會被彈簧頂起來，撞到吊具或車體。" }
       ] },
-    { "toolId": "tool.megger", "displayName": "高阻計", "hotkey": 11, "parameters": ["min_mohm=100"],
+    { "toolId": "tool.megger", "displayName": "高阻計", "secondaryAction": "test", "hotkey": 11, "parameters": ["min_mohm=100"],
       "pages": [
         { "title": "用途", "body": "量高壓側對車體接地點的絕緣電阻，確認吊回安裝後沒有漏電路徑。" },
         { "title": "操作", "body": "在平台接上測試線量測，讀值要 ≥ 100 MΩ（示例值）；量完要放電。" },

@@ -19,6 +19,7 @@ namespace PantographSim.Data
         public StationFloor floor;
         public Vector2 positionXZ;
         public string facingTargetId;
+        [Tooltip("第 8 點：看目標的姿勢（建置檢查、截圖的眼高讀 PostureDef）")] public Posture posture;
         [Tooltip("水平距離上限（預設 0.4–0.9 m）；0＝用預設")] public float maxTargetDistance;
         public string unlockKey;
         [TextArea] public string lockedMessage;
