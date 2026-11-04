@@ -145,7 +145,8 @@ namespace PantographSim.XR
                 var bridge = hit.collider.GetComponentInParent<XRInteractableBridge>();
                 next = bridge != null ? bridge.Target : null;
                 if (next == null) next = hit.collider.GetComponentInParent<IInteractable>();
-                nextId = bridge != null && !string.IsNullOrEmpty(bridge.SimId) ? bridge.SimId : next?.Id ?? "";
+                if (next != null && !SimIds.Clickable(S, next.Id)) next = null;
+                nextId = next == null ? "" : bridge != null && !string.IsNullOrEmpty(bridge.SimId) ? bridge.SimId : next.Id;
                 hoverPoint = hit.point;
             }
             if (nextId == hoveredId) return;
@@ -238,14 +239,15 @@ namespace PantographSim.XR
             // T2-a：拿著卡尺、沒指著東西按右扳機＝ZERO（和左手 poke Poke_Zero 送同一個事件）
             if (hovered == null && tool == SimIds.ToolCaliper) { Sim.Bus.Publish(XrToolWidgets.ZeroRequest()); return; }
             if (hovered == null) return;
+            string clicked = SimIds.RayTarget(tool, hoveredId);
             Sim.Bus.Publish(new ActionRequested
             {
-                targetId = hoveredId, toolId = tool,
+                targetId = clicked, toolId = tool,
                 text = string.IsNullOrEmpty(tool) ? hovered.DefaultVerb : "click",
                 pointId = $"{hoverPoint.x.ToString("0.###", CultureInfo.InvariantCulture)},{hoverPoint.y.ToString("0.###", CultureInfo.InvariantCulture)},{hoverPoint.z.ToString("0.###", CultureInfo.InvariantCulture)}",
                 time = SimClock.Now
             });
-            S.Set("ui.last_clicked", hoveredId);
+            S.Set("ui.last_clicked", clicked);
         }
 
         // ---------- 握把：拿／還工具、放下滑板 ----------

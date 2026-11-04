@@ -32,6 +32,7 @@ namespace PantographSim.Data
         public int count;
         public bool blocks;
         public bool oncePerRun;   // R1.5b b4 3d
+        public bool tutorialHintOnly;
     }
 
     [Serializable] public class HintJson
@@ -44,6 +45,7 @@ namespace PantographSim.Data
 
     [Serializable] public class SubActionJson
     {
+        public string textDesktop, hint;   // text＝VR 文字；桌面照舊用 textDesktop
         public string text, why, target, tool, done;
         /// <summary>這個小動作的站點 ID（R1）；tp.roof.{side} 依側別展開成 tp.roof.inner／tp.roof.outer。</summary>
         public string stand;
@@ -189,7 +191,7 @@ namespace PantographSim.Data
             st.refSecondsExam = s.refSeconds != null && s.refSeconds.Length > 1 ? s.refSeconds[1] : 0f;
             st.hints = new HintSet { text = s.hints?.text, why = s.hints?.why, checklist = s.hints?.checklist ?? Array.Empty<string>(), highlightIds = s.hints?.highlightIds ?? Array.Empty<string>(), showBoltNumbers = s.hints?.showBoltNumbers ?? false, showOutwardArrow = s.hints?.showOutwardArrow ?? false };
             st.subActions = (s.subActions ?? Array.Empty<SubActionJson>())
-                .Select(a => new SubAction { text = a.text, why = a.why ?? "", targetId = a.target ?? "", toolId = a.tool ?? "", condition = a.done ?? "", standPointId = a.stand ?? "" }).ToArray();
+                .Select(a => new SubAction { text = a.text, textDesktop = a.textDesktop ?? "", hint = a.hint ?? "", why = a.why ?? "", targetId = a.target ?? "", toolId = a.tool ?? "", condition = a.done ?? "", standPointId = a.stand ?? "" }).ToArray();
             st.completion = BuildRule(s.completion);
             st.errors = s.errors.Select(BuildError).ToArray();
             return st;
@@ -221,7 +223,7 @@ namespace PantographSim.Data
             trigger = (ErrorTrigger)Enum.Parse(typeof(ErrorTrigger), e.trigger),
             what = e.what, why = e.why, fix = e.fix,
             key = e.key, key2 = e.key2, keys = e.keys ?? Array.Empty<string>(), value = e.value, whenAnswer = e.whenAnswer,
-            min = e.min, max = e.max, expected = e.expected, count = e.count, blocks = e.blocks, oncePerRun = e.oncePerRun
+            min = e.min, max = e.max, expected = e.expected, count = e.count, blocks = e.blocks, oncePerRun = e.oncePerRun, tutorialHintOnly = e.tutorialHintOnly
         };
     }
 }

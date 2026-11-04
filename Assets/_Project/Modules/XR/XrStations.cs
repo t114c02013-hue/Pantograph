@@ -87,7 +87,8 @@ namespace PantographSim.XR
         {
             var s = Sim.State;
             string stand = s?.Get("hint.sub_stand") ?? "";
-            if (string.IsNullOrEmpty(stand) || teleport == null || teleport.Find(stand) == null) return false;
+            if (teleport == null) return false;
+            if (string.IsNullOrEmpty(stand) || teleport.Find(stand) == null) { SayTarget(s); return false; }
             Vector3? look = null;
             string target = s.Get("hint.sub_target");
             if (Sim.Registry != null && !string.IsNullOrEmpty(target))
@@ -96,8 +97,16 @@ namespace PantographSim.XR
                 var pts = ids.Select(id => Sim.Registry.TryGetPosition(id, out var p) ? (Vector3?)p : null).Where(p => p.HasValue).Select(p => p.Value).ToList();
                 if (pts.Count > 0) look = pts.Aggregate(Vector3.zero, (a, b) => a + b) / pts.Count;
             }
-            teleport.GoToStation(stand, look);
+            if (teleport.GoToStation(stand, look) == XrTeleport.GoResult.AlreadyThere) SayTarget(s);
             return true;
+        }
+
+        /// <summary>已經在這一站：按「找目標」要有反應，提示要做什麼並震一下。</summary>
+        static void SayTarget(ISimState s)
+        {
+            if (s == null) return;
+            s.Set("ui.toast", ""); s.Set("ui.toast", "就在這一站：" + s.Get("hint.sub_text")); s.SetFloat("ui.toast_time", Time.time);
+            XrHaptics.Pulse(UnityEngine.XR.XRNode.RightHand, 0.3f, 0.06f);
         }
     }
 }

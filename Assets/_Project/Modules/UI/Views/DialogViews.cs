@@ -19,7 +19,7 @@ namespace PantographSim.UI
         string builtFor = "";
         int nameIndex;
         const string DesktopControls = "<b>操作</b>：到工具架點掛位拿起／歸還工具（手上一次一件；數字鍵 1–9 會高亮掛位）　左鍵點互動點　右鍵拖曳轉視角　滾輪縮放　F 拉近檢視　C 帶我到目標　R 轉動手上的滑板　Backspace 重設工具　H 完整說明　F9 開始／停止錄影";
-        const string XrControls = "<b>操作（VR）</b>：扳機＝使用／點擊　握把＝拿工具（在掛位前放開＝歸還）　左搖桿＝傳送／轉向　右搖桿＝工具微調　A 重設工具　B 帶我到目標　X 作業單　Y 說明　≡ 暫停選單（含「● 開始錄影」）";
+        const string XrControls = "<b>操作（VR）</b>：扳機＝使用／點擊　握把＝拿工具（在掛位前放開＝歸還）　左搖桿＝傳送／轉向　工具數值＝看左手開工具面板　A 重設工具　B 帶我到目標　X 作業單　Y 說明　≡ 暫停選單（含「● 開始錄影」）";
 
         protected override void OnBuild(RectTransform safe)
         {
@@ -181,7 +181,7 @@ namespace PantographSim.UI
             var pages = s.Get("ui.tutorial.pages").Split('\u001e');
             page = Mathf.Clamp(page, 0, pages.Length - 1);
             var f = pages[page].Split('\u001f');
-            title.text = $"工具教學：{s.Get("ui.tutorial.title")}　<size=22>（{page + 1}/{pages.Length}，工具架第 {Ui.ToolKey(tool)} 格）</size>";
+            title.text = $"工具教學：{s.Get("ui.tutorial.title")}　<size=22>（{page + 1}/{pages.Length}，{Ui.ToolPlace(tool)}第 {Ui.ToolKey(tool)} 格）</size>";
             heading.text = f.Length > 0 ? f[0] : "";
             body.text = f.Length > 1 ? f[1] : "";
             if (InputMode.XrActive && XrGestures.For(tool).Length > 0) body.text += "\n" + Ui.Tint("VR：" + XrGestures.For(tool), Ui.Accent);

@@ -120,6 +120,7 @@ namespace PantographSim.Data
         [Tooltip("零件盒在地面維修區的位置（R1.5b 才把 env.parts_tray 移過來；這輪只放空物件 Anchor_PartsTray_Maint）")] public Vector2 partsTrayMaintXZ = new Vector2(-12.5f, -1.4f);
 
         [Header("R1.5a 天車、吊具、工具袋（a5，靜態）")]
+        [Tooltip("terry 手調：架上驗電桿、接地桿的長度縮放與離工具模型的高度（x＝驗電桿、y＝接地桿）")] public Vector2 rackPoleScale = new Vector2(0.12305149f, 0.1400058f), rackPoleLocalY = new Vector2(-0.118f, -0.151f);
         [Tooltip("D24：驗電器（掛位 2）與接地棒（掛位 3）的伸縮絕緣桿長度（EX）；接地站到弓頭接地掛點的上限＝這個 − 0.5")] public float insulatedPoleLength = 2.5f;
         [Tooltip("天車走行軌道 X（東、西）")] public float craneRunwayEastX = 3.0f, craneRunwayWestX = -16.0f;
         [Tooltip("走行軌道 Z 範圍 ±")] public float craneRunwayHalfLength = 15f;

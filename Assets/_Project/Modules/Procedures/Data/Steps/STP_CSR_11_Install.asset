@@ -23,9 +23,10 @@ MonoBehaviour:
   - part.carbon_strip_{side}
   requiredToolId: 
   completion:
-    rid: 8951035158582525987
+    rid: 1000
   errors:
   - errorId: ERR_CSR11_Reversed
+    tutorialHintOnly: 0
     severity: 2
     what: "\u65B0\u6ED1\u677F\u88DD\u53CD\u4E86\uFF08\u659C\u9762\u671D\u5167\uFF09\u3002"
     why: "\u659C\u9762\u662F\u8B93\u67B6\u7A7A\u7DDA\u5E73\u9806\u6ED1\u5165\u7684\u5C0E\u89D2\uFF0C\u88DD\u53CD\u6703\u8B93\u7DDA\u649E\u4E0A\u76F4\u89D2\u908A\uFF0C\u9020\u6210\u522E\u7DDA\u3001\u8DF3\u5F13\u3002"
@@ -41,6 +42,9 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 1
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: "\u6309 R \u8F49\u5230\u7BAD\u982D\u671D\u5916\uFF0C\u518D\u5F92\u624B\u9EDE\u6258\u67B6\u653E\u4E0B\u3002"
     why: "\u659C\u9762\u662F\u8B93\u67B6\u7A7A\u7DDA\u5E73\u9806\u6ED1\u5165\u7684\u5C0E\u89D2\uFF0C\u88DD\u53CD\u6703\u522E\u7DDA\u3001\u8DF3\u5F13\u3002"
@@ -58,18 +62,30 @@ MonoBehaviour:
     toolId: 
     condition: part.carbon_strip_{side}.over_bracket
     standPointId: tp.roof.{side}
-  - text: "\u6309 R \u8B93\u7BAD\u982D\u671D\u5916"
+    subId: 
+    textDesktop: "\u628A\u65B0\u6ED1\u677F\u79FB\u5230\u6258\u67B6\u4E0A\u65B9"
+    hint: "\u62FF\u8457\u65B0\u6ED1\u677F\u79FB\u5230\u767C\u4EAE\u7684\u6258\u67B6\u4E0A\u65B9\u3002"
+    when: 
+  - text: "\u7FFB\u8F49\u6ED1\u677F\uFF0C\u8B93\u7BAD\u982D\u671D\u5F13\u982D\u5916\u5074"
     why: "\u659C\u9762\u8981\u671D\u5F13\u982D\u5916\u5074"
     targetId: ip.carbon_strip_{side}.install_check
     toolId: 
     condition: part.carbon_strip_{side}.new_orientation=out
     standPointId: tp.roof.{side}
-  - text: "\u5C0D\u6E96\u87BA\u6813\u5B54\u9EDE\u6258\u67B6\u653E\u4E0B"
+    subId: 
+    textDesktop: "\u6309 R \u8B93\u7BAD\u982D\u671D\u5916"
+    hint: "\u8F49\u52D5\u53F3\u624B\u624B\u8155\u628A\u6ED1\u677F\u7FFB\u9762\uFF0C\u8B93\u300C\u6B64\u5074\u671D\u5916\u300D\u7BAD\u982D\u671D\u5F13\u982D\u5916\u7DE3\u3002\u65B9\u5411\u88DD\u53CD\u662F\u56B4\u91CD\u932F\u8AA4\uFF0C\u65B9\u5411\u4E0D\u5C0D\u4E5F\u653E\u4E0D\u4E0A\u53BB\u3002"
+    when: 
+  - text: "\u5C0D\u6E96\u87BA\u6813\u5B54\u653E\u4E0B"
     why: "\u5438\u9644\u5F8C\u8AA4\u5DEE \u2264 0.5 cm"
     targetId: ip.carbon_strip_{side}.bracket
     toolId: 
     condition: part.carbon_strip_{side}.state=NewMounted && part.carbon_strip_{side}.install_distance_cm<=0.5
     standPointId: tp.roof.{side}
+    subId: 
+    textDesktop: "\u5C0D\u6E96\u87BA\u6813\u5B54\u9EDE\u6258\u67B6\u653E\u4E0B"
+    hint: 
+    when: 
   presetDone: 0
   side: 
   presetStates: []
@@ -79,7 +95,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035158582525987
+    - rid: 1000
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: part.carbon_strip_{side}.state

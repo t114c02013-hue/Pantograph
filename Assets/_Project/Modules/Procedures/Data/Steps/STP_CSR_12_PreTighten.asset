@@ -26,6 +26,7 @@ MonoBehaviour:
     rid: 1000
   errors:
   - errorId: ERR_CSR12_Overtight
+    tutorialHintOnly: 0
     severity: 1
     what: "\u7B2C\u4E00\u652F\u87BA\u6813\u5C31\u76F4\u63A5\u9396\u6B7B\uFF0C\u5176\u4ED6\u87BA\u6813\u9084\u6C92\u8CBC\u5408\u3002"
     why: "\u55AE\u908A\u5148\u9396\u6B7B\u6703\u628A\u6ED1\u677F\u62C9\u6B6A\uFF0C\u5176\u4ED6\u5B54\u5C0D\u4E0D\u6B63\uFF0C\u6ED1\u677F\u53D7\u529B\u4E0D\u5747\u3002"
@@ -41,7 +42,11 @@ MonoBehaviour:
     expected: 
     count: 4
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   - errorId: ERR_CSR12_Order
+    tutorialHintOnly: 0
     severity: 1
     what: "\u6C92\u6709\u7167 1\u21922\u21923\u21924 \u7684\u9806\u5E8F\u9810\u9396\u3002"
     why: "\u4E0D\u7167\u5C0D\u89D2\u9806\u5E8F\uFF0C\u6ED1\u677F\u6703\u88AB\u62C9\u504F\u3001\u8CBC\u5408\u4E0D\u5E73\u3002"
@@ -58,6 +63,9 @@ MonoBehaviour:
     expected: 1,2,3,4
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: "\u65B9\u5411\u5207\u5230\u300C\u9396\u300D\uFF0C\u9EDE\u7A7A\u5B54\u653E\u56DE\u87BA\u6813\uFF0C\u518D\u6BCF\u652F\u8F49\u7D04\u4E00\u5708\u5230\u8CBC\u5408\uFF0C\u4F9D
       1\u21924\u3002"
@@ -73,72 +81,116 @@ MonoBehaviour:
     showBoltNumbers: 1
     showOutwardArrow: 0
   subActions:
-  - text: "\u5230\u8ECA\u9802\u5DE5\u5177\u7BB1\u62FF\u8D77\u5957\u7B52\u6273\u624B"
+  - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u5957\u7B52\u6273\u624B"
     why: "\u8ECA\u9802\u5DE5\u5177\u7BB1\u7B2C 6 \u683C"
     targetId: env.tool_rack.slot_6
     toolId: tool.socket_wrench
     condition: tool.active=tool.socket_wrench
     standPointId: tp.roof.inner
+    subId: 
+    textDesktop: "\u5230\u8ECA\u9802\u5DE5\u5177\u7BB1\u62FF\u8D77\u5957\u7B52\u6273\u624B"
+    hint: "\u4EFB\u4E00\u624B\u4F38\u5230\u5DE6\u8170\u7684\u5DE5\u5177\u888B\uFF0C\u6309\u63E1\u628A\u62FF\u51FA\u5957\u7B52\u6273\u624B\uFF0C\u6703\u62FF\u5728\u53F3\u624B\u3002"
+    when: 
   - text: "\u5F9E\u87BA\u6813\u76E4\u62FF 1 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
     why: 
     targetId: ip.carbon_strip_{side}.bolt_1
     toolId: tool.socket_wrench
     condition: ip.carbon_strip_{side}.bolt_1.state=Placed
     standPointId: tp.roof.{side}
+    subId: 
+    textDesktop: "\u5F9E\u87BA\u6813\u76E4\u62FF 1 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
+    hint: 
+    when: 
   - text: "\u5F9E\u87BA\u6813\u76E4\u62FF 2 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
     why: 
     targetId: ip.carbon_strip_{side}.bolt_2
     toolId: tool.socket_wrench
     condition: ip.carbon_strip_{side}.bolt_2.state=Placed
     standPointId: tp.roof.{side}
+    subId: 
+    textDesktop: "\u5F9E\u87BA\u6813\u76E4\u62FF 2 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
+    hint: 
+    when: 
   - text: "\u5F9E\u87BA\u6813\u76E4\u62FF 3 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
     why: 
     targetId: ip.carbon_strip_{side}.bolt_3
     toolId: tool.socket_wrench
     condition: ip.carbon_strip_{side}.bolt_3.state=Placed
     standPointId: tp.roof.{side}
+    subId: 
+    textDesktop: "\u5F9E\u87BA\u6813\u76E4\u62FF 3 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
+    hint: 
+    when: 
   - text: "\u5F9E\u87BA\u6813\u76E4\u62FF 4 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
     why: 
     targetId: ip.carbon_strip_{side}.bolt_4
     toolId: tool.socket_wrench
     condition: ip.carbon_strip_{side}.bolt_4.state=Placed
     standPointId: tp.roof.{side}
+    subId: 
+    textDesktop: "\u5F9E\u87BA\u6813\u76E4\u62FF 4 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
+    hint: 
+    when: 
   - text: "\u65B9\u5411\u5207\u5230\u300C\u9396\u300D"
     why: 
     targetId: 
     toolId: tool.socket_wrench
     condition: tool.socket_wrench.dir=lock
     standPointId: tp.roof.{side}
+    subId: 
+    textDesktop: "\u65B9\u5411\u5207\u5230\u300C\u9396\u300D"
+    hint: "\u53F3\u624B\u62FF\u8457\u6273\u624B\uFF0C\u770B\u5DE6\u624B\u6253\u958B\u5DE5\u5177\u9762\u677F\uFF0C\u7528\u53F3\u624B\u5C04\u7DDA\u6307\u8457\u300C\u9396\u300D\u6309\u6273\u6A5F\u3002\u4E5F\u53EF\u7528\u5DE6\u624B\u6307\u5C16\u78B0\u6273\u624B\u4E0A\u7684\u6A58\u8272\u64A5\u687F\u5207\u63DB\u3002"
+    when: 
   - text: "\u628A 1 \u865F\u87BA\u6813\u9396\u5230\u8CBC\u5408"
     why: 
     targetId: ip.carbon_strip_{side}.bolt_1
     toolId: tool.socket_wrench
     condition: ip.carbon_strip_{side}.bolt_1.state=Snug
     standPointId: tp.roof.{side}
+    subId: 
+    textDesktop: "\u628A 1 \u865F\u87BA\u6813\u9396\u5230\u8CBC\u5408"
+    hint: 
+    when: 
   - text: "\u628A 2 \u865F\u87BA\u6813\u9396\u5230\u8CBC\u5408"
     why: 
     targetId: ip.carbon_strip_{side}.bolt_2
     toolId: tool.socket_wrench
     condition: ip.carbon_strip_{side}.bolt_2.state=Snug
     standPointId: tp.roof.{side}
+    subId: 
+    textDesktop: "\u628A 2 \u865F\u87BA\u6813\u9396\u5230\u8CBC\u5408"
+    hint: 
+    when: 
   - text: "\u628A 3 \u865F\u87BA\u6813\u9396\u5230\u8CBC\u5408"
     why: 
     targetId: ip.carbon_strip_{side}.bolt_3
     toolId: tool.socket_wrench
     condition: ip.carbon_strip_{side}.bolt_3.state=Snug
     standPointId: tp.roof.{side}
+    subId: 
+    textDesktop: "\u628A 3 \u865F\u87BA\u6813\u9396\u5230\u8CBC\u5408"
+    hint: 
+    when: 
   - text: "\u628A 4 \u865F\u87BA\u6813\u9396\u5230\u8CBC\u5408"
     why: 
     targetId: ip.carbon_strip_{side}.bolt_4
     toolId: tool.socket_wrench
     condition: ip.carbon_strip_{side}.bolt_4.state=Snug
     standPointId: tp.roof.{side}
-  - text: "\u628A\u5957\u7B52\u6273\u624B\u653E\u56DE\u8ECA\u9802\u5DE5\u5177\u7BB1"
+    subId: 
+    textDesktop: "\u628A 4 \u865F\u87BA\u6813\u9396\u5230\u8CBC\u5408"
+    hint: 
+    when: 
+  - text: "\u628A\u5957\u7B52\u6273\u624B\u6536\u56DE\u5DE5\u5177\u888B"
     why: "\u7528\u5B8C\u5C31\u6B78\u4F4D\uFF0C\u6536\u5C3E\u6E05\u9EDE\u624D\u5C0D\u5F97\u4E0A"
     targetId: env.tool_rack.slot_6
     toolId: 
     condition: tool.active=
     standPointId: tp.roof.inner
+    subId: 
+    textDesktop: "\u628A\u5957\u7B52\u6273\u624B\u653E\u56DE\u8ECA\u9802\u5DE5\u5177\u7BB1"
+    hint: "\u53F3\u624B\u628A\u5957\u7B52\u6273\u624B\u79FB\u56DE\u5DE6\u8170\u7684\u5DE5\u5177\u888B\uFF0C\u653E\u958B\u63E1\u628A\u5C31\u6536\u56DE\u3002"
+    when: 
   presetDone: 0
   side: 
   presetStates: []

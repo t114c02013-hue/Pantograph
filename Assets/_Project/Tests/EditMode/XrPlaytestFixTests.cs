@@ -236,6 +236,39 @@ namespace PantographSim.Tests
             Assert.LessOrEqual(b.size.x + b.size.y + b.size.z - len, 0.2f, "粗細");
         }
 
+        /// <summary>a：拿驗電桿、接地桿時指弓頭、滑板、螺栓都算掛點；其他工具不變。</summary>
+        [Test]
+        public void RayTarget_PanHead_CountsAsGroundClamp()
+        {
+            Assert.AreEqual(SimIds.GroundClamp, SimIds.RayTarget(SimIds.ToolGroundingRod, "part.pan_head"));
+            Assert.AreEqual(SimIds.GroundClamp, SimIds.RayTarget(SimIds.ToolVoltageDetector, "part.carbon_strip_R"));
+            Assert.AreEqual(SimIds.GroundClamp, SimIds.RayTarget(SimIds.ToolVoltageDetector, "ip.carbon_strip_L.bolt_1"));
+            Assert.AreEqual("part.pan_head", SimIds.RayTarget(SimIds.ToolCaliper, "part.pan_head"));
+            Assert.AreEqual(SimIds.GroundTerminal, SimIds.RayTarget(SimIds.ToolGroundingRod, SimIds.GroundTerminal));
+        }
+
+        /// <summary>i：R1 和吊車停駐的課程不能點吊車，定期課可以。</summary>
+        [Test]
+        public void Crane_NotClickable_InR1AndDaily()
+        {
+            var s = new SimState(new EventBus());
+            Assert.IsFalse(SimIds.Clickable(s, "env.crane"), "沒有課程＝R1");
+            s.Set(SimIds.CourseId, "periodic");
+            Assert.IsTrue(SimIds.Clickable(s, "env.crane"));
+            s.SetBool(SimIds.CourseCraneParked, true);
+            Assert.IsFalse(SimIds.Clickable(s, "env.crane"));
+            Assert.IsTrue(SimIds.Clickable(s, "part.pan_head"));
+        }
+
+        /// <summary>e：作業單在不在視線內。</summary>
+        [Test]
+        public void WorkOrder_InView()
+        {
+            Assert.IsTrue(PanelLogic.InView(Vector3.zero, Vector3.forward, new Vector3(0.3f, 0f, 0.6f), 50f, 1.5f));
+            Assert.IsFalse(PanelLogic.InView(Vector3.zero, Vector3.forward, new Vector3(0f, 0f, -0.6f), 50f, 1.5f), "在背後");
+            Assert.IsFalse(PanelLogic.InView(Vector3.zero, Vector3.forward, new Vector3(0f, 0f, 3f), 50f, 1.5f), "太遠");
+        }
+
         /// <summary>第 5 點：按鍵動畫的 t（WebXR 對應）。</summary>
         [Test]
         public void Controller_PressAmount()

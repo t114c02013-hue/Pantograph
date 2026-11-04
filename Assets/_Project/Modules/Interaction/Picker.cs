@@ -33,6 +33,7 @@ namespace PantographSim.Interaction
             RaycastHit info = default;
             if (!PointerState.OverUi && Physics.Raycast(cam.ScreenPointToRay(Input.mousePosition), out info, maxDistance, SceneLayers.InteractMask, QueryTriggerInteraction.Ignore))   // 不打不可見的邊界牆
                 hit = info.collider.GetComponentInParent<IInteractable>();
+            if (hit != null && !SimIds.Clickable(s, hit.Id)) hit = null;
 
             if (!ReferenceEquals(hit, hovered))
             {
@@ -47,13 +48,14 @@ namespace PantographSim.Interaction
             if (hovered == null || !ShouldSendClick(PointerState.OverUi, s.GetBool("training.paused"), s.GetBool("training.running"))) return;
             if (!Input.GetMouseButtonDown(0)) return;
             string tool = s.Get(SimIds.ActiveTool);
+            string clicked = SimIds.RayTarget(tool, hovered.Id);
             Sim.Bus.Publish(new ActionRequested
             {
-                targetId = hovered.Id, toolId = tool,
+                targetId = clicked, toolId = tool,
                 text = string.IsNullOrEmpty(tool) ? hovered.DefaultVerb : "click",
                 pointId = $"{info.point.x:0.###},{info.point.y:0.###},{info.point.z:0.###}", time = SimClock.Now
             });
-            s.Set("ui.last_clicked", hovered.Id);
+            s.Set("ui.last_clicked", clicked);
         }
     }
 }

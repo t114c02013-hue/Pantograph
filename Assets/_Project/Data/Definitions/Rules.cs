@@ -71,6 +71,7 @@ namespace PantographSim.Data
     public class ErrorRule
     {
         public string errorId;
+        [Tooltip("教學模式：不記分，把這一步的動作退回並用 fix 提示（terry 試玩）")] public bool tutorialHintOnly;
         public Severity severity;
         [TextArea] public string what;
         [TextArea] public string why;

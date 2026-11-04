@@ -25,6 +25,7 @@ MonoBehaviour:
     rid: 1000
   errors:
   - errorId: ERR_CSR06_WrongSocket
+    tutorialHintOnly: 0
     severity: 0
     what: "\u5957\u7B52\u5C3A\u5BF8\u4E0D\u5C0D\uFF0C\u5957\u4E0D\u4E0A\u87BA\u6813\u3002"
     why: "\u5C3A\u5BF8\u4E0D\u5408\u7684\u5957\u7B52\u6703\u6253\u6ED1\u3001\u78E8\u5713\u87BA\u6813\u982D\u3002"
@@ -40,7 +41,11 @@ MonoBehaviour:
     expected: 
     count: 4
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   - errorId: ERR_CSR06_Order
+    tutorialHintOnly: 0
     severity: 0
     what: "\u6C92\u6709\u7167 1\u21922\u21923\u21924 \u7684\u9806\u5E8F\u9810\u9B06\u3002"
     why: "\u4E0D\u7167\u5C0D\u89D2\u9806\u5E8F\u9B06\uFF0C\u6ED1\u677F\u53D7\u529B\u4E0D\u5747\u53EF\u80FD\u7FF9\u8D77\u6216\u5361\u4F4F\u3002"
@@ -57,7 +62,11 @@ MonoBehaviour:
     expected: 1,2,3,4
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   - errorId: ERR_CSR06_FullTurn
+    tutorialHintOnly: 0
     severity: 1
     what: "\u4E00\u652F\u87BA\u6813\u76F4\u63A5\u8F49\u9B06\u5230\u5E95\uFF0C\u6C92\u6709\u5148\u5168\u90E8\u9810\u9B06\u534A\u5708\u3002"
     why: "\u5176\u4ED6\u87BA\u6813\u9084\u9396\u8457\u6642\u55AE\u652F\u5168\u9B06\uFF0C\u6ED1\u677F\u53D7\u529B\u96C6\u4E2D\uFF0C\u53EF\u80FD\u8B8A\u5F62\u6216\u5361\u4F4F\u3002"
@@ -73,6 +82,9 @@ MonoBehaviour:
     expected: 
     count: 4
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: "\u9EDE\u87BA\u6813\u5957\u4E0A\u6273\u624B\uFF0C\u6EFE\u8F2A\u8F49 4 \u683C\uFF08\u534A\u5708\uFF09\uFF0C\u4F9D
       1\u21922\u21923\u21924\u3002"
@@ -90,48 +102,77 @@ MonoBehaviour:
     showBoltNumbers: 1
     showOutwardArrow: 0
   subActions:
-  - text: "\u5230\u8ECA\u9802\u5DE5\u5177\u7BB1\u62FF\u8D77\u5957\u7B52\u6273\u624B"
+  - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u5957\u7B52\u6273\u624B"
     why: "\u8ECA\u9802\u5DE5\u5177\u7BB1\u7B2C 6 \u683C"
     targetId: env.tool_rack.slot_6
     toolId: tool.socket_wrench
     condition: tool.active=tool.socket_wrench
     standPointId: tp.roof.inner
+    subId: 
+    textDesktop: "\u5230\u8ECA\u9802\u5DE5\u5177\u7BB1\u62FF\u8D77\u5957\u7B52\u6273\u624B"
+    hint: "\u4EFB\u4E00\u624B\u4F38\u5230\u5DE6\u8170\u7684\u5DE5\u5177\u888B\uFF0C\u6309\u63E1\u628A\u62FF\u51FA\u5957\u7B52\u6273\u624B\uFF0C\u6703\u62FF\u5728\u53F3\u624B\u3002"
+    when: 
   - text: "\u63DB\u4E0A 13 mm \u5957\u7B52"
     why: "M8 \u87BA\u6813\u7528 13 mm"
     targetId: 
     toolId: tool.socket_wrench
     condition: tool.socket_wrench.size=13
     standPointId: tp.roof.inner
+    subId: 
+    textDesktop: "\u63DB\u4E0A 13 mm \u5957\u7B52"
+    hint: "\u628A\u6273\u624B\u982D\u78B0\u5230\u5957\u7B52\u76D2\u88E1\u7684 13
+      mm \u5957\u7B52\u5EA7\uFF0C\u505C\u4E00\u4E0B\u5C31\u63DB\u597D\u3002\u5957\u7B52\u5C3A\u5BF8\u4E0D\u5C0D\u6703\u6ED1\u7259\u50B7\u87BA\u6813\u3002"
+    when: 
   - text: "\u65B9\u5411\u5207\u5230\u300C\u9B06\u300D"
     why: 
     targetId: 
     toolId: tool.socket_wrench
     condition: tool.socket_wrench.dir=loosen
     standPointId: tp.roof.inner
+    subId: 
+    textDesktop: "\u65B9\u5411\u5207\u5230\u300C\u9B06\u300D"
+    hint: "\u53F3\u624B\u62FF\u8457\u6273\u624B\uFF0C\u770B\u5DE6\u624B\u6253\u958B\u5DE5\u5177\u9762\u677F\uFF0C\u7528\u53F3\u624B\u5C04\u7DDA\u6307\u8457\u300C\u9B06\u300D\u6309\u6273\u6A5F\uFF0C\u4E5F\u53EF\u7528\u5DE6\u624B\u6307\u5C16\u78B0\u6273\u624B\u4E0A\u7684\u6A58\u8272\u64A5\u687F\u5207\u63DB\u3002\u65B9\u5411\u932F\u4E86\u87BA\u6813\u6703\u8D8A\u9396\u8D8A\u7DCA\u3002"
+    when: 
   - text: "\u628A 1 \u865F\u87BA\u6813\u9B06\u534A\u5708"
     why: 
     targetId: ip.carbon_strip_{side}.bolt_1
     toolId: tool.socket_wrench
     condition: ip.carbon_strip_{side}.bolt_1.angle_deg>=150
     standPointId: tp.roof.{side}
+    subId: 
+    textDesktop: "\u628A 1 \u865F\u87BA\u6813\u9B06\u534A\u5708"
+    hint: 
+    when: 
   - text: "\u628A 2 \u865F\u87BA\u6813\u9B06\u534A\u5708"
     why: 
     targetId: ip.carbon_strip_{side}.bolt_2
     toolId: tool.socket_wrench
     condition: ip.carbon_strip_{side}.bolt_2.angle_deg>=150
     standPointId: tp.roof.{side}
+    subId: 
+    textDesktop: "\u628A 2 \u865F\u87BA\u6813\u9B06\u534A\u5708"
+    hint: 
+    when: 
   - text: "\u628A 3 \u865F\u87BA\u6813\u9B06\u534A\u5708"
     why: 
     targetId: ip.carbon_strip_{side}.bolt_3
     toolId: tool.socket_wrench
     condition: ip.carbon_strip_{side}.bolt_3.angle_deg>=150
     standPointId: tp.roof.{side}
+    subId: 
+    textDesktop: "\u628A 3 \u865F\u87BA\u6813\u9B06\u534A\u5708"
+    hint: 
+    when: 
   - text: "\u628A 4 \u865F\u87BA\u6813\u9B06\u534A\u5708"
     why: 
     targetId: ip.carbon_strip_{side}.bolt_4
     toolId: tool.socket_wrench
     condition: ip.carbon_strip_{side}.bolt_4.angle_deg>=150
     standPointId: tp.roof.{side}
+    subId: 
+    textDesktop: "\u628A 4 \u865F\u87BA\u6813\u9B06\u534A\u5708"
+    hint: 
+    when: 
   presetDone: 0
   side: 
   presetStates: []

@@ -22,7 +22,7 @@ MonoBehaviour:
   - ip.depot.ground_terminal
   requiredToolId: tool.grounding_rod
   completion:
-    rid: 8951035158582526004
+    rid: 1000
   errors: []
   hints:
     text: "\u62FF\u63A5\u5730\u68D2\uFF0C\u5148\u9EDE\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u53D6\u4E0B\uFF0C\u518D\u9EDE\u5E73\u53F0\u7AEF\u5B50\u53D6\u4E0B\u3002"
@@ -44,18 +44,30 @@ MonoBehaviour:
     toolId: 
     condition: isolation.head_clamped=false
     standPointId: tp.platform.ground
+    subId: 
+    textDesktop: "\u53D6\u4E0B\u5F13\u982D\u7AEF\u639B\u9264"
+    hint: "\u7528\u5C04\u7DDA\u6307\u8457\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u6309\u6273\u6A5F\u3002\u62C6\u7684\u9806\u5E8F\u548C\u639B\u7684\u6642\u5019\u76F8\u53CD\uFF0C\u5148\u62C6\u5F13\u982D\u7AEF\u3002"
+    when: 
   - text: "\u9B06\u958B\u63A5\u5730\u7AEF\u5B50\u7684\u593E\u5B50"
     why: 
     targetId: ip.depot.ground_terminal
     toolId: 
     condition: isolation.terminal_clamped=false
     standPointId: tp.platform.ground
-  - text: "\u628A\u63A5\u5730\u68D2\u653E\u56DE\u5DE5\u5177\u67B6"
+    subId: 
+    textDesktop: "\u9B06\u958B\u63A5\u5730\u7AEF\u5B50\u7684\u593E\u5B50"
+    hint: "\u7528\u5C04\u7DDA\u6307\u8457\u5E73\u53F0\u65C1\u7684\u63A5\u5730\u7AEF\u5B50\u6309\u6273\u6A5F\u3002\u5730\u7AEF\u6700\u5F8C\u624D\u62C6\uFF0C\u4EBA\u624D\u4E0D\u6703\u78B0\u5230\u53EF\u80FD\u5E36\u96FB\u7684\u7DDA\u3002"
+    when: 
+  - text: "\u628A\u63A5\u5730\u687F\u653E\u56DE\u687F\u67B6"
     why: "\u5DE5\u5177\u67B6\u7B2C 3 \u683C"
     targetId: env.tool_rack.slot_3
     toolId: 
     condition: rack.slot_3=on_rack
     standPointId: tp.platform.rack
+    subId: 
+    textDesktop: "\u628A\u63A5\u5730\u68D2\u653E\u56DE\u5DE5\u5177\u67B6"
+    hint: "\u53F3\u624B\u628A\u63A5\u5730\u687F\u79FB\u56DE\u687F\u67B6\u7684\u639B\u4F4D\uFF0C\u653E\u958B\u63E1\u628A\u3002"
+    when: 
   presetDone: 0
   side: 
   presetStates: []
@@ -65,24 +77,24 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035158582526004
+    - rid: 1000
       type: {class: AllOf, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         rules:
-        - rid: 8951035158582526005
-        - rid: 8951035158582526006
-        - rid: 8951035158582526007
-    - rid: 8951035158582526005
+        - rid: 1001
+        - rid: 1002
+        - rid: 1003
+    - rid: 1001
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: isolation.head_clamped
         value: false
-    - rid: 8951035158582526006
+    - rid: 1002
       type: {class: StateEquals, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: isolation.terminal_clamped
         value: false
-    - rid: 8951035158582526007
+    - rid: 1003
       type: {class: OrderedSequence, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         key: isolation.removal_order

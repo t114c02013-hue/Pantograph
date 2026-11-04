@@ -31,6 +31,16 @@ namespace PantographSim.Core
         public const string WaistPouch = "env.waist_pouch", RackInPouch = "in_pouch";
         /// <summary>審查建議：工具架／工具袋有哪些掛位（ToolBelt 開場從 ToolSlotTable 寫「1,2,…,13」；UI、VR 只能引用 Core，從這裡讀，不寫死 1–9）。</summary>
         public const string RackSlots = "rack.slots";
+        /// <summary>工具放在哪裡：「toolId|工具架;…」（ToolBelt 開場寫；UI 只能引用 Core，從這裡讀）。</summary>
+        public const string ToolPlaces = "tools.places";
+        /// <summary>terry 試玩：拿驗電桿、接地桿時，射線指著弓頭、滑板、螺栓都算指著弓頭接地掛點（掛點太小，被它們擋住）。桌面和 VR 共用。</summary>
+        public static string RayTarget(string tool, string hovered) =>
+            (tool == ToolGroundingRod || tool == ToolVoltageDetector) && hovered != null && (hovered == "part.pan_head" || hovered.StartsWith("part.carbon_strip_") || hovered.StartsWith("ip.carbon_strip_")) ? GroundClamp : hovered;
+
+        /// <summary>日常課和 R1 沒有吊車步驟：吊車不能點。</summary>
+        public static bool Clickable(ISimState s, string id) =>
+            id != "env.crane" || !(s.GetBool(CourseCraneParked) || string.IsNullOrEmpty(s.Get(CourseId)) || s.Get(CourseId) == CourseR1);
+
         /// <summary>第 6 點：送給手上工具的「第二功能」（ToolBelt 換成 ToolDefinition.secondaryAction）。</summary>
         public const string ToolSecondaryCommand = "secondary";
 

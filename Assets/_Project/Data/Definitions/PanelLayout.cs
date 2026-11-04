@@ -26,6 +26,7 @@ namespace PantographSim.Data
         [Tooltip("任務卡、對話框、錯誤視窗（試玩修正 8.5）：頭前方距離、比眼睛低多少（m）；只跟頭的水平朝向，擺好就固定")] public float taskCardDistance = 1.0f, taskCardBelowEye = 0.15f;
 
         [Tooltip("terry 試玩：開場背對站點面向目標（升降盒），任務卡在升降盒對面、正面朝學員")] public bool startFacesOpposite = true;
+        [Tooltip("terry 試玩：作業單打開時，離視線超過這個角度（度）或這個距離（m）就移到眼前")] public float carriedMaxAngle = 50f, carriedMaxDistance = 1.5f;
         public Panel[] panels =
         {
             new Panel { panelId = "board", offset = new Vector3(-0.55f, 1.35f, 1.05f) },    // 步驟提示面板：站點左前方約 1.2 m，上緣略低於視線

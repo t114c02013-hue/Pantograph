@@ -1168,6 +1168,14 @@ namespace PantographSim.Editor
                 pole.transform.SetParent(model, true);   // 先放在沒有縮放的桿架下再搬進工具模型（保留世界大小），跟著掛位的「在架／拿走」顯示或隱藏
                 var len = pole.GetComponentsInChildren<Renderer>().Select(r => r.bounds).Aggregate((a, b) => { a.Encapsulate(b); return a; }).size.y;
                 if (Mathf.Abs(len - d.insulatedPoleLength) > 0.05f) Debug.LogWarning($"[RoofSiteBuilder] 絕緣桿長度 {len:0.00} m 和資料 {d.insulatedPoleLength} m 不同：重跑 Blender");
+                bool detector = slot.name == "Slot_2";   // terry 手調的短桿
+                foreach (var part in pole.transform.Cast<Transform>())
+                {
+                    part.localPosition = new Vector3(0f, detector ? d.rackPoleLocalY.x : d.rackPoleLocalY.y, 0.032f);
+                    var ls = part.localScale; ls.z = detector ? d.rackPoleScale.x : d.rackPoleScale.y; part.localScale = ls;
+                }
+                var box = slot.GetComponent<BoxCollider>();   // 整支都點得到（下半段在原本的掛位方塊外）
+                if (box != null) { box.center = new Vector3(box.center.x, -0.25f, box.center.z); box.size = new Vector3(box.size.x, 1.6f, box.size.z); }
             }
             Wrap(res, "ENV_PoleRack", rack);
             res.ids["env.pole_rack"] = rack;

@@ -18,13 +18,13 @@ namespace PantographSim.UI
             switch (toolId)
             {
                 case SimIds.ToolVoltageDetector: return "扳機點驗電器自檢器（綠燈）→ 扳機點弓頭接地掛點";
-                case SimIds.ToolGroundingRod: return "扳機點平台接地端子 → 手腕面板「拉線確認」→ 扳機點弓頭接地掛點";
-                case SimIds.ToolCaliper: return "右搖桿上下＝開合量爪　手腕面板 ZERO＝歸零\n扳機點量測點＝量；手腕面板「填入作業單」一按就填";
-                case SimIds.ToolSocket: return "扳機點螺栓套上，按住扳機＝轉（每秒 90°）\n右搖桿上下＝換套筒尺寸　左撥＝鬆　右撥＝鎖";
-                case SimIds.ToolTorque: return "右搖桿上下＝設定 ±0.5 N·m\n扳機點螺栓後按住扳機＝加力，喀一聲就放開";
+                case SimIds.ToolGroundingRod: return "扳機點平台接地端子 → 看左手開工具面板點「拉線確認」→ 扳機點弓頭接地掛點";
+                case SimIds.ToolCaliper: return "看左手開工具面板：合攏量爪、ZERO，也可用左手指尖碰量爪\n扳機點量測點＝量；工具面板「填入作業單」一按就填";
+                case SimIds.ToolSocket: return "扳機點螺栓套上，按住扳機＝轉（每秒 90°）\n看左手開工具面板選鬆／鎖和套筒，也可用左手指尖碰橘色撥桿；扳手頭碰套筒座＝換套筒";
+                case SimIds.ToolTorque: return "看左手開工具面板點 +0.5／−0.5，也可用左手指尖碰綠、紅小方塊\n扳機點螺栓後按住扳機＝加力，喀一聲就放開";
                 case SimIds.ToolCloth: return "按住扳機，用射線掃過托架上的黑色碳粉";
                 case SimIds.ToolMarker: return "扳機點已鎖到扭力的螺栓，畫防鬆標記";
-                case "carried": return "射線移到托架上方，扳機點托架＝放下\n右搖桿左右撥＝翻轉 180°";
+                case "carried": return "射線移到托架上方，扳機點托架＝放下\n轉動手腕超過 90°＝翻轉 180°";
                 default: return "";
             }
         }
@@ -33,7 +33,7 @@ namespace PantographSim.UI
             "<b>扳機</b>　使用／點擊（指著不按＝只看資訊卡）\n" +
             "<b>握把</b>　抓取／放下工具與滑板（在掛位前放開＝歸還）\n" +
             "<b>左搖桿</b>　往前推＝傳送　左右撥＝轉 45°\n" +
-            "<b>右搖桿</b>　工具微調（扭力、量爪、套筒尺寸、鬆／鎖、翻轉滑板）\n" +
+            "<b>右搖桿按下</b>　手上工具的第二功能　<b>工具數值</b>　看左手開工具面板\n" +
             "<b>A</b>　重設手上工具　<b>B</b>　帶我到目標\n" +
             "<b>X</b>　作業單（用握把抓把手移動）　<b>Y</b>　說明\n" +
             "<b>≡</b>　暫停選單（重做本步、切換模式、視角置中、錄影、離開）\n" +

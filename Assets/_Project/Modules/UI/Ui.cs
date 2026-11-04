@@ -176,6 +176,17 @@ namespace PantographSim.UI
             return string.IsNullOrEmpty(toolId) ? "徒手" : toolId;
         }
 
+        /// <summary>工具平常放在哪裡：工具架、桿架或工具袋。</summary>
+        public static string ToolPlace(string toolId)
+        {
+            foreach (var entry in (Sim.State?.Get(SimIds.ToolPlaces) ?? "").Split(';'))
+            {
+                var f = entry.Split('|');
+                if (f.Length == 2 && f[0] == toolId) return f[1];
+            }
+            return "工具架";
+        }
+
         public static string ToolKey(string toolId)
         {
             foreach (var entry in (Sim.State?.Get("tools.list") ?? "").Split(';'))

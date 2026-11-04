@@ -267,6 +267,12 @@ namespace PantographSim.Procedures
 
         void Fire(ErrorRule r, RuntimeStep s, string target, string detail = "")
         {
+            if (r.tutorialHintOnly && state.Get("training.mode") == "tutorial")
+            {
+                if (r.trigger == ErrorTrigger.Incomplete && !string.IsNullOrEmpty(r.key)) state.SetBool(r.key, false);   // 擋下：這個動作不算，照順序再做一次
+                state.Set("ui.toast", ""); state.Set("ui.toast", r.fix); state.SetFloat("ui.toast_time", UnityEngine.Time.time);
+                return;
+            }
             if (r.oncePerRun && !firedRun.Add(r.errorId)) return;
             if (!fired.Add(r.errorId)) { Repeat(r, s); return; }
             state.Set("error.last", r.errorId);

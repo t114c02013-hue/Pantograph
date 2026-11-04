@@ -18,12 +18,13 @@ namespace PantographSim.Tests
         {
             public readonly SimState s; readonly ProcedureRunner runner; readonly ErrorDetector det; readonly CompositeActionGuard guard = new CompositeActionGuard(); readonly ProcedureDefinition prc;
             public readonly List<ErrorDetected> errors = new List<ErrorDetected>();
-            public Rig(string course, string stepId)
+            public Rig(string course, string stepId, ErrorRule extra = null)
             {
                 var bus = new EventBus(); s = new SimState(bus);
                 var src = AssetDatabase.LoadAssetAtPath<ProcedureDefinition>(StepsCsvImporter.ProcedurePath(course));
                 prc = ScriptableObject.CreateInstance<ProcedureDefinition>();
                 prc.procedureId = "PRC_Err"; prc.steps = new List<StepDefinition> { src.steps.First(x => x.stepId == stepId) }; prc.globalErrors = src.globalErrors;
+                if (extra != null) { prc.steps[0] = Object.Instantiate(prc.steps[0]); prc.steps[0].errors = prc.steps[0].errors.Where(x => x.errorId != extra.errorId).Append(extra).ToArray(); }
                 runner = new ProcedureRunner(prc, bus, s);
                 det = new ErrorDetector(runner, bus, s);
                 guard.Add(new SafetyGuard(bus, s, StepJsonImporter.LoadAll<SafetyRuleDefinition>(StepJsonImporter.SafetyFolder)) { SkipDeprecated = true });
@@ -92,6 +93,24 @@ namespace PantographSim.Tests
                 Assert.AreEqual(1, r.Count("ERR_IN10_NotConnected"), "控制線沒接就升弓");
                 r.s.SetBool("harness.unhooked", true);
                 Assert.AreEqual(1, r.Count("ERR_Global_HarnessUnclipped"));
+            }
+        }
+
+        /// <summary>h：先看燈再看弓頭：教學擋下並提示、不記分，練習記 Major。</summary>
+        [Test]
+        public void LightBeforeHead_TutorialHintsOnly()
+        {
+            var rule = new ErrorRule { errorId = "ERR_SI01_LightOnly", trigger = ErrorTrigger.Incomplete, key = "ip.cab.pan_indicator.checked", keys = new[] { "part.pan_head.inspected" }, fix = "先看弓頭", tutorialHintOnly = true };
+            using (var r = new Rig("daily", "STP_SI_01_ConfirmLowered", rule))
+            {
+                r.s.Set("training.mode", "tutorial");
+                r.s.SetBool("ip.cab.pan_indicator.checked", true);
+                Assert.AreEqual(0, r.Count("ERR_SI01_LightOnly"), "教學不記分");
+                Assert.IsFalse(r.s.GetBool("ip.cab.pan_indicator.checked"), "擋下");
+                Assert.AreEqual("先看弓頭", r.s.Get("ui.toast"));
+                r.s.Set("training.mode", "practice");
+                r.s.SetBool("ip.cab.pan_indicator.checked", true);
+                Assert.AreEqual(1, r.Count("ERR_SI01_LightOnly"), "練習記錯");
             }
         }
 

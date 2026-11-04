@@ -23,9 +23,10 @@ MonoBehaviour:
   - env.work_order
   requiredToolId: 
   completion:
-    rid: 8951035158582525971
+    rid: 1000
   errors:
   - errorId: ERR_CSR05_ShouldReplace
+    tutorialHintOnly: 0
     severity: 2
     what: "\u6709\u6ED1\u677F\u6700\u8584\u8655\u5DF2 \u2264 3.0 mm\uFF0C\u537B\u5224\u5B9A\u5408\u683C\uFF08\u6216\u7528\u5E73\u5747\u503C\u5224\u65B7\uFF09\u3002"
     why: "\u78E8\u8017\u5230\u6975\u9650\u7684\u78B3\u6ED1\u677F\u53EF\u80FD\u65B7\u88C2\u3001\u522E\u50B7\u67B6\u7A7A\u7DDA\uFF0C\u751A\u81F3\u9020\u6210\u5F13\u7DB2\u4E8B\u6545\u3002"
@@ -42,7 +43,11 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 1
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   - errorId: ERR_CSR05_OnlyOne
+    tutorialHintOnly: 0
     severity: 1
     what: "\u53EA\u63DB\u4E00\u689D\u6ED1\u677F\u3002"
     why: "\u4FDD\u990A\u8868 m1-3 \u8981\u6C42\u5169\u689D\u6ED1\u677F\u6C92\u6709\u9AD8\u4F4E\u5DEE\uFF1B\u53EA\u63DB\u4E00\u689D\u6703\u9020\u6210\u65B0\u820A\u9AD8\u4F4E\u5DEE\uFF0C\u63A5\u89F8\u58D3\u529B\u4E0D\u5747\u3001\u52A0\u901F\u78E8\u8017\u3002"
@@ -58,7 +63,11 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   - errorId: ERR_CSR05_OnlyOne
+    tutorialHintOnly: 0
     severity: 1
     what: "\u53EA\u63DB\u4E00\u689D\u6ED1\u677F\u3002"
     why: "\u4FDD\u990A\u8868 m1-3 \u8981\u6C42\u5169\u689D\u6ED1\u677F\u6C92\u6709\u9AD8\u4F4E\u5DEE\uFF1B\u53EA\u63DB\u4E00\u689D\u6703\u9020\u6210\u65B0\u820A\u9AD8\u4F4E\u5DEE\uFF0C\u63A5\u89F8\u58D3\u529B\u4E0D\u5747\u3001\u52A0\u901F\u78E8\u8017\u3002"
@@ -74,7 +83,11 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   - errorId: ERR_CSR05_Unneeded
+    tutorialHintOnly: 0
     severity: 0
     what: "\u5169\u689D\u90FD\u9084\u5728\u6A19\u6E96\u5167\uFF0C\u537B\u5224\u5B9A\u8981\u63DB\u3002"
     why: "\u4E0D\u5FC5\u8981\u7684\u66F4\u63DB\u6D6A\u8CBB\u5099\u54C1\u8207\u5DE5\u6642\u3002"
@@ -90,6 +103,9 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: "\u5728\u4F5C\u696D\u55AE\u300C\u5224\u5B9A\u300D\u9078\u4E00\u500B\u3002\u7528\u6BCF\u689D\u7684\u6700\u5C0F\u503C\u5224\u65B7\uFF0C\u4E0D\u662F\u5E73\u5747\u503C\u3002"
     why: "\u78E8\u5230\u6975\u9650\u7684\u6ED1\u677F\u6703\u65B7\u88C2\u3001\u522E\u50B7\u67B6\u7A7A\u7DDA\uFF1B\u5169\u689D\u4E00\u8D77\u63DB\u624D\u4E0D\u6703\u9AD8\u4F4E\u5DEE\u3002"
@@ -100,12 +116,17 @@ MonoBehaviour:
     showBoltNumbers: 0
     showOutwardArrow: 0
   subActions:
-  - text: "\u4F9D\u6700\u5C0F\u503C\u9078\u64C7\u5224\u5B9A"
+  - text: "\u4F9D\u4E09\u9EDE\u6700\u5C0F\u503C\u5224\u5B9A\u8981\u4E0D\u8981\u63DB"
     why: "\u4EFB\u4E00\u9EDE \u2264 3.0 mm \u5C31\u5169\u689D\u90FD\u63DB"
     targetId: env.work_order
     toolId: 
     condition: workorder.decision
     standPointId: 
+    subId: 
+    textDesktop: "\u4F9D\u6700\u5C0F\u503C\u9078\u64C7\u5224\u5B9A"
+    hint: "\u6309 X \u6253\u958B\u4F5C\u696D\u55AE\uFF0C\u7528\u5C04\u7DDA\u6307\u8457\u5224\u5B9A\u9078\u9805\u6309\u6273\u6A5F\uFF1B\u53EA\u8981\u6709\u4E00\u9EDE
+      \u2264 3.0 mm \u5C31\u9078\u300C\u5169\u689D\u90FD\u63DB\u300D\u3002\u8981\u770B\u6700\u5C0F\u503C\uFF0C\u5E73\u5747\u503C\u6703\u628A\u78E8\u8584\u7684\u5730\u65B9\u906E\u6389\u3002"
+    when: 
   presetDone: 0
   side: 
   presetStates: []
@@ -117,7 +138,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 8951035158582525971
+    - rid: 1000
       type: {class: Decision, ns: PantographSim.Data, asm: PantographSim.Data}
       data:
         choiceKey: workorder.decision

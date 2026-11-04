@@ -47,6 +47,7 @@ namespace PantographSim.Tools
             foreach (var t in tools) RackLogic.Initialize(s, t.Hotkey);
             s.Set(SimIds.RackSlots, string.Join(",", (slotTable != null ? slotTable.slots.Where(x => x != null).Select(x => x.slot) : tools.Select(t => t.Hotkey)).Where(n => n > 0).Distinct().OrderBy(n => n)));
             s.Set("tools.list", string.Join(";", tools.Select(t => $"{t.Hotkey}|{t.ToolId}|{t.DisplayName}")));
+            s.Set(SimIds.ToolPlaces, string.Join(";", tools.Select(t => $"{t.ToolId}|{Place(t.Hotkey)}")));
             // 一句用途（工具教學的「用途」頁），給資訊卡顯示
             foreach (var t in tools)
             {
@@ -114,6 +115,7 @@ namespace PantographSim.Tools
             if (BySlot(slot) == null) return;
             // 一批：tool.active、掛位狀態、tools.all_returned（與提示）同時生效
             Sim.State.Batch(() => ClickSlotInBatch(slot));
+            WarnWrongTool();
         }
 
         void ClickSlotInBatch(int slot)
@@ -223,6 +225,21 @@ namespace PantographSim.Tools
             });
         }
 
+        /// <summary>工具平常放在哪裡（畫面文字用）。</summary>
+        string Place(int slot)
+        {
+            string home = slotTable?.Find(slot)?.homeStorageId;
+            return home == ToolSlotTable.ToolBag ? "工具袋" : home == ToolSlotTable.PoleRack ? "桿架" : "工具架";
+        }
+
+        /// <summary>教學模式拿錯工具：提示這一步要用的工具和位置。</summary>
+        void WarnWrongTool()
+        {
+            var s = Sim.State; var need = ById(s.Get("hint.sub_tool"));
+            if (active == null || need == null || need == active || s.Get("training.mode") != "tutorial") return;
+            Toast($"這一步要用「{need.DisplayName}」，在{Place(need.Hotkey)}第 {need.Hotkey} 格");
+        }
+
         void Hint(int slot)
         {
             var tool = BySlot(slot);
@@ -230,7 +247,7 @@ namespace PantographSim.Tools
             if (tool == active) { ResetActive(); return; }
             Sim.State.Set("ui.rack_hint", RackLogic.SlotId(slot));
             Sim.State.SetFloat("ui.rack_hint_time", Time.time);
-            Toast($"「{tool.DisplayName}」在工具架第 {slot} 格，點掛位拿起");
+            Toast($"「{tool.DisplayName}」在{Place(slot)}第 {slot} 格，點掛位拿起");
         }
 
         static void Toast(string text) { Sim.State.Set("ui.toast", text); Sim.State.SetFloat("ui.toast_time", Time.time); }

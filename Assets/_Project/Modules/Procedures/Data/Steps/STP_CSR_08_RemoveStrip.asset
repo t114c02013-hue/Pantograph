@@ -24,6 +24,7 @@ MonoBehaviour:
     rid: 1000
   errors:
   - errorId: ERR_CSR08_Pry
+    tutorialHintOnly: 0
     severity: 1
     what: "\u7528\u8D77\u5B50\u64AC\u8D77\u6ED1\u677F\u3002"
     why: "\u64AC\u7684\u529B\u91CF\u6703\u8B93\u92C1\u88FD\u6258\u67B6\u8B8A\u5F62\uFF0C\u65B0\u6ED1\u677F\u88DD\u4E0A\u5F8C\u8CBC\u5408\u4E0D\u826F\u3001\u63A5\u89F8\u4E0D\u5747\u3002"
@@ -39,6 +40,9 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: "\u653E\u4E0B\u5DE5\u5177\uFF0C\u9EDE\u767C\u4EAE\u7684\u6ED1\u677F\uFF0C\u9078\u300C\u5782\u76F4\u53D6\u51FA\u300D\u3002"
     why: "\u7528\u8D77\u5B50\u64AC\u6703\u8B93\u6258\u67B6\u8B8A\u5F62\uFF0C\u65B0\u6ED1\u677F\u5C31\u8CBC\u5408\u4E0D\u597D\u3002"
@@ -56,12 +60,20 @@ MonoBehaviour:
     toolId: 
     condition: part.carbon_strip_{side}.state=Removed
     standPointId: tp.roof.{side}
+    subId: 
+    textDesktop: "\u9EDE\u820A\u6ED1\u677F\u9078\u300C\u5782\u76F4\u53D6\u51FA\u300D"
+    hint: "\u7528\u5C04\u7DDA\u6307\u8457\u820A\u6ED1\u677F\u6309\u6273\u6A5F\uFF0C\u518D\u9078\u300C\u5782\u76F4\u53D6\u51FA\u300D\u3002\u7528\u64AC\u7684\u6703\u522E\u50B7\u6258\u67B6\u3002"
+    when: 
   - text: "\u628A\u820A\u6ED1\u677F\u653E\u9032\u96F6\u4EF6\u76D2"
     why: "\u9EDE\u96F6\u4EF6\u76D2"
     targetId: env.parts_tray
     toolId: 
     condition: part.carbon_strip_{side}.state=InTray
     standPointId: tp.roof.inner
+    subId: 
+    textDesktop: "\u628A\u820A\u6ED1\u677F\u653E\u9032\u96F6\u4EF6\u76D2"
+    hint: "\u62FF\u8457\u820A\u6ED1\u677F\u79FB\u5230\u767C\u4EAE\u7684\u96F6\u4EF6\u76D2\uFF0C\u653E\u958B\u63E1\u628A\u3002\u820A\u6ED1\u677F\u5206\u958B\u653E\uFF0C\u624D\u4E0D\u6703\u88AB\u8AA4\u88DD\u56DE\u53BB\u3002"
+    when: 
   presetDone: 0
   side: 
   presetStates: []

@@ -25,6 +25,7 @@ MonoBehaviour:
     rid: 1000
   errors:
   - errorId: ERR_CSR04_OnlyMid
+    tutorialHintOnly: 0
     severity: 1
     what: "\u6C92\u6709\u4E09\u9EDE\u90FD\u91CF\u5C31\u9001\u51FA\u8B80\u6578\uFF08\u4F8B\u5982\u53EA\u91CF\u4E2D\u9593\uFF09\u3002"
     why: "\u6ED1\u677F\u5E38\u5E38\u5169\u7AEF\u78E8\u5F97\u6BD4\u8F03\u591A\uFF0C\u53EA\u91CF\u4E00\u9EDE\u6703\u6F0F\u6389\u6700\u8584\u8655\uFF0C\u8A72\u63DB\u7684\u6ED1\u677F\u88AB\u653E\u904E\u3002"
@@ -43,7 +44,11 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   - errorId: ERR_CSR04_CopyError
+    tutorialHintOnly: 0
     severity: 0
     what: "\u4F5C\u696D\u55AE\u4E0A\u7684\u8B80\u6578\u548C\u5361\u5C3A\u91CF\u5230\u7684\u4E0D\u4E00\u6A23\u3002"
     why: "\u6284\u932F\u6703\u8B93\u5224\u5B9A\u8207\u7D00\u9304\u5931\u771F\u3002"
@@ -60,7 +65,11 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   - errorId: ERR_CSR04_CopyError
+    tutorialHintOnly: 0
     severity: 0
     what: "\u4F5C\u696D\u55AE\u4E0A\u7684\u8B80\u6578\u548C\u5361\u5C3A\u91CF\u5230\u7684\u4E0D\u4E00\u6A23\u3002"
     why: "\u6284\u932F\u6703\u8B93\u5224\u5B9A\u8207\u7D00\u9304\u5931\u771F\u3002"
@@ -77,7 +86,11 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   - errorId: ERR_CSR04_CopyError
+    tutorialHintOnly: 0
     severity: 0
     what: "\u4F5C\u696D\u55AE\u4E0A\u7684\u8B80\u6578\u548C\u5361\u5C3A\u91CF\u5230\u7684\u4E0D\u4E00\u6A23\u3002"
     why: "\u6284\u932F\u6703\u8B93\u5224\u5B9A\u8207\u7D00\u9304\u5931\u771F\u3002"
@@ -94,6 +107,9 @@ MonoBehaviour:
     expected: 
     count: 0
     blocks: 0
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: "\u540C\u8098\u5074\uFF1A\u62FF\u5361\u5C3A\u9EDE\u4E09\u500B\u91CF\u6E2C\u9EDE\uFF0C\u7167\u6284\u8B80\u6578\u5230\u4F5C\u696D\u55AE\u3002"
     why: "\u5169\u689D\u90FD\u8981\u91CF\uFF0C\u624D\u80FD\u5224\u65B7\u8981\u4E0D\u8981\u4E00\u8D77\u63DB\u3002"
@@ -108,36 +124,56 @@ MonoBehaviour:
     showBoltNumbers: 0
     showOutwardArrow: 0
   subActions:
-  - text: "\u91CF\u5916\u5074\u6ED1\u677F\u5DE6\u5074\u9EDE"
+  - text: "\u91CF\u5916\u5074\u6ED1\u677F\u7684\u5DE6\u7AEF\u9EDE"
     why: "\u8DDD\u7AEF 15 cm"
     targetId: ip.carbon_strip_R.measure_left
     toolId: tool.caliper
     condition: ip.carbon_strip_R.measure_left.measured
     standPointId: tp.roof.outer
-  - text: "\u91CF\u5916\u5074\u6ED1\u677F\u4E2D\u9EDE"
+    subId: 
+    textDesktop: "\u91CF\u5916\u5074\u6ED1\u677F\u5DE6\u5074\u9EDE"
+    hint: "\u96E2\u5F13\u81C2\u95DC\u7BC0\u8F03\u9060\u90A3\u4E00\u689D\u6ED1\u677F\u4E0A\u7684\u85CD\u8272\u91CF\u6E2C\u9EDE\uFF0C\u7528\u5C04\u7DDA\u6307\u8457\u6309\u6273\u6A5F\uFF0C\u8B80\u6578\u6703\u81EA\u52D5\u5E36\u5165\u3002\u4E09\u9EDE\u90FD\u8981\u91CF\uFF0C\u7528\u6700\u5C0F\u503C\u5224\u65B7\u8981\u4E0D\u8981\u63DB\u3002"
+    when: 
+  - text: "\u91CF\u5916\u5074\u6ED1\u677F\u7684\u4E2D\u9EDE"
     why: 
     targetId: ip.carbon_strip_R.measure_mid
     toolId: tool.caliper
     condition: ip.carbon_strip_R.measure_mid.measured
     standPointId: tp.roof.outer
-  - text: "\u91CF\u5916\u5074\u6ED1\u677F\u53F3\u5074\u9EDE"
+    subId: 
+    textDesktop: "\u91CF\u5916\u5074\u6ED1\u677F\u4E2D\u9EDE"
+    hint: "\u7528\u5C04\u7DDA\u6307\u8457\u85CD\u8272\u91CF\u6E2C\u9EDE\u6309\u6273\u6A5F\uFF0C\u8B80\u6578\u6703\u81EA\u52D5\u5E36\u5165\u3002"
+    when: 
+  - text: "\u91CF\u5916\u5074\u6ED1\u677F\u7684\u53F3\u7AEF\u9EDE"
     why: "\u8DDD\u7AEF 15 cm"
     targetId: ip.carbon_strip_R.measure_right
     toolId: tool.caliper
     condition: ip.carbon_strip_R.measure_right.measured
     standPointId: tp.roof.outer
+    subId: 
+    textDesktop: "\u91CF\u5916\u5074\u6ED1\u677F\u53F3\u5074\u9EDE"
+    hint: "\u7528\u5C04\u7DDA\u6307\u8457\u85CD\u8272\u91CF\u6E2C\u9EDE\u6309\u6273\u6A5F\uFF0C\u8B80\u6578\u6703\u81EA\u52D5\u5E36\u5165\u3002"
+    when: 
   - text: "\u4E09\u500B\u8B80\u6578\u586B\u5165\u4F5C\u696D\u55AE"
     why: "\u7167\u5361\u5C3A\u8B80\u6578\u6284\uFF0C\u8AA4\u5DEE \u2264 0.05"
     targetId: env.work_order
     toolId: 
     condition: workorder.reading.R.submitted
     standPointId: tp.roof.outer
-  - text: "\u628A\u5361\u5C3A\u653E\u56DE\u8ECA\u9802\u5DE5\u5177\u7BB1"
+    subId: 
+    textDesktop: "\u4E09\u500B\u8B80\u6578\u586B\u5165\u4F5C\u696D\u55AE"
+    hint: "\u770B\u5DE6\u624B\u6253\u958B\u5DE5\u5177\u9762\u677F\uFF0C\u9EDE\u300C\u586B\u5165\u4F5C\u696D\u55AE\u300D\u3002\u8B80\u6578\u8A18\u5728\u4F5C\u696D\u55AE\u4E0A\uFF0C\u624D\u80FD\u505A\u5224\u5B9A\u3002"
+    when: 
+  - text: "\u628A\u6E38\u6A19\u5361\u5C3A\u6536\u56DE\u5DE5\u5177\u888B"
     why: "\u7528\u5B8C\u5C31\u6B78\u4F4D\uFF0C\u6536\u5C3E\u6E05\u9EDE\u624D\u5C0D\u5F97\u4E0A"
     targetId: env.tool_rack.slot_5
     toolId: 
     condition: tool.active=
     standPointId: tp.roof.inner
+    subId: 
+    textDesktop: "\u628A\u5361\u5C3A\u653E\u56DE\u8ECA\u9802\u5DE5\u5177\u7BB1"
+    hint: "\u53F3\u624B\u628A\u6E38\u6A19\u5361\u5C3A\u79FB\u56DE\u5DE6\u8170\u7684\u5DE5\u5177\u888B\uFF0C\u653E\u958B\u63E1\u628A\u5C31\u6536\u56DE\u3002"
+    when: 
   presetDone: 0
   side: R
   presetStates: []

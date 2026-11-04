@@ -79,7 +79,7 @@ namespace PantographSim.XR
         void UpdateCarried(Entry e)
         {
             bool shown = ContentBounds(e.panel, out _);
-            if (shown && !e.wasShown && !memory.TryGet(e.id, AnyStation, out _, out _) && head != null)
+            if (shown && !e.wasShown && head != null && (!memory.TryGet(e.id, AnyStation, out _, out _) || !PanelLogic.InView(head.position, head.forward, e.panel.position, layout.carriedMaxAngle, layout.carriedMaxDistance)))
             {
                 var p = layout.Find(e.id);
                 var pose = PanelLogic.Carried(head.position, head.forward, p.frontDistance, p.frontBelow, p.frontTiltDeg);

@@ -21,6 +21,10 @@ namespace PantographSim.XR
             return new Pose(eye + f * distance + Vector3.down * below, Quaternion.LookRotation(f, Vector3.up));
         }
 
+        /// <summary>面板在不在視線內。</summary>
+        public static bool InView(Vector3 eye, Vector3 forward, Vector3 panel, float maxAngle, float maxDistance) =>
+            Vector3.Distance(eye, panel) <= maxDistance && Vector3.Angle(forward, panel - eye) <= maxAngle;
+
         /// <summary>作業單：頭前 distance、比眼睛低 below，往下傾 tiltDeg 面向眼睛。</summary>
         public static Pose Carried(Vector3 eye, Vector3 forward, float distance, float below, float tiltDeg)
         {

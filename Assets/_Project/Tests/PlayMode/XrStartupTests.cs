@@ -120,7 +120,7 @@ namespace PantographSim.Tests
             Assert.AreEqual(Rig.Head.position.y - 0.15f, clip.position.y, 0.05f, "8.5：眼下 0.15 m");
 
             var panels = Object.FindObjectOfType<XrPanels>();
-            var moved = clip.position + Vector3.right * 0.5f;
+            var moved = clip.position + Rig.Head.right * 0.3f;
             panels.MovePanel("workorder", moved, clip.rotation);
             for (int i = 0; i < 10; i++) yield return null;
             Assert.Less((clip.position - moved).magnitude, 1e-3f, "放開就停在原地，不會掉也不會彈回");
@@ -274,6 +274,38 @@ namespace PantographSim.Tests
             yield return null; yield return null;
             Assert.AreNotEqual("", Sim.State.Get(SimIds.ActiveTool), "手在附近就拿到這一步要的工具");
             XrPlayer.ScriptedFrame = null;
+        }
+
+        /// <summary>e、f、g：作業單不在視線內打開時回到眼前；教學拿錯工具提示正確工具和位置；已到站按「找目標」有提示。</summary>
+        [UnityTest]
+        public IEnumerator WorkOrderBackInView_WrongToolHint_FocusAtStation()
+        {
+            yield return Boot(new Vector3(0f, 1.6f, 0f));
+            tracked = true;
+            yield return WaitReady();
+            Sim.State.SetBool("training.running", true);
+            Sim.State.SetBool("xr.tutorial.active", false);
+            Sim.State.Set("training.mode", "tutorial");
+            Assert.IsTrue(Sim.Registry.TryGetTransform("xr.panel.workorder", out var clip));
+            Sim.State.SetBool("ui.workorder_open", true);
+            for (int i = 0; i < 5; i++) yield return null;
+            Sim.State.SetBool("ui.workorder_open", false);
+            for (int i = 0; i < 3; i++) yield return null;
+            Object.FindObjectOfType<XrPanels>().MovePanel("workorder", Rig.Head.position - Rig.Head.forward * 0.6f, clip.rotation);
+            Sim.State.SetBool("ui.workorder_open", true);
+            for (int i = 0; i < 3; i++) yield return null;
+            Assert.Greater(Vector3.Dot((clip.position - Rig.Head.position).normalized, Rig.Head.forward), 0.5f, "在背後打開要回到眼前");
+
+            Sim.State.Set("hint.sub_tool", "tool.caliper");
+            Sim.Bus.Publish(new ToolPickRequested { targetId = "env.tool_rack.slot_6", value = 6, time = 0f });
+            yield return null;
+            StringAssert.Contains("工具袋第 5 格", Sim.State.Get("ui.toast"), "拿錯工具提示");
+            Sim.State.Set("hint.sub_tool", "");
+
+            var st = Object.FindObjectOfType<XrStations>();
+            Sim.State.Set("hint.sub_text", "測試小動作"); Sim.State.Set("hint.sub_stand", "");
+            st.Focus();
+            StringAssert.Contains("測試小動作", Sim.State.Get("ui.toast"), "已到站也有反應");
         }
 
         /// <summary>第 6 點：拿著上鎖掛牌組按右搖桿，鎖和牌切換；高阻計等於按測試鍵；空手沒作用。</summary>
