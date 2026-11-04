@@ -105,6 +105,11 @@ namespace PantographSim.Procedures
             foreach (var r in ActiveRules(s.def).Where(r => r.trigger == ErrorTrigger.OutOfRangeOnLeave))
                 foreach (var k in ValueInRangeEvaluator.Expand(r.key, r.count, ctx).Where(k => k.StartsWith(a.targetId + ".")))
                     if (state.Has(k) && state.GetFloat(k) < r.min - ValueInRangeEvaluator.Epsilon) return Policy.underHint;
+            // 完成條件要這支合格、數值卻超出錯誤規則的範圍：往下引導也完成不了，留在這支（R1 第 19 步：2 號 22.9 N·m）
+            var unmet = RuleExplainer.Explain(s.def.completion, ctx).SelectMany(u => u.keys).ToList();
+            foreach (var r in ActiveRules(s.def).Where(r => r.trigger == ErrorTrigger.ValueOutOfRange))
+                foreach (var k in ValueInRangeEvaluator.Expand(r.key, r.count, ctx).Where(k => k.StartsWith(a.targetId + ".") && unmet.Contains(k)))
+                    if (state.Has(k) && !ValueInRangeEvaluator.InRange(state.GetFloat(k), r.min, r.max)) return r.fix ?? "";
             return null;
         }
 

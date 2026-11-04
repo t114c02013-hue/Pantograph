@@ -17,7 +17,7 @@ namespace PantographSim.UI
         RectTransform root, subBox, details;
         Text header, dots, subText, subWhy, check, toolWarn, detailToggle, backReason, recLine;
         Text doText, whyText, toolText, whereText, tags, gate, goLabel;
-        Button back, stallHint;
+        Button back, stallHint, redo;
         RectTransform stallBox;
         Text stallText;
         public const string StallGeneric = "這一步還有條件沒完成，請再檢查";
@@ -35,7 +35,7 @@ namespace PantographSim.UI
             root = Ui.Place(panel.rectTransform, new Vector2(0, 1), Vector2.zero, new Vector2(500, 0));
             Ui.VStack(panel.gameObject, 18, 8);
             recLine = Ui.Text(root, "", 17, Ui.Muted, TextAnchor.UpperRight);   // 角落小字：● 紀錄中　● REC mm:ss
-            header = Ui.Text(root, "", 26, Color.white, TextAnchor.UpperLeft, FontStyle.Bold);
+            header = Ui.Text(root, "", 22, Color.white, TextAnchor.UpperLeft, FontStyle.Bold);
             dots = Ui.Text(root, "", 26, Ui.Accent);
 
             var sb = Ui.Panel(root, "SubAction", new Color(0.12f, 0.16f, 0.22f, 1f), true, false);
@@ -70,6 +70,8 @@ namespace PantographSim.UI
                 Sim.State.SetBool("procedure.stall_hint_shown", true);
             }, new Color(0.15f, 0.45f, 0.75f));
             Ui.Size(stallHint, -1, 42);
+            redo = Ui.Button(root, "↻ 從這一步重做", 20, () => { if (!SimSession.IsReplay) Ui.Send("ui.error", "restart"); }, new Color(0.6f, 0.3f, 0.1f));   // 錯誤視窗按「繼續」之後還回得來
+            Ui.Size(redo, -1, 42);
         }
 
         void Section(string name) => Ui.Text(details, name, 20, Ui.Accent, TextAnchor.UpperLeft, FontStyle.Bold);
@@ -93,7 +95,7 @@ namespace PantographSim.UI
             int count = (int)s.GetFloat("hint.sub_count");
             int idx = (int)s.GetFloat("procedure.sub_index");
             bool hasSubs = tutorial && count > 0;
-            Ui.SetActive(dots, hasSubs);
+            Ui.SetActive(dots, hasSubs && idx < count);
             Ui.SetActive(subBox, hasSubs);
             if (hasSubs)
             {
@@ -136,6 +138,7 @@ namespace PantographSim.UI
             // 卡關：教學＝直接顯示第一個缺的小動作指令；練習＝通用句，按「提示」才顯示（計提示次數）；考核＝只顯示通用句
             bool stalled = s.GetBool("procedure.stalled");
             Ui.SetActive(stallBox, stalled);
+            Ui.SetActive(redo, stalled || gate.text.Length > 0);
             if (stalled)
             {
                 string mode = s.Get("training.mode");

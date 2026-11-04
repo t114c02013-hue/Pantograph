@@ -87,6 +87,10 @@ namespace PantographSim.UI
 
         static bool Close(Vector2 a, Vector2 b) => Mathf.Abs(a.x - b.x) < 170f && Mathf.Abs(a.y - b.y) < 40f;
 
+        /// <summary>放在 at 的標籤（底部中心對齊）會不會蓋到 q 的標記：標記從 q 往上約 100 px（箭頭加文字）、半寬約 120 px。</summary>
+        static bool Covers(Vector2 q, Vector2 at, RectTransform rt) =>
+            Mathf.Abs(q.x - at.x) < rt.rect.width * 0.5f + 120f && q.y + 100f > at.y && q.y < at.y + rt.rect.height;
+
         static bool RackHintActive(ISimState s) =>
             !string.IsNullOrEmpty(s.Get("ui.rack_hint")) && Time.time - s.GetFloat("ui.rack_hint_time") < 4f;
 
@@ -176,7 +180,7 @@ namespace PantographSim.UI
                 reg.TryGetPosition($"ip.carbon_strip_{side}.outward", out var ap2);
                 ui.WorldToSafe(ap2, out var al2, out _);
                 var outAt = al2 + new Vector2(0, 30);
-                while (placed.Exists(q => Close(q, outAt))) outAt.y += 44f;
+                while (placed.Exists(q => Covers(q, outAt, outward.rt))) outAt.y += 44f;
                 placed.Add(outAt);
                 outward.rt.anchoredPosition = outAt;
                 outward.text.text = s.Get($"part.carbon_strip_{side}.new_orientation") == "out" ? "✔ 此側朝外（方向正確）" : "此側朝外 ➜　方向不對，按 R 轉 180°";
@@ -193,8 +197,7 @@ namespace PantographSim.UI
                     ? hl + new Vector2(0, 40)
                     : ui.MouseInSafe() + new Vector2(0, 28);
                 var hoverAt = hover.rt.anchoredPosition;   // 不要和「點這裡」疊在一起
-                float cardHalf = hover.rt.rect.height * 0.5f;   // 備品資訊牌有好幾行
-                while (placed.Exists(q => Mathf.Abs(q.x - hoverAt.x) < 240f && Mathf.Abs(q.y - hoverAt.y) < 40f + cardHalf)) hoverAt.y += 44f;
+                while (placed.Exists(q => Covers(q, hoverAt, hover.rt))) hoverAt.y += 44f;
                 hover.rt.anchoredPosition = hoverAt;
             }
         }

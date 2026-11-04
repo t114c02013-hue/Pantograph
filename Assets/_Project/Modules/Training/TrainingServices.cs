@@ -44,7 +44,7 @@ namespace PantographSim.Training
         string[][] subs = new string[0][];
         string stepHighlight = "";
         int lastIndex = -1;
-        bool hasStep;
+        bool hasStep, lastStalled;
 
         public HintService(IEventBus bus, ISimState state)
         {
@@ -76,7 +76,7 @@ namespace PantographSim.Training
         void OnState(StateChanged e)
         {
             if (!hasStep) return;   // 還沒開始任何步驟時不發提示
-            if (e.Has("procedure.sub_index") || e.Has("training.mode")) UpdateSub();
+            if (e.Has("procedure.sub_index") || e.Has("training.mode") || e.Has("procedure.stalled") || e.Has("procedure.stall_target")) UpdateSub();
         }
 
         /// <summary>教學模式：只高亮目前這一個小動作的目標，並把它的短指令寫到 hint.sub_*。</summary>
@@ -84,8 +84,10 @@ namespace PantographSim.Training
         {
             bool tutorial = state.Get("training.mode") != "practice";
             int idx = (int)state.GetFloat("procedure.sub_index");
-            if (idx == lastIndex && state.Has("hint.highlight")) return;
-            lastIndex = idx;
+            string mode = state.Get("training.mode");
+            bool stalled = state.GetBool("procedure.stalled") && (mode == "tutorial" || mode == "");   // 練習、考核不直接講還差什麼
+            if (idx == lastIndex && stalled == lastStalled && !stalled && state.Has("hint.highlight")) return;
+            lastIndex = idx; lastStalled = stalled;
             string highlight = stepHighlight;
             using (state.BeginBatch())   // 提示的各鍵一批生效；HighlightRequested 在 Commit 之後發
             {
@@ -105,9 +107,13 @@ namespace PantographSim.Training
                 }
                 else
                 {
-                    state.Set("hint.sub_text", subs.Length > 0 ? "這一步完成了" : "");
-                    state.Set("hint.sub_target", ""); state.Set("hint.sub_tool", ""); state.Set("hint.sub_why", ""); state.Set("hint.sub_stand", "");
-                    if (subs.Length > 0) highlight = "";
+                    // 小動作都做完不等於步驟完成：完成了會直接換步，還留在這裡就是在等完成條件
+                    string target = stalled ? state.Get("procedure.stall_target") : "";
+                    state.Set("hint.sub_text", subs.Length == 0 ? "" : stalled ? "還差：" + state.Get("procedure.stall_text") : "確認這一步的結果…");
+                    state.Set("hint.sub_target", target); state.Set("hint.sub_why", "");
+                    state.Set("hint.sub_tool", stalled ? state.Get("procedure.stall_tool") : "");
+                    state.Set("hint.sub_stand", stalled ? state.Get("procedure.stall_stand") : "");
+                    if (subs.Length > 0) highlight = !stalled ? "" : target.Length > 0 ? target : stepHighlight;
                 }
                 state.Set("hint.highlight", tutorial ? highlight : "");
             }

@@ -11,7 +11,7 @@ namespace PantographSim.Interaction
     /// </summary>
     public class StepFocus : MonoBehaviour
     {
-        [SerializeField] float viewHeight = 1.2f, boltViewHeight = 1f, boltViewBack = 0.3f, boltViewSize = 0.2f;
+        [SerializeField] float viewHeight = 1.2f, boltViewHeight = 1f, boltViewBack = 0.3f, boltViewSize = 0.2f, bagViewBack = 0.05f;
         [SerializeField] OrbitCameraController orbit;
         [SerializeField] float minSize = 0.45f;
         string currentTargets = "", stepTargets = "";
@@ -86,7 +86,7 @@ namespace PantographSim.Interaction
             if (!inBag && (targetId ?? "").StartsWith("env.tool_rack.slot_")) return target + Vector3.right + Vector3.up * 0.2f;
             if (!inBag && !SimIds.IsBoltId(targetId)) return stand + Vector3.up * viewHeight;   // 工具袋和螺栓一樣從上面看：開口朝上，側面被零件袋擋住
             var back = stand - target; back.y = 0f;
-            return target + Vector3.up * boltViewHeight + back.normalized * boltViewBack;
+            return target + Vector3.up * boltViewHeight + back.normalized * (inBag ? bagViewBack : boltViewBack);
         }
 
         static bool InBag(string id) => id.StartsWith("env.tool_rack.slot_") && Sim.State.Get(SimIds.BagSlots).Contains("," + id.Substring(id.LastIndexOf('_') + 1) + ",");

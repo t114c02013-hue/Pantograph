@@ -255,6 +255,9 @@ namespace PantographSim.Procedures
                 state.SetBool("procedure.stalled", false);
                 state.Set("procedure.stall_text", "");
                 state.Set("procedure.stall_ids", "");
+                state.Set("procedure.stall_target", "");
+                state.Set("procedure.stall_stand", "");
+                state.Set("procedure.stall_tool", "");
                 state.SetBool("procedure.stall_hint_shown", false);
             });
             ArmSub(s, 0);
@@ -448,8 +451,12 @@ namespace PantographSim.Procedures
         {
             var first = unmet.FirstOrDefault();
             string text = first == null ? s.def.instruction : DescribeUnmet(first, s).text;
+            var missing = first == null ? null : RuleExplainer.SubActionFor(first, subs);
             state.Batch(() =>
             {
+                state.Set("procedure.stall_target", missing?.targetId ?? "");   // 提示、C 和「帶我過去」帶到還差的地方
+                state.Set("procedure.stall_stand", missing?.standPointId ?? "");
+                state.Set("procedure.stall_tool", missing?.toolId ?? "");
                 state.SetBool("procedure.stalled", true);
                 state.Set("procedure.stall_text", text);
                 state.Set("procedure.stall_ids", string.Join("\n", unmet.Select(u => u.id)));

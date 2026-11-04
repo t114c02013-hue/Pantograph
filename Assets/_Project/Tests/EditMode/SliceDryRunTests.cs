@@ -9,6 +9,7 @@ using PantographSim.Parts.Common;
 using PantographSim.Procedures;
 using PantographSim.Safety;
 using PantographSim.Tools;
+using PantographSim.Training;
 using PantographSim.Worksite;
 
 namespace PantographSim.Tests
@@ -462,6 +463,62 @@ namespace PantographSim.Tests
             sim.bus.Publish(new RestartStepRequested());
             for (int n = 1; n <= 4; n++) sim.Torque($"ip.carbon_strip_L.bolt_{n}", 25f, 20f);
             AssertError(sim, "ERR_CSR13_Setting", Severity.Major);
+        }
+
+        /// <summary>驗收組長第 9 輪：第 19 步 2 號只鎖到 22.9，按「繼續」後引導留在 2 號，重鎖到合格後走完。</summary>
+        [Test]
+        public void Step19_UnderTorque_Continue_StaysOnBolt_ReTorque_Completes()
+        {
+            var sim = new SliceSim();
+            sim.s.Set("training.mode", "tutorial");
+            using var hints = new HintService(sim.bus, sim.s);
+            using var feedback = new ErrorFeedback(sim.bus, sim.s);
+            sim.RunUntil("STP_CSR_13_Torque_L");
+            string Bolt(int n) => $"ip.carbon_strip_L.bolt_{n}";
+            sim.s.Set(SimIds.ActiveTool, SimIds.ToolTorque);
+            sim.s.SetFloat("tool.torque_wrench.setting", 25f);
+            Assert.IsTrue(sim.Torque(Bolt(1), 25f));
+            Assert.IsTrue(sim.Torque(Bolt(2), 22.9f));
+            AssertError(sim, "ERR_CSR13_Under", Severity.Major);
+            sim.bus.Publish(new ActionRequested { targetId = "ui.error", text = "dismiss" });
+            Assert.AreEqual(Bolt(2), sim.s.Get("hint.sub_target"), "按繼續後引導留在 2 號");
+            StringAssert.Contains("再按住施力", sim.s.Get("procedure.gate_reason"));
+            Assert.IsTrue(sim.Torque(Bolt(2), 25f), "能重鎖");
+            Assert.AreEqual(Bolt(3), sim.s.Get("hint.sub_target"), "合格才往下");
+            Assert.AreEqual("", sim.s.Get("procedure.gate_reason"));
+            sim.Torque(Bolt(3), 25f); sim.Torque(Bolt(4), 25f);
+            sim.s.Set(SimIds.ActiveTool, "");
+            Assert.AreNotEqual("STP_CSR_13_Torque_L", sim.Current, "步驟完成");
+        }
+
+        /// <summary>練習模式放行：小動作走完還差 2 號，還差的目標要寫出來。教學模式提示帶到那個目標，不說「這一步完成了」。</summary>
+        [Test]
+        public void Stall_NamesMissingTarget_HintFollows()
+        {
+            var sim = new SliceSim();
+            sim.s.Set("training.mode", "practice");
+            sim.RunUntil("STP_CSR_13_Torque_L");
+            string bolt2 = "ip.carbon_strip_L.bolt_2";
+            sim.s.Set(SimIds.ActiveTool, SimIds.ToolTorque);
+            sim.s.SetFloat("tool.torque_wrench.setting", 25f);
+            for (int n = 1; n <= 4; n++) sim.Torque($"ip.carbon_strip_L.bolt_{n}", n == 2 ? 22.9f : 25f);
+            sim.s.Set(SimIds.ActiveTool, "");
+            sim.runner.Poll(1000f); sim.runner.Poll(1004f);
+            Assert.IsTrue(sim.s.GetBool("procedure.stalled"));
+            Assert.AreEqual(bolt2, sim.s.Get("procedure.stall_target"));
+
+            var bus = new EventBus(); var s = new SimState(bus);
+            using var hints = new HintService(bus, s);
+            s.Set("training.mode", "tutorial");
+            bus.Publish(new StepStarted { subActions = "拿\u001ftool", highlightIds = "all" });
+            s.SetFloat("procedure.sub_index", 1);
+            Assert.AreEqual("", s.Get("hint.sub_target"));
+            StringAssert.DoesNotContain("完成了", s.Get("hint.sub_text"), "完成條件還沒成立");
+            s.Batch(() => { s.SetBool("procedure.stalled", true); s.Set("procedure.stall_text", "鎖 2 號"); s.Set("procedure.stall_target", bolt2); s.Set("procedure.stall_stand", "tp.roof.L"); });
+            Assert.AreEqual(bolt2, s.Get("hint.sub_target"), "C 和帶我過去讀這個");
+            Assert.AreEqual("tp.roof.L", s.Get("hint.sub_stand"));
+            Assert.AreEqual(bolt2, s.Get("hint.highlight"));
+            Assert.AreEqual("還差：鎖 2 號", s.Get("hint.sub_text"));
         }
 
         [Test]
