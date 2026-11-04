@@ -164,19 +164,19 @@ namespace PantographSim.UI
             Ui.Text(card, "判定（任一點 ≤ 3.0 mm〔保養表值〕兩條都換）", 19, Ui.Accent, TextAnchor.UpperLeft, FontStyle.Bold);
             var d1 = Ui.Rect(card, "D1"); Ui.HStack(d1.gameObject, 6);
             var d2 = Ui.Rect(card, "D2"); Ui.HStack(d2.gameObject, 6);
-            AddDecision(d1, "both", "兩條都換"); AddDecision(d1, "L", "只換肘側");
+            AddDecision(d1, "both", "兩條都換"); AddDecision(d1, "L", "只換靠關節");
             AddDecision(d2, "R", "只換外側"); AddDecision(d2, "pass", "合格");
 
             Ui.Text(card, "新滑板中點（mm）　兩條差 ≤ 1.0（示例值）", 19, Ui.Accent, TextAnchor.UpperLeft, FontStyle.Bold);
             var nm = Ui.Rect(card, "NewMid"); Ui.HStack(nm.gameObject, 6);
             foreach (var side in new[] { "L", "R" })
             {
-                Ui.Text(nm, side == "L" ? "肘側" : "外側", 20);
+                Ui.Text(nm, side == "L" ? "靠關節" : "外側", 20);
                 AddField(nm, "newmid." + side, 92);
             }
             var sendNew = Ui.Button(nm, "送出", 19, () =>
             {
-                if (!AllFilled(new[] { "newmid.L", "newmid.R" })) { Notice("先把肘側、外側兩格中點都填好再送出"); return; }
+                if (!AllFilled(new[] { "newmid.L", "newmid.R" })) { Notice("先把靠關節、外側兩格中點都填好再送出"); return; }
                 Submit("newmid.L"); Submit("newmid.R");
             }); Ui.Size(sendNew, 76, 40);
             diffText = Ui.Text(card, "", 17, Ui.Muted);

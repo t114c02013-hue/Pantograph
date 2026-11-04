@@ -239,11 +239,11 @@ namespace PantographSim.XR
             // T2-a：拿著卡尺、沒指著東西按右扳機＝ZERO（和左手 poke Poke_Zero 送同一個事件）
             if (hovered == null && tool == SimIds.ToolCaliper) { Sim.Bus.Publish(XrToolWidgets.ZeroRequest()); return; }
             if (hovered == null) return;
-            string clicked = SimIds.RayTarget(tool, hoveredId);
+            string clicked = SimIds.RayTarget(S, tool, hoveredId, hoverPoint);
             Sim.Bus.Publish(new ActionRequested
             {
                 targetId = clicked, toolId = tool,
-                text = string.IsNullOrEmpty(tool) ? hovered.DefaultVerb : "click",
+                text = !string.IsNullOrEmpty(tool) ? "click" : clicked == hoveredId ? hovered.DefaultVerb : "inspect",
                 pointId = $"{hoverPoint.x.ToString("0.###", CultureInfo.InvariantCulture)},{hoverPoint.y.ToString("0.###", CultureInfo.InvariantCulture)},{hoverPoint.z.ToString("0.###", CultureInfo.InvariantCulture)}",
                 time = SimClock.Now
             });
@@ -426,7 +426,7 @@ namespace PantographSim.XR
             string point = e.targetId.Substring(e.targetId.IndexOf(".measure_") + ".measure_".Length);
             bool newStrip = S.Get("procedure.current").StartsWith("STP_CSR_15");
             string field = newStrip ? "newmid." + side : $"reading.{side}.{point}";
-            string label = (side == "L" ? "肘側" : "外側") + (newStrip ? "新滑板中點" : point == "left" ? "左" : point == "mid" ? "中" : "右");
+            string label = (side == "L" ? "靠關節" : "外側") + (newStrip ? "新滑板中點" : point == "left" ? "左" : point == "mid" ? "中" : "右");
             S.Set("xr.fill.value", e.value.ToString("0.00", CultureInfo.InvariantCulture));
             S.Set("xr.fill.label", label);
             S.Set("xr.fill.field", field);

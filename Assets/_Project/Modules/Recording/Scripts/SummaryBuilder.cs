@@ -221,12 +221,12 @@ namespace PantographSim.Recording
             return key;
         }
 
-        /// <summary>ip.carbon_strip_L.bolt_3.torque_Nm → 肘側螺栓 3。</summary>
+        /// <summary>ip.carbon_strip_L.bolt_3.torque_Nm → 靠關節螺栓 3。</summary>
         public static string TargetName(string id)
         {
             if (string.IsNullOrEmpty(id)) return "";
             string side = SimIds.SideOf(id);
-            string sideName = side == "L" ? "肘側" : side == "R" ? "外側" : "";
+            string sideName = side == "L" ? "靠關節" : side == "R" ? "外側" : "";
             int b = id.IndexOf(".bolt_", StringComparison.Ordinal);
             if (b >= 0) { var rest = id.Substring(b + 6); int dot = rest.IndexOf('.'); return $"{sideName}螺栓 {(dot >= 0 ? rest.Substring(0, dot) : rest)}"; }
             int m = id.IndexOf(".measure_", StringComparison.Ordinal);
@@ -266,7 +266,7 @@ namespace PantographSim.Recording
                     if (last == null) continue;
                     string v = last.S("value");
                     if (v != "1,2,3,4" && v.Length > 0 && v.Split(',').Length >= 2 && !"1,2,3,4".StartsWith(v))
-                        Add(last.t, last.step, $"{(side == "L" ? "肘側" : "外側")}{OrderNames[key]}", "1→2→3→4", v.Replace(",", "→"));
+                        Add(last.t, last.step, $"{(side == "L" ? "靠關節" : "外側")}{OrderNames[key]}", "1→2→3→4", v.Replace(",", "→"));
                 }
 
             // 接地：先夾平台端子再掛弓頭；拆除相反

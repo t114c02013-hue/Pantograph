@@ -265,6 +265,27 @@ namespace PantographSim.Tests
             Assert.AreEqual(SimIds.GroundTerminal, SimIds.RayTarget(SimIds.ToolGroundingRod, SimIds.GroundTerminal));
         }
 
+        /// <summary>第 9 步：卡尺打到滑板算量測點；教學是這一步要量的，其他取最近的；已經指著量測點不換。徒手點檢測點算看弓頭。</summary>
+        [Test]
+        public void RayTarget_Caliper_MeasurePoints()
+        {
+            var bus = new EventBus(); var s = new SimState(bus);
+            var reg = new SceneRegistry(); ServiceLocator.Register(reg);
+            var a = new GameObject("a").transform; var c = new GameObject("c").transform; c.position = Vector3.right;
+            try
+            {
+                reg.Register("ip.carbon_strip_L.measure_left", a); reg.Register("ip.carbon_strip_L.measure_right", c);
+                Assert.AreEqual("ip.carbon_strip_L.measure_right", SimIds.RayTarget(s, SimIds.ToolCaliper, "part.carbon_strip_L", new Vector3(0.9f, 0f, 0f)), "最近");
+                Assert.AreEqual("ip.carbon_strip_L.measure_left", SimIds.RayTarget(s, SimIds.ToolCaliper, "part.pan_head", Vector3.zero));
+                s.Set("training.mode", "tutorial"); s.Set("hint.sub_target", "ip.carbon_strip_R.measure_mid");
+                Assert.AreEqual("ip.carbon_strip_R.measure_mid", SimIds.RayTarget(s, SimIds.ToolCaliper, "part.carbon_strip_R", Vector3.zero), "教學：這一步要量的");
+                Assert.AreEqual("ip.carbon_strip_L.measure_left", SimIds.RayTarget(s, SimIds.ToolCaliper, "ip.carbon_strip_L.measure_left", Vector3.zero), "已指著量測點");
+                Assert.AreEqual("env.work_order", SimIds.RayTarget(s, SimIds.ToolCaliper, "env.work_order", Vector3.zero), "別的東西不換");
+                Assert.AreEqual(SimIds.PanHead, SimIds.RayTarget(s, "", SimIds.LowerCheckId, Vector3.zero), "第 1 步箭頭那一點");
+            }
+            finally { ServiceLocator.Clear(); Object.DestroyImmediate(a.gameObject); Object.DestroyImmediate(c.gameObject); }
+        }
+
         /// <summary>i：R1 和吊車停駐的課程不能點吊車，定期課可以。</summary>
         [Test]
         public void Crane_NotClickable_InR1AndDaily()

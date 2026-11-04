@@ -157,7 +157,7 @@ namespace PantographSim.UI
 
         void BuildCaliper()
         {
-            var p = Panel(SimIds.ToolCaliper, "數位卡尺");
+            var p = Panel(SimIds.ToolCaliper, "游標卡尺");
             var row = Row(p);
             var screen = Ui.Panel(row, "Screen", new Color(0.05f, 0.12f, 0.08f), true, false);
             Ui.Size(screen, 260, 84);

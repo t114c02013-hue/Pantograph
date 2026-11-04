@@ -48,11 +48,11 @@ namespace PantographSim.Interaction
             if (hovered == null || !ShouldSendClick(PointerState.OverUi, s.GetBool("training.paused"), s.GetBool("training.running"))) return;
             if (!Input.GetMouseButtonDown(0)) return;
             string tool = s.Get(SimIds.ActiveTool);
-            string clicked = SimIds.RayTarget(tool, hovered.Id);
+            string clicked = SimIds.RayTarget(s, tool, hovered.Id, info.point);
             Sim.Bus.Publish(new ActionRequested
             {
                 targetId = clicked, toolId = tool,
-                text = string.IsNullOrEmpty(tool) ? hovered.DefaultVerb : "click",
+                text = !string.IsNullOrEmpty(tool) ? "click" : clicked == hovered.Id ? hovered.DefaultVerb : "inspect",
                 pointId = $"{info.point.x:0.###},{info.point.y:0.###},{info.point.z:0.###}", time = SimClock.Now
             });
             s.Set("ui.last_clicked", clicked);

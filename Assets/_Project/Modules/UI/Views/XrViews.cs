@@ -176,7 +176,7 @@ namespace PantographSim.UI
         static string FieldLabel(string field)
         {
             var p = field.Split('.');
-            string side = p.Length > 1 ? (p[1] == "L" ? "肘側" : "外側") : "";
+            string side = p.Length > 1 ? (p[1] == "L" ? "靠關節" : "外側") : "";
             if (p[0] == "newmid") return side + "新滑板中點";
             return p.Length > 2 ? side + (p[2] == "left" ? "左" : p[2] == "mid" ? "中" : "右") : field;
         }

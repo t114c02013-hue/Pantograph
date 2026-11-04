@@ -57,7 +57,7 @@ namespace PantographSim.UI
         {
             string side = SimIds.SideOf(id);
             string st = s.Get(id + ".state", "OldMounted");
-            var sb = new StringBuilder(Title((side == "L" ? "肘側" : "外側") + "碳滑板"));
+            var sb = new StringBuilder(Title((side == "L" ? "靠關節" : "外側") + "碳滑板"));
             sb.Append(st == "OldMounted" || st == "NewMounted" ? "\n已安裝" : "\n已拆下");
             var reads = new List<string>();
             foreach (var (p, label) in new[] { ("left", "左"), ("mid", "中"), ("right", "右") })
@@ -73,7 +73,7 @@ namespace PantographSim.UI
         {
             string side = SimIds.SideOf(id);
             string n = id.Substring(id.Length - 1);
-            var sb = new StringBuilder(Title($"螺栓 {n}（{(side == "L" ? "肘側" : "外側")}）"));
+            var sb = new StringBuilder(Title($"螺栓 {n}（{(side == "L" ? "靠關節" : "外側")}）"));
             sb.Append("\nM8×25（13 mm）");
             sb.Append("\n狀態：").Append(BoltState(s.Get(id + ".state", "Tight")));
             sb.Append(s.GetBool(id + ".marked") ? "\n有防鬆標記" : "\n沒有防鬆標記");

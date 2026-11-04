@@ -25,7 +25,7 @@ namespace PantographSim.Worksite
         protected override bool Watches(string key) => key == CountKey(side);
 
         protected override void OnBareHand(ActionRequested e) =>
-            Toast($"{(side == "L" ? "肘側" : "外側")}螺栓盤：{State.GetFloat(CountKey(side)):0} 支螺栓");
+            Toast($"{(side == "L" ? "靠關節" : "外側")}螺栓盤：{State.GetFloat(CountKey(side)):0} 支螺栓");
 
         protected override void OnToolAction(ActionPerformed e) => Apply(State, side, e.text, e.pointId);
 

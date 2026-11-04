@@ -64,6 +64,15 @@ namespace PantographSim.Interaction
             distance = DistanceToFit(bounds);
         }
 
+        /// <summary>框住目標，並從 from 這個方向看（站點看得到面向目標，建置檢查保證）。</summary>
+        public void Retarget(Bounds bounds, Vector3 from)
+        {
+            Retarget(bounds);
+            var look = Quaternion.LookRotation(bounds.center - from, Vector3.up).eulerAngles;
+            yaw = look.y;
+            pitch = Mathf.Clamp(Mathf.DeltaAngle(0f, look.x), minPitch, maxPitch);
+        }
+
         public void ResetView(bool immediate = false)
         {
             target = homeTarget;

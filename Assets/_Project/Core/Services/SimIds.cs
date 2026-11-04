@@ -35,7 +35,23 @@ namespace PantographSim.Core
         public const string ToolPlaces = "tools.places";
         /// <summary>terry 試玩：拿驗電桿、接地桿時，射線指著弓頭、滑板、螺栓都算指著弓頭接地掛點（掛點太小，被它們擋住）。桌面和 VR 共用。</summary>
         public static string RayTarget(string tool, string hovered) =>
-            (tool == ToolGroundingRod || tool == ToolVoltageDetector) && hovered != null && (hovered == "part.pan_head" || hovered.StartsWith("part.carbon_strip_") || hovered.StartsWith("ip.carbon_strip_")) ? GroundClamp : hovered;
+            (tool == ToolGroundingRod || tool == ToolVoltageDetector) && hovered != null && (hovered == "part.pan_head" || hovered.StartsWith("part.carbon_strip_") || hovered.StartsWith("ip.carbon_strip_") || hovered == LowerCheckId) ? GroundClamp : hovered;
+
+        /// <summary>打到 hit 時實際算哪個目標：卡尺打到滑板或弓頭算量測點（教學＝這一步要量的，其他＝離 hit 最近的，量測點只有 1.6 cm）；徒手點檢測點算看弓頭。</summary>
+        public static string RayTarget(ISimState s, string tool, string hovered, UnityEngine.Vector3 hit)
+        {
+            if (string.IsNullOrEmpty(tool) && hovered == LowerCheckId) return PanHead;
+            if (tool != ToolCaliper || hovered == null || hovered.Contains(".measure_") || !(hovered == PanHead || hovered == LowerCheckId || hovered.StartsWith("part.carbon_strip_") || hovered.StartsWith("ip.carbon_strip_"))) return RayTarget(tool, hovered);
+            string want = s.Get("hint.sub_target");
+            if (s.Get("training.mode") == "tutorial" && want.Contains(".measure_")) return want;
+            string best = hovered; float bestD = float.MaxValue;
+            foreach (var id in Sim.Registry.Ids)
+                if (id.Contains(".measure_") && Sim.Registry.TryGetPosition(id, out var p) && (p - hit).sqrMagnitude < bestD) { bestD = (p - hit).sqrMagnitude; best = id; }
+            return best;
+        }
+
+        /// <summary>弓頭上的檢測點。</summary>
+        public const string LowerCheckId = "ip.pan_head.lower_check";
 
         /// <summary>日常課和 R1 沒有吊車步驟：吊車不能點。</summary>
         public static bool Clickable(ISimState s, string id) =>

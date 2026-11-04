@@ -74,7 +74,8 @@ namespace PantographSim.Interaction
             var b = new Bounds(points[0], Vector3.zero);
             foreach (var p in points) b.Encapsulate(p);
             b.size = Vector3.Max(b.size, Vector3.one * minSize);
-            orbit.Retarget(b);
+            var stand = GameObject.Find("StationAnchor_" + Sim.State.Get("hint.sub_stand"));
+            if (stand != null) orbit.Retarget(b, stand.transform.position + Vector3.up * 1.2f); else orbit.Retarget(b);
         }
 
         static IEnumerable<Vector3> Resolve(string ids)

@@ -127,7 +127,7 @@ namespace PantographSim.Tests
             CollectionAssert.IsSubsetOf(new[] { "reading.L.left=2.81", "submit.L=true", "submit.R=true" }, written, "RecordWritten 在 Commit 後照常發出");
 
             // 判定四選一
-            foreach (var (label, value) in new[] { ("只換肘側", "L"), ("只換外側", "R"), ("合格", "pass"), ("兩條都換", "both") })
+            foreach (var (label, value) in new[] { ("只換靠關節", "L"), ("只換外側", "R"), ("合格", "pass"), ("兩條都換", "both") })
             {
                 Press(ButtonLabeled(view, label).gameObject);
                 Assert.AreEqual(value, s.Get("workorder.decision"), label);

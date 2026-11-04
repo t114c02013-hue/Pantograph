@@ -157,7 +157,7 @@ namespace PantographSim.XR
                     float dd = Flat(roof.transform.position, Center(tray));
                     if (dd < set.boltTrayMin - Eps || dd > set.boltTrayMax + Eps) r.bad.Add($"tp.roof.inner：到 env.bolt_tray_{side} {dd:0.00} m（要 {set.boltTrayMin}–{set.boltTrayMax} m）");
                 }
-            if (set.measuredFarBoltL > set.roofBoltMaxDistance) r.warn.Add($"肘側最遠螺栓 {set.measuredFarBoltL:0.00} m 超過 {set.roofBoltMaxDistance} m：啟用側移提示");
+            if (set.measuredFarBoltL > set.roofBoltMaxDistance) r.warn.Add($"靠關節最遠螺栓 {set.measuredFarBoltL:0.00} m 超過 {set.roofBoltMaxDistance} m：啟用側移提示");
             if (Mathf.Abs(d.platformFloorY - d.roofFloorY) > set.maxFloorStep) r.bad.Add($"平台與車頂高度差 {Mathf.Abs(d.platformFloorY - d.roofFloorY):0.00} m 超過 {set.maxFloorStep} m");
             if (d.platformGap > set.maxPlatformGap) r.bad.Add($"平台到車頂間隙 {d.platformGap:0.00} m 超過 {set.maxPlatformGap} m");
             CheckA6(set, d, pts, find, r, wrench);

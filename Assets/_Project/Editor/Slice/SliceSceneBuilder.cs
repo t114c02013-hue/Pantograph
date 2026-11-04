@@ -161,7 +161,7 @@ namespace PantographSim.Editor
             var checkWorld = new Vector3(headBounds.center.x, headBounds.max.y + 0.015f, headBounds.center.z);
             var checkPoint = SliceModelBuilder.Prim(PrimitiveType.Sphere, "LowerCheckPoint", panHead, Vector3.zero, Vector3.one * 0.035f, mats["checkPoint"]);
             checkPoint.transform.position = checkWorld;
-            Object.DestroyImmediate(checkPoint.GetComponent<Collider>());
+            checkPoint.GetComponent<SphereCollider>().radius = 2.5f;   // 「點這裡：弓頭」的箭頭就在檢測點上，這裡要點得到（SimIds.RayTarget 算成弓頭）
             checkPoint.AddComponent<InteractionPointMarker>().Configure(pcDef.CheckMarkerId, "弓頭檢測點");
             pcDef.checkPointLocal = panHead.InverseTransformPoint(checkWorld);
             pcDef.targetLocal = rig.transform.InverseTransformPoint(checkWorld);   // 現在是降到底的姿態
