@@ -78,6 +78,7 @@ namespace PantographSim.Core
         public static bool RayIgnores(ISimState s, string id)
         {
             if (id == LowerCheckId) { string t = s.Get("hint.sub_target"); return t != PanHead && t != LowerCheckId; }
+            if (id.Contains(".measure_")) return s.Get(ActiveTool) != ToolCaliper;   // 量測點只有拿卡尺才收射線，不然蓋住滑板
             return s.Get(id + ".state") == "Carried" || (id.Length > 0 && id == s.Get("hand.item"));
         }
 

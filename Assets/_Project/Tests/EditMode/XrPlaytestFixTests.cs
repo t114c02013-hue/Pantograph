@@ -317,6 +317,9 @@ namespace PantographSim.Tests
             Assert.IsTrue(SimIds.RayIgnores(s, SimIds.LowerCheckId), "不是目標");
             s.Set("hint.sub_target", SimIds.PanHead);
             Assert.IsFalse(SimIds.RayIgnores(s, SimIds.LowerCheckId), "第 1 步要點得到");
+            Assert.IsTrue(SimIds.RayIgnores(s, "ip.carbon_strip_L.measure_mid"), "空手：量測點不蓋住滑板");
+            s.Set(SimIds.ActiveTool, SimIds.ToolCaliper);
+            Assert.IsFalse(SimIds.RayIgnores(s, "ip.carbon_strip_L.measure_mid"), "拿卡尺要點得到");
         }
 
         /// <summary>第 16 步：教學指向型號正確的那條，條件跟著換；其他模式不給答案。</summary>

@@ -21,6 +21,39 @@ namespace PantographSim.Tests
             return it != null ? it.Id : c.name;
         }
 
+        /// <summary>第 17 步：從帶我過去的鏡頭（按 C 同一個位置）滑鼠對準托架中心，拿著的滑板不擋，判定是對準。</summary>
+        [Test]
+        public void Install_AimAtBracket_FromFocusView_IsAligned()
+        {
+            StationTests.WithScene(scene =>
+            {
+                var roots = scene.GetRootGameObjects();
+                var ids = StationTests.SceneIds(scene);
+                roots.SelectMany(g => g.GetComponentsInChildren<PantographMechanism>(true)).First().SetLift(0f);
+                var focus = roots.SelectMany(g => g.GetComponentsInChildren<StepFocus>(true)).First();
+                var orbit = roots.SelectMany(g => g.GetComponentsInChildren<OrbitCameraController>(true)).First();
+                var s = new SimState(new EventBus());
+                Physics.SyncTransforms();
+                foreach (var side in new[] { "L", "R" })
+                {
+                    s.Set("part.carbon_strip_" + side + ".state", "Carried");
+                    foreach (var c in ids["part.carbon_strip_" + side].GetComponentsInChildren<Collider>()) c.enabled = false;   // 拿在手上：RefreshVisual 關掉碰撞體
+                    Physics.SyncTransforms();
+                    var mount = ids["part.carbon_strip_" + side].position;
+                    var bracket = ids["ip.carbon_strip_" + side + ".bracket"];
+                    var stand = GameObject.Find("StationAnchor_tp.roof.inner").transform.position;
+                    orbit.Retarget(new Bounds(mount, Vector3.one * 0.45f), focus.ViewFrom(stand, "ip.carbon_strip_" + side + ".bracket", mount));
+                    var eye = orbit.PlannedPosition; var dir = (mount - eye).normalized;
+                    Assert.IsTrue(PickRay.Cast(new Ray(eye, dir), 5f, SceneLayers.InteractMask, s, out var hit), side + "：打不到");
+                    Assert.AreEqual("ip.carbon_strip_" + side + ".bracket", Id(hit.collider), side + "：要打到托架");
+                    var held = PantographSim.Parts.Common.StripLogic.CarryPoint(new Ray(eye, dir), true, mount, 0.06f);
+                    var off = held - mount; off.y = 0f;
+                    Assert.Less(off.magnitude, PantographSim.Parts.Common.StripLogic.SnapTolerance, side + "：斜看也要算對準");
+                    Assert.Less(off.magnitude, 0.001f, side);
+                }
+            });
+        }
+
         [Test]
         public void EveryR1Target_VisibleAndClickable_FromFocusView()
         {
@@ -44,12 +77,11 @@ namespace PantographSim.Tests
                             string id = (sub.target ?? "").Replace("{side}", side);
                             if (id.Length == 0 || id.EndsWith("*") || !ids.TryGetValue(id, out var t) || !t.gameObject.activeInHierarchy) continue;
                             if (id.StartsWith("env.work_order") || id.EndsWith(".bracket") || id.EndsWith(".install_check")) continue;   // 作業單是 UI；托架要滑板拆下才露出
-                            if (id.StartsWith("env.tool_rack.slot_") && ids.TryGetValue("env.tool_bag", out var bag) && t.IsChildOf(bag)) continue;   // 工具袋用工具列拿
                             var anchor = GameObject.Find("StationAnchor_" + (sub.stand ?? ""));
                             if (anchor == null) continue;
                             t.TryGetComponent<Collider>(out var col); if (col == null) col = t.GetComponentInChildren<Collider>();
                             var p = col != null ? col.bounds.center : t.position;
-                            orbit.Retarget(new Bounds(p, Vector3.one * 0.45f), focus.ViewFrom(anchor.transform.position, id, p));
+                            orbit.Retarget(new Bounds(p, Vector3.one * 0.45f), focus.ViewFrom(anchor.transform.position, id, p, ids.TryGetValue("env.tool_bag", out var bag) && t.IsChildOf(bag)));
                             views.Add((st.stepId, id, t, orbit.PlannedPosition, p));
                         }
                 // 點得到：真實的碰撞體
@@ -58,6 +90,7 @@ namespace PantographSim.Tests
                 {
                     checkedCount++;
                     s.Set("hint.sub_target", v.id);
+                    s.Set(SimIds.ActiveTool, v.id.Contains(".measure_") ? SimIds.ToolCaliper : "");   // 量測點要拿著卡尺才收射線
                     var dir = v.p - v.eye;
                     if (!PickRay.Cast(new Ray(v.eye, dir.normalized), dir.magnitude + 0.05f, SceneLayers.InteractMask, s, out var hit)) { bad.Add($"{v.step} {v.id}：打不到"); continue; }
                     string got = Id(hit.collider);

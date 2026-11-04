@@ -87,7 +87,7 @@ namespace PantographSim.UI
 
             bool tutorial = s.Get("training.mode") != "practice";
             goLabel.text = InputMode.XrActive ? "帶我過去（B）" : "帶我過去（C）";
-            string side = string.IsNullOrEmpty(step.sideLabel) ? "" : "（" + step.sideLabel + "）";
+            string side = string.IsNullOrEmpty(step.sideLabel) || (step.title ?? "").Contains(step.sideLabel) ? "" : "（" + step.sideLabel + "）";
             header.text = $"第 {step.index}/{step.total} 步：{step.title}{side}";
 
             int count = (int)s.GetFloat("hint.sub_count");

@@ -105,7 +105,7 @@ namespace PantographSim.Interaction
         {
             if (!InputBlocked && !PantographSim.Core.PointerState.OverUi)
             {
-                if ((rotateWithLeftButton && Input.GetMouseButton(0)) || Input.GetMouseButton(1))
+                if ((rotateWithLeftButton && !PantographSim.Core.PointerState.DragCaptured && Input.GetMouseButton(0)) || Input.GetMouseButton(1))
                 {
                     yaw += Input.GetAxis("Mouse X") * rotateSpeed;
                     pitch = Mathf.Clamp(pitch - Input.GetAxis("Mouse Y") * rotateSpeed, minPitch, maxPitch);

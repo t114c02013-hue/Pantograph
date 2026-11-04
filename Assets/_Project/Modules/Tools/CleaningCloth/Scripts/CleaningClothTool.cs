@@ -9,6 +9,9 @@ namespace PantographSim.Tools
     {
         string strokeTarget = "";
 
+        public override void OnSelected() { PointerState.DragCaptured = true; }   // 拖曳是擦拭，不轉鏡頭：從哪裡開始拖都可以
+        public override void OnDeselected() { PointerState.DragCaptured = false; }
+
         public override void Tick()
         {
             if (!PrimaryHeld || PointerState.OverUi) { strokeTarget = ""; return; }
@@ -18,10 +21,17 @@ namespace PantographSim.Tools
             if (InputMode.XrActive) ray = PointerState.Ray;
             else if (cam != null) ray = cam.ScreenPointToRay(Input.mousePosition);
             else return;
-            if (!Physics.Raycast(ray, out var hit, 50f, SceneLayers.InteractMask, QueryTriggerInteraction.Collide)) return;   // 不打不可見的邊界牆；絕緣子的 COL_Dirt 是 trigger
-            var obj = hit.collider.GetComponentInParent<ISimObject>();
-            bool insulator = obj != null && obj.Id.StartsWith("ip.roof.insulator_");   // R1.5b b4（D43）：絕緣子髒汙殼
-            if (obj == null || (!obj.Id.EndsWith(".bracket") && !insulator)) return;
+            // 不打不可見的邊界牆；絕緣子的 COL_Dirt 是 trigger。擦拭只認托架和絕緣子：線上其他東西不擋布
+            var hits = Physics.RaycastAll(ray, 50f, SceneLayers.InteractMask, QueryTriggerInteraction.Collide);
+            System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+            RaycastHit hit = default; ISimObject obj = null;
+            foreach (var h in hits)
+            {
+                var o = h.collider.GetComponentInParent<ISimObject>();
+                if (o != null && (o.Id.EndsWith(".bracket") || o.Id.StartsWith("ip.roof.insulator_"))) { hit = h; obj = o; break; }
+            }
+            if (obj == null) return;
+            bool insulator = obj.Id.StartsWith("ip.roof.insulator_");   // R1.5b b4（D43）：絕緣子髒汙殼
             if (strokeTarget != obj.Id)
             {
                 if (!Ask(obj.Id, "clean")) { strokeTarget = ""; return; }

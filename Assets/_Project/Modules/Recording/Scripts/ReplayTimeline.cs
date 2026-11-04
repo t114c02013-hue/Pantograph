@@ -215,7 +215,7 @@ namespace PantographSim.Recording
                 state.Set("procedure.current", l.step);
                 state.Set("procedure.side", d.Str("side"));
                 string label = d.Str("sideLabel");
-                state.Set("procedure.current_title", string.IsNullOrEmpty(label) ? d.Str("title") : d.Str("title") + "（" + label + "）");
+                state.Set("procedure.current_title", string.IsNullOrEmpty(label) || d.Str("title").Contains(label) ? d.Str("title") : d.Str("title") + "（" + label + "）");
                 state.SetFloat("procedure.sub_index", 0);
                 state.SetFloat("procedure.sub_count", subs.Length);
             }

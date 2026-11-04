@@ -1,5 +1,6 @@
 using System.Linq;
 using PantographSim.Core;
+using UnityEngine;
 using PantographSim.Data;
 
 namespace PantographSim.Parts.Common
@@ -14,6 +15,13 @@ namespace PantographSim.Parts.Common
     public static class StripLogic
     {
         public const string OldMounted = "OldMounted", Removed = "Removed", InTray = "InTray", Carried = "Carried", NewMounted = "NewMounted";
+        /// <summary>手上滑板跟著射線：先取射線打在托架高度的那一點（判定用，斜看也不偏），再抬高 height（外觀）。</summary>
+        public static Vector3 CarryPoint(Ray ray, bool hasRay, Vector3 mount, float height)
+        {
+            var at = hasRay && new Plane(Vector3.up, mount).Raycast(ray, out float dist) ? ray.GetPoint(dist) : mount;
+            return at + Vector3.up * height;
+        }
+
         /// <summary>放下時孔位與托架的偏差在這個範圍內就吸附到正確位置（之後 install_check 量得 ≤ 0.5 cm）。</summary>
         public static float SnapTolerance => (ToolRulesDef.Load()?.stripSnapCm ?? 5f) / 100f;
 

@@ -1254,8 +1254,8 @@ namespace PantographSim.Editor
                 if (p.GetComponent<Collider>() == null) p.gameObject.AddComponent<BoxCollider>();
                 if (p.GetComponent<Collider>() is BoxCollider pb)   // 格子很薄：最薄的方向加厚，從上面看也點得到；排列方向不動，格子不互相蓋到
                 {
-                    var ls = p.lossyScale; int thin = ls.x <= ls.y && ls.x <= ls.z ? 0 : ls.y <= ls.z ? 1 : 2;
-                    var sz = pb.size; sz[thin] = 0.15f / Mathf.Abs(ls[thin]); pb.size = sz;
+                    var sz = Vector3.Scale(pb.size, p.lossyScale); int thin = sz.x <= sz.y && sz.x <= sz.z ? 0 : sz.y <= sz.z ? 1 : 2;   // 模型的縮放已經烘進網格：要看碰撞體本身的大小
+                    var size = pb.size; size[thin] = 0.15f / Mathf.Abs(p.lossyScale[thin]); pb.size = size;
                 }
                 var tool = tools.FirstOrDefault(t => t.toolId == s.toolId);
                 var comp = p.gameObject.AddComponent<ToolRackSlot>();

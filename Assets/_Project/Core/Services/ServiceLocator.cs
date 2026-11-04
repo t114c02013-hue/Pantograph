@@ -52,6 +52,8 @@ namespace PantographSim.Core
     /// </summary>
     public static class PointerState
     {
+        /// <summary>手上工具要用左鍵拖曳：鏡頭不跟著轉。</summary>
+        public static bool DragCaptured;
         public static bool OverUi;
         public static bool ScrollCaptured;
         public static bool LeftDragCaptured;

@@ -80,6 +80,11 @@ namespace PantographSim.UI
             return (rt, arrow, text, bg);
         }
 
+        /// <summary>工具袋的格子標籤只有鏡頭在旁邊才顯示：袋子在遠處時投影到畫面會浮在別的東西上。</summary>
+        static bool FarBagSlot(ISimState s, string id, Vector3 p) =>
+            id.StartsWith("env.tool_rack.slot_") && s.Get(SimIds.BagSlots).Contains("," + id.Substring(id.LastIndexOf('_') + 1) + ",")
+            && Camera.main != null && Vector3.Distance(Camera.main.transform.position, p) > 2f;
+
         static bool Close(Vector2 a, Vector2 b) => Mathf.Abs(a.x - b.x) < 170f && Mathf.Abs(a.y - b.y) < 40f;
 
         static bool RackHintActive(ISimState s) =>
@@ -124,7 +129,7 @@ namespace PantographSim.UI
                     m.rt.anchoredPosition = at + new Vector2(0, bob);
                     Ui.SetActive(m.arrow, true);
                     m.text.text = hintOn && id == rackHint ? $"▼ 在這裡：{name}"
-                        : id.EndsWith("_check") ? $"{num} 用右側控制器把這個點降到綠框"
+                        : id == SimIds.LowerCheckId ? (InputMode.XrActive ? $"{num} 用右側控制器把這個點降到綠框" : $"{num} 按住升降面板的 ▼ 把這個點降到綠框")
                         : $"{num} 點這裡：{name}";
                 }
                 else
@@ -145,7 +150,8 @@ namespace PantographSim.UI
             foreach (var kv in labels)
             {
                 bool show = !targetSet.Contains(kv.Key) && reg.TryGetPosition(kv.Key, out var p)
-                            && ui.WorldToSafe(p, out var lp, out bool inside) && inside && !placed.Exists(q => Close(q, lp + new Vector2(0, 26)));
+                            && ui.WorldToSafe(p, out var lp, out bool inside) && inside && !placed.Exists(q => Close(q, lp + new Vector2(0, 26)))
+                            && !FarBagSlot(s, kv.Key, p);
                 Ui.SetActive(kv.Value.rt, show);
                 if (!show) continue;
                 reg.TryGetPosition(kv.Key, out var p2);
@@ -169,7 +175,10 @@ namespace PantographSim.UI
             {
                 reg.TryGetPosition($"ip.carbon_strip_{side}.outward", out var ap2);
                 ui.WorldToSafe(ap2, out var al2, out _);
-                outward.rt.anchoredPosition = al2 + new Vector2(0, 30);
+                var outAt = al2 + new Vector2(0, 30);
+                while (placed.Exists(q => Close(q, outAt))) outAt.y += 44f;
+                placed.Add(outAt);
+                outward.rt.anchoredPosition = outAt;
                 outward.text.text = s.Get($"part.carbon_strip_{side}.new_orientation") == "out" ? "✔ 此側朝外（方向正確）" : "此側朝外 ➜　方向不對，按 R 轉 180°";
             }
 
@@ -184,7 +193,8 @@ namespace PantographSim.UI
                     ? hl + new Vector2(0, 40)
                     : ui.MouseInSafe() + new Vector2(0, 28);
                 var hoverAt = hover.rt.anchoredPosition;   // 不要和「點這裡」疊在一起
-                while (placed.Exists(q => Close(q, hoverAt))) hoverAt.y += 44f;
+                float cardHalf = hover.rt.rect.height * 0.5f;   // 備品資訊牌有好幾行
+                while (placed.Exists(q => Mathf.Abs(q.x - hoverAt.x) < 240f && Mathf.Abs(q.y - hoverAt.y) < 40f + cardHalf)) hoverAt.y += 44f;
                 hover.rt.anchoredPosition = hoverAt;
             }
         }

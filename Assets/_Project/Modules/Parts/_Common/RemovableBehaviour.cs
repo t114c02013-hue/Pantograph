@@ -122,11 +122,8 @@ namespace PantographSim.Parts.Common
             if (st == StripLogic.InTray && State.GetBool("spare." + Side + ".picked")) { StripLogic.Carry(State, Id); return; }
             if (st != StripLogic.Carried && st != StripLogic.Removed) return;
 
-            // 拿在手上：跟著滑鼠，在托架高度上方的水平面移動
-            var mount = MountWorld;
-            var plane = new Plane(Vector3.up, mount + Vector3.up * carryHeight);
-            Vector3 target = mount + Vector3.up * carryHeight;
-            if (PointerState.HasRay && plane.Raycast(PointerState.Ray, out float dist)) target = PointerState.Ray.GetPoint(dist);
+            // 拿在手上：跟著滑鼠指到的托架高度那一點，抬高一點顯示（不能用抬高後的平面算：斜看會偏 6 cm 以上）
+            var target = StripLogic.CarryPoint(PointerState.Ray, PointerState.HasRay, MountWorld, carryHeight);
             transform.position = Vector3.Lerp(transform.position, target, 1f - Mathf.Exp(-18f * Time.deltaTime));
             transform.localRotation = mountRot;
             if (st == StripLogic.Carried)
