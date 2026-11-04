@@ -69,8 +69,8 @@ namespace PantographSim.XR
                 container.position = WaistPosition(h.position, turned, waistOffset, s != null && s.GetBool(SwapKey));
                 container.rotation = turned;   // pivot 在背面中心、開口朝 +Y
             }
-            // 第 4 點：教學模式每一格都顯示名稱，練習只顯示手指到的那一格（XrPouchHover）
-            bool all = s != null && s.Get("training.mode") != "practice";
+            // 第 4 點：教學模式每一格都顯示名稱，練習、考核只顯示手指到的那一格（XrPouchHover）
+            string mode = s != null ? s.Get("training.mode") : ""; bool all = mode != "practice" && mode != "exam";
             string pointed = s != null ? "Label_" + (int)s.GetFloat(XrPouchHover.SlotKey) : "";
             Open = pointed != "Label_0";
             foreach (var l in labels) { if (l == null) continue; bool show = all || l.name == pointed; if (l.activeSelf != show) l.SetActive(show); }
