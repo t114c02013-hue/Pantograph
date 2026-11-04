@@ -368,7 +368,7 @@ namespace PantographSim.Editor
             yield return 10;
             foreach (var side in new[] { "L", "R" }) { Click($"ip.carbon_strip_{side}.measure_mid", SimIds.ToolCaliper); yield return 10; }
             if (!S.GetBool("ui.workorder_open")) Send(SimIds.WorkOrder, "toggle");
-            foreach (var side in new[] { "L", "R" }) Send(SimIds.WorkOrder, R($"ip.carbon_strip_{side}.measure_mid.reading"), "newmid." + side);
+            foreach (var side in new[] { "L", "R" }) Send(SimIds.WorkOrder, R($"ip.carbon_strip_{side}.measure_mid.new_reading"), "newmid." + side);
             yield return 10;
             Return();
             foreach (var x in WaitStep("STP_WC_01")) yield return x;

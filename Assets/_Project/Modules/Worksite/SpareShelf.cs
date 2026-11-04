@@ -8,7 +8,7 @@ namespace PantographSim.Worksite
     /// <summary>
     /// 備品架上的一條備品滑板（env.spare_shelf.slot_1..3）。點它 → 檢視面板（看標籤、翻面、選用）。
     /// 選用前要先用卡尺量中點；型號不符或有裂紋都不能用。選用成功寫 spare.&lt;側&gt;.picked=true，由零件端接手。
-    /// 換到外側（procedure.side=R）時備品架補貨。
+    /// 換側時備品架換成那一側的排列（補貨）。
     /// </summary>
     public class SpareShelf : SiteObject
     {
@@ -61,11 +61,20 @@ namespace PantographSim.Worksite
         }
 
         string lastSide;
+        /// <summary>第 10 步量外側時也會換到 R，所以回到 L 也要換回 L 的排列，不然靠關節用的是外側的排列。</summary>
+        public static bool SideChanged(string last, string side) => !string.IsNullOrEmpty(last) && last != side;
+
         void LateUpdate()
         {
             if (State == null) return;
             var side = State.Get("procedure.side");
-            if (side != lastSide) { if (!string.IsNullOrEmpty(lastSide) && side == "R") Restock("R"); lastSide = side; }
+            if (string.IsNullOrEmpty(side)) return;   // 兩側之間的步驟沒有側別，不算換側
+            if (SideChanged(lastSide, side))
+            {
+                if (State.GetBool(id + ".taken")) { State.Set("ui.toast", ""); State.Set("ui.toast", "備品架已補貨，這一側重新檢查"); }
+                Restock(side);
+            }
+            lastSide = side;
         }
 
         protected override void OnBareHand(ActionRequested e)

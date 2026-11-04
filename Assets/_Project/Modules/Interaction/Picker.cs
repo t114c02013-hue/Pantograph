@@ -45,14 +45,20 @@ namespace PantographSim.Interaction
                 Sim.Bus.Publish(new HoverChanged { targetId = hovered != null ? hovered.Id : "", text = "mouse", time = SimClock.Now });
             }
 
-            if (hovered == null || !ShouldSendClick(PointerState.OverUi, s.GetBool("training.paused"), s.GetBool("training.running"))) return;
+            string bracket = SimIds.CarriedBracket(s);
+            if ((hovered == null && bracket.Length == 0) || !ShouldSendClick(PointerState.OverUi, s.GetBool("training.paused"), s.GetBool("training.running"))) return;
             if (!Input.GetMouseButtonDown(0)) return;
             string tool = s.Get(SimIds.ActiveTool);
-            string clicked = SimIds.RayTarget(s, tool, hovered.Id, info.point);
+            if (bracket.Length > 0 && !SimIds.ClicksBracket(s, bracket, hovered?.Id))
+            {
+                s.Set("ui.toast", ""); s.Set("ui.toast", "滑板還不在托架上方，先移到托架上再點");
+                return;
+            }
+            string clicked = bracket.Length > 0 ? bracket : SimIds.RayTarget(s, tool, hovered.Id, info.point);
             Sim.Bus.Publish(new ActionRequested
             {
                 targetId = clicked, toolId = tool,
-                text = !string.IsNullOrEmpty(tool) ? "click" : clicked == hovered.Id ? hovered.DefaultVerb : "inspect",
+                text = !string.IsNullOrEmpty(tool) || bracket.Length > 0 ? "click" : clicked == hovered.Id ? hovered.DefaultVerb : "inspect",
                 pointId = $"{info.point.x:0.###},{info.point.y:0.###},{info.point.z:0.###}", time = SimClock.Now
             });
             s.Set("ui.last_clicked", clicked);

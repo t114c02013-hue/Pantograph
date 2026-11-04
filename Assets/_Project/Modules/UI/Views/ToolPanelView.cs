@@ -180,7 +180,9 @@ namespace PantographSim.UI
                     string V(string pt) { string k = $"ip.carbon_strip_{side}.measure_{pt}.reading"; return s.Has(k) ? s.GetFloat(k).ToString("0.00") : "—"; }
                     return $"{name}：左 {V("left")}　中 {V("mid")}　右 {V("right")}";
                 }
-                taken.text = Line("L", "靠關節") + "\n" + Line("R", "外側");   // 讀數留在畫面上照著抄（抄寫本身是訓練項目，ERR_CSR03_CopyError）
+                string New(string side) { string k = $"ip.carbon_strip_{side}.measure_mid.new_reading"; return s.Has(k) ? s.GetFloat(k).ToString("0.00") : "—"; }
+                bool anyNew = New("L") != "—" || New("R") != "—";
+                taken.text = Line("L", "靠關節") + "\n" + Line("R", "外側") + (anyNew ? $"\n新品中點：靠關節 {New("L")}　外側 {New("R")}" : "");   // 讀數留在畫面上照著抄（抄寫本身是訓練項目，ERR_CSR03_CopyError）
                 digits.text = s.Get("tool.caliper.display", "--.-- mm");
                 zero.text = s.GetBool("tool.caliper.zeroed") ? Ui.Tint("● 已歸零", Ui.Ok) : Ui.Tint("● 未歸零（多 0.30 mm）", Ui.Bad);
             });

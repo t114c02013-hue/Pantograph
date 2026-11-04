@@ -54,6 +54,21 @@ namespace PantographSim.Tests
             });
         }
 
+        /// <summary>第 10 輪：第 22 步箭頭指的點要打得到工具架背板，不是掛位。</summary>
+        [Test]
+        public void ToolRackMarker_HitsBoard_NotSlot()
+        {
+            StationTests.WithScene(scene =>
+            {
+                var board = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<PantographSim.Worksite.ToolRackBoard>(true)).First(b => b.Id == "env.tool_rack");
+                var p = board.MarkerPoint.position;
+                Physics.SyncTransforms();
+                var s = new SimState(new EventBus());
+                Assert.IsTrue(PickRay.Cast(new Ray(p + Vector3.right, Vector3.left), 3f, SceneLayers.InteractMask, s, out var hit), "打不到");
+                Assert.AreEqual("env.tool_rack", Id(hit.collider));
+            });
+        }
+
         [Test]
         public void EveryR1Target_VisibleAndClickable_FromFocusView()
         {

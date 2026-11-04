@@ -95,6 +95,11 @@ namespace PantographSim.Parts.Common
                 return ok;
             });
 
+        /// <summary>放不下去時告訴學員為什麼。</summary>
+        public static string InstallFailText(ISimState s, string stripId, float holeOffset) =>
+            s.Get(stripId + ".install_result") == "WrongOrientation" ? "方向不對：先按 R 轉到箭頭朝外"
+            : $"螺栓孔還沒對齊：偏 {holeOffset * 100f:0.0} cm，要在 {SnapTolerance * 100f:0.#} cm 內";
+
         static bool InstallInBatch(ISimState s, string stripId, float holeOffset)
         {
             if (s.Get(stripId + ".state") != Carried) return false;

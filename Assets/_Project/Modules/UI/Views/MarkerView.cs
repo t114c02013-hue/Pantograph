@@ -144,7 +144,8 @@ namespace PantographSim.UI
                     Ui.SetActive(m.arrow, false);
                     string arrow = Mathf.Abs(dir.x) > Mathf.Abs(dir.y) ? (dir.x > 0 ? "▶" : "◀") : (dir.y > 0 ? "▲" : "▼");
                     bool inBag = id.StartsWith("env.tool_rack.slot_") && s.Get(SimIds.BagSlots).Contains("," + id.Substring(id.LastIndexOf('_') + 1) + ",");
-                    m.text.text = inBag ? $"{arrow} {name}（點下方工具列的格子）" : $"{arrow} {name}（按「帶我過去」或 C）";
+                    bool cGoesThere = s.Get("training.mode") != "practice" && (id != rackHint || id == s.Get("hint.sub_target"));   // 練習不帶路；數字鍵的掛位不是 C 的目標
+                    m.text.text = inBag ? $"{arrow} {name}（點下方工具列的格子）" : cGoesThere ? $"{arrow} {name}（按「帶我過去」或 C）" : $"{arrow} {name}";
                 }
                 m.bg.color = Color.Lerp(new Color(1f, 0.85f, 0.1f), new Color(1f, 0.6f, 0.05f), Ui.Blink(5f));
             }

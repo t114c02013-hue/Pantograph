@@ -59,6 +59,17 @@ namespace PantographSim.Core
             return best;
         }
 
+        /// <summary>手上拿著這一側的新滑板：回傳它的托架 ID，沒拿就是空字串。</summary>
+        public static string CarriedBracket(ISimState s)
+        {
+            string side = s.Get("procedure.side");
+            return side.Length > 0 && s.Get($"part.carbon_strip_{side}.state") == "Carried" ? $"ip.carbon_strip_{side}.bracket" : "";
+        }
+
+        /// <summary>手上有滑板時這一下算不算點托架：滑板已在托架上方就算，射線沒打到托架本體也一樣（判定看孔位，不看點在哪）。</summary>
+        public static bool ClicksBracket(ISimState s, string bracket, string hovered) =>
+            hovered == bracket || s.GetBool($"part.carbon_strip_{SideOf(bracket)}.over_bracket");
+
         /// <summary>是不是一支螺栓（…bolt_ 後面接數字）；env.bolt_tray_L 是盤子，不算。</summary>
         public static bool IsBoltId(string id)
         {

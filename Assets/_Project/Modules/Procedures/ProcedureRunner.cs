@@ -211,6 +211,16 @@ namespace PantographSim.Procedures
         /// </summary>
         int NextOpen(int from)
         {
+            var notes = new List<string>();
+            int next = NextOpen(from, notes);
+            state.Set("procedure.preset_note", string.Join("\n", notes));
+            if (notes.Count > 0) { state.Set("ui.toast", ""); state.Set("ui.toast", string.Join("\n", notes)); }
+            return next;
+        }
+
+        /// <summary>途經的預設完成步驟記進 notes：步驟編號會跳，要讓學員看到跳過的那一步在做什麼。</summary>
+        int NextOpen(int from, List<string> notes)
+        {
             for (int i = from; i < steps.Count; i++)
             {
                 var st = steps[i];
@@ -221,6 +231,7 @@ namespace PantographSim.Procedures
                         KeyValueList.Apply(st.def.presetStates, state);
                         state.SetBool(st.DoneKey, true);
                     });
+                    notes.Add($"第 {st.defIndex} 步 {st.def.title}：{st.def.instruction}");
                     continue;
                 }
                 if (!state.GetBool(st.DoneKey)) return i;

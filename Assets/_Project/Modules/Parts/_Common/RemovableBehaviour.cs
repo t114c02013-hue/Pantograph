@@ -53,7 +53,9 @@ namespace PantographSim.Parts.Common
             {
                 if (st != StripLogic.Carried || !AskBare("install")) return;
                 // 吸附成功：同一批裡把滑板放到托架位置，並讓安裝位置檢測立刻寫入吸附後的距離（install_distance_cm）
-                StripLogic.Install(State, Id, HoleOffsetNow(), () => { RefreshVisual(); Sensors.Flush(State, Id + ".install"); });
+                float offset = HoleOffsetNow();
+                if (!StripLogic.Install(State, Id, offset, () => { RefreshVisual(); Sensors.Flush(State, Id + ".install"); }))
+                { State.Set("ui.toast", ""); State.Set("ui.toast", StripLogic.InstallFailText(State, Id, offset)); }
                 return;
             }
             // 點滑板本身

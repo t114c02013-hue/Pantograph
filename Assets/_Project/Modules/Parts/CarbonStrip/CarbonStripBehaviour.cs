@@ -29,9 +29,10 @@ namespace PantographSim.Parts.CarbonStrip
             foreach (var p in Points)
             {
                 if (pointId != PointId(stripId, p)) continue;
-                s.SetFloat(pointId + ".reading", Mathf.Round(value * 100f) / 100f);
+                bool isNew = s.Get(stripId + ".state") == "NewMounted";   // 新品另外記：舊滑板的讀數是更換依據，不能蓋掉
+                s.SetFloat(pointId + (isNew ? ".new_reading" : ".reading"), Mathf.Round(value * 100f) / 100f);
                 s.SetBool(pointId + ".measured", true);
-                if (s.Get(stripId + ".state") == "NewMounted") s.SetBool(pointId + ".new_measured", true);
+                if (isNew) s.SetBool(pointId + ".new_measured", true);
                 return true;
             }
             return false;

@@ -1303,7 +1303,12 @@ namespace PantographSim.Editor
             root.rotation = Quaternion.LookRotation(facing, Vector3.up);   // 本地 +Z＝朝學員（工具模型在掛位前方）
             float width = StorageWidth(list.Count, spacing);
             var board = SliceModelBuilder.Prim(PrimitiveType.Cube, "Board", root, new Vector3(shiftX, height / 2f + 0.05f, -0.04f), new Vector3(width, height + 0.1f, 0.04f), mats["shelf"]);
-            board.AddComponent<ToolRackBoard>().Configure(boardId, label + "（點一下查看掛位）");
+            var boardComp = board.AddComponent<ToolRackBoard>();
+            boardComp.Configure(boardId, label + "（點一下查看掛位）");
+            var marker = new GameObject("Marker").transform;   // 背板中心被掛位蓋住：箭頭指掛位下方露出來的背板
+            marker.SetParent(root, false);
+            marker.localPosition = new Vector3(shiftX, (height / 2f + 0.05f - Mathf.Min(0.32f, height) / 2f) / 2f, -0.02f);
+            boardComp.SetMarkerPoint(marker);
             int i = 0;
             foreach (var t in list.OrderBy(t => t.hotkey))
             {

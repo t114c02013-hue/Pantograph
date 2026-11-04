@@ -321,6 +321,7 @@ namespace PantographSim.UI
             countText.text = $"工具已收回：{(s.GetBool("tools.all_returned") ? Ui.Tint("是", Ui.Ok) : Ui.Tint("否（到工具架掛回）", Ui.Bad))}　零件盒剩螺栓：{s.GetFloat("tray.bolts"):0}　舊滑板：{s.GetFloat("tray.old_strips"):0}";
             confirmLabel.text = s.GetBool("workorder.toolcount_confirmed") ? "✔ 已確認清點" : "確認工具與零件清點";
             platformLabel.text = s.GetBool("workorder.toolcount_platform_confirmed") ? "✔ 平台清點完成" : "平台清點完成";
+            platformLabel.transform.parent.gameObject.SetActive(s.Get("procedure.current").StartsWith("STP_WC_01b"));   // 只有日常、定期課程有這一步
             string anomaly = s.Get("workorder.anomaly");
             foreach (var (v, bg) in anomalyButtons) bg.color = v == anomaly ? Ui.ButtonOn : Ui.ButtonBg;
             string judged = s.Get("workorder.ir_judgement");

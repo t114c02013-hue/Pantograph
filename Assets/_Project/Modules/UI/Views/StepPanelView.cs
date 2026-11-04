@@ -18,6 +18,7 @@ namespace PantographSim.UI
         Text header, dots, subText, subWhy, check, toolWarn, detailToggle, backReason, recLine;
         Text doText, whyText, toolText, whereText, tags, gate, goLabel;
         Button back, stallHint, redo;
+        Text presetNote;
         RectTransform stallBox;
         Text stallText;
         public const string StallGeneric = "這一步還有條件沒完成，請再檢查";
@@ -36,6 +37,7 @@ namespace PantographSim.UI
             Ui.VStack(panel.gameObject, 18, 8);
             recLine = Ui.Text(root, "", 17, Ui.Muted, TextAnchor.UpperRight);   // 角落小字：● 紀錄中　● REC mm:ss
             header = Ui.Text(root, "", 22, Color.white, TextAnchor.UpperLeft, FontStyle.Bold);
+            presetNote = Ui.Text(root, "", 18, Ui.Muted);
             dots = Ui.Text(root, "", 26, Ui.Accent);
 
             var sb = Ui.Panel(root, "SubAction", new Color(0.12f, 0.16f, 0.22f, 1f), true, false);
@@ -91,6 +93,9 @@ namespace PantographSim.UI
             goLabel.text = InputMode.XrActive ? "帶我過去（B）" : "帶我過去（C）";
             string side = string.IsNullOrEmpty(step.sideLabel) || (step.title ?? "").Contains(step.sideLabel) ? "" : "（" + step.sideLabel + "）";
             header.text = $"第 {step.index}/{step.total} 步：{step.title}{side}";
+
+            presetNote.text = s.Get("procedure.preset_note");
+            Ui.SetActive(presetNote, presetNote.text.Length > 0);
 
             int count = (int)s.GetFloat("hint.sub_count");
             int idx = (int)s.GetFloat("procedure.sub_index");

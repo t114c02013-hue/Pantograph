@@ -24,13 +24,18 @@ namespace PantographSim.Worksite
 
         public void Configure(string newId, string newName, string verb = "click") { id = newId; displayName = newName; defaultVerb = verb; }
 
-        protected virtual void OnEnable() { Sim.Registry?.Register(id, transform); }
-        protected virtual void OnDisable() { Sim.Registry?.Unregister(id, transform); }
+        /// <summary>箭頭和鏡頭對準的點（沒設就是物件中心；工具架中心被掛位蓋住，要指在背板空的地方）。</summary>
+        [SerializeField] Transform markerPoint;
+        public void SetMarkerPoint(Transform t) => markerPoint = t;
+        public Transform MarkerPoint => markerPoint != null ? markerPoint : transform;
+
+        protected virtual void OnEnable() { Sim.Registry?.Register(id, MarkerPoint); }
+        protected virtual void OnDisable() { Sim.Registry?.Unregister(id, MarkerPoint); }
 
         protected virtual void Start()
         {
             if (!Sim.Ready) return;
-            Sim.Registry?.Register(id, transform);
+            Sim.Registry?.Register(id, MarkerPoint);
             Bus.Subscribe<ActionRequested>(OnRequestInternal);
             Bus.Subscribe<ActionPerformed>(OnPerformedInternal);
             Bus.Subscribe<StateChanged>(OnStateInternal);

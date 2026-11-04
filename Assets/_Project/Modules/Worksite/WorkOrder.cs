@@ -127,16 +127,18 @@ namespace PantographSim.Worksite
                 return true;
             });
             if (ok) s.AfterCommit(() => bus?.Publish(new RecordWritten { targetId = SimIds.WorkOrder, pointId = field, text = written, time = SimClock.Now }));
+            if (ok && Tutorial(s) && field.StartsWith("toolcount") && s.Get("hint.sub_target") != SimIds.WorkOrder)   // 小動作照順序：按了會記著，但前面的還沒做不會往下
+            { s.Set("ui.toast", ""); s.Set("ui.toast", "已記下。這一步還要先：" + s.Get("hint.sub_text")); }
             return ok;
         }
 
-        /// <summary>reading.L.left → ip.carbon_strip_L.measure_left.reading；newmid.R → ip.carbon_strip_R.measure_mid.reading。</summary>
+        /// <summary>reading.L.left → ip.carbon_strip_L.measure_left.reading；newmid.R → ip.carbon_strip_R.measure_mid.new_reading。</summary>
         public static string ReadingKeyFor(string field)
         {
             if (field == IrReadingField) return "tool.megger.reading";
             var p = field.Split('.');
             if (p[0] == "reading" && p.Length == 3) return $"ip.carbon_strip_{p[1]}.measure_{p[2]}.reading";
-            if (p[0] == "newmid" && p.Length == 2) return $"ip.carbon_strip_{p[1]}.measure_mid.reading";
+            if (p[0] == "newmid" && p.Length == 2) return $"ip.carbon_strip_{p[1]}.measure_mid.new_reading";
             return null;
         }
     }

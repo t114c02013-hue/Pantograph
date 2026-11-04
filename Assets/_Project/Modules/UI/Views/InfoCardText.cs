@@ -63,7 +63,8 @@ namespace PantographSim.UI
             foreach (var (p, label) in new[] { ("left", "左"), ("mid", "中"), ("right", "右") })
             {
                 string key = SimIds.Point(side, "measure_" + p);
-                if (s.GetBool(key + ".measured")) reads.Add($"{label} {s.GetFloat(key + ".reading"):0.00}");
+                bool isNew = st == "NewMounted";
+                if (s.GetBool(key + (isNew ? ".new_measured" : ".measured"))) reads.Add($"{label} {s.GetFloat(key + (isNew ? ".new_reading" : ".reading")):0.00}");
             }
             sb.Append(reads.Count > 0 ? "\n已量：" + string.Join("　", reads) + " mm" : "\n還沒量");
             return sb.ToString();

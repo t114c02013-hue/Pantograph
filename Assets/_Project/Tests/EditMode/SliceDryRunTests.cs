@@ -465,6 +465,82 @@ namespace PantographSim.Tests
             AssertError(sim, "ERR_CSR13_Setting", Severity.Major);
         }
 
+        /// <summary>第 10 輪：新品量測另外記，舊滑板讀數不被蓋掉；作業單比對新品讀數。</summary>
+        [Test]
+        public void NewStripReading_DoesNotOverwriteOldReading()
+        {
+            var sim = new SliceSim();
+            sim.RunUntil("STP_CSR_15_HeightCheck");
+            string mid = "ip.carbon_strip_L.measure_mid";
+            float old = sim.s.GetFloat(mid + ".reading");
+            var r = sim.Measure(mid);
+            Assert.AreEqual(old, sim.s.GetFloat(mid + ".reading"), "舊滑板讀數留著");
+            Assert.AreEqual(r.Value, sim.s.GetFloat(mid + ".new_reading"), 0.01f);
+            Assert.IsTrue(sim.s.GetBool(mid + ".new_measured"));
+            Assert.Greater(sim.s.GetFloat(mid + ".new_reading"), old + 5f, "新品比舊滑板厚");
+        }
+
+        /// <summary>第 10 輪：第 23 步是預設完成，編號跳過時要寫出那一步在做什麼，下一步再清掉。</summary>
+        [Test]
+        public void PresetStep_LeavesNote_ForTheNextStep()
+        {
+            var sim = new SliceSim();
+            sim.RunUntil("STP_WC_03_RemoveGround");
+            StringAssert.Contains("第 23 步 下車頂", sim.s.Get("procedure.preset_note"));
+            StringAssert.Contains("第 23 步", sim.s.Get("ui.toast"));
+            var early = new SliceSim();
+            early.RunUntil("STP_SI_04_VoltageTest");
+            StringAssert.Contains("第 2 步", early.s.Get("procedure.preset_note"));
+            StringAssert.Contains("第 3 步", early.s.Get("procedure.preset_note"));
+            early.RunUntil("STP_SI_05_Grounding");
+            Assert.AreEqual("", early.s.Get("procedure.preset_note"), "下一步清掉");
+        }
+
+        /// <summary>第 10 輪：第 17 步放不下去要說為什麼；手上有滑板時在托架上方就算點到托架。</summary>
+        [Test]
+        public void Install_Fail_SaysWhy_AndClickOverBracketCounts()
+        {
+            var s = new SimState(new EventBus());
+            string strip = "part.carbon_strip_L", bracket = "ip.carbon_strip_L.bracket";
+            Assert.AreEqual("", SimIds.CarriedBracket(s));
+            s.Set("procedure.side", "L"); s.Set(strip + ".state", "Carried");
+            Assert.AreEqual(bracket, SimIds.CarriedBracket(s));
+            Assert.IsTrue(SimIds.ClicksBracket(s, bracket, bracket));
+            Assert.IsFalse(SimIds.ClicksBracket(s, bracket, null), "不在托架上方：不算");
+            s.SetBool(strip + ".over_bracket", true);
+            Assert.IsTrue(SimIds.ClicksBracket(s, bracket, null), "射線沒打到托架也算");
+            s.Set(strip + ".new_orientation", "in");
+            Assert.IsFalse(StripLogic.Install(s, strip, 0f));
+            StringAssert.Contains("按 R", StripLogic.InstallFailText(s, strip, 0f));
+            s.Set(strip + ".new_orientation", "out");
+            Assert.IsFalse(StripLogic.Install(s, strip, 0.2f));
+            StringAssert.Contains("偏 20.0 cm", StripLogic.InstallFailText(s, strip, 0.2f));
+        }
+
+        /// <summary>第 10 輪：備品架換側。第 10 步量外側換到 R，回到 L 要換回 L 的排列；兩側之間沒有側別不算換側（呼叫端略過）。</summary>
+        [Test]
+        public void SpareShelf_SideChanged_BothWays()
+        {
+            Assert.IsFalse(SpareShelf.SideChanged(null, "L"), "開場已經是 L 的排列");
+            Assert.IsTrue(SpareShelf.SideChanged("L", "R"));
+            Assert.IsTrue(SpareShelf.SideChanged("R", "L"));
+            Assert.IsFalse(SpareShelf.SideChanged("L", "L"));
+        }
+
+        /// <summary>第 10 輪：作業單按了清點但前面還沒做，要說還差什麼，不能沒反應。</summary>
+        [Test]
+        public void ToolCount_PressedEarly_SaysWhatIsLeft()
+        {
+            var bus = new EventBus(); var s = new SimState(bus);
+            s.Set("training.mode", "tutorial");
+            s.Set("hint.sub_target", "env.tool_rack"); s.Set("hint.sub_text", "清點平台桿架與工具袋");
+            Assert.IsTrue(WorkOrder.Write(s, bus, "toolcount_confirmed", "true"));
+            StringAssert.Contains("清點平台桿架與工具袋", s.Get("ui.toast"));
+            s.Set("ui.toast", ""); s.Set("hint.sub_target", SimIds.WorkOrder);
+            WorkOrder.Write(s, bus, "toolcount_confirmed", "true");
+            Assert.AreEqual("", s.Get("ui.toast"), "輪到作業單就不用提示");
+        }
+
         /// <summary>驗收組長第 9 輪：第 19 步 2 號只鎖到 22.9，按「繼續」後引導留在 2 號，重鎖到合格後走完。</summary>
         [Test]
         public void Step19_UnderTorque_Continue_StaysOnBolt_ReTorque_Completes()

@@ -618,7 +618,7 @@
       "valueTags": ["高低差 ≤ 1.0 mm=示例值"],
       "completion": { "type": "AllOf", "all": [
         { "type": "ChecklistAll", "keys": ["ip.carbon_strip_L.measure_mid.new_measured", "ip.carbon_strip_R.measure_mid.new_measured"] },
-        { "type": "ReadingMatches", "recordKeys": ["workorder.newmid.L", "workorder.newmid.R"], "readingKeys": ["ip.carbon_strip_L.measure_mid.reading", "ip.carbon_strip_R.measure_mid.reading"], "tolerance": 0.05 },
+        { "type": "ReadingMatches", "recordKeys": ["workorder.newmid.L", "workorder.newmid.R"], "readingKeys": ["ip.carbon_strip_L.measure_mid.new_reading", "ip.carbon_strip_R.measure_mid.new_reading"], "tolerance": 0.05 },
         { "type": "ValueInRange", "key": "workorder.height_diff", "min": 0, "max": 1.0 }
       ] },
       "errors": [

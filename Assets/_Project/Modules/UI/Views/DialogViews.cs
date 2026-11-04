@@ -323,7 +323,6 @@ namespace PantographSim.UI
         static void OnChange(string key, string text)
         {
             if (key.EndsWith(".remove_blocked") && text == "bolts") Show("螺栓還沒全部取出，不能拿下滑板");
-            else if (key.EndsWith(".install_result") && text == "NotAligned") Show("螺栓孔沒有對齊，再對準一次");
             else if (key.EndsWith(".pick_result") && text == "not_measured") Show("選用前先用卡尺量這條備品的中點厚度");
             else if (key == "workorder.last_error" && !string.IsNullOrEmpty(text)) Show(text);
             else if (key == "ui.toast" && !string.IsNullOrEmpty(text)) Show(text);

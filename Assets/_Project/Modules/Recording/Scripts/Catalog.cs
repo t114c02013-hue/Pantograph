@@ -150,6 +150,7 @@ namespace PantographSim.Recording
             new Rule { pattern = "ip.carbon_strip_*.bolt_*.angle_deg", label = "鬆開累計角度", unit = "°", tag = "示例值", standard = "預鬆半圈 180°±30°" },
             new Rule { pattern = "ip.carbon_strip_*.bolt_*.lock_deg", label = "鎖緊累計角度", unit = "°", tag = "示例值", standard = "貼合 360°" },
             new Rule { pattern = "ip.carbon_strip_*.measure_*.reading", label = "厚度讀數", unit = "mm", tag = "保養表值", standard = "≤ 3.0 mm 更換" },
+            new Rule { pattern = "ip.carbon_strip_*.measure_*.new_reading", label = "新品厚度讀數", unit = "mm", tag = "示例值", standard = "12.0 ± 0.2 mm" },
             new Rule { pattern = "part.pan_head.lower_distance_cm", label = "降弓檢測點距離", unit = "cm", tag = "示例值", standard = "≤ 1 cm" },
             new Rule { pattern = "ip.carbon_strip_*.bracket.clean_ratio", label = "托架清除率", unit = "", tag = "示例值", standard = "≥ 95%" },
             new Rule { pattern = "tool.caliper.reading", label = "卡尺讀數", unit = "mm", tag = "保養表值", standard = "≤ 3.0 mm 更換" },
