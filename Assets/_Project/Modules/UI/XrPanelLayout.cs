@@ -32,7 +32,7 @@ namespace PantographSim.UI
 
         IXrRig rig;
         RectTransform safe;
-        Canvas board, dialog, wrist, lift, hover, clip, labels;
+        Canvas board, dialog, wrist, lift, hover, clip, labels, toolNote;
         RectTransform stepPanel, wristView, gesture, toolPanel, hoverCard, labelsRoot, boardArrow;
         Transform hidden;
         readonly List<Canvas> canvases = new List<Canvas>();
@@ -60,11 +60,14 @@ namespace PantographSim.UI
             hover = MakeCanvas("XR_Hover", new Vector2(460, 420), HoverScale, null);
             wrist = MakeCanvas("XR_Wrist", new Vector2(720, 1100), WristScale, rig != null ? rig.LeftHand : null);
             clip = MakeCanvas("XR_Clipboard", new Vector2(1160, 980), ClipScale, null);   // 試玩修正 第 3 點：世界中的面板，可以抓（XrPanels）
+            toolNote = MakeCanvas("XR_ToolNote", new Vector2(720, 360), WristScale, rig != null ? rig.RightHand : null);   // terry 試玩：工具使用說明是工具的附記
             labels = MakeCanvas("XR_ControllerLabels", new Vector2(420, 360), LabelScale, rig != null ? rig.RightHand : null);
             if (rig != null)
             {
                 wrist.transform.localPosition = new Vector3(0f, 0.09f, 0.03f);
                 wrist.transform.localRotation = Quaternion.Euler(40f, 0f, 0f);
+                toolNote.transform.localPosition = new Vector3(-0.1f, 0.06f, 0.06f);
+                toolNote.transform.localRotation = Quaternion.Euler(40f, 0f, 0f);
                 labels.transform.localPosition = new Vector3(0.07f, 0.03f, 0.0f);
                 labels.transform.localRotation = Quaternion.Euler(70f, 0f, 0f);
             }
@@ -88,7 +91,7 @@ namespace PantographSim.UI
             hoverCard = Move("HoverCard", hover, new Vector2(0.5f, 0f));
             wristView = Move("XrWrist", wrist, new Vector2(0.5f, 1f));
             toolPanel = Move("ToolPanel", wrist, new Vector2(0.5f, 1f));
-            gesture = Move("XrGesture", wrist, new Vector2(0.5f, 0f));
+            gesture = Move("XrGesture", toolNote, new Vector2(0.5f, 0f));
             labelsRoot = Move("XrLabels", labels, new Vector2(0.5f, 0.5f));
             foreach (var n in HiddenNames) { var t = safe.Find(n); if (t != null) t.SetParent(hidden, false); }
             if (toolPanel != null) toolPanel.sizeDelta = new Vector2(700, toolPanel.sizeDelta.y);

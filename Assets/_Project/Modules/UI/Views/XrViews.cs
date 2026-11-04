@@ -358,6 +358,7 @@ namespace PantographSim.UI
     public class ControllerLabelsView : View
     {
         RectTransform root;
+        Text keys;
         public RectTransform Root => root;
 
         protected override void OnBuild(RectTransform safe)
@@ -365,9 +366,13 @@ namespace PantographSim.UI
             var img = Ui.Panel(safe, "XrLabels", new Color(0.04f, 0.05f, 0.07f, 0.88f), true, false);
             root = Ui.Place(img.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(420, 0));
             Ui.VStack(img.gameObject, 14, 4);
-            Ui.Text(root, "扳機＝使用\n握把＝抓取\n左搖桿＝傳送／轉向\n右搖桿＝工具微調\nA＝重設　B＝帶我到目標\nX＝作業單　Y＝說明", 26);
+            keys = Ui.Text(root, "", 22);
         }
 
-        public override void Refresh(ISimState s) => Ui.SetActive(root, InputMode.XrActive);
+        public override void Refresh(ISimState s)
+        {
+            Ui.SetActive(root, InputMode.XrActive);
+            keys.text = s.Get("xr.keys.card");   // XR 依按鍵表與目前情境產生
+        }
     }
 }

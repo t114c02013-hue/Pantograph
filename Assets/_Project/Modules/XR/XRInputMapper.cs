@@ -191,6 +191,11 @@ namespace PantographSim.XR
                 .Select(r => Data.HandednessMap.Map(r, leftHanded))
                 .Select(r => $"<b>{(ControlNames.TryGetValue(r.control, out var n) ? n : r.control)}</b>　{r.labelKey}"));
 
+        /// <summary>低頭看控制器的小卡：這個情境有作用的按鍵，一鍵一行，只取冒號前的短名稱。</summary>
+        public static string KeyCard(Data.InputBindingTable t, string context) =>
+            string.Join("\n", t.rows.Where(r => r.context == context && r.enabled && r.functionId != "None")
+                .Select(r => $"{(ControlNames.TryGetValue(r.control, out var n) ? n : r.control)}＝{r.labelKey.Split('：')[0]}"));
+
         /// <summary>套筒尺寸循環（10 → 13 → 17 → 10）。</summary>
         public string CycleSize(string current, int step)
         {

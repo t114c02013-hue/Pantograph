@@ -27,21 +27,9 @@ namespace PantographSim.Editor.XR
             model.transform.localPosition = Vector3.zero; model.transform.localRotation = Quaternion.identity; model.transform.localScale = Vector3.one;
             var mat = Material(side);
             foreach (var r in model.GetComponentsInChildren<Renderer>(true)) r.sharedMaterial = mat;
-            foreach (var t in model.GetComponentsInChildren<Transform>(true))
-                if (t.name.StartsWith("LBL_")) Label(t);
             model.AddComponent<XrControllerVisual>().Setup(left);
             ctrl.modelParent = parent; ctrl.model = model.transform;
             return model;
-        }
-
-        static void Label(Transform anchor)
-        {
-            var l = new GameObject("Text").AddComponent<TextMesh>();
-            l.transform.SetParent(anchor, false);
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            l.font = font; l.GetComponent<MeshRenderer>().sharedMaterial = font.material;
-            l.characterSize = 0.003f; l.fontSize = 48; l.anchor = TextAnchor.LowerCenter; l.color = Color.white;
-            l.gameObject.SetActive(false);   // XrControllerVisual 決定顯示
         }
 
         /// <summary>Standard 材質，貼圖沿用模型原檔的 BaseColor。</summary>

@@ -69,6 +69,13 @@ namespace PantographSim.XR
             if (p != null) TeleportTo(p.transform.position, p.transform.rotation, p, immediate: true);
         }
 
+        /// <summary>開場：turnAround＝背對站點的面向目標。</summary>
+        public void PlaceAtStart(bool turnAround)
+        {
+            var p = StartPoint;
+            if (p != null) TeleportTo(p.transform.position, p.transform.rotation * Quaternion.Euler(0f, turnAround ? 180f : 0f, 0f), p, immediate: true);
+        }
+
         public void BeginAim() { aiming = true; if (arc != null) arc.enabled = true; }
 
         public void EndAim()

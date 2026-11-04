@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using PantographSim.Core;
-using PantographSim.Data;
 using UnityEngine;
 using UnityEngine.XR;
 
@@ -8,7 +6,7 @@ namespace PantographSim.XR
 {
     /// <summary>
     /// VR 試玩修正 第 5 點：原廠控制器模型。按鍵跟著手上的實體按鍵動（*_pressed_value 節點＝Lerp/Slerp(min, max, t)），
-    /// 標示掛在 LBL_*，文字讀 InputBindingTable，只顯示這個情境有作用的按鍵；教學模式一直顯示，其他模式按住 Y 才顯示。
+    /// 按鍵說明不放在模型上，低頭看控制器時的小卡顯示（ControllerLabelsView，XrPlayer 寫 xr.keys.card）。
     /// </summary>
     public class XrControllerVisual : MonoBehaviour
     {
@@ -20,20 +18,13 @@ namespace PantographSim.XR
         struct Node { public Transform value, min, max; public string name; }
 
         [SerializeField] bool left;
-        [SerializeField] XrRig rig;
-        [SerializeField] XrPlayer player;
 
         readonly List<Node> nodes = new List<Node>();
-        readonly List<TextMesh> labels = new List<TextMesh>();
-        InputBindingTable table;
-        string shown;
 
         public void Setup(bool isLeft) => left = isLeft;
-        public void Setup(XrRig r, XrPlayer p) { rig = r; player = p; }
 
         void Awake()
         {
-            table = InputBindingTable.LoadDefault();
             var all = new Dictionary<string, Transform>();
             foreach (var t in GetComponentsInChildren<Transform>(true)) all[t.name] = t;
             foreach (var kv in all)
@@ -43,7 +34,6 @@ namespace PantographSim.XR
                 if (all.TryGetValue(stem + "_min", out var min) && all.TryGetValue(stem + "_max", out var max))
                     nodes.Add(new Node { value = kv.Value, min = min, max = max, name = kv.Key });
             }
-            labels.AddRange(GetComponentsInChildren<TextMesh>(true));
         }
 
         /// <summary>節點的 t（WebXR motion-controllers 的對應）；沒有對應的回傳 0。</summary>
@@ -57,23 +47,6 @@ namespace PantographSim.XR
             if (node.StartsWith("a_button") || node.StartsWith("x_button")) return b.primary ? 1f : 0f;
             if (node.StartsWith("b_button") || node.StartsWith("y_button")) return b.secondary ? 1f : 0f;
             return 0f;
-        }
-
-        /// <summary>教學模式一直顯示，其他模式按住 Y 才顯示。</summary>
-        public static bool ShowLabels(string mode, bool holdingY) => mode == "tutorial" || holdingY;
-
-        /// <summary>LBL_* 對應的按鍵表控制項。</summary>
-        public static string ControlOf(string anchor, bool isLeft)
-        {
-            string c = anchor.Substring("LBL_".Length);
-            return c == "Trigger" || c == "Grip" || c == "Stick" ? (isLeft ? "Left" : "Right") + c : c;
-        }
-
-        /// <summary>標示文字：這個情境沒作用回傳空字串；只取冒號前的短名稱。</summary>
-        public static string LabelText(InputBindingTable table, string context, string control)
-        {
-            var row = table.Find(context, control);
-            return row == null || !row.enabled || row.functionId == "None" ? "" : row.labelKey.Split('：')[0];
         }
 
         Buttons Read()
@@ -100,26 +73,6 @@ namespace PantographSim.XR
                 n.value.localPosition = Vector3.Lerp(n.min.localPosition, n.max.localPosition, t);
                 n.value.localRotation = Quaternion.Slerp(n.min.localRotation, n.max.localRotation, t);
             }
-            UpdateLabels();
-        }
-
-        void UpdateLabels()
-        {
-            var s = Sim.State;
-            if (s == null || player == null) return;
-            bool show = ShowLabels(s.Get("training.mode"), player.LastFrame.y);
-            string key = show ? player.BindingContext : "";
-            if (key != shown)
-            {
-                shown = key;
-                foreach (var l in labels)
-                {
-                    l.text = show ? LabelText(table, key, ControlOf(l.transform.parent.name, left)) : "";
-                    l.gameObject.SetActive(l.text != "");
-                }
-            }
-            if (rig == null || rig.Head == null) return;
-            foreach (var l in labels) if (l.gameObject.activeSelf) l.transform.rotation = Quaternion.LookRotation(l.transform.position - rig.Head.position);
         }
     }
 }

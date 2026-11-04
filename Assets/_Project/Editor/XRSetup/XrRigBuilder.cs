@@ -214,7 +214,6 @@ namespace PantographSim.Editor.XR
             }
             player.SetBodyRingRadius(rd.bodyRingRadius);
             rigGo.AddComponent<XrPouchHover>().Setup(rig, player);   // 第 4 點
-            foreach (var v in rigGo.GetComponentsInChildren<XrControllerVisual>(true)) v.Setup(rig, player);   // 第 5 點
             rigGo.SetActive(false);
             BuildToCabMarker(xrRoot.transform, mats, lineMat, sb);
             sb.AppendLine("VR：站點 " + string.Join("、", points.Select(p => p.Label + (string.IsNullOrEmpty(p.LockKey) ? "" : "（車頂開放才解鎖）"))));

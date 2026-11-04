@@ -79,12 +79,13 @@ namespace PantographSim.XR
         void Place(bool fallback)
         {
             if (teleport == null) return;
-            teleport.PlaceAtStart();
+            teleport.PlaceAtStart(layout.startFacesOpposite);
             var head = rig != null ? rig.Head : null;
             var st = teleport.StartPoint;
             if (head == null || st == null) return;
             var eye = fallback ? st.transform.position + Vector3.up * PostureDef.Load().standEye : head.position;
-            PlacePanels(eye, fallback ? st.transform.forward : head.forward);
+            // 任務卡的方向跟站點走，不跟頭：固定在升降盒對面
+            PlacePanels(eye, st.transform.forward * (layout.startFacesOpposite ? -1f : 1f));
         }
 
         void PlacePanels(Vector3 eye, Vector3 forward)

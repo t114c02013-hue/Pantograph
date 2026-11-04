@@ -186,6 +186,8 @@ namespace PantographSim.Tests
             Assert.AreEqual(Vector3.zero, model.transform.localPosition);
             Assert.AreEqual(Quaternion.identity, model.transform.localRotation);
             Assert.IsNull(right.Find("Ring"), "舊的方塊和環拿掉");
+            Assert.AreEqual(0, model.GetComponentsInChildren<TextMesh>(true).Length, "按鍵說明不放在模型上");
+            StringAssert.Contains("＝", Sim.State.Get("xr.keys.card"), "說明在小卡上");
             Assert.IsNotNull(Rig.LeftHand.GetComponentInChildren<XrControllerVisual>(true), "左手有模型");
             var nodes = model.GetComponentsInChildren<Transform>(true);
             Transform N(string n) => System.Array.Find(nodes, t => t.name == n);
@@ -256,6 +258,10 @@ namespace PantographSim.Tests
             Assert.IsTrue(Sim.Registry.TryGetTransform("xr.panel.dialog", out var card));
             Assert.AreEqual(1f, Flat(card.position, Rig.Head.position), 0.02f, "頭前 1.0 m");
             Assert.AreEqual(Rig.Head.position.y - 0.15f, card.position.y, 0.02f, "眼下 0.15 m");
+            var lift = Sim.Registry.TryGetTransform("xr.mount.lift_panel", out var mount) ? mount.position : GameObject.Find("LiftPanelMount").transform.position;
+            var head = Rig.Head.position;
+            Assert.Less(Vector3.Dot(Vector3.ProjectOnPlane(card.position - head, Vector3.up), Vector3.ProjectOnPlane(lift - head, Vector3.up)), 0f, "在升降盒對面");
+            Assert.Greater(Vector3.Dot(card.forward, Vector3.ProjectOnPlane(card.position - head, Vector3.up).normalized), 0.9f, "正面朝學員");
             var at = card.position;
             Rig.Head.Rotate(0f, 90f, 0f, Space.World);
             for (int i = 0; i < 5; i++) yield return null;

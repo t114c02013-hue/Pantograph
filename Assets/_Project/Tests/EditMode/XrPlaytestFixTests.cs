@@ -241,20 +241,16 @@ namespace PantographSim.Tests
             Assert.AreEqual(0f, XrControllerVisual.PressAmount("thumbrest_pressed_value", b), 1e-4f);
         }
 
-        /// <summary>第 5 點：標示讀按鍵表：教學一直顯示、練習按住 Y；只顯示這個情境有作用的按鍵。</summary>
+        /// <summary>第 5 點：按鍵小卡讀按鍵表，只列這個情境有作用的按鍵。</summary>
         [Test]
         public void Controller_LabelsFollowBindingTable()
         {
-            Assert.IsTrue(XrControllerVisual.ShowLabels("tutorial", false));
-            Assert.IsFalse(XrControllerVisual.ShowLabels("practice", false));
-            Assert.IsTrue(XrControllerVisual.ShowLabels("practice", true));
-            Assert.AreEqual("RightTrigger", XrControllerVisual.ControlOf("LBL_Trigger", false));
-            Assert.AreEqual("LeftGrip", XrControllerVisual.ControlOf("LBL_Grip", true));
-            Assert.AreEqual("A", XrControllerVisual.ControlOf("LBL_A", false));
             var t = InputBindingTable.LoadDefault();
-            Assert.AreEqual("", XrControllerVisual.LabelText(t, InputBindingTable.Empty, "A"), "空手 A 沒作用");
-            Assert.AreEqual("", XrControllerVisual.LabelText(t, InputBindingTable.Empty, "LeftTrigger"), "左扳機不在表上");
-            Assert.AreEqual("點／使用", XrControllerVisual.LabelText(t, InputBindingTable.Empty, "RightTrigger"), "只取冒號前");
+            var empty = XRInputMapper.KeyCard(t, InputBindingTable.Empty).Split('\n');
+            CollectionAssert.Contains(empty, "右扳機＝點／使用", "只取冒號前");
+            Assert.IsFalse(empty.Any(l => l.StartsWith("A＝")), "空手 A 沒作用");
+            Assert.IsTrue(XRInputMapper.KeyCard(t, InputBindingTable.ToolPrefix + "tool.megger").Contains("右搖桿按下＝第二功能"));
+            Assert.IsFalse(empty.Any(l => l.StartsWith("右搖桿按下")), "空手右搖桿按下沒作用");
         }
 
         /// <summary>第 4 點：取最近的一格；半徑外沒有；左右手都算。</summary>

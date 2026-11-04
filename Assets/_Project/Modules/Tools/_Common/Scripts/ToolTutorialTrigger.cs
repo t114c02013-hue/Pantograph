@@ -33,6 +33,7 @@ namespace PantographSim.Tools
         void OnSelected(ToolSelected e)
         {
             if (string.IsNullOrEmpty(e.toolId) || Sim.State.GetBool(e.toolId + ".tutorial_seen")) return;
+            if (InputMode.XrActive) return;   // terry 試玩：VR 的使用說明看工具旁的附記（XrGesture），不跳視窗
             Show(e.toolId);
         }
 
