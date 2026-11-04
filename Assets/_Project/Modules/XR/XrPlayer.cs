@@ -130,7 +130,7 @@ namespace PantographSim.XR
         {
             var o = rig != null ? rig.RightRayOrigin : transform;
             var ray = new Ray(o.position, o.forward);
-            bool hit3d = Physics.Raycast(ray, out var hit, maxDistance, SceneLayers.InteractMask, QueryTriggerInteraction.Ignore);   // 不打不可見的邊界牆
+            bool hit3d = PickRay.Cast(ray, maxDistance, SceneLayers.InteractMask, S, out var hit);   // 不打不可見的邊界牆
             bool overUi = false;
             if (rightRay != null && rightRay.TryGetCurrentUIRaycastResult(out var ui) && ui.isValid)
                 overUi = !hit3d || ui.distance <= hit.distance + 0.01f;

@@ -473,7 +473,7 @@
       "subActions": [
         { "text": "把新滑板移到托架上方", "textDesktop": "把新滑板移到托架上方", "hint": "拿著新滑板移到發亮的托架上方。", "target": "ip.carbon_strip_{side}.bracket", "done": "part.carbon_strip_{side}.over_bracket", "why": "滑鼠移到發亮的托架上", "tool": "", "stand": "tp.roof.{side}" },
         { "text": "翻轉滑板，讓箭頭朝弓頭外側", "textDesktop": "按 R 讓箭頭朝外", "hint": "轉動右手手腕把滑板翻面，讓「此側朝外」箭頭朝弓頭外緣。方向裝反是嚴重錯誤，方向不對也放不上去。", "target": "ip.carbon_strip_{side}.install_check", "done": "part.carbon_strip_{side}.new_orientation=out", "why": "斜面要朝弓頭外側", "tool": "", "stand": "tp.roof.{side}" },
-        { "text": "對準螺栓孔放下", "textDesktop": "對準螺栓孔點托架放下", "hint": "用射線指著發亮的托架，放開握把或按扳機就會裝上。", "target": "ip.carbon_strip_{side}.bracket", "done": "part.carbon_strip_{side}.state=NewMounted && part.carbon_strip_{side}.install_distance_cm<=0.5", "why": "吸附後誤差 ≤ 0.5 cm", "tool": "", "stand": "tp.roof.{side}" }
+        { "text": "對準螺栓孔放下", "textDesktop": "對準螺栓孔點托架放下", "hint": "用射線指著發亮的托架，放開握把或按扳機就會裝上。", "target": "ip.carbon_strip_{side}.bracket", "done": "part.carbon_strip_{side}.state=NewMounted && part.carbon_strip_{side}.install_distance_cm<=0.5", "why": "孔位差 {吸附} cm 內會自動吸附", "tool": "", "stand": "tp.roof.{side}" }
       ],
       "title": "安裝新滑板",
       "instruction": "新滑板拿在手上，按 R 轉向讓斜面（箭頭）朝外，然後點托架放下，4 個螺栓孔對齊就會吸附。",

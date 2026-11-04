@@ -33,6 +33,8 @@ namespace PantographSim.Core
         public const string RackSlots = "rack.slots";
         /// <summary>工具放在哪裡：「toolId|工具架;…」（ToolBelt 開場寫；UI 只能引用 Core，從這裡讀）。</summary>
         public const string ToolPlaces = "tools.places";
+        /// <summary>工具袋有哪些格子：「,5,6,…,」。</summary>
+        public const string BagSlots = "tools.bag_slots";
         /// <summary>terry 試玩：拿驗電桿、接地桿時，射線指著弓頭、滑板、螺栓都算指著弓頭接地掛點（掛點太小，被它們擋住）。桌面和 VR 共用。</summary>
         public static string RayTarget(string tool, string hovered) =>
             (tool == ToolGroundingRod || tool == ToolVoltageDetector) && hovered != null && (hovered == "part.pan_head" || hovered.StartsWith("part.carbon_strip_") || hovered.StartsWith("ip.carbon_strip_") || hovered == LowerCheckId) ? GroundClamp : hovered;
@@ -64,6 +66,18 @@ namespace PantographSim.Core
                 if (s.Get($"ip.carbon_strip_{side}.bolt_{n}.state") == "Out") return $"ip.carbon_strip_{side}.bolt_{n}";
             return "";
         }
+
+        /// <summary>射線要穿過去的東西：手上拿著的零件；檢測點只有在目前目標是弓頭或它自己時才收射線。</summary>
+        public static bool RayIgnores(ISimState s, string id)
+        {
+            if (id == LowerCheckId) { string t = s.Get("hint.sub_target"); return t != PanHead && t != LowerCheckId; }
+            return s.Get(id + ".state") == "Carried" || (id.Length > 0 && id == s.Get("hand.item"));
+        }
+
+        /// <summary>教學的備品目標：型號正確的那一條（SpareShelf 寫 spare.good_slot）；其他模式不給提示。</summary>
+        public const string SpareToken = "env.spare_shelf.slot_2";   // R1 資料寫這一格；執行時換成真正型號正確的那格（daily、periodic 的表也對照 R1，資料不動）
+        public static string SpareTarget(ISimState s) => s.Get("training.mode") == "tutorial" ? s.Get("spare.good_slot", "env.spare_shelf.slot_2") : "env.spare_shelf.slot_*";
+        public static string SpareCondition(ISimState s, string condition) => condition?.Replace(SpareToken, s.Get("spare.good_slot", "env.spare_shelf.slot_2"));
 
         /// <summary>弓頭上的檢測點。</summary>
         public const string LowerCheckId = "ip.pan_head.lower_check";

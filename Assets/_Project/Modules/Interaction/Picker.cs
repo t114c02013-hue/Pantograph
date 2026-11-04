@@ -31,7 +31,7 @@ namespace PantographSim.Interaction
             PointerState.HasRay = !PointerState.OverUi;
             IInteractable hit = null;
             RaycastHit info = default;
-            if (!PointerState.OverUi && Physics.Raycast(cam.ScreenPointToRay(Input.mousePosition), out info, maxDistance, SceneLayers.InteractMask, QueryTriggerInteraction.Ignore))   // 不打不可見的邊界牆
+            if (!PointerState.OverUi && PickRay.Cast(cam.ScreenPointToRay(Input.mousePosition), maxDistance, SceneLayers.InteractMask, s, out info))   // 不打不可見的邊界牆
                 hit = info.collider.GetComponentInParent<IInteractable>();
             if (hit != null && !SimIds.Clickable(s, hit.Id)) hit = null;
 

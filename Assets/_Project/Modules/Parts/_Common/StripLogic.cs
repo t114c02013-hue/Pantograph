@@ -1,5 +1,6 @@
 using System.Linq;
 using PantographSim.Core;
+using PantographSim.Data;
 
 namespace PantographSim.Parts.Common
 {
@@ -14,7 +15,7 @@ namespace PantographSim.Parts.Common
     {
         public const string OldMounted = "OldMounted", Removed = "Removed", InTray = "InTray", Carried = "Carried", NewMounted = "NewMounted";
         /// <summary>放下時孔位與托架的偏差在這個範圍內就吸附到正確位置（之後 install_check 量得 ≤ 0.5 cm）。</summary>
-        public const float SnapTolerance = 0.05f;
+        public static float SnapTolerance => (ToolRulesDef.Load()?.stripSnapCm ?? 5f) / 100f;
 
         public static string Side(string stripId) => stripId.Substring(stripId.Length - 1);
         public static string BoltId(string stripId, int n) => "ip.carbon_strip_" + Side(stripId) + ".bolt_" + n;

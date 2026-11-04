@@ -303,6 +303,32 @@ namespace PantographSim.Tests
             Assert.AreEqual("ip.carbon_strip_L.bolt_3", SimIds.StripBoltOut(s, "L"));
         }
 
+        /// <summary>第 17 步：拿著的滑板不擋射線；檢測點只有目標是弓頭時才擋。</summary>
+        [Test]
+        public void RayIgnores_CarriedPart_AndCheckPointUnlessTarget()
+        {
+            var s = new SimState(new EventBus());
+            s.Set("part.carbon_strip_L.state", "Carried");
+            Assert.IsTrue(SimIds.RayIgnores(s, "part.carbon_strip_L"));
+            Assert.IsFalse(SimIds.RayIgnores(s, "part.carbon_strip_R"));
+            Assert.IsTrue(SimIds.RayIgnores(s, SimIds.LowerCheckId), "不是目標");
+            s.Set("hint.sub_target", SimIds.PanHead);
+            Assert.IsFalse(SimIds.RayIgnores(s, SimIds.LowerCheckId), "第 1 步要點得到");
+        }
+
+        /// <summary>第 16 步：教學指向型號正確的那條，條件跟著換；其他模式不給答案。</summary>
+        [Test]
+        public void SpareTarget_FollowsGoodSlot_TutorialOnly()
+        {
+            var s = new SimState(new EventBus());
+            s.Set("spare.good_slot", "env.spare_shelf.slot_3");
+            s.Set("training.mode", "tutorial");
+            Assert.AreEqual("env.spare_shelf.slot_3", SimIds.SpareTarget(s));
+            Assert.AreEqual("env.spare_shelf.slot_3.flipped", SimIds.SpareCondition(s, "env.spare_shelf.slot_2.flipped"));
+            s.Set("training.mode", "practice");
+            Assert.AreEqual("env.spare_shelf.slot_*", SimIds.SpareTarget(s), "練習不提示");
+        }
+
         /// <summary>i：R1 和吊車停駐的課程不能點吊車，定期課可以。</summary>
         [Test]
         public void Crane_NotClickable_InR1AndDaily()

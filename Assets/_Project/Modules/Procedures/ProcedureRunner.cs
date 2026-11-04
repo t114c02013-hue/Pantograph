@@ -41,14 +41,15 @@ namespace PantographSim.Procedures
         void ArmSub(RuntimeStep s, int i)
         {
             var subs = SubActions(s);
-            if (i < subs.Length) fresh.Arm(state, subs[i].condition);
+            if (i < subs.Length) fresh.Arm(state, SimIds.SpareCondition(state, subs[i].condition));
         }
 
         /// <summary>小動作完成：條件成立；requireFreshWrite 時還要啟用後有條件鍵被寫過（或列在 autoCompleteAllowed）。</summary>
         bool SubDone(RuntimeStep s, SubAction a)
         {
             if (Skipped(a)) return true;   // D43：分支小動作，條件不成立就跳過
-            bool done = FreshMode ? fresh.Done(state, a.condition, FreshWriteGate.Allowed(procedure, s.def.stepId, a.subId)) : ChecklistEval.Done(state, a.condition);
+            string cond = SimIds.SpareCondition(state, a.condition);
+            bool done = FreshMode ? fresh.Done(state, cond, FreshWriteGate.Allowed(procedure, s.def.stepId, a.subId)) : ChecklistEval.Done(state, cond);
             if (!done || SubActionHold == null) return done;
             holdReason = SubActionHold(s, a);
             return holdReason == null;

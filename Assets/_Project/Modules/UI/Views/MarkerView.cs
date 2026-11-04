@@ -128,7 +128,8 @@ namespace PantographSim.UI
                     m.rt.anchoredPosition = new Vector2(Mathf.Clamp(dir.x, -half.x + 140, half.x - 140), Mathf.Clamp(dir.y, -half.y + 40, half.y - 110));
                     Ui.SetActive(m.arrow, false);
                     string arrow = Mathf.Abs(dir.x) > Mathf.Abs(dir.y) ? (dir.x > 0 ? "▶" : "◀") : (dir.y > 0 ? "▲" : "▼");
-                    m.text.text = $"{arrow} {name}（按「帶我過去」或 C）";
+                    bool inBag = id.StartsWith("env.tool_rack.slot_") && s.Get(SimIds.BagSlots).Contains("," + id.Substring(id.LastIndexOf('_') + 1) + ",");
+                    m.text.text = inBag ? $"{arrow} {name}（點下方工具列的格子）" : $"{arrow} {name}（按「帶我過去」或 C）";
                 }
                 m.bg.color = Color.Lerp(new Color(1f, 0.85f, 0.1f), new Color(1f, 0.6f, 0.05f), Ui.Blink(5f));
             }

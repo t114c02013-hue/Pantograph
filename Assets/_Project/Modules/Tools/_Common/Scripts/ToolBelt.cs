@@ -48,6 +48,7 @@ namespace PantographSim.Tools
             s.Set(SimIds.RackSlots, string.Join(",", (slotTable != null ? slotTable.slots.Where(x => x != null).Select(x => x.slot) : tools.Select(t => t.Hotkey)).Where(n => n > 0).Distinct().OrderBy(n => n)));
             s.Set("tools.list", string.Join(";", tools.Select(t => $"{t.Hotkey}|{t.ToolId}|{t.DisplayName}")));
             s.Set(SimIds.ToolPlaces, string.Join(";", tools.Select(t => $"{t.ToolId}|{Place(t.Hotkey)}")));
+            s.Set(SimIds.BagSlots, "," + string.Join(",", tools.Where(t => Place(t.Hotkey) == "工具袋").Select(t => t.Hotkey)) + ",");
             // 一句用途（工具教學的「用途」頁），給資訊卡顯示
             foreach (var t in tools)
             {
@@ -245,6 +246,7 @@ namespace PantographSim.Tools
             var tool = BySlot(slot);
             if (tool == null) return;
             if (tool == active) { ResetActive(); return; }
+            if (Place(slot) == "工具袋") { ClickSlot(slot); return; }   // 工具袋在身上：選格就拿
             Sim.State.Set("ui.rack_hint", RackLogic.SlotId(slot));
             Sim.State.SetFloat("ui.rack_hint_time", Time.time);
             Toast($"「{tool.DisplayName}」在{Place(slot)}第 {slot} 格，點掛位拿起");

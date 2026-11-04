@@ -96,9 +96,10 @@ namespace PantographSim.Training
                 {
                     var a = subs[idx];
                     state.Set("hint.sub_text", a.Length > 0 ? a[0] : "");
+                    if (a.Length > 1 && a[1] == SimIds.SpareToken) a[1] = SimIds.SpareTarget(state);
                     state.Set("hint.sub_target", a.Length > 1 ? a[1] : "");
                     state.Set("hint.sub_tool", a.Length > 2 ? a[2] : "");
-                    state.Set("hint.sub_why", a.Length > 4 ? a[4] : "");
+                    state.Set("hint.sub_why", a.Length > 4 ? a[4].Replace("{吸附}", state.GetFloat("strip.snap_cm").ToString("0.#")) : "");
                     state.Set("hint.sub_stand", a.Length > 5 ? a[5] : "");   // 這個小動作的站點（B 鍵傳到這裡）
                     if (a.Length > 1 && a[1].Length > 0) highlight = a[1];
                 }

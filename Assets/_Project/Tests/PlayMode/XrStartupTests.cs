@@ -326,6 +326,25 @@ namespace PantographSim.Tests
             Assert.Greater(b.size.magnitude, 0.2f, "看得到：" + b.size);
         }
 
+        /// <summary>工具列選工具袋的格子就拿得到（放回之後也拿得回來）。</summary>
+        [UnityTest]
+        public IEnumerator ToolBar_BagSlot_PicksTool()
+        {
+            yield return Boot(new Vector3(0f, 1.6f, 0f));
+            tracked = true;
+            yield return WaitReady();
+            Sim.State.SetBool("training.running", true);
+            Sim.Bus.Publish(new ActionRequested { targetId = "tool.belt", text = "hint:5", time = 0f });
+            yield return null;
+            Assert.AreEqual(SimIds.ToolCaliper, Sim.State.Get(SimIds.ActiveTool));
+            Sim.Bus.Publish(new ToolReturnRequested { targetId = "env.tool_rack.slot_5", value = 5, time = 0f });
+            yield return null;
+            Assert.AreEqual("", Sim.State.Get(SimIds.ActiveTool));
+            Sim.Bus.Publish(new ActionRequested { targetId = "tool.belt", text = "hint:5", time = 0f });
+            yield return null;
+            Assert.AreEqual(SimIds.ToolCaliper, Sim.State.Get(SimIds.ActiveTool), "放回後再拿");
+        }
+
         /// <summary>第 13 步：拿套筒扳手點螺栓盤，把這一側脫出的螺栓收進盤子。</summary>
         [UnityTest]
         public IEnumerator SocketWrench_ClickTray_TakesOutBolt()

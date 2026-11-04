@@ -229,7 +229,7 @@ namespace PantographSim.UI
             entry.callback.AddListener(_ => Sim.State?.Set(SelectedKey, fieldId));
             trigger.triggers.Add(entry);
             var click = new UnityEngine.EventSystems.EventTrigger.Entry { eventID = UnityEngine.EventSystems.EventTriggerType.PointerClick };
-            click.callback.AddListener(_ => Sim.State?.Set(SelectedKey, fieldId));
+            click.callback.AddListener(_ => { Sim.State?.Set(SelectedKey, fieldId); f.Select(); f.ActivateInputField(); });   // 點哪格字就打在哪格，不用先 hover
             trigger.triggers.Add(click);
         }
 

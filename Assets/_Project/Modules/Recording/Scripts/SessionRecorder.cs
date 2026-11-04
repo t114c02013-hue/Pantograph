@@ -267,7 +267,7 @@ namespace PantographSim.Recording
             Write("MeasurementTaken", currentStep, new Dictionary<string, object>
             {
                 { "target", e.targetId ?? "" }, { "tool", e.toolId ?? "" }, { "value", e.value }, { "display", e.text ?? "" }, { "zeroed", zeroed },
-                { "tag", "保養表值" }, { "standard", "≤ 3.0 mm 更換" }
+                { "tag", "保養表值" }, { "standard", e.targetId.StartsWith("env.spare_shelf") ? "新品 " + state.Get("spare.spec") : "≤ 3.0 mm 更換" }
             });
         }
 

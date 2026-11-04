@@ -30,6 +30,8 @@ namespace PantographSim.Worksite
         {
             Restock();
             State.Set("spare.required_model", CorrectModel);   // 作業單要求的型號（教學模式資訊卡並排顯示）
+            State.Set("spare.spec", $"{Nominal:0.0} ± {Tolerance:0.0} mm");
+            State.SetFloat("strip.snap_cm", (ToolRulesDef.Load()?.stripSnapCm ?? 5f));
         }
 
         /// <summary>補貨：換成這一側的排列（SpareArrangementDef，負責人裁定 2026-11-03：L slot_2 正確、R slot_3 正確；沒有資料就照場景設定）。</summary>
@@ -39,6 +41,7 @@ namespace PantographSim.Worksite
             var e = State.Has(CourseApplier.CourseKey) ? SpareArrangementDef.Load()?.Find(side, SlotNumber(id)) : null;
             if (e != null) { modelCode = e.model; cracked = e.cracked; }
             Stock(State, id, modelCode, thicknessMm);
+            if (modelCode == CorrectModel && !cracked) State.Set("spare.good_slot", id);   // 教學的箭頭指這一條
             State.SetBool(id + ".cracked", cracked);
         }
 
