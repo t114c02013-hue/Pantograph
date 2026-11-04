@@ -11,13 +11,14 @@ namespace PantographSim.XR
     /// </summary>
     public class XrPouchHover : MonoBehaviour
     {
-        public const string SlotKey = "xr.pouch.slot";
+        public const string SlotKey = "xr.pouch.slot", TargetKey = "xr.pouch.target";
 
         [SerializeField] XrRig rig;
         [SerializeField] XrPlayer player;
 
         ToolPouchDef def;
         int current;
+        bool bound;
 
         /// <summary>測試用：指到新的一格幾次（每次一個輕震）。</summary>
         public int HoverCount { get; private set; }
@@ -25,6 +26,50 @@ namespace PantographSim.XR
         public void Setup(XrRig r, XrPlayer p) { rig = r; player = p; }
 
         void Awake() => def = ToolPouchDef.Load();
+
+        void OnDestroy()
+        {
+            if (!bound || Sim.Bus == null) return;
+            Sim.Bus.Unsubscribe<StepStarted>(OnStep);
+            Sim.Bus.Unsubscribe<HighlightRequested>(OnHighlight);
+        }
+
+        void OnStep(StepStarted e) => SetTarget(!string.IsNullOrEmpty(e.highlightIds) ? e.highlightIds : e.targetIds != null ? string.Join(",", e.targetIds) : "");
+        void OnHighlight(HighlightRequested e) => SetTarget(e.text);
+
+        /// <summary>這一步要拿的工具在工具袋裡：記下格子；教學模式提示怎麼拿。</summary>
+        void SetTarget(string ids)
+        {
+            var s = Sim.State;
+            if (s == null || !InputMode.XrActive) return;
+            int slot = BagSlot(ids);
+            if (slot == (int)s.GetFloat(TargetKey)) return;
+            s.SetFloat(TargetKey, slot);
+            if (slot == 0 || s.Get("training.mode") != "tutorial") return;
+            var label = Sim.Registry.TryGetTransform(Id(slot), out var t) ? t.GetComponentInChildren<TextMesh>(true) : null;
+            s.Set("ui.toast", ""); s.Set("ui.toast", string.Format(def.takeHint, label != null ? label.text : "")); s.SetFloat("ui.toast_time", Time.time);
+        }
+
+        static int BagSlot(string ids)
+        {
+            if (Sim.Registry == null || !Sim.Registry.TryGetTransform("env.tool_bag", out var bag) || bag == null) return 0;
+            foreach (var id in (ids ?? "").Split(','))
+                if (id.StartsWith("env.tool_rack.slot_") && int.TryParse(id.Substring("env.tool_rack.slot_".Length), out int k) && Sim.Registry.TryGetTransform(id, out var t) && t != null && t.IsChildOf(bag)) return k;
+            return 0;
+        }
+
+        /// <summary>教學模式要拿的格子優先（手在 targetRadius 內），否則取最近的一格。</summary>
+        public static (int slot, int hand) Pick(ISimState s, ToolPouchDef def, Vector3[] hands)
+        {
+            System.Func<int, Vector3?> at = k => Sim.Registry != null && Sim.Registry.TryGetPosition(Id(k), out var p) ? p : (Vector3?)null;
+            int target = s.Get("training.mode") == "tutorial" ? (int)s.GetFloat(TargetKey) : 0;
+            if (target > 0)
+            {
+                var hit = Nearest(new[] { target }, at, hands, def.targetRadius);
+                if (hit.slot > 0) return hit;
+            }
+            return Nearest(SimIds.RackSlotNumbers(s), at, hands, def.slotRadius);
+        }
 
         static string Id(int k) => "env.tool_rack.slot_" + k;
 
@@ -49,8 +94,8 @@ namespace PantographSim.XR
         {
             var s = Sim.State;
             if (s == null || Sim.Registry == null || rig == null || rig.LeftHand == null || rig.RightHand == null || !InputMode.XrActive || !s.GetBool(XrStartupSequencer.ReadyKey)) return;
-            var (slot, hand) = Nearest(SimIds.RackSlotNumbers(s), k => Sim.Registry.TryGetPosition(Id(k), out var p) ? p : (Vector3?)null,
-                new[] { rig.RightHand.position, rig.LeftHand.position }, def.slotRadius);
+            if (!bound && Sim.Bus != null) { Sim.Bus.Subscribe<StepStarted>(OnStep); Sim.Bus.Subscribe<HighlightRequested>(OnHighlight); bound = true; }
+            var (slot, hand) = Pick(s, def, new[] { rig.RightHand.position, rig.LeftHand.position });
             if (slot == current) return;
             Highlight(current, false);
             current = slot;

@@ -1250,6 +1250,7 @@ namespace PantographSim.Editor
                 var comp = p.gameObject.AddComponent<ToolRackSlot>();
                 comp.Configure("env.tool_rack.slot_" + s.slot, "工具袋：" + (tool != null ? tool.displayName : s.toolId));
                 comp.Setup(s.slot, null, p.GetComponent<Renderer>());
+                p.gameObject.AddComponent<Highlightable>();   // terry 試玩：步驟要拿的格子要亮
                 var model = SliceSceneBuilder.BuildToolModelPublic(s.toolId, p, SliceModelBuilder.Materials());   // VR 手上的工具模型從這裡複製（XrPlayer.ShowHeldModel）；袋子裡不顯示
                 model.SetActive(false);
                 var label = new GameObject("Label_" + s.slot).AddComponent<TextMesh>();

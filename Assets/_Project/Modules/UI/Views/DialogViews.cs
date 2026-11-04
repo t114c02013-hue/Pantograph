@@ -184,6 +184,7 @@ namespace PantographSim.UI
             title.text = $"工具教學：{s.Get("ui.tutorial.title")}　<size=22>（{page + 1}/{pages.Length}，工具架第 {Ui.ToolKey(tool)} 格）</size>";
             heading.text = f.Length > 0 ? f[0] : "";
             body.text = f.Length > 1 ? f[1] : "";
+            if (InputMode.XrActive && XrGestures.For(tool).Length > 0) body.text += "\n" + Ui.Tint("VR：" + XrGestures.For(tool), Ui.Accent);
             prev.interactable = page > 0;
             next.interactable = page < pages.Length - 1;
         }

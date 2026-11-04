@@ -226,6 +226,19 @@ namespace PantographSim.Tests
             Assert.IsFalse(t.Enabled(InputBindingTable.Empty, "RightStickClick"), "空手沒作用");
         }
 
+        /// <summary>terry 試玩：長桿的尺寸照 D25（2.5 m、最粗 9 cm 內），FBX 匯入沒有放大。</summary>
+        [Test]
+        public void Poles_MatchSpec_NotScaled()
+        {
+            var fbx = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Worksite/Models/Generated/ENV_InsulatedPole.fbx");
+            Assert.NotNull(fbx);
+            var b = new Bounds();
+            foreach (var f in fbx.GetComponentsInChildren<MeshFilter>()) { var s = Vector3.Scale(f.sharedMesh.bounds.size, f.transform.lossyScale); b.Encapsulate(new Bounds(Vector3.zero, new Vector3(Mathf.Abs(s.x), Mathf.Abs(s.y), Mathf.Abs(s.z)))); }
+            float len = Mathf.Max(b.size.x, b.size.y, b.size.z);
+            Assert.AreEqual(2.5f, len, 0.02f, "長度");
+            Assert.LessOrEqual(b.size.x + b.size.y + b.size.z - len, 0.2f, "粗細");
+        }
+
         /// <summary>第 5 點：按鍵動畫的 t（WebXR 對應）。</summary>
         [Test]
         public void Controller_PressAmount()

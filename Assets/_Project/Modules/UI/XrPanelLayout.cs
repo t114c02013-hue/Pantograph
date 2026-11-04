@@ -28,12 +28,12 @@ namespace PantographSim.UI
         };
         /// <summary>只給頭盔看的圖層（旁觀鏡頭不畫，影片裡不會出現 REC 紅點）；與紀錄模組 SpectatorCamera.HmdOnlyLayer 相同。</summary>
         public const int HmdOnlyLayer = 30;
-        static readonly string[] HiddenNames = { "Markers", "ToolBar", "Controls", "TopBar" };
+        static readonly string[] HiddenNames = { "Markers", "ToolBar", "Controls", "TopBar", "XrGesture" };   // terry 試玩：說明看教學卡，按「我知道了」後畫面不留面板
 
         IXrRig rig;
         RectTransform safe;
-        Canvas board, dialog, wrist, lift, hover, clip, labels, toolNote;
-        RectTransform stepPanel, wristView, gesture, toolPanel, hoverCard, labelsRoot, boardArrow;
+        Canvas board, dialog, wrist, lift, hover, clip, labels;
+        RectTransform stepPanel, wristView, toolPanel, hoverCard, labelsRoot, boardArrow;
         Transform hidden;
         readonly List<Canvas> canvases = new List<Canvas>();
         float boardYaw, boardShownAt = -1f;
@@ -60,14 +60,11 @@ namespace PantographSim.UI
             hover = MakeCanvas("XR_Hover", new Vector2(460, 420), HoverScale, null);
             wrist = MakeCanvas("XR_Wrist", new Vector2(720, 1100), WristScale, rig != null ? rig.LeftHand : null);
             clip = MakeCanvas("XR_Clipboard", new Vector2(1160, 980), ClipScale, null);   // 試玩修正 第 3 點：世界中的面板，可以抓（XrPanels）
-            toolNote = MakeCanvas("XR_ToolNote", new Vector2(720, 360), WristScale, rig != null ? rig.RightHand : null);   // terry 試玩：工具使用說明是工具的附記
             labels = MakeCanvas("XR_ControllerLabels", new Vector2(420, 360), LabelScale, rig != null ? rig.RightHand : null);
             if (rig != null)
             {
                 wrist.transform.localPosition = new Vector3(0f, 0.09f, 0.03f);
                 wrist.transform.localRotation = Quaternion.Euler(40f, 0f, 0f);
-                toolNote.transform.localPosition = new Vector3(-0.1f, 0.06f, 0.06f);
-                toolNote.transform.localRotation = Quaternion.Euler(40f, 0f, 0f);
                 labels.transform.localPosition = new Vector3(0.07f, 0.03f, 0.0f);
                 labels.transform.localRotation = Quaternion.Euler(70f, 0f, 0f);
             }
@@ -91,7 +88,6 @@ namespace PantographSim.UI
             hoverCard = Move("HoverCard", hover, new Vector2(0.5f, 0f));
             wristView = Move("XrWrist", wrist, new Vector2(0.5f, 1f));
             toolPanel = Move("ToolPanel", wrist, new Vector2(0.5f, 1f));
-            gesture = Move("XrGesture", toolNote, new Vector2(0.5f, 0f));
             labelsRoot = Move("XrLabels", labels, new Vector2(0.5f, 0.5f));
             foreach (var n in HiddenNames) { var t = safe.Find(n); if (t != null) t.SetParent(hidden, false); }
             if (toolPanel != null) toolPanel.sizeDelta = new Vector2(700, toolPanel.sizeDelta.y);
@@ -209,6 +205,19 @@ namespace PantographSim.UI
             dialog.transform.rotation = Quaternion.Slerp(dialog.transform.rotation, Quaternion.LookRotation(fwd, Vector3.up), t);
         }
 
+        /// <summary>工具教學卡開在手上工具的前方（射線點得到的距離），面向頭。</summary>
+        void PlaceBesideTool()
+        {
+            var pos = rig.RightHand.position + FlatForward() * 0.45f + Vector3.up * 0.12f;
+            dialog.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(pos - HeadPos, Vector3.up));
+        }
+
+        bool Looking(Transform hand)
+        {
+            var to = hand.position - rig.Head.position;
+            return to.magnitude < 0.7f && Vector3.Dot(rig.Head.forward, to.normalized) > 0.82f;
+        }
+
         void PlaceLift()
         {
             if (Sim.Registry != null && Sim.Registry.TryGetTransform(LiftMountId, out var mount) && mount != null)
@@ -255,7 +264,11 @@ namespace PantographSim.UI
 
             // 開場的擺放由 XrStartupSequencer 負責；開場之後才打開的對話框（錯誤視窗）開在頭前 1 m，開著時固定不跟頭，可以抓把手移動
             bool open = DialogOpen();
-            if (open && !dialogWasOpen && s.GetBool("xr.ready")) PlaceDialog(1f);
+            if (open && !dialogWasOpen && s.GetBool("xr.ready"))
+            {
+                PlaceDialog(1f);
+                if (!string.IsNullOrEmpty(s.Get("ui.tutorial.tool")) && rig.RightHand != null) PlaceBesideTool();
+            }
             dialogWasOpen = open;
 
             bool managed = Managed;
@@ -274,10 +287,9 @@ namespace PantographSim.UI
                 }
             }
 
-            // 手腕面板：工具面板接在腕面板下面；手勢小卡在上面
+            // 手腕面板：工具面板接在腕面板下面
             if (wristView != null && toolPanel != null)
                 toolPanel.anchoredPosition = new Vector2(0, -(wristView.gameObject.activeSelf ? wristView.rect.height + 12f : 0f));
-            if (gesture != null) { gesture.anchorMin = gesture.anchorMax = new Vector2(0.5f, 1f); gesture.pivot = new Vector2(0.5f, 0f); gesture.anchoredPosition = new Vector2(0, 12f); }
 
             // 資訊卡：物件靠玩家一側、面向頭盔，大小隨距離（看起來一樣大）
             if (hoverCard != null && hoverCard.gameObject.activeSelf)
@@ -293,13 +305,9 @@ namespace PantographSim.UI
                 }
             }
 
-            // 右控制器標籤：低頭看控制器（控制器在視線中央附近、距離 0.7 m 內）才出現
-            if (labels != null && rig.RightHand != null && rig.Head != null)
-            {
-                var to = rig.RightHand.position - rig.Head.position;
-                bool look = to.magnitude < 0.7f && Vector3.Dot(rig.Head.forward, to.normalized) > 0.82f;
-                labels.gameObject.SetActive(look);
-            }
+            // 按鍵小卡、手腕面板：看著那隻手（手在視線中央附近、距離 0.7 m 內）才出現，平常畫面上不留
+            if (labels != null && rig.RightHand != null && rig.Head != null) labels.gameObject.SetActive(Looking(rig.RightHand));
+            if (wrist != null && rig.LeftHand != null && rig.Head != null) wrist.gameObject.SetActive(Looking(rig.LeftHand));
         }
     }
 }

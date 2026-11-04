@@ -25,7 +25,7 @@ namespace PantographSim.UI
                 case SimIds.ToolCloth: return "按住扳機，用射線掃過托架上的黑色碳粉";
                 case SimIds.ToolMarker: return "扳機點已鎖到扭力的螺栓，畫防鬆標記";
                 case "carried": return "射線移到托架上方，扳機點托架＝放下\n右搖桿左右撥＝翻轉 180°";
-                default: return "本切片已預先完成，掛回工具架即可";
+                default: return "";
             }
         }
 

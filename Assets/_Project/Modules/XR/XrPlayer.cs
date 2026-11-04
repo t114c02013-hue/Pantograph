@@ -178,8 +178,9 @@ namespace PantographSim.XR
                     break;
                 case "PanelGrab":   // 左握把：抓面板把手由 XRI 處理；手在工具袋前就拿、放工具
                     leftHandActing = true;
-                    if (c.pressed) { if (SlotNearHand() > 0 || Near("env.waist_pouch", SlotRadius)) GrabStart(); }
-                    else if (!string.IsNullOrEmpty(S.Get(SimIds.ActiveTool)) && (SlotNearHand() > 0 || Near("env.waist_pouch", SlotRadius))) GrabEnd();
+                    if (c.pressed) { if (BodyItemNear()) GrabStart(); }
+                    else if (grabPickedThisPress) grabPickedThisPress = false;
+                    else if (!string.IsNullOrEmpty(S.Get(SimIds.ActiveTool)) && BodyItemNear()) GrabEnd();
                     leftHandActing = false;
                     break;
                 case "ResetTool":
@@ -266,9 +267,11 @@ namespace PantographSim.XR
 
         bool Near(string id, float radius) => Sim.Registry != null && Sim.Registry.TryGetPosition(id, out var p) && Vector3.Distance(p, HandPos) <= radius;
 
+        bool BodyItemNear() => SlotNearHand() > 0 || Near("env.waist_pouch", SlotRadius) || Near(BodyRings.ChestRing, bodyRingRadius) || Near(BodyRings.ToolRing, bodyRingRadius);
+
         int SlotNearHand()
         {
-            return XrPouchHover.Nearest(SimIds.RackSlotNumbers(S), k => Sim.Registry != null && Sim.Registry.TryGetPosition("env.tool_rack.slot_" + k, out var p) ? p : (Vector3?)null, new[] { HandPos }, SlotRadius).slot;
+            return XrPouchHover.Pick(S, pouch != null ? pouch : Data.ToolPouchDef.Load(), new[] { HandPos }).slot;
         }
 
         void GrabStart()

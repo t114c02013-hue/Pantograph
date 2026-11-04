@@ -204,6 +204,78 @@ namespace PantographSim.Tests
             Assert.Less((N("xr_standard_trigger_pressed_value").localRotation.eulerAngles - N("xr_standard_trigger_pressed_max").localRotation.eulerAngles).magnitude, 0.01f, "扳機到底");
         }
 
+        /// <summary>terry 試玩：身上的工具實走一次：左右手靠近工具袋每一格、按握把拿出、在格子放開放回；腰包、胸前扣環也按得到。教學模式手在 0.30 m 內就拿到這一步要的工具。</summary>
+        [UnityTest]
+        public IEnumerator BodyItems_Walkthrough_BothHands()
+        {
+            yield return Boot(new Vector3(0f, 1.6f, 0f));
+            tracked = true;
+            yield return WaitReady();
+            Sim.State.SetBool("training.running", true);
+            Sim.State.SetBool("xr.tutorial.active", false);
+            yield return null;
+            XrPlayer.ScriptedFrame = new XrFrame();
+            Rig.Head.position = Rig.Head.position;   // 工具袋跟著頭
+            yield return null; yield return null;
+            Assert.IsTrue(Sim.Registry.TryGetTransform("env.tool_bag", out var bag));
+            var slots = SimIds.RackSlotNumbers(Sim.State).Where(k => Sim.Registry.TryGetTransform("env.tool_rack.slot_" + k, out var t) && t.IsChildOf(bag)).ToArray();
+            Assert.Greater(slots.Length, 3, "工具袋有格子");
+            Assert.Less(Rig.Head.position.y - bag.position.y, 0.62f, "手自然下垂搆得到");
+            foreach (bool left in new[] { false, true })
+                foreach (int k in slots)
+                {
+                    var hand = left ? Rig.LeftHand : Rig.RightHand;
+                    var other = left ? Rig.RightHand : Rig.LeftHand;
+                    Sim.Registry.TryGetPosition("env.tool_rack.slot_" + k, out var at);
+                    other.position = at + Vector3.up * 2f;
+                    hand.position = at + new Vector3(0.02f, 0.02f, 0f);
+                    yield return null;
+                    XrPlayer.ScriptedFrame = left ? new XrFrame { leftGrip = true } : new XrFrame { rightGrip = true };
+                    yield return null; yield return null;
+                    XrPlayer.ScriptedFrame = new XrFrame();
+                    yield return null; yield return null;
+                    Sim.State.Set("ui.tutorial.tool", "");
+                    string held = Sim.State.Get(SimIds.ActiveTool);
+                    Assert.AreNotEqual("", held, (left ? "左手" : "右手") + "拿不到第 " + k + " 格");
+                    XrPlayer.ScriptedFrame = left ? new XrFrame { leftGrip = true } : new XrFrame { rightGrip = true };
+                    yield return null; yield return null;
+                    XrPlayer.ScriptedFrame = new XrFrame();
+                    yield return null; yield return null;
+                    Assert.AreEqual("", Sim.State.Get(SimIds.ActiveTool), (left ? "左手" : "右手") + "放不回第 " + k + " 格");
+                }
+
+            int asked = 0; string target = "";
+            Sim.Bus.Subscribe<ActionRequested>(e => { asked++; target = e.targetId; });
+            foreach (bool left in new[] { false, true })
+                foreach (var id in new[] { "env.waist_pouch", PantographSim.Core.BodyRings.ChestRing })
+                {
+                    var hand = left ? Rig.LeftHand : Rig.RightHand;
+                    (left ? Rig.RightHand : Rig.LeftHand).position = Vector3.up * 50f;
+                    Assert.IsTrue(Sim.Registry.TryGetPosition(id, out var at), id);
+                    hand.position = at;
+                    asked = 0;
+                    XrPlayer.ScriptedFrame = left ? new XrFrame { leftGrip = true } : new XrFrame { rightGrip = true };
+                    yield return null; yield return null;
+                    XrPlayer.ScriptedFrame = new XrFrame();
+                    yield return null; yield return null;
+                    Assert.Greater(asked, 0, id + (left ? " 左手" : " 右手") + "按握把沒有反應");
+                }
+
+            Sim.State.Set("training.mode", "tutorial");
+            Sim.Bus.Publish(new HighlightRequested { text = "env.tool_rack.slot_" + slots[0] });
+            Rig.LeftHand.position = Vector3.up * 50f;
+            yield return null;
+            Sim.Registry.TryGetPosition("env.tool_rack.slot_" + slots[0], out var want);
+            Rig.RightHand.position = want + Vector3.right * 0.25f;
+            yield return null;
+            Assert.AreEqual(slots[0], (int)Sim.State.GetFloat(XrPouchHover.TargetKey), "記下這一步要拿的格子");
+            StringAssert.Contains("工具袋", Sim.State.Get("ui.toast"), "提示怎麼拿");
+            XrPlayer.ScriptedFrame = new XrFrame { rightGrip = true };
+            yield return null; yield return null;
+            Assert.AreNotEqual("", Sim.State.Get(SimIds.ActiveTool), "手在附近就拿到這一步要的工具");
+            XrPlayer.ScriptedFrame = null;
+        }
+
         /// <summary>第 6 點：拿著上鎖掛牌組按右搖桿，鎖和牌切換；高阻計等於按測試鍵；空手沒作用。</summary>
         [UnityTest]
         public IEnumerator RightStickClick_ToolSecondary()
