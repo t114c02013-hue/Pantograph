@@ -1169,11 +1169,8 @@ namespace PantographSim.Editor
                 var len = pole.GetComponentsInChildren<Renderer>().Select(r => r.bounds).Aggregate((a, b) => { a.Encapsulate(b); return a; }).size.y;
                 if (Mathf.Abs(len - d.insulatedPoleLength) > 0.05f) Debug.LogWarning($"[RoofSiteBuilder] 絕緣桿長度 {len:0.00} m 和資料 {d.insulatedPoleLength} m 不同：重跑 Blender");
                 bool detector = slot.name == "Slot_2";   // terry 手調的短桿
-                foreach (var part in pole.transform.Cast<Transform>())
-                {
-                    part.localPosition = new Vector3(0f, detector ? d.rackPoleLocalY.x : d.rackPoleLocalY.y, 0.032f);
-                    var ls = part.localScale; ls.z = detector ? d.rackPoleScale.x : d.rackPoleScale.y; part.localScale = ls;
-                }
+                pole.transform.localPosition = new Vector3(0f, detector ? d.rackPoleLocalY.x : d.rackPoleLocalY.y, 0.032f);
+                var ls = pole.transform.localScale; ls.z = detector ? d.rackPoleScale.x : d.rackPoleScale.y; pole.transform.localScale = ls;
                 var box = slot.GetComponent<BoxCollider>();   // 整支都點得到（下半段在原本的掛位方塊外）
                 if (box != null) { box.center = new Vector3(box.center.x, -0.25f, box.center.z); box.size = new Vector3(box.size.x, 1.6f, box.size.z); }
             }

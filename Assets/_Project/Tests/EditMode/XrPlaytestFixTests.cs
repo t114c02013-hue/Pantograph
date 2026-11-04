@@ -236,6 +236,24 @@ namespace PantographSim.Tests
             Assert.LessOrEqual(b.size.x + b.size.y + b.size.z - len, 0.2f, "粗細");
         }
 
+        /// <summary>terry 手調：架上的驗電桿、接地桿約 0.3 m，重建不會變回 2.5 m。</summary>
+        [Test]
+        public void RackPoles_KeepTerryLength()
+        {
+            StationTests.WithScene(scene =>
+            {
+                var poles = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<Transform>(true)).Where(t => t.name == "InsulatedPole").ToList();
+                Assert.AreEqual(2, poles.Count);
+                foreach (var p in poles)
+                {
+                    var rs = p.GetComponentsInChildren<Renderer>(true);
+                    var b = rs[0].bounds; foreach (var r in rs) b.Encapsulate(r.bounds);
+                    Assert.AreEqual(0.33f, b.size.y, 0.06f, p.parent.name);
+                    Assert.Greater(b.min.y, 0.85f, "在掛位高度，不是從地上立起來");
+                }
+            });
+        }
+
         /// <summary>a：拿驗電桿、接地桿時指弓頭、滑板、螺栓都算掛點；其他工具不變。</summary>
         [Test]
         public void RayTarget_PanHead_CountsAsGroundClamp()
