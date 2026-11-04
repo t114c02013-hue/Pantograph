@@ -35,6 +35,7 @@ namespace PantographSim.Parts.Common
         {
             Capture();
             StripLogic.Initialize(State, Id);
+            State.SetFloat(SimIds.OverBracketRadius, overBracketRadius);
         }
 
         protected override bool Owns(string targetId) => targetId == Id || targetId == BracketId || targetId == "carried";
@@ -53,6 +54,7 @@ namespace PantographSim.Parts.Common
             {
                 if (st != StripLogic.Carried || !AskBare("install")) return;
                 // 吸附成功：同一批裡把滑板放到托架位置，並讓安裝位置檢測立刻寫入吸附後的距離（install_distance_cm）
+                if (PointerState.HasRay) transform.position = StripLogic.CarryPoint(PointerState.Ray, true, MountWorld, carryHeight);   // 判定這一下指的地方，不等外觀追上
                 float offset = HoleOffsetNow();
                 if (!StripLogic.Install(State, Id, offset, () => { RefreshVisual(); Sensors.Flush(State, Id + ".install"); }))
                 { State.Set("ui.toast", ""); State.Set("ui.toast", StripLogic.InstallFailText(State, Id, offset)); }

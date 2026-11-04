@@ -50,6 +50,12 @@ namespace PantographSim.Tests
                     var off = held - mount; off.y = 0f;
                     Assert.Less(off.magnitude, PantographSim.Parts.Common.StripLogic.SnapTolerance, side + "：斜看也要算對準");
                     Assert.Less(off.magnitude, 0.001f, side);
+                    // 第 11 輪：滑板外觀還沒追上、射線被別的東西先擋到，對準托架中心也要算點到托架
+                    s.SetFloat(SimIds.OverBracketRadius, 0.12f);
+                    var bracketPos = bracket.position;
+                    var aim = (bracketPos - eye).normalized;
+                    Assert.IsTrue(SimIds.ClicksBracket(s, "ip.carbon_strip_" + side + ".bracket", "part.pan_head", new Ray(eye, aim), bracketPos), side + "：托架中心");
+                    Assert.IsFalse(SimIds.ClicksBracket(s, "ip.carbon_strip_" + side + ".bracket", "", new Ray(eye, (bracketPos + Vector3.forward * 0.3f - eye).normalized), bracketPos), side + "：偏 30 cm 不算");
                 }
             });
         }

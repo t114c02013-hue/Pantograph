@@ -487,13 +487,30 @@ namespace PantographSim.Tests
             var sim = new SliceSim();
             sim.RunUntil("STP_WC_03_RemoveGround");
             StringAssert.Contains("第 23 步 下車頂", sim.s.Get("procedure.preset_note"));
-            StringAssert.Contains("第 23 步", sim.s.Get("ui.toast"));
+            StringAssert.Contains("第 23 步", sim.s.Get("ui.notice"));
             var early = new SliceSim();
             early.RunUntil("STP_SI_04_VoltageTest");
             StringAssert.Contains("第 2 步", early.s.Get("procedure.preset_note"));
             StringAssert.Contains("第 3 步", early.s.Get("procedure.preset_note"));
             early.RunUntil("STP_SI_05_Grounding");
             Assert.AreEqual("", early.s.Get("procedure.preset_note"), "下一步清掉");
+        }
+
+        /// <summary>第 11 輪：跳過步驟的說明一則接一則，每則停 noticeSeconds；標籤推回畫面內。</summary>
+        [Test]
+        public void Notices_OneAtATime_LabelsStayOnScreen()
+        {
+            PantographSim.UI.PromptViews.ClearToasts();
+            PantographSim.UI.PromptViews.AddNotices("第 2 步\n第 3 步");
+            Assert.AreEqual("第 2 步", PantographSim.UI.PromptViews.ToastAt(100f, 6f));
+            Assert.AreEqual("第 2 步", PantographSim.UI.PromptViews.ToastAt(105f, 6f));
+            Assert.AreEqual("第 3 步", PantographSim.UI.PromptViews.ToastAt(106f, 6f));
+            Assert.AreEqual("", PantographSim.UI.PromptViews.ToastAt(112f, 6f));
+            PantographSim.UI.PromptViews.ClearToasts();
+
+            Assert.AreEqual(0f, PantographSim.UI.MarkerView.EdgeShift(0f, 100f, 500f));
+            Assert.AreEqual(-50f, PantographSim.UI.MarkerView.EdgeShift(450f, 100f, 500f), "右邊超出：往左");
+            Assert.AreEqual(50f, PantographSim.UI.MarkerView.EdgeShift(-450f, 100f, 500f), "左邊超出：往右");
         }
 
         /// <summary>第 10 輪：第 17 步放不下去要說為什麼；手上有滑板時在托架上方就算點到托架。</summary>
@@ -505,10 +522,13 @@ namespace PantographSim.Tests
             Assert.AreEqual("", SimIds.CarriedBracket(s));
             s.Set("procedure.side", "L"); s.Set(strip + ".state", "Carried");
             Assert.AreEqual(bracket, SimIds.CarriedBracket(s));
-            Assert.IsTrue(SimIds.ClicksBracket(s, bracket, bracket));
-            Assert.IsFalse(SimIds.ClicksBracket(s, bracket, null), "不在托架上方：不算");
-            s.SetBool(strip + ".over_bracket", true);
-            Assert.IsTrue(SimIds.ClicksBracket(s, bracket, null), "射線沒打到托架也算");
+            s.SetFloat(SimIds.OverBracketRadius, 0.12f);
+            var pos = new UnityEngine.Vector3(0f, 0.67f, 0.15f);
+            var far = new UnityEngine.Ray(pos + new UnityEngine.Vector3(0.5f, 1f, 0f), UnityEngine.Vector3.down);
+            var near = new UnityEngine.Ray(pos + new UnityEngine.Vector3(0.05f, 1f, 0f), UnityEngine.Vector3.down);
+            Assert.IsTrue(SimIds.ClicksBracket(s, bracket, bracket, far, pos));
+            Assert.IsFalse(SimIds.ClicksBracket(s, bracket, null, far, pos), "不在托架上方：不算");
+            Assert.IsTrue(SimIds.ClicksBracket(s, bracket, null, near, pos), "射線沒打到托架也算");
             s.Set(strip + ".new_orientation", "in");
             Assert.IsFalse(StripLogic.Install(s, strip, 0f));
             StringAssert.Contains("按 R", StripLogic.InstallFailText(s, strip, 0f));

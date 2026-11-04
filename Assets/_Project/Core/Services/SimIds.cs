@@ -66,9 +66,16 @@ namespace PantographSim.Core
             return side.Length > 0 && s.Get($"part.carbon_strip_{side}.state") == "Carried" ? $"ip.carbon_strip_{side}.bracket" : "";
         }
 
-        /// <summary>手上有滑板時這一下算不算點托架：滑板已在托架上方就算，射線沒打到托架本體也一樣（判定看孔位，不看點在哪）。</summary>
-        public static bool ClicksBracket(ISimState s, string bracket, string hovered) =>
-            hovered == bracket || s.GetBool($"part.carbon_strip_{SideOf(bracket)}.over_bracket");
+        public const string OverBracketRadius = "strip.over_radius_m";
+
+        /// <summary>手上有滑板時這一下算不算點托架：射線打在托架高度的點離托架夠近就算。看射線不看滑板外觀：外觀追滑鼠會慢幾幀，弓頭框架也可能先擋到射線。</summary>
+        public static bool ClicksBracket(ISimState s, string bracket, string hovered, UnityEngine.Ray ray, UnityEngine.Vector3 bracketPos)
+        {
+            if (hovered == bracket) return true;
+            if (!new UnityEngine.Plane(UnityEngine.Vector3.up, bracketPos).Raycast(ray, out float dist)) return false;
+            var off = ray.GetPoint(dist) - bracketPos; off.y = 0f;
+            return off.magnitude <= s.GetFloat(OverBracketRadius);
+        }
 
         /// <summary>是不是一支螺栓（…bolt_ 後面接數字）；env.bolt_tray_L 是盤子，不算。</summary>
         public static bool IsBoltId(string id)

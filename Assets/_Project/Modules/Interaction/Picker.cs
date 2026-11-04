@@ -49,7 +49,7 @@ namespace PantographSim.Interaction
             if ((hovered == null && bracket.Length == 0) || !ShouldSendClick(PointerState.OverUi, s.GetBool("training.paused"), s.GetBool("training.running"))) return;
             if (!Input.GetMouseButtonDown(0)) return;
             string tool = s.Get(SimIds.ActiveTool);
-            if (bracket.Length > 0 && !SimIds.ClicksBracket(s, bracket, hovered?.Id))
+            if (bracket.Length > 0 && !(Sim.Registry.TryGetPosition(bracket, out var bracketPos) && SimIds.ClicksBracket(s, bracket, hovered?.Id, PointerState.Ray, bracketPos)))
             {
                 s.Set("ui.toast", ""); s.Set("ui.toast", "滑板還不在托架上方，先移到托架上再點");
                 return;

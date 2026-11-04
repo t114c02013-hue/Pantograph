@@ -24,6 +24,7 @@ namespace PantographSim.Training
         {
             Mode = mode; Scenario = scenario;
             state.Set("training.mode", mode == TrainingMode.Tutorial ? "tutorial" : "practice");
+            state.SetFloat("ui.notice_seconds", ToolRulesDef.Load()?.noticeSeconds ?? 6f);
             state.Set("training.scenario", scenario != null ? scenario.scenarioId : "");
             state.Set("training.scenario_title", scenario != null ? scenario.title : "");
             state.SetBool("scenario.start_raised", scenario != null && scenario.startRaised);

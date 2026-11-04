@@ -311,6 +311,7 @@ namespace PantographSim.UI
     {
         static string toast = "";
         static float toastUntil;
+        static readonly Queue<string> notices = new Queue<string>();
         RectTransform removalDim, spareDim, trayPanel, toastPanel;
         Text spareModel, spareCrack, spareThick, trayText, toastText;
         string removalSide = "L";
@@ -326,10 +327,21 @@ namespace PantographSim.UI
             else if (key.EndsWith(".pick_result") && text == "not_measured") Show("選用前先用卡尺量這條備品的中點厚度");
             else if (key == "workorder.last_error" && !string.IsNullOrEmpty(text)) Show(text);
             else if (key == "ui.toast" && !string.IsNullOrEmpty(text)) Show(text);
+            else if (key == "ui.notice" && !string.IsNullOrEmpty(text)) foreach (var line in text.Split('\n')) notices.Enqueue(line);
             else if (key == "part.pan_head.inspected" && text == "true") Show("已親眼確認弓頭");
         }
 
         static void Show(string text) { toast = text; toastUntil = Time.realtimeSinceStartup + 3f; }
+
+        /// <summary>現在該顯示的提示：一般提示優先，空出來就換下一則說明，一則接一則。</summary>
+        public static string ToastAt(float now, float noticeSeconds)
+        {
+            if (now >= toastUntil && notices.Count > 0) { toast = notices.Dequeue(); toastUntil = now + noticeSeconds; }
+            return now < toastUntil ? toast : "";
+        }
+
+        public static void AddNotices(string text) => OnChange("ui.notice", text);
+        public static void ClearToasts() { notices.Clear(); toast = ""; toastUntil = 0f; }
 
         protected override void OnBuild(RectTransform safe)
         {
@@ -387,9 +399,11 @@ namespace PantographSim.UI
             Ui.SetActive(trayPanel, running && s.GetBool("ui.tray_open"));
             trayText.text = $"螺栓：{s.GetFloat("tray.bolts"):0} 支\n舊滑板：{s.GetFloat("tray.old_strips"):0} 條\n裝回螺栓：套筒方向切到「鎖」，點空的螺栓孔。";
 
-            bool toastOn = running && Time.realtimeSinceStartup < toastUntil && !string.IsNullOrEmpty(toast);
+            if (!running) notices.Clear();
+            string shown = ToastAt(Time.realtimeSinceStartup, s.GetFloat("ui.notice_seconds", 6f));
+            bool toastOn = running && !string.IsNullOrEmpty(shown);
             Ui.SetActive(toastPanel, toastOn);
-            if (toastOn) toastText.text = toast;
+            if (toastOn) toastText.text = shown;
         }
     }
 }

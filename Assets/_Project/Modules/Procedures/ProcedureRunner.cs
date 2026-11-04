@@ -214,7 +214,7 @@ namespace PantographSim.Procedures
             var notes = new List<string>();
             int next = NextOpen(from, notes);
             state.Set("procedure.preset_note", string.Join("\n", notes));
-            if (notes.Count > 0) { state.Set("ui.toast", ""); state.Set("ui.toast", string.Join("\n", notes)); }
+            if (notes.Count > 0) { state.Set("ui.notice", ""); state.Set("ui.notice", string.Join("\n", notes)); }
             return next;
         }
 

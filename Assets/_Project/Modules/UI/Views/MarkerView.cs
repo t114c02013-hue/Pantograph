@@ -87,6 +87,10 @@ namespace PantographSim.UI
 
         static bool Close(Vector2 a, Vector2 b) => Mathf.Abs(a.x - b.x) < 170f && Mathf.Abs(a.y - b.y) < 40f;
 
+        /// <summary>中心在 center、半寬 halfSize 的東西要移多少才不超出 ±limit。</summary>
+        public static float EdgeShift(float center, float halfSize, float limit) =>
+            Mathf.Clamp(center, -limit + halfSize, Mathf.Max(limit - halfSize, -limit + halfSize)) - center;
+
         /// <summary>放在 at 的標籤（底部中心對齊）會不會蓋到 q 的標記：標記從 q 往上約 100 px（箭頭加文字）、半寬約 120 px。</summary>
         static bool Covers(Vector2 q, Vector2 at, RectTransform rt) =>
             Mathf.Abs(q.x - at.x) < rt.rect.width * 0.5f + 120f && q.y + 100f > at.y && q.y < at.y + rt.rect.height;
@@ -148,6 +152,9 @@ namespace PantographSim.UI
                     m.text.text = inBag ? $"{arrow} {name}（點下方工具列的格子）" : cGoesThere ? $"{arrow} {name}（按「帶我過去」或 C）" : $"{arrow} {name}";
                 }
                 m.bg.color = Color.Lerp(new Color(1f, 0.85f, 0.1f), new Color(1f, 0.6f, 0.05f), Ui.Blink(5f));
+                // 箭頭留在目標上，只把字推回畫面內
+                var mp = m.rt.anchoredPosition;
+                m.bg.rectTransform.anchoredPosition = new Vector2(EdgeShift(mp.x, m.bg.rectTransform.rect.width * 0.5f, half.x), 52f + EdgeShift(mp.y + 52f + m.bg.rectTransform.rect.height * 0.5f, m.bg.rectTransform.rect.height * 0.5f, half.y));
             }
 
             // ---- 常駐標籤 ----
