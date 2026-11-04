@@ -129,7 +129,7 @@ namespace PantographSim.Tools
                 var msg = RackLogic.TryReturn(s, slot, tool.ToolId, canReturnInUse);
                 if (msg == null && tool.ToolId == GroundingLeadLogic.ToolId) s.SetBool(GroundingLeadLogic.Carried, false);   // 掛回工具架就不在身上
                 if (msg != null) Toast(msg);
-                else { if (active == tool) Activate(null); Toast($"已把「{tool.DisplayName}」放回工具架"); }
+                else { if (active == tool) Activate(null); Toast($"已把「{tool.DisplayName}」放回{Place(slot)}"); }
                 return;
             }
             if (s.Get(RackLogic.SlotKey(slot)) == RackLogic.InPouch)

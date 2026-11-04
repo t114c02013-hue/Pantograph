@@ -28,7 +28,7 @@
       "stepId": "STP_SI_01_ConfirmLowered",
       "refSeconds": [45, 30],
       "subActions": [
-        { "text": "1/3 按住 ▼ 把弓頭降到綠框", "textDesktop": "按住 ▼ 把弓頭降到綠框", "hint": "", "target": "ip.pan_head.lower_check", "done": "part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm", "why": "放開時距離要 ≤ 1 cm", "tool": "", "stand": "tp.platform.lift" },
+        { "text": "1/3 按住 ▼ 把弓頭降到綠框", "textDesktop": "按住 ▼ 把弓頭降到綠框", "hint": "射線指著 ▼ 按住扳機，弓頭降到綠框這一步就自動完成。弓頭降下才不會碰到架空線。", "target": "ip.pan_head.lower_check", "done": "part.pan_head.lower_distance_cm<=part.pan_head.lower_tolerance_cm", "why": "放開時距離要 ≤ 1 cm", "tool": "", "stand": "tp.platform.lift" },
         { "text": "2/3 指著弓頭確認已降下", "textDesktop": "點弓頭，確認已降下", "hint": "用射線指著弓頭按扳機。要親眼看到弓頭降下，不能只看儀表。", "target": "part.pan_head", "done": "part.pan_head.inspected", "why": "親眼看，不只看燈", "tool": "", "stand": "tp.platform.lift" },
         { "text": "3/3 指著弓位指示燈確認", "textDesktop": "點控制盤的弓位指示燈", "hint": "用射線指著面板上的弓位指示燈按扳機。燈號和實物都對，才算確定已降弓。", "target": "ip.cab.pan_indicator", "done": "ip.cab.pan_indicator.checked", "why": "目視和指示燈交叉確認", "tool": "", "stand": "tp.platform.lift" }
       ],
@@ -495,10 +495,10 @@
       "refSeconds": [90, 50],
       "subActions": [
         { "text": "從工具袋拿出套筒扳手", "textDesktop": "到工具袋拿起套筒扳手", "hint": "任一手伸到左腰的工具袋，按握把拿出套筒扳手，會拿在右手。", "target": "env.tool_rack.slot_6", "done": "tool.active=tool.socket_wrench", "why": "工具袋第 6 格", "tool": "tool.socket_wrench", "stand": "tp.roof.inner" },
-        { "text": "從螺栓盤拿 1 號螺栓放回孔位", "textDesktop": "從螺栓盤拿 1 號螺栓放回孔位", "hint": "", "target": "ip.carbon_strip_{side}.bolt_1", "done": "ip.carbon_strip_{side}.bolt_1.state=Placed", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
-        { "text": "從螺栓盤拿 2 號螺栓放回孔位", "textDesktop": "從螺栓盤拿 2 號螺栓放回孔位", "hint": "", "target": "ip.carbon_strip_{side}.bolt_2", "done": "ip.carbon_strip_{side}.bolt_2.state=Placed", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
-        { "text": "從螺栓盤拿 3 號螺栓放回孔位", "textDesktop": "從螺栓盤拿 3 號螺栓放回孔位", "hint": "", "target": "ip.carbon_strip_{side}.bolt_3", "done": "ip.carbon_strip_{side}.bolt_3.state=Placed", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
-        { "text": "從螺栓盤拿 4 號螺栓放回孔位", "textDesktop": "從螺栓盤拿 4 號螺栓放回孔位", "hint": "", "target": "ip.carbon_strip_{side}.bolt_4", "done": "ip.carbon_strip_{side}.bolt_4.state=Placed", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "從螺栓盤拿 1 號螺栓放回孔位", "textDesktop": "從螺栓盤拿 1 號螺栓放回孔位", "hint": "拿著套筒扳手，用射線點空的螺栓孔，螺栓會從螺栓盤放回孔位。", "target": "ip.carbon_strip_{side}.bolt_1", "done": "ip.carbon_strip_{side}.bolt_1.state=Placed", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "從螺栓盤拿 2 號螺栓放回孔位", "textDesktop": "從螺栓盤拿 2 號螺栓放回孔位", "hint": "拿著套筒扳手，用射線點空的螺栓孔，螺栓會從螺栓盤放回孔位。", "target": "ip.carbon_strip_{side}.bolt_2", "done": "ip.carbon_strip_{side}.bolt_2.state=Placed", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "從螺栓盤拿 3 號螺栓放回孔位", "textDesktop": "從螺栓盤拿 3 號螺栓放回孔位", "hint": "拿著套筒扳手，用射線點空的螺栓孔，螺栓會從螺栓盤放回孔位。", "target": "ip.carbon_strip_{side}.bolt_3", "done": "ip.carbon_strip_{side}.bolt_3.state=Placed", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "從螺栓盤拿 4 號螺栓放回孔位", "textDesktop": "從螺栓盤拿 4 號螺栓放回孔位", "hint": "拿著套筒扳手，用射線點空的螺栓孔，螺栓會從螺栓盤放回孔位。", "target": "ip.carbon_strip_{side}.bolt_4", "done": "ip.carbon_strip_{side}.bolt_4.state=Placed", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
         { "text": "方向切到「鎖」", "textDesktop": "方向切到「鎖」", "hint": "右手拿著扳手，看左手打開工具面板，用右手射線指著「鎖」按扳機。也可用左手指尖碰扳手上的橘色撥桿切換。", "target": "", "done": "tool.socket_wrench.dir=lock", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
         { "text": "把 1 號螺栓鎖到貼合", "textDesktop": "把 1 號螺栓鎖到貼合", "hint": "用射線指著螺栓按扳機套上，再按住扳機轉（每秒 90°），轉到螺栓頭貼平再放開。先四支都貼合，再用扭力扳手鎖到規定值。", "target": "ip.carbon_strip_{side}.bolt_1", "done": "ip.carbon_strip_{side}.bolt_1.state=Snug", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
         { "text": "把 2 號螺栓鎖到貼合", "textDesktop": "把 2 號螺栓鎖到貼合", "hint": "用射線指著螺栓按扳機套上，再按住扳機轉（每秒 90°），轉到螺栓頭貼平再放開。", "target": "ip.carbon_strip_{side}.bolt_2", "done": "ip.carbon_strip_{side}.bolt_2.state=Snug", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },

@@ -34,7 +34,7 @@ namespace PantographSim.Parts.Common
         {
             if (s.Get(stripId + ".state") != OldMounted) return false;
             if (!BoltsRemoved(s, stripId)) { s.Set(stripId + ".remove_blocked", "bolts"); return false; }
-            if (!string.IsNullOrEmpty(s.Get(SimIds.ActiveTool))) { s.Set("ui.toast", "先把手上的工具放回工具架，空手才能拿滑板"); return false; }
+            if (!string.IsNullOrEmpty(s.Get(SimIds.ActiveTool))) { s.Set("ui.toast", "先把手上的工具收好，空手才能拿滑板"); return false; }
             s.Set(stripId + ".removal", method);
             if (method != "vertical") return false;
             s.Set(stripId + ".state", Removed);

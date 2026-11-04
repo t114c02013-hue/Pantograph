@@ -114,7 +114,7 @@ namespace PantographSim.UI
                 if (projected && inView)
                 {
                     // 同一端的兩支螺栓很近，標籤上下錯開
-                    float stagger = id.Contains(".bolt_") && (id.EndsWith("_1") || id.EndsWith("_3")) ? 64f : 0f;
+                    float stagger = SimIds.IsBoltId(id) && (id.EndsWith("_1") || id.EndsWith("_3")) ? 64f : 0f;
                     m.rt.anchoredPosition = local + new Vector2(0, 18 + bob + stagger);
                     Ui.SetActive(m.arrow, true);
                     m.text.text = hintOn && id == rackHint ? $"▼ 在這裡：{name}"
@@ -175,6 +175,7 @@ namespace PantographSim.UI
                 hover.rt.anchoredPosition = reg.TryGetPosition(hoverId, out var hp) && ui.WorldToSafe(hp, out var hl, out bool hin) && hin
                     ? hl + new Vector2(0, 40)
                     : ui.MouseInSafe() + new Vector2(0, 28);
+                if (targetSet.Contains(hoverId)) hover.rt.anchoredPosition += new Vector2(0, 90f);   // 不要和「點這裡」疊在一起
             }
         }
 

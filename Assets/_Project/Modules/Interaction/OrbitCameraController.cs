@@ -68,6 +68,7 @@ namespace PantographSim.Interaction
         public void Retarget(Bounds bounds, Vector3 from)
         {
             Retarget(bounds);
+            distance = Mathf.Clamp(Mathf.Min(distance, Vector3.Distance(bounds.center, from)), minDistance, maxDistance);   // 不退到站點後面：護欄和擋板不會擋住
             var look = Quaternion.LookRotation(bounds.center - from, Vector3.up).eulerAngles;
             yaw = look.y;
             pitch = Mathf.Clamp(Mathf.DeltaAngle(0f, look.x), minPitch, maxPitch);

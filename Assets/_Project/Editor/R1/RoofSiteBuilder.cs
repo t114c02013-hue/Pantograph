@@ -678,7 +678,7 @@ namespace PantographSim.Editor
                     Object.DestroyImmediate(g.GetComponent<Collider>()); g.SetActive(false); return g;
                 }).ToArray();
                 var comp = bt.AddComponent<BoltTray>();
-                comp.Configure(SimIds.BoltTray(side), (side == "L" ? "肘側" : "外側") + "螺栓盤");
+                comp.Configure(SimIds.BoltTray(side), (side == "L" ? "靠關節" : "外側") + "螺栓盤");
                 comp.Setup(side, icons);
                 bt.AddComponent<Highlightable>();
                 Wrap(res, "ENV_BoltTray_" + side, bt.transform, btSupport);

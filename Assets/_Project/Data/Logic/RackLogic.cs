@@ -28,7 +28,7 @@ namespace PantographSim.Data
         {
             string active = s.Get(SimIds.ActiveTool);
             if (active == toolId) return null;
-            if (!string.IsNullOrEmpty(active)) return $"手上已經拿著「{activeName}」，先把它放回工具架";
+            if (!string.IsNullOrEmpty(active)) return $"手上已經拿著「{activeName}」，先把它放好";
             if (!string.IsNullOrEmpty(s.Get("hand.item"))) return "手上拿著零件，先把它放好再拿工具";
             string st = s.Get(SlotKey(slot), OnRack);
             if (st != OnRack && st != Hanging && st != Dropped && st != OnTray) return $"「{toolName}」正在使用中，不在架上";   // 垂在繫繩上、掉在地上的工具可以撿回來

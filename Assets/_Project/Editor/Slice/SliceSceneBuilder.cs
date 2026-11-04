@@ -109,7 +109,7 @@ namespace PantographSim.Editor
                 strip.transform.localRotation = side == "L" ? Quaternion.identity : Quaternion.Euler(0, 180, 0);   // +Z（斜面側）朝外
                 strip.name = $"CarbonStrip_{side}";
 
-                string sideName = side == "L" ? "肘側" : "外側";
+                string sideName = side == "L" ? "靠關節" : "外側";
                 var slots = new Transform[4];
                 for (int n = 1; n <= 4; n++)
                 {

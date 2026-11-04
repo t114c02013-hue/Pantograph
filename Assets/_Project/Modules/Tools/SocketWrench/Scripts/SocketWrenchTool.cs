@@ -41,7 +41,13 @@ namespace PantographSim.Tools
 
         public override void OnClick(ActionRequested e)
         {
-            if (!e.targetId.Contains(".bolt_")) return;
+            if (e.targetId.StartsWith("env.bolt_tray_"))   // 點盤子＝把這一側脫出的螺栓收進去（步驟文字、帶我過去都指盤子）
+            {
+                string outBolt = SimIds.StripBoltOut(State, e.targetId.Substring("env.bolt_tray_".Length));
+                if (outBolt.Length > 0 && Ask(outBolt, "take")) Perform(outBolt, "take");
+                return;
+            }
+            if (!SimIds.IsBoltId(e.targetId)) return;
             string st = State.Get(e.targetId + ".state", "Tight");
             string dir = State.Get(Key("dir"), "loosen");
             if (st == "Out") { if (Ask(e.targetId, "take")) Perform(e.targetId, "take"); return; }

@@ -308,6 +308,26 @@ namespace PantographSim.Tests
             StringAssert.Contains("測試小動作", Sim.State.Get("ui.toast"), "已到站也有反應");
         }
 
+        /// <summary>第 13 步：拿套筒扳手點螺栓盤，把這一側脫出的螺栓收進盤子。</summary>
+        [UnityTest]
+        public IEnumerator SocketWrench_ClickTray_TakesOutBolt()
+        {
+            yield return Boot(new Vector3(0f, 1.6f, 0f));
+            tracked = true;
+            yield return WaitReady();
+            Sim.State.SetBool("training.running", true);
+            Sim.Bus.Publish(new ToolPickRequested { targetId = "env.tool_rack.slot_6", value = 6, time = 0f });
+            yield return null;
+            Assert.AreEqual(SimIds.ToolSocket, Sim.State.Get(SimIds.ActiveTool));
+            Sim.State.Set("ip.carbon_strip_L.bolt_1.state", "Out");
+            yield return null;
+            ServiceLocator.Register<IActionGuard>(new CompositeActionGuard());   // 只測收螺栓，安全規則另有測試
+            Sim.Bus.Publish(new ActionRequested { targetId = "env.bolt_tray_L", toolId = SimIds.ToolSocket, text = "click", time = 0f });
+            yield return null;
+            Assert.AreEqual("InTray", Sim.State.Get("ip.carbon_strip_L.bolt_1.state"), "收進盤子");
+            Assert.AreEqual("", Sim.State.Get(SimIds.ToolSocket + ".engaged"), "不會套上盤子");
+        }
+
         /// <summary>第 6 點：拿著上鎖掛牌組按右搖桿，鎖和牌切換；高阻計等於按測試鍵；空手沒作用。</summary>
         [UnityTest]
         public IEnumerator RightStickClick_ToolSecondary()

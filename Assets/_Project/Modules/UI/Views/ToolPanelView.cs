@@ -52,6 +52,8 @@ namespace PantographSim.UI
             Ui.Size(reset, 280, 46);
             var putBack = Ui.Button(resetRow, "放回工具架", 20, () => Ui.Send("tool.belt", "put_away"));
             Ui.Size(putBack, 150, 46);
+            var putBackLabel = Ui.LabelOf(putBack);
+            refreshers.Add(s => putBackLabel.text = "放回" + Ui.ToolPlace(s.Get(SimIds.ActiveTool)));
         }
 
         RectTransform Panel(string toolId, string title)
@@ -170,8 +172,15 @@ namespace PantographSim.UI
             Btn(btns, "ZERO", () => Ui.Send(SimIds.ToolCaliper, "zero"), 100);
             Btn(btns, "張開", () => Ui.Send(SimIds.ToolCaliper, "open"), 90);
             Help(p, "滾輪開合量爪；點滑板上的藍色量測點會自動吸附讀數。讀數要自己抄到作業單。");
+            var taken = Ui.Text(p, "", 21, Ui.Accent);
             refreshers.Add(s =>
             {
+                string Line(string side, string name)
+                {
+                    string V(string pt) { string k = $"ip.carbon_strip_{side}.measure_{pt}.reading"; return s.Has(k) ? s.GetFloat(k).ToString("0.00") : "—"; }
+                    return $"{name}：左 {V("left")}　中 {V("mid")}　右 {V("right")}";
+                }
+                taken.text = Line("L", "靠關節") + "\n" + Line("R", "外側");   // 讀數留在畫面上照著抄（抄寫本身是訓練項目，ERR_CSR03_CopyError）
                 digits.text = s.Get("tool.caliper.display", "--.-- mm");
                 zero.text = s.GetBool("tool.caliper.zeroed") ? Ui.Tint("● 已歸零", Ui.Ok) : Ui.Tint("● 未歸零（多 0.30 mm）", Ui.Bad);
             });

@@ -29,7 +29,7 @@ namespace PantographSim.UI
             string name = ShortName(reg != null ? reg.NameOf(id) : id);
             if (id.StartsWith("env.spare_shelf.slot_")) return Spare(s, id);
             if (id.StartsWith("part.carbon_strip_")) return Strip(s, id);
-            if (id.Contains(".bolt_")) return Bolt(s, id);
+            if (SimIds.IsBoltId(id)) return Bolt(s, id);
             if (id.StartsWith("env.tool_rack.slot_")) return RackSlot(s, id);
             if (id == "ip.cab.panel") return ControlPanel(s);
             if (id == "ip.cab.pan_indicator")

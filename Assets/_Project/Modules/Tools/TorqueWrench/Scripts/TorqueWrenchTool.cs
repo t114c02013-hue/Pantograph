@@ -55,7 +55,7 @@ namespace PantographSim.Tools
 
         public override void OnClick(ActionRequested e)
         {
-            if (!e.targetId.Contains(".bolt_")) return;
+            if (!SimIds.IsBoltId(e.targetId)) return;
             string st = State.Get(e.targetId + ".state");
             if (st != "Snug" && st != "Torqued") { State.Set(Key("message"), "這支螺栓還沒預鎖到貼合，先用套筒扳手預鎖"); return; }
             if (!Ask(e.targetId, "torque")) return;

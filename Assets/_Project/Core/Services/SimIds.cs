@@ -50,6 +50,21 @@ namespace PantographSim.Core
             return best;
         }
 
+        /// <summary>是不是一支螺栓（…bolt_ 後面接數字）；env.bolt_tray_L 是盤子，不算。</summary>
+        public static bool IsBoltId(string id)
+        {
+            int i = id?.LastIndexOf(".bolt_") ?? -1;
+            return i >= 0 && int.TryParse(id.Substring(i + 6), out _);
+        }
+
+        /// <summary>這一側已經脫出、還沒收進盤子的螺栓（沒有回傳空字串）。</summary>
+        public static string StripBoltOut(ISimState s, string side)
+        {
+            for (int n = 1; n <= 4; n++)
+                if (s.Get($"ip.carbon_strip_{side}.bolt_{n}.state") == "Out") return $"ip.carbon_strip_{side}.bolt_{n}";
+            return "";
+        }
+
         /// <summary>弓頭上的檢測點。</summary>
         public const string LowerCheckId = "ip.pan_head.lower_check";
 

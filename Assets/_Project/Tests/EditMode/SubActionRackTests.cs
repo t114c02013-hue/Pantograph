@@ -127,7 +127,7 @@ namespace PantographSim.Tests
             Assert.AreEqual(SimIds.ToolCaliper, s.Get(SimIds.ActiveTool));
             Assert.AreEqual(RackLogic.InHand, s.Get("rack.slot_5"));
             var msg = RackLogic.TryPick(s, 6, SimIds.ToolSocket, "套筒扳手", "卡尺");
-            StringAssert.Contains("先把它放回工具架", msg, "手上一次只能一件，提示不算錯");
+            StringAssert.Contains("先把它放好", msg, "手上一次只能一件，提示不算錯");
             Assert.AreEqual(SimIds.ToolCaliper, s.Get(SimIds.ActiveTool));
             Assert.IsNull(RackLogic.TryReturn(s, 5, SimIds.ToolCaliper, true));
             Assert.AreEqual("", s.Get(SimIds.ActiveTool));

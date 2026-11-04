@@ -11,7 +11,7 @@ namespace PantographSim.UI
     /// <summary>VR 各工具的手勢說明（手勢小卡與 Y 說明共用）。</summary>
     public static class XrGestures
     {
-        public const string Common = "握把在工具架掛位前放開＝歸還　A＝重設手上工具";
+        public const string Common = "手到掛位按一下握把＝歸還　A＝重設手上工具";
 
         public static string For(string toolId)
         {
@@ -307,7 +307,7 @@ namespace PantographSim.UI
             string table = s.Get("xr.help.keys");   // XR 依按鍵表（InputBindingTable）與目前情境產生
             keys.text = string.IsNullOrEmpty(table) ? XrGestures.KeyTable : table;
             string active = s.Get(SimIds.ActiveTool);
-            gesture.text = string.IsNullOrEmpty(active) ? "手上沒有工具：到工具架用握把拿起。" : $"<b>{Ui.ToolName(active)}</b>　" + XrGestures.For(active);
+            gesture.text = string.IsNullOrEmpty(active) ? "手上沒有工具：到工具架、桿架或工具袋用握把拿起。" : $"<b>{Ui.ToolName(active)}</b>　" + XrGestures.For(active);
         }
     }
 

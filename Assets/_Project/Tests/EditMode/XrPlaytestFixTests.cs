@@ -286,6 +286,23 @@ namespace PantographSim.Tests
             finally { ServiceLocator.Clear(); Object.DestroyImmediate(a.gameObject); Object.DestroyImmediate(c.gameObject); }
         }
 
+        /// <summary>第 13 步：盤子不是螺栓；點盤子收的是這一側脫出的螺栓。</summary>
+        [Test]
+        public void BoltIds_TrayIsNotABolt_OutBoltPerSide()
+        {
+            Assert.IsTrue(SimIds.IsBoltId("ip.carbon_strip_L.bolt_1"));
+            Assert.IsTrue(SimIds.IsBoltId("part.pan_base.bolt_3"));
+            Assert.IsFalse(SimIds.IsBoltId("env.bolt_tray_L"));
+            Assert.IsFalse(SimIds.IsBoltId("env.bolt_tray_L.bolts"));
+            Assert.IsFalse(SimIds.IsBoltId(null));
+            var s = new SimState(new EventBus());
+            Assert.AreEqual("", SimIds.StripBoltOut(s, "L"));
+            s.Set("ip.carbon_strip_R.bolt_2.state", "Out");
+            Assert.AreEqual("", SimIds.StripBoltOut(s, "L"), "別側不算");
+            s.Set("ip.carbon_strip_L.bolt_3.state", "Out");
+            Assert.AreEqual("ip.carbon_strip_L.bolt_3", SimIds.StripBoltOut(s, "L"));
+        }
+
         /// <summary>i：R1 和吊車停駐的課程不能點吊車，定期課可以。</summary>
         [Test]
         public void Crane_NotClickable_InR1AndDaily()

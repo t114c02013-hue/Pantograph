@@ -138,14 +138,14 @@ namespace PantographSim.Editor
                 foreach (var (p, x) in new[] { ("left", -half + MeasureFromEnd), ("mid", 0f), ("right", half - MeasureFromEnd) })
                 {
                     var mp = Prim(PrimitiveType.Sphere, "measure_" + p, root.transform, new Vector3(x, top + 0.002f, 0), Vector3.one * 0.016f, mats["measure"]);
-                    mp.AddComponent<InteractionPointMarker>().Configure($"ip.carbon_strip_{side}.measure_{p}", $"{(side == "L" ? "肘側" : "外側")}滑板 量測點（{(p == "left" ? "左" : p == "mid" ? "中" : "右")}）");
+                    mp.AddComponent<InteractionPointMarker>().Configure($"ip.carbon_strip_{side}.measure_{p}", $"{(side == "L" ? "靠關節" : "外側")}滑板 量測點（{(p == "left" ? "左" : p == "mid" ? "中" : "右")}）");
                     mp.AddComponent<Highlightable>();
                 }
 
                 var col = root.AddComponent<BoxCollider>();
                 col.center = b.center; col.size = b.size;
                 var removable = root.AddComponent<RemovableBehaviour>();
-                removable.Configure($"part.carbon_strip_{side}", side == "L" ? "肘側碳滑板" : "外側碳滑板");
+                removable.Configure($"part.carbon_strip_{side}", side == "L" ? "靠關節碳滑板" : "外側碳滑板");
                 removable.Setup(holes, new Transform[0], visual);
                 root.AddComponent<CarbonStripBehaviour>().Setup($"part.carbon_strip_{side}");
                 var label = root.AddComponent<StripLabel>();
