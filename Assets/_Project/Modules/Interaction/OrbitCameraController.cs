@@ -74,6 +74,9 @@ namespace PantographSim.Interaction
             pitch = Mathf.Clamp(Mathf.DeltaAngle(0f, look.x), minPitch, maxPitch);
         }
 
+        /// <summary>Retarget 之後鏡頭會停的位置。</summary>
+        public Vector3 PlannedPosition => target - Quaternion.Euler(pitch, yaw, 0f) * Vector3.forward * distance;
+
         public void ResetView(bool immediate = false)
         {
             target = homeTarget;

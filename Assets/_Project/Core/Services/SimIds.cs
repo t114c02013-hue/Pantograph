@@ -43,6 +43,13 @@ namespace PantographSim.Core
         public static string RayTarget(ISimState s, string tool, string hovered, UnityEngine.Vector3 hit)
         {
             if (string.IsNullOrEmpty(tool) && hovered == LowerCheckId) return PanHead;
+            if ((tool == ToolSocket || tool == ToolTorque || tool == ToolMarker) && hovered != null && hovered.StartsWith("part.carbon_strip_"))
+            {
+                string near = hovered; float nearD = BoltPickRadius * BoltPickRadius;   // 螺栓只有 2 cm，打到旁邊的滑板也算（不穿過東西）
+                foreach (var id in Sim.Registry.Ids)
+                    if (IsBoltId(id) && Sim.Registry.TryGetPosition(id, out var p) && (p - hit).sqrMagnitude < nearD) { nearD = (p - hit).sqrMagnitude; near = id; }
+                return near;
+            }
             if (tool != ToolCaliper || hovered == null || hovered.Contains(".measure_") || !(hovered == PanHead || hovered == LowerCheckId || hovered.StartsWith("part.carbon_strip_") || hovered.StartsWith("ip.carbon_strip_"))) return RayTarget(tool, hovered);
             string want = s.Get("hint.sub_target");
             if (s.Get("training.mode") == "tutorial" && want.Contains(".measure_")) return want;
@@ -78,6 +85,8 @@ namespace PantographSim.Core
         public const string SpareToken = "env.spare_shelf.slot_2";   // R1 資料寫這一格；執行時換成真正型號正確的那格（daily、periodic 的表也對照 R1，資料不動）
         public static string SpareTarget(ISimState s) => s.Get("training.mode") == "tutorial" ? s.Get("spare.good_slot", "env.spare_shelf.slot_2") : "env.spare_shelf.slot_*";
         public static string SpareCondition(ISimState s, string condition) => condition?.Replace(SpareToken, s.Get("spare.good_slot", "env.spare_shelf.slot_2"));
+
+        const float BoltPickRadius = 0.06f;
 
         /// <summary>弓頭上的檢測點。</summary>
         public const string LowerCheckId = "ip.pan_head.lower_check";

@@ -593,8 +593,7 @@ namespace PantographSim.Editor
             // 驗電器自檢器
             var tester = SliceModelBuilder.Prim(PrimitiveType.Cube, "DetectorTester", env, Vector3.zero, new Vector3(0.1f, 0.08f, 0.12f), mats["panel"]);
             tester.transform.position = aTester.position + new Vector3(-0.06f, 0, 0);
-            var led = SliceModelBuilder.Prim(PrimitiveType.Sphere, "LED", tester.transform, new Vector3(0, 0.6f, 0), new Vector3(0.3f, 0.3f, 0.3f), mats["led"]);
-            Object.DestroyImmediate(led.GetComponent<Collider>());
+            var led = SliceModelBuilder.Prim(PrimitiveType.Sphere, "LED", tester.transform, new Vector3(0, 0.6f, 0), new Vector3(0.3f, 0.3f, 0.3f), mats["led"]);   // 圓頂也點得到（算自檢器）
             tester.AddComponent<VoltageTesterStand>().Configure(SimIds.VoltageTester, "驗電器自檢器");
             tester.GetComponent<VoltageTesterStand>().Setup(led.GetComponent<Renderer>());
             tester.AddComponent<Highlightable>();
@@ -1171,8 +1170,10 @@ namespace PantographSim.Editor
                 bool detector = slot.name == "Slot_2";   // terry 手調的短桿
                 pole.transform.localPosition = new Vector3(0f, detector ? d.rackPoleLocalY.x : d.rackPoleLocalY.y, 0.032f);
                 var ls = pole.transform.localScale; ls.z = detector ? d.rackPoleScale.x : d.rackPoleScale.y; pole.transform.localScale = ls;
-                var box = slot.GetComponent<BoxCollider>();   // 整支都點得到（下半段在原本的掛位方塊外）
-                if (box != null) { box.center = new Vector3(box.center.x, -0.25f, box.center.z); box.size = new Vector3(box.size.x, 1.6f, box.size.z); }
+                var poleBounds = pole.GetComponentsInChildren<Renderer>().Select(r => r.bounds).Aggregate((a, b) => { a.Encapsulate(b); return a; });
+                var click = new GameObject("PoleClick").transform;   // 桿子本身就點得到（算掛位，手上的複製品會刪掉 collider）
+                click.SetParent(model, true); click.SetPositionAndRotation(poleBounds.center, Quaternion.identity);
+                click.gameObject.AddComponent<BoxCollider>().size = poleBounds.size + Vector3.one * 0.02f;
             }
             Wrap(res, "ENV_PoleRack", rack);
             res.ids["env.pole_rack"] = rack;
@@ -1251,6 +1252,11 @@ namespace PantographSim.Editor
                 var p = all.FirstOrDefault(x => x.name == "Pocket_" + s.slot);
                 if (p == null) continue;
                 if (p.GetComponent<Collider>() == null) p.gameObject.AddComponent<BoxCollider>();
+                if (p.GetComponent<Collider>() is BoxCollider pb)   // 格子很薄：最薄的方向加厚，從上面看也點得到；排列方向不動，格子不互相蓋到
+                {
+                    var ls = p.lossyScale; int thin = ls.x <= ls.y && ls.x <= ls.z ? 0 : ls.y <= ls.z ? 1 : 2;
+                    var sz = pb.size; sz[thin] = 0.15f / Mathf.Abs(ls[thin]); pb.size = sz;
+                }
                 var tool = tools.FirstOrDefault(t => t.toolId == s.toolId);
                 var comp = p.gameObject.AddComponent<ToolRackSlot>();
                 comp.Configure("env.tool_rack.slot_" + s.slot, "工具袋：" + (tool != null ? tool.displayName : s.toolId));

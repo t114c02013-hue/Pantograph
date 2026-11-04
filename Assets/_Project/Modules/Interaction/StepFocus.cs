@@ -11,7 +11,7 @@ namespace PantographSim.Interaction
     /// </summary>
     public class StepFocus : MonoBehaviour
     {
-        [SerializeField] float viewHeight = 1.2f, boltViewHeight = 2.2f;
+        [SerializeField] float viewHeight = 1.2f, boltViewHeight = 1f, boltViewBack = 0.3f, boltViewSize = 0.2f;
         [SerializeField] OrbitCameraController orbit;
         [SerializeField] float minSize = 0.45f;
         string currentTargets = "", stepTargets = "";
@@ -74,11 +74,19 @@ namespace PantographSim.Interaction
             if (points.Count == 0) return;
             var b = new Bounds(points[0], Vector3.zero);
             foreach (var p in points) b.Encapsulate(p);
-            b.size = Vector3.Max(b.size, Vector3.one * minSize);
+            b.size = Vector3.Max(b.size, Vector3.one * (SimIds.IsBoltId(Sim.State.Get("hint.sub_target")) ? boltViewSize : minSize));   // 螺栓很小，拉近一點
             var stand = GameObject.Find("StationAnchor_" + Sim.State.Get("hint.sub_stand"));
-            // 螺栓在弓頭上方：從高一點往下看，不會被弓頭框架擋住
-            bool bolt = SimIds.IsBoltId(Sim.State.Get("hint.sub_target"));
-            if (stand != null) orbit.Retarget(b, stand.transform.position + Vector3.up * (bolt ? boltViewHeight : viewHeight)); else orbit.Retarget(b);
+            if (stand != null) orbit.Retarget(b, ViewFrom(stand.transform.position, Sim.State.Get("hint.sub_target"), b.center)); else orbit.Retarget(b);
+        }
+
+        /// <summary>鏡頭從哪個方向看目標：一般從站點的眼高；螺栓在弓頭上面，從它正上方偏站點一點往下看（側面會被弓角和框架擋住）。</summary>
+        public Vector3 ViewFrom(Vector3 stand, string targetId, Vector3 target)
+        {
+            // 掛位排成一列：斜看會被隔壁的工具擋住，從架子正前方看（架子都靠外側護欄，面向 +X）
+            if ((targetId ?? "").StartsWith("env.tool_rack.slot_")) return target + Vector3.right + Vector3.up * 0.2f;
+            if (!SimIds.IsBoltId(targetId)) return stand + Vector3.up * viewHeight;
+            var back = stand - target; back.y = 0f;
+            return target + Vector3.up * boltViewHeight + back.normalized * boltViewBack;
         }
 
         static IEnumerable<Vector3> Resolve(string ids)

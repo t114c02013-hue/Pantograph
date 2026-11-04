@@ -120,6 +120,9 @@ namespace PantographSim.Editor
                     bolt.transform.rotation = panHead.rotation;
                     bolt.GetComponent<FastenerBehaviour>().Configure($"ip.carbon_strip_{side}.bolt_{n}", $"{sideName}滑板 螺栓 {n}");
                     Track(bolt, $"ip.carbon_strip_{side}.bolt_{n}");
+                    // 螺栓只有 2 cm，點擊範圍放大到 4.5 cm（同一端兩支隔 5 cm，不互相蓋到）
+                    var pick = bolt.AddComponent<BoxCollider>(); var ls = bolt.transform.lossyScale;
+                    pick.size = new Vector3(0.045f / ls.x, 0.03f / ls.y, 0.045f / ls.z);
                     slots[n - 1] = bolt.transform;
                 }
                 Track(strip, $"part.carbon_strip_{side}");

@@ -248,7 +248,7 @@ namespace PantographSim.Procedures
             {
                 state.Set("procedure.current", s.RunId);
                 state.Set("procedure.side", s.side);
-                state.Set("procedure.current_title", string.IsNullOrEmpty(s.sideLabel) ? s.def.title : s.def.title + "（" + s.sideLabel + "）");
+                state.Set("procedure.current_title", string.IsNullOrEmpty(s.sideLabel) || (s.def.title ?? "").Contains(s.sideLabel) ? s.def.title : s.def.title + "（" + s.sideLabel + "）");
                 state.SetFloat("procedure.sub_index", 0);
                 state.SetFloat("procedure.sub_count", SubActions(s).Length);
                 state.Set("procedure.gate_reason", "");   // 上一步的閘門說明不帶到這一步

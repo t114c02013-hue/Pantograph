@@ -282,6 +282,9 @@ namespace PantographSim.Tests
                 Assert.AreEqual("ip.carbon_strip_L.measure_left", SimIds.RayTarget(s, SimIds.ToolCaliper, "ip.carbon_strip_L.measure_left", Vector3.zero), "已指著量測點");
                 Assert.AreEqual("env.work_order", SimIds.RayTarget(s, SimIds.ToolCaliper, "env.work_order", Vector3.zero), "別的東西不換");
                 Assert.AreEqual(SimIds.PanHead, SimIds.RayTarget(s, "", SimIds.LowerCheckId, Vector3.zero), "第 1 步箭頭那一點");
+                reg.Register("ip.carbon_strip_L.bolt_1", c);
+                Assert.AreEqual("ip.carbon_strip_L.bolt_1", SimIds.RayTarget(s, SimIds.ToolSocket, "part.carbon_strip_L", new Vector3(0.96f, 0f, 0f)), "螺栓旁邊的滑板算螺栓");
+                Assert.AreEqual("part.carbon_strip_L", SimIds.RayTarget(s, SimIds.ToolSocket, "part.carbon_strip_L", new Vector3(0.5f, 0f, 0f)), "離螺栓遠就還是滑板");
             }
             finally { ServiceLocator.Clear(); Object.DestroyImmediate(a.gameObject); Object.DestroyImmediate(c.gameObject); }
         }

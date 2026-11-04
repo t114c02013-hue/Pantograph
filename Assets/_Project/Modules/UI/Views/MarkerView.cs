@@ -151,6 +151,7 @@ namespace PantographSim.UI
                 reg.TryGetPosition(kv.Key, out var p2);
                 ui.WorldToSafe(p2, out var lp2, out _);
                 kv.Value.rt.anchoredPosition = lp2 + new Vector2(0, 26);
+                placed.Add(lp2 + new Vector2(0, 26));
                 if (kv.Key.StartsWith("env.tool_rack.slot_"))
                 {
                     string st = s.Get("rack." + kv.Key.Substring("env.tool_rack.".Length), "on_rack");
