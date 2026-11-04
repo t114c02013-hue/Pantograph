@@ -439,7 +439,6 @@ namespace PantographSim.XR
             heldModel = null;
             if (string.IsNullOrEmpty(toolId) || rig == null || Sim.Registry == null) return;
             int k = SlotOfTool(toolId);
-            if (IsPole(toolId)) { ShowHeldPole(toolId); return; }
             if (!Sim.Registry.TryGetTransform("env.tool_rack.slot_" + k, out var slot)) return;
             var model = slot.Cast<Transform>().FirstOrDefault(t => t.name.StartsWith("Model_"));
             if (model == null) return;
@@ -452,24 +451,6 @@ namespace PantographSim.XR
             var s = model.lossyScale;
             heldModel.transform.localScale = new Vector3(s.x / parentScale.x, s.y / parentScale.y, s.z / parentScale.z);
             foreach (var c in heldModel.GetComponentsInChildren<Collider>()) Destroy(c);
-        }
-
-        static bool IsPole(string toolId) => toolId == SimIds.ToolGroundingRod || toolId == "tool.voltage_detector";
-
-        /// <summary>R1.5b b3（P2）：2.5 m 長桿（驗電器、接地棒）：桿身沿 +Z、護環在桿尾 1.6 m，XrHeldPole 負責雙手握持、HeldPole 層與輕震。</summary>
-        void ShowHeldPole(string toolId)
-        {
-            const float length = 2.5f, guard = 1.6f;
-            heldModel = new GameObject("Held_" + toolId);
-            var shaft = GameObject.CreatePrimitive(PrimitiveType.Cylinder); shaft.name = "Shaft"; Destroy(shaft.GetComponent<Collider>());
-            shaft.transform.SetParent(heldModel.transform, false); shaft.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-            shaft.transform.localPosition = new Vector3(0f, 0f, length / 2f); shaft.transform.localScale = new Vector3(0.03f, length / 2f, 0.03f);
-            var ring = GameObject.CreatePrimitive(PrimitiveType.Cylinder); ring.name = "GuardRing"; Destroy(ring.GetComponent<Collider>());
-            ring.transform.SetParent(heldModel.transform, false); ring.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-            ring.transform.localPosition = new Vector3(0f, 0f, guard); ring.transform.localScale = new Vector3(0.09f, 0.005f, 0.09f);
-            var tint = toolId == SimIds.ToolGroundingRod ? new Color(0.2f, 0.6f, 0.2f) : new Color(0.9f, 0.7f, 0.1f);
-            foreach (var r in heldModel.GetComponentsInChildren<Renderer>()) r.material.color = tint;
-            heldModel.AddComponent<XrHeldPole>().Setup(rig, length, guard);
         }
 
         // ---------- 震動 ----------

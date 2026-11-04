@@ -308,6 +308,24 @@ namespace PantographSim.Tests
             StringAssert.Contains("測試小動作", Sim.State.Get("ui.toast"), "已到站也有反應");
         }
 
+        /// <summary>terry 裁定：拿在手上的驗電桿和架上一樣短。</summary>
+        [UnityTest]
+        public IEnumerator HeldPole_SameShortLength()
+        {
+            yield return Boot(new Vector3(0f, 1.6f, 0f));
+            tracked = true;
+            yield return WaitReady();
+            Sim.State.SetBool("training.running", true);
+            Sim.Bus.Publish(new ToolPickRequested { targetId = "env.tool_rack.slot_2", value = 2, time = 0f });
+            yield return null; yield return null;
+            var held = GameObject.Find("Held_tool.voltage_detector");
+            Assert.NotNull(held);
+            var rs = held.GetComponentsInChildren<Renderer>().Where(r => r.enabled).ToArray();
+            var b = rs[0].bounds; foreach (var r in rs) b.Encapsulate(r.bounds);
+            Assert.Less(b.size.magnitude, 0.6f, "不再是 2.5 m：" + b.size);
+            Assert.Greater(b.size.magnitude, 0.2f, "看得到：" + b.size);
+        }
+
         /// <summary>第 13 步：拿套筒扳手點螺栓盤，把這一側脫出的螺栓收進盤子。</summary>
         [UnityTest]
         public IEnumerator SocketWrench_ClickTray_TakesOutBolt()
@@ -321,7 +339,11 @@ namespace PantographSim.Tests
             Assert.AreEqual(SimIds.ToolSocket, Sim.State.Get(SimIds.ActiveTool));
             Sim.State.Set("ip.carbon_strip_L.bolt_1.state", "Out");
             yield return null;
-            ServiceLocator.Register<IActionGuard>(new CompositeActionGuard());   // 只測收螺栓，安全規則另有測試
+            // 安全規則的前提：弓頭已降下、已驗電、已接地（規則照常運作）
+            Sim.State.SetFloat(SimIds.PanHeadLowerDistance, 0f);
+            Sim.State.SetBool(SimIds.Grounded, true);
+            Sim.State.SetBool("step.STP_SI_04_VoltageTest.done", true);
+            Sim.State.SetBool("step.STP_SI_05_Grounding.done", true);
             Sim.Bus.Publish(new ActionRequested { targetId = "env.bolt_tray_L", toolId = SimIds.ToolSocket, text = "click", time = 0f });
             yield return null;
             Assert.AreEqual("InTray", Sim.State.Get("ip.carbon_strip_L.bolt_1.state"), "收進盤子");
