@@ -60,11 +60,15 @@ namespace PantographSim.Tests
         }
 
         [Test]
-        public void OnlyLeftDirectGrabsHandles_LiftPanelAndWorkOrderHaveNoHandle()
+        public void BothHandsGrabHandles_LiftPanelHasNoHandle_WorkOrderCarried()
         {
             var layout = AssetDatabase.LoadAssetAtPath<PanelLayout>("Assets/_Project/Modules/XR/Resources/PanelLayout.asset");
             Assert.IsNotNull(layout);
-            CollectionAssert.AreEquivalent(new[] { "board", "dialog" }, layout.panels.Select(p => p.panelId), "升降操作盒、作業單沒有把手");
+            Assert.IsTrue(layout.Find("workorder").carried, "第 3 點：作業單可以抓");
+            Assert.AreEqual(0.5f, layout.Find("workorder").frontDistance, 1e-4f, "8.5：眼前 0.5 m");
+            Assert.AreEqual(0.15f, layout.Find("workorder").frontBelow, 1e-4f);
+            Assert.AreEqual(15f, layout.Find("workorder").frontTiltDeg, 1e-4f);
+            CollectionAssert.AreEquivalent(new[] { "board", "dialog", "workorder" }, layout.panels.Select(p => p.panelId), "升降操作盒沒有把手");
             Assert.IsTrue(layout.Find("dialog").openInFront, "錯誤視窗一定開在頭前");
             StationTests.WithScene(scene =>
             {
@@ -72,9 +76,9 @@ namespace PantographSim.Tests
                 int handle = UnityEngine.XR.Interaction.Toolkit.InteractionLayerMask.GetMask(XrPanels.HandleLayerName);
                 Assert.AreNotEqual(0, handle, "Interaction Layer PanelHandle 要存在");
                 var direct = all.OfType<UnityEngine.XR.Interaction.Toolkit.XRDirectInteractor>().ToList();
-                Assert.AreEqual(1, direct.Count, "只有左手一個 XRDirectInteractor");
-                Assert.AreEqual(handle, direct[0].interactionLayers.value, "左手只抓把手");
-                Assert.IsTrue(direct[0].GetComponentInParent<UnityEngine.XR.Interaction.Toolkit.ActionBasedController>(true).name.StartsWith("Left"));
+                Assert.AreEqual(2, direct.Count, "第 3 點：左右手各一個 XRDirectInteractor");
+                foreach (var d in direct) Assert.AreEqual(handle, d.interactionLayers.value, "只抓把手");
+                CollectionAssert.AreEquivalent(new[] { "Left", "Right" }, direct.Select(d => d.GetComponentInParent<UnityEngine.XR.Interaction.Toolkit.ActionBasedController>(true).name.Substring(0, d.GetComponentInParent<UnityEngine.XR.Interaction.Toolkit.ActionBasedController>(true).name.StartsWith("Left") ? 4 : 5)));
                 foreach (var ray in all.OfType<UnityEngine.XR.Interaction.Toolkit.XRRayInteractor>())
                     Assert.AreEqual(0, ray.interactionLayers.value & handle, "右手射線抓不到把手");
                 Assert.IsTrue(all.Any(m => m is XrPanels));

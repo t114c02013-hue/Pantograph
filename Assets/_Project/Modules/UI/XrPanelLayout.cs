@@ -59,15 +59,12 @@ namespace PantographSim.UI
             lift = MakeCanvas("XR_Lift", new Vector2(360, 900), LiftScale, null);
             hover = MakeCanvas("XR_Hover", new Vector2(460, 420), HoverScale, null);
             wrist = MakeCanvas("XR_Wrist", new Vector2(720, 1100), WristScale, rig != null ? rig.LeftHand : null);
-            clip = MakeCanvas("XR_Clipboard", new Vector2(1160, 980), ClipScale, rig != null ? rig.LeftHand : null);
+            clip = MakeCanvas("XR_Clipboard", new Vector2(1160, 980), ClipScale, null);   // 試玩修正 第 3 點：世界中的面板，可以抓（XrPanels）
             labels = MakeCanvas("XR_ControllerLabels", new Vector2(420, 360), LabelScale, rig != null ? rig.RightHand : null);
             if (rig != null)
             {
                 wrist.transform.localPosition = new Vector3(0f, 0.09f, 0.03f);
                 wrist.transform.localRotation = Quaternion.Euler(40f, 0f, 0f);
-                // 夾板（作業單）在左手的左側，不和手腕面板疊在一起（手腕面板有卡尺「一按填入」，兩塊要同時看得到）
-                clip.transform.localPosition = new Vector3(-0.34f, 0.15f, 0.12f);
-                clip.transform.localRotation = Quaternion.Euler(30f, 18f, 0f);
                 labels.transform.localPosition = new Vector3(0.07f, 0.03f, 0.0f);
                 labels.transform.localRotation = Quaternion.Euler(70f, 0f, 0f);
             }
@@ -242,6 +239,7 @@ namespace PantographSim.UI
                 registered = true;
                 Sim.Registry.Register("xr.panel.board", board.transform);
                 Sim.Registry.Register("xr.panel.dialog", dialog.transform);
+                Sim.Registry.Register("xr.panel.workorder", clip.transform);
             }
 
             // REC 紅點（提示板收起或轉身時也看得到，因為它跟著頭）

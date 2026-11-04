@@ -105,6 +105,40 @@ namespace PantographSim.Tests
             Assert.AreEqual(before.y, Rig.Head.position.y, 0.01f, "只推水平");
         }
 
+        /// <summary>第 3 點：作業單第一次打開在眼前 0.5 m；移動後位置不變；關掉再開同一個位置；傳送後相對學員不變。</summary>
+        [UnityTest]
+        public IEnumerator WorkOrder_OpensInFront_StaysWhereMoved_FollowsStation()
+        {
+            yield return Boot(new Vector3(0f, 1.6f, 0f));
+            tracked = true;
+            yield return WaitReady();
+            Assert.IsTrue(Sim.Registry.TryGetTransform("xr.panel.workorder", out var clip));
+            Sim.State.SetBool("training.running", true);
+            Sim.State.SetBool("ui.workorder_open", true);
+            for (int i = 0; i < 5; i++) yield return null;
+            Assert.AreEqual(0.5f, Flat(clip.position, Rig.Head.position), 0.05f, "8.5：眼前 0.5 m");
+            Assert.AreEqual(Rig.Head.position.y - 0.15f, clip.position.y, 0.05f, "8.5：眼下 0.15 m");
+
+            var panels = Object.FindObjectOfType<XrPanels>();
+            var moved = clip.position + Vector3.right * 0.5f;
+            panels.MovePanel("workorder", moved, clip.rotation);
+            for (int i = 0; i < 10; i++) yield return null;
+            Assert.Less((clip.position - moved).magnitude, 1e-3f, "放開就停在原地，不會掉也不會彈回");
+            Sim.State.SetBool("ui.workorder_open", false);
+            for (int i = 0; i < 3; i++) yield return null;
+            Sim.State.SetBool("ui.workorder_open", true);
+            for (int i = 0; i < 3; i++) yield return null;
+            Assert.Less((clip.position - moved).magnitude, 1e-3f, "關掉再開在同一個位置");
+
+            var tp = Object.FindObjectOfType<XrTeleport>();
+            var (before, _) = PanelLogic.ToLocal(tp.Find("tp.platform.lift").transform, clip.position, clip.rotation);
+            var rack = tp.Find("tp.platform.anchor");
+            tp.TeleportTo(rack.transform.position, rack.transform.rotation, rack, immediate: true);
+            for (int i = 0; i < 5; i++) yield return null;
+            var (after, _) = PanelLogic.ToLocal(rack.transform, clip.position, clip.rotation);
+            Assert.Less((after - before).magnitude, 0.01f, "傳送之後相對學員的位置不變");
+        }
+
         [UnityTest]
         public IEnumerator HeadOffCentre_StillLandsOnStation()
         {

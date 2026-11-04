@@ -107,12 +107,16 @@ namespace PantographSim.Editor.XR
             pokeTip.transform.SetParent(left, false);
             pokeTip.transform.localPosition = new Vector3(0, -0.01f, 0.05f);
             var tipCol = pokeTip.AddComponent<SphereCollider>(); tipCol.radius = 0.008f; tipCol.isTrigger = true;
-            // T3：面板把手只有左手 XRDirectInteractor 抓得到（Interaction Layer PanelHandle）；右手射線不抓把手
+            // T3：面板把手用 XRDirectInteractor 抓（Interaction Layer PanelHandle）；試玩修正 第 3 點左右手都能抓，射線不抓把手
             int handleMask = InteractionLayerMask.GetMask(XrPanels.HandleLayerName);
             var panelGrab = new GameObject("PanelGrab");
             panelGrab.transform.SetParent(left, false);
             var pgCol = panelGrab.AddComponent<SphereCollider>(); pgCol.radius = 0.06f; pgCol.isTrigger = true;
             panelGrab.AddComponent<XRDirectInteractor>().interactionLayers = handleMask;
+            var panelGrabR = new GameObject("PanelGrab");
+            panelGrabR.transform.SetParent(rightT, false);
+            var pgColR = panelGrabR.AddComponent<SphereCollider>(); pgColR.radius = 0.06f; pgColR.isTrigger = true;
+            panelGrabR.AddComponent<XRDirectInteractor>().interactionLayers = handleMask;
             ray.interactionLayers = ~handleMask;
 
             // 傳送：LocomotionSystem＋TeleportationProvider，左手拋物線

@@ -17,6 +17,7 @@ namespace PantographSim.XR
     {
         public const string ManagedKey = "xr.panels.managed", RecallKey = "xr.panels.recall", ReplayPrefix = "xr.panel.replay.";
         public const string HandleLayerName = "PanelHandle";
+        const string AnyStation = "*";   // 作業單的位置不分站點
 
         [SerializeField] PanelLayout layout;
         [SerializeField] Transform head;
@@ -25,7 +26,7 @@ namespace PantographSim.XR
         class Entry
         {
             public string id; public Transform panel, handle, plate; public XRGrabInteractable grab; public Renderer handleRenderer;
-            public bool grabbed; public Vector3 grabOffset; public Quaternion grabRot;
+            public bool grabbed, wasShown; public Vector3 grabOffset; public Quaternion grabRot;
         }
         readonly List<Entry> entries = new List<Entry>();
         readonly PanelMemory memory = new PanelMemory();
@@ -46,6 +47,7 @@ namespace PantographSim.XR
 
             string now = s.Get("xr.point");
             if (now != station) { station = now; foreach (var e in entries) if (!layout.Find(e.id).openInFront) PlaceForStation(e); }
+            foreach (var e in entries) if (layout.Find(e.id).carried) UpdateCarried(e);
             float recall = s.GetFloat(RecallKey, -1f);
             if (recall != lastRecall) { lastRecall = recall; Recall(); }
 
@@ -71,6 +73,30 @@ namespace PantographSim.XR
                 else PlaceForStation(e);
                 FollowHandle(e);
             }
+        }
+
+        /// <summary>第 3 點：作業單第一次打開放到眼前，之後留在學員放的地方（記在同一份，換站跟著站點走）；關著時藏把手。</summary>
+        void UpdateCarried(Entry e)
+        {
+            bool shown = ContentBounds(e.panel, out _);
+            if (shown && !e.wasShown && !memory.TryGet(e.id, AnyStation, out _, out _) && head != null)
+            {
+                var p = layout.Find(e.id);
+                var pose = PanelLogic.Carried(head.position, head.forward, p.frontDistance, p.frontBelow, p.frontTiltDeg);
+                e.panel.SetPositionAndRotation(pose.position, pose.rotation);
+                Remember(e);
+            }
+            e.wasShown = shown;
+            if (e.handle.gameObject.activeSelf != shown && !e.grabbed) e.handle.gameObject.SetActive(shown);
+        }
+
+        /// <summary>把面板放到 pos（和抓著移動放開一樣；測試、程式擺放用）。</summary>
+        public void MovePanel(string id, Vector3 pos, Quaternion rot)
+        {
+            var e = entries.Find(x => x.id == id);
+            if (e == null) return;
+            e.panel.SetPositionAndRotation(pos, rot);
+            Remember(e);
         }
 
         void Build(ISimState s)
@@ -166,7 +192,9 @@ namespace PantographSim.XR
             var st = StationT;
             if (st == null) return;
             Pose pose;
-            if (memory.TryGet(e.id, station, out var local, out var yaw)) pose = PanelLogic.FromLocal(st, local, yaw);
+            bool carried = layout.Find(e.id).carried;
+            if (memory.TryGet(e.id, carried ? AnyStation : station, out var local, out var yaw)) pose = PanelLogic.FromLocal(st, local, yaw);
+            else if (carried) return;   // 還沒打開過：等第一次打開
             else
             {
                 var pos = PanelLogic.FromLocal(st, layout.Find(e.id).offset, 0f).position;
@@ -178,7 +206,7 @@ namespace PantographSim.XR
         void Released(Entry e)
         {
             e.grabbed = false;
-            if (head != null) e.panel.rotation = PanelLogic.FaceHead(e.panel.position, head.position);   // 只留水平轉向、轉正面向頭
+            if (head != null && !layout.Find(e.id).carried) e.panel.rotation = PanelLogic.FaceHead(e.panel.position, head.position);   // 只留水平轉向、轉正面向頭（作業單放開就停在原來的角度）
             Remember(e);
         }
 
@@ -187,7 +215,7 @@ namespace PantographSim.XR
             var st = StationT;
             if (st == null) return;
             var (local, yaw) = PanelLogic.ToLocal(st, e.panel.position, e.panel.rotation);
-            memory.Save(e.id, station, local, yaw);
+            memory.Save(e.id, layout.Find(e.id).carried ? AnyStation : station, local, yaw);
             Sim.Bus.Publish(new PanelMoved { panelId = e.id, standPointId = station, x = local.x, y = local.y, z = local.z, yaw = yaw, time = SimClock.Now });
         }
 
@@ -197,7 +225,8 @@ namespace PantographSim.XR
             if (head == null) return;
             for (int i = 0; i < entries.Count; i++)
             {
-                var pose = PanelLogic.Recall(head.position, head.forward, i, layout.recallDistance, layout.recallMaxAngle);
+                var p = layout.Find(entries[i].id);
+                var pose = p.carried ? PanelLogic.Carried(head.position, head.forward, p.frontDistance, p.frontBelow, p.frontTiltDeg) : PanelLogic.Recall(head.position, head.forward, i, layout.recallDistance, layout.recallMaxAngle);
                 entries[i].panel.SetPositionAndRotation(pose.position, pose.rotation);
                 Remember(entries[i]);
             }

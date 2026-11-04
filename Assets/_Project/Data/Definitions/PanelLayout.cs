@@ -18,6 +18,8 @@ namespace PantographSim.Data
             public string panelId;
             [Tooltip("相對站點的預設位置（站點的 panelOffset 有值時，提示板優先用站點的）")] public Vector3 offset;
             [Tooltip("開啟時一律放到頭前（錯誤視窗）")] public bool openInFront;
+            [Tooltip("試玩修正 第 3 點：可以叫出來、放到想要位置的面板（作業單）：第一次打開放在眼前 frontDistance、眼下 frontBelow、往下傾 frontTiltDeg，之後記住學員放的位置，換站跟著站點走；沒內容時藏把手")] public bool carried;
+            public float frontDistance, frontBelow, frontTiltDeg;
         }
 
         [Tooltip("VR 開場（XrStartupSequencer）：等頭盔追蹤最多幾秒、頭離地多高才算追蹤有效、逾時用的眼高（m）")] public float startupTimeoutSec = 5f, trackedMinHeadY = 0.5f, fallbackHeadHeight = 1.6f;
@@ -27,6 +29,7 @@ namespace PantographSim.Data
         {
             new Panel { panelId = "board", offset = new Vector3(-0.55f, 1.35f, 1.05f) },    // 步驟提示面板：站點左前方約 1.2 m，上緣略低於視線
             new Panel { panelId = "dialog", offset = new Vector3(0f, 1.52f, 1.0f), openInFront = true },   // 錯誤視窗等對話框：頭前 1 m
+            new Panel { panelId = "workorder", carried = true, frontDistance = 0.5f, frontBelow = 0.15f, frontTiltDeg = 15f },   // 作業單（第 8.5 點的位置）
         };
         public float dialogDistance = 1.0f, recallDistance = 1.2f, recallMaxAngle = 30f;
         public Vector3 handleSize = new Vector3(0.20f, 0.03f, 0.03f);

@@ -21,6 +21,13 @@ namespace PantographSim.XR
             return new Pose(eye + f * distance + Vector3.down * below, Quaternion.LookRotation(f, Vector3.up));
         }
 
+        /// <summary>作業單：頭前 distance、比眼睛低 below，往下傾 tiltDeg 面向眼睛。</summary>
+        public static Pose Carried(Vector3 eye, Vector3 forward, float distance, float below, float tiltDeg)
+        {
+            var p = InFront(eye, forward, distance, below);
+            return new Pose(p.position, p.rotation * Quaternion.Euler(tiltDeg, 0f, 0f));
+        }
+
         /// <summary>叫回眼前：頭前 distance、在視線 ±maxAngle 內（index 依序往左右錯開），比眼睛低 0.15 m，面向頭。</summary>
         public static Pose Recall(Vector3 head, Vector3 headForward, int index, float distance, float maxAngle)
         {
