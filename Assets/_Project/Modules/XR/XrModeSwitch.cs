@@ -31,17 +31,28 @@ namespace PantographSim.XR
         /// <summary>XRI 的 XR Device Simulator 開著、沒有真的頭盔：鍵鼠模擬裝置，手和頭照真的走 Input System。開關是 XR Device Simulator 的設定（Project Settings）。</summary>
         public static bool DeviceSimulated { get; private set; }
 
+        /// <summary>有人戴著頭盔（純函式）：Meta 執行環境開著時沒人戴也回報追蹤、session 也到 FOCUSED，所以還要看頭的高度。</summary>
+        public static bool IsHeadWorn(bool tracked, float headY, float minY) => tracked && headY >= minY;
+
+        /// <summary>這一刻要不要走實機（純函式）：沒開模擬器照舊有 loader 就走；開著模擬器要有人戴著。</summary>
+        public static bool UseRealHeadset(bool loaderUp, bool simulator, bool worn) => loaderUp && (!simulator || worn);
+
         /// <summary>沒有 loader、等完 wait 秒之後怎麼走（純函式）。</summary>
         public static bool UseDeviceSimulator(bool simulatorPresent, bool forceDesktop) => simulatorPresent && !forceDesktop;
 
         /// <summary>測試用：取代真的頭盔追蹤。</summary>
-        public static System.Func<bool> HeadTrackedOverride;
+        public static System.Func<bool> HeadWornOverride;
 
-        static bool HeadTracked()
+        static bool HeadWorn(PantographSim.Data.PanelLayout layout)
         {
-            if (HeadTrackedOverride != null) return HeadTrackedOverride();
+            if (HeadWornOverride != null) return HeadWornOverride();
+            var subsystems = new System.Collections.Generic.List<UnityEngine.XR.XRInputSubsystem>();
+            SubsystemManager.GetInstances(subsystems);
+            foreach (var s in subsystems) s.TrySetTrackingOriginMode(UnityEngine.XR.TrackingOriginModeFlags.Floor);   // rig 還沒啟用，先要離地高度
             var head = UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode.Head);
-            return head.isValid && head.TryGetFeatureValue(UnityEngine.XR.CommonUsages.isTracked, out bool tracked) && tracked;
+            bool tracked = head.isValid && head.TryGetFeatureValue(UnityEngine.XR.CommonUsages.isTracked, out bool t) && t;
+            float y = head.TryGetFeatureValue(UnityEngine.XR.CommonUsages.centerEyePosition, out Vector3 p) ? p.y : 0f;
+            return IsHeadWorn(tracked, y, layout.simulatorWornHeadY);
         }
 
         static void RemoveSimulator() { if (XRDeviceSimulator.instance != null) Destroy(XRDeviceSimulator.instance.gameObject); }
@@ -54,15 +65,15 @@ namespace PantographSim.XR
             if (rigRoot != null) rigRoot.SetActive(false);
             if (InputMode.ForceDesktop) { RemoveSimulator(); Status = "命令列 -desktop：桌面模式"; Debug.Log("[XR] " + Status); yield break; }
             float t0 = Time.realtimeSinceStartup;
+            var layout = Resources.Load<PantographSim.Data.PanelLayout>(PantographSim.Data.PanelLayout.ResourceName);
             while (true)
             {
                 if (SimulateRequested) { RemoveSimulator(); Simulated = true; break; }
                 var m = XRGeneralSettings.Instance != null ? XRGeneralSettings.Instance.Manager : null;
                 bool loaderUp = m != null && m.isInitializationComplete && m.activeLoader != null;
                 bool simulator = XRDeviceSimulator.instance != null;
-                // OpenXR 只要 Meta 執行環境開著就會起來，沒戴頭盔也一樣：開著模擬器時要頭真的有追蹤才算實機
-                if (loaderUp && (!simulator || HeadTracked())) { RemoveSimulator(); break; }
-                if (Time.realtimeSinceStartup - t0 > waitSeconds)
+                if (UseRealHeadset(loaderUp, simulator, simulator && HeadWorn(layout))) { RemoveSimulator(); break; }
+                if (Time.realtimeSinceStartup - t0 > (simulator ? layout.simulatorWaitSeconds : waitSeconds))
                 {
                     if (UseDeviceSimulator(simulator, InputMode.ForceDesktop))
                     {

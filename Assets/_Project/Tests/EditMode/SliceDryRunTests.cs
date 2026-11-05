@@ -503,6 +503,12 @@ namespace PantographSim.Tests
             Assert.IsTrue(PantographSim.XR.XrModeSwitch.UseDeviceSimulator(true, false));
             Assert.IsFalse(PantographSim.XR.XrModeSwitch.UseDeviceSimulator(true, true), "PANTO_DESKTOP");
             Assert.IsFalse(PantographSim.XR.XrModeSwitch.UseDeviceSimulator(false, false), "Link 關掉、沒開模擬器：桌面");
+            // 第 0 步卡住的情況：Link 開著、回報追蹤，但頭盔放桌上
+            Assert.IsFalse(PantographSim.XR.XrModeSwitch.IsHeadWorn(true, 0.3f, 1f), "放著：不算有人戴");
+            Assert.IsFalse(PantographSim.XR.XrModeSwitch.UseRealHeadset(true, true, false), "loader 在線、沒人戴：走模擬器");
+            Assert.IsTrue(PantographSim.XR.XrModeSwitch.IsHeadWorn(true, 1.6f, 1f));
+            Assert.IsTrue(PantographSim.XR.XrModeSwitch.UseRealHeadset(true, true, true), "有人戴：實機");
+            Assert.IsTrue(PantographSim.XR.XrModeSwitch.UseRealHeadset(true, false, false), "沒開模擬器：照舊");
         }
 
         /// <summary>terry 2026-11-05：選好模式時，開著的說明都收掉。</summary>

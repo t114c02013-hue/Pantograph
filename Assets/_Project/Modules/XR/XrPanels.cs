@@ -124,7 +124,7 @@ namespace PantographSim.XR
                 }
                 var rb = root.AddComponent<Rigidbody>(); rb.isKinematic = true; rb.useGravity = false;
                 var grab = root.AddComponent<XRGrabInteractable>();
-                grab.colliders.Add(vis.GetComponent<Collider>());
+                if (!grab.colliders.Contains(vis.GetComponent<Collider>())) grab.colliders.Add(vis.GetComponent<Collider>());   // Awake 已經把子物件的碰撞體收進來，再加一次會重複註冊
                 grab.movementType = XRBaseInteractable.MovementType.Kinematic;
                 grab.throwOnDetach = false;
                 grab.useDynamicAttach = true;

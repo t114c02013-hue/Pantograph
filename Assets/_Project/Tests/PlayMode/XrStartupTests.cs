@@ -419,7 +419,7 @@ namespace PantographSim.Tests
         {
             XrModeSwitch.SimulateRequested = false;
             XrStartupSequencer.ProbeOverride = null;
-            XrModeSwitch.HeadTrackedOverride = () => false;   // 測試不看有沒有人戴著頭盔
+            XrModeSwitch.HeadWornOverride = () => false;   // 測試不看有沒有人戴著頭盔：loader 在線、沒有人戴
 #if UNITY_EDITOR
             var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Samples/XR Interaction Toolkit/2.6.5/XR Device Simulator/XR Device Simulator.prefab");
             Assert.IsNotNull(prefab, "範例要匯入");
@@ -446,10 +446,24 @@ namespace PantographSim.Tests
                 Debug.Log($"[SimCheck] eye {Rig.Head.position.y - origin.transform.position.y:0.000} head {Rig.Head.position} left {Rig.LeftHand.position} right {Rig.RightHand.position} mode {origin.CurrentTrackingOriginMode}");
                 Assert.AreEqual(PostureDef.Load().standEye, Rig.Head.position.y - origin.transform.position.y, 0.02f, "175 cm 站姿眼高，沒有疊加桌面的 1.2 m");
                 Assert.AreEqual(Unity.XR.CoreUtils.XROrigin.TrackingOriginMode.Floor, origin.RequestedTrackingOriginMode, "Floor");
+                var mgrNow = UnityEngine.XR.Management.XRGeneralSettings.Instance?.Manager;
+                Assert.IsTrue(mgrNow == null || mgrNow.activeLoader == null, "OpenXR 要停掉，畫面才不是 Left Eye");
+
+                // 不用右鍵：開場就是身體模式，方向鍵（和滑鼠移動）直接轉頭
+                var kb = UnityEngine.InputSystem.Keyboard.current;
+                float yaw0 = Rig.Head.eulerAngles.y;
+                while (Time.time < 1.5f) yield return null;
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.RightArrow));
+                for (int i = 0; i < 30; i++) yield return null;
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState());
+                for (int i = 0; i < 3; i++) yield return null;
+                float turned = Mathf.Abs(Mathf.DeltaAngle(yaw0, Rig.Head.eulerAngles.y));
+                Debug.Log($"[SimCheck] 方向鍵轉頭 {turned:0.0} 度");
+                Assert.Greater(turned, 5f, "方向鍵要能轉頭");
             }
             finally
             {
-                XrModeSwitch.HeadTrackedOverride = null;
+                XrModeSwitch.HeadWornOverride = null;
                 Object.Destroy(sim);
                 if (keyboard != null) UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);
                 if (mouse != null) UnityEngine.InputSystem.InputSystem.RemoveDevice(mouse);
