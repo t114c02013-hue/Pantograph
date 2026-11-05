@@ -97,6 +97,8 @@ namespace PantographSim.Tests
                         {
                             string id = (sub.target ?? "").Replace("{side}", side);
                             if (id.Length == 0 || id.EndsWith("*") || !ids.TryGetValue(id, out var t) || !t.gameObject.activeInHierarchy) continue;
+                            // 第 12 輪：「點這裡」的字讀顯示名，不能露出 ID
+                            if (!t.TryGetComponent<IInteractable>(out var named) || named.DisplayName == id || named.DisplayName.Contains(".")) bad.Add($"{st.stepId} {id}：沒有顯示名");
                             if (id.StartsWith("env.work_order") || id.EndsWith(".bracket") || id.EndsWith(".install_check")) continue;   // 作業單是 UI；托架要滑板拆下才露出
                             var anchor = GameObject.Find("StationAnchor_" + (sub.stand ?? ""));
                             if (anchor == null) continue;

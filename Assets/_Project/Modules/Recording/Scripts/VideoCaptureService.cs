@@ -7,7 +7,7 @@ using UnityEngine;
 namespace PantographSim.Recording
 {
     /// <summary>
-    /// 錄影的執行期入口：桌面按 F9、VR 在 ≡ 選單或左手腕面板按「● 開始錄影／■ 停止錄影」（介面送 ActionRequested 目標 rec.video），
+    /// 錄影的執行期入口：桌面按資料裡的鍵（ToolRulesDef.videoHotkey）、VR 在 ≡ 選單或左手腕面板按「● 開始錄影／■ 停止錄影」（介面送 ActionRequested 目標 rec.video），
     /// 一律轉成 VideoCaptureToggled 給後端。也負責開始／停止的提示音（震動由 XR 模組聽 VideoStarted／VideoStopped）。
     /// </summary>
     public class VideoCaptureService : MonoBehaviour
@@ -39,10 +39,14 @@ namespace PantographSim.Recording
             return clip;
         }
 
+        KeyCode hotkey;
+
         void Bind()
         {
             if (bound || !Sim.Ready) return;
             bound = true;
+            hotkey = PantographSim.Data.ToolRulesDef.Load()?.videoHotkey ?? KeyCode.F8;
+            Sim.State.Set("ui.video_key", hotkey.ToString());
             Sim.Bus.Subscribe<ActionRequested>(OnRequest);
             if (!Sim.State.Has(VideoCapture.ViewKey)) Sim.State.Set(VideoCapture.ViewKey, "third");
         }
@@ -78,7 +82,7 @@ namespace PantographSim.Recording
         {
             Bind();
             if (!bound) return;
-            if (!InputMode.XrActive && !PointerState.TypingInUi && Input.GetKeyDown(KeyCode.F9)) Toggle("key.F9");
+            if (!InputMode.XrActive && !PointerState.TypingInUi && Input.GetKeyDown(hotkey)) Toggle("key." + hotkey);
             bool active = Sim.State.GetBool(VideoCapture.ActiveKey);
             if (active != wasActive)
             {

@@ -208,7 +208,7 @@ namespace PantographSim.UI
 
             Ui.Text(card, "收尾清點", 19, Ui.Accent, TextAnchor.UpperLeft, FontStyle.Bold);
             countText = Ui.Text(card, "", 17, Ui.Muted);
-            var confirm = Ui.Button(card, "確認工具與零件清點", 20, () => Ui.Send(SimIds.WorkOrder, "true", "toolcount_confirmed"));
+            var confirm = Ui.Button(card, SimIds.ToolCountLabel, 20, () => Ui.Send(SimIds.WorkOrder, "true", "toolcount_confirmed"));
             Ui.Size(confirm, -1, 42); confirmLabel = Ui.LabelOf(confirm);
             var confirmPlatform = Ui.Button(card, "平台清點完成", 20, () => Ui.Send(SimIds.WorkOrder, "true", "toolcount_platform_confirmed"));   // R1.5b b4 WC_01b c
             Ui.Size(confirmPlatform, -1, 42); platformLabel = Ui.LabelOf(confirmPlatform);
@@ -319,7 +319,7 @@ namespace PantographSim.UI
             foreach (var (value, bg) in decisions) bg.color = value == decision ? Ui.ButtonOn : Ui.ButtonBg;
             diffText.text = s.Has("workorder.height_diff") ? $"高低差：{s.GetFloat("workorder.height_diff"):0.00} mm" : "";
             countText.text = $"工具已收回：{(s.GetBool("tools.all_returned") ? Ui.Tint("是", Ui.Ok) : Ui.Tint("否（到工具架掛回）", Ui.Bad))}　零件盒剩螺栓：{s.GetFloat("tray.bolts"):0}　舊滑板：{s.GetFloat("tray.old_strips"):0}";
-            confirmLabel.text = s.GetBool("workorder.toolcount_confirmed") ? "✔ 已確認清點" : "確認工具與零件清點";
+            confirmLabel.text = s.GetBool("workorder.toolcount_confirmed") ? "✔ 已確認清點" : SimIds.ToolCountLabel;
             platformLabel.text = s.GetBool("workorder.toolcount_platform_confirmed") ? "✔ 平台清點完成" : "平台清點完成";
             platformLabel.transform.parent.gameObject.SetActive(s.Get("procedure.current").StartsWith("STP_WC_01b"));   // 只有日常、定期課程有這一步
             string anomaly = s.Get("workorder.anomaly");

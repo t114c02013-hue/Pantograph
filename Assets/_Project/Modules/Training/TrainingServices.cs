@@ -63,6 +63,7 @@ namespace PantographSim.Training
         void OnStep(StepStarted e)
         {
             bool tutorial = state.Get("training.mode") != "practice";
+            state.SetBool("ui.tray_open", false);   // 零件盒說明框只留在看它的那一步
             state.Set("hint.text", e.text ?? "");
             state.SetBool("hint.show_bolt_numbers", tutorial && e.showBoltNumbers);
             state.SetBool("hint.show_arrow", tutorial && e.showOutwardArrow);

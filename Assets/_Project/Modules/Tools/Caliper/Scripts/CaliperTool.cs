@@ -10,7 +10,6 @@ namespace PantographSim.Tools
     /// </summary>
     public class CaliperTool : ToolBase
     {
-        System.Random rng;
         int measureCount;
 
         public override bool CapturesScroll => true;
@@ -55,11 +54,10 @@ namespace PantographSim.Tools
             var s = State;
             if (!s.Has(e.targetId + ".true")) return;
             if (!Ask(e.targetId, "measure")) return;
-            if (rng == null) rng = new System.Random((int)s.GetFloat("scenario.seed", 1));
             measureCount++;
             float truth = s.GetFloat(e.targetId + ".true");
             bool zeroed = s.GetBool(Key("zeroed"));
-            float reading = CaliperLogic.Reading(truth, zeroed, rng);
+            float reading = CaliperLogic.Reading(truth, zeroed, CaliperLogic.PieceRng((int)s.GetFloat("scenario.seed", 1), CaliperLogic.Piece(s, e.targetId)));
             // 一批：卡尺讀數／量爪／顯示，與量測點的讀數（MeasurementTaken 的接收者在同一批寫入）同時生效
             s.Batch(() =>
             {

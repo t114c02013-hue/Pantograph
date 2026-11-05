@@ -15,6 +15,7 @@ namespace PantographSim.Data
         public bool gripReleaseDrops = true;
         [Tooltip("滑板放上托架：孔位差這個距離（cm）內就吸附")] public float stripSnapCm = 5f;
         [Tooltip("跳過步驟的說明，每則停留秒數")] public float noticeSeconds = 6f;
+        [Tooltip("遊戲內錄影的鍵：不要用 F9，驗收用它控制 Unity Recorder")] public KeyCode videoHotkey = KeyCode.F8;
         [Tooltip("放開後多久之內再抓回不算（秒）")] public float regrabGraceSec = 1.5f;
         [Tooltip("只提示、不記錯的模式（training.mode）")] public string[] hintOnlyModes = { "tutorial" };
         public string keepHint = "把手伸到工具架／工具袋";

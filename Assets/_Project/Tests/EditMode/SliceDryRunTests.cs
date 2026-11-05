@@ -496,6 +496,54 @@ namespace PantographSim.Tests
             Assert.AreEqual("", early.s.Get("procedure.preset_note"), "下一步清掉");
         }
 
+        /// <summary>第 12 輪：同一條滑板在備品架和裝上車量到一樣；不同條可以不同。</summary>
+        [Test]
+        public void SamePiece_SameReading_SpareAndMounted()
+        {
+            var s = new SimState(new EventBus());
+            s.Set("procedure.side", "R"); s.Set("part.carbon_strip_R.state", "NewMounted"); s.Set("spare.R.picked_slot", "env.spare_shelf.slot_3");
+            string spare = CaliperLogic.Piece(s, "env.spare_shelf.slot_3"), mounted = CaliperLogic.Piece(s, "ip.carbon_strip_R.measure_mid");
+            Assert.AreEqual(spare, mounted);
+            for (int seed = 1; seed < 20; seed++)
+                Assert.AreEqual(CaliperLogic.Reading(12f, true, CaliperLogic.PieceRng(seed, spare)), CaliperLogic.Reading(12f, true, CaliperLogic.PieceRng(seed, mounted)));
+            s.Set("procedure.side", "L");
+            Assert.AreNotEqual(spare, CaliperLogic.Piece(s, "env.spare_shelf.slot_3"), "另一側是另一條");
+            Assert.AreEqual("ip.carbon_strip_L.measure_mid", CaliperLogic.Piece(s, "ip.carbon_strip_L.measure_mid"), "舊滑板");
+        }
+
+        /// <summary>第 12 輪：提示和按鈕同一個字、零件盒框換步就關、箭頭的點另外記時名稱還讀得到、錄影鍵不是 F9。</summary>
+        [Test]
+        public void Round12_TextAndPanels()
+        {
+            var sim = new SliceSim();
+            sim.RunUntil("STP_WC_01_ToolCount");
+            var subs = ProcedureRunner.SubActions(sim.runner.Current);
+            StringAssert.Contains(SimIds.ToolCountLabel, subs.Last().text);
+            StringAssert.DoesNotContain("{", subs.Last().text);
+
+            var bus = new EventBus(); var s = new SimState(bus);
+            using var hints = new HintService(bus, s);
+            s.SetBool("ui.tray_open", true);
+            bus.Publish(new StepStarted { subActions = "" });
+            Assert.IsFalse(s.GetBool("ui.tray_open"));
+
+            var go = new UnityEngine.GameObject("Board"); var pt = new UnityEngine.GameObject("Point");
+            try
+            {
+                var board = go.AddComponent<PantographSim.Worksite.ToolRackBoard>();
+                board.Configure("env.tool_rack", "平台工具架");
+                pt.transform.position = UnityEngine.Vector3.up;
+                var reg = new SceneRegistry();
+                reg.Register("env.tool_rack", go.transform); reg.RegisterPoint("env.tool_rack", pt.transform);
+                Assert.AreEqual("平台工具架", reg.NameOf("env.tool_rack"));
+                Assert.IsTrue(reg.TryGetPosition("env.tool_rack", out var p));
+                Assert.AreEqual(UnityEngine.Vector3.up, p);
+            }
+            finally { UnityEngine.Object.DestroyImmediate(go); UnityEngine.Object.DestroyImmediate(pt); }
+
+            Assert.AreNotEqual(UnityEngine.KeyCode.F9, ToolRulesDef.Load().videoHotkey, "F9 是 Unity Recorder 的鍵");
+        }
+
         /// <summary>第 11 輪：跳過步驟的說明一則接一則，每則停 noticeSeconds；標籤推回畫面內。</summary>
         [Test]
         public void Notices_OneAtATime_LabelsStayOnScreen()

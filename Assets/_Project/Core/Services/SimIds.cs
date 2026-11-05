@@ -67,6 +67,8 @@ namespace PantographSim.Core
         }
 
         public const string OverBracketRadius = "strip.over_radius_m";
+        /// <summary>作業單清點按鈕的字；步驟文字寫 ToolCountToken，兩邊讀這裡，不會對不上。</summary>
+        public const string ToolCountLabel = "確認工具與零件清點", ToolCountToken = "{清點鈕}";
 
         /// <summary>手上有滑板時這一下算不算點托架：射線打在托架高度的點離托架夠近就算。看射線不看滑板外觀：外觀追滑鼠會慢幾幀，弓頭框架也可能先擋到射線。</summary>
         public static bool ClicksBracket(ISimState s, string bracket, string hovered, UnityEngine.Ray ray, UnityEngine.Vector3 bracketPos)

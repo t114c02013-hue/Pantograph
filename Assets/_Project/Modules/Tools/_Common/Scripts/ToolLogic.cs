@@ -18,6 +18,23 @@ namespace PantographSim.Tools
         }
 
         public static string Display(float mm) => mm.ToString("0.00");
+
+        /// <summary>量的是哪一件實物：備品架上的備品和裝上車後的中點是同一條。</summary>
+        public static string Piece(PantographSim.Core.ISimState s, string target)
+        {
+            if (target.StartsWith("env.spare_shelf.")) return target + "|" + s.Get("procedure.side");
+            if (!target.EndsWith(".measure_mid")) return target;
+            string side = PantographSim.Core.SimIds.SideOf(target);
+            return s.Get(PantographSim.Core.SimIds.Strip(side) + ".state") == "NewMounted" ? s.Get($"spare.{side}.picked_slot") + "|" + side : target;
+        }
+
+        /// <summary>雜訊跟著實物走：同一件量幾次、在哪裡量都一樣，不同件才不同。</summary>
+        public static Random PieceRng(int seed, string piece)
+        {
+            int h = seed;
+            unchecked { foreach (char c in piece) h = h * 31 + c; }
+            return new Random(h);
+        }
     }
 
     public static class TorqueLogic

@@ -18,7 +18,7 @@ namespace PantographSim.UI
         InputField nameField;
         string builtFor = "";
         int nameIndex;
-        const string DesktopControls = "<b>操作</b>：到工具架點掛位拿起／歸還工具（手上一次一件；數字鍵 1–9 會高亮掛位）　左鍵點互動點　右鍵拖曳轉視角　滾輪縮放　F 拉近檢視　C 帶我到目標　R 轉動手上的滑板　Backspace 重設工具　H 完整說明　F9 開始／停止錄影";
+        const string DesktopControls = "<b>操作</b>：到工具架點掛位拿起／歸還工具（手上一次一件；數字鍵 1–9 會高亮掛位）　左鍵點互動點　右鍵拖曳轉視角　滾輪縮放　F 拉近檢視　C 帶我到目標　R 轉動手上的滑板　Backspace 重設工具　H 完整說明　{錄影鍵} 開始／停止錄影";
         const string XrControls = "<b>操作（VR）</b>：扳機＝使用／點擊　握把＝拿工具（在掛位前放開＝歸還）　左搖桿＝傳送／轉向　工具數值＝看左手開工具面板　A 重設工具　B 帶我到目標　X 作業單　Y 說明　≡ 暫停選單（含「● 開始錄影」）";
 
         protected override void OnBuild(RectTransform safe)
@@ -62,7 +62,7 @@ namespace PantographSim.UI
             bool show = !s.GetBool("training.running") && (!InputMode.XrActive || s.GetBool("xr.tutorial.done")) && !s.GetBool("rec.list_open");
             Ui.SetActive(dim, show);
             if (!show) return;
-            controls.text = InputMode.XrActive ? XrControls : DesktopControls;
+            controls.text = InputMode.XrActive ? XrControls : DesktopControls.Replace("{錄影鍵}", s.Get("ui.video_key"));
             Ui.SetActive(nameDesktop, !InputMode.XrActive);
             Ui.SetActive(nameXr, InputMode.XrActive);
             if (InputMode.XrActive) xrName.text = XrNames(s)[Wrap(nameIndex, XrNames(s).Count)];
@@ -238,7 +238,7 @@ namespace PantographSim.UI
     public class ResultView : View
     {
         RectTransform dim;
-        Text score, detail, log, folder;
+        Text score, detail, presetNote, log, folder;
 
         protected override void OnBuild(RectTransform safe)
         {
@@ -248,6 +248,7 @@ namespace PantographSim.UI
             Ui.Text(card, "結算　碳滑板更換", 36, Color.white, TextAnchor.UpperCenter, FontStyle.Bold);
             score = Ui.Text(card, "", 44, Color.white, TextAnchor.UpperCenter, FontStyle.Bold);
             detail = Ui.Text(card, "", 24, Ui.Muted, TextAnchor.UpperCenter);
+            presetNote = Ui.Text(card, "", 20, Ui.Muted, TextAnchor.UpperCenter);
             Ui.Text(card, "錯誤紀錄", 24, Ui.Accent, TextAnchor.UpperLeft, FontStyle.Bold);
             log = Ui.Text(card, "", 21);
             Ui.Size(log, -1, 360);
@@ -272,6 +273,8 @@ namespace PantographSim.UI
             score.text = $"{s.GetFloat("score.total"):0} 分　" + (passed ? Ui.Tint("通過", Ui.Ok) : Ui.Tint("未通過", Ui.Bad));
             float sec = s.GetFloat("score.elapsed");
             detail.text = $"用時 {(int)(sec / 60)} 分 {(int)(sec % 60)} 秒　嚴重 {s.GetFloat("score.critical"):0}　錯誤 {s.GetFloat("score.major"):0}　提醒 {s.GetFloat("score.minor"):0}　（計分方式為示例值）";
+            presetNote.text = s.Get("procedure.preset_note");
+            Ui.SetActive(presetNote, presetNote.text.Length > 0);
             var l = s.Get("score.log");
             log.text = string.IsNullOrEmpty(l) ? "沒有錯誤，做得好！" : StripCodes(l);
         }
@@ -282,7 +285,7 @@ namespace PantographSim.UI
     /// <summary>完整說明（H）。</summary>
     public class HelpView : View
     {
-        RectTransform dim;
+        RectTransform dim; Text body;
 
         protected override void OnBuild(RectTransform safe)
         {
@@ -290,7 +293,7 @@ namespace PantographSim.UI
             dim = d;
             Ui.VStack(card.gameObject, 30, 10, false);
             Ui.Text(card, "操作說明", 34, Color.white, TextAnchor.UpperLeft, FontStyle.Bold);
-            Ui.Text(card,
+            body = Ui.Text(card,
                 "<b>看哪裡</b>：左側面板寫著「現在要做、為什麼、需要工具、點哪裡」，下面的清單會一項一項打勾。\n" +
                 "場景中閃爍發黃的就是要點的東西，上方有「▼ 點這裡」標籤。看不到時按「帶我過去」或 C。\n\n" +
                 "<b>工具</b>：到工具架點掛位拿起，用完點同一格歸還；手上一次只能拿一件。數字鍵 1–9 只會高亮掛位。第一次拿起會跳出教學。\n" +
@@ -299,11 +302,16 @@ namespace PantographSim.UI
                 "<b>鍵盤</b>：F 拉近檢視滑鼠下的物件、Esc 返回；R 轉動手上的新滑板；C 帶我到目標；H 開關本說明。\n\n" +
                 "<b>作業單</b>：右上「作業單」按鈕。量測讀數要自己抄，送出後系統會比對。\n" +
                 "<b>做錯時</b>：會跳出說明「做錯什麼、為什麼、怎麼改」。嚴重錯誤要按「從這一步重做」。\n" +
-                "<b>紀錄與錄影</b>：按「開始」就自動記錄（左上角「● 紀錄中」）；F9 開始／停止錄影，影片存在這一場的紀錄資料夾。", 23);
+                "<b>紀錄與錄影</b>：按「開始」就自動記錄（左上角「● 紀錄中」）；{錄影鍵} 開始／停止錄影，影片存在這一場的紀錄資料夾。", 23);
             var close = Ui.Button(card, "關閉（H）", 24, () => Sim.State.SetBool("ui.help_open", false), Ui.ButtonOn); Ui.Size(close, -1, 60);
         }
 
-        public override void Refresh(ISimState s) => Ui.SetActive(dim, s.GetBool("ui.help_open") && !InputMode.XrActive);
+        public override void Refresh(ISimState s)
+        {
+            bool open = s.GetBool("ui.help_open") && !InputMode.XrActive;
+            Ui.SetActive(dim, open);
+            if (open) body.text = body.text.Replace("{錄影鍵}", s.Get("ui.video_key"));
+        }
     }
 
     /// <summary>小視窗：舊滑板取出方式、備品檢視、零件盒內容，以及短暫提示。</summary>

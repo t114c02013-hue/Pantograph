@@ -29,13 +29,14 @@ namespace PantographSim.Worksite
         public void SetMarkerPoint(Transform t) => markerPoint = t;
         public Transform MarkerPoint => markerPoint != null ? markerPoint : transform;
 
-        protected virtual void OnEnable() { Sim.Registry?.Register(id, MarkerPoint); }
-        protected virtual void OnDisable() { Sim.Registry?.Unregister(id, MarkerPoint); }
+        void RegisterSelf() { Sim.Registry?.Register(id, transform); Sim.Registry?.RegisterPoint(id, MarkerPoint); }
+        protected virtual void OnEnable() { RegisterSelf(); }
+        protected virtual void OnDisable() { Sim.Registry?.Unregister(id, transform); }
 
         protected virtual void Start()
         {
             if (!Sim.Ready) return;
-            Sim.Registry?.Register(id, MarkerPoint);
+            RegisterSelf();
             Bus.Subscribe<ActionRequested>(OnRequestInternal);
             Bus.Subscribe<ActionPerformed>(OnPerformedInternal);
             Bus.Subscribe<StateChanged>(OnStateInternal);

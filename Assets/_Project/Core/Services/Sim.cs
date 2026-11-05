@@ -27,12 +27,15 @@ namespace PantographSim.Core
     public class SceneRegistry : ISceneLocator
     {
         readonly Dictionary<string, Transform> map = new Dictionary<string, Transform>();
+        readonly Dictionary<string, Transform> points = new Dictionary<string, Transform>();
         public void Register(string id, Transform t) { if (!string.IsNullOrEmpty(id) && t != null) map[id] = t; }
-        public void Unregister(string id, Transform t) { if (map.TryGetValue(id, out var cur) && cur == t) map.Remove(id); }
+        public void Unregister(string id, Transform t) { if (map.TryGetValue(id, out var cur) && cur == t) { map.Remove(id); points.Remove(id); } }
+        /// <summary>箭頭和鏡頭對準的點跟物件中心不同時用；名稱、元件還是讀 Register 的物件。</summary>
+        public void RegisterPoint(string id, Transform t) { if (!string.IsNullOrEmpty(id) && t != null) points[id] = t; }
 
         public bool TryGetPosition(string id, out Vector3 position)
         {
-            if (map.TryGetValue(id, out var t) && t != null && t.gameObject.activeInHierarchy) { position = t.position; return true; }
+            if (map.TryGetValue(id, out var t) && t != null && t.gameObject.activeInHierarchy) { position = points.TryGetValue(id, out var p) && p != null ? p.position : t.position; return true; }
             position = default;
             return false;
         }
