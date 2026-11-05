@@ -496,6 +496,17 @@ namespace PantographSim.Tests
             Assert.AreEqual("", early.s.Get("procedure.preset_note"), "下一步清掉");
         }
 
+        /// <summary>第 14 輪：弓位指示燈的球在 VR 不收射線，桌面照舊。</summary>
+        [Test]
+        public void PanIndicator_NoRayInVr()
+        {
+            var s = new SimState(new EventBus());
+            Assert.IsFalse(SimIds.RayIgnores(s, "ip.cab.pan_indicator"), "桌面點得到");
+            InputMode.SetXr(true);
+            try { Assert.IsTrue(SimIds.RayIgnores(s, "ip.cab.pan_indicator"), "VR 不擋 ▼"); }
+            finally { InputMode.SetXr(false); }
+        }
+
         /// <summary>桌機 VR 模擬器：PANTO_DESKTOP 優先，沒有模擬器照舊掉回桌面。</summary>
         [Test]
         public void DeviceSimulator_Decision()

@@ -20,7 +20,7 @@ namespace PantographSim.Interaction
 
         void Update()
         {
-            if (orbit == null || Sim.State == null || PointerState.TypingInUi) return;
+            if (orbit == null || InputMode.XrActive || Sim.State == null || PointerState.TypingInUi) return;
             if (Input.GetKeyDown(KeyCode.F) && picker.Hovered is Component c)
             {
                 orbit.Retarget(new Bounds(c.transform.position, Vector3.one * inspectSize));

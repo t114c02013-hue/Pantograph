@@ -260,10 +260,12 @@ namespace PantographSim.Tools
             if (!bound || !Sim.Ready) return;   // 結束 Play／場景卸載時服務已清掉
             if (Sim.State.GetBool("training.paused")) { PointerState.ScrollCaptured = false; return; }
             TickRelease(SimClock.Now);
-            if (!PointerState.TypingInUi)
+            if (!PointerState.TypingInUi && !InputMode.XrActive)   // 鍵盤熱鍵只有桌面模式：模擬器的 1–9 另有用途
+            {
                 for (int k = 1; k <= 9; k++)
                     if (Input.GetKeyDown(KeyCode.Alpha0 + k) || Input.GetKeyDown(KeyCode.Keypad0 + k)) Hint(k);
-            if (!PointerState.TypingInUi && Input.GetKeyDown(KeyCode.Backspace)) ResetActive();
+                if (Input.GetKeyDown(KeyCode.Backspace)) ResetActive();
+            }
             PointerState.ScrollCaptured = active != null && active.CapturesScroll && !PointerState.OverUi;
             if (active != null) { var t = active; Sim.State.Batch(t.Tick); }   // 每幀的工具操作（滾輪、按住）也一批生效
         }

@@ -14,7 +14,7 @@ namespace PantographSim.Interaction
         void Update()
         {
             var s = Sim.State;
-            if (s == null || s.GetBool("training.paused") || PointerState.TypingInUi) return;
+            if (s == null || InputMode.XrActive || s.GetBool("training.paused") || PointerState.TypingInUi) return;
             if (Input.GetKeyDown(rotateKey))
                 Sim.Bus.Publish(new ActionRequested { targetId = "carried", toolId = "", text = "rotate180", time = SimClock.Now });
         }

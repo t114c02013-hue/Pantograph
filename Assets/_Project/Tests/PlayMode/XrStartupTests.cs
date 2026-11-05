@@ -462,6 +462,26 @@ namespace PantographSim.Tests
                 float turned = Mathf.Abs(Mathf.DeltaAngle(yaw0, Rig.Head.eulerAngles.y));
                 Debug.Log($"[SimCheck] 方向鍵轉頭 {turned:0.0} 度");
                 Assert.Greater(turned, 5f, "方向鍵要能轉頭");
+
+                // 模擬器的扳機只送給選中的手：身體模式按左鍵沒有扳機，按 Y 選右手才有
+                var right = devs.OfType<UnityEngine.InputSystem.XR.XRController>().First(d => d.usages.Contains(UnityEngine.InputSystem.CommonUsages.RightHand));
+                var trigger = (UnityEngine.InputSystem.Controls.ButtonControl)right["triggerPressed"];
+                var pressed = new UnityEngine.InputSystem.LowLevel.MouseState().WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left);
+                var ms = UnityEngine.InputSystem.Mouse.current;
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(ms, pressed);
+                for (int i = 0; i < 5; i++) yield return null;
+                Assert.IsFalse(trigger.isPressed, "身體模式：左鍵不到手把");
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(ms, new UnityEngine.InputSystem.LowLevel.MouseState());
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.Y));
+                for (int i = 0; i < 3; i++) yield return null;
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState());
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(ms, pressed);
+                for (int i = 0; i < 5; i++) yield return null;
+                Assert.IsTrue(trigger.isPressed, "按 Y 選右手後左鍵＝扳機，按住一直有");
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(ms, new UnityEngine.InputSystem.LowLevel.MouseState());
+                for (int i = 0; i < 3; i++) yield return null;
+                Assert.IsFalse(trigger.isPressed, "放開就沒有");
+                if (Sim.Registry.TryGetTransform(XrPanelLayoutMount, out var mount)) Debug.Log($"[SimCheck] 升降面板 {mount.position} 離頭 {Vector3.Distance(mount.position, Rig.Head.position):0.00} m");
             }
             finally
             {
@@ -473,6 +493,30 @@ namespace PantographSim.Tests
 #else
             yield break;
 #endif
+        }
+
+        const string XrPanelLayoutMount = "xr.mount.lift_panel";
+
+        /// <summary>第 14 輪：射線按住 ▼ 持續 1 秒要一直是 Down，放開 Stop（XRUIInputModule 送的就是這兩個事件）。</summary>
+        [UnityTest]
+        public IEnumerator LiftButton_HoldOneSecond_Down_ReleaseStops()
+        {
+            yield return Boot(new Vector3(0f, 1.63f, 0f));
+            tracked = true; headY = 1.63f;
+            yield return WaitReady();
+            Sim.State.Set("procedure.current", "STP_SI_01_ConfirmLowered");   // 升降面板在降弓那一步才顯示
+            Sim.State.SetBool("training.running", true);
+            for (int i = 0; i < 5; i++) yield return null;
+            var button = Object.FindObjectsOfType<UnityEngine.UI.Button>(true).First(b => b.GetComponentInChildren<UnityEngine.UI.Text>(true)?.text.Contains("下降（按住）") ?? false);
+            var data = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current);
+            Assert.IsTrue(button.gameObject.activeInHierarchy, "升降面板要顯示");
+            UnityEngine.EventSystems.ExecuteEvents.Execute(button.gameObject, data, UnityEngine.EventSystems.ExecuteEvents.pointerDownHandler);
+            Assert.AreEqual("Down", Sim.State.Get(SimIds.LiftCmd), "按下就 Down");
+            yield return new WaitForSecondsRealtime(1f);
+            Assert.AreEqual("Down", Sim.State.Get(SimIds.LiftCmd), "按住 1 秒要持續 Down");
+            UnityEngine.EventSystems.ExecuteEvents.Execute(button.gameObject, data, UnityEngine.EventSystems.ExecuteEvents.pointerUpHandler);
+            yield return null;
+            Assert.AreEqual("Stop", Sim.State.Get(SimIds.LiftCmd), "放開就停");
         }
 
         /// <summary>terry 2026-11-05：選好模式後開場面板都要消失，包含任務卡背後的深色底板和把手；之後跳出來的對話框還是有底板。</summary>

@@ -29,7 +29,7 @@ namespace PantographSim.Interaction
                 Sim.Bus.Subscribe<FocusRequested>(OnFocus);
                 bound = true;
             }
-            if (bound && !PointerState.TypingInUi && Input.GetKeyDown(KeyCode.C)) { UiCommands.Issue(UiCommands.FocusTarget, "key.C"); FocusCurrent(); }
+            if (bound && !InputMode.XrActive && !PointerState.TypingInUi && Input.GetKeyDown(KeyCode.C)) { UiCommands.Issue(UiCommands.FocusTarget, "key.C"); FocusCurrent(); }
         }
 
         void OnDestroy()

@@ -15,7 +15,7 @@ namespace PantographSim.Interaction
         void Update()
         {
             var s = Sim.State;
-            if (s == null || !s.GetBool("training.running")) return;
+            if (s == null || !s.GetBool("training.running") || InputMode.XrActive) return;   // VR 用升降面板；鍵盤留給模擬器
             string cmd = "";
             if (!PointerState.TypingInUi)
             {
