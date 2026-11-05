@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.XR;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Inputs.Simulation;
 using UnityEngine.XR.Interaction.Toolkit.UI;
 using UnityEngine.XR.Management;
 
@@ -27,22 +28,48 @@ namespace PantographSim.XR
         public static bool SimulateRequested;
         public static bool Simulated { get; private set; }
         public static string Status { get; private set; } = "";
+        /// <summary>XRI 的 XR Device Simulator 開著、沒有真的頭盔：鍵鼠模擬裝置，手和頭照真的走 Input System。開關是 XR Device Simulator 的設定（Project Settings）。</summary>
+        public static bool DeviceSimulated { get; private set; }
+
+        /// <summary>沒有 loader、等完 wait 秒之後怎麼走（純函式）。</summary>
+        public static bool UseDeviceSimulator(bool simulatorPresent, bool forceDesktop) => simulatorPresent && !forceDesktop;
+
+        /// <summary>測試用：取代真的頭盔追蹤。</summary>
+        public static System.Func<bool> HeadTrackedOverride;
+
+        static bool HeadTracked()
+        {
+            if (HeadTrackedOverride != null) return HeadTrackedOverride();
+            var head = UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode.Head);
+            return head.isValid && head.TryGetFeatureValue(UnityEngine.XR.CommonUsages.isTracked, out bool tracked) && tracked;
+        }
+
+        static void RemoveSimulator() { if (XRDeviceSimulator.instance != null) Destroy(XRDeviceSimulator.instance.gameObject); }
 
         public void Setup(GameObject root, XrRig r, XrTeleport tp, XrCoach c) { rigRoot = root; rig = r; teleport = tp; coach = c; }
 
         IEnumerator Start()
         {
-            Simulated = false;
+            Simulated = false; DeviceSimulated = false;
             if (rigRoot != null) rigRoot.SetActive(false);
-            if (InputMode.ForceDesktop) { Status = "命令列 -desktop：桌面模式"; Debug.Log("[XR] " + Status); yield break; }
+            if (InputMode.ForceDesktop) { RemoveSimulator(); Status = "命令列 -desktop：桌面模式"; Debug.Log("[XR] " + Status); yield break; }
             float t0 = Time.realtimeSinceStartup;
             while (true)
             {
-                if (SimulateRequested) { Simulated = true; break; }
+                if (SimulateRequested) { RemoveSimulator(); Simulated = true; break; }
                 var m = XRGeneralSettings.Instance != null ? XRGeneralSettings.Instance.Manager : null;
-                if (m != null && m.isInitializationComplete && m.activeLoader != null) break;
+                bool loaderUp = m != null && m.isInitializationComplete && m.activeLoader != null;
+                bool simulator = XRDeviceSimulator.instance != null;
+                // OpenXR 只要 Meta 執行環境開著就會起來，沒戴頭盔也一樣：開著模擬器時要頭真的有追蹤才算實機
+                if (loaderUp && (!simulator || HeadTracked())) { RemoveSimulator(); break; }
                 if (Time.realtimeSinceStartup - t0 > waitSeconds)
                 {
+                    if (UseDeviceSimulator(simulator, InputMode.ForceDesktop))
+                    {
+                        if (loaderUp) { m.StopSubsystems(); m.DeinitializeLoader(); }   // 不然畫面還是送給沒人戴的頭盔
+                        DeviceSimulated = true;
+                        break;
+                    }
                     Status = "沒有偵測到頭盔（OpenXR 沒有啟動），使用桌面模式";
                     Debug.Log("[XR] " + Status);
                     yield break;
@@ -67,13 +94,13 @@ namespace PantographSim.XR
             }
             ServiceLocator.Register<IXrRig>(rig);
             var sequencer = gameObject.AddComponent<XrStartupSequencer>();
-            StartCoroutine(sequencer.Run(rig, teleport, Simulated, () =>
+            StartCoroutine(sequencer.Run(rig, teleport, Simulated || DeviceSimulated, () =>
             {
                 if (ears != null) ears.enabled = true;
                 SetupEventSystem();
                 InputMode.SetXr(true);
                 AddRaycasters();
-                Status = Simulated ? "VR 版面（模擬，沒有頭盔）" : "VR 模式：" + (XRGeneralSettings.Instance?.Manager?.activeLoader?.name ?? "");
+                Status = Simulated ? "VR 版面（模擬，沒有頭盔）" : DeviceSimulated ? "VR 模式：XR Device Simulator（鍵鼠）" : "VR 模式：" + (XRGeneralSettings.Instance?.Manager?.activeLoader?.name ?? "");
                 Debug.Log("[XR] " + Status);
                 StartCoroutine(KeepRaycasters());
             }, () => { if (coach != null) coach.Begin(); }));

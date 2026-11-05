@@ -496,6 +496,15 @@ namespace PantographSim.Tests
             Assert.AreEqual("", early.s.Get("procedure.preset_note"), "下一步清掉");
         }
 
+        /// <summary>桌機 VR 模擬器：PANTO_DESKTOP 優先，沒有模擬器照舊掉回桌面。</summary>
+        [Test]
+        public void DeviceSimulator_Decision()
+        {
+            Assert.IsTrue(PantographSim.XR.XrModeSwitch.UseDeviceSimulator(true, false));
+            Assert.IsFalse(PantographSim.XR.XrModeSwitch.UseDeviceSimulator(true, true), "PANTO_DESKTOP");
+            Assert.IsFalse(PantographSim.XR.XrModeSwitch.UseDeviceSimulator(false, false), "Link 關掉、沒開模擬器：桌面");
+        }
+
         /// <summary>terry 2026-11-05：選好模式時，開著的說明都收掉。</summary>
         [Test]
         public void ModeChosen_ClosesOpeningHelp()

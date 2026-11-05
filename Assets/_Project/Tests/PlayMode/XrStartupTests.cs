@@ -413,6 +413,52 @@ namespace PantographSim.Tests
         }
 
         /// <summary>第 2 點：頭在 (0, 1.63, 0) 看 +Z，任務卡在頭前 1.0 m、眼下 0.15 m，頭轉動不跟著走，「面板叫回眼前」叫得回來。</summary>
+        /// <summary>terry 2026-11-05：桌機用 XR Device Simulator 走 VR：Link 關著時等完就進 VR，頭、兩手都有裝置，追蹤沒被關掉，按鍵走 Input System。</summary>
+        [UnityTest]
+        public IEnumerator DeviceSimulator_EntersVr_DevicesTrack()
+        {
+            XrModeSwitch.SimulateRequested = false;
+            XrStartupSequencer.ProbeOverride = null;
+            XrModeSwitch.HeadTrackedOverride = () => false;   // 測試不看有沒有人戴著頭盔
+#if UNITY_EDITOR
+            var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Samples/XR Interaction Toolkit/2.6.5/XR Device Simulator/XR Device Simulator.prefab");
+            Assert.IsNotNull(prefab, "範例要匯入");
+            // 批次模式沒有鍵盤滑鼠，模擬器的畫面說明要讀按鍵名稱
+            var keyboard = UnityEngine.InputSystem.Keyboard.current == null ? UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>() : null;
+            var mouse = UnityEngine.InputSystem.Mouse.current == null ? UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Mouse>() : null;
+            var sim = Object.Instantiate(prefab); Object.DontDestroyOnLoad(sim);
+            try
+            {
+                SceneManager.LoadScene(Scene);
+                for (int i = 0; i < 10; i++) yield return null;   // 等新場景的黑板，上一個測試的 xr.ready 不算
+                for (float t = Time.realtimeSinceStartup; Time.realtimeSinceStartup - t < 12f && !(Sim.State?.GetBool(XrStartupSequencer.ReadyKey) ?? false);) yield return null;
+                var mgr = UnityEngine.XR.Management.XRGeneralSettings.Instance?.Manager;
+                Debug.Log($"[SimCheck] status {XrModeSwitch.Status} loader {(mgr != null && mgr.activeLoader != null ? mgr.activeLoader.name : "none")} simExists {sim != null}");
+                Assert.IsTrue(XrModeSwitch.DeviceSimulated, XrModeSwitch.Status);
+                Assert.IsTrue(InputMode.XrActive, "進 VR");
+                Assert.IsFalse(XrModeSwitch.Simulated, "不是截圖模擬：追蹤要開著");
+                var devs = UnityEngine.InputSystem.InputSystem.devices;
+                Assert.IsTrue(devs.Any(d => d is UnityEngine.InputSystem.XR.XRHMD), "頭");
+                Assert.AreEqual(2, devs.Count(d => d is UnityEngine.InputSystem.XR.XRController), "兩手");
+                foreach (var d in Rig.GetComponentsInChildren<UnityEngine.InputSystem.XR.TrackedPoseDriver>(true)) Assert.IsTrue(d.enabled, d.name);
+                for (int i = 0; i < 10; i++) yield return null;
+                var origin = Rig.GetComponentInParent<Unity.XR.CoreUtils.XROrigin>() ?? Object.FindObjectOfType<Unity.XR.CoreUtils.XROrigin>();
+                Debug.Log($"[SimCheck] eye {Rig.Head.position.y - origin.transform.position.y:0.000} head {Rig.Head.position} left {Rig.LeftHand.position} right {Rig.RightHand.position} mode {origin.CurrentTrackingOriginMode}");
+                Assert.AreEqual(PostureDef.Load().standEye, Rig.Head.position.y - origin.transform.position.y, 0.02f, "175 cm 站姿眼高，沒有疊加桌面的 1.2 m");
+                Assert.AreEqual(Unity.XR.CoreUtils.XROrigin.TrackingOriginMode.Floor, origin.RequestedTrackingOriginMode, "Floor");
+            }
+            finally
+            {
+                XrModeSwitch.HeadTrackedOverride = null;
+                Object.Destroy(sim);
+                if (keyboard != null) UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);
+                if (mouse != null) UnityEngine.InputSystem.InputSystem.RemoveDevice(mouse);
+            }
+#else
+            yield break;
+#endif
+        }
+
         /// <summary>terry 2026-11-05：選好模式後開場面板都要消失，包含任務卡背後的深色底板和把手；之後跳出來的對話框還是有底板。</summary>
         [UnityTest]
         public IEnumerator StartPanels_GoneAfterModeChosen()
