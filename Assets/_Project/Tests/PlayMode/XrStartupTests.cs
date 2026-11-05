@@ -490,6 +490,15 @@ namespace PantographSim.Tests
                 UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState());
                 for (int i = 0; i < 3; i++) yield return null;
 
+                // 選右手時 I J K L 慢慢轉手（鍵盤就能瞄，不用移滑鼠）
+                float pitch0 = Rig.RightHand.forward.y;
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.K));
+                for (int i = 0; i < 20; i++) yield return null;
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState());
+                for (int i = 0; i < 3; i++) yield return null;
+                Debug.Log($"[SimCheck] K 20 幀 手往下 {(pitch0 - Rig.RightHand.forward.y):0.000}");
+                Assert.Greater(pitch0 - Rig.RightHand.forward.y, 0.02f, "K 要讓手往下");
+
                 // N＝B（帶我到目標）：一樣要先選右手
                 UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.N));
                 for (int i = 0; i < 4; i++) yield return null;

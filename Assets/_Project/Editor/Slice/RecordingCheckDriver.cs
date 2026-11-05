@@ -25,6 +25,7 @@ namespace PantographSim.Editor
     ///   replay=0（不進重播）
     ///   until=步驟 ID（例 STP_CSR_11_Install_L；開頭相符就算）：走到那一步就停，工具收回原位、保持 Play 交人接手；這之前的操作標成測試驅動，不計成績、不進報表
     ///   tutorial=1（教學模式；沒給就是練習）；exit=1（到 until 後離開 Play，檢查用）
+    ///   xr=off（這次 Play 走桌機模式、不開模擬器：只設這個 Editor 程序的 PANTO_DESKTOP，不改專案檔，離開 Play 自動恢復）
     /// 結果寫到 Logs/rec-check.txt。
     /// </summary>
     [InitializeOnLoad]
@@ -33,6 +34,7 @@ namespace PantographSim.Editor
         const string RequestPath = "Logs/rec-check.request";
         const string SessionKey = "PantographSim.RecCheckPending";
         const string ArgsKey = "PantographSim.RecCheckArgs";
+        const string DesktopKey = "PantographSim.RecCheckDesktop";
         public const string Trainee = "驗證學員";
         static IEnumerator routine;
         static int waitUntilFrame, lastFrame;
@@ -54,8 +56,16 @@ namespace PantographSim.Editor
 
         static string Arg(string k, string fallback = "") => args.TryGetValue(k, out var v) ? v : fallback;
 
+        /// <summary>request 內容有 xr=off。</summary>
+        public static bool WantsDesktop(string request) => (request ?? "").Split('\n').Any(l => l.Trim() == "xr=off");
+
         static void Tick()
         {
+            if (!EditorApplication.isPlayingOrWillChangePlaymode && SessionState.GetBool(DesktopKey, false))
+            {
+                SessionState.SetBool(DesktopKey, false);
+                Environment.SetEnvironmentVariable("PANTO_DESKTOP", null);
+            }
             if (!EditorApplication.isPlaying && !EditorApplication.isPlayingOrWillChangePlaymode && EditorApplication.timeSinceStartup > nextPoll)
             {
                 nextPoll = EditorApplication.timeSinceStartup + 2.0;
@@ -71,6 +81,11 @@ namespace PantographSim.Editor
                     }
                     SessionState.SetString(ArgsKey, text);
                     SessionState.SetBool(SessionKey, true);
+                    if (WantsDesktop(text))
+                    {
+                        SessionState.SetBool(DesktopKey, true);
+                        Environment.SetEnvironmentVariable("PANTO_DESKTOP", "1");
+                    }
                     EditorApplication.EnterPlaymode();
                 }
                 return;

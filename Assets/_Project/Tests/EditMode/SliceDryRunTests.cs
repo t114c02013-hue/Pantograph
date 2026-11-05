@@ -515,6 +515,8 @@ namespace PantographSim.Tests
             Assert.IsTrue(PantographSim.Editor.RecordingCheckDriver.ReachedStep("STP_CSR_11_Install_L", "STP_CSR_11"));
             Assert.IsFalse(PantographSim.Editor.RecordingCheckDriver.ReachedStep("STP_CSR_10_CheckNew_L", "STP_CSR_11"));
             Assert.IsFalse(PantographSim.Editor.RecordingCheckDriver.ReachedStep("STP_CSR_11_Install_L", ""));
+            Assert.IsTrue(PantographSim.Editor.RecordingCheckDriver.WantsDesktop("until=STP_SI_04\nxr=off\n"));
+            Assert.IsFalse(PantographSim.Editor.RecordingCheckDriver.WantsDesktop("until=STP_SI_04\n"));
             Assert.AreEqual("測試驅動", ToolRulesDef.Load().testDriverTag);
 
             var dir = System.IO.Path.Combine(UnityEngine.Application.temporaryCachePath, "handoff.jsonl");
