@@ -497,6 +497,31 @@ namespace PantographSim.Tests
 
         const string XrPanelLayoutMount = "xr.mount.lift_panel";
 
+        /// <summary>第 15 輪：站在桿架前，右手射線指著 3 號掛位那一帶按握把，要送出 ToolPickRequested（打到桿子或後面的掛架都算）。</summary>
+        [UnityTest]
+        public IEnumerator PoleRack_RayGrip_PicksGroundingRod()
+        {
+            yield return Boot(new Vector3(0f, 1.63f, 0f));
+            tracked = true; headY = 1.63f;
+            yield return WaitReady();
+            Sim.State.SetBool("training.running", true);
+            Sim.State.SetBool("xr.tutorial.active", false);
+            XrPlayer.ScriptedFrame = new XrFrame();
+            yield return null;
+            Assert.IsTrue(Sim.Registry.TryGetPosition("env.tool_rack.slot_3", out var slot));
+            int picked = 0;
+            Sim.Bus.Subscribe<ToolPickRequested>(e => picked = (int)e.value);
+            var from = slot + Vector3.right * 1.2f + Vector3.up * 0.1f;
+            Rig.RightHand.SetPositionAndRotation(from, Quaternion.LookRotation(slot - from));
+            Rig.LeftHand.position = from + Vector3.up * 3f;
+            for (int i = 0; i < 5; i++) yield return null;
+            XrPlayer.ScriptedFrame = new XrFrame { rightGrip = true };
+            yield return null; yield return null;
+            XrPlayer.ScriptedFrame = new XrFrame();
+            yield return null;
+            Assert.AreEqual(3, picked, "握把要拿到 3 號");
+        }
+
         /// <summary>第 14 輪：射線按住 ▼ 持續 1 秒要一直是 Down，放開 Stop（XRUIInputModule 送的就是這兩個事件）。</summary>
         [UnityTest]
         public IEnumerator LiftButton_HoldOneSecond_Down_ReleaseStops()

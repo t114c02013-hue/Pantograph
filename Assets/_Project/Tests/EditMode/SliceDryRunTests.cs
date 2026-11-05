@@ -525,6 +525,16 @@ namespace PantographSim.Tests
             Assert.AreEqual(0, ((System.Collections.ICollection)summary["errors"]).Count, "交接之前的錯不進報表");
         }
 
+        /// <summary>第 15 輪：射線打到掛架，拿最近的掛位；太遠不算。</summary>
+        [Test]
+        public void RackHover_PicksNearestSlot()
+        {
+            var slots = new[] { (2, new UnityEngine.Vector3(0f, 1f, 0f)), (3, new UnityEngine.Vector3(0f, 1f, 0.3f)) };
+            Assert.AreEqual(3, PantographSim.XR.XrPlayer.NearestSlot(slots, new UnityEngine.Vector3(0f, 1.2f, 0.25f), 0.35f));
+            Assert.AreEqual(2, PantographSim.XR.XrPlayer.NearestSlot(slots, new UnityEngine.Vector3(0f, 0.9f, 0.05f), 0.35f));
+            Assert.AreEqual(0, PantographSim.XR.XrPlayer.NearestSlot(slots, new UnityEngine.Vector3(2f, 1f, 0f), 0.35f), "太遠");
+        }
+
         /// <summary>第 14 輪：弓位指示燈的球在 VR 不收射線，桌面照舊。</summary>
         [Test]
         public void PanIndicator_NoRayInVr()

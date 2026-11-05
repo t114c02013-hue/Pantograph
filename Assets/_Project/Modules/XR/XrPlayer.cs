@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Collections.Generic;
 using System.Linq;
 using PantographSim.Core;
 using PantographSim.Data;
@@ -276,6 +277,14 @@ namespace PantographSim.XR
             return XrPouchHover.Pick(S, pouch != null ? pouch : Data.ToolPouchDef.Load(), new[] { HandPos }).slot;
         }
 
+        /// <summary>離 point 最近、在 radius 內的掛位；沒有就是 0。桿子很細，射線常常打到後面的掛架，和桌機點掛位一樣算拿。</summary>
+        public static int NearestSlot(IEnumerable<(int slot, Vector3 pos)> slots, Vector3 point, float radius)
+        {
+            int best = 0; float bestD = radius;
+            foreach (var (slot, pos) in slots) { float d = Vector3.Distance(pos, point); if (d <= bestD) { bestD = d; best = slot; } }
+            return best;
+        }
+
         void GrabStart()
         {
             grabPickedThisPress = false;
@@ -289,6 +298,7 @@ namespace PantographSim.XR
             if (string.IsNullOrEmpty(active) && string.IsNullOrEmpty(S.Get("hand.item")) && Near("env.waist_pouch", SlotRadius)) { Send("env.waist_pouch", "click"); grabPickedThisPress = true; return; }
             int slot = SlotOf(hoveredId);
             if (slot == 0) slot = SlotNearHand();
+            if (slot == 0 && (hoveredId == "env.pole_rack" || hoveredId == "env.tool_rack")) slot = NearestSlot(SimIds.RackSlotNumbers(S).Select(k => (k, Sim.Registry.TryGetPosition("env.tool_rack.slot_" + k, out var p) ? p : Vector3.positiveInfinity)), hoverPoint, Data.ToolRulesDef.Load().rackGrabRadius);
             if (slot > 0 && string.IsNullOrEmpty(active) && string.IsNullOrEmpty(S.Get("hand.item")))
             {
                 Sim.Bus.Publish(new ToolPickRequested { targetId = "env.tool_rack.slot_" + slot, value = slot, time = SimClock.Now });

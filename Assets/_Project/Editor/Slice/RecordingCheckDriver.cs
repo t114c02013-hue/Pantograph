@@ -63,9 +63,12 @@ namespace PantographSim.Editor
                 {
                     string text = File.ReadAllText(RequestPath);
                     File.Delete(RequestPath);
-                    var active = EditorSceneManager.GetActiveScene();
-                    if (active.isDirty && !string.IsNullOrEmpty(active.path)) EditorSceneManager.SaveScene(active);
-                    if (active.path != SliceSceneBuilder.ScenePath) EditorSceneManager.OpenScene(SliceSceneBuilder.ScenePath);
+                    var active = EditorSceneManager.GetActiveScene();   // 不替人存場景：進 Play 不需要，未存的變動留給開場景的人決定
+                    if (active.path != SliceSceneBuilder.ScenePath)
+                    {
+                        if (active.isDirty && !string.IsNullOrEmpty(active.path)) EditorSceneManager.SaveScene(active);
+                        EditorSceneManager.OpenScene(SliceSceneBuilder.ScenePath);
+                    }
                     SessionState.SetString(ArgsKey, text);
                     SessionState.SetBool(SessionKey, true);
                     EditorApplication.EnterPlaymode();
@@ -111,7 +114,10 @@ namespace PantographSim.Editor
             yield return 10;
             if (S.GetBool("ui.workorder_open")) Send(SimIds.WorkOrder, "toggle");
             Send("ui.tutorial", "close");
-            yield return 5;
+            Send("xr.tutorial", "skip");   // 開場控制器教學不留在眼前
+            Sim.Bus.Publish(new FocusRequested { time = SimClock.Now });   // 人轉向這一步的目標（桌面是鏡頭）
+            yield return 40;
+            S.Set("ui.toast", "");
             Sim.Bus.Publish(new TestDriverHandoff { tag = DriverTag, time = SimClock.Now });
             Note("交給人接手");
             stayInPlay = Arg("exit") != "1";

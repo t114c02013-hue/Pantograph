@@ -271,7 +271,7 @@ namespace PantographSim.Editor
                 var m = AssetDatabase.LoadAssetAtPath<Material>(path);
                 if (m == null) { m = new Material(shader); AssetDatabase.CreateAsset(m, path); }
                 m.shader = shader; m.color = color;
-                if (shader.name == "Standard") { m.EnableKeyword("_EMISSION"); m.SetColor("_EmissionColor", color * 0.6f); }
+                if (shader.name == "Standard") { m.EnableKeyword("_EMISSION"); m.SetColor("_EmissionColor", color * 0.6f); m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive; }   // 留著「發光是黑的」旗標，Unity 會把 _EMISSION 拿掉，.mat 每次 Play 都變動
                 EditorUtility.SetDirty(m);
                 result[key] = m;
             }
