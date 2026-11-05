@@ -132,6 +132,7 @@ namespace PantographSim.Training
     public class ErrorFeedback : IDisposable
     {
         readonly IEventBus bus; readonly ISimState state;
+        float lastErrorTime = -1f;
 
         public ErrorFeedback(IEventBus bus, ISimState state)
         {
@@ -154,13 +155,18 @@ namespace PantographSim.Training
             // 已有更嚴重的錯誤在畫面上時，不被較輕的蓋掉
             if (state.GetBool("ui.error.active") && Rank(state.Get("ui.error.severity")) > Rank(e.severity.ToString())) return;
             bool blocking = e.severity == Severity.Critical || e.blocks;
+            // 同一個動作違反兩條：視窗兩條都列，先發生的排前面
+            bool sameAction = state.GetBool("ui.error.active") && e.time == lastErrorTime && state.Get("ui.error.id") != e.errorId;
+            string Join(string key, string text) => sameAction ? state.Get(key) + "\n" + (text ?? "") : text ?? "";
+            string what = Join("ui.error.what", e.what), why = Join("ui.error.why", e.why), fix = Join("ui.error.fix", e.fix);
+            lastErrorTime = e.time;
             state.Batch(() =>   // 錯誤視窗的內容與暫停一批生效（不會先顯示視窗、內容還是上一個錯誤）
             {
                 state.Set("ui.error.id", e.errorId);
                 state.Set("ui.error.severity", e.severity.ToString());
-                state.Set("ui.error.what", e.what ?? "");
-                state.Set("ui.error.why", e.why ?? "");
-                state.Set("ui.error.fix", e.fix ?? "");
+                state.Set("ui.error.what", what);
+                state.Set("ui.error.why", why);
+                state.Set("ui.error.fix", fix);
                 state.Set("ui.error.step", e.stepId ?? "");
                 state.SetBool("ui.error.blocking", blocking);
                 state.SetBool("ui.error.active", true);

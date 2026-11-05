@@ -353,7 +353,8 @@ namespace PantographSim.Procedures
         {
             if (Current == null || snapshot == null) return;
             // 錯誤紀錄與分數不還原：重做不會抹掉已經犯過的錯
-            var kept = state.Snapshot().Where(kv => kv.Key.StartsWith("score.")).ToList();
+            // xr.＝裝置和控制器教學的狀態，不屬於步驟：不然重做會把做過的教學叫回來
+            var kept = state.Snapshot().Where(kv => kv.Key.StartsWith("score.") || kv.Key.StartsWith("xr.")).ToList();
             state.Restore(snapshot);
             foreach (var kv in kept) state.Set(kv.Key, kv.Value);
             BeginCurrent();

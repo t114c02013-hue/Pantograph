@@ -237,7 +237,7 @@ namespace PantographSim.UI
 
         /// <summary>T3：XR 的 XrPanels 接手提示板與對話框（固定在世界、把手移動、各站點記位置）。</summary>
         static bool Managed => Sim.State != null && Sim.State.GetBool("xr.panels.managed");
-        bool registered, dialogWasOpen;
+        bool registered, dialogWasOpen, errorWasOpen;
 
         bool DialogOpen() { foreach (Transform c in dialog.transform) if (c.gameObject.activeSelf && c.name.EndsWith("_Dim")) return true; return false; }
 
@@ -264,12 +264,13 @@ namespace PantographSim.UI
 
             // 開場的擺放由 XrStartupSequencer 負責；開場之後才打開的對話框（錯誤視窗）開在頭前 1 m，開著時固定不跟頭，可以抓把手移動
             bool open = DialogOpen();
-            if (open && !dialogWasOpen && s.GetBool("xr.ready"))
+            bool error = s.GetBool("ui.error.active");   // 工具教學卡還開在遠處時跳錯誤，也要到眼前
+            if (s.GetBool("xr.ready") && ((open && !dialogWasOpen) || (error && !errorWasOpen)))
             {
                 PlaceDialog(1f);
-                if (!string.IsNullOrEmpty(s.Get("ui.tutorial.tool")) && rig.RightHand != null) PlaceBesideTool();
+                if (!error && !string.IsNullOrEmpty(s.Get("ui.tutorial.tool")) && rig.RightHand != null) PlaceBesideTool();
             }
-            dialogWasOpen = open;
+            dialogWasOpen = open; errorWasOpen = error;
 
             bool managed = Managed;
             // 提示板：第一次出現在正前方 → 3 秒後箭頭 → 1 秒移到左前方（−35°）

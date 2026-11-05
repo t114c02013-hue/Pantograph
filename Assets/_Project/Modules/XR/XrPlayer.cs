@@ -165,9 +165,16 @@ namespace PantographSim.XR
         static bool BlockedInReplay(string command) =>
             SimSession.IsReplay && (command == "Use" || command == "Grab" || command == "ResetTool" || command == "ToolAdjust" || command == "ToolSecondary" || command == "ToggleWorkOrder" || command == "FocusTarget");
 
+        /// <summary>按介面按鈕（例：略過教學）不算控制器教學的練習：不然按下去教學換頁，按鈕移走，這一下就沒按到。</summary>
+        public static bool CoachCounts(string command, bool onUiButton) => !(command == "Use" && onUiButton);
+
+        bool PressingUiButton() =>
+            rightRay != null && rightRay.TryGetCurrentUIRaycastResult(out var ui) && ui.isValid && ui.gameObject != null
+            && ui.gameObject.GetComponentInParent<UnityEngine.UI.Button>() != null;
+
         void Execute(XrCommand c)
         {
-            coach?.Notify(c);
+            if (CoachCounts(c.command, PressingUiButton())) coach?.Notify(c);
             if (BlockedInReplay(c.command)) { PointerState.XrTriggerHeld = false; return; }
             switch (c.command)
             {

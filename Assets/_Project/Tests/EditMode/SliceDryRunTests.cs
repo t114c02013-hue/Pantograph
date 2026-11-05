@@ -525,6 +525,39 @@ namespace PantographSim.Tests
             Assert.AreEqual(0, ((System.Collections.ICollection)summary["errors"]).Count, "交接之前的錯不進報表");
         }
 
+        /// <summary>第 18 輪：沒驗電又先掛弓頭：兩筆都記、視窗兩條都列，驗電在前；重做不把 xr 狀態還原；按介面按鈕不算教學練習。</summary>
+        [Test]
+        public void NoVoltage_AndOrder_BothRecorded_InOneDialog()
+        {
+            var sim = new SliceSim();
+            using var feedback = new ErrorFeedback(sim.bus, sim.s);
+            sim.RunUntil("STP_SI_04_VoltageTest");
+            var guard = new PantographSim.Safety.SafetyGuard(sim.bus, sim.s, sim.bundle.safetyRules);
+            var result = guard.Check(new ActionRequest(SimIds.ToolGroundingRod, SimIds.GroundClamp, "ground"));
+            Assert.IsFalse(result.allowed);
+            var ids = sim.errors.Select(e => e.errorId).ToList();
+            Assert.Less(ids.IndexOf("ERR_Ground_NoVoltageTest"), ids.IndexOf("ERR_Ground_Order"), "驗電排前面");
+            Assert.GreaterOrEqual(ids.IndexOf("ERR_Ground_NoVoltageTest"), 0, string.Join(",", ids));
+            string what = sim.s.Get("ui.error.what");
+            StringAssert.Contains(sim.errors.First(e => e.errorId == "ERR_Ground_NoVoltageTest").what, what);
+            StringAssert.Contains(sim.errors.First(e => e.errorId == "ERR_Ground_Order").what, what);
+        }
+
+        [Test]
+        public void Restart_KeepsXrState_UiButtonNotCoachPractice()
+        {
+            var sim = new SliceSim();
+            sim.s.SetBool("xr.tutorial.active", true);
+            sim.RunUntil("STP_SI_04_VoltageTest");
+            sim.s.SetBool("xr.tutorial.active", false); sim.s.SetBool("xr.tutorial.done", true);
+            sim.bus.Publish(new RestartStepRequested());
+            Assert.IsFalse(sim.s.GetBool("xr.tutorial.active"), "重做不重開控制器教學");
+            Assert.IsTrue(sim.s.GetBool("xr.tutorial.done"));
+            Assert.IsFalse(PantographSim.XR.XrPlayer.CoachCounts("Use", true), "按略過教學不算練習");
+            Assert.IsTrue(PantographSim.XR.XrPlayer.CoachCounts("Use", false));
+            Assert.IsTrue(PantographSim.XR.XrPlayer.CoachCounts("Grab", true));
+        }
+
         /// <summary>第 15 輪：射線打到掛架，拿最近的掛位；太遠不算。</summary>
         [Test]
         public void RackHover_PicksNearestSlot()

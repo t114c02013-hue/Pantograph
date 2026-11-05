@@ -62,12 +62,23 @@ namespace PantographSim.Safety
                     if (!terminal && !state.GetBool(SimIds.VoltageTested)) return Block(SafetyRuleKind.NoVoltageTest, req);
                     if (terminal && head && Active(SafetyRuleKind.RemoveOrder)) return Block(SafetyRuleKind.RemoveOrder, req);
                 }
-                if (req.targetId == SimIds.GroundClamp && !head && !terminal && Active(SafetyRuleKind.GroundOrder)) return Block(SafetyRuleKind.GroundOrder, req);   // 課程裡由 ERR_Global_GroundHangOrder 取代
+                if (req.targetId == SimIds.GroundClamp && !head && !terminal && Active(SafetyRuleKind.GroundOrder))
+                {
+                    if (!state.GetBool(SimIds.VoltageTested)) Report(SafetyRuleKind.NoVoltageTest, req);   // 兩條都違反：都記，驗電排前面
+                    return Block(SafetyRuleKind.GroundOrder, req);
+                }
+                // 課程裡由 ERR_Global_GroundHangOrder 取代
             }
             return GuardResult.Allow;
         }
 
         GuardResult Block(SafetyRuleKind kind, ActionRequest req)
+        {
+            string errorId = Report(kind, req);
+            return GuardResult.Block(errorId);
+        }
+
+        string Report(SafetyRuleKind kind, ActionRequest req)
         {
             rules.TryGetValue(kind, out var r);
             string errorId = r != null ? r.errorId : "ERR_Safety_" + kind;
@@ -78,7 +89,7 @@ namespace PantographSim.Safety
                 what = r?.what ?? "違反安全規定。", why = r?.why ?? "", fix = r?.fix ?? "",
                 stepId = state.Get("procedure.current"), targetId = req.targetId, toolId = req.toolId, time = SimClock.Now
             });
-            return GuardResult.Block(errorId);
+            return errorId;
         }
 
         public bool CanComplete(string stepId, out string reason)

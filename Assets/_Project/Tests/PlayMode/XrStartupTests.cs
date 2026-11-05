@@ -527,6 +527,28 @@ namespace PantographSim.Tests
 
         const string XrPanelLayoutMount = "xr.mount.lift_panel";
 
+        /// <summary>第 18 輪：VR 記錯時，錯誤視窗在頭前方 ±30° 內，就算工具教學卡還開在別處。</summary>
+        [UnityTest]
+        public IEnumerator ErrorDialog_OpensInFrontOfHead()
+        {
+            yield return Boot(new Vector3(0f, 1.63f, 0f));
+            tracked = true; headY = 1.63f;
+            yield return WaitReady();
+            Sim.State.SetBool("training.running", true);
+            Sim.State.SetBool("xr.tutorial.active", false);
+            XrPlayer.ScriptedFrame = new XrFrame();
+            Sim.State.Set("ui.tutorial.tool", SimIds.ToolGroundingRod);
+            for (int i = 0; i < 5; i++) yield return null;
+            Rig.Head.Rotate(0f, 110f, 0f, Space.World);
+            for (int i = 0; i < 3; i++) yield return null;
+            Sim.Bus.Publish(new ErrorDetected { errorId = "ERR_Ground_Order", severity = Severity.Critical, blocks = true, what = "x", why = "y", fix = "z", time = 1f });
+            for (int i = 0; i < 5; i++) yield return null;
+            Assert.IsTrue(Sim.State.GetBool("ui.error.active"));
+            var to = Vector3.ProjectOnPlane(Dialog().position - Rig.Head.position, Vector3.up);
+            Assert.Less(Vector3.Angle(to, Vector3.ProjectOnPlane(Rig.Head.forward, Vector3.up)), 30f, "錯誤視窗要在眼前");
+            Sim.State.Set("ui.tutorial.tool", "");
+        }
+
         /// <summary>第 17 輪：從人走得到的位置（走道最靠弓處、接地站點），手在 1.23 m，射線到掛點不被擋；線條不停在走動阻擋體上。</summary>
         [UnityTest]
         public IEnumerator HoldingRod_FromWalkway_ReachesGroundClamp()
