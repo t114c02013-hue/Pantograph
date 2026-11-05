@@ -481,6 +481,15 @@ namespace PantographSim.Tests
                 UnityEngine.InputSystem.InputSystem.QueueStateEvent(ms, new UnityEngine.InputSystem.LowLevel.MouseState());
                 for (int i = 0; i < 3; i++) yield return null;
                 Assert.IsFalse(trigger.isPressed, "放開就沒有");
+                // 選完手馬上按 G：下一幀就要到手把
+                var grip = (UnityEngine.InputSystem.Controls.ButtonControl)right["gripPressed"];
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.G));
+                for (int i = 0; i < 3; i++) yield return null;
+                Debug.Log("[SimCheck] 選手後 3 幀 G " + grip.isPressed);
+                Assert.IsTrue(grip.isPressed, "已選右手時 G 直接送出");
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState());
+                for (int i = 0; i < 3; i++) yield return null;
+
                 // N＝B（帶我到目標）：一樣要先選右手
                 UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.N));
                 for (int i = 0; i < 4; i++) yield return null;
@@ -517,6 +526,33 @@ namespace PantographSim.Tests
         }
 
         const string XrPanelLayoutMount = "xr.mount.lift_panel";
+
+        /// <summary>第 17 輪：從人走得到的位置（走道最靠弓處、接地站點），手在 1.23 m，射線到掛點不被擋；線條不停在走動阻擋體上。</summary>
+        [UnityTest]
+        public IEnumerator HoldingRod_FromWalkway_ReachesGroundClamp()
+        {
+            yield return Boot(new Vector3(0f, 1.63f, 0f));
+            tracked = true; headY = 1.63f;
+            yield return WaitReady();
+            Sim.State.SetBool("training.running", true);
+            Sim.State.SetBool("xr.tutorial.active", false);
+            XrPlayer.ScriptedFrame = new XrFrame();
+            yield return null;
+            Sim.Bus.Publish(new ToolPickRequested { targetId = "env.tool_rack.slot_3", value = 3 });
+            for (int i = 0; i < 20; i++) yield return null;
+            Sim.State.Set("ui.tutorial.tool", "");
+            Assert.AreEqual(0, Object.FindObjectOfType<UnityEngine.XR.Interaction.Toolkit.XRRayInteractor>(true).raycastMask.value & LayerMask.GetMask(SceneLayers.LocomotionBlocker), "線條不停在走動阻擋體");
+            Assert.IsTrue(Sim.Registry.TryGetPosition(SimIds.GroundClamp, out var clamp));
+            var ground = Object.FindObjectsOfType<XrTeleportPoint>(true).First(p => p.PointId == "tp.platform.ground").transform.position;
+            foreach (var hand in new[] { new Vector3(-1.565f, 1.23f, -0.565f), ground + new Vector3(0.3f, 1.23f, -0.2f) })
+            {
+                Rig.LeftHand.position = hand + Vector3.up * 3f;
+                Rig.RightHand.SetPositionAndRotation(hand, Quaternion.LookRotation(clamp - hand));
+                for (int i = 0; i < 5; i++) yield return null;
+                string hovered = Sim.State.Get("ui.hover_id");
+                Assert.AreEqual(SimIds.GroundClamp, SimIds.RayTarget(Sim.State, SimIds.ToolGroundingRod, hovered, clamp), "從 " + hand + " 打到 " + hovered);
+            }
+        }
 
         /// <summary>第 16 輪：手持接地棒。組長紀錄裡的水平射線從弓頭上方飛過（弓頭比手低 0.6 m）；往下指弓頭任一處，點擊算掛點。</summary>
         [UnityTest]

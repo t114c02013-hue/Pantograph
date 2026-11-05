@@ -86,6 +86,7 @@ namespace PantographSim.XR
             Sim.Bus.Subscribe<VideoStarted>(OnVideoStarted);
             Sim.Bus.Subscribe<VideoStopped>(OnVideoStopped);
             bound = true;
+            if (rightRay != null) rightRay.raycastMask = SceneLayers.InteractMask;   // 線條和點擊判定（PickRay）用同一個遮罩：不然線條停在看不見的走動阻擋體上，看起來像打到弓架
             // 右手射線指到介面時的圓點、變色與按下震動（只有右手）
             if (rightRay != null && rightRay.GetComponent<XrUiPointer>() == null) rightRay.gameObject.AddComponent<XrUiPointer>().Setup(rightRay, rightController);
         }
