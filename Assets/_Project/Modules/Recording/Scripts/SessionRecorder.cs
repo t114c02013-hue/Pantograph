@@ -80,6 +80,7 @@ namespace PantographSim.Recording
             Meta["procedureTitle"] = catalog.procedureTitle;
             writer.WriteFile(RecordFiles.Meta, Json.Write(Meta));
             bus.Subscribe<StepStarted>(OnStepStarted);
+            bus.Subscribe<TestDriverHandoff>(OnHandoff);
             bus.Subscribe<StepCompleted>(OnStepCompleted);
             bus.Subscribe<ActionRequested>(OnRequested);
             bus.Subscribe<ActionPerformed>(OnPerformed);
@@ -126,6 +127,7 @@ namespace PantographSim.Recording
             if (begun)
             {
                 bus.Unsubscribe<StepStarted>(OnStepStarted);
+            bus.Unsubscribe<TestDriverHandoff>(OnHandoff);
                 bus.Unsubscribe<StepCompleted>(OnStepCompleted);
                 bus.Unsubscribe<ActionRequested>(OnRequested);
                 bus.Unsubscribe<ActionPerformed>(OnPerformed);
@@ -259,6 +261,8 @@ namespace PantographSim.Recording
             if (e.isReplay) return;
             Write("ToolReturnRequested", currentStep, new Dictionary<string, object> { { "slot", (int)e.value }, { "target", e.targetId ?? "" }, { "held", Held } });
         }
+
+        void OnHandoff(TestDriverHandoff e) => Write(SummaryBuilder.HandoffLine, currentStep, new Dictionary<string, object> { { "tag", e.tag ?? "" } });
 
         void OnMeasured(MeasurementTaken e)
         {

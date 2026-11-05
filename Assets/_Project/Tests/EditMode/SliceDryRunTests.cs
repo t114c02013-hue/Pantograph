@@ -496,6 +496,35 @@ namespace PantographSim.Tests
             Assert.AreEqual("", early.s.Get("procedure.preset_note"), "下一步清掉");
         }
 
+        /// <summary>從第 N 步開始：交接之前不計成績、不進報表。</summary>
+        [Test]
+        public void TestDriverHandoff_NotScored_NotReported()
+        {
+            var bus = new EventBus(); var s = new SimState(bus);
+            var scoring = new Scoring(bus, s); scoring.Start(0f);
+            bus.Publish(new ErrorDetected { errorId = "E", stepId = "S", severity = Severity.Major, what = "x" });
+            Assert.AreEqual(1f, s.GetFloat("score.major"));
+            bus.Publish(new TestDriverHandoff { tag = "測試驅動", time = 100f });
+            Assert.AreEqual(0f, s.GetFloat("score.major"), "交接之前的錯不算");
+            Assert.AreEqual("", s.Get("score.log"));
+            Assert.AreEqual(100f, s.GetFloat("score.start_time"), "從接手開始計時");
+            bus.Publish(new ErrorDetected { errorId = "E", stepId = "S", severity = Severity.Major, what = "x" });
+            Assert.AreEqual(1f, s.GetFloat("score.major"), "接手後同一個錯要算");
+            scoring.Dispose();
+
+            Assert.IsTrue(PantographSim.Editor.RecordingCheckDriver.ReachedStep("STP_CSR_11_Install_L", "STP_CSR_11"));
+            Assert.IsFalse(PantographSim.Editor.RecordingCheckDriver.ReachedStep("STP_CSR_10_CheckNew_L", "STP_CSR_11"));
+            Assert.IsFalse(PantographSim.Editor.RecordingCheckDriver.ReachedStep("STP_CSR_11_Install_L", ""));
+            Assert.AreEqual("測試驅動", ToolRulesDef.Load().testDriverTag);
+
+            var dir = System.IO.Path.Combine(UnityEngine.Application.temporaryCachePath, "handoff.jsonl");
+            System.IO.File.WriteAllText(dir, "{\"t\":1,\"seq\":1,\"type\":\"ErrorDetected\",\"step\":\"A\",\"data\":{\"errorId\":\"E\",\"severity\":\"Major\"}}\n{\"t\":2,\"seq\":2,\"type\":\"TestDriverHandoff\",\"step\":\"B\",\"data\":{\"tag\":\"測試驅動\"}}\n{\"t\":3,\"seq\":3,\"type\":\"StepStarted\",\"step\":\"B\",\"data\":{}}\n");
+            var lines = PantographSim.Recording.RecordLine.ReadAll(dir, out _);
+            var summary = PantographSim.Recording.SummaryBuilder.Build(null, lines, false);
+            Assert.AreEqual("測試驅動", summary["testDriven"]);
+            Assert.AreEqual(0, ((System.Collections.ICollection)summary["errors"]).Count, "交接之前的錯不進報表");
+        }
+
         /// <summary>第 14 輪：弓位指示燈的球在 VR 不收射線，桌面照舊。</summary>
         [Test]
         public void PanIndicator_NoRayInVr()

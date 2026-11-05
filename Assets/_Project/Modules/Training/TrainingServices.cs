@@ -201,13 +201,18 @@ namespace PantographSim.Training
             this.bus = bus; this.state = state;
             bus.Subscribe<ErrorDetected>(OnError);
             bus.Subscribe<ProcedureCompleted>(OnDone);
+            bus.Subscribe<TestDriverHandoff>(OnHandoff);
         }
 
         public void Dispose()
         {
             bus.Unsubscribe<ErrorDetected>(OnError);
             bus.Unsubscribe<ProcedureCompleted>(OnDone);
+            bus.Unsubscribe<TestDriverHandoff>(OnHandoff);
         }
+
+        /// <summary>測試驅動走過的那一段不算：從接手的人開始計時、計錯。</summary>
+        void OnHandoff(TestDriverHandoff e) { Start(e.time); state.Set("score.log", ""); }
 
         public void Start(float now)
         {

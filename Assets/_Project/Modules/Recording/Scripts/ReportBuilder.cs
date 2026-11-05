@@ -84,6 +84,7 @@ namespace PantographSim.Recording
             // ---- 第一頁 ----
             sb.Append("<section class=\"cover\">");
             sb.Append($"<h1>{H(meta.Str("procedureTitle", "集電弓碳滑板更換"))}　訓練報表</h1>");
+            if (s.Str("testDriven").Length > 0) sb.Append($"<p><b>{H(s.Str("testDriven"))}</b>：前面的步驟由編輯器代做，這份只算接手之後，不是完整訓練成績。</p>");
             if (!finished) sb.Append("<p class=\"banner\">這一筆是「未完成（中斷）」：沒有結算，所以沒有分數；以下是中斷前已記下的內容。</p>");
             string passText = finished ? (result.Bool("passed") ? "<b class=\"ok\">通過</b>" : "<b class=\"bad\">未通過</b>") : "—（中斷）";
             var incomplete = s.StrArr("incompleteStepNames");

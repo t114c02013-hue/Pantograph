@@ -51,6 +51,12 @@
         public float time; public bool isReplay;
     }
 
+    /// <summary>編輯器的測試驅動走到指定步驟、交給人接手：這之前的操作不是學員做的，不計成績、不進報表。tag＝紀錄上的標示。</summary>
+    public struct TestDriverHandoff
+    {
+        public string tag; public float time;
+    }
+
     /// <summary>要求開始／停止錄影。text：toggle（預設）／start／stop；targetId＝來源（key.F9、xr.menu、xr.wrist）。</summary>
     public struct VideoCaptureToggled
     {

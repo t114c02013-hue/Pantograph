@@ -23,6 +23,8 @@ namespace PantographSim.Editor
     ///   pace=秒（full 時把整場拉長到大約這個秒數，給錄影檢查用；扭力步驟放在最後一分鐘）
     ///   video=1（開始時就按 F9 開始錄影，結束時停止）；videostop=play（錄影中直接離開 Play，不先停止）
     ///   replay=0（不進重播）
+    ///   until=步驟 ID（例 STP_CSR_11_Install_L；開頭相符就算）：走到那一步就停，工具收回原位、保持 Play 交人接手；這之前的操作標成測試驅動，不計成績、不進報表
+    ///   tutorial=1（教學模式；沒給就是練習）；exit=1（到 until 後離開 Play，檢查用）
     /// 結果寫到 Logs/rec-check.txt。
     /// </summary>
     [InitializeOnLoad]
@@ -39,6 +41,7 @@ namespace PantographSim.Editor
         static readonly List<string> errors = new List<string>();
         static Dictionary<string, string> args = new Dictionary<string, string>();
         static float pace;          // 每步之間額外等待（秒）
+        static bool stayInPlay;     // 交給人接手：走完不離開 Play
         static float tStart;
 
         /// <summary>每幀的 unscaledDeltaTime（錄影與不錄影比較用）。</summary>
@@ -75,7 +78,7 @@ namespace PantographSim.Editor
                 SessionState.SetBool(SessionKey, false);
                 args = SessionState.GetString(ArgsKey, "").Split('\n').Select(l => l.Trim()).Where(l => l.Contains("="))
                     .ToDictionary(l => l.Substring(0, l.IndexOf('=')), l => l.Substring(l.IndexOf('=') + 1));
-                log.Clear(); errors.Clear(); frameTimes.Clear();
+                log.Clear(); errors.Clear(); frameTimes.Clear(); stayInPlay = false;
                 routine = Run();
                 waitUntilFrame = Time.frameCount + 5;
             }
@@ -84,8 +87,12 @@ namespace PantographSim.Editor
             if (Time.frameCount < waitUntilFrame) return;
             try
             {
-                if (routine.MoveNext()) waitUntilFrame = Time.frameCount + Math.Max(1, routine.Current is int n ? n : 1);
-                else Finish(true);
+                if (routine.MoveNext())
+                {
+                    waitUntilFrame = Time.frameCount + Math.Max(1, routine.Current is int n ? n : 1);
+                    if (ReachedStep(S?.Get("procedure.current"), Arg("until"))) { args.Remove("until"); routine = HandOff(); }
+                }
+                else Finish(!stayInPlay);
             }
             catch (Exception e)
             {
@@ -93,6 +100,24 @@ namespace PantographSim.Editor
                 Finish(true);
             }
         }
+
+        /// <summary>走到 until 指定的步驟了沒。</summary>
+        public static bool ReachedStep(string current, string until) => !string.IsNullOrEmpty(until) && !string.IsNullOrEmpty(current) && current.StartsWith(until);
+
+        /// <summary>交給人接手：手上的工具收回原位、面板關掉，之後的操作才算數。</summary>
+        static IEnumerator HandOff()
+        {
+            Return();
+            yield return 10;
+            if (S.GetBool("ui.workorder_open")) Send(SimIds.WorkOrder, "toggle");
+            Send("ui.tutorial", "close");
+            yield return 5;
+            Sim.Bus.Publish(new TestDriverHandoff { tag = DriverTag, time = SimClock.Now });
+            Note("交給人接手");
+            stayInPlay = Arg("exit") != "1";
+        }
+
+        static string DriverTag => PantographSim.Data.ToolRulesDef.Load().testDriverTag;
 
         static void Finish(bool exit)
         {
@@ -177,13 +202,13 @@ namespace PantographSim.Editor
             float target = float.TryParse(Arg("pace", "0"), NumberStyles.Float, CultureInfo.InvariantCulture, out var p) ? p : 0f;
             log.AppendLine($"模式 {mode}　目標長度 {target:0} s　錄影 {Arg("video", "0")}　紀錄根目錄 {RecordingService.Instance.Root}");
 
-            Send("rec", "trainee:" + Trainee);
-            Send("app.start", "practice:SCN_Default");
+            Send("rec", "trainee:" + (args.ContainsKey("until") ? DriverTag : Trainee));
+            Send("app.start", (Arg("tutorial") == "1" ? "tutorial" : "practice") + ":SCN_Default");
             yield return 30;
             string folder = S.Get("rec.folder");
             log.AppendLine("紀錄資料夾：" + folder);
             log.AppendLine($"● 紀錄中：{S.GetBool("rec.active")}　訓練模式：{S.Get("training.mode")}");
-            bool nameOk = Path.GetFileName(folder).EndsWith("_" + Trainee) && System.Text.RegularExpressions.Regex.IsMatch(Path.GetFileName(folder), @"^\d{8}_\d{6}_");
+            bool nameOk = Path.GetFileName(folder).EndsWith("_" + (args.ContainsKey("until") ? DriverTag : Trainee)) && System.Text.RegularExpressions.Regex.IsMatch(Path.GetFileName(folder), @"^\d{8}_\d{6}_");
             bool rootOk = Path.GetFullPath(folder).StartsWith(Path.GetFullPath("Recordings"), StringComparison.OrdinalIgnoreCase);
             log.AppendLine($"{(nameOk ? "✔" : "✘")} 資料夾名稱 yyyyMMdd_HHmmss_學員　{(rootOk ? "✔" : "✘")} 在專案根目錄 Recordings/ 底下（不在 Assets）");
             foreach (var x in Sec(1.5f)) yield return x;
@@ -431,15 +456,15 @@ namespace PantographSim.Editor
             foreach (var x in WaitStep("STP_CSR_10")) yield return x;
             foreach (var x in Pace()) yield return x;
             foreach (var s in new[] { 1, 2, 3 }) { Click($"env.spare_shelf.slot_{s}"); yield return 10; }
-            Send("env.spare_shelf.slot_2", "flip");
+            Send(S.Get("spare.good_slot"), "flip");
             yield return 10;
             Pick(SimIds.ToolCaliper);
             yield return 10;
-            Click("env.spare_shelf.slot_2", SimIds.ToolCaliper);
+            Click(S.Get("spare.good_slot"), SimIds.ToolCaliper);
             yield return 10;
             Return();
             yield return 5;
-            Send("env.spare_shelf.slot_2", "pick");
+            Send(S.Get("spare.good_slot"), "pick");
             foreach (var x in WaitStep("STP_CSR_11")) yield return x;
             if (Sim.Registry.TryGetPosition($"ip.carbon_strip_{side}.bracket", out var bracket))
                 PointerState.ScriptedRay = new Ray(bracket + Vector3.up * 2f, Vector3.down);

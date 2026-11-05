@@ -34,9 +34,23 @@ namespace PantographSim.Recording
 
         public static string CountNote(int n) => n > 1 ? $"（本步發生 {n} 次）" : "";
 
+        public const string HandoffLine = "TestDriverHandoff";
+
+        /// <summary>測試驅動的標示；紀錄裡沒有就是空字串。</summary>
+        public static string HandoffTag(IReadOnlyList<RecordLine> lines) => lines.LastOrDefault(l => l.type == HandoffLine)?.S("tag") ?? "";
+
+        /// <summary>報表只算接手之後：交接那一行之前是測試驅動做的。</summary>
+        public static IReadOnlyList<RecordLine> AfterHandoff(IReadOnlyList<RecordLine> lines)
+        {
+            int at = lines.ToList().FindLastIndex(l => l.type == HandoffLine);
+            return at < 0 ? lines : lines.Skip(at + 1).ToList();
+        }
+
         public static Dictionary<string, object> Build(Dictionary<string, object> meta, IReadOnlyList<RecordLine> lines, bool rebuiltAfterCrash)
         {
             meta = meta ?? new Dictionary<string, object>();
+            string driverTag = HandoffTag(lines);
+            lines = AfterHandoff(lines);
             var cat = StepCatalog.FromMeta(meta);
             var resultLine = lines.LastOrDefault(l => l.type == "SessionResult");
             bool finished = resultLine != null;
@@ -63,6 +77,7 @@ namespace PantographSim.Recording
             else s["result"] = null;
 
             s["steps"] = Steps(cat, lines, finished, end, mode);
+            s["testDriven"] = driverTag;
             s["faultTimes"] = lines.Where(l => l.type == "FaultTime").Select(l => (object)new Dictionary<string, object> { { "step", l.step }, { "stepName", cat.NameOf(l.step) }, { "fault", l.S("fault") }, { "seconds", l.N("seconds") } }).ToList();
             s["faultSeconds"] = lines.Where(l => l.type == "FaultTime").Sum(l => l.N("seconds"));   // b5 的 1.5 倍判定要先扣這個
             s["errors"] = lines.Where(l => l.type == "ErrorDetected").Select(l => (object)new Dictionary<string, object>
