@@ -481,6 +481,27 @@ namespace PantographSim.Tests
                 UnityEngine.InputSystem.InputSystem.QueueStateEvent(ms, new UnityEngine.InputSystem.LowLevel.MouseState());
                 for (int i = 0; i < 3; i++) yield return null;
                 Assert.IsFalse(trigger.isPressed, "放開就沒有");
+                // N＝B（帶我到目標）：一樣要先選右手
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.N));
+                for (int i = 0; i < 4; i++) yield return null;
+                Assert.IsTrue(((UnityEngine.InputSystem.Controls.ButtonControl)right["secondaryButton"]).isPressed, "選右手後 N 就是 B 鍵");
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState());
+                for (int i = 0; i < 3; i++) yield return null;
+
+                // 傳送：左手搖桿往前。按 T 選左手，W A S D 開場就是搖桿（按 1 反而會關掉），按住 W 瞄準、放開傳送
+                foreach (var key in new[] { UnityEngine.InputSystem.Key.T })
+                {
+                    UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState(key));
+                    for (int i = 0; i < 3; i++) yield return null;
+                    UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState());
+                    for (int i = 0; i < 3; i++) yield return null;
+                }
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.W));
+                for (int i = 0; i < 6; i++) yield return null;
+                Assert.IsTrue(Object.FindObjectOfType<XrTeleport>().Aiming, "按住 W 要開始瞄準傳送");
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb, new UnityEngine.InputSystem.LowLevel.KeyboardState());
+                for (int i = 0; i < 6; i++) yield return null;
+                Assert.IsFalse(Object.FindObjectOfType<XrTeleport>().Aiming, "放開結束瞄準");
                 if (Sim.Registry.TryGetTransform(XrPanelLayoutMount, out var mount)) Debug.Log($"[SimCheck] 升降面板 {mount.position} 離頭 {Vector3.Distance(mount.position, Rig.Head.position):0.00} m");
             }
             finally
@@ -496,6 +517,35 @@ namespace PantographSim.Tests
         }
 
         const string XrPanelLayoutMount = "xr.mount.lift_panel";
+
+        /// <summary>第 16 輪：手持接地棒。組長紀錄裡的水平射線從弓頭上方飛過（弓頭比手低 0.6 m）；往下指弓頭任一處，點擊算掛點。</summary>
+        [UnityTest]
+        public IEnumerator HoldingRod_RayAtPanHead_ClicksGroundClamp()
+        {
+            yield return Boot(new Vector3(0f, 1.63f, 0f));
+            tracked = true; headY = 1.63f;
+            yield return WaitReady();
+            Sim.State.SetBool("training.running", true);
+            Sim.State.SetBool("xr.tutorial.active", false);
+            XrPlayer.ScriptedFrame = new XrFrame();
+            yield return null;
+            Sim.Bus.Publish(new ToolPickRequested { targetId = "env.tool_rack.slot_3", value = 3 });
+            yield return null; yield return null;
+            Sim.State.Set("ui.tutorial.tool", "");
+            Assert.AreEqual(SimIds.ToolGroundingRod, Sim.State.Get(SimIds.ActiveTool));
+            var hand = new Vector3(-1.55f, 1.23f, -0.51f);   // 紀錄 20261105_184055 t=600 的右手位置
+            Rig.LeftHand.position = hand + Vector3.up * 3f;
+            Rig.RightHand.SetPositionAndRotation(hand, Quaternion.LookRotation(new Vector3(0.08f, -0.01f, 1f)));
+            for (int i = 0; i < 5; i++) yield return null;
+            Assert.AreEqual("", Sim.State.Get("ui.hover_id"), "水平的射線本來就打不到弓頭");
+            Assert.IsFalse(PointerState.OverUi, "不是介面擋住");
+            Assert.IsTrue(Sim.Registry.TryGetPosition(SimIds.PanHead, out var pan));
+            Rig.RightHand.SetPositionAndRotation(hand, Quaternion.LookRotation(pan - hand));
+            for (int i = 0; i < 5; i++) yield return null;
+            string hovered = Sim.State.Get("ui.hover_id");
+            Assert.AreNotEqual("", hovered, "往下指要 hover 到弓頭");
+            Assert.AreEqual(SimIds.GroundClamp, SimIds.RayTarget(Sim.State, SimIds.ToolGroundingRod, hovered, pan), "弓頭任一處都算掛點");
+        }
 
         /// <summary>第 15 輪：站在桿架前，右手射線指著 3 號掛位那一帶按握把，要送出 ToolPickRequested（打到桿子或後面的掛架都算）。</summary>
         [UnityTest]

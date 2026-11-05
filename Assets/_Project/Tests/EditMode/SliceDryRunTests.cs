@@ -530,9 +530,10 @@ namespace PantographSim.Tests
         public void RackHover_PicksNearestSlot()
         {
             var slots = new[] { (2, new UnityEngine.Vector3(0f, 1f, 0f)), (3, new UnityEngine.Vector3(0f, 1f, 0.3f)) };
-            Assert.AreEqual(3, PantographSim.XR.XrPlayer.NearestSlot(slots, new UnityEngine.Vector3(0f, 1.2f, 0.25f), 0.35f));
-            Assert.AreEqual(2, PantographSim.XR.XrPlayer.NearestSlot(slots, new UnityEngine.Vector3(0f, 0.9f, 0.05f), 0.35f));
-            Assert.AreEqual(0, PantographSim.XR.XrPlayer.NearestSlot(slots, new UnityEngine.Vector3(2f, 1f, 0f), 0.35f), "太遠");
+            float radius = ToolRulesDef.Load().rackGrabRadius;
+            Assert.AreEqual(3, PantographSim.XR.XrPlayer.NearestSlot(slots, new UnityEngine.Vector3(0f, 1.05f, 0.25f), radius));
+            Assert.AreEqual(2, PantographSim.XR.XrPlayer.NearestSlot(slots, new UnityEngine.Vector3(0f, 0.95f, 0.05f), radius));
+            Assert.AreEqual(0, PantographSim.XR.XrPlayer.NearestSlot(slots, new UnityEngine.Vector3(0f, 1.3f, 0.15f), radius), "打到大框：不拿");
         }
 
         /// <summary>第 14 輪：弓位指示燈的球在 VR 不收射線，桌面照舊。</summary>
