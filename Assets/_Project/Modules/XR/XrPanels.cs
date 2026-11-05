@@ -175,7 +175,11 @@ namespace PantographSim.XR
         void FollowHandle(Entry e)
         {
             float sc = Mathf.Max(e.panel.lossyScale.y, 1e-5f);
-            if (!ContentBounds(e.panel, out var b)) b = e.panel is RectTransform rt ? new Bounds(rt.rect.center, rt.rect.size) : new Bounds(Vector3.zero, Vector3.one * 100f);
+            // 面板沒有內容（任務卡收掉了）：底板和把手一起收，不然整塊深色底板留在原地擋視野
+            bool shown = ContentBounds(e.panel, out var b);
+            if (e.plate != null) e.plate.gameObject.SetActive(shown);
+            if (!e.grabbed && e.handle.gameObject.activeSelf != shown) e.handle.gameObject.SetActive(shown);
+            if (!shown) return;
             if (e.plate != null)
             {
                 e.plate.localPosition = new Vector3(b.center.x, b.center.y, 0.006f / sc);

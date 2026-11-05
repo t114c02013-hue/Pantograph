@@ -413,6 +413,34 @@ namespace PantographSim.Tests
         }
 
         /// <summary>第 2 點：頭在 (0, 1.63, 0) 看 +Z，任務卡在頭前 1.0 m、眼下 0.15 m，頭轉動不跟著走，「面板叫回眼前」叫得回來。</summary>
+        /// <summary>terry 2026-11-05：選好模式後開場面板都要消失，包含任務卡背後的深色底板和把手；之後跳出來的對話框還是有底板。</summary>
+        [UnityTest]
+        public IEnumerator StartPanels_GoneAfterModeChosen()
+        {
+            yield return Boot(new Vector3(0f, 1.63f, 0f));
+            tracked = true;
+            yield return WaitReady();
+            Sim.State.SetBool("xr.tutorial.active", false);
+            Sim.State.SetBool("xr.tutorial.done", true);
+            for (int i = 0; i < 5; i++) yield return null;
+            var plate = Dialog().Find("BackPlate");
+            var handle = GameObject.Find("UI_PanelHandle_dialog");
+            Assert.IsNotNull(plate); Assert.IsNotNull(handle);
+            Assert.IsTrue(plate.gameObject.activeSelf, "任務卡開著要有底板");
+            Assert.IsTrue(Dialog().Find("TaskCard_Dim").gameObject.activeSelf, "任務卡開著");
+            Sim.State.SetBool("training.running", true);
+            yield return new WaitForSecondsRealtime(3.2f);   // 短暫提示本來就停 3 秒
+            foreach (Transform c in Dialog())
+                if (c.name != "BackPlate") Assert.IsFalse(c.gameObject.activeSelf, c.name + "：開始後不能留著");
+            Assert.IsFalse(plate.gameObject.activeSelf, "底板收掉");
+            Assert.IsFalse(handle.activeSelf, "把手收掉");
+
+            Sim.State.SetBool("xr.help_open", true);   // 之後要看再叫：Y
+            for (int i = 0; i < 5; i++) yield return null;
+            Assert.IsTrue(plate.gameObject.activeSelf, "叫出說明時底板回來");
+            Sim.State.SetBool("xr.help_open", false);
+        }
+
         [UnityTest]
         public IEnumerator TaskCard_FrontOfHead_Fixed_Recalled()
         {

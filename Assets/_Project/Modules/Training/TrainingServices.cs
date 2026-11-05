@@ -31,6 +31,7 @@ namespace PantographSim.Training
             state.SetBool("training.allow_pose_toggle", mode == TrainingMode.Practice && scenario != null && scenario.startRaised);
             state.SetFloat("scenario.seed", scenario != null ? scenario.randomSeed : 1);
             if (scenario != null) KeyValueList.Apply(scenario.initialStates, state);
+            foreach (var open in new[] { "ui.help_open", "xr.help_open", "xr.menu_open" }) state.SetBool(open, false);   // 開始後畫面不留開場的說明，要看再叫
             state.SetBool("training.running", true);
         }
     }

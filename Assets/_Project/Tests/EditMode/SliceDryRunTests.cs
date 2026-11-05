@@ -496,6 +496,17 @@ namespace PantographSim.Tests
             Assert.AreEqual("", early.s.Get("procedure.preset_note"), "下一步清掉");
         }
 
+        /// <summary>terry 2026-11-05：選好模式時，開著的說明都收掉。</summary>
+        [Test]
+        public void ModeChosen_ClosesOpeningHelp()
+        {
+            var s = new SimState(new EventBus());
+            foreach (var k in new[] { "ui.help_open", "xr.help_open", "xr.menu_open" }) s.SetBool(k, true);
+            new ModeController(s).Begin(TrainingMode.Tutorial, null);
+            foreach (var k in new[] { "ui.help_open", "xr.help_open", "xr.menu_open" }) Assert.IsFalse(s.GetBool(k), k);
+            Assert.IsTrue(s.GetBool("training.running"));
+        }
+
         /// <summary>第 12 輪：同一條滑板在備品架和裝上車量到一樣；不同條可以不同。</summary>
         [Test]
         public void SamePiece_SameReading_SpareAndMounted()
