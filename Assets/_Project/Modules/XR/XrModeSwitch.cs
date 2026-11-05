@@ -55,6 +55,22 @@ namespace PantographSim.XR
             return IsHeadWorn(tracked, y, layout.simulatorWornHeadY);
         }
 
+        /// <summary>模擬器的手開場位置寫死在套件裡（離臉 30 cm）、沒有設定欄位，只能改它的私有狀態。</summary>
+        // shortcut: 依賴 XRI 2.6.5 的私有欄位名，升級 XRI 時要重新確認；欄位不見時只記警告，手留在預設位置
+        static void PlaceSimulatorHands(Vector3 right)
+        {
+            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            foreach (var (name, pos) in new[] { ("m_RightControllerState", right), ("m_LeftControllerState", new Vector3(-right.x, right.y, right.z)) })
+            {
+                var field = typeof(XRDeviceSimulator).GetField(name, flags);
+                var position = field?.FieldType.GetField("devicePosition");
+                if (position == null) { Debug.LogWarning("[XR] 模擬器沒有 " + name + "，手留在預設位置"); continue; }
+                object state = field.GetValue(XRDeviceSimulator.instance);
+                position.SetValue(state, pos);
+                field.SetValue(XRDeviceSimulator.instance, state);
+            }
+        }
+
         static void RemoveSimulator() { if (XRDeviceSimulator.instance != null) Destroy(XRDeviceSimulator.instance.gameObject); }
 
         public void Setup(GameObject root, XrRig r, XrTeleport tp, XrCoach c) { rigRoot = root; rig = r; teleport = tp; coach = c; }
@@ -79,6 +95,7 @@ namespace PantographSim.XR
                     {
                         if (loaderUp) { m.StopSubsystems(); m.DeinitializeLoader(); }   // 不然畫面還是送給沒人戴的頭盔
                         DeviceSimulated = true;
+                        PlaceSimulatorHands(layout.simulatorRightHand);
                         break;
                     }
                     Status = "沒有偵測到頭盔（OpenXR 沒有啟動），使用桌面模式";

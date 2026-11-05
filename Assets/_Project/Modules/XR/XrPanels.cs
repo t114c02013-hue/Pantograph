@@ -32,6 +32,7 @@ namespace PantographSim.XR
         readonly PanelMemory memory = new PanelMemory();
         string station = "";
         float lastRecall = -1f;
+        bool wasRunning;
         readonly Dictionary<string, string> replayApplied = new Dictionary<string, string>();
 
         public void Setup(PanelLayout l, Transform headT, XrTeleport tp) { layout = l; head = headT; teleport = tp; }
@@ -44,6 +45,10 @@ namespace PantographSim.XR
             if (entries.Count == 0) return;
 
             if (SimSession.IsReplay) { ApplyReplay(s); return; }
+
+            bool running = s.GetBool("training.running");
+            if (running && !wasRunning && layout.faceWorkOnStart && teleport != null) teleport.PlaceAtStart(false);   // 任務卡在背面，開始後面向提示板和升降盒
+            wasRunning = running;
 
             string now = s.Get("xr.point");
             if (now != station) { station = now; foreach (var e in entries) if (!layout.Find(e.id).openInFront) PlaceForStation(e); }

@@ -27,6 +27,9 @@ namespace PantographSim.Data
 
         [Tooltip("桌機 VR 模擬器開著時：等真的頭盔幾秒、頭離地多高才算有人戴著（m）。Meta 執行環境開著時，頭盔放桌上也回報追蹤")] public float simulatorWaitSeconds = 4f, simulatorWornHeadY = 1f;
 
+        [Tooltip("桌機 VR 模擬器：右手開場相對頭的位置（m），左手鏡射。預設太靠臉，手把擋面板、手腕面板一直開著")] public Vector3 simulatorRightHand = new Vector3(0.22f, -0.4f, 0.35f);
+        [Tooltip("選好模式後把人轉向站點正面：任務卡在站點背面，提示板和工作目標在正面")] public bool faceWorkOnStart = true;
+
         [Tooltip("terry 試玩：開場背對站點面向目標（升降盒），任務卡在升降盒對面、正面朝學員")] public bool startFacesOpposite = true;
         [Tooltip("terry 試玩：作業單打開時，離視線超過這個角度（度）或這個距離（m）就移到眼前")] public float carriedMaxAngle = 50f, carriedMaxDistance = 1.5f;
         public Panel[] panels =

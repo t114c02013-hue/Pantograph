@@ -444,6 +444,8 @@ namespace PantographSim.Tests
                 for (int i = 0; i < 10; i++) yield return null;
                 var origin = Rig.GetComponentInParent<Unity.XR.CoreUtils.XROrigin>() ?? Object.FindObjectOfType<Unity.XR.CoreUtils.XROrigin>();
                 Debug.Log($"[SimCheck] eye {Rig.Head.position.y - origin.transform.position.y:0.000} head {Rig.Head.position} left {Rig.LeftHand.position} right {Rig.RightHand.position} mode {origin.CurrentTrackingOriginMode}");
+                Assert.Greater(Rig.Head.position.y - Rig.RightHand.position.y, 0.3f, "手放低，不擋面板");
+                Assert.Greater(Rig.Head.position.y - Rig.LeftHand.position.y, 0.3f, "手放低，不擋面板");
                 Assert.AreEqual(PostureDef.Load().standEye, Rig.Head.position.y - origin.transform.position.y, 0.02f, "175 cm 站姿眼高，沒有疊加桌面的 1.2 m");
                 Assert.AreEqual(Unity.XR.CoreUtils.XROrigin.TrackingOriginMode.Floor, origin.RequestedTrackingOriginMode, "Floor");
                 var mgrNow = UnityEngine.XR.Management.XRGeneralSettings.Instance?.Manager;
@@ -488,8 +490,12 @@ namespace PantographSim.Tests
             Assert.IsNotNull(plate); Assert.IsNotNull(handle);
             Assert.IsTrue(plate.gameObject.activeSelf, "任務卡開著要有底板");
             Assert.IsTrue(Dialog().Find("TaskCard_Dim").gameObject.activeSelf, "任務卡開著");
+            Sim.Bus.Publish(new StepStarted { title = "降弓並確認", index = 1, total = 25, side = "" });
             Sim.State.SetBool("training.running", true);
             yield return new WaitForSecondsRealtime(3.2f);   // 短暫提示本來就停 3 秒
+            Assert.IsTrue(Sim.Registry.TryGetTransform("xr.panel.board", out var board));
+            Assert.IsTrue(board.Find("StepPanel").gameObject.activeSelf, "提示板要有內容");
+            Assert.IsTrue(PanelLogic.InView(Rig.Head.position, Rig.Head.forward, board.position, 60f, 2.5f), "選好模式後提示板在眼前");
             foreach (Transform c in Dialog())
                 if (c.name != "BackPlate") Assert.IsFalse(c.gameObject.activeSelf, c.name + "：開始後不能留著");
             Assert.IsFalse(plate.gameObject.activeSelf, "底板收掉");
