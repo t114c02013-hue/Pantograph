@@ -560,7 +560,9 @@ namespace PantographSim.Tests
             yield return new WaitForSecondsRealtime(3.2f);   // 短暫提示本來就停 3 秒
             Assert.IsTrue(Sim.Registry.TryGetTransform("xr.panel.board", out var board));
             Assert.IsTrue(board.Find("StepPanel").gameObject.activeSelf, "提示板要有內容");
-            Assert.IsTrue(PanelLogic.InView(Rig.Head.position, Rig.Head.forward, board.position, 60f, 2.5f), "選好模式後提示板在眼前");
+            Assert.IsFalse(Layout.faceWorkOnStart, "terry：開始時不要把人轉過去");
+            var lift = GameObject.Find("LiftPanelMount").transform.position;
+            Assert.Greater(Vector3.Dot(Vector3.ProjectOnPlane(board.position - Rig.Head.position, Vector3.up), Vector3.ProjectOnPlane(lift - Rig.Head.position, Vector3.up)), 0f, "提示板在升降盒那一側，人自己轉身");
             foreach (Transform c in Dialog())
                 if (c.name != "BackPlate") Assert.IsFalse(c.gameObject.activeSelf, c.name + "：開始後不能留著");
             Assert.IsFalse(plate.gameObject.activeSelf, "底板收掉");
@@ -591,7 +593,14 @@ namespace PantographSim.Tests
             for (int i = 0; i < 5; i++) yield return null;
             Assert.Less((card.position - at).magnitude, 1e-3f, "不跟著視線走");
             Object.FindObjectOfType<XrPanels>().Recall();
-            Assert.Greater(Vector3.Dot((card.position - Rig.Head.position).normalized, Rig.Head.forward), 0.5f, "叫得回來");
+            Assert.Less((card.position - at).magnitude, 1e-3f, "面板回到眼前不搬開始介面");
+            // 控制器教學結束、換成任務卡：也不搬
+            Sim.State.SetBool("xr.tutorial.active", false);
+            yield return null;
+            Sim.State.SetBool("xr.tutorial.done", true);
+            for (int i = 0; i < 5; i++) yield return null;
+            Assert.IsTrue(card.Find("TaskCard_Dim").gameObject.activeSelf, "任務卡開著");
+            Assert.Less((card.position - at).magnitude, 1e-3f, "教學換任務卡不搬開始介面");
         }
 
         [UnityTest]

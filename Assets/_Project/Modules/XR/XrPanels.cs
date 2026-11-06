@@ -234,6 +234,7 @@ namespace PantographSim.XR
             if (head == null) return;
             for (int i = 0; i < entries.Count; i++)
             {
+                if (entries[i].id == "dialog" && !(Sim.State?.GetBool("training.running") ?? false)) continue;   // 開始介面固定，不叫回眼前
                 var p = layout.Find(entries[i].id);
                 var pose = p.carried ? PanelLogic.Carried(head.position, head.forward, p.frontDistance, p.frontBelow, p.frontTiltDeg) : PanelLogic.Recall(head.position, head.forward, i, layout.recallDistance, layout.recallMaxAngle);
                 entries[i].panel.SetPositionAndRotation(pose.position, pose.rotation);

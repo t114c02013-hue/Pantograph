@@ -97,11 +97,7 @@ namespace PantographSim.XR
                 var pts = ids.Select(id => Sim.Registry.TryGetPosition(id, out var p) ? (Vector3?)p : null).Where(p => p.HasValue).Select(p => p.Value).ToList();
                 if (pts.Count > 0) look = pts.Aggregate(Vector3.zero, (a, b) => a + b) / pts.Count;
             }
-            if (teleport.GoToStation(stand, look) == XrTeleport.GoResult.AlreadyThere)
-            {
-                teleport.FaceFromHere(look);   // 同一站也要轉向目標，不然背對著按了沒反應
-                SayTarget(s);
-            }
+            if (teleport.GoToStation(stand, look) == XrTeleport.GoResult.AlreadyThere) SayTarget(s);
             return true;
         }
 

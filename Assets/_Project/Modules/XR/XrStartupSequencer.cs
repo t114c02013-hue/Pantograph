@@ -99,7 +99,7 @@ namespace PantographSim.XR
         {
             if (teleport == null) return;
             teleport.Recenter();
-            if (rig != null && rig.Head != null) PlacePanels(rig.Head.position, rig.Head.forward);
+            if (rig != null && rig.Head != null && (Sim.State?.GetBool("training.running") ?? false)) PlacePanels(rig.Head.position, rig.Head.forward);   // 開始之前面板固定
         }
     }
 }

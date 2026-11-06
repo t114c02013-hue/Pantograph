@@ -265,7 +265,8 @@ namespace PantographSim.UI
             // 開場的擺放由 XrStartupSequencer 負責；開場之後才打開的對話框（錯誤視窗）開在頭前 1 m，開著時固定不跟頭，可以抓把手移動
             bool open = DialogOpen();
             bool error = s.GetBool("ui.error.active");   // 工具教學卡還開在遠處時跳錯誤，也要到眼前
-            if (s.GetBool("xr.ready") && ((open && !dialogWasOpen) || (error && !errorWasOpen)))
+            // 開始介面固定在升降盒對面：開場擺好之後不搬（terry：不要亂跳）
+            if (s.GetBool("training.running") && s.GetBool("xr.ready") && ((open && !dialogWasOpen) || (error && !errorWasOpen)))
             {
                 PlaceDialog(1f);
                 if (!error && !string.IsNullOrEmpty(s.Get("ui.tutorial.tool")) && rig.RightHand != null) PlaceBesideTool();

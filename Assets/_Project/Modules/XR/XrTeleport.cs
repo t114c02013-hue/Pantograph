@@ -147,9 +147,6 @@ namespace PantographSim.XR
             return r;
         }
 
-        /// <summary>留在目前站點，轉向 lookAt。</summary>
-        public void FaceFromHere(Vector3? lookAt) { if (lookAt.HasValue && Current != null) GoTo(Current, lookAt); }
-
         void GoTo(XrTeleportPoint p, Vector3? lookAt)
         {
             var dir = lookAt.HasValue ? Flat(lookAt.Value - p.transform.position) : Vector3.zero;

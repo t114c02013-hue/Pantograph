@@ -25,7 +25,7 @@ namespace PantographSim.Data
         [Tooltip("VR 開場（XrStartupSequencer）：等頭盔追蹤最多幾秒、頭離地多高才算追蹤有效、逾時用的眼高（m）")] public float startupTimeoutSec = 5f, trackedMinHeadY = 0.5f;
         [Tooltip("任務卡、對話框、錯誤視窗（試玩修正 8.5）：頭前方距離、比眼睛低多少（m）；只跟頭的水平朝向，擺好就固定")] public float taskCardDistance = 1.0f, taskCardBelowEye = 0.15f;
 
-        [Tooltip("選好模式後把人轉向站點正面：任務卡在站點背面，提示板和工作目標在正面")] public bool faceWorkOnStart = true;
+        [Tooltip("選好模式後把人轉向站點正面：任務卡在站點背面，提示板和工作目標在正面")] public bool faceWorkOnStart = false;
 
         [Tooltip("terry 試玩：開場背對站點面向目標（升降盒），任務卡在升降盒對面、正面朝學員")] public bool startFacesOpposite = true;
         [Tooltip("terry 試玩：作業單打開時，離視線超過這個角度（度）或這個距離（m）就移到眼前")] public float carriedMaxAngle = 50f, carriedMaxDistance = 1.5f;
