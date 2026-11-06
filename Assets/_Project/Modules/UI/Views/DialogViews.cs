@@ -154,6 +154,7 @@ namespace PantographSim.UI
         RectTransform dim;
         Text title, heading, body;
         Button prev, next;
+        RectTransform buttons;
         int page; string shownTool;
 
         protected override void OnBuild(RectTransform safe)
@@ -166,6 +167,7 @@ namespace PantographSim.UI
             body = Ui.Text(card, "", 24);
             Ui.Size(body, -1, 200);
             var row = Ui.Rect(card, "Buttons"); var h = Ui.HStack(row.gameObject, 12); h.childAlignment = TextAnchor.MiddleRight;
+            buttons = row;
             prev = Ui.Button(row, "上一頁", 22, () => page--); Ui.Size(prev, 150, 56);
             next = Ui.Button(row, "下一頁", 22, () => page++); Ui.Size(next, 150, 56);
             var ok = Ui.Button(row, "我知道了", 24, () => Ui.Send("ui.tutorial", "close"), Ui.ButtonOn); Ui.Size(ok, 200, 56);
@@ -179,6 +181,8 @@ namespace PantographSim.UI
             if (!show) return;
             if (tool != shownTool) { shownTool = tool; page = 0; }
             var pages = s.Get("ui.tutorial.pages").Split('\u001e');
+            Ui.SetActive(buttons, !InputMode.XrActive);
+            if (InputMode.XrActive) { RefreshToolCard(s, tool, pages); return; }
             page = Mathf.Clamp(page, 0, pages.Length - 1);
             var f = pages[page].Split('\u001f');
             title.text = $"工具教學：{s.Get("ui.tutorial.title")}　<size=22>（{page + 1}/{pages.Length}，{Ui.ToolPlace(tool)}第 {Ui.ToolKey(tool)} 格）</size>";
@@ -187,6 +191,25 @@ namespace PantographSim.UI
             if (InputMode.XrActive && XrGestures.For(tool).Length > 0) body.text += "\n" + Ui.Tint("VR：" + XrGestures.For(tool), Ui.Accent);
             prev.interactable = page > 0;
             next.interactable = page < pages.Length - 1;
+        }
+
+        /// <summary>VR：工具旁邊的小視窗沒有按鈕（工具在右手，射線點不到自己旁邊），全部頁面一次列出，放回工具就收起。</summary>
+        void RefreshToolCard(ISimState s, string tool, string[] pages)
+        {
+            title.text = s.Get("ui.tutorial.title");
+            heading.text = "";
+            var lines = new List<string>();
+            foreach (var p in pages)
+            {
+                var f = p.Split('\u001f');
+                lines.Add(f.Length > 1 ? Ui.Tint(f[0], Ui.Accent) + "　" + f[1] : p);
+            }
+            if (XrGestures.For(tool).Length > 0) lines.Add(Ui.Tint("VR：" + XrGestures.For(tool), Ui.Accent));
+            body.text = string.Join("\n", lines);
+            body.resizeTextForBestFit = true;
+            body.resizeTextMaxSize = 22; body.resizeTextMinSize = 14;
+            body.verticalOverflow = VerticalWrapMode.Truncate;
+            Ui.Size(body, -1, 400);
         }
     }
 

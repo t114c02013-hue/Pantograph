@@ -118,7 +118,7 @@ namespace PantographSim.XR
         };
 
         bool DialogOpen() =>
-            S.GetBool("ui.error.active") || !string.IsNullOrEmpty(S.Get("ui.tutorial.tool")) || S.GetBool("xr.menu_open") || S.GetBool("xr.help_open")
+            S.GetBool("ui.error.active") || S.GetBool("xr.menu_open") || S.GetBool("xr.help_open")
             || !string.IsNullOrEmpty(S.Get("ui.spare_inspect")) || S.GetBool("ui.panel_open") || !S.GetBool("training.running") || S.GetBool("score.finished");
 
         string CarriedStrip()

@@ -269,6 +269,10 @@ namespace PantographSim.Tests
             Rig.RightHand.position = want + Vector3.right * 0.25f;
             yield return null;
             Assert.AreEqual(slots[0], (int)Sim.State.GetFloat(XrPouchHover.TargetKey), "記下這一步要拿的格子");
+            // CSR_02 這種步驟沒寫目標：小動作的目標比 StepStarted 先到，StepStarted 不能把它清掉（terry 試玩拿錯工具的原因）
+            var onStep = typeof(XrPouchHover).GetMethod("OnStep", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            onStep.Invoke(Object.FindObjectOfType<XrPouchHover>(), new object[] { new StepStarted() });
+            Assert.AreEqual(slots[0], (int)Sim.State.GetFloat(XrPouchHover.TargetKey), "沒寫目標的步驟不清掉小動作的目標");
             StringAssert.Contains("工具袋", Sim.State.Get("ui.toast"), "提示怎麼拿");
             XrPlayer.ScriptedFrame = new XrFrame { rightGrip = true };
             yield return null; yield return null;
@@ -435,6 +439,43 @@ namespace PantographSim.Tests
             var to = Vector3.ProjectOnPlane(Dialog().position - Rig.Head.position, Vector3.up);
             Assert.Less(Vector3.Angle(to, Vector3.ProjectOnPlane(Rig.Head.forward, Vector3.up)), 30f, "錯誤視窗要在眼前");
             Sim.State.Set("ui.tutorial.tool", "");
+        }
+
+        /// <summary>terry 試玩：工具說明是工具旁邊的小視窗，跟著手走（傳送到別站也一樣）、不擋操作，工具收起就關，不留在原地。</summary>
+        [UnityTest]
+        public IEnumerator ToolCard_StaysBesideHand_ClosesWhenToolPutBack()
+        {
+            yield return Boot(new Vector3(0f, 1.63f, 0f));
+            tracked = true; headY = 1.63f;
+            yield return WaitReady();
+            Sim.State.SetBool("training.running", true);
+            Sim.State.SetBool("xr.tutorial.active", false);
+            XrPlayer.ScriptedFrame = new XrFrame();
+            var card = GameObject.Find("XR_ToolCard");
+            Assert.IsNotNull(card, "工具說明有自己的小視窗");
+            Rig.RightHand.position = Rig.Head.position + Rig.Head.forward * 0.4f + Vector3.down * 0.4f;
+            Sim.State.Set("ui.tutorial.title", "卡尺");
+            Sim.State.Set("ui.tutorial.pages", "用途\u001f量厚度\u001e歸零\u001f按 ZERO");
+            Sim.State.Set("ui.tutorial.tool", SimIds.ToolCaliper);
+            for (int i = 0; i < 3; i++) yield return null;
+            var dim = card.transform.Find("Tutorial_Dim");
+            Assert.IsTrue(dim != null && dim.gameObject.activeInHierarchy, "小視窗打開");
+            Assert.Less(Vector3.Distance(card.transform.position, Rig.RightHand.position), 0.4f, "在工具旁邊");
+            Assert.Greater(Vector3.Dot(card.transform.forward, (card.transform.position - Rig.Head.position).normalized), 0.95f, "面向使用者");
+            StringAssert.Contains("按 ZERO", string.Join("", dim.GetComponentsInChildren<UnityEngine.UI.Text>().Select(t => t.text)), "全部頁面都看得到");
+            var button = dim.GetComponentsInChildren<UnityEngine.UI.Button>(false);
+            Assert.AreEqual(0, button.Length, "工具在右手，射線點不到旁邊的按鈕，所以不放按鈕");
+
+            Rig.transform.position += new Vector3(3f, 0.5f, -2f);   // 傳送到車頂
+            for (int i = 0; i < 3; i++) yield return null;
+            Assert.Less(Vector3.Distance(card.transform.position, Rig.RightHand.position), 0.4f, "傳送之後還在工具旁邊");
+
+            Sim.Bus.Publish(new ToolSelected { toolId = "" });
+            for (int i = 0; i < 3; i++) yield return null;
+            Assert.AreEqual("", Sim.State.Get("ui.tutorial.tool"), "工具收起就關");
+            Assert.IsTrue(Sim.State.GetBool(SimIds.ToolCaliper + ".tutorial_seen"), "算看過");
+            Assert.IsFalse(dim.gameObject.activeInHierarchy);
+            XrPlayer.ScriptedFrame = null;
         }
 
         /// <summary>第 17 輪：從人走得到的位置（走道最靠弓處、接地站點），手在 1.23 m，射線到掛點不被擋；線條不停在走動阻擋體上。</summary>

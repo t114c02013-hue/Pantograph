@@ -32,6 +32,13 @@ namespace PantographSim.Tools
 
         void OnSelected(ToolSelected e)
         {
+            // VR 的說明貼在工具旁邊、沒有按鈕：收起或換工具就算看過，不留在原地
+            string shown = Sim.State.Get("ui.tutorial.tool");
+            if (InputMode.XrActive && !string.IsNullOrEmpty(shown) && shown != e.toolId)
+            {
+                Sim.State.SetBool(shown + ".tutorial_seen", true);
+                Sim.State.Set("ui.tutorial.tool", "");
+            }
             if (string.IsNullOrEmpty(e.toolId) || Sim.State.GetBool(e.toolId + ".tutorial_seen")) return;
             Show(e.toolId);
         }

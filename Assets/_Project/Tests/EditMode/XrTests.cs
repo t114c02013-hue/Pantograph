@@ -202,6 +202,9 @@ namespace PantographSim.Tests
                 foreach (var c in canvases) Assert.AreEqual(RenderMode.WorldSpace, c.renderMode, c.name + " 不是 World Space");
                 // 步驟面板 22 級字 ≈ 2 cm（1 unit = 1 m，canvas 比例 0.0009 m/unit）
                 Assert.AreEqual(0.02f, 22 * XrPanelLayout.BoardScale, 0.003f);
+                // 工具說明小視窗：面向 +z 看工具時，往右（+x）、往上、往人靠近
+                var card = XrPanelLayout.ToolCardPosition(new Vector3(0, 1, 1), new Vector3(0, 1, 0), new Vector3(0.2f, 0.1f, 0.12f));
+                Assert.Less(Vector3.Distance(new Vector3(0.2f, 1.1f, 0.88f), card), 1e-4f);
             }
             finally
             {

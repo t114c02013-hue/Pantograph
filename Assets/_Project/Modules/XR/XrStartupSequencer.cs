@@ -61,6 +61,10 @@ namespace PantographSim.XR
             Sim.State?.SetFloat("xr.stand_eye", PostureDef.Load().standEye);
             Sim.State?.SetFloat("xr.dialog.distance", layout.taskCardDistance);
             Sim.State?.SetFloat("xr.dialog.below", layout.taskCardBelowEye);
+            Sim.State?.SetFloat(XrToolCardKeys.Right, layout.toolCardOffset.x);
+            Sim.State?.SetFloat(XrToolCardKeys.Up, layout.toolCardOffset.y);
+            Sim.State?.SetFloat(XrToolCardKeys.Toward, layout.toolCardOffset.z);
+            Sim.State?.SetFloat(XrToolCardKeys.Scale, layout.toolCardScale);
             enterXr?.Invoke();   // (2)
             for (int i = 0; i < 60 && !(Sim.State?.GetBool(XrPanels.ManagedKey) ?? true); i++) yield return null;   // 介面搬到世界空間、面板登記好
             Place(gate == Gate.Timeout);   // (3)(4)

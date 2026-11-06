@@ -34,7 +34,12 @@ namespace PantographSim.XR
             Sim.Bus.Unsubscribe<HighlightRequested>(OnHighlight);
         }
 
-        void OnStep(StepStarted e) => SetTarget(!string.IsNullOrEmpty(e.highlightIds) ? e.highlightIds : e.targetIds != null ? string.Join(",", e.targetIds) : "");
+        /// <summary>步驟沒寫目標時不清掉：小動作的目標（HighlightRequested）比 StepStarted 先到，例 CSR_02 的卡尺格。</summary>
+        void OnStep(StepStarted e)
+        {
+            string ids = !string.IsNullOrEmpty(e.highlightIds) ? e.highlightIds : e.targetIds != null ? string.Join(",", e.targetIds) : "";
+            if (ids.Length > 0) SetTarget(ids);
+        }
         void OnHighlight(HighlightRequested e) => SetTarget(e.text);
 
         /// <summary>這一步要拿的工具在工具袋裡：記下格子；教學模式提示怎麼拿。</summary>

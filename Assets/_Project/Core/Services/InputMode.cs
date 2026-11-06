@@ -2,6 +2,12 @@ using UnityEngine;
 
 namespace PantographSim.Core
 {
+    /// <summary>VR 工具說明小視窗的位置與大小（資料在 PanelLayout，開場寫進黑板；UI 只能引用 Core）。</summary>
+    public static class XrToolCardKeys
+    {
+        public const string Right = "xr.toolcard.right", Up = "xr.toolcard.up", Toward = "xr.toolcard.toward", Scale = "xr.toolcard.scale";
+    }
+
     /// <summary>
     /// 輸入模式：桌面（滑鼠鍵盤）或 VR（頭盔＋控制器）。XR 模組偵測到頭盔後呼叫 SetXr(true)；
     /// 其他模組只讀這裡，不引用任何 XR 套件（VR 只是另一個輸入來源與顯示方式）。

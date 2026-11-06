@@ -23,7 +23,7 @@ namespace PantographSim.UI
 
         static readonly string[] DialogNames =
         {
-            "Tray", "Toast", "ControlPanel_Dim", "Removal_Dim", "Spare_Dim", "TaskCard_Dim", "Tutorial_Dim",
+            "Tray", "Toast", "ControlPanel_Dim", "Removal_Dim", "Spare_Dim", "TaskCard_Dim",
             "Result_Dim", "Help_Dim", "XrHelp_Dim", "XrMenu_Dim", "XrTutorial_Dim", "RecordsList_Dim", "VideoNotice", "Error_Dim"
         };
         /// <summary>只給頭盔看的圖層（旁觀鏡頭不畫，影片裡不會出現 REC 紅點）；與紀錄模組 SpectatorCamera.HmdOnlyLayer 相同。</summary>
@@ -46,6 +46,7 @@ namespace PantographSim.UI
         public Canvas Lift => lift;
         public Canvas Hover => hover;
         public Canvas Wrist => wrist;
+        public Canvas ToolCard => toolCard;
 
         public void Setup(Canvas mainCanvas, RectTransform safeArea, IXrRig xrRig, HoverCardView hoverCardView)
         {
@@ -84,6 +85,7 @@ namespace PantographSim.UI
             if (toast != null) PlaceIn(toast, new Vector2(0.5f, 0f), new Vector2(0, 30));
 
             Move("WorkOrder_Dim", clip, new Vector2(0.5f, 0.5f));
+            SetupToolCard();
             liftPanel = Move("LiftPanel", lift, new Vector2(0.5f, 1f));
             hoverCard = Move("HoverCard", hover, new Vector2(0.5f, 0f));
             wristView = Move("XrWrist", wrist, new Vector2(0.5f, 1f));
@@ -130,7 +132,8 @@ namespace PantographSim.UI
 
         RectTransform liftPanel;
         HoverCardView hoverView;
-        Canvas replay, recDot;
+        Canvas replay, recDot, toolCard;
+        RectTransform toolCardDim;
         Text recDotText;
 
         void PlaceReplay()
@@ -205,11 +208,36 @@ namespace PantographSim.UI
             dialog.transform.rotation = Quaternion.Slerp(dialog.transform.rotation, Quaternion.LookRotation(fwd, Vector3.up), t);
         }
 
-        /// <summary>工具教學卡開在手上工具的前方（射線點得到的距離），面向頭。</summary>
-        void PlaceBesideTool()
+        /// <summary>工具說明小視窗：自己一塊 Canvas，不擋射線；ZTest Always，工具、掛架、車頂設備都蓋不住它。</summary>
+        void SetupToolCard()
         {
-            var pos = rig.RightHand.position + FlatForward() * 0.45f + Vector3.up * 0.12f;
-            dialog.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(pos - HeadPos, Vector3.up));
+            toolCard = MakeCanvas("XR_ToolCard", new Vector2(620, 520), Sim.State?.GetFloat(XrToolCardKeys.Scale, 0.0005f) ?? 0.0005f, null);
+            toolCard.sortingOrder = 100;
+            toolCardDim = Move("Tutorial_Dim", toolCard, new Vector2(0.5f, 0.5f));
+            if (toolCardDim == null) return;
+            toolCardDim.GetComponent<Image>().color = Color.clear;
+            toolCardDim.gameObject.AddComponent<CanvasGroup>().blocksRaycasts = false;
+            Ui.Stretch(toolCardDim.Find("Tutorial") as RectTransform);
+            var onTop = new Material(Graphic.defaultGraphicMaterial);
+            onTop.SetInt("unity_GUIZTestMode", (int)UnityEngine.Rendering.CompareFunction.Always);
+            foreach (var g in toolCardDim.GetComponentsInChildren<Graphic>(true)) g.material = onTop;
+        }
+
+        /// <summary>工具旁邊的位置：往使用者右邊 offset.x、往上 offset.y、往使用者靠近 offset.z（純函式）。</summary>
+        public static Vector3 ToolCardPosition(Vector3 tool, Vector3 head, Vector3 offset)
+        {
+            var toHead = (head - tool).normalized;
+            var right = Vector3.Cross(Vector3.up, -toHead);
+            right = right.sqrMagnitude < 1e-4f ? Vector3.right : right.normalized;
+            return tool + right * offset.x + Vector3.up * offset.y + toHead * offset.z;
+        }
+
+        void PlaceToolCard(ISimState s)
+        {
+            if (toolCardDim == null || !toolCardDim.gameObject.activeSelf || rig.RightHand == null) return;
+            var offset = new Vector3(s.GetFloat(XrToolCardKeys.Right, 0.2f), s.GetFloat(XrToolCardKeys.Up, 0.1f), s.GetFloat(XrToolCardKeys.Toward, 0.12f));
+            var pos = ToolCardPosition(rig.RightHand.position, HeadPos, offset);
+            toolCard.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(pos - HeadPos, Vector3.up));
         }
 
         bool Looking(Transform hand)
@@ -264,14 +292,14 @@ namespace PantographSim.UI
 
             // 開場的擺放由 XrStartupSequencer 負責；開場之後才打開的對話框（錯誤視窗）開在頭前 1 m，開著時固定不跟頭，可以抓把手移動
             bool open = DialogOpen();
-            bool error = s.GetBool("ui.error.active");   // 工具教學卡還開在遠處時跳錯誤，也要到眼前
+            bool error = s.GetBool("ui.error.active");
             // 開始介面固定在升降盒對面：開場擺好之後不搬（terry：不要亂跳）
             if (s.GetBool("training.running") && s.GetBool("xr.ready") && ((open && !dialogWasOpen) || (error && !errorWasOpen)))
             {
                 PlaceDialog(1f);
-                if (!error && !string.IsNullOrEmpty(s.Get("ui.tutorial.tool")) && rig.RightHand != null) PlaceBesideTool();
             }
             dialogWasOpen = open; errorWasOpen = error;
+            PlaceToolCard(s);
 
             bool managed = Managed;
             // 提示板：第一次出現在正前方 → 3 秒後箭頭 → 1 秒移到左前方（−35°）
