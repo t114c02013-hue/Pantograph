@@ -44,7 +44,7 @@ namespace PantographSim.Editor
         static readonly StringBuilder log = new StringBuilder();
         static readonly List<string> errors = new List<string>();
         static Dictionary<string, string> args = new Dictionary<string, string>();
-        const float VrWaitSeconds = 6f;   // 比 XrModeSwitch 等頭盔的 4 秒長
+        const float VrWaitSeconds = 6f;   // 比 XrModeSwitch 等頭盔的 4 秒長（ProcedureAutoRun.GoTo 同）
         static bool stayInPlay;     // 交給人接手：走完不離開 Play
         static ProcedureAutoRun auto;
 

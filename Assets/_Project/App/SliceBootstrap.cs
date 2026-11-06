@@ -105,6 +105,9 @@ namespace PantographSim.App
                 .Where(s => !state.GetBool(s.DoneKey) && !state.GetBool("step." + s.RunId + ".skipped")).Select(s => s.RunId).ToArray();
 
             WriteTaskCard();
+            // 代做腳本目前只有 R1；預設完成的步驟不會停，不列
+            state.Set(SimIds.StepsList, course != null ? "" : string.Join(";", runner.Steps.Where(s => !s.def.presetDone).Select(s =>
+                s.RunId + "|" + s.defIndex + " " + s.def.title + (s.sideLabel.Length == 0 || s.def.title.Contains(s.sideLabel) ? "" : "（" + s.sideLabel + "）"))));
             state.Set(SimIds.CourseId, course != null ? course.courseId : SimIds.CourseR1);   // 錄影、成績都記 courseId
             state.Set("app.courses.list", string.Join(";", new[] { SimIds.CourseR1 + "|" + r1Title + "|" }.Concat(courses.Where(c => c != null).Select(c => c.courseId + "|" + c.title + "|" + NoteOf(c.courseId)))));
             if (course != null) PantographSim.Worksite.CourseApplier.Apply(course, state);   // 課程覆寫（擺放、天車停駐、升弓上限）
@@ -119,7 +122,14 @@ namespace PantographSim.App
 
         string NoteOf(string id) => (courseNotes ?? "").Split(';').Select(x => x.Split('|')).Where(x => x.Length == 2 && x[0] == id).Select(x => x[1]).FirstOrDefault() ?? "";
 
-        void Start() => RegisterPoseSource();
+        void Start()
+        {
+            RegisterPoseSource();
+            if (string.IsNullOrEmpty(SimSession.PendingJump)) return;
+            string jump = SimSession.PendingJump;
+            SimSession.PendingJump = "";
+            bus.Publish(new ActionRequested { targetId = "app.jump", text = jump, time = SimClock.Now });
+        }
 
         /// <summary>卡關偵測：每 0.5 s 只讀地檢查目前步驟（不推進步驟；見 ProcedureRunner.Poll）。重播時 runner 沒有開始，不作用。</summary>
         string dwellId = ""; float dwellT;
@@ -211,10 +221,35 @@ namespace PantographSim.App
                 SimSession.EnterCourse(e.text);   // 換課程一律重新載入場景（軟體工程），不在同一場景裡切換
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
+            else if (e.targetId == "app.jump" && course == null && !state.GetBool(SimIds.AutoRunActive))
+            {
+                if (!runner.Started && !starting) { StartCoroutine(JumpTo(e.text ?? "")); return; }
+                SimSession.PendingJump = e.text;   // 訓練已經開始：重新載入場景再從頭代做
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            }
             else if (e.targetId == "app.restart")
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
+        }
+
+        /// <summary>後台面板「從這一步開始」（text＝模式:步驟）：遮罩蓋住，代做前面的步驟，交給人後才淡回。</summary>
+        System.Collections.IEnumerator JumpTo(string request)
+        {
+            var parts = request.Split(':');
+            var target = parts.Length == 2 ? runner.Steps.FirstOrDefault(s => s.RunId == parts[1]) : null;
+            if (target == null) yield break;
+            var rules = ToolRulesDef.Load();
+            state.Set(SimIds.AutoRunStatus, "");
+            state.Set(SimIds.AutoRunText, string.Format(rules.autoRunMaskText, target.defIndex));
+            state.SetFloat(SimIds.AutoRunFade, rules.autoRunFadeSeconds);
+            state.SetBool(SimIds.AutoRunActive, true);
+            try
+            {
+                foreach (int frames in new ProcedureAutoRun { Log = l => Debug.Log("[代做] " + l) }.GoTo(parts[0], target.RunId))
+                    for (int i = 0; i < frames; i++) yield return null;
+            }
+            finally { state.SetBool(SimIds.AutoRunActive, false); }   // 腳本出錯也不能把人關在遮罩裡
         }
 
         System.Collections.IEnumerator StartRunnerAfterPoseSettles()

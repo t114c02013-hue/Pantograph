@@ -12,8 +12,8 @@ namespace PantographSim.UI
     /// </summary>
     public class AdminPanel : MonoBehaviour
     {
-        const float Width = 400, Row = 28, Gap = 4, Pad = 10, DesignHeight = 1080;
-        const int FontSize = 16;
+        const float Width = 400, Row = 23, Gap = 2, Pad = 10, DesignHeight = 1080;   // R1 有 29 個可選步驟，要整張放進 1080 高
+        const int FontSize = 14;
         public const string Tutorial = "tutorial", Practice = "practice";
 
         static string mode = Tutorial, step = "";   // 重新載入場景後保留，同一步可以連續重練

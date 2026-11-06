@@ -19,7 +19,7 @@ namespace PantographSim.UI
         public const string LiftMountId = "xr.mount.lift_panel";
         // 每 unit 幾公尺（字高約 = 字級 × 比例；步驟面板 22 級 ≈ 2 cm）
         public const float BoardScale = 0.0009f, DialogScale = 0.0007f, WristScale = 0.00042f, LiftScale = 0.0009f, HoverScale = 0.001f, ClipScale = 0.00036f, LabelScale = 0.00022f;
-        const float BoardDistance = 1.2f, DialogDistance = 1.0f;
+        const float BoardDistance = 1.2f, DialogDistance = 1.0f, MaskDistance = 0.3f, MaskScale = 0.0005f;
 
         static readonly string[] DialogNames =
         {
@@ -86,6 +86,7 @@ namespace PantographSim.UI
 
             Move("WorkOrder_Dim", clip, new Vector2(0.5f, 0.5f));
             SetupToolCard();
+            SetupAutoRunMask();
             liftPanel = Move("LiftPanel", lift, new Vector2(0.5f, 1f));
             hoverCard = Move("HoverCard", hover, new Vector2(0.5f, 0f));
             wristView = Move("XrWrist", wrist, new Vector2(0.5f, 1f));
@@ -218,9 +219,28 @@ namespace PantographSim.UI
             toolCardDim.GetComponent<Image>().color = Color.clear;
             toolCardDim.gameObject.AddComponent<CanvasGroup>().blocksRaycasts = false;
             Ui.Stretch(toolCardDim.Find("Tutorial") as RectTransform);
+            DrawOnTop(toolCardDim);
+        }
+
+        /// <summary>這塊介面不做深度測試：比它近的東西也蓋不住它。</summary>
+        static void DrawOnTop(RectTransform root)
+        {
             var onTop = new Material(Graphic.defaultGraphicMaterial);
             onTop.SetInt("unity_GUIZTestMode", (int)UnityEngine.Rendering.CompareFunction.Always);
-            foreach (var g in toolCardDim.GetComponentsInChildren<Graphic>(true)) g.material = onTop;
+            foreach (var g in root.GetComponentsInChildren<Graphic>(true)) g.material = onTop;
+        }
+
+        /// <summary>代做遮罩：跟著頭、蓋滿視野，畫在所有東西（含手上工具）上面。</summary>
+        void SetupAutoRunMask()
+        {
+            if (rig == null || rig.Head == null) return;
+            var c = MakeCanvas("XR_AutoRunMask", new Vector2(6000, 6000), MaskScale, rig.Head);
+            c.transform.localPosition = Vector3.forward * MaskDistance;
+            c.sortingOrder = short.MaxValue;
+            var mask = Move(AutoRunMaskView.Name, c, new Vector2(0.5f, 0.5f));
+            if (mask == null) return;
+            Ui.Stretch(mask);
+            DrawOnTop(mask);
         }
 
         /// <summary>工具旁邊的位置：往使用者右邊 offset.x、往上 offset.y、往使用者靠近 offset.z（純函式）。</summary>

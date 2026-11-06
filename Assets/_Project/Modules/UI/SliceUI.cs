@@ -109,9 +109,11 @@ namespace PantographSim.UI
             views.Add(new ReplayView());        // 重播：控制列與時間軸
             views.Add(new RecordsListView());   // 紀錄清單
             views.Add(new VideoNoticeView());   // 影片存檔路徑
-            views.Add(new ErrorDialogView());   // 最上層
+            views.Add(new ErrorDialogView());
+            views.Add(new AutoRunMaskView());   // 最上層：代做期間什麼都不給看
             UpdateSafeArea();
             foreach (var v in views) v.Build(safe, this);
+            gameObject.AddComponent<AdminPanel>();
         }
 
         void OnDestroy()
@@ -136,7 +138,7 @@ namespace PantographSim.UI
             }
             if (InputMode.XrActive && xrLayout == null) UseXrLayout(ServiceLocator.Get<IXrRig>());
             var es = EventSystem.current;
-            if (!InputMode.XrActive) PointerState.OverUi = es != null && es.IsPointerOverGameObject();   // VR 由 XR 模組依右手射線寫入
+            if (!InputMode.XrActive) PointerState.OverUi = AdminPanel.Hover || (es != null && es.IsPointerOverGameObject());   // VR 由 XR 模組依右手射線寫入
             var sel = es != null ? es.currentSelectedGameObject : null;
             var field = sel != null ? sel.GetComponent<InputField>() : null;
             PointerState.TypingInUi = field != null && field.isFocused;

@@ -30,9 +30,38 @@ namespace PantographSim.Training
         /// <summary>走到 until 指定的步驟了沒。</summary>
         public static bool ReachedStep(string current, string until) => !string.IsNullOrEmpty(until) && !string.IsNullOrEmpty(current) && current.StartsWith(until);
 
+        const float VrWaitSeconds = 6f;   // 比 XrModeSwitch 等頭盔的 4 秒長
+
+        /// <summary>後台面板：開始一場，照標準做到 stepId 再交給人。走不到就停在原地，把原因寫在面板上。</summary>
+        public IEnumerable<int> GoTo(string mode, string stepId)
+        {
+            yield return 20;
+            // 等 VR 開場走完再開始：不然紀錄的輸入方式會寫成桌機（Link 關著時等滿就照桌機走）
+            for (float until = Time.realtimeSinceStartup + VrWaitSeconds; Time.realtimeSinceStartup < until && !InputMode.ForceDesktop && !S.GetBool("xr.ready");) yield return 5;
+            Send("rec", "trainee:" + DriverTag);
+            Send("app.start", mode + ":SCN_Default");
+            yield return 30;
+            if (!ReachedStep(S.Get("procedure.current"), stepId))
+                foreach (var x in Procedure())
+                {
+                    if (ReachedStep(S.Get("procedure.current"), stepId)) break;
+                    yield return x;
+                }
+            if (!ReachedStep(S.Get("procedure.current"), stepId))
+            {
+                S.Set(SimIds.AutoRunStatus, $"✘ 走不到 {stepId}，停在 {S.Get("procedure.current")}");
+                yield break;
+            }
+            foreach (var x in HandOff()) yield return x;
+            S.Set(SimIds.AutoRunStatus, "");
+        }
+
         /// <summary>交給人接手：手上的工具收回原位、面板關掉，之後的操作才算數。</summary>
         public IEnumerable<int> HandOff()
         {
+            PointerState.ScriptedRay = null;   // 腳本可能停在動作中間
+            PointerState.XrTriggerHeld = false;
+            LiftControl.Release(S);
             Return();
             yield return 10;
             if (S.GetBool("ui.workorder_open")) Send(SimIds.WorkOrder, "toggle");
@@ -87,6 +116,7 @@ namespace PantographSim.Training
             while (Time.realtimeSinceStartup < until && !S.Get("procedure.current").StartsWith(runIdPrefix) && !S.GetBool("procedure.finished")) yield return 5;
             if (!S.Get("procedure.current").StartsWith(runIdPrefix) && !S.GetBool("procedure.finished"))
                 Log($"⚠ 等不到步驟 {runIdPrefix}（目前 {S.Get("procedure.current")}，小動作 {S.GetFloat("procedure.sub_index"):0}「{S.Get("hint.sub_text")}」，閘門：{S.Get("procedure.gate_reason")}）");
+            yield return 1;   // 換步之後先讓外面檢查到了沒，不然同一幀會接著做下一步
         }
 
         public static IEnumerable<int> Sec(float seconds)
