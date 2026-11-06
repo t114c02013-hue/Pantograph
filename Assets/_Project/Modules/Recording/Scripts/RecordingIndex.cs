@@ -125,13 +125,14 @@ namespace PantographSim.Recording
         public static List<string> LoadNames(string root)
         {
             var d = ReadJson(Path.Combine(root, NamesFile));
-            return d != null ? d.StrArr("names").Where(x => !string.IsNullOrWhiteSpace(x)).ToList() : new List<string>();
+            string driver = PantographSim.Data.ToolRulesDef.Load().testDriverTag;   // 跳步工具的驗收名不是學員，舊檔裡有也不沿用
+            return d != null ? d.StrArr("names").Where(x => !string.IsNullOrWhiteSpace(x) && x != driver).ToList() : new List<string>();
         }
 
         /// <summary>把名稱放到清單最前面（上次用的就是第一個）。</summary>
         public static void RememberName(string root, string name)
         {
-            if (string.IsNullOrWhiteSpace(name)) return;
+            if (string.IsNullOrWhiteSpace(name) || name == PantographSim.Data.ToolRulesDef.Load().testDriverTag) return;
             var names = LoadNames(root);
             names.Remove(name);
             names.Insert(0, name);

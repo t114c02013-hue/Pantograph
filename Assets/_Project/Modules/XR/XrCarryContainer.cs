@@ -8,6 +8,7 @@ namespace PantographSim.XR
     /// R1.5b b3 隨身容器（§3.4，D30）：工具袋 env.tool_bag、個人腰包 env.waist_pouch 共用同一個元件。
     /// ・位置由頭部推估：頭下方 waistOffset.y、左右 waistOffset.x（工具袋左腰、腰包右腰；xr.carry.swap＝true 時左右對調）、前方 waistOffset.z。
     ///   只跟著頭的水平方向轉（yaw），低頭、抬頭、歪頭時不動。xr.toolbag.mount＝wrist 時工具袋改掛左手腕。
+    /// ・工具袋（terry 試玩）固定在腰部：高度＝樓層＋站姿眼高－toolBagBelowEye，水平只看身體位置和朝向，低頭、蹲下時袋子不動。
     /// ・右手在 range 內時袋子算「打開」：每格的名稱標籤（Label_k）顯示。拿取、放回由 XrPlayer 的握把邏輯處理（掛位位置就是袋子裡的 Pocket_k）。
     /// </summary>
     public class XrCarryContainer : MonoBehaviour
@@ -37,7 +38,19 @@ namespace PantographSim.XR
             return head + yaw * offset;
         }
 
+        /// <summary>工具袋的腰部位置（純函式）：高度只看樓層與站姿眼高；水平用脖子當身體中心，低頭不會把袋子帶走。</summary>
+        public static Vector3 FixedWaistPosition(Vector3 head, Quaternion headRot, Quaternion bodyYaw, Vector3 offset, bool swap, float floorY, PostureDef p)
+        {
+            var headYaw = Quaternion.Euler(0f, headRot.eulerAngles.y, 0f);
+            var body = head - headRot * p.neckToEye + headYaw * p.neckToEye;
+            if (swap) offset.x = -offset.x;
+            var pos = body + bodyYaw * offset;
+            pos.y = floorY + p.standEye - p.toolBagBelowEye;
+            return pos;
+        }
+
         ToolPouchDef pouch;
+        PostureDef posture;
         float yaw; bool turning;
 
         /// <summary>第 4 點（純函式）：轉身超過 limit 度才開始跟，跟到對齊才停，平常不晃。</summary>
@@ -66,7 +79,12 @@ namespace PantographSim.XR
                 if (pouch == null) pouch = ToolPouchDef.Load();
                 yaw = FollowYaw(yaw, h.rotation.eulerAngles.y, ref turning, pouch.followAngleDeg, pouch.followSpeedDeg * Time.deltaTime);
                 var turned = Quaternion.Euler(0f, yaw, 0f);
-                container.position = WaistPosition(h.position, turned, waistOffset, s != null && s.GetBool(SwapKey));
+                bool swap = s != null && s.GetBool(SwapKey);
+                if (posture == null) posture = PostureDef.Load();
+                // 只有工具袋能掛手腕；h.parent＝Camera Offset，高度含樓層與車頂的視角調整
+                container.position = canMountOnWrist && h.parent != null
+                    ? FixedWaistPosition(h.position, h.rotation, turned, waistOffset, swap, h.parent.position.y, posture)
+                    : WaistPosition(h.position, turned, waistOffset, swap);
                 container.rotation = turned;   // pivot 在背面中心、開口朝 +Y
             }
             // 只顯示手指到的那一格和教學模式這一步要拿的那一格（XrPouchHover）：格子只隔 6 cm，全顯示會疊在一起

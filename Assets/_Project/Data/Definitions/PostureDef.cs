@@ -10,6 +10,8 @@ namespace PantographSim.Data
         public const string ResourceName = "PostureDef";
 
         public float standEye = 1.63f, kneelEye = 1.20f, crouchEye = 0.95f, standElbow = 1.09f, standShoulder = 1.43f;
+        [Tooltip("terry 試玩：工具袋固定在腰部：比站姿眼高低多少（m），低頭、蹲下都不跟著動")] public float toolBagBelowEye = 0.55f;
+        [Tooltip("脖子轉軸到眼睛（頭的局部座標，m）：扣掉低頭時眼睛往前下的位移，工具袋才不會跟著跑")] public Vector3 neckToEye = new Vector3(0f, 0.1f, 0.08f);
 
         [Header("StationLayoutCheck 第 23 項：離地高度（m）")]
         public Vector2 liftButtons = new Vector2(1.00f, 1.20f);

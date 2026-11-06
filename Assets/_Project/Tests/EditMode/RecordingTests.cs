@@ -401,6 +401,11 @@ namespace PantographSim.Tests
             Assert.IsEmpty(RecordingIndex.List(root));
             RecordingIndex.RememberName(root, "甲"); RecordingIndex.RememberName(root, "乙"); RecordingIndex.RememberName(root, "甲");
             CollectionAssert.AreEqual(new[] { "甲", "乙" }, RecordingIndex.LoadNames(root), "上次用的名稱排第一");
+            string driver = PantographSim.Data.ToolRulesDef.Load().testDriverTag;
+            RecordingIndex.RememberName(root, driver);
+            CollectionAssert.AreEqual(new[] { "甲", "乙" }, RecordingIndex.LoadNames(root), "跳步工具的驗收名不記");
+            File.WriteAllText(Path.Combine(root, RecordingIndex.NamesFile), "{\"names\":[\"" + driver + "\",\"甲\"]}", System.Text.Encoding.UTF8);
+            CollectionAssert.AreEqual(new[] { "甲" }, RecordingIndex.LoadNames(root), "舊檔裡的驗收名不沿用");
         }
     }
 }

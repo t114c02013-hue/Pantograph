@@ -89,6 +89,23 @@ namespace PantographSim.Tests
         }
 
         [Test]
+        public void ToolBag_StaysAtWaist_WhenLookingDownOrCrouching()
+        {
+            var p = ScriptableObject.CreateInstance<PantographSim.Data.PostureDef>();
+            var off = new Vector3(-0.2f, -0.55f, 0.15f);
+            var yaw = Quaternion.Euler(0f, 90f, 0f);
+            System.Func<float, Vector3> eyeAt = pitch => new Vector3(1f, 1.5f, 2f) + Quaternion.Euler(pitch, 90f, 0f) * p.neckToEye;   // 脖子不動，只有頭轉
+            var level = PantographSim.XR.XrCarryContainer.FixedWaistPosition(eyeAt(0f), Quaternion.Euler(0f, 90f, 0f), yaw, off, false, 0f, p);
+            var down = PantographSim.XR.XrCarryContainer.FixedWaistPosition(eyeAt(60f), Quaternion.Euler(60f, 90f, 0f), yaw, off, false, 0f, p);
+            Assert.Less(Vector3.Distance(level, down), 1e-3f, "低頭 60° 袋子不動");
+            Assert.AreEqual(p.standEye - p.toolBagBelowEye, level.y, 1e-4f, "高度＝站姿眼高－固定值");
+            var crouched = PantographSim.XR.XrCarryContainer.FixedWaistPosition(eyeAt(0f) + Vector3.down * 0.5f, Quaternion.Euler(0f, 90f, 0f), yaw, off, false, 0f, p);
+            Assert.AreEqual(level.y, crouched.y, 1e-4f, "蹲下高度不變");
+            Assert.AreEqual(2.5f + p.standEye - p.toolBagBelowEye, PantographSim.XR.XrCarryContainer.FixedWaistPosition(eyeAt(0f), Quaternion.Euler(0f, 90f, 0f), yaw, off, false, 2.5f, p).y, 1e-4f, "換樓層跟著樓層");
+            Object.DestroyImmediate(p);
+        }
+
+        [Test]
         public void WaistPosition_FollowsYawOnly()
         {
             var off = new Vector3(-0.2f, -0.65f, 0.1f);
