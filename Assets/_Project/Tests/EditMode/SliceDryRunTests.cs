@@ -517,6 +517,10 @@ namespace PantographSim.Tests
             Assert.IsFalse(PantographSim.Editor.RecordingCheckDriver.ReachedStep("STP_CSR_11_Install_L", ""));
             Assert.IsTrue(PantographSim.Editor.RecordingCheckDriver.WantsDesktop("until=STP_SI_04\nxr=off\n"));
             Assert.IsFalse(PantographSim.Editor.RecordingCheckDriver.WantsDesktop("until=STP_SI_04\n"));
+            Assert.AreEqual("PANTO_XR_HEADSET", PantographSim.Editor.RecordingCheckDriver.XrEnv("until=STP_SI_04\nxr=headset\n"));
+            Assert.AreEqual(PantographSim.XR.XrModeSwitch.HeadsetEnv, PantographSim.Editor.RecordingCheckDriver.XrEnv("xr=headset"), "兩邊同一個名字");
+            Assert.AreEqual("PANTO_DESKTOP", PantographSim.Editor.RecordingCheckDriver.XrEnv("xr=off"));
+            Assert.IsNull(PantographSim.Editor.RecordingCheckDriver.XrEnv("until=STP_SI_04"));
             Assert.AreEqual("測試驅動", ToolRulesDef.Load().testDriverTag);
 
             var dir = System.IO.Path.Combine(UnityEngine.Application.temporaryCachePath, "handoff.jsonl");

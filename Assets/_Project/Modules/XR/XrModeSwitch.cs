@@ -30,6 +30,7 @@ namespace PantographSim.XR
         public static string Status { get; private set; } = "";
         /// <summary>XRI 的 XR Device Simulator 開著、沒有真的頭盔：鍵鼠模擬裝置，手和頭照真的走 Input System。開關是 XR Device Simulator 的設定（Project Settings）。</summary>
         public static bool DeviceSimulated { get; private set; }
+        public const string HeadsetEnv = "PANTO_XR_HEADSET";
 
         /// <summary>有人戴著頭盔（純函式）：Meta 執行環境開著時沒人戴也回報追蹤、session 也到 FOCUSED，所以還要看頭的高度。</summary>
         public static bool IsHeadWorn(bool tracked, float headY, float minY) => tracked && headY >= minY;
@@ -80,6 +81,7 @@ namespace PantographSim.XR
             Simulated = false; DeviceSimulated = false;
             if (rigRoot != null) rigRoot.SetActive(false);
             if (InputMode.ForceDesktop) { RemoveSimulator(); Status = "命令列 -desktop：桌面模式"; Debug.Log("[XR] " + Status); yield break; }
+            if (System.Environment.GetEnvironmentVariable(HeadsetEnv) == "1") RemoveSimulator();   // 指定真頭盔：不開模擬器，也不做有沒有人戴的判斷
             float t0 = Time.realtimeSinceStartup;
             var layout = Resources.Load<PantographSim.Data.PanelLayout>(PantographSim.Data.PanelLayout.ResourceName);
             while (true)
@@ -87,7 +89,7 @@ namespace PantographSim.XR
                 if (SimulateRequested) { RemoveSimulator(); Simulated = true; break; }
                 var m = XRGeneralSettings.Instance != null ? XRGeneralSettings.Instance.Manager : null;
                 bool loaderUp = m != null && m.isInitializationComplete && m.activeLoader != null;
-                bool simulator = XRDeviceSimulator.instance != null;
+                bool simulator = XRDeviceSimulator.instance != null && System.Environment.GetEnvironmentVariable(HeadsetEnv) != "1";
                 if (UseRealHeadset(loaderUp, simulator, simulator && HeadWorn(layout))) { RemoveSimulator(); break; }
                 if (Time.realtimeSinceStartup - t0 > (simulator ? layout.simulatorWaitSeconds : waitSeconds))
                 {
