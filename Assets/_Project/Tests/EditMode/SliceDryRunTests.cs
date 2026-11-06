@@ -517,8 +517,6 @@ namespace PantographSim.Tests
             Assert.IsFalse(PantographSim.Editor.RecordingCheckDriver.ReachedStep("STP_CSR_11_Install_L", ""));
             Assert.IsTrue(PantographSim.Editor.RecordingCheckDriver.WantsDesktop("until=STP_SI_04\nxr=off\n"));
             Assert.IsFalse(PantographSim.Editor.RecordingCheckDriver.WantsDesktop("until=STP_SI_04\n"));
-            Assert.AreEqual("PANTO_XR_HEADSET", PantographSim.Editor.RecordingCheckDriver.XrEnv("until=STP_SI_04\nxr=headset\n"));
-            Assert.AreEqual(PantographSim.XR.XrModeSwitch.HeadsetEnv, PantographSim.Editor.RecordingCheckDriver.XrEnv("xr=headset"), "兩邊同一個名字");
             Assert.AreEqual("PANTO_DESKTOP", PantographSim.Editor.RecordingCheckDriver.XrEnv("xr=off"));
             Assert.IsNull(PantographSim.Editor.RecordingCheckDriver.XrEnv("until=STP_SI_04"));
             Assert.AreEqual("測試驅動", ToolRulesDef.Load().testDriverTag);
@@ -584,21 +582,6 @@ namespace PantographSim.Tests
             InputMode.SetXr(true);
             try { Assert.IsTrue(SimIds.RayIgnores(s, "ip.cab.pan_indicator"), "VR 不擋 ▼"); }
             finally { InputMode.SetXr(false); }
-        }
-
-        /// <summary>桌機 VR 模擬器：PANTO_DESKTOP 優先，沒有模擬器照舊掉回桌面。</summary>
-        [Test]
-        public void DeviceSimulator_Decision()
-        {
-            Assert.IsTrue(PantographSim.XR.XrModeSwitch.UseDeviceSimulator(true, false));
-            Assert.IsFalse(PantographSim.XR.XrModeSwitch.UseDeviceSimulator(true, true), "PANTO_DESKTOP");
-            Assert.IsFalse(PantographSim.XR.XrModeSwitch.UseDeviceSimulator(false, false), "Link 關掉、沒開模擬器：桌面");
-            // 第 0 步卡住的情況：Link 開著、回報追蹤，但頭盔放桌上
-            Assert.IsFalse(PantographSim.XR.XrModeSwitch.IsHeadWorn(true, 0.3f, 1f), "放著：不算有人戴");
-            Assert.IsFalse(PantographSim.XR.XrModeSwitch.UseRealHeadset(true, true, false), "loader 在線、沒人戴：走模擬器");
-            Assert.IsTrue(PantographSim.XR.XrModeSwitch.IsHeadWorn(true, 1.6f, 1f));
-            Assert.IsTrue(PantographSim.XR.XrModeSwitch.UseRealHeadset(true, true, true), "有人戴：實機");
-            Assert.IsTrue(PantographSim.XR.XrModeSwitch.UseRealHeadset(true, false, false), "沒開模擬器：照舊");
         }
 
         /// <summary>terry 2026-11-05：選好模式時，開著的說明都收掉。</summary>

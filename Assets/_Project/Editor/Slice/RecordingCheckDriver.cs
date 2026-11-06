@@ -25,8 +25,7 @@ namespace PantographSim.Editor
     ///   replay=0（不進重播）
     ///   until=步驟 ID（例 STP_CSR_11_Install_L；開頭相符就算）：走到那一步就停，工具收回原位、保持 Play 交人接手；這之前的操作標成測試驅動，不計成績、不進報表
     ///   tutorial=1（教學模式；沒給就是練習）；exit=1（到 until 後離開 Play，檢查用）
-    ///   xr=off（這次 Play 走桌機模式、不開模擬器）；xr=headset（這次 Play 走真頭盔、不開模擬器、不判斷有沒有人戴，戴真頭盔一律用這個）。
-    ///     兩個都只設這個 Editor 程序的環境變數，不改專案檔，離開 Play 自動恢復
+    ///   xr=off（這次 Play 走桌機模式：只設這個 Editor 程序的 PANTO_DESKTOP，不改專案檔，離開 Play 自動恢復）
     /// 結果寫到 Logs/rec-check.txt。
     /// </summary>
     [InitializeOnLoad]
@@ -62,7 +61,7 @@ namespace PantographSim.Editor
 
         /// <summary>xr 選項要設的環境變數；沒有選項是 null。</summary>
         public static string XrEnv(string request) =>
-            WantsDesktop(request) ? "PANTO_DESKTOP" : (request ?? "").Split('\n').Any(l => l.Trim() == "xr=headset") ? "PANTO_XR_HEADSET" : null;
+            WantsDesktop(request) ? "PANTO_DESKTOP" : null;
 
         static void Tick()
         {

@@ -63,10 +63,7 @@ namespace PantographSim.XR
             return "Platform";
         }
 
-        /// <summary>鍵鼠模擬器的頭從地面開始：追蹤原點維持 Floor，用 175 cm 的站姿眼高（PostureDef）墊起來；真的頭盔自己回報高度，這裡是 0。</summary>
-        static float SimulatorEye => XrModeSwitch.DeviceSimulated ? PostureDef.Load().standEye : 0f;
-
-        float Desired => SimulatorEye + (profile == null ? 0f : OffsetFor(floor, mode, profile.measuredStripTop, profile.raisedStripTop, crouch, profile.crouchOffset));
+        float Desired => profile == null ? 0f : OffsetFor(floor, mode, profile.measuredStripTop, profile.raisedStripTop, crouch, profile.crouchOffset);
 
         void Update()
         {
