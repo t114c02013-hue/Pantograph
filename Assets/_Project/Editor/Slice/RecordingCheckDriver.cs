@@ -42,6 +42,7 @@ namespace PantographSim.Editor
         static readonly StringBuilder log = new StringBuilder();
         static readonly List<string> errors = new List<string>();
         static Dictionary<string, string> args = new Dictionary<string, string>();
+        const float VrWaitSeconds = 6f;   // 比 XrModeSwitch 等頭盔的 4 秒長
         static float pace;          // 每步之間額外等待（秒）
         static bool stayInPlay;     // 交給人接手：走完不離開 Play
         static float tStart;
@@ -228,6 +229,8 @@ namespace PantographSim.Editor
             float target = float.TryParse(Arg("pace", "0"), NumberStyles.Float, CultureInfo.InvariantCulture, out var p) ? p : 0f;
             log.AppendLine($"模式 {mode}　目標長度 {target:0} s　錄影 {Arg("video", "0")}　紀錄根目錄 {RecordingService.Instance.Root}");
 
+            // 等 VR 開場走完再開始：不然紀錄的輸入方式會寫成桌機（Link 關著時等滿就照桌機走）
+            for (float until = Time.realtimeSinceStartup + VrWaitSeconds; Time.realtimeSinceStartup < until && !InputMode.ForceDesktop && !S.GetBool("xr.ready");) yield return 5;
             Send("rec", "trainee:" + (args.ContainsKey("until") ? DriverTag : Trainee));
             Send("app.start", (Arg("tutorial") == "1" ? "tutorial" : "practice") + ":SCN_Default");
             yield return 30;
