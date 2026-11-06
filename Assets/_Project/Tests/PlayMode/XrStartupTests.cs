@@ -441,6 +441,88 @@ namespace PantographSim.Tests
             Sim.State.Set("ui.tutorial.tool", "");
         }
 
+        /// <summary>terry 試玩：拿起工具不跳說明，指到看一行，左扳機開關詳細用法。</summary>
+        [UnityTest]
+        public IEnumerator ToolHelp_NotAuto_SummaryOnPoint_LeftTriggerTogglesDetail()
+        {
+            yield return Boot(new Vector3(0f, 1.63f, 0f));
+            tracked = true; headY = 1.63f;
+            yield return WaitReady();
+            Sim.State.SetBool("training.running", true);
+            Sim.State.SetBool("xr.tutorial.active", false);
+            int slot = Sim.State.Get("tools.list").Split(';').Select(e => e.Split('|')).Where(f => f.Length >= 2 && f[1] == SimIds.ToolCaliper).Select(f => int.Parse(f[0])).First();
+            string summary = PantographSim.UI.InfoCardText.Build(Sim.State, Sim.Registry, "env.tool_rack.slot_" + slot);
+            StringAssert.Contains(slot + " ", summary);
+            Assert.LessOrEqual(summary.Split('\n').Length, 2, "只有名稱和一行");
+            StringAssert.DoesNotContain("。", summary);
+
+            XrPlayer.ScriptedFrame = new XrFrame();
+            Sim.State.Set(SimIds.ActiveTool, SimIds.ToolCaliper);
+            Sim.Bus.Publish(new ToolSelected { toolId = SimIds.ToolCaliper });
+            yield return null; yield return null;
+            Assert.AreEqual("", Sim.State.Get("ui.tutorial.tool"), "拿起來不自動開");
+            StringAssert.Contains("左手扳機", Sim.State.Get("ui.toast"), "第一次提示怎麼看");
+            XrPlayer.ScriptedFrame = new XrFrame { leftTrigger = true };
+            yield return null; yield return null;
+            Assert.AreEqual(SimIds.ToolCaliper, Sim.State.Get("ui.tutorial.tool"), "按一下開");
+            XrPlayer.ScriptedFrame = new XrFrame();
+            yield return null; yield return null;
+            XrPlayer.ScriptedFrame = new XrFrame { leftTrigger = true };
+            yield return null; yield return null;
+            Assert.AreEqual("", Sim.State.Get("ui.tutorial.tool"), "再按一下關");
+            XrPlayer.ScriptedFrame = null;
+            Sim.State.Set(SimIds.ActiveTool, "");
+        }
+
+        /// <summary>terry 試玩：工具袋在站點內完全不動，名稱一直顯示且有格子編號，換站點才重擺。</summary>
+        [UnityTest]
+        public IEnumerator ToolBag_FixedInStation_LabelsAlwaysOn_MovesOnlyWithStation()
+        {
+            yield return Boot(new Vector3(0f, 1.63f, 0f));
+            tracked = true; headY = 1.63f;
+            yield return WaitReady();
+            for (int i = 0; i < 6; i++) yield return null;
+            Assert.IsTrue(Sim.Registry.TryGetTransform("env.tool_bag", out var bag));
+            var at = bag.position;
+            var rot = bag.rotation;
+            Assert.AreEqual(PostureDef.Load().standEye - PostureDef.Load().toolBagBelowEye, bag.position.y - Rig.Head.parent.position.y, 1e-3f, "腰高");
+            var labels = bag.GetComponentsInChildren<TextMesh>(true).Where(t => t.name.StartsWith("Label_")).ToList();
+            Assert.Greater(labels.Count, 3);
+            foreach (var l in labels)
+            {
+                Assert.IsTrue(l.gameObject.activeInHierarchy, l.name + " 一直顯示");
+                StringAssert.StartsWith(l.name.Substring(6) + " ", l.text, "和提示的第 N 格對得上");
+            }
+            Rig.Head.Rotate(0f, 90f, 0f, Space.World);
+            Rig.Head.Rotate(50f, 0f, 0f, Space.Self);
+            Rig.Head.position += new Vector3(0.3f, -0.4f, 0.2f);
+            for (int i = 0; i < 40; i++) yield return null;
+            Assert.Less(Vector3.Distance(at, bag.position), 1e-4f, "轉頭、低頭、走動都不動");
+            Assert.Less(Quaternion.Angle(rot, bag.rotation), 0.01f);
+            Sim.State.Set("xr.point", "tp.roof.inner");
+            for (int i = 0; i < 6; i++) yield return null;
+            Assert.Greater(Vector3.Distance(at, bag.position), 0.05f, "換站點才重擺");
+        }
+
+        /// <summary>第 9 步卡關：VR 三點量完讀數都在作業單上並自動送出，不用另外按。</summary>
+        [UnityTest]
+        public IEnumerator Measure_ThreePoints_AutoFilled_AndSubmitted()
+        {
+            yield return Boot(new Vector3(0f, 1.63f, 0f));
+            tracked = true; headY = 1.63f;
+            yield return WaitReady();
+            Sim.State.SetBool("training.running", true);
+            var values = new[] { ("left", 3.42f), ("mid", 2.82f), ("right", 3.12f) };
+            foreach (var (point, value) in values)
+            {
+                Sim.Bus.Publish(new MeasurementTaken { targetId = "ip.carbon_strip_L.measure_" + point, value = value });
+                for (int i = 0; i < 3; i++) yield return null;
+                Assert.AreEqual(value, Sim.State.GetFloat("workorder.reading.L." + point), 1e-3f, point + " 不會被下一次蓋掉");
+            }
+            Assert.IsTrue(Sim.State.GetBool("workorder.reading.L.submitted"), "三點都有就送出");
+            Assert.IsFalse(Sim.State.GetBool("workorder.reading.R.submitted"));
+        }
+
         /// <summary>terry 試玩：工具說明是工具旁邊的小視窗，跟著手走（傳送到別站也一樣）、不擋操作，工具收起就關，不留在原地。</summary>
         [UnityTest]
         public IEnumerator ToolCard_StaysBesideHand_ClosesWhenToolPutBack()

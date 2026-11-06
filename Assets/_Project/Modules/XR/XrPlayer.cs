@@ -26,6 +26,7 @@ namespace PantographSim.XR
         [SerializeField] XrCoach coach;
         [SerializeField] float maxDistance = 30f, grabRadius = 0.15f, trayRadius = 0.3f, pouchRadius = 0.15f;
         Data.ToolPouchDef pouch;
+        float grabStartedAt;
         [Tooltip("D31：胸前扣環、工具環的握把半徑（RoofSceneDef.bodyRingRadius，建置時寫入）")] [SerializeField] float bodyRingRadius = 0.08f;
 
         /// <summary>R1.5b b4（D31）：建置時寫入胸前扣環、工具環的握把半徑。</summary>
@@ -227,6 +228,9 @@ namespace PantographSim.XR
                     if (teleport == null) break;
                     if (c.pressed) teleport.BeginAim(); else teleport.EndAim();
                     break;
+                case "ToolDetail":   // 左扳機：手上工具的詳細用法，再按一次關
+                    Send("ui.tutorial", "toggle");
+                    break;
                 case "ToolSecondary":   // 第 6 點：右搖桿按下＝手上工具的第二功能
                     Send(S.Get(SimIds.ActiveTool), SimIds.ToolSecondaryCommand);
                     break;
@@ -296,6 +300,7 @@ namespace PantographSim.XR
         void GrabStart()
         {
             grabPickedThisPress = false;
+            grabStartedAt = Time.unscaledTime;
             if (!S.GetBool("training.running") || S.GetBool("training.paused")) return;
             string active = S.Get(SimIds.ActiveTool);
             // D31：手空著伸到胸前扣環按握把＝掛鉤收起／取下；伸到工具環＝拿下短接地線（和桌面版按鈕同一個請求）
@@ -317,6 +322,9 @@ namespace PantographSim.XR
             if (string.IsNullOrEmpty(active) && hoveredId.StartsWith("part.carbon_strip_")) Click();
         }
 
+        /// <summary>握把按一下是誤觸（Quest 握把拿著控制器很容易壓到）：要按住夠久才算放手。</summary>
+        public static bool IsDeliberateRelease(float heldSeconds, Data.ToolRulesDef rules) => heldSeconds >= rules.releaseHoldSeconds;
+
         void GrabEnd()
         {
             if (grabPickedThisPress) { grabPickedThisPress = false; return; }   // 剛拿起的這一下不算放下
@@ -329,7 +337,7 @@ namespace PantographSim.XR
                     Sim.Bus.Publish(new ToolReturnRequested { targetId = "env.tool_rack.slot_" + k, value = k, time = SimClock.Now });
                 else if (active == BodyRings.ToolGroundingLead && Near(BodyRings.ToolRing, bodyRingRadius)) { var (t, x) = BodyRings.ToolRingRequest(S); Send(t, x); }   // D31：短接地線掛回安全帶工具環
                 else if (Near("env.waist_pouch", SlotRadius)) Send("env.waist_pouch", "click");   // D30：上鎖掛牌組收進腰包（不是腰包的工具由 ToolBelt 提示）
-                else Send("tool.belt", "release:" + (S.Get(XrViewHeight.FloorKey) == "Roof" ? "roof" : "ground"));   // 防墜繫繩：車頂垂掛並記 Major、地面放下（crane-procedure 6.3）
+                else if (IsDeliberateRelease(Time.unscaledTime - grabStartedAt, Data.ToolRulesDef.Load())) Send("tool.belt", "release:" + (S.Get(XrViewHeight.FloorKey) == "Roof" ? "roof" : "ground"));   // 防墜繫繩：車頂垂掛並記 Major、地面放下（crane-procedure 6.3）
                 return;
             }
             if (!string.IsNullOrEmpty(S.Get("hand.item")) && (hoveredId == SimIds.PartsTray || Near(SimIds.PartsTray, trayRadius)))
@@ -435,7 +443,7 @@ namespace PantographSim.XR
             teleport.FocusOn(center);
         }
 
-        /// <summary>卡尺量完：手腕面板出現「填入作業單」，一按就寫進對應欄位。</summary>
+        /// <summary>卡尺量完：VR 讀數自動填進作業單對應的格子（XrWristView.AutoFill），不用另外按。</summary>
         void OnMeasured(MeasurementTaken e)
         {
             const string prefix = "ip.carbon_strip_";
@@ -448,6 +456,7 @@ namespace PantographSim.XR
             S.Set("xr.fill.value", e.value.ToString("0.00", CultureInfo.InvariantCulture));
             S.Set("xr.fill.label", label);
             S.Set("xr.fill.field", field);
+            S.Set(XrToolWidgets.AutoFillKey, field);
         }
 
         // ---------- 手上的工具模型 ----------

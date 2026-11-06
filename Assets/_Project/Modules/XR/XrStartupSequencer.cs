@@ -65,6 +65,7 @@ namespace PantographSim.XR
             Sim.State?.SetFloat(XrToolCardKeys.Up, layout.toolCardOffset.y);
             Sim.State?.SetFloat(XrToolCardKeys.Toward, layout.toolCardOffset.z);
             Sim.State?.SetFloat(XrToolCardKeys.Scale, layout.toolCardScale);
+            Sim.State?.SetFloat(XrToolCardKeys.SummaryScale, layout.toolSummaryScale);
             enterXr?.Invoke();   // (2)
             for (int i = 0; i < 60 && !(Sim.State?.GetBool(XrPanels.ManagedKey) ?? true); i++) yield return null;   // 介面搬到世界空間、面板登記好
             Place(gate == Gate.Timeout);   // (3)(4)

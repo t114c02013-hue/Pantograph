@@ -99,6 +99,7 @@ namespace PantographSim.UI
                 var f = entry.Split('|');
                 if (f.Length >= 3 && f[0] == k) { toolId = f[1]; toolName = f[2]; }
             }
+            if (InputMode.XrActive) return Title($"{k} {toolName}") + "\n" + s.Get("tools.purpose." + toolId).Split('。')[0];   // VR 指到工具：只看一行做什麼
             string st = s.Get("rack.slot_" + k, "on_rack");
             var sb = new StringBuilder(Title($"{k} {toolName}"));
             sb.Append(st == "on_rack" ? "\n在架" : st == "in_hand" ? "\n空（在你手上）" : "\n使用中");

@@ -331,7 +331,8 @@ namespace PantographSim.UI
                     float dist = toHead.magnitude;
                     var pos = p + toHead.normalized * Mathf.Min(0.2f, dist * 0.3f) + Vector3.up * 0.1f;
                     hover.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(pos - HeadPos, Vector3.up));
-                    hover.transform.localScale = Vector3.one * HoverScale * Mathf.Clamp(Vector3.Distance(pos, HeadPos), 0.5f, 3f);
+                    float size = id.StartsWith("env.tool_rack.slot_") ? s.GetFloat(XrToolCardKeys.SummaryScale, 0.7f) : 1f;
+                    hover.transform.localScale = Vector3.one * HoverScale * size * Mathf.Clamp(Vector3.Distance(pos, HeadPos), 0.5f, 3f);
                 }
             }
 

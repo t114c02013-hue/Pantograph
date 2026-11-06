@@ -279,13 +279,14 @@ namespace PantographSim.Procedures
             subSnaps.Add(snapshot);
             snapshotPending = true;
             StepBegan?.Invoke(s);
+            bool xrText = InputMode.XrActive && !string.IsNullOrEmpty(s.def.instructionXR);
             bus.Publish(new StepStarted
             {
-                stepId = s.RunId, title = s.def.title, instruction = s.def.instruction,
+                stepId = s.RunId, title = s.def.title, instruction = xrText ? s.def.instructionXR : s.def.instruction,
                 toolHint = s.def.toolHint, targetHint = s.def.targetHint, toolId = s.def.requiredToolId,
                 side = s.side, sideLabel = s.sideLabel,
                 index = s.defIndex, total = procedure.steps.Count, runIndex = CurrentIndex + 1, runTotal = steps.Count,
-                targetIds = ExpandTargets(s), text = s.def.hints?.text, time = SimClock.Now,
+                targetIds = ExpandTargets(s), text = xrText ? "" : s.def.hints?.text, time = SimClock.Now,
                 showBoltNumbers = s.def.hints?.showBoltNumbers ?? false, showOutwardArrow = s.def.hints?.showOutwardArrow ?? false,
                 valueTags = string.Join(";", s.def.valueTags ?? Array.Empty<string>()),
                 highlightIds = string.Join(",", (s.def.hints?.highlightIds ?? Array.Empty<string>()).Select(id => StateKeys.Expand(id, s.side))),

@@ -89,20 +89,23 @@ namespace PantographSim.Tests
         }
 
         [Test]
-        public void ToolBag_StaysAtWaist_WhenLookingDownOrCrouching()
+        public void ToolBag_Pose_LeftFrontOfArrival_WaistHeight()
         {
             var p = ScriptableObject.CreateInstance<PantographSim.Data.PostureDef>();
-            var off = new Vector3(-0.2f, -0.55f, 0.15f);
-            var yaw = Quaternion.Euler(0f, 90f, 0f);
-            System.Func<float, Vector3> eyeAt = pitch => new Vector3(1f, 1.5f, 2f) + Quaternion.Euler(pitch, 90f, 0f) * p.neckToEye;   // 脖子不動，只有頭轉
-            var level = PantographSim.XR.XrCarryContainer.FixedWaistPosition(eyeAt(0f), Quaternion.Euler(0f, 90f, 0f), yaw, off, false, 0f, p);
-            var down = PantographSim.XR.XrCarryContainer.FixedWaistPosition(eyeAt(60f), Quaternion.Euler(60f, 90f, 0f), yaw, off, false, 0f, p);
-            Assert.Less(Vector3.Distance(level, down), 1e-3f, "低頭 60° 袋子不動");
-            Assert.AreEqual(p.standEye - p.toolBagBelowEye, level.y, 1e-4f, "高度＝站姿眼高－固定值");
-            var crouched = PantographSim.XR.XrCarryContainer.FixedWaistPosition(eyeAt(0f) + Vector3.down * 0.5f, Quaternion.Euler(0f, 90f, 0f), yaw, off, false, 0f, p);
-            Assert.AreEqual(level.y, crouched.y, 1e-4f, "蹲下高度不變");
-            Assert.AreEqual(2.5f + p.standEye - p.toolBagBelowEye, PantographSim.XR.XrCarryContainer.FixedWaistPosition(eyeAt(0f), Quaternion.Euler(0f, 90f, 0f), yaw, off, false, 2.5f, p).y, 1e-4f, "換樓層跟著樓層");
+            var pose = PantographSim.XR.XrCarryContainer.ToolBagPose(new Vector3(1f, 1.6f, 2f), Quaternion.Euler(0f, 90f, 0f), 0f, false, p);   // 面向 +x：左邊是 +z
+            Assert.Less(Vector3.Distance(new Vector3(1.15f, p.standEye - p.toolBagBelowEye, 2.2f), pose.position), 1e-4f);
+            var up = PantographSim.XR.XrCarryContainer.ToolBagPose(new Vector3(1f, 1.0f, 2f), Quaternion.Euler(50f, 90f, 0f), 2.5f, false, p);
+            Assert.AreEqual(2.5f + p.standEye - p.toolBagBelowEye, up.position.y, 1e-4f, "高度只看樓層，到站時低頭、蹲著都一樣");
+            Assert.Less(Vector3.Distance(new Vector3(1.15f, 0f, 1.8f), Vector3.Scale(PantographSim.XR.XrCarryContainer.ToolBagPose(new Vector3(1f, 1.6f, 2f), Quaternion.Euler(0f, 90f, 0f), 0f, true, p).position, new Vector3(1f, 0f, 1f))), 1e-4f, "選單對調左右");
             Object.DestroyImmediate(p);
+        }
+
+        [Test]
+        public void GripTap_IsNotARelease()
+        {
+            var rules = PantographSim.Data.ToolRulesDef.Load();
+            Assert.IsFalse(PantographSim.XR.XrPlayer.IsDeliberateRelease(rules.releaseHoldSeconds - 0.1f, rules), "輕按一下工具留在手上");
+            Assert.IsTrue(PantographSim.XR.XrPlayer.IsDeliberateRelease(rules.releaseHoldSeconds, rules));
         }
 
         [Test]

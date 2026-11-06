@@ -11,7 +11,7 @@ namespace PantographSim.XR
     /// ・套筒尺寸：扳手頭（Socket_Mount）碰到套筒座 env.socket_seat_10／13／17 停留 0.15 s → tool.socket_wrench「size:n」。
     /// ・鬆／鎖：左手 Poke_Tip 碰 Poke_Ratchet，一次切換一次 →「dir:lock|loosen」。
     /// ・扭力：左手碰 Poke_Plus／Poke_Minus，一下 ±0.5；按住 0.4 s 後每秒 4 格 →「set:+|-」（範圍由 TorqueWrenchTool 夾在 5–50）。
-    /// ・卡尺：量爪尖 3 cm 內有量測點就自動吸附量測（等同點擊量測點）；停留 0.5 s 寫 xr.fill.auto（介面把讀數填進那個量測點的格子）；離開就合攏。
+    /// ・卡尺：量爪尖 3 cm 內有量測點就自動吸附量測（等同點擊量測點）；量到就由 XrPlayer 寫 xr.fill.auto（介面把讀數填進那個量測點的格子）；離開就合攏。
     ///   ZERO：左手碰 Poke_Zero →「zero」（右扳機在沒有指著東西時送同一個指令，見 XrPlayer）；左手碰量爪 FX_Jaw＝合攏。
     /// ・新滑板翻面：抓著滑板轉手腕超過 90° →「carried rotate180」。
     /// 只有右手正拿著的那件工具的節點會啟用；沒拿工具全停用。poke 到時左手輕震。
@@ -32,7 +32,6 @@ namespace PantographSim.XR
         Transform socketMount, jawTip, jaw;
         readonly HoldRepeater plus = new HoldRepeater(), minus = new HoldRepeater();
         readonly DwellTimer seatDwell = new DwellTimer(ToolWidgetLogic.SocketDwellSeconds);
-        readonly DwellTimer caliperStable = new DwellTimer(ToolWidgetLogic.CaliperStableSeconds);
         string snapped = "";
         bool carrying, flipped;
         float grabRoll;
@@ -144,8 +143,6 @@ namespace PantographSim.XR
                 else if (snapped.Length > 0 && tool == SimIds.ToolCaliper) Send(SimIds.ToolCaliper, "close");   // 離開就合攏
                 snapped = near;
             }
-            var stable = caliperStable.Update(near, dt);
-            if (stable != null && !string.IsNullOrEmpty(s.Get("xr.fill.field"))) s.Set(AutoFillKey, s.Get("xr.fill.field"));
         }
 
         void UpdateFlip(ISimState s)

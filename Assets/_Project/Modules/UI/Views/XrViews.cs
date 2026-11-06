@@ -1,3 +1,4 @@
+using System.Linq;
 ﻿using System.Collections.Generic;
 using PantographSim.Core;
 using UnityEngine;
@@ -146,7 +147,7 @@ namespace PantographSim.UI
         }
 
         /// <summary>
-        /// T2-a 卡尺讀數穩定 0.5 s（XR 寫 xr.fill.auto＝量測點對應的格子）：填進那一格（不看目前選中哪格），選中移到下一個沒填的格子。
+        /// VR 量到讀數（XR 寫 xr.fill.auto＝量測點對應的格子）：填進那一格（不看目前選中哪格），選中移到下一個沒填的格子。這條三格都有了就自動送出。
         /// </summary>
         public static void AutoFill(ISimState s)
         {
@@ -155,6 +156,8 @@ namespace PantographSim.UI
             s.Set("xr.fill.auto", "");
             Ui.Send(SimIds.WorkOrder, s.Get("xr.fill.value"), target);
             s.Batch(() => { s.Set("xr.fill.field", ""); s.Set(WorkOrderView.SelectedKey, NextEmpty(s, target)); });
+            var f = target.Split('.');
+            if (f[0] == "reading" && new[] { "left", "mid", "right" }.All(p => s.Has($"workorder.reading.{f[1]}.{p}"))) Ui.Send(SimIds.WorkOrder, "true", "submit." + f[1]);
         }
 
         /// <summary>FieldOrder 裡 field 之後第一個還沒填（workorder.&lt;欄位&gt; 是空的）的格子；都填了回傳空字串。</summary>

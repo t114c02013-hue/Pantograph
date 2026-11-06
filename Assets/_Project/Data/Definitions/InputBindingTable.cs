@@ -61,6 +61,7 @@ namespace PantographSim.Data
             ("Left", "LeftStick", "TeleportTurn", "往前推＝傳送；左右撥＝轉 45°"),
             ("Left", "LeftStickClick", "Crouch", "蹲低視角（只在車頂有效）"),
             ("Left", "LeftGrip", "PanelGrab", "抓面板把手、拿放工具袋的工具"),
+            ("Left", "LeftTrigger", "ToolDetail", "看手上工具的用法（再按一次關）"),
             ("Left", "LeftPoke", "ToolPoke", "按工具上的撥桿、± 鈕、ZERO 鍵"),
             ("Left", "X", "ToggleWorkOrder", "開關作業單"),
             ("Left", "Y", "ToggleHelp", "說明"),
@@ -83,6 +84,7 @@ namespace PantographSim.Data
                 case "RightStick": return false;   // 沒有功能
                 case "RightStickClick": return context == ToolPrefix + "tool.lockout_tag" || context == ToolPrefix + "tool.megger";   // ToolDefinition.secondaryAction
                 case "A": return tool;                  // 重設工具：彈窗開著（PanelOpen／ErrorOpen）或空手時沒作用
+                case "LeftTrigger": return tool;        // 手上有工具才有用法可看
                 case "LeftPoke": return tool;           // 只有拿著工具時，工具上的撥桿、± 鈕、ZERO 才啟用
                 default: return true;                   // 其他鍵在所有情境都有作用
             }

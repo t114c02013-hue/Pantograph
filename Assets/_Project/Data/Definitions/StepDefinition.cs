@@ -10,6 +10,7 @@ namespace PantographSim.Data
         public string stepId;
         public string title;
         [TextArea] public string instruction;
+        [Tooltip("VR 的做法和桌面不同時寫這裡（空白＝和 instruction 相同），VR 只顯示這段")] [TextArea] public string instructionXR;
         public string toolHint;
         public string targetHint;
         public string[] targetIds = Array.Empty<string>();

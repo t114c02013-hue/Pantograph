@@ -5,7 +5,7 @@ using UnityEngine;
 namespace PantographSim.Tools
 {
     /// <summary>
-    /// 第一次拿起某工具時顯示它的教學（ToolDefinition 的 3–5 頁）。內容寫進黑板 ui.tutorial.*，由 UI 顯示；
+    /// 桌面：第一次拿起某工具時顯示它的教學（ToolDefinition 的 3–5 頁）。VR：不自動開，拿著工具按左扳機（ToolDetail）開關。內容寫進黑板 ui.tutorial.*，由 UI 顯示；
     /// 介面送 ActionRequested(ui.tutorial, close) 後記為已看過。
     /// </summary>
     public class ToolTutorialTrigger : MonoBehaviour
@@ -40,7 +40,10 @@ namespace PantographSim.Tools
                 Sim.State.Set("ui.tutorial.tool", "");
             }
             if (string.IsNullOrEmpty(e.toolId) || Sim.State.GetBool(e.toolId + ".tutorial_seen")) return;
-            Show(e.toolId);
+            if (!InputMode.XrActive) { Show(e.toolId); return; }
+            // VR 拿起來不跳說明（terry 試玩：會擋住），第一次只提示怎麼看
+            Sim.State.SetBool(e.toolId + ".tutorial_seen", true);
+            Sim.State.Set("ui.toast", ""); Sim.State.Set("ui.toast", PantographSim.Data.ToolRulesDef.Load().toolDetailHint); Sim.State.SetFloat("ui.toast_time", Time.time);
         }
 
         public void Show(string toolId)
@@ -57,13 +60,14 @@ namespace PantographSim.Tools
         void OnRequest(ActionRequested e)
         {
             if (e.targetId != "ui.tutorial") return;
-            if (e.text == "close")
+            string text = e.text != "toggle" ? e.text : string.IsNullOrEmpty(Sim.State.Get("ui.tutorial.tool")) ? "show:" + Sim.State.Get(SimIds.ActiveTool) : "close";
+            if (text == "close")
             {
                 var id = Sim.State.Get("ui.tutorial.tool");
                 if (!string.IsNullOrEmpty(id)) Sim.State.SetBool(id + ".tutorial_seen", true);
                 Sim.State.Set("ui.tutorial.tool", "");
             }
-            else if (e.text != null && e.text.StartsWith("show:")) Show(e.text.Substring(5));
+            else if (text != null && text.StartsWith("show:")) Show(text.Substring(5));
         }
     }
 }

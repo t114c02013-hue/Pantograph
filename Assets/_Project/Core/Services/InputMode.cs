@@ -5,7 +5,7 @@ namespace PantographSim.Core
     /// <summary>VR 工具說明小視窗的位置與大小（資料在 PanelLayout，開場寫進黑板；UI 只能引用 Core）。</summary>
     public static class XrToolCardKeys
     {
-        public const string Right = "xr.toolcard.right", Up = "xr.toolcard.up", Toward = "xr.toolcard.toward", Scale = "xr.toolcard.scale";
+        public const string Right = "xr.toolcard.right", Up = "xr.toolcard.up", Toward = "xr.toolcard.toward", Scale = "xr.toolcard.scale", SummaryScale = "xr.toolcard.summary_scale";
     }
 
     /// <summary>

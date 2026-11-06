@@ -18,6 +18,8 @@ namespace PantographSim.Data
         [Tooltip("VR 射線指著掛架按握把：離擊中點這個距離（m）內最近的掛位算拿到")] public float rackGrabRadius = 0.1f;
         [Tooltip("編輯器測試驅動走過的那一段，在紀錄和報表上的標示")] public string testDriverTag = "測試驅動";
         [Tooltip("遊戲內錄影的鍵：不要用 F9，驗收用它控制 Unity Recorder")] public KeyCode videoHotkey = KeyCode.F8;
+        [Tooltip("VR 第一次拿起工具時的提示")] public string toolDetailHint = "按左手扳機看用法";
+        [Tooltip("VR 按住握把這麼久（秒）再放開才算放手；輕按一下是誤觸，工具留在手上")] public float releaseHoldSeconds = 0.6f;
         [Tooltip("放開後多久之內再抓回不算（秒）")] public float regrabGraceSec = 1.5f;
         [Tooltip("只提示、不記錯的模式（training.mode）")] public string[] hintOnlyModes = { "tutorial" };
         public string keepHint = "把手伸到工具架／工具袋";

@@ -215,18 +215,19 @@
         { "text": "量靠關節滑板的左端點", "textDesktop": "量靠關節滑板左側點", "hint": "靠弓臂關節那一條滑板上的藍色量測點，用射線指著按扳機，讀數會自動帶入。三點都要量，用最小值判斷要不要換。", "target": "ip.carbon_strip_L.measure_left", "done": "ip.carbon_strip_L.measure_left.measured", "why": "距端 15 cm", "tool": "tool.caliper", "stand": "tp.roof.inner" },
         { "text": "量靠關節滑板的中點", "textDesktop": "量靠關節滑板中點", "hint": "用射線指著藍色量測點按扳機，讀數會自動帶入。", "target": "ip.carbon_strip_L.measure_mid", "done": "ip.carbon_strip_L.measure_mid.measured", "why": "", "tool": "tool.caliper", "stand": "tp.roof.inner" },
         { "text": "量靠關節滑板的右端點", "textDesktop": "量靠關節滑板右側點", "hint": "用射線指著藍色量測點按扳機，讀數會自動帶入。", "target": "ip.carbon_strip_L.measure_right", "done": "ip.carbon_strip_L.measure_right.measured", "why": "距端 15 cm", "tool": "tool.caliper", "stand": "tp.roof.inner" },
-        { "text": "三個讀數填入作業單", "textDesktop": "三個讀數填入作業單", "hint": "看左手打開工具面板，點「填入作業單」。讀數記在作業單上，才能做判定。", "target": "env.work_order", "done": "workorder.reading.L.submitted", "why": "照卡尺讀數抄，誤差 ≤ 0.05", "tool": "", "stand": "tp.roof.inner" }
+        { "text": "三點量完自動填入作業單", "textDesktop": "三個讀數填入作業單", "hint": "三點量完，讀數會自動填進作業單並送出，不用另外按。", "target": "env.work_order", "done": "workorder.reading.L.submitted", "why": "照卡尺讀數抄，誤差 ≤ 0.05", "tool": "", "stand": "tp.roof.inner" }
       ],
       "side": "L",
       "title": "量測靠關節滑板",
       "instruction": "用卡尺依序點靠關節滑板的左、中、右三個量測點，把卡尺上的讀數抄到作業單，按「送出這條的讀數」。",
+      "instructionXR": "用卡尺依序量靠關節滑板的左、中、右三個藍色量測點。讀數會自動填進作業單，三點量完自動送出。",
       "toolHint": "游標卡尺",
       "targetHint": "靠關節滑板頂面三個量測點（左距端 15 cm、中點、右距端 15 cm）",
       "requiredToolId": "tool.caliper",
       "targetIds": ["ip.carbon_strip_{side}.measure_*", "env.work_order"],
       "hints": { "text": "拿卡尺點滑板上三個藍色量測點，把卡尺讀數抄進作業單。",
                  "why": "滑板常常兩端磨得比較多，三點都量才找得到最薄處。",
-                 "checklist": ["到工具袋第 5 格拿起卡尺|tool.active=tool.caliper", "量左點|ip.carbon_strip_{side}.measure_left.measured", "量中點|ip.carbon_strip_{side}.measure_mid.measured", "量右點|ip.carbon_strip_{side}.measure_right.measured", "讀數抄進作業單並送出|workorder.reading.{side}.submitted"],
+                 "checklist": ["到工具袋第 5 格拿起卡尺|tool.active=tool.caliper", "量左點|ip.carbon_strip_{side}.measure_left.measured", "量中點|ip.carbon_strip_{side}.measure_mid.measured", "量右點|ip.carbon_strip_{side}.measure_right.measured", "讀數填進作業單並送出|workorder.reading.{side}.submitted"],
                  "highlightIds": ["ip.carbon_strip_{side}.measure_*"] },
       "valueTags": ["量測點距端 15 cm=示例值", "抄寫容差 0.05 mm=示例值"],
       "completion": { "type": "AllOf", "all": [
@@ -252,19 +253,20 @@
         { "text": "量外側滑板的左端點", "textDesktop": "量外側滑板左側點", "hint": "離弓臂關節較遠那一條滑板上的藍色量測點，用射線指著按扳機，讀數會自動帶入。三點都要量，用最小值判斷要不要換。", "target": "ip.carbon_strip_R.measure_left", "done": "ip.carbon_strip_R.measure_left.measured", "why": "距端 15 cm", "tool": "tool.caliper", "stand": "tp.roof.outer" },
         { "text": "量外側滑板的中點", "textDesktop": "量外側滑板中點", "hint": "用射線指著藍色量測點按扳機，讀數會自動帶入。", "target": "ip.carbon_strip_R.measure_mid", "done": "ip.carbon_strip_R.measure_mid.measured", "why": "", "tool": "tool.caliper", "stand": "tp.roof.outer" },
         { "text": "量外側滑板的右端點", "textDesktop": "量外側滑板右側點", "hint": "用射線指著藍色量測點按扳機，讀數會自動帶入。", "target": "ip.carbon_strip_R.measure_right", "done": "ip.carbon_strip_R.measure_right.measured", "why": "距端 15 cm", "tool": "tool.caliper", "stand": "tp.roof.outer" },
-        { "text": "三個讀數填入作業單", "textDesktop": "三個讀數填入作業單", "hint": "看左手打開工具面板，點「填入作業單」。讀數記在作業單上，才能做判定。", "target": "env.work_order", "done": "workorder.reading.R.submitted", "why": "照卡尺讀數抄，誤差 ≤ 0.05", "tool": "", "stand": "tp.roof.outer" },
+        { "text": "三點量完自動填入作業單", "textDesktop": "三個讀數填入作業單", "hint": "三點量完，讀數會自動填進作業單並送出，不用另外按。", "target": "env.work_order", "done": "workorder.reading.R.submitted", "why": "照卡尺讀數抄，誤差 ≤ 0.05", "tool": "", "stand": "tp.roof.outer" },
         { "text": "把游標卡尺收回工具袋", "textDesktop": "把卡尺放回工具袋", "hint": "右手把游標卡尺移到左腰工具袋的格子，按一下握把就收回。", "target": "env.tool_rack.slot_5", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.inner" }
       ],
       "side": "R",
       "title": "量測外側滑板",
       "instruction": "用卡尺依序點外側滑板的左、中、右三個量測點，把讀數抄到作業單，按「送出這條的讀數」。",
+      "instructionXR": "用卡尺依序量外側滑板的左、中、右三個藍色量測點。讀數會自動填進作業單，三點量完自動送出。",
       "toolHint": "游標卡尺",
       "targetHint": "外側滑板頂面三個量測點",
       "requiredToolId": "tool.caliper",
       "targetIds": ["ip.carbon_strip_{side}.measure_*", "env.work_order"],
       "hints": { "text": "同靠關節：拿卡尺點三個量測點，照抄讀數到作業單。",
                  "why": "兩條都要量，才能判斷要不要一起換。",
-                 "checklist": ["到工具袋第 5 格拿起卡尺|tool.active=tool.caliper", "量左點|ip.carbon_strip_{side}.measure_left.measured", "量中點|ip.carbon_strip_{side}.measure_mid.measured", "量右點|ip.carbon_strip_{side}.measure_right.measured", "讀數抄進作業單並送出|workorder.reading.{side}.submitted"],
+                 "checklist": ["到工具袋第 5 格拿起卡尺|tool.active=tool.caliper", "量左點|ip.carbon_strip_{side}.measure_left.measured", "量中點|ip.carbon_strip_{side}.measure_mid.measured", "量右點|ip.carbon_strip_{side}.measure_right.measured", "讀數填進作業單並送出|workorder.reading.{side}.submitted"],
                  "highlightIds": ["ip.carbon_strip_{side}.measure_*"] },
       "valueTags": ["量測點距端 15 cm=示例值", "抄寫容差 0.05 mm=示例值"],
       "completion": { "type": "AllOf", "all": [
@@ -602,11 +604,12 @@
         { "text": "從工具袋拿出游標卡尺", "textDesktop": "到工具袋拿起游標卡尺", "hint": "任一手伸到左腰的工具袋，按握把拿出游標卡尺，會拿在右手。", "target": "env.tool_rack.slot_5", "done": "tool.active=tool.caliper", "why": "工具袋第 5 格", "tool": "tool.caliper", "stand": "tp.roof.inner" },
         { "text": "量靠關節新滑板的中點", "textDesktop": "量靠關節新滑板中點", "hint": "用射線指著藍色量測點按扳機，讀數會自動帶入。確認新滑板裝好、厚度正確。", "target": "ip.carbon_strip_L.measure_mid", "done": "ip.carbon_strip_L.measure_mid.new_measured", "why": "", "tool": "tool.caliper", "stand": "tp.roof.inner" },
         { "text": "量外側新滑板的中點", "textDesktop": "量外側新滑板中點", "hint": "用射線指著藍色量測點按扳機，讀數會自動帶入。", "target": "ip.carbon_strip_R.measure_mid", "done": "ip.carbon_strip_R.measure_mid.new_measured", "why": "", "tool": "tool.caliper", "stand": "tp.roof.outer" },
-        { "text": "兩個讀數填入作業單", "textDesktop": "兩個讀數填入作業單", "hint": "看左手打開工具面板，點「填入作業單」。讀數留在作業單上，交車時會被核對。", "target": "env.work_order", "done": "workorder.height_diff", "why": "差值 ≤ 1.0 mm", "tool": "", "stand": "" },
+        { "text": "兩點量完自動填入作業單", "textDesktop": "兩個讀數填入作業單", "hint": "量到的讀數會自動填進作業單，不用另外按。讀數留在作業單上，交車時會被核對。", "target": "env.work_order", "done": "workorder.height_diff", "why": "差值 ≤ 1.0 mm", "tool": "", "stand": "" },
         { "text": "把游標卡尺收回工具袋", "textDesktop": "把卡尺放回工具袋", "hint": "右手把游標卡尺移到左腰工具袋的格子，按一下握把就收回。", "target": "env.tool_rack.slot_5", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.inner" }
       ],
       "title": "確認兩條高低差",
       "instruction": "兩條都裝好後，用卡尺量兩條新滑板的中點，把讀數抄到作業單「新滑板中點」並送出。兩條差要 ≤ 1.0 mm。",
+      "instructionXR": "兩條都裝好後，用卡尺量兩條新滑板的中點，讀數會自動填進作業單。兩條差要 ≤ 1.0 mm。",
       "toolHint": "游標卡尺",
       "targetHint": "兩條新滑板的中點量測點；作業單",
       "requiredToolId": "tool.caliper",
@@ -779,7 +782,7 @@
         { "title": "用途", "body": "量碳滑板厚度，解析度 0.01 mm。" },
         { "title": "歸零", "body": "按「合攏量爪」（或滾輪轉到 0），再按 ZERO，螢幕顯示 0.00。沒歸零的讀數會多 0.30 mm（示例值）。" },
         { "title": "量測", "body": "拿著卡尺點滑板上的量測點，量爪會自動吸附並顯示讀數。滾輪可以開合量爪。" },
-        { "title": "抄寫", "body": "讀數只顯示在卡尺上，請自己抄到作業單（右上「打開作業單」），差 0.05 mm 以內才算正確。" }
+        { "title": "記錄", "body": "VR：量到就自動填進作業單。桌面：讀數只顯示在卡尺上，自己抄到作業單（右上「打開作業單」），差 0.05 mm 以內才算正確。" }
       ] },
     { "toolId": "tool.socket_wrench", "displayName": "套筒扳手", "hotkey": 6, "parameters": ["sockets=10,13,17", "correct=13", "deg_per_notch=45", "handleLength=0.45"],
       "pages": [

@@ -54,7 +54,7 @@ namespace PantographSim.Data
     [Serializable] public class StepJson
     {
         public SubActionJson[] subActions = Array.Empty<SubActionJson>();
-        public string stepId, title, instruction, toolHint, targetHint, requiredToolId, side;
+        public string stepId, title, instruction, instructionXR, toolHint, targetHint, requiredToolId, side;
         public string[] targetIds = Array.Empty<string>();
         public string[] presetStates = Array.Empty<string>();
         public string[] valueTags = Array.Empty<string>();
@@ -183,7 +183,7 @@ namespace PantographSim.Data
         {
             var st = ScriptableObject.CreateInstance<StepDefinition>();
             st.name = s.stepId;
-            st.stepId = s.stepId; st.title = s.title; st.instruction = s.instruction;
+            st.stepId = s.stepId; st.title = s.title; st.instruction = s.instruction; st.instructionXR = s.instructionXR;
             st.toolHint = s.toolHint; st.targetHint = s.targetHint; st.targetIds = s.targetIds;
             st.requiredToolId = s.requiredToolId ?? ""; st.side = s.side ?? "";
             st.presetDone = s.presetDone; st.presetStates = s.presetStates; st.valueTags = s.valueTags;
