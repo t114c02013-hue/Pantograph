@@ -23,9 +23,12 @@ namespace PantographSim.Core
         public static void EnterCourse(string courseId) => CourseId = courseId ?? "";
         public static void EnterTraining() { Mode = SimMode.Training; ReplayFolder = ""; }
 
+        /// <summary>後台面板在訓練中選了新的起始步驟：重新載入場景後要跑的 app.jump（「模式:步驟」）。</summary>
+        public static string PendingJump = "";
+
         /// <summary>每次進入 Play 都從訓練模式開始（關閉 Domain Reload 時靜態值不會殘留）。</summary>
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetOnPlay() { EnterTraining(); CourseId = ""; }
+        static void ResetOnPlay() { EnterTraining(); CourseId = ""; PendingJump = ""; }
     }
 
     /// <summary>

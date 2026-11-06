@@ -16,7 +16,9 @@ namespace PantographSim.Data
         [Tooltip("滑板放上托架：孔位差這個距離（cm）內就吸附")] public float stripSnapCm = 5f;
         [Tooltip("跳過步驟的說明，每則停留秒數")] public float noticeSeconds = 6f;
         [Tooltip("VR 射線指著掛架按握把：離擊中點這個距離（m）內最近的掛位算拿到")] public float rackGrabRadius = 0.1f;
-        [Tooltip("編輯器測試驅動走過的那一段，在紀錄和報表上的標示")] public string testDriverTag = "測試驅動";
+        [Tooltip("測試驅動（編輯器工具、後台面板代做）走過的那一段，在紀錄和報表上的標示")] public string testDriverTag = "測試驅動";
+        [Tooltip("後台面板代做時遮罩上的字（{0}＝步驟序號）")] public string autoRunMaskText = "正在前往第 {0} 步…";
+        [Tooltip("代做做完後遮罩淡回的秒數")] public float autoRunFadeSeconds = 0.6f;
         [Tooltip("遊戲內錄影的鍵：不要用 F9，驗收用它控制 Unity Recorder")] public KeyCode videoHotkey = KeyCode.F8;
         [Tooltip("VR 第一次拿起工具時的提示")] public string toolDetailHint = "按左手扳機看用法";
         [Tooltip("VR 按住握把這麼久（秒）再放開才算放手；輕按一下是誤觸，工具留在手上")] public float releaseHoldSeconds = 0.6f;
