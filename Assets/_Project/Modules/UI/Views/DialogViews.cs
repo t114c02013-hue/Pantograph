@@ -185,7 +185,7 @@ namespace PantographSim.UI
             if (InputMode.XrActive) { RefreshToolCard(s, tool, pages); return; }
             page = Mathf.Clamp(page, 0, pages.Length - 1);
             var f = pages[page].Split('\u001f');
-            title.text = $"工具教學：{s.Get("ui.tutorial.title")}　<size=22>（{page + 1}/{pages.Length}，{Ui.ToolPlace(tool)}第 {Ui.ToolKey(tool)} 格）</size>";
+            title.text = $"工具教學：{s.Get("ui.tutorial.title")}　<size=22>（{page + 1}/{pages.Length}，{Ui.ToolSpot(tool)}）</size>";
             heading.text = f.Length > 0 ? f[0] : "";
             body.text = f.Length > 1 ? f[1] : "";
             if (InputMode.XrActive && XrGestures.For(tool).Length > 0) body.text += "\n" + Ui.Tint("VR：" + XrGestures.For(tool), Ui.Accent);

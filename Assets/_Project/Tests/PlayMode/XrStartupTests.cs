@@ -303,7 +303,8 @@ namespace PantographSim.Tests
             Sim.State.Set("hint.sub_tool", "tool.caliper");
             Sim.Bus.Publish(new ToolPickRequested { targetId = "env.tool_rack.slot_6", value = 6, time = 0f });
             yield return null;
-            StringAssert.Contains("工具袋第 5 格", Sim.State.Get("ui.toast"), "拿錯工具提示");
+            StringAssert.Contains("「游標卡尺」，在工具袋", Sim.State.Get("ui.toast"), "拿錯工具提示");
+            StringAssert.DoesNotContain("第 5 格", Sim.State.Get("ui.toast"), "工具袋不講格號（terry：用外型分）");
             Sim.State.Set("hint.sub_tool", "");
 
             var st = Object.FindObjectOfType<XrStations>();
@@ -452,7 +453,8 @@ namespace PantographSim.Tests
             Sim.State.SetBool("xr.tutorial.active", false);
             int slot = Sim.State.Get("tools.list").Split(';').Select(e => e.Split('|')).Where(f => f.Length >= 2 && f[1] == SimIds.ToolCaliper).Select(f => int.Parse(f[0])).First();
             string summary = PantographSim.UI.InfoCardText.Build(Sim.State, Sim.Registry, "env.tool_rack.slot_" + slot);
-            StringAssert.Contains(slot + " ", summary);
+            StringAssert.Contains("卡尺", summary);
+            StringAssert.DoesNotContain(slot + " ", summary, "不講格號");
             Assert.LessOrEqual(summary.Split('\n').Length, 2, "只有名稱和一行");
             StringAssert.DoesNotContain("。", summary);
 
@@ -474,9 +476,9 @@ namespace PantographSim.Tests
             Sim.State.Set(SimIds.ActiveTool, "");
         }
 
-        /// <summary>terry 試玩：工具袋在站點內完全不動，名稱一直顯示且有格子編號，換站點才重擺。</summary>
+        /// <summary>terry 試玩：工具袋在站點內完全不動、不放文字（用外型分），換站點才重擺。</summary>
         [UnityTest]
-        public IEnumerator ToolBag_FixedInStation_LabelsAlwaysOn_MovesOnlyWithStation()
+        public IEnumerator ToolBag_FixedInStation_NoText_MovesOnlyWithStation()
         {
             yield return Boot(new Vector3(0f, 1.63f, 0f));
             tracked = true; headY = 1.63f;
@@ -486,13 +488,7 @@ namespace PantographSim.Tests
             var at = bag.position;
             var rot = bag.rotation;
             Assert.AreEqual(PostureDef.Load().standEye - PostureDef.Load().toolBagBelowEye, bag.position.y - Rig.Head.parent.position.y, 1e-3f, "腰高");
-            var labels = bag.GetComponentsInChildren<TextMesh>(true).Where(t => t.name.StartsWith("Label_")).ToList();
-            Assert.Greater(labels.Count, 3);
-            foreach (var l in labels)
-            {
-                Assert.IsTrue(l.gameObject.activeInHierarchy, l.name + " 一直顯示");
-                StringAssert.StartsWith(l.name.Substring(6) + " ", l.text, "和提示的第 N 格對得上");
-            }
+            Assert.IsEmpty(bag.GetComponentsInChildren<TextMesh>(false).Select(t => t.name + "：" + t.text), "工具袋上沒有字");
             Rig.Head.Rotate(0f, 90f, 0f, Space.World);
             Rig.Head.Rotate(50f, 0f, 0f, Space.Self);
             Rig.Head.position += new Vector3(0.3f, -0.4f, 0.2f);

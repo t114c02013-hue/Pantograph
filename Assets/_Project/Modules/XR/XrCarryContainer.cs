@@ -1,4 +1,3 @@
-using System.Linq;
 using PantographSim.Core;
 using PantographSim.Data;
 using UnityEngine;
@@ -9,7 +8,7 @@ namespace PantographSim.XR
     /// R1.5b b3 隨身容器（§3.4，D30）：工具袋 env.tool_bag、個人腰包 env.waist_pouch 共用同一個元件。
     /// ・位置由頭部推估：頭下方 waistOffset.y、左右 waistOffset.x（工具袋左腰、腰包右腰；xr.carry.swap＝true 時左右對調）、前方 waistOffset.z。
     ///   只跟著頭的水平方向轉（yaw），低頭、抬頭、歪頭時不動。xr.toolbag.mount＝wrist 時工具袋改掛左手腕。
-    /// ・工具袋（terry 試玩：不要亂動）：傳送到站點時擺一次，在腰高、人的左前方，之後不跟頭也不跟身體；換站點或重設高度才重擺。格子名稱一直顯示。
+    /// ・工具袋（terry 試玩：不要亂動）：傳送到站點時擺一次，在腰高、人的左前方，之後不跟頭也不跟身體；換站點或重設高度才重擺。不放文字，用工具外型分。
     /// ・右手在 range 內時袋子算「打開」。拿取、放回由 XrPlayer 的握把邏輯處理（掛位位置就是袋子裡的 Pocket_k）。
     /// </summary>
     public class XrCarryContainer : MonoBehaviour
@@ -61,47 +60,10 @@ namespace PantographSim.XR
                 settleFrames--;
                 placed = ToolBagPose(h.position, h.rotation, floorY, swap, posture);
                 container.SetPositionAndRotation(placed.position, placed.rotation);
-                ArrangeLabels(h.position);
+                foreach (var l in labels) if (l != null && l.activeSelf) l.SetActive(false);   // terry：工具袋不放字，用外型分
             }
             container.SetPositionAndRotation(new Vector3(placed.position.x, floorY + posture.standEye - posture.toolBagBelowEye, placed.position.z), placed.rotation);
         }
-
-        /// <summary>袋子旁一列清單「編號 工具名」，格子上放同一個編號（和提示的「工具袋第 N 格」一樣），都面向人。</summary>
-        void ArrangeLabels(Vector3 head)
-        {
-            var sorted = labels.Where(l => l != null).OrderBy(l => Slot(l.name)).ToList();
-            if (sorted.Count == 0) return;
-            float edge = sorted.Min(l => Vector3.Dot(l.transform.parent.position - container.position, container.right));
-            var foot = container.position + container.right * (edge - posture.toolBagListGap) + Vector3.up * posture.toolBagListRise;
-            for (int i = 0; i < sorted.Count; i++)
-            {
-                var t = sorted[i].transform;
-                t.position = foot + Vector3.up * (sorted.Count - 1 - i) * posture.toolBagListRow;
-                t.rotation = Quaternion.LookRotation(t.position - head, Vector3.up);
-                var mesh = sorted[i].GetComponent<TextMesh>();
-                if (mesh == null) continue;
-                mesh.anchor = TextAnchor.MiddleRight;
-                string number = Slot(sorted[i].name).ToString();
-                if (!mesh.text.StartsWith(number + " ")) mesh.text = number + " " + mesh.text;
-                var num = PocketNumber(t, mesh, number);
-                num.position = t.parent.position + Vector3.up * posture.toolBagListRise;
-                num.rotation = Quaternion.LookRotation(num.position - head, Vector3.up);
-            }
-        }
-
-        static Transform PocketNumber(Transform label, TextMesh from, string number)
-        {
-            var found = label.parent.Find("Num_" + number);
-            if (found != null) return found;
-            var mesh = new GameObject("Num_" + number).AddComponent<TextMesh>();
-            mesh.transform.SetParent(label.parent, false);
-            mesh.transform.localScale = label.localScale;
-            mesh.font = from.font; mesh.GetComponent<MeshRenderer>().sharedMaterial = from.GetComponent<MeshRenderer>().sharedMaterial;
-            mesh.characterSize = from.characterSize; mesh.fontSize = from.fontSize; mesh.anchor = TextAnchor.MiddleCenter; mesh.text = number; mesh.color = Color.white;
-            return mesh.transform;
-        }
-
-        static int Slot(string labelName) => int.TryParse(labelName.Substring(labelName.IndexOf('_') + 1), out int k) ? k : 0;
 
         const int SettleFrames = 3;
         ToolPouchDef pouch;
@@ -141,17 +103,8 @@ namespace PantographSim.XR
                 container.position = WaistPosition(h.position, turned, waistOffset, s != null && s.GetBool(SwapKey));
                 container.rotation = turned;   // pivot 在背面中心、開口朝 +Y
             }
-            // 名稱一直顯示；手指到的那一格和教學模式這一步要拿的那一格變色（XrPouchHover）
-            string pointed = s != null ? "Label_" + (int)s.GetFloat(XrPouchHover.SlotKey) : "";
-            string wanted = s != null && s.Get("training.mode") == "tutorial" ? "Label_" + (int)s.GetFloat(XrPouchHover.TargetKey) : "";
-            Open = pointed != "Label_0";
-            foreach (var l in labels)
-            {
-                if (l == null) continue;
-                if (!l.activeSelf) l.SetActive(true);
-                var mesh = l.GetComponent<TextMesh>();
-                if (mesh != null) mesh.color = l.name == pointed || l.name == wanted ? new Color(1f, 0.72f, 0.15f) : Color.white;
-            }
+            // 手指到的那一格、教學模式這一步要拿的那一格由 XrPouchHover 讓格子變色
+            Open = s != null && (int)s.GetFloat(XrPouchHover.SlotKey) != 0;
         }
     }
 }

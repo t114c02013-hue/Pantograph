@@ -187,6 +187,14 @@ namespace PantographSim.UI
             return "工具架";
         }
 
+        /// <summary>工具在哪：VR 的工具袋只講「工具袋」（不放格號，用外型分）；工具架、桿架和桌面講到第幾格。</summary>
+        public static string ToolSpot(string toolId)
+        {
+            string k = ToolKey(toolId);
+            bool bag = InputMode.XrActive && (Sim.State?.Get(SimIds.BagSlots) ?? "").Contains("," + k + ",");   // 桌面用數字鍵拿，格號照講
+            return bag ? ToolPlace(toolId) : $"{ToolPlace(toolId)}第 {k} 格";
+        }
+
         public static string ToolKey(string toolId)
         {
             foreach (var entry in (Sim.State?.Get("tools.list") ?? "").Split(';'))

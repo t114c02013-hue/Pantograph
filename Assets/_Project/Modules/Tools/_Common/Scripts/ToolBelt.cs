@@ -227,6 +227,9 @@ namespace PantographSim.Tools
         }
 
         /// <summary>工具平常放在哪裡（畫面文字用）。</summary>
+        /// <summary>VR 的工具袋不講格號（terry：用外型分）；工具架、桿架和桌面講到第幾格。</summary>
+        string Spot(int slot) => InputMode.XrActive && Place(slot) == "工具袋" ? "工具袋" : $"{Place(slot)}第 {slot} 格";   // 桌面用數字鍵拿，格號照講
+
         string Place(int slot)
         {
             string home = slotTable?.Find(slot)?.homeStorageId;
@@ -238,7 +241,7 @@ namespace PantographSim.Tools
         {
             var s = Sim.State; var need = ById(s.Get("hint.sub_tool"));
             if (active == null || need == null || need == active || s.Get("training.mode") != "tutorial") return;
-            Toast($"這一步要用「{need.DisplayName}」，在{Place(need.Hotkey)}第 {need.Hotkey} 格");
+            Toast($"這一步要用「{need.DisplayName}」，在{Spot(need.Hotkey)}");
         }
 
         void Hint(int slot)
@@ -249,7 +252,7 @@ namespace PantographSim.Tools
             if (Place(slot) == "工具袋") { ClickSlot(slot); return; }   // 工具袋在身上：選格就拿
             Sim.State.Set("ui.rack_hint", RackLogic.SlotId(slot));
             Sim.State.SetFloat("ui.rack_hint_time", Time.time);
-            Toast($"「{tool.DisplayName}」在{Place(slot)}第 {slot} 格，點掛位拿起");
+            Toast($"「{tool.DisplayName}」在{Spot(slot)}，點掛位拿起");
         }
 
         static void Toast(string text) { Sim.State.Set("ui.toast", text); Sim.State.SetFloat("ui.toast_time", Time.time); }

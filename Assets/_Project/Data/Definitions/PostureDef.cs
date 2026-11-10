@@ -12,7 +12,6 @@ namespace PantographSim.Data
         public float standEye = 1.63f, kneelEye = 1.20f, crouchEye = 0.95f, standElbow = 1.09f, standShoulder = 1.43f;
         [Tooltip("terry 試玩：工具袋到站點才擺一次、之後不動：比站姿眼高低多少（m）")] public float toolBagBelowEye = 0.55f;
         [Tooltip("工具袋相對到站時的頭：x＝往右（負＝左）、y＝往前（m）")] public Vector2 toolBagOffset = new Vector2(-0.2f, 0.15f);
-        [Tooltip("工具袋名稱清單（格子只隔 6 cm，名稱放格子上會疊在一起）：離袋子邊多遠、最下一列多高、每列多高（m）")] public float toolBagListGap = 0.06f, toolBagListRise = 0.04f, toolBagListRow = 0.045f;
 
         [Header("StationLayoutCheck 第 23 項：離地高度（m）")]
         public Vector2 liftButtons = new Vector2(1.00f, 1.20f);

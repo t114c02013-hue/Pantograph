@@ -17,6 +17,7 @@ MonoBehaviour:
   instruction: "\u5957\u7B52\u6273\u624B\u65B9\u5411\u5207\u5230\u300C\u9396\u300D\uFF0C\u4F9D
     1\u21924 \u9EDE\u7A7A\u5B54\u653E\u56DE\u87BA\u6813\uFF0C\u518D\u4F9D 1\u21922\u21923\u21924
     \u6BCF\u652F\u9396\u5230\u8CBC\u5408\uFF08\u7D04\u4E00\u5708\uFF09\u3002"
+  instructionXR: 
   toolHint: "\u5957\u7B52\u6273\u624B\uFF0C\u65B9\u5411\u300C\u9396\u300D"
   targetHint: "\u9019\u689D\u6ED1\u677F\u7684 4 \u500B\u87BA\u6813\u5B54"
   targetIds:
@@ -71,7 +72,7 @@ MonoBehaviour:
       1\u21924\u3002"
     why: "\u5148\u5168\u90E8\u8CBC\u5408\u518D\u9396\u7DCA\uFF0C\u6ED1\u677F\u624D\u4E0D\u6703\u88AB\u62C9\u6B6A\u3002"
     checklist:
-    - "\u5230\u5DE5\u5177\u888B\u7B2C 6 \u683C\u62FF\u5957\u7B52\u6273\u624B\uFF0C\u65B9\u5411\u9078\u300C\u9396\u300D|tool.socket_wrench.dir=lock"
+    - "\u5230\u5DE5\u5177\u888B\u62FF\u5957\u7B52\u6273\u624B\uFF0C\u65B9\u5411\u9078\u300C\u9396\u300D|tool.socket_wrench.dir=lock"
     - "\u87BA\u6813 1 \u8CBC\u5408|ip.carbon_strip_{side}.bolt_1.state=Snug"
     - "\u87BA\u6813 2 \u8CBC\u5408|ip.carbon_strip_{side}.bolt_2.state=Snug"
     - "\u87BA\u6813 3 \u8CBC\u5408|ip.carbon_strip_{side}.bolt_3.state=Snug"
@@ -82,7 +83,7 @@ MonoBehaviour:
     showOutwardArrow: 0
   subActions:
   - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u5957\u7B52\u6273\u624B"
-    why: "\u5DE5\u5177\u888B\u7B2C 6 \u683C"
+    why: "\u5DE5\u5177\u888B"
     targetId: env.tool_rack.slot_6
     toolId: tool.socket_wrench
     condition: tool.active=tool.socket_wrench

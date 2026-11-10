@@ -15,6 +15,7 @@ MonoBehaviour:
   stepId: STP_CSR_14_Mark
   title: "\u756B\u9632\u9B06\u6A19\u8A18"
   instruction: "\u62FF\u6A19\u8A18\u7B46\uFF0C\u4F9D 1\u21922\u21923\u21924 \u9EDE\u6BCF\u652F\u87BA\u6813\uFF0C\u756B\u4E0A\u8DE8\u87BA\u6813\u982D\u8207\u6258\u67B6\u7684\u6A19\u8A18\u7DDA\u3002"
+  instructionXR: 
   toolHint: "\u6A19\u8A18\u7B46"
   targetHint: "\u9019\u689D\u6ED1\u677F\u7684 4 \u652F\u87BA\u6813"
   targetIds:
@@ -47,7 +48,7 @@ MonoBehaviour:
     text: "\u62FF\u6A19\u8A18\u7B46\u4F9D 1\u21924 \u9EDE\u6BCF\u652F\u87BA\u6813\u3002"
     why: "\u5DE1\u6AA2\u6642\u770B\u6A19\u8A18\u7DDA\u6709\u6C92\u6709\u932F\u958B\uFF0C\u5C31\u77E5\u9053\u87BA\u6813\u6709\u6C92\u6709\u9B06\u3002"
     checklist:
-    - "\u5230\u5DE5\u5177\u888B\u7B2C 9 \u683C\u62FF\u8D77\u6A19\u8A18\u7B46|tool.active=tool.marker"
+    - "\u5230\u5DE5\u5177\u888B\u62FF\u8D77\u6A19\u8A18\u7B46|tool.active=tool.marker"
     - "\u87BA\u6813 1 \u756B\u7DDA|ip.carbon_strip_{side}.bolt_1.marked"
     - "\u87BA\u6813 2 \u756B\u7DDA|ip.carbon_strip_{side}.bolt_2.marked"
     - "\u87BA\u6813 3 \u756B\u7DDA|ip.carbon_strip_{side}.bolt_3.marked"
@@ -58,7 +59,7 @@ MonoBehaviour:
     showOutwardArrow: 0
   subActions:
   - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u6A19\u8A18\u7B46"
-    why: "\u5DE5\u5177\u888B\u7B2C 9 \u683C"
+    why: "\u5DE5\u5177\u888B"
     targetId: env.tool_rack.slot_9
     toolId: tool.marker
     condition: tool.active=tool.marker

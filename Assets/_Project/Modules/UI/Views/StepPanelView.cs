@@ -119,7 +119,7 @@ namespace PantographSim.UI
                 subWhy.text = why; Ui.SetActive(subWhy, why.Length > 0);
                 string need = s.Get("hint.sub_tool"), active = s.Get(SimIds.ActiveTool);
                 bool wrong = !string.IsNullOrEmpty(need) && need != active && !s.Get("hint.sub_target").StartsWith("env.tool_rack.slot_");
-                toolWarn.text = wrong ? (string.IsNullOrEmpty(active) ? $"► 先到{Ui.ToolPlace(need)}拿「{Ui.ToolName(need)}」（第 {Ui.ToolKey(need)} 格）" : $"► 手上是「{Ui.ToolName(active)}」，要用「{Ui.ToolName(need)}」") : "";
+                toolWarn.text = wrong ? (string.IsNullOrEmpty(active) ? $"► 先到{Ui.ToolSpot(need)}拿「{Ui.ToolName(need)}」" : $"► 手上是「{Ui.ToolName(active)}」，要用「{Ui.ToolName(need)}」") : "";
                 toolWarn.color = Color.Lerp(Ui.Bad, Color.white, Ui.Blink(6f) * 0.4f);
                 Ui.SetActive(toolWarn, wrong);
                 back.interactable = s.GetBool("procedure.can_back");
@@ -133,7 +133,7 @@ namespace PantographSim.UI
             if (showDetails)
             {
                 string required = step.toolId ?? "";
-                toolText.text = string.IsNullOrEmpty(required) ? "不用工具（徒手）" : $"{Ui.ToolName(required)}（{Ui.ToolPlace(required)}第 {Ui.ToolKey(required)} 格）";
+                toolText.text = string.IsNullOrEmpty(required) ? "不用工具（徒手）" : $"{Ui.ToolName(required)}（{Ui.ToolSpot(required)}）";
             }
 
             var reason = s.Get("procedure.gate_reason");

@@ -212,7 +212,7 @@ namespace PantographSim.UI
         /// <summary>工具說明小視窗：自己一塊 Canvas，不擋射線；ZTest Always，工具、掛架、車頂設備都蓋不住它。</summary>
         void SetupToolCard()
         {
-            toolCard = MakeCanvas("XR_ToolCard", new Vector2(620, 520), Sim.State?.GetFloat(XrToolCardKeys.Scale, 0.0005f) ?? 0.0005f, null);
+            toolCard = MakeCanvas("XR_ToolCard", new Vector2(620, 520), Sim.State?.GetFloat(XrToolCardKeys.Scale, 0.00035f) ?? 0.00035f, null);
             toolCard.sortingOrder = 100;
             toolCardDim = Move("Tutorial_Dim", toolCard, new Vector2(0.5f, 0.5f));
             if (toolCardDim == null) return;
@@ -243,20 +243,25 @@ namespace PantographSim.UI
             DrawOnTop(mask);
         }
 
-        /// <summary>工具旁邊的位置：往使用者右邊 offset.x、往上 offset.y、往使用者靠近 offset.z（純函式）。</summary>
-        public static Vector3 ToolCardPosition(Vector3 tool, Vector3 head, Vector3 offset)
+        /// <summary>
+        /// 工具旁邊的位置（純函式）：往工具的外側（工具在視線右邊就往右、左邊就往左）offset.x、往上 offset.y、往使用者靠近 offset.z。
+        /// terry 試玩：放在工具和視線中間會跟眼前的東西疊在一起。
+        /// </summary>
+        public static Vector3 ToolCardPosition(Vector3 tool, Vector3 head, Vector3 headForward, Vector3 offset)
         {
             var toHead = (head - tool).normalized;
             var right = Vector3.Cross(Vector3.up, -toHead);
             right = right.sqrMagnitude < 1e-4f ? Vector3.right : right.normalized;
-            return tool + right * offset.x + Vector3.up * offset.y + toHead * offset.z;
+            var viewRight = Vector3.Cross(Vector3.up, headForward);
+            float side = Vector3.Dot(tool - head, viewRight) >= 0f ? 1f : -1f;
+            return tool + right * side * offset.x + Vector3.up * offset.y + toHead * offset.z;
         }
 
         void PlaceToolCard(ISimState s)
         {
             if (toolCardDim == null || !toolCardDim.gameObject.activeSelf || rig.RightHand == null) return;
-            var offset = new Vector3(s.GetFloat(XrToolCardKeys.Right, 0.2f), s.GetFloat(XrToolCardKeys.Up, 0.1f), s.GetFloat(XrToolCardKeys.Toward, 0.12f));
-            var pos = ToolCardPosition(rig.RightHand.position, HeadPos, offset);
+            var offset = new Vector3(s.GetFloat(XrToolCardKeys.Right, 0.22f), s.GetFloat(XrToolCardKeys.Up, 0f), s.GetFloat(XrToolCardKeys.Toward, 0.1f));
+            var pos = ToolCardPosition(rig.RightHand.position, HeadPos, FlatForward(), offset);
             toolCard.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(pos - HeadPos, Vector3.up));
         }
 
