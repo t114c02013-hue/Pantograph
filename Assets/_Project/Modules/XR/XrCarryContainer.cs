@@ -60,6 +60,7 @@ namespace PantographSim.XR
             {
                 settleFrames--;
                 placed = ToolBagPose(h.position, h.rotation, floorY, swap, posture);
+                placed.rotation *= Quaternion.Euler(0f, 180f, 0f);   // 腰包正面（+Z）朝學員：後排比前排高，背面朝人會擋住袋口
                 container.SetPositionAndRotation(placed.position, placed.rotation);
                 foreach (var l in labels) if (l != null && l.activeSelf) l.SetActive(false);   // terry：工具袋不放字，用外型分
             }
@@ -74,18 +75,10 @@ namespace PantographSim.XR
                 bagTools = new List<(int, GameObject)>();
                 foreach (var t in container.GetComponentsInChildren<Transform>(true))
                 {
-                    if (!t.name.StartsWith("Model_") || t.parent == null || !t.parent.name.StartsWith("Pocket_")) continue;
-                    if (!int.TryParse(t.parent.name.Substring("Pocket_".Length), out int k)) continue;
+                    var pocket = t.parent != null && t.parent.name.StartsWith("Stow_") ? t.parent.parent : t.parent;   // 模型放在格子的 Stow 節點上
+                    if (!t.name.StartsWith("Model_") || pocket == null || !pocket.name.StartsWith("Pocket_")) continue;
+                    if (!int.TryParse(pocket.name.Substring("Pocket_".Length), out int k)) continue;
                     foreach (var c in t.GetComponentsInChildren<Collider>(true)) Destroy(c);   // 射線和手要碰到的是格子，不是模型
-                    // 建置時模型擺在工具架掛位前方 1.6 m（工具架用的位置），袋裡改成直插在自己的格子裡，上半截露出來
-                    t.gameObject.SetActive(true);
-                    var rs = t.GetComponentsInChildren<Renderer>();
-                    if (rs.Length > 0)
-                    {
-                        var b = rs[0].bounds;
-                        foreach (var r in rs) b.Encapsulate(r.bounds);
-                        t.position += t.parent.position + Vector3.up * posture.toolBagToolRise - b.center;
-                    }
                     bagTools.Add((k, t.gameObject));
                 }
             }
@@ -135,7 +128,7 @@ namespace PantographSim.XR
                 container.position = WaistPosition(h.position, turned, waistOffset, s != null && s.GetBool(SwapKey));
                 container.rotation = turned;   // pivot 在背面中心、開口朝 +Y
             }
-            if (canMountOnWrist && s != null) { if (posture == null) posture = PostureDef.Load(); ShowBagTools(s); }
+            if (canMountOnWrist && s != null) ShowBagTools(s);
             // 手指到的那一格、教學模式這一步要拿的那一格由 XrPouchHover 讓格子變色
             Open = s != null && (int)s.GetFloat(XrPouchHover.SlotKey) != 0;
         }

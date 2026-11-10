@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -1139,7 +1139,7 @@ namespace PantographSim.Editor
             }
 
             var bench = new Vector3(d.workbenchCenterXZ.x, g + 0.92f, d.workbenchCenterXZ.y + 0.45f);
-            var pouch = Fbx("ENV_ToolPouch", null, env, bench, yaw: 90f);
+            var pouch = Fbx("ENV_ToolPouch", null, env, bench, yaw: 90f, folder: ToolPouchFolder);
             var bagComp = pouch.AddComponent<PantographSim.Worksite.ToolBag>(); bagComp.Configure("env.tool_bag", "工具袋");   // R1.5b b4：清點（ToolCountLogic）
             bagComp.Setup(AssetDatabase.LoadAssetAtPath<ToolSlotTable>(ToolSlotTablePath));
             res.ids["env.tool_bag"] = pouch.transform;
@@ -1236,39 +1236,43 @@ namespace PantographSim.Editor
         }
 
         /// <summary>
-        /// R1.5b b3 隨身工具袋（§3.4）：每個 Pocket_k（k＝5..10、13；13 給大扭力扳手，模型沒有就在 10 旁補一個）是掛位 env.tool_rack.slot_k（ToolRackSlot），
-        /// 名稱標籤 Label_k（手伸進袋子時顯示，文字從工具資料讀）；SocketCase＝env.tool_bag.socket_case，底下 6 個套筒座 TGT_Socket_*（a6 增補 7 §7.4，3 × 2 排）。
+        /// 隨身工具袋（資深建模師 B 的黑色帆布腰包，gen_tool_pouch.py v1.0）：每個 Pocket_NN（袋口中心）是掛位 env.tool_rack.slot_k（ToolRackSlot），
+        /// 工具模型（新 TL_*，根節點＝握把中心）放在它的 Stow_NN、Transform 全 0；不放任何文字，用外型分（terry 2026-11-10）。
+        /// 拿起時 XrPlayer.ShowHeldModel 從格子裡複製這個模型到手上。SocketCase＝env.tool_bag.socket_case，6 個 TGT_Socket_* 放建模 A 的 TL_Socket_* prefab。
         /// </summary>
+        public const string ToolPouchFolder = "Assets/_Project/Worksite/Models/ToolPouch";
+        static readonly Dictionary<string, string> PouchToolFbx = new Dictionary<string, string>
+        {
+            { "tool.caliper", "TL_Caliper" }, { "tool.socket_wrench", "TL_SocketWrench" }, { "tool.torque_wrench", "TL_TorqueWrench_S" },
+            { "tool.cleaning_cloth", "TL_Cloth" }, { "tool.marker", "TL_Marker" }, { "tool.hold_down_strap", "TL_HoldDownStrap" }, { "tool.torque_wrench_l", "TL_TorqueWrench_L" },
+        };
+
         static void BuildToolBagPockets(Result res, Transform bag, StringBuilder sb)
         {
             var all = bag.GetComponentsInChildren<Transform>(true).ToList();
+            foreach (var t in all.Where(t => t.name.StartsWith("Pocket_0"))) t.name = "Pocket_" + t.name.Substring("Pocket_0".Length);   // 模型是 Pocket_05，程式和掛位編號用 Pocket_5
             var tools = StepJsonImporter.LoadTools().Append(ToolSocketSetup.LargeWrench).Where(t => t != null).ToList();
             var slots = R1Data.ApplyToolSlots().slots.Where(s => s.homeStorageId == ToolSlotTable.ToolBag).ToList();
-            var p10 = all.FirstOrDefault(x => x.name == "Pocket_10");
-            foreach (var s in slots.Where(s => all.All(x => x.name != "Pocket_" + s.slot)))   // 模型沒有的格子（13）先從乾淨的 Pocket_10 複製，再一起加元件
-                if (p10 != null) { var c = Object.Instantiate(p10.gameObject, p10.parent).transform; c.name = "Pocket_" + s.slot; c.position = p10.position + bag.right * 0.06f; all.Add(c); }
             foreach (var s in slots)
             {
                 var p = all.FirstOrDefault(x => x.name == "Pocket_" + s.slot);
-                if (p == null) continue;
-                if (p.GetComponent<Collider>() == null) p.gameObject.AddComponent<BoxCollider>();
-                if (p.GetComponent<Collider>() is BoxCollider pb)   // 格子很薄：最薄的方向加厚，從上面看也點得到；排列方向不動，格子不互相蓋到
-                {
-                    var sz = Vector3.Scale(pb.size, p.lossyScale); int thin = sz.x <= sz.y && sz.x <= sz.z ? 0 : sz.y <= sz.z ? 1 : 2;   // 模型的縮放已經烘進網格：要看碰撞體本身的大小
-                    var size = pb.size; size[thin] = 0.15f / Mathf.Abs(p.lossyScale[thin]); pb.size = size;
-                }
+                if (p == null) throw new System.Exception($"ENV_ToolPouch.fbx 沒有工具袋第 {s.slot} 格（Pocket_{s.slot:00}）");
+                var ls = p.lossyScale;
+                var pb = p.gameObject.AddComponent<BoxCollider>();   // 袋口是空節點：碰撞體往袋裡伸，從上面點、手伸進去都碰得到
+                pb.size = new Vector3(0.05f / Mathf.Abs(ls.x), 0.10f / Mathf.Abs(ls.y), 0.05f / Mathf.Abs(ls.z));
+                pb.center = new Vector3(0f, -0.04f / Mathf.Abs(ls.y), 0f);
                 var tool = tools.FirstOrDefault(t => t.toolId == s.toolId);
                 var comp = p.gameObject.AddComponent<ToolRackSlot>();
                 comp.Configure("env.tool_rack.slot_" + s.slot, "工具袋：" + (tool != null ? tool.displayName : s.toolId));
-                comp.Setup(s.slot, null, p.GetComponent<Renderer>());
-                p.gameObject.AddComponent<Highlightable>();   // terry 試玩：步驟要拿的格子要亮
-                var model = SliceSceneBuilder.BuildToolModelPublic(s.toolId, p, SliceModelBuilder.Materials());   // VR 手上的工具模型從這裡複製（XrPlayer.ShowHeldModel）；袋子裡不顯示
-                model.SetActive(false);
-                var label = new GameObject("Label_" + s.slot).AddComponent<TextMesh>();
-                label.transform.SetParent(p, false); label.transform.position = p.position + Vector3.up * 0.09f;
-                var labelFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); label.font = labelFont; label.GetComponent<MeshRenderer>().sharedMaterial = labelFont.material;   // 第 4 點：沒給字型什麼都不會顯示
-                label.text = tool != null ? tool.displayName : s.toolId; label.characterSize = 0.006f; label.fontSize = 48; label.anchor = TextAnchor.LowerCenter; label.color = Color.white;
-                label.gameObject.SetActive(false);   // 手在工具袋範圍內才顯示（XrCarryContainer）
+                comp.Setup(s.slot, null, null);
+                p.gameObject.AddComponent<Highlightable>();   // terry 試玩：步驟要拿的格子要亮（亮的是格子裡的工具）
+                var stow = p.Cast<Transform>().FirstOrDefault(c => c.name.StartsWith("Stow_"));
+                if (!PouchToolFbx.TryGetValue(s.toolId, out var fbx)) throw new System.Exception("工具袋沒有 " + s.toolId + " 的模型");
+                var src = AssetDatabase.LoadAssetAtPath<GameObject>($"{ToolPouchFolder}/{fbx}.fbx");
+                if (src == null) throw new System.Exception($"找不到 {ToolPouchFolder}/{fbx}.fbx：先跑 Tools/Blender/gen_tool_pouch.py");
+                var model = (GameObject)Object.Instantiate(src, stow != null ? stow : p, false);
+                model.name = "Model_" + s.toolId;   // XrPlayer.ShowHeldModel 用這個名稱找
+                model.transform.localPosition = Vector3.zero; model.transform.localRotation = Quaternion.identity; model.transform.localScale = Vector3.one;
                 res.ids["env.tool_rack.slot_" + s.slot] = p;
             }
             var caseT = all.FirstOrDefault(x => x.name == "SocketCase");
@@ -1276,17 +1280,19 @@ namespace PantographSim.Editor
             {
                 caseT.gameObject.AddComponent<InteractionPointMarker>().Configure("env.tool_bag.socket_case", "套筒盒");
                 res.ids["env.tool_bag.socket_case"] = caseT;
-                var sizes = new[] { "10", "13", "17", "19", "24", "13_38" };
-                for (int i = 0; i < sizes.Length; i++)
+                foreach (var size in new[] { "10", "13", "17", "19", "24", "13_38" })
                 {
-                    var cap = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-                    cap.name = "TGT_Socket_" + sizes[i];
-                    cap.transform.SetParent(caseT, true);
-                    cap.transform.position = caseT.position + bag.right * (-0.033f + 0.033f * (i % 3)) + bag.forward * (i < 3 ? -0.012f : 0.012f) + Vector3.up * 0.03f;
-                    cap.transform.localScale = Vector3.one;
-                    cap.transform.localScale = new Vector3(0.02f / cap.transform.lossyScale.x, 0.02f / cap.transform.lossyScale.y, 0.02f / cap.transform.lossyScale.z);
-                    var cc = cap.GetComponent<CapsuleCollider>(); cc.isTrigger = true;
-                    cap.AddComponent<InteractionPointMarker>().Configure("env.socket_seat_" + sizes[i], (sizes[i].EndsWith("_38") ? "3/8\" 13" : sizes[i]) + " mm 套筒座");
+                    var tgt = all.FirstOrDefault(x => x.name == "TGT_Socket_" + size);
+                    if (tgt == null) throw new System.Exception("ENV_ToolPouch.fbx 的套筒盒沒有 TGT_Socket_" + size);
+                    var cc = tgt.gameObject.AddComponent<CapsuleCollider>(); cc.isTrigger = true;
+                    cc.radius = 0.012f / Mathf.Abs(tgt.lossyScale.x); cc.height = 0.03f / Mathf.Abs(tgt.lossyScale.x);
+                    tgt.gameObject.AddComponent<InteractionPointMarker>().Configure("env.socket_seat_" + size, (size.EndsWith("_38") ? "3/8\" 13" : size) + " mm 套筒座");
+                    var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{ToolModelBuilder.SocketPrefabFolder}/TL_Socket_{size}.prefab");
+                    if (prefab == null) continue;
+                    var sock = (GameObject)PrefabUtility.InstantiatePrefab(prefab, tgt);
+                    sock.transform.position = tgt.position;
+                    sock.transform.rotation = Quaternion.Euler(0f, bag.eulerAngles.y, 0f);   // 套筒直立插在盒裡（prefab 的 Tip 在 −Y）
+                    foreach (var c in sock.GetComponentsInChildren<Collider>(true)) Object.DestroyImmediate(c);   // 碰的是套筒座，不是套筒模型
                 }
             }
             sb.AppendLine($"工具袋（b3）：掛位 {string.Join("、", slots.Select(s => s.slot))}、套筒盒 6 格");

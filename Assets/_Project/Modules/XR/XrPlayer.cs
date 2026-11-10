@@ -473,7 +473,7 @@ namespace PantographSim.XR
             heldModel.name = "Held_" + toolId;
             heldModel.SetActive(true);
             heldModel.transform.localPosition = Vector3.zero;
-            heldModel.transform.localRotation = Quaternion.Euler(70f, 0f, 0f);
+            heldModel.transform.localRotation = model.Find("Visual") != null ? Quaternion.identity : Quaternion.Euler(70f, 0f, 0f);   // 工具袋的新模型：根節點＝握把中心、+Z 朝工具前端，直接對齊手；架上的舊模型照舊
             var parentScale = rig.HeldToolAnchor.lossyScale;
             var s = model.lossyScale;
             heldModel.transform.localScale = new Vector3(s.x / parentScale.x, s.y / parentScale.y, s.z / parentScale.z);
