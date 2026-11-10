@@ -29,7 +29,7 @@ namespace PantographSim.Data
 
         [Tooltip("terry 試玩：開場背對站點面向目標（升降盒），任務卡在升降盒對面、正面朝學員")] public bool startFacesOpposite = true;
         [Tooltip("terry 試玩：作業單打開時，離視線超過這個角度（度）或這個距離（m）就移到眼前")] public float carriedMaxAngle = 50f, carriedMaxDistance = 0.8f;
-        [Tooltip("terry 試玩：工具說明小視窗貼在手上工具旁邊：x＝往工具外側（離視線中間遠的那一邊）、y＝往上、z＝往使用者靠近（m）")] public Vector3 toolCardOffset = new Vector3(0.22f, 0f, 0.1f);
+        [Tooltip("terry 試玩：工具說明小視窗貼在手上工具旁邊：x＝往拿工具那隻手（右手）的外側、y＝往上、z＝往使用者靠近（m）")] public Vector3 toolCardOffset = new Vector3(0.22f, 0f, 0.1f);
         [Tooltip("工具說明小視窗每 unit 幾公尺（620×520 unit，0.00035＝約 22×18 cm；字高約＝字級×這個值）")] public float toolCardScale = 0.00035f;
         [Tooltip("射線指到工具時的摘要小框，比一般資訊卡縮小成幾倍")] public float toolSummaryScale = 0.7f;
         public Panel[] panels =

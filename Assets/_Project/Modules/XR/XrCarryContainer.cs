@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using PantographSim.Core;
 using PantographSim.Data;
 using UnityEngine;
@@ -65,6 +66,37 @@ namespace PantographSim.XR
             container.SetPositionAndRotation(new Vector3(placed.position.x, floorY + posture.standEye - posture.toolBagBelowEye, placed.position.z), placed.rotation);
         }
 
+        /// <summary>terry：工具袋用外型分。工具在袋裡就顯示格子裡的模型，拿出來（在手上或掛在繩上）就藏起來。</summary>
+        void ShowBagTools(ISimState s)
+        {
+            if (bagTools == null)
+            {
+                bagTools = new List<(int, GameObject)>();
+                foreach (var t in container.GetComponentsInChildren<Transform>(true))
+                {
+                    if (!t.name.StartsWith("Model_") || t.parent == null || !t.parent.name.StartsWith("Pocket_")) continue;
+                    if (!int.TryParse(t.parent.name.Substring("Pocket_".Length), out int k)) continue;
+                    foreach (var c in t.GetComponentsInChildren<Collider>(true)) Destroy(c);   // 射線和手要碰到的是格子，不是模型
+                    // 建置時模型擺在工具架掛位前方 1.6 m（工具架用的位置），袋裡改成直插在自己的格子裡，上半截露出來
+                    t.gameObject.SetActive(true);
+                    var rs = t.GetComponentsInChildren<Renderer>();
+                    if (rs.Length > 0)
+                    {
+                        var b = rs[0].bounds;
+                        foreach (var r in rs) b.Encapsulate(r.bounds);
+                        t.position += t.parent.position + Vector3.up * posture.toolBagToolRise - b.center;
+                    }
+                    bagTools.Add((k, t.gameObject));
+                }
+            }
+            foreach (var (k, model) in bagTools)
+            {
+                bool inBag = s.Get("rack.slot_" + k, "on_rack") == "on_rack";
+                if (model.activeSelf != inBag) model.SetActive(inBag);
+            }
+        }
+
+        List<(int slot, GameObject model)> bagTools;
         const int SettleFrames = 3;
         ToolPouchDef pouch;
         PostureDef posture;
@@ -103,6 +135,7 @@ namespace PantographSim.XR
                 container.position = WaistPosition(h.position, turned, waistOffset, s != null && s.GetBool(SwapKey));
                 container.rotation = turned;   // pivot 在背面中心、開口朝 +Y
             }
+            if (canMountOnWrist && s != null) { if (posture == null) posture = PostureDef.Load(); ShowBagTools(s); }
             // 手指到的那一格、教學模式這一步要拿的那一格由 XrPouchHover 讓格子變色
             Open = s != null && (int)s.GetFloat(XrPouchHover.SlotKey) != 0;
         }
