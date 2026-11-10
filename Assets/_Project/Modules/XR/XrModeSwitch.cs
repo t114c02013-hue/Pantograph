@@ -94,7 +94,7 @@ namespace PantographSim.XR
         {
             foreach (var c in FindObjectsOfType<Canvas>(true))
             {
-                if (!c.isRootCanvas) continue;
+                if (!c.isRootCanvas || c.renderMode == RenderMode.ScreenSpaceOverlay) continue;   // 只在電腦螢幕的面板（後台）用滑鼠，不接射線
                 var r = c.GetComponent<TrackedDeviceGraphicRaycaster>();
                 if (r == null) r = c.gameObject.AddComponent<TrackedDeviceGraphicRaycaster>();
                 // 左手夾板（作業單）會隨手腕翻轉：背面也接住射線，從下面往上指也點得到

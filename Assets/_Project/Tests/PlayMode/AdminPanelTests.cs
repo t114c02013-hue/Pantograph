@@ -125,14 +125,13 @@ namespace PantographSim.Tests
             var eye = Object.FindObjectOfType<XrRig>(true).Eye;
             var panel = Object.FindObjectOfType<AdminPanel>(true);
             Assert.IsNotNull(panel, "VR 模式下面板還在（畫在電腦螢幕）");
-            Assert.IsNull(panel.GetComponent<Canvas>());
+            Assert.AreEqual(RenderMode.ScreenSpaceOverlay, panel.Canvas.renderMode, "只畫在電腦螢幕");
+            Assert.IsNull(panel.Canvas.GetComponent<UnityEngine.XR.Interaction.Toolkit.UI.TrackedDeviceGraphicRaycaster>(), "控制器射線點不到");
             yield return null;
             var with = Render(eye);
-            panel.enabled = false;
-            yield return null;
-            yield return null;
+            panel.Canvas.enabled = false;
             var without = Render(eye);
-            panel.enabled = true;
+            panel.Canvas.enabled = true;
             Assert.Less(with.Zip(without, (a, b) => Mathf.Abs(a.r - b.r) + Mathf.Abs(a.g - b.g) + Mathf.Abs(a.b - b.b)).Average(), 2.0, "面板開關，頭盔畫面一樣");
 
             const string step = "STP_SI_04_VoltageTest";
@@ -140,9 +139,6 @@ namespace PantographSim.Tests
             for (int i = 0; i < 10; i++) yield return null;
             Assert.IsTrue(Sim.State.GetBool(SimIds.AutoRunActive));
             StringAssert.Contains("第 4 步", Sim.State.Get(SimIds.AutoRunText));
-            var dbg = GameObject.Find("XR_AutoRunMask");
-            Debug.Log($"DBG mask={dbg != null} eye={eye.name} eyePos={eye.transform.position} near={eye.nearClipPlane} cull={eye.cullingMask} t={Time.realtimeSinceStartup}");
-            if (dbg != null) { var ch = dbg.transform.Find("AutoRunMask"); Debug.Log($"DBG pos={dbg.transform.position} parent={dbg.transform.parent.name} scale={dbg.transform.lossyScale} child={(ch != null)} act={(ch != null && ch.gameObject.activeInHierarchy)} alpha={(ch != null ? ch.GetComponent<CanvasGroup>().alpha : -1)} rect={(ch != null ? ((RectTransform)ch).rect.ToString() : "")} layer={dbg.layer}"); }
             yield return null;
             float masked = Brightness(Render(eye, "Logs/rig_autorun_mask.png"));
             Assert.Less(masked, 12f, "代做期間頭盔裡看不到場景");

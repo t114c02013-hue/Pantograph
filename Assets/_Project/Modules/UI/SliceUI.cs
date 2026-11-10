@@ -138,7 +138,7 @@ namespace PantographSim.UI
             }
             if (InputMode.XrActive && xrLayout == null) UseXrLayout(ServiceLocator.Get<IXrRig>());
             var es = EventSystem.current;
-            if (!InputMode.XrActive) PointerState.OverUi = AdminPanel.Hover || (es != null && es.IsPointerOverGameObject());   // VR 由 XR 模組依右手射線寫入
+            if (!InputMode.XrActive) PointerState.OverUi = es != null && es.IsPointerOverGameObject();   // VR 由 XR 模組依右手射線寫入
             var sel = es != null ? es.currentSelectedGameObject : null;
             var field = sel != null ? sel.GetComponent<InputField>() : null;
             PointerState.TypingInUi = field != null && field.isFocused;
