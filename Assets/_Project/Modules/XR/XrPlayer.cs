@@ -24,7 +24,7 @@ namespace PantographSim.XR
         [SerializeField] XRBaseController rightController;
         [SerializeField] XrTeleport teleport;
         [SerializeField] XrCoach coach;
-        [SerializeField] float maxDistance = 30f, grabRadius = 0.15f, trayRadius = 0.3f, pouchRadius = 0.15f;
+        [SerializeField] float maxDistance = 30f, grabRadius = 0.15f, trayRadius = 0.3f;
         Data.ToolPouchDef pouch;
         float grabStartedAt;
         [Tooltip("D31：胸前扣環、工具環的握把半徑（RoofSceneDef.bodyRingRadius，建置時寫入）")] [SerializeField] float bodyRingRadius = 0.08f;
