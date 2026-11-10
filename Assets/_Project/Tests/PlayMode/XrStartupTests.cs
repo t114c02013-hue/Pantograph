@@ -490,7 +490,7 @@ namespace PantographSim.Tests
             Assert.AreEqual(PostureDef.Load().standEye - PostureDef.Load().toolBagBelowEye, bag.position.y - Rig.Head.parent.position.y, 1e-3f, "腰高");
             Assert.IsEmpty(bag.GetComponentsInChildren<TextMesh>(false).Select(t => t.name + "：" + t.text), "工具袋上沒有字");
             Assert.IsTrue(Sim.Registry.TryGetTransform("env.tool_rack.slot_5", out var pocket5));
-            var caliper = pocket5.Cast<Transform>().First(t => t.name.StartsWith("Model_"));
+            var caliper = pocket5.GetComponentsInChildren<Transform>(true).First(t => t.name.StartsWith("Model_"));
             Assert.IsTrue(caliper.gameObject.activeInHierarchy, "卡尺在袋裡看得到外型");
             Assert.IsEmpty(caliper.GetComponentsInChildren<Collider>(), "模型不擋格子");
             Sim.State.Set("rack.slot_5", "in_hand");

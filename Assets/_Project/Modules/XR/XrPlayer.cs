@@ -467,7 +467,7 @@ namespace PantographSim.XR
             if (string.IsNullOrEmpty(toolId) || rig == null || Sim.Registry == null) return;
             int k = SlotOfTool(toolId);
             if (!Sim.Registry.TryGetTransform("env.tool_rack.slot_" + k, out var slot)) return;
-            var model = slot.Cast<Transform>().FirstOrDefault(t => t.name.StartsWith("Model_"));
+            var model = slot.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name.StartsWith("Model_"));   // 工具袋的模型在格子的 Stow 節點底下
             if (model == null) return;
             heldModel = Instantiate(model.gameObject, rig.HeldToolAnchor);
             heldModel.name = "Held_" + toolId;

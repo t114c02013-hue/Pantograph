@@ -1258,9 +1258,9 @@ namespace PantographSim.Editor
                 var p = all.FirstOrDefault(x => x.name == "Pocket_" + s.slot);
                 if (p == null) throw new System.Exception($"ENV_ToolPouch.fbx 沒有工具袋第 {s.slot} 格（Pocket_{s.slot:00}）");
                 var ls = p.lossyScale;
-                var pb = p.gameObject.AddComponent<BoxCollider>();   // 袋口是空節點：碰撞體往袋裡伸，從上面點、手伸進去都碰得到
-                pb.size = new Vector3(0.05f / Mathf.Abs(ls.x), 0.10f / Mathf.Abs(ls.y), 0.05f / Mathf.Abs(ls.z));
-                pb.center = new Vector3(0f, -0.04f / Mathf.Abs(ls.y), 0f);
+                var pb = p.gameObject.AddComponent<BoxCollider>();   // 袋口是空節點：碰撞體包住袋口和露出來的工具，從上面點、手伸進去都碰得到；中心在袋口上方，鏡頭和箭頭才不會被袋身擋住
+                pb.size = new Vector3(0.05f / Mathf.Abs(ls.x), 0.08f / Mathf.Abs(ls.y), 0.05f / Mathf.Abs(ls.z));
+                pb.center = new Vector3(0f, 0.01f / Mathf.Abs(ls.y), 0f);
                 var tool = tools.FirstOrDefault(t => t.toolId == s.toolId);
                 var comp = p.gameObject.AddComponent<ToolRackSlot>();
                 comp.Configure("env.tool_rack.slot_" + s.slot, "工具袋：" + (tool != null ? tool.displayName : s.toolId));

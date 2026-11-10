@@ -1,5 +1,5 @@
 """
-水電工維修腰包＋腰包內工具（資深建模師 B，v1.0，2026-11-10）
+水電工維修腰包＋腰包內工具（資深建模師 B，v1.2，2026-11-10）
 
 依據：tool-pouch/references.md（負責人 2026-11-10 裁定：0.30 × 0.26 × 0.10 m、Pocket_05…Pocket_13、深褐皮革、
 外型照第 4 節、handleLengthM 0.39／0.26／0.19）。不顯示文字，靠外型分辨。
@@ -10,7 +10,8 @@
 
 座標約定（和 controller-model/gen_controller_fbx.py 相同的匯出設定，已在控制器上驗證）：
   腳本裡所有尺寸都用 Unity 座標寫（+X 右、+Y 上、+Z 前），由 U() 換成 Blender 座標 (x,y,z)→(-x,-z,y)。
-  FBX 匯出 axis_forward=-Z、axis_up=Y，Unity 匯入後就回到腳本裡寫的 Unity 座標。
+  FBX 匯出 axis_forward=-Z、axis_up=Y（v1.2 起不用 bake_space_transform，改由 export() 自己換算整條階層），
+  Unity 匯入後就回到腳本裡寫的 Unity 座標。
 工具原點 = Attach_Grip（握把中心，+Z 朝工具前端，+Y 朝上，T2-collider-spec）。
 腰包原點 = 背面中心，+Y 朝上（袋口），+Z 朝外（離開身體）。
 """
@@ -372,14 +373,37 @@ def pouch():
     return r
 
 # ---------------------------------------------------------------- 匯出
+# v1.2：不用 bake_space_transform。它只換算掛在根節點底下的第一層，
+# 更深的空節點（Stow_NN、TGT_Socket_*、FX_Jaw/Poke_Zero）局部座標沒換算，匯出後偏 90°（實驗室電腦回報）。
+# 改成匯出前自己換算整條階層：子物件做共軛 C·M·C⁻¹、網格頂點乘 C，根節點放 C⁻¹；
+# 匯出器只在根節點乘 C，根節點就變成單位矩陣，每一層的局部座標都是 FBX 座標。
+from bpy_extras.io_utils import axis_conversion
+CONV = axis_conversion(to_forward="-Z", to_up="Y").to_4x4()
+
+def _conj(objs, rt, C):
+    Ci = C.inverted()
+    for o in objs:
+        if o.type == "MESH": o.data.transform(C)
+        if o is rt: continue
+        o.matrix_parent_inverse = C @ o.matrix_parent_inverse @ Ci
+        o.matrix_basis = C @ o.matrix_basis @ Ci
+
 def export(objs, path):
+    rt = objs[0]
+    keep = rt.matrix_basis.copy()               # 根節點原本是單位矩陣
+    _conj(objs, rt, CONV)
+    rt.matrix_basis = CONV.inverted()
+    bpy.context.view_layer.update()
     bpy.ops.object.select_all(action="DESELECT")
     for o in objs: o.select_set(True)
     bpy.ops.export_scene.fbx(
         filepath=path, use_selection=True, object_types={"MESH", "EMPTY"},
         apply_unit_scale=True, apply_scale_options="FBX_SCALE_UNITS",
-        axis_forward="-Z", axis_up="Y", bake_space_transform=True,
+        axis_forward="-Z", axis_up="Y", bake_space_transform=False,
         mesh_smooth_type="FACE", add_leaf_bones=False, bake_anim=False)
+    _conj(objs, rt, CONV.inverted())            # 還原，預覽圖照原樣算
+    rt.matrix_basis = keep
+    bpy.context.view_layer.update()
 
 def tris(objs):
     return sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in objs if o.type == "MESH")

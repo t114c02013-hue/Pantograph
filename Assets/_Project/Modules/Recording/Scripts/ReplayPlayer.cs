@@ -231,13 +231,14 @@ namespace PantographSim.Recording
                 if (f.Length >= 2 && f[1] == tool) slot = f[0];
             }
             if (!Sim.Registry.TryGetTransform("env.tool_rack.slot_" + slot, out var slotT)) return;
-            var model = slotT.Cast<Transform>().FirstOrDefault(c => c.name.StartsWith("Model_"));
+            var model = slotT.GetComponentsInChildren<Transform>(true).FirstOrDefault(c => c.name.StartsWith("Model_"));   // 工具袋的模型在格子的 Stow 節點底下
             if (model == null) return;
             heldModel = Instantiate(model.gameObject, hand, false);
             foreach (var tr in heldModel.GetComponentsInChildren<ReplayTracked>(true)) Destroy(tr);
             heldModel.SetActive(true);
-            heldModel.transform.localPosition = new Vector3(0, 0, 0.08f);
-            heldModel.transform.localRotation = Quaternion.Euler(70f, 0, 0);
+            bool grip = model.Find("Visual") != null;   // 工具袋的新模型：根節點＝握把中心、+Z 朝工具前端
+            heldModel.transform.localPosition = grip ? Vector3.zero : new Vector3(0, 0, 0.08f);
+            heldModel.transform.localRotation = grip ? Quaternion.identity : Quaternion.Euler(70f, 0, 0);
             var s = model.lossyScale; var ps = hand.lossyScale;
             heldModel.transform.localScale = new Vector3(s.x / ps.x, s.y / ps.y, s.z / ps.z);
         }
