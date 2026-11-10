@@ -16,6 +16,8 @@ namespace PantographSim.XR
     /// ・新滑板翻面：抓著滑板轉手腕超過 90° →「carried rotate180」。
     /// 只有右手正拿著的那件工具的節點會啟用；沒拿工具全停用。poke 到時左手輕震。
     /// shortcut: 節點掛在右手 Attach_Tool 上的小方塊（不是工具 prefab 裡），用距離判定碰觸，不經 XRI 的 poke 互動；R2 的 ContactRouter 再換成真正的接觸。
+    /// 手上是建模師 B 的新模型（Held_*，有同名節點 Socket_Mount、Poke_*、FX_Jaw、Tip）時，小方塊跟著模型的節點走，卡尺的量爪 FX_Jaw 照讀數滑動；
+    /// 判定方式和數值不變，只換位置。架上的舊模型沒有這些節點，照舊用下面寫死的位置。
     /// </summary>
     public class XrToolWidgets : MonoBehaviour
     {
@@ -101,6 +103,8 @@ namespace PantographSim.XR
             if (s == null || !InputMode.XrActive || toolAnchor == null || SimSession.IsReplay) { SetActiveTool(""); return; }
             string tool = s.GetBool("training.running") ? s.Get(SimIds.ActiveTool) : "";
             SetActiveTool(tool);
+            FindHeld(tool);
+            FollowModel(tool);
             float dt = Time.unscaledDeltaTime;
             foreach (var w in widgets.Where(x => x.name.StartsWith("Poke_") || x.name == "FX_Jaw"))
             {
@@ -116,6 +120,7 @@ namespace PantographSim.XR
             }
             UpdateSocketSeat(s, tool, dt);
             UpdateCaliper(s, tool, dt);
+            if (modelJaw != null) FollowModel(tool);   // 量爪剛滑動過，FX_Jaw 和 Poke_Zero 跟上
             UpdateFlip(s);
         }
 
@@ -129,13 +134,46 @@ namespace PantographSim.XR
             if (size != null && size != s.Get(SimIds.ToolSocket + ".size", "10")) { Send(SimIds.ToolSocket, "size:" + size); Buzz(); }
         }
 
+        // ---- 手上模型的節點 ----
+        Transform held, modelJaw, modelTip;
+        string heldFor = "";
+        Vector3 jawBase;
+        readonly Dictionary<string, Transform> heldNodes = new Dictionary<string, Transform>();
+
+        /// <summary>找手上的模型（XrPlayer 在 Attach_Tool 下建立 Held_工具）；拿起那一幀可能還沒建好，找到為止。</summary>
+        void FindHeld(string tool)
+        {
+            if (tool == heldFor && (held != null || string.IsNullOrEmpty(tool))) return;
+            if (tool != heldFor) { heldFor = tool; held = null; }
+            heldNodes.Clear(); modelJaw = modelTip = null;
+            if (string.IsNullOrEmpty(tool)) return;
+            held = toolAnchor.Find("Held_" + tool);
+            if (held == null) return;
+            foreach (var t in held.GetComponentsInChildren<Transform>(true))
+                if (!heldNodes.ContainsKey(t.name)) heldNodes[t.name] = t;
+            heldNodes.TryGetValue("FX_Jaw", out modelJaw);
+            heldNodes.TryGetValue("Tip", out modelTip);
+            if (modelJaw != null) jawBase = modelJaw.localPosition;
+        }
+
+        /// <summary>小方塊放到手上模型的同名節點上（沒有同名節點就留在原位）。</summary>
+        void FollowModel(string tool)
+        {
+            if (held == null) return;
+            foreach (var w in widgets)
+                if (w.tool == tool && heldNodes.TryGetValue(w.name, out var n) && n != null) w.t.SetPositionAndRotation(n.position, n.rotation);
+        }
+
         void UpdateCaliper(ISimState s, string tool, float dt)
         {
-            if (jaw != null && tool == SimIds.ToolCaliper)   // 量爪沿 +X 開合 0–150 mm
-                jaw.localPosition = new Vector3(Mathf.Clamp(s.GetFloat(SimIds.ToolCaliper + ".jaw"), 0f, 150f) / 1000f, 0f, 0.10f);
+            float mm = Mathf.Clamp(s.GetFloat(SimIds.ToolCaliper + ".jaw"), 0f, 150f);
+            if (modelJaw != null && tool == SimIds.ToolCaliper) modelJaw.localPosition = jawBase + Vector3.right * (mm / 1000f);   // 新模型：量爪沿尺身 +X 滑動
+            else if (jaw != null && tool == SimIds.ToolCaliper)   // 量爪沿 +X 開合 0–150 mm
+                jaw.localPosition = new Vector3(mm / 1000f, 0f, 0.10f);
             string near = "";
-            if (tool == SimIds.ToolCaliper && Sim.Registry != null && jawTip != null)
-                near = ToolWidgetLogic.Nearest(jawTip.position, Sim.Registry.Ids.Where(id => id.Contains(".measure_") && s.Has(id + ".true"))
+            var tipT = modelTip != null && tool == SimIds.ToolCaliper ? modelTip : jawTip;   // 新模型：量爪尖
+            if (tool == SimIds.ToolCaliper && Sim.Registry != null && tipT != null)
+                near = ToolWidgetLogic.Nearest(tipT.position, Sim.Registry.Ids.Where(id => id.Contains(".measure_") && s.Has(id + ".true"))
                     .Select(id => new KeyValuePair<string, Vector3>(id, Sim.Registry.TryGetPosition(id, out var p) ? p : Vector3.one * 1e4f)), ToolWidgetLogic.CaliperSnapRadius);
             if (near != snapped)
             {

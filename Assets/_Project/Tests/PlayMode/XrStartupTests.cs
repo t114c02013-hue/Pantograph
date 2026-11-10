@@ -442,6 +442,45 @@ namespace PantographSim.Tests
             Sim.State.Set("ui.tutorial.tool", "");
         }
 
+        /// <summary>換新模型：工具上的互動點跟著手上模型的同名節點走（判定數值不變），卡尺量爪照讀數滑動。</summary>
+        [UnityTest]
+        public IEnumerator HeldTools_WidgetsOnModelNodes_CaliperJawSlides()
+        {
+            yield return Boot(new Vector3(0f, 1.63f, 0f));
+            tracked = true; headY = 1.63f;
+            yield return WaitReady();
+            Sim.State.SetBool("training.running", true);
+            Sim.State.SetBool("xr.tutorial.active", false);
+            Sim.State.Set("training.mode", "practice");   // 教學模式只讓拿這一步要用的工具
+            var anchor = Rig.HeldToolAnchor;
+            int SlotOf(string tool) => Sim.State.Get("tools.list").Split(';').Select(e => e.Split('|')).Where(f => f.Length >= 2 && f[1] == tool).Select(f => int.Parse(f[0])).First();
+            foreach (var (tool, nodes) in new[] { (SimIds.ToolSocket, new[] { "Socket_Mount", "Poke_Ratchet" }), (SimIds.ToolTorque, new[] { "Poke_Plus", "Poke_Minus" }), (SimIds.ToolCaliper, new[] { "FX_Jaw", "Poke_Zero" }) })
+            {
+                string holding = Sim.State.Get(SimIds.ActiveTool);
+                if (holding.Length > 0) Sim.Bus.Publish(new ToolReturnRequested { targetId = "env.tool_rack.slot_" + SlotOf(holding), value = SlotOf(holding), time = SimClock.Now });
+                for (int i = 0; i < 3; i++) yield return null;
+                Sim.Bus.Publish(new ToolPickRequested { targetId = "env.tool_rack.slot_" + SlotOf(tool), value = SlotOf(tool), time = SimClock.Now });
+                for (int i = 0; i < 4; i++) yield return null;
+                Assert.AreEqual(tool, Sim.State.Get(SimIds.ActiveTool));
+                var held = anchor.Find("Held_" + tool);
+                Assert.IsNotNull(held, tool + " 手上有模型");
+                foreach (var n in nodes)
+                {
+                    var node = held.GetComponentsInChildren<Transform>(true).First(t => t.name == n);
+                    var widget = anchor.Cast<Transform>().First(t => t.name == n);
+                    Assert.Less(Vector3.Distance(node.position, widget.position), 0.001f, tool + " 的 " + n + " 對在模型上");
+                }
+            }
+            var jaw = anchor.Find("Held_" + SimIds.ToolCaliper).GetComponentsInChildren<Transform>(true).First(t => t.name == "FX_Jaw");
+            Sim.State.SetFloat(SimIds.ToolCaliper + ".jaw", 0f);
+            yield return null; yield return null;
+            var closed = jaw.localPosition;
+            Sim.State.SetFloat(SimIds.ToolCaliper + ".jaw", 40f);
+            yield return null; yield return null;
+            Assert.AreEqual(0.04f, jaw.localPosition.x - closed.x, 0.0015f, "量爪照讀數滑 40 mm");
+            Sim.State.SetFloat(SimIds.ToolCaliper + ".jaw", 0f);
+        }
+
         /// <summary>terry 試玩：拿起工具不跳說明，指到看一行，左扳機開關詳細用法。</summary>
         [UnityTest]
         public IEnumerator ToolHelp_NotAuto_SummaryOnPoint_LeftTriggerTogglesDetail()
