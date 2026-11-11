@@ -108,7 +108,7 @@ namespace PantographSim.XR
             if (slot == 0) return;
             Highlight(slot, true);
             HoverCount++;
-            player?.Haptic(hand == 1, def.hoverAmplitude, def.hoverSeconds);
+            if (!XrCarryContainer.BagHeld) player?.Haptic(hand == 1, def.hoverAmplitude, def.hoverSeconds);   // 左手抓著袋子移動時格子一直換，不要一直震
             if (!s.GetBool("training.running")) { s.Set("ui.toast", ""); s.Set("ui.toast", def.notStartedHint); s.SetFloat("ui.toast_time", Time.time); }
         }
 

@@ -37,7 +37,7 @@ namespace PantographSim.XR
         IInteractable hovered;
         string hoveredId = "";
         Vector3 hoverPoint;
-        bool bound, triggerHeld, grabPickedThisPress;
+        bool bound, triggerHeld, grabPickedThisPress, bagThisPress;
         string helpContext = "";
         GameObject heldModel;
 
@@ -189,7 +189,8 @@ namespace PantographSim.XR
                     break;
                 case "PanelGrab":   // 左握把：抓面板把手由 XRI 處理；手在工具袋前就拿、放工具
                     leftHandActing = true;
-                    if (c.pressed) { if (BodyItemNear()) GrabStart(); }
+                    if (c.pressed) { bagThisPress = XrCarryContainer.BagHovered; if (!bagThisPress && BodyItemNear()) GrabStart(); }   // 碰到袋子上緣＝抓袋子（XRI 處理）
+                    else if (bagThisPress) bagThisPress = false;   // 放下袋子不是放回工具
                     else if (grabPickedThisPress) grabPickedThisPress = false;
                     else if (!string.IsNullOrEmpty(S.Get(SimIds.ActiveTool)) && BodyItemNear()) GrabEnd();
                     leftHandActing = false;

@@ -60,7 +60,7 @@ namespace PantographSim.Data
             ("Right", "B", "FocusTarget", "帶我到目標"),
             ("Left", "LeftStick", "TeleportTurn", "往前推＝傳送；左右撥＝轉 45°"),
             ("Left", "LeftStickClick", "Crouch", "蹲低視角（只在車頂有效）"),
-            ("Left", "LeftGrip", "PanelGrab", "抓面板把手、拿放工具袋的工具"),
+            ("Left", "LeftGrip", "PanelGrab", "抓面板把手／工具袋（袋子上緣）；手在格子前＝拿放工具"),
             ("Left", "LeftTrigger", "ToolDetail", "看手上工具的用法（再按一次關）"),
             ("Left", "LeftPoke", "ToolPoke", "按工具上的撥桿、± 鈕、ZERO 鍵"),
             ("Left", "X", "ToggleWorkOrder", "開關作業單"),
