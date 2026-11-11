@@ -54,7 +54,7 @@ namespace PantographSim.Tools
             if (st == "InTray")
             {
                 // 從零件盒取螺栓放回孔位（v5：先放回四支，再把方向切到「鎖」預鎖）
-                if (Ask(e.targetId, "place")) Perform(e.targetId, "place");
+                if (SimIds.CanPlaceBolt(State, e.targetId) && Ask(e.targetId, "place")) Perform(e.targetId, "place");
                 return;
             }
             if (!Ask(e.targetId, "engage")) return;

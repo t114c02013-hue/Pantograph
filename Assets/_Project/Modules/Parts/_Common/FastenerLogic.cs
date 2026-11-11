@@ -88,7 +88,7 @@ namespace PantographSim.Parts.Common
                     bus?.Publish(new ActionPerformed { targetId = TrayFor(s, boltId), text = "add:bolt", pointId = boltId, time = SimClock.Now });   // 放進該側的螺栓盤
                     return true;
                 case "place":
-                    if (st != InTray || s.GetFloat(IsStripBolt(boltId) ? "tray.bolts" : BoltPouchCount) < 1) return false;
+                    if (st != InTray || s.GetFloat(IsStripBolt(boltId) ? "tray.bolts" : BoltPouchCount) < 1 || !SimIds.CanPlaceBolt(s, boltId)) return false;
                     s.Set(boltId + ".state", Placed);
                     s.SetFloat(boltId + ".lock_deg", 0);
                     bus?.Publish(new ActionPerformed { targetId = TrayFor(s, boltId), text = "remove:bolt", pointId = boltId, time = SimClock.Now });   // 從該側的螺栓盤拿

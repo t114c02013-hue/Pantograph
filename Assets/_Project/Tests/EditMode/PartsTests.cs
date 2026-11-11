@@ -33,6 +33,23 @@ namespace PantographSim.Tests
             Assert.IsFalse(s.Has(B1 + ".angle_deg"));
         }
 
+        /// <summary>2026-11-10 頭盔紀錄第 13 步卡關：螺栓放進盤後又對空孔按扳機，被裝回舊滑板（Placed），小動作已勾、完成條件要 InTray，步驟卡住。</summary>
+        [Test]
+        public void StripBolt_CannotGoBack_UntilNewStripMounted()
+        {
+            s.Set("part.carbon_strip_L.state", "OldMounted");
+            Rotate(B1, 720);
+            FastenerLogic.Apply(s, bus, B1, "take", 0);
+            s.SetFloat("tray.bolts", 1);
+            Assert.IsFalse(FastenerLogic.Apply(s, bus, B1, "place", 0), "取出螺栓那一步不能裝回舊滑板");
+            Assert.AreEqual("InTray", s.Get(B1 + ".state"), "還在盤裡，取出螺栓的完成條件照樣成立");
+            Assert.IsFalse(SimIds.CanPlaceBolt(s, B1));
+            s.Set("part.carbon_strip_L.state", "NewMounted");
+            Assert.IsTrue(FastenerLogic.Apply(s, bus, B1, "place", 0), "新滑板裝上後（第 18 步）可以裝回");
+            Assert.AreEqual("Placed", s.Get(B1 + ".state"));
+            Assert.IsTrue(SimIds.CanPlaceBolt(s, "ip.pan_base.bolt_1"), "其他螺栓不受限");
+        }
+
         [Test]
         public void Fastener_HalfTurnLoosens_ThenOut_Tray_Place_Snug_Torque_Mark()
         {
@@ -44,6 +61,7 @@ namespace PantographSim.Tests
             FastenerLogic.Apply(s, bus, B1, "take", 0);
             Assert.AreEqual("InTray", s.Get(B1 + ".state"));
             s.SetFloat("tray.bolts", 1);
+            s.Set("part.carbon_strip_L.state", "NewMounted");   // 換上新滑板後才裝回
             FastenerLogic.Apply(s, bus, B1, "place", 0);
             Assert.AreEqual("Placed", s.Get(B1 + ".state"));
             Rotate(B1, 360, "lock");

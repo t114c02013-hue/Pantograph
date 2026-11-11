@@ -162,6 +162,17 @@ namespace PantographSim.Core
             !string.IsNullOrEmpty(id) && (id.StartsWith("part.carbon_strip_") || id.StartsWith("ip.carbon_strip_") || id == PanHead);
 
         public static string Strip(string side) => "part.carbon_strip_" + side;
+
+        /// <summary>
+        /// 滑板螺栓能不能從盤子放回孔位：要等這一側的新滑板裝上（NewMounted）。取出螺栓那一步對空孔按扳機不會把螺栓裝回舊滑板
+        /// （2026-11-10 頭盔紀錄：裝回後小動作已勾、完成條件卻要螺栓在盤裡，步驟卡住）。其他螺栓（集電弓底座、高壓端子）不受限。
+        /// </summary>
+        public static bool CanPlaceBolt(ISimState s, string boltId)
+        {
+            if (!boltId.StartsWith("ip.carbon_strip_")) return true;
+            string key = Strip(SideOf(boltId)) + ".state";
+            return !s.Has(key) || s.Get(key) == "NewMounted";
+        }
         public static string Point(string side, string point) => "ip.carbon_strip_" + side + "." + point;
 
         /// <summary>
