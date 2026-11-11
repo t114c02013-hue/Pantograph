@@ -50,8 +50,13 @@ namespace PantographSim.Worksite
 
         protected override bool Watches(string key) => key.StartsWith(id + ".") || key == "procedure.side";
 
+        /// <summary>黑板是唯一依據：重做本步還原成換側前的排列時，型號和裂紋要跟著黑板，外觀、標籤、判定、教學箭頭才是同一條。</summary>
+        public static (string model, bool cracked) Current(ISimState s, string slotId, string model, bool cracked) =>
+            (s.Get(slotId + ".model", model), s.Has(slotId + ".cracked") ? s.GetBool(slotId + ".cracked") : cracked);
+
         protected override void Refresh()
         {
+            (modelCode, cracked) = Current(State, id, modelCode, cracked);
             if (body != null)
             {
                 body.gameObject.SetActive(!State.GetBool(id + ".taken"));

@@ -1349,10 +1349,10 @@ namespace PantographSim.Editor
                 var mesh = new GameObject("Mesh"); mesh.transform.SetParent(body.transform, false);
                 mesh.AddComponent<MeshFilter>().sharedMesh = stripMesh;
                 mesh.AddComponent<MeshRenderer>().sharedMaterials = stripMats;
-                GameObject crack = null;
-                if (specs[i].Item2)
+                // 三格都做裂紋：左右兩側的排列裡有裂紋的格子不同（L 3 號、R 1 號），由 SpareShelf 依黑板開關
+                var crack = new GameObject("CrackDecal"); crack.transform.SetParent(body.transform, false);
+                crack.SetActive(specs[i].Item2);
                 {
-                    crack = new GameObject("CrackDecal"); crack.transform.SetParent(body.transform, false);
                     for (int k = 0; k < 4; k++)
                     {
                         var seg = SliceModelBuilder.Prim(PrimitiveType.Cube, "Seg" + k, crack.transform, new Vector3(-0.06f + 0.035f * k, stripMesh.bounds.min.y - 0.0006f, k % 2 == 0 ? 0.01f : -0.01f), new Vector3(0.04f, 0.001f, 0.003f), mats["crack"]);

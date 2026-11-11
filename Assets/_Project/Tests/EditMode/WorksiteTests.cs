@@ -43,6 +43,27 @@ namespace PantographSim.Tests
             Assert.AreEqual(0.03f, s.GetFloat("workorder.height_diff"), 1e-3f);
         }
 
+        /// <summary>2026-11-11 頭盔紀錄：重做本步還原成換側前（R）的排列，元件欄位還是 L，箭頭指的那條判成有裂紋。</summary>
+        [Test]
+        public void SpareShelf_AfterRestoreToOtherSide_ModelAndCrackFollowBlackboard()
+        {
+            const string slot1 = "env.spare_shelf.slot_1";
+            SpareShelf.Stock(s, slot1, SpareShelf.CorrectModel, SpareShelf.Nominal);   // R 排列：1 號 74A 有裂紋
+            s.SetBool(slot1 + ".cracked", true);
+            var snapR = s.Snapshot();
+            SpareShelf.Stock(s, slot1, "CS-1100-64B", SpareShelf.Nominal);             // 換到 L：1 號 64B 完好
+            s.SetBool(slot1 + ".cracked", false);
+            s.Restore(snapR);                                                            // 重做本步
+
+            var (model, cracked) = SpareShelf.Current(s, slot1, "CS-1100-64B", false);  // 元件欄位還是 L
+            Assert.AreEqual(SpareShelf.CorrectModel, model);
+            Assert.IsTrue(cracked, "外觀、標籤和判定都要用還原後黑板上的那一條");
+            SpareShelf.RecordMeasurement(s, slot1, SpareShelf.Nominal);
+            Assert.IsFalse(SpareShelf.Pick(s, slot1, "L", model, cracked));
+            Assert.AreEqual("cracked", s.Get("spare.L.pick_result"));
+            Assert.AreEqual(("CS-1100-64B", false), SpareShelf.Current(new SimState(bus), slot1, "CS-1100-64B", false), "黑板沒寫就用場景設定");
+        }
+
         [Test]
         public void SpareShelf_PickRules()
         {
