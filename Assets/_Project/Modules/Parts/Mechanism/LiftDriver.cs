@@ -14,6 +14,7 @@ namespace PantographSim.Parts.Mechanism
     {
         public const string CmdKey = SimIds.LiftCmd;
         [SerializeField] LiftSettings settings;
+        ToolRulesDef rules;
         float value, velocity;
         bool initialized;
 
@@ -59,7 +60,9 @@ namespace PantographSim.Parts.Mechanism
             }
             int input = s.GetBool("training.paused") ? 0 : InputOf(s.Get(CmdKey), LiftControl.UpLocked(s));
             float distance = s.Has(SimIds.PanHeadLowerDistance) ? s.GetFloat(SimIds.PanHeadLowerDistance) : float.MaxValue;
-            LiftLogic.Step(ref value, ref velocity, input, Time.deltaTime, LiftSettingsValues.From(settings), distance);
+            if (rules == null) rules = ToolRulesDef.Load();
+            float dt = Time.deltaTime * ToolRulesDef.AutoRunScale(s.GetBool(SimIds.AutoRunActive), rules.autoRunLiftSpeed);   // 後台代做加快，學員操作不變
+            LiftLogic.Step(ref value, ref velocity, input, dt, LiftSettingsValues.From(settings), distance);
             ApplyCap(s, ref value, ref velocity);
             s.SetFloat(SimIds.LiftValue, Mathf.Round(value * 10000f) / 10000f);
             s.SetBool("lift.moving", Mathf.Abs(velocity) > 1e-5f);

@@ -25,6 +25,11 @@ namespace PantographSim.Data
         [Tooltip("後台面板進度條：卡住（{0}＝目前這一步、{1}＝秒數、{2}＝原因）")] public string autoRunStuckText = "⚠ 停在{0}已 {1:0} 秒：{2}";
         [Tooltip("後台面板進度條：卡住但流程沒有寫原因時")] public string autoRunStuckUnknown = "原因不明，看 Console 的 [代做] 紀錄";
         [Tooltip("後台面板：按了停止代做（{0}＝停在哪一步）")] public string autoRunStoppedText = "■ 已停止代做，停在{0}";
+        [Tooltip("後台代做時升降速度的倍數（學員自己操作不變；放開那一刻的位置判定不變）")] public float autoRunLiftSpeed = 5f;
+        [Tooltip("後台代做時扭力扳手上升速度的倍數（學員自己操作不變）")] public float autoRunTorqueSpeed = 5f;
+
+        /// <summary>代做中用 multiplier 加快，其他時候 1（倍數小於 1 也當 1，不會變慢）。</summary>
+        public static float AutoRunScale(bool autoRun, float multiplier) => autoRun ? Mathf.Max(1f, multiplier) : 1f;
         [Tooltip("遊戲內錄影的鍵：不要用 F9，驗收用它控制 Unity Recorder")] public KeyCode videoHotkey = KeyCode.F8;
         [Tooltip("VR 第一次拿起工具時的提示")] public string toolDetailHint = "按左手扳機看用法";
         [Tooltip("VR 按住握把這麼久（秒）再放開才算放手；輕按一下是誤觸，工具留在手上")] public float releaseHoldSeconds = 0.6f;

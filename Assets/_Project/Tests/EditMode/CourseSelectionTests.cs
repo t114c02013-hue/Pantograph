@@ -100,6 +100,17 @@ namespace PantographSim.Tests
             Assert.AreEqual("ERR_Ground_RemoveOrder", r1.Check(new ActionRequest(SimIds.ToolGroundingRod, SimIds.GroundTerminal, "click")).errorId, "R1 的 25 步照舊判");
         }
 
+        /// <summary>terry 2026-11-13 選「加快」：只有後台代做時升降、扭力加快，學員操作不變。</summary>
+        [Test]
+        public void AutoRunScale_OnlyDuringAutoRun()
+        {
+            Assert.AreEqual(1f, ToolRulesDef.AutoRunScale(false, 5f), "學員操作不變");
+            Assert.AreEqual(5f, ToolRulesDef.AutoRunScale(true, 5f));
+            Assert.AreEqual(1f, ToolRulesDef.AutoRunScale(true, 0.2f), "倍數填錯也不會變慢");
+            var r = ToolRulesDef.Load();
+            Assert.GreaterOrEqual(r.autoRunLiftSpeed, 1f); Assert.GreaterOrEqual(r.autoRunTorqueSpeed, 1f);
+        }
+
         /// <summary>terry 2026-11-13：後台面板代做進度（開場算 0、目標那一步算滿格、同一步停太久顯示卡住和原因）。</summary>
         [Test]
         public void AutoRunProgress_CountsStepsAndReportsStuck()

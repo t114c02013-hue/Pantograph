@@ -1,5 +1,6 @@
 using System.Globalization;
 using PantographSim.Core;
+using PantographSim.Data;
 using UnityEngine;
 
 namespace PantographSim.Tools
@@ -12,6 +13,7 @@ namespace PantographSim.Tools
     {
         string target = "";
         bool holding;
+        ToolRulesDef rules;
         float current;
 
         public override void OnReset()
@@ -73,7 +75,8 @@ namespace PantographSim.Tools
             {
                 float setting = State.GetFloat(Key("setting"), 20f);
                 float before = current;
-                current = TorqueLogic.Hold(current, Time.deltaTime);
+                if (rules == null) rules = ToolRulesDef.Load();
+                current = TorqueLogic.Hold(current, Time.deltaTime * ToolRulesDef.AutoRunScale(State.GetBool(SimIds.AutoRunActive), rules.autoRunTorqueSpeed));   // 後台代做加快
                 State.SetFloat(Key("current"), Mathf.Round(current * 10f) / 10f);
                 if (ReachStep(before, current, setting, Definition != null ? Definition.clickClip : null))
                 {
