@@ -110,6 +110,7 @@ namespace PantographSim.Tests
             Assert.AreEqual(ok, PantographSim.XR.XrCarryContainer.ClampBagDrop(ok, 2.5f, anchor, p), "範圍內不動");
             Assert.AreEqual(2.5f + p.toolBagMinAboveFloor, PantographSim.XR.XrCarryContainer.ClampBagDrop(new Vector3(1f, 2.0f, 2f), 2.5f, anchor, p).y, 1e-4f, "不會放到地板下");
             Assert.AreEqual(2.5f + p.standEye + p.toolBagMaxAboveEye, PantographSim.XR.XrCarryContainer.ClampBagDrop(new Vector3(1f, 9f, 2f), 2.5f, anchor, p).y, 1e-4f, "不會舉到頭頂上");
+            Assert.AreEqual(0f, PantographSim.Data.PostureDef.Load().toolBagMaxAboveEye, 1e-4f, "terry 2026-11-13：最高不超過視線（站姿眼高）");
             var far = PantographSim.XR.XrCarryContainer.ClampBagDrop(new Vector3(4f, 3f, 2f), 2.5f, anchor, p);
             Assert.AreEqual(1f + p.toolBagMaxReach, far.x, 1e-4f, "水平拉回站點 maxReach 內，方向不變");
             Assert.AreEqual(2f, far.z, 1e-4f);

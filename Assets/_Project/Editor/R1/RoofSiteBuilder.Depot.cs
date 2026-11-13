@@ -109,6 +109,8 @@ namespace PantographSim.Editor
                 // 擋住不能走進坑裡（傳送也到不了：沒有 Walkable）
                 Col("PitBlocker", pit, new Vector3(s > 0 ? PitHalfWidth : -PitHalfWidth - 0.05f, gy, pz0), new Vector3(s > 0 ? PitHalfWidth + 0.05f : -PitHalfWidth, gy + 1.1f, pz1), SceneLayers.LocomotionBlocker);
             }
+            foreach (float e in new[] { pz0, pz1 })   // terry 2026-11-13：坑的兩端也畫黃黑邊線（坑邊一圈都有明顯邊線）
+                HazardStripe("PitEdge_End", pit, new Vector3(-PitHalfWidth - 0.08f, gy, e + Mathf.Sign(e) * 0.08f), new Vector3(PitHalfWidth + 0.08f, gy, e + Mathf.Sign(e) * 0.08f), gy + 0.004f, 0.12f, mWarn, mBlack);
             foreach (float e in new[] { pz0, pz1 })   // 兩端階梯
                 for (int i = 0; i < 6; i++)
                 {
