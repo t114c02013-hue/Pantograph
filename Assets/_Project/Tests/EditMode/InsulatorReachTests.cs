@@ -64,7 +64,7 @@ namespace PantographSim.Tests
                 }
             });
             System.IO.Directory.CreateDirectory("Logs");
-            System.IO.File.WriteAllText("Logs/InsulatorReach.txt", sb.ToString() + (bad.Count == 0 ? "全部通過\n" : "不通過：\n" + string.Join("\n", bad) + "\n"));
+            System.IO.File.WriteAllText("Logs/InsulatorReach.txt", (sb.ToString() + (bad.Count == 0 ? "全部通過\n" : "不通過：\n" + string.Join("\n", bad) + "\n")).Replace("\r\n", "\n"));
             Assert.IsEmpty(bad, string.Join("\n", bad));
         }
     }

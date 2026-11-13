@@ -173,7 +173,7 @@ namespace PantographSim.Tests
                     if (Mathf.Max(b.size.x, b.size.z) <= 0.15f) type = "C 端擋板";
                     sb.AppendLine($"{c.name}\t{b.center.x:0.00},{b.center.z:0.00}\t{Mathf.Max(b.size.x, b.size.z):0.00}\t{b.size.y:0.00}\t{type}");
                 }
-                System.IO.File.WriteAllText("Logs/BoundaryReport.txt", sb.ToString());
+                System.IO.File.WriteAllText("Logs/BoundaryReport.txt", sb.ToString().Replace("\r\n", "\n"));   // 版本庫文字檔一律 LF
                 Assert.IsEmpty(far, "站點在活動範圍外：\n" + string.Join("\n", far));
             });
         }
