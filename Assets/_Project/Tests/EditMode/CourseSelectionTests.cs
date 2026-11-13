@@ -100,6 +100,22 @@ namespace PantographSim.Tests
             Assert.AreEqual("ERR_Ground_RemoveOrder", r1.Check(new ActionRequest(SimIds.ToolGroundingRod, SimIds.GroundTerminal, "click")).errorId, "R1 的 25 步照舊判");
         }
 
+        /// <summary>terry 2026-11-13（5B）：建置寫的 Logs 報告改成 LF。</summary>
+        [Test]
+        public void BuildReports_NormalizedToLf()
+        {
+            const string f = "Logs/_lf_check_tmp.txt";
+            System.IO.File.WriteAllText(f, "第一行\r\n第二行\r\n");
+            try
+            {
+                Assert.GreaterOrEqual(SliceSceneBuilder.NormalizeLogsToLf(), 1);
+                Assert.AreEqual("第一行\n第二行\n", System.IO.File.ReadAllText(f));
+                Assert.AreEqual(0, SliceSceneBuilder.NormalizeLogsToLf(), "已經是 LF 的不再改寫");
+            }
+            finally { System.IO.File.Delete(f); }
+        }
+
+
         /// <summary>terry 2026-11-13 選 A：驗電器改成直流 750 V 用（機身標示讀資料，判定不變）。</summary>
         [Test]
         public void VoltageDetector_IsDc750_InData()

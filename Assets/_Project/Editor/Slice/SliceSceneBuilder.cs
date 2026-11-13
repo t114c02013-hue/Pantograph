@@ -44,6 +44,23 @@ namespace PantographSim.Editor
         {
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
             Debug.Log("[SliceSceneBuilder]\n" + Build());
+            NormalizeLogsToLf();
+        }
+
+        /// <summary>terry 2026-11-13（5B）：建置寫的 Logs 報告一律 LF（版本庫 .gitattributes eol=lf），新電腦重建場景不會出現只差換行的修改。</summary>
+        public static int NormalizeLogsToLf()
+        {
+            int n = 0;
+            if (!System.IO.Directory.Exists("Logs")) return 0;
+            foreach (var f in System.IO.Directory.GetFiles("Logs").Where(f => f.EndsWith(".txt") || f.EndsWith(".csv") || f.EndsWith(".md") || f.EndsWith(".json")))
+            {
+                var bytes = System.IO.File.ReadAllBytes(f);
+                if (System.Array.IndexOf(bytes, (byte)'\r') < 0) continue;
+                var text = System.Text.Encoding.UTF8.GetString(bytes);   // BOM（U+FEFF）原樣保留
+                System.IO.File.WriteAllBytes(f, System.Text.Encoding.UTF8.GetBytes(text.Replace("\r\n", "\n")));
+                n++;
+            }
+            return n;
         }
 
         public static string Build()
