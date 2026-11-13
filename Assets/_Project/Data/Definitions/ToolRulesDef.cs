@@ -19,6 +19,12 @@ namespace PantographSim.Data
         [Tooltip("測試驅動（編輯器工具、後台面板代做）走過的那一段，在紀錄和報表上的標示")] public string testDriverTag = "測試驅動";
         [Tooltip("後台面板代做時遮罩上的字（{0}＝步驟序號）")] public string autoRunMaskText = "正在前往第 {0} 步…";
         [Tooltip("代做做完後遮罩淡回的秒數")] public float autoRunFadeSeconds = 0.6f;
+        [Tooltip("後台面板進度條：代做中（{0}＝已完成幾步、{1}＝要做幾步、{2}＝目前這一步）")] public string autoRunProgressText = "代做中 {0}／{1}：{2}";
+        [Tooltip("後台面板進度條：做完（{0}＝目標步驟）")] public string autoRunDoneText = "✔ 已到{0}，可以開始";
+        [Tooltip("後台面板進度條：同一步停超過這麼久（秒）就顯示卡住和原因")] public float autoRunStuckSeconds = 20f;
+        [Tooltip("後台面板進度條：卡住（{0}＝目前這一步、{1}＝秒數、{2}＝原因）")] public string autoRunStuckText = "⚠ 停在{0}已 {1:0} 秒：{2}";
+        [Tooltip("後台面板進度條：卡住但流程沒有寫原因時")] public string autoRunStuckUnknown = "原因不明，看 Console 的 [代做] 紀錄";
+        [Tooltip("後台面板：按了停止代做（{0}＝停在哪一步）")] public string autoRunStoppedText = "■ 已停止代做，停在{0}";
         [Tooltip("遊戲內錄影的鍵：不要用 F9，驗收用它控制 Unity Recorder")] public KeyCode videoHotkey = KeyCode.F8;
         [Tooltip("VR 第一次拿起工具時的提示")] public string toolDetailHint = "按左手扳機看用法";
         [Tooltip("VR 按住握把這麼久（秒）再放開才算放手；輕按一下是誤觸，工具留在手上")] public float releaseHoldSeconds = 0.6f;

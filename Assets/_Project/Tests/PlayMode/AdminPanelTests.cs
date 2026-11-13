@@ -55,6 +55,24 @@ namespace PantographSim.Tests
                 Assert.IsTrue(Sim.State.GetBool("step." + id + ".done"), id + " 要先做完");
             Assert.IsFalse(Sim.State.GetBool("step." + step + ".done"), "這一步留給人做");
             Assert.AreEqual(0f, Sim.State.GetFloat("score.minor") + Sim.State.GetFloat("score.major") + Sim.State.GetFloat("score.critical"), "代做不留錯誤");
+            Assert.AreEqual(1f, Sim.State.GetFloat(SimIds.AutoRunProgress), "進度條滿格");
+            StringAssert.StartsWith("✔", Sim.State.Get(SimIds.AutoRunProgressText), "後台面板顯示已到");
+        }
+
+        /// <summary>terry 2026-11-13：代做要看得到進度，也要能停。</summary>
+        [UnityTest, Timeout(LongRun)]
+        public IEnumerator Progress_Advances_ThenStopButtonStops()
+        {
+            yield return LoadDesktop();
+            Jump(AdminPanel.Tutorial, "STP_WC_03_RemoveGround");
+            for (float t = Time.realtimeSinceStartup; Time.realtimeSinceStartup - t < 120f && Sim.State.GetFloat(SimIds.AutoRunProgress) <= 0f;) yield return null;
+            Assert.Greater(Sim.State.GetFloat(SimIds.AutoRunProgress), 0f, "做完第一步進度就往前");
+            StringAssert.StartsWith("代做中", Sim.State.Get(SimIds.AutoRunProgressText));
+            Sim.Bus.Publish(new ActionRequested { targetId = "app.jump_stop", time = SimClock.Now });
+            for (int i = 0; i < 10; i++) yield return null;
+            Assert.IsFalse(Sim.State.GetBool(SimIds.AutoRunActive), "停下來、遮罩收掉");
+            StringAssert.StartsWith("■", Sim.State.Get(SimIds.AutoRunStatus), "面板顯示停在哪一步");
+            Assert.AreEqual("Stop", Sim.State.Get(SimIds.LiftCmd, "Stop"), "升降沒有一直按著");
         }
 
         [UnityTest, Timeout(LongRun)]

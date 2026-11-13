@@ -24,7 +24,8 @@ namespace PantographSim.UI
         RectTransform courseList, stepList;
         Text status, collapseLabel;
         Image tutorialBg, practiceBg;
-        Button start;
+        Button start, stop;
+        RectTransform bar, barFill;
         bool collapsed;
         string coursesBuiltFor, stepsBuiltFor;
         readonly List<(string id, Image bg, Button b)> courseButtons = new List<(string, Image, Button)>();
@@ -82,6 +83,11 @@ namespace PantographSim.UI
             }, new Color(0.2f, 0.6f, 0.25f));
             Ui.Size(start, -1, Row + 6);
             status = Ui.Text(panel, "", FontSize, Color.white);
+            bar = Ui.Panel(panel, "AutoRunBar", new Color(0.15f, 0.15f, 0.18f), false, false).rectTransform; Ui.Size(bar, -1, 12);
+            barFill = Ui.Panel(bar, "Fill", new Color(0.2f, 0.6f, 0.25f), false, false).rectTransform;
+            Ui.Stretch(barFill);
+            stop = Ui.Button(panel, "■ 停止代做", FontSize, () => Ui.Send("app.jump_stop", ""), new Color(0.6f, 0.2f, 0.2f));
+            Ui.Size(stop, -1, Row + 4);
         }
 
         static void Label(RectTransform parent, string text) => Ui.Size(Ui.Text(parent, text, FontSize, Ui.Muted, TextAnchor.MiddleLeft), -1, Row);
@@ -108,8 +114,13 @@ namespace PantographSim.UI
             bool running = s.GetBool(SimIds.AutoRunActive);
             Ui.SetActive(body, !collapsed);
             collapseLabel.text = collapsed ? "展開" : "收合";
-            status.text = running ? s.Get(SimIds.AutoRunText) : s.Get(SimIds.AutoRunStatus);
+            // 代做中／做完：App 寫的進度那一行；走不到、按了停止：AutoRunStatus
+            string why = s.Get(SimIds.AutoRunStatus);
+            status.text = running || why.Length == 0 ? s.Get(SimIds.AutoRunProgressText) : why;
             Ui.SetActive(status, status.text.Length > 0);
+            Ui.SetActive(bar, running || (why.Length == 0 && s.GetFloat(SimIds.AutoRunProgress) >= 1f));
+            barFill.anchorMax = new Vector2(Mathf.Clamp01(s.GetFloat(SimIds.AutoRunProgress)), 1f);
+            Ui.SetActive(stop, running);
             if (collapsed) return;
 
             string courses = s.Get("app.courses.list");

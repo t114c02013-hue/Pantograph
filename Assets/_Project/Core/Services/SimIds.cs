@@ -129,6 +129,8 @@ namespace PantographSim.Core
         public const string StepsList = "app.steps.list";
         // 代做期間的遮罩：放 xr. 開頭，「重做本步」還原快照時才不會把遮罩一起還原回來
         public const string AutoRunActive = "xr.autorun.active", AutoRunText = "xr.autorun.text", AutoRunFade = "xr.autorun.fade", AutoRunStatus = "xr.autorun.status";
+        /// <summary>後台面板進度條：0..1、顯示的那一行字（App 依 ToolRulesDef 的文字寫入；UI 不引用 Data，只讀這兩個鍵）。</summary>
+        public const string AutoRunProgress = "xr.autorun.progress", AutoRunProgressText = "xr.autorun.progress_text";
         /// <summary>VR 開場站點（CourseDef.startStationId；R1 沒有這個鍵，用 StationSet.startStationId）。</summary>
         public const string CourseStartStation = "course.start_station";
         public const string CourseId = "course.id", CourseCraneParked = "course.crane_parked", LiftMax = "lift.max", PanAtContactWire = "part.pan_head.at_contact_wire";

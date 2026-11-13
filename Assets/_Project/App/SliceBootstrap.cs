@@ -227,6 +227,10 @@ namespace PantographSim.App
                 SimSession.PendingJump = e.text;   // 訓練已經開始：重新載入場景再從頭代做
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
+            else if (e.targetId == "app.jump_stop" && state.GetBool(SimIds.AutoRunActive))
+            {
+                jumpStop = true;   // 後台面板「停止代做」：JumpTo 下一幀停下
+            }
             else if (e.targetId == "app.restart")
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
@@ -244,12 +248,59 @@ namespace PantographSim.App
             state.Set(SimIds.AutoRunText, string.Format(rules.autoRunMaskText, target.defIndex));
             state.SetFloat(SimIds.AutoRunFade, rules.autoRunFadeSeconds);
             state.SetBool(SimIds.AutoRunActive, true);
+            var steps = runner.Steps.Where(s => !s.def.presetDone).ToList();
+            int total = Mathf.Max(1, steps.IndexOf(target));
+            string at = null; float since = Time.realtimeSinceStartup;
+            float began = Time.realtimeSinceStartup;
+            jumpStop = false;
+            void Progress()
+            {
+                string cur = state.Get("procedure.current");
+                if (cur != at) { at = cur; since = Time.realtimeSinceStartup; }
+                int i = steps.FindIndex(s => s.RunId == cur);
+                string why = state.Get("procedure.stall_text");
+                if (why.Length == 0) why = state.Get("procedure.gate_reason");
+                var (fraction, text) = AutoRunProgress(i, total, i >= 0 ? StepLabel(steps[i]) : "", Time.realtimeSinceStartup - since, why, rules);
+                if (state.Get(SimIds.AutoRunProgressText) != text) state.Set(SimIds.AutoRunProgressText, text);
+                if (Mathf.Abs(state.GetFloat(SimIds.AutoRunProgress) - fraction) > 1e-4f) state.SetFloat(SimIds.AutoRunProgress, fraction);
+            }
             try
             {
                 foreach (int frames in new ProcedureAutoRun { Log = l => Debug.Log("[代做] " + l) }.GoTo(parts[0], target.RunId))
-                    for (int i = 0; i < frames; i++) yield return null;
+                {
+                    for (int i = 0; i < frames && !jumpStop; i++) { Progress(); yield return null; }
+                    if (jumpStop) break;
+                }
             }
             finally { state.SetBool(SimIds.AutoRunActive, false); }   // 腳本出錯也不能把人關在遮罩裡
+            var now = runner.Steps.FirstOrDefault(s => s.RunId == state.Get("procedure.current"));
+            Debug.Log($"[代做] {target.RunId}：{(jumpStop ? "停止" : state.Get(SimIds.AutoRunStatus).Length == 0 ? "到了" : "走不到")}，{Time.realtimeSinceStartup - began:0.0} 秒");
+            if (jumpStop)
+            {
+                PointerState.ScriptedRay = null; PointerState.XrTriggerHeld = false;   // 腳本可能停在動作中間
+                LiftControl.Release(state);
+                state.Set(SimIds.AutoRunStatus, string.Format(rules.autoRunStoppedText, now != null ? StepLabel(now) : "開場"));
+            }
+            else if (state.Get(SimIds.AutoRunStatus).Length == 0 && now == target)
+            {
+                state.SetFloat(SimIds.AutoRunProgress, 1f);
+                state.Set(SimIds.AutoRunProgressText, string.Format(rules.autoRunDoneText, StepLabel(target)));
+            }
+        }
+
+        bool jumpStop;
+
+        static string StepLabel(RuntimeStep s) => $"第 {s.defIndex} 步 {s.def.title}" + (s.sideLabel.Length == 0 || s.def.title.Contains(s.sideLabel) ? "" : "（" + s.sideLabel + "）");
+
+        /// <summary>後台面板進度（純函式）：index＝目前這一步在可選步驟裡的位置（-1＝還在開場），total＝目標步驟的位置。同一步停超過 autoRunStuckSeconds 改顯示卡住和原因。</summary>
+        public static (float fraction, string text) AutoRunProgress(int index, int total, string label, float stuckSeconds, string reason, ToolRulesDef r)
+        {
+            int done = Mathf.Clamp(index, 0, total);
+            if (index < 0) label = "開場";
+            string text = stuckSeconds >= r.autoRunStuckSeconds
+                ? string.Format(r.autoRunStuckText, label, stuckSeconds, string.IsNullOrEmpty(reason) ? r.autoRunStuckUnknown : reason)
+                : string.Format(r.autoRunProgressText, done, total, label);
+            return ((float)done / Mathf.Max(1, total), text);
         }
 
         System.Collections.IEnumerator StartRunnerAfterPoseSettles()

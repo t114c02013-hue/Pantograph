@@ -99,5 +99,20 @@ namespace PantographSim.Tests
             s1.Batch(() => { s1.SetBool(SimIds.HeadClamped, true); s1.SetBool(SimIds.TerminalClamped, true); });
             Assert.AreEqual("ERR_Ground_RemoveOrder", r1.Check(new ActionRequest(SimIds.ToolGroundingRod, SimIds.GroundTerminal, "click")).errorId, "R1 的 25 步照舊判");
         }
+
+        /// <summary>terry 2026-11-13：後台面板代做進度（開場算 0、目標那一步算滿格、同一步停太久顯示卡住和原因）。</summary>
+        [Test]
+        public void AutoRunProgress_CountsStepsAndReportsStuck()
+        {
+            var r = ScriptableObject.CreateInstance<ToolRulesDef>();
+            var (f0, t0) = SliceBootstrap.AutoRunProgress(-1, 12, "", 1f, "", r);
+            Assert.AreEqual(0f, f0); Assert.AreEqual("代做中 0／12：開場", t0);
+            var (f5, t5) = SliceBootstrap.AutoRunProgress(5, 12, "第 6 步 預鬆螺栓", 1f, "", r);
+            Assert.AreEqual(5f / 12f, f5, 1e-4f); Assert.AreEqual("代做中 5／12：第 6 步 預鬆螺栓", t5);
+            Assert.AreEqual(1f, SliceBootstrap.AutoRunProgress(12, 12, "x", 0f, "", r).fraction, "到目標滿格");
+            StringAssert.Contains("弓頭還沒降到綠框", SliceBootstrap.AutoRunProgress(0, 12, "第 1 步 降弓並確認", r.autoRunStuckSeconds, "弓頭還沒降到綠框", r).text);
+            StringAssert.Contains(r.autoRunStuckUnknown, SliceBootstrap.AutoRunProgress(0, 12, "第 1 步", r.autoRunStuckSeconds + 5f, "", r).text, "沒有原因也要說去哪裡查");
+            Object.DestroyImmediate(r);
+        }
     }
 }
