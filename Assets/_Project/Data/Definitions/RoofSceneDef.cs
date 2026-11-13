@@ -13,8 +13,8 @@ namespace PantographSim.Data
     public class RoofSceneDef : ScriptableObject
     {
         [Header("車頂")]
-        public float carBodyHalfWidth = 1.69f;   // R1.5a：700T 車寬 3.38（推估）
-        public float roofEdgeNoWalk = 0.50f;
+        public float carBodyHalfWidth = 1.325f;   // terry 2026-11-13：輕軌車寬 2.65（淡海輕軌公開資料）
+        [Tooltip("可走範圍離車頂邊至少多遠。terry 2026-11-13 輕軌車頂窄（半寬 1.325），兩側都有平台＋1.1 m 欄杆＋補隙踏板，從 0.5 改 0.3（待鐵道確認）")] public float roofEdgeNoWalk = 0.30f;
         public float roofSectionZMin = -4.0f, roofSectionZMax = 4.0f;
         public float roofFloorY = 0f;
         [Tooltip("車頂弧面兩側往下彎的量")] public float roofCurveDrop = 0.15f;
@@ -25,6 +25,7 @@ namespace PantographSim.Data
 
         [Header("檢修平台")]
         public float platformGap = 0.12f;
+        [Tooltip("terry 2026-11-13 換輕軌：車變窄後平台不內移，靠車側加補隙踏板（可走）。平台靠車側邊＝車側＋platformGap＋這個寬度")] public float platformBoard = 0.365f;
         public float platformWidth = 1.50f;
         public float platformZMin = -4.0f, platformZMax = 4.0f;
         public float platformFloorY = 0f;
@@ -90,6 +91,9 @@ namespace PantographSim.Data
         [Tooltip("避雷器")] public Vector3 arrester = new Vector3(0.55f, 0f, 2.60f);
         [Tooltip("控制線接頭 Car_Roof_Work/CtrlCable_End")] public Vector3 ctrlCableEnd = new Vector3(-0.35f, 0.05f, 2.10f);
         [Tooltip("三節車之間的間隙")] public float carGap = 0.6f;
+        [Tooltip("terry 2026-11-13 輕軌：各模組長（m，頭車在兩端、集電弓在中間那個）。7.875／5.5／4.1 是同車系文件的推估")] public float[] lrvModules = { 7.875f, 5.5f, 4.1f, 5.5f, 7.875f };
+        [Tooltip("模組之間的鉸接通道長（推估）")] public float lrvArticulation = 0.9f;
+        [Tooltip("輕軌車身的水藍色帶")] public Color liveryAqua = new Color32(0x2E, 0xB0, 0xC8, 0xFF);
         [Tooltip("廠房屋頂桁架下緣高度")] public float shedTrussY = 8.0f;
         [Tooltip("terry 2026-11-13 室內日光燈感：主光（由上往下）強度、俯角（度）、顏色")] public float lightIntensity = 0.75f, lightPitchDeg = 75f;
         public Color lightColor = new Color(0.96f, 0.98f, 1f);
@@ -193,7 +197,9 @@ namespace PantographSim.Data
 
         // ---------- 推導值（建置腳本計算，不手填；車寬改了位置自動跟著變） ----------
         public float RoofEdgeX => carBodyHalfWidth;
-        public float PlatformInnerX => -carBodyHalfWidth - platformGap;
+        public float PlatformInnerX => -carBodyHalfWidth - platformGap - platformBoard;
+        /// <summary>補隙踏板靠車側的邊（踏板 x 從 PlatformInnerX 到這裡）。</summary>
+        public float PlatformBoardEdgeX => -carBodyHalfWidth - platformGap;
         public float PlatformOuterX => PlatformInnerX - platformWidth;
         public float RackBandMinX => PlatformOuterX;
         public float RackBandMaxX => PlatformOuterX + rackBandDepth;
@@ -217,7 +223,9 @@ namespace PantographSim.Data
                 $"\"gateCenterZ\": {F(gateCenterZ)}", $"\"gateWidth\": {F(gateWidth)}", $"\"roofFlatWidth\": {F(roofFlatWidth)}", $"\"roofArcRadius\": {F(roofArcRadius)}",
                 $"\"insulatedPoleLength\": {F(insulatedPoleLength)}",
                 $"\"standTopAboveGround\": {F(standTopAboveGround)}", $"\"standFrameTopAboveGround\": {F(standFrameTopAboveGround)}",
-                $"\"liveryWhite\": {C(liveryWhite)}", $"\"liveryOrange\": {C(liveryOrange)}", $"\"liveryDark\": {C(liveryDark)}",
+                $"\"liveryWhite\": {C(liveryWhite)}", $"\"liveryOrange\": {C(liveryOrange)}", $"\"liveryDark\": {C(liveryDark)}", $"\"liveryAqua\": {C(liveryAqua)}",
+                $"\"platformBoard\": {F(platformBoard)}", $"\"lrvArticulation\": {F(lrvArticulation)}", $"\"roofSectionZMax\": {F(roofSectionZMax)}",
+                $"\"lrvModules\": [{string.Join(", ", System.Array.ConvertAll(lrvModules ?? new float[0], F))}]",
                 $"\"roofStripMat\": {{ \"center\": [{F(roofStripMatCenter.x)}, {F(roofStripMatCenter.y)}, {F(roofStripMatCenter.z)}], \"size\": [{F(roofStripMatSize.x)}, {F(roofStripMatSize.y)}], " +
                 $"\"thickness\": {F(roofStripMatThickness)}, \"rimWidth\": {F(roofStripMatRimWidth)}, \"rimHeight\": {F(roofStripMatRimHeight)} }}",
                 $"\"ctrlConnector\": {{ \"bodySize\": [{F(ctrlConnectorBodySize.x)}, {F(ctrlConnectorBodySize.y)}, {F(ctrlConnectorBodySize.z)}], \"socketDiameter\": {F(ctrlSocketDiameter)}, \"socketLength\": {F(ctrlSocketLength)}, " +

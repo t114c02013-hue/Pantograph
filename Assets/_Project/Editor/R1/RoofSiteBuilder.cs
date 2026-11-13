@@ -261,14 +261,11 @@ namespace PantographSim.Editor
                 foreach (var (x, a, b) in new[] { (walkHalf, z0, zb0), (d.roofBaseWarningX, zb0, zb1), (walkHalf, zb1, z1) })
                     Box("WarningLine", roof.visual, new Vector3(sgn * x, roofY + 0.002f, (a + b) / 2f), new Vector3(0.05f, 0.004f, b - a), mWarn, collider: false);
 
-            // ---------- ENV_CarBody：700T 三節（共用 Blender 產生的 ENV_CarBody.fbx；中間那節有集電弓，弓在 Z 0） ----------
+            // ---------- ENV_CarBody：terry 2026-11-13 換成一列 5 模組輕軌（Tools/Blender/gen_lrv 產生的 ENV_LRV.fbx；集電弓在中間模組，弓在 Z 0） ----------
+            // 舊的 700T（ENV_CarBody.fbx、gen_700t/car_body.py）留著不刪
             var cars = Piece(env, "ENV_CarBody");
-            for (int k = -1; k <= 1; k++)
-            {
-                float cz = d.MiddleCarCenterZ + k * (d.carLength + d.carGap);
-                Fbx("ENV_CarBody", null, cars.visual, new Vector3(0f, roofY, cz), rename: k == 0 ? "Car_Middle" : k < 0 ? "Car_South" : "Car_North");
-                Anchor(cars.anchors, k == 0 ? "Anchor_Car_Middle" : k < 0 ? "Anchor_Car_South" : "Anchor_Car_North", new Vector3(0f, roofY, cz), Vector3.forward);
-            }
+            Fbx("ENV_LRV", null, cars.visual, new Vector3(0f, roofY, d.MiddleCarCenterZ), rename: "LRV");
+            Anchor(cars.anchors, "Anchor_Car_Middle", new Vector3(0f, roofY, d.MiddleCarCenterZ), Vector3.forward);
             NoShadow(cars.root);
             res.equipment.Add(cars.root);
 
@@ -431,6 +428,24 @@ namespace PantographSim.Editor
             Rail("Rail_End-Z", new Vector3(px0, py, pz0), new Vector3(px1, py, pz0));
             Rail("Rail_CarSide_A", new Vector3(px1, py, pz0), new Vector3(px1, py, gz0));
             Rail("Rail_CarSide_B", new Vector3(px1, py, gz1), new Vector3(px1, py, pz1));
+            // terry 2026-11-13 輕軌：車變窄，平台不內移；車側欄杆外是補隙踏板（收起時的外觀，活動欄開口處由跨板 BridgePlate 鋪滿、可走）
+            float bx = d.PlatformBoardEdgeX;
+            if (bx > px1 + 0.01f)
+            {
+                Box("GapBoard", plat.visual, new Vector3((px1 + bx) / 2f, py - 0.02f, (pz0 + pz1) / 2f), new Vector3(bx - px1, 0.04f, pz1 - pz0), mGrating, collider: false);
+                Box("GapBoard_Edge", plat.visual, new Vector3(bx - 0.03f, py + 0.001f, (pz0 + pz1) / 2f), new Vector3(0.06f, 0.004f, pz1 - pz0), mWarn, collider: false);
+            }
+            // 車的另一側（+X）也有一道作業平台＋1.1 m 欄杆＋補隙踏板：純外觀、不能傳送、沒有站點
+            var far = Child(plat.visual, "FarSidePlatform");
+            Box("Grating", far, new Vector3(-(px0 + px1) / 2f, py - 0.03f, (pz0 + pz1) / 2f), new Vector3(px1 - px0, 0.06f, pz1 - pz0), mGrating, collider: false);
+            if (bx > px1 + 0.01f) Box("GapBoard", far, new Vector3(-(px1 + bx) / 2f, py - 0.02f, (pz0 + pz1) / 2f), new Vector3(bx - px1, 0.04f, pz1 - pz0), mGrating, collider: false);
+            for (float z = pz0; z <= pz1 + 0.01f; z += 1.5f)
+                foreach (float x in new[] { -(px0 + 0.05f), -(px1 - 0.05f) })
+                    Box("Leg", far, new Vector3(x, (py + d.groundY) / 2f, z), new Vector3(0.08f, py - d.groundY, 0.08f), mats["steel"], collider: false);
+            foreach (float x in new[] { -px0, -px1 })
+                GuardRail("Rail", far, new Vector3(x, py + d.guardrailHeight / 2f, (pz0 + pz1) / 2f), new Vector3(0.04f, d.guardrailHeight, pz1 - pz0), mRail);
+            foreach (float z in new[] { pz0, pz1 })
+                GuardRail("Rail_End", far, new Vector3(-(px0 + px1) / 2f, py + d.guardrailHeight / 2f, z), new Vector3(px1 - px0, d.guardrailHeight, 0.04f), mRail);
             // 活動欄（開＝Boundary 停用）與跨板（開＝Walkable 啟用）；車頂邊牆開口用 LocomotionBlocker 補（閘門關時擋住）
             var gateRoot = Child(plat.root, "ENV_PlatformGate");
             var gateVis = new GameObject("GateLeaf").transform; gateVis.SetParent(gateRoot, false); gateVis.position = new Vector3(px1, py, gz0);

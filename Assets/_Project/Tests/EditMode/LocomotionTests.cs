@@ -70,7 +70,7 @@ namespace PantographSim.Tests
                 var roofWalk = cols.Where(c => c.gameObject.layer == LayerMask.NameToLayer(SceneLayers.Walkable) && c.transform.parent != null && c.transform.parent.parent != null && c.transform.parent.parent.name == "ENV_RoofSection").ToList();
                 Assert.IsNotEmpty(roofWalk);
                 foreach (var w in roofWalk)
-                    Assert.LessOrEqual(Mathf.Max(Mathf.Abs(w.bounds.min.x), Mathf.Abs(w.bounds.max.x)), walkHalf + 1e-3f, w.name + " 伸進車頂邊 0.5 m 內");
+                    Assert.LessOrEqual(Mathf.Max(Mathf.Abs(w.bounds.min.x), Mathf.Abs(w.bounds.max.x)), walkHalf + 1e-3f, w.name + $" 伸進車頂邊 {def.roofEdgeNoWalk} m 內");
                 var insulators = cols.Where(c => c.name == "InsulatorCollision").ToList();
                 Assert.AreEqual(4, insulators.Count);
                 foreach (var ins in insulators)

@@ -19,6 +19,7 @@ class Palette:
             "craneyellow": (0.95, 0.70, 0.08), "rail": (0.25, 0.24, 0.22), "concrete": (0.60, 0.62, 0.64), "blue": (0.15, 0.35, 0.75),
             "steel": (0.40, 0.42, 0.45), "rubber": (0.08, 0.08, 0.08), "copper": (0.72, 0.45, 0.20), "orangesafety": (1.0, 0.45, 0.05),
             "strapyellow": _hex("#F2C200"), "rubberdarkgrey": _hex("#3A3A3A"),   # a6 增補 2：Strap_Yellow、Rubber_DarkGrey
+            "aqua": _hex(params.get("liveryAqua", "#2EB0C8")),   # terry 2026-11-13 輕軌水藍（只往後加，舊模型的色格位置不變）
         }
         self.index = {name: i for i, name in enumerate(self.colors)}
         assert len(self.colors) <= GRID * GRID

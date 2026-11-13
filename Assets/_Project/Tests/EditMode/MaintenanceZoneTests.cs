@@ -81,16 +81,16 @@ namespace PantographSim.Tests
         }
 
         [Test]
-        public void Cab_D27_InAdjacentCar_FloorMinus235()
+        public void Cab_InLrvHeadCar_LowFloor()   // terry 2026-11-13：輕軌頭車駕駛室，低地板（推估軌面 ＋ 0.35）
         {
-            Assert.AreEqual(-2.35f, Def.cabFloorY, 1e-4f);
-            Assert.AreEqual(Def.groundY + Def.floorAboveRail, Def.cabFloorY, 1e-4f, "軌面 ＋ 車廂地板 1.30");
+            Assert.AreEqual(Def.groundY + Def.floorAboveRail, Def.cabFloorY, 1e-4f, "軌面 ＋ 車廂地板");
+            Assert.Greater(Def.cabCenter.z - Def.cabSize / 2f, -Def.carLength / 2f, "駕駛室在車頭裡");
             StationTests.WithScene(scene =>
             {
                 var cab = Object.FindObjectsOfType<XrTeleportPoint>(true).First(p => p.gameObject.scene == scene && p.PointId == "tp.cab").transform.position;
                 Assert.LessOrEqual(Mathf.Abs(cab.x), Def.RoofEdgeX);
                 Assert.LessOrEqual(cab.z, Set.cabMaxZ);
-                Assert.AreEqual(-2.35f, cab.y, 0.02f);
+                Assert.AreEqual(Def.cabFloorY, cab.y, 0.02f);
             });
         }
     }

@@ -31,7 +31,7 @@ namespace PantographSim.Data
         [Tooltip("D11：站點到平台護欄（封閉 1.1 m 護欄）的最低距離＝身體膠囊 0.25 m＋0.05 m")] public float guardrailClearance = 0.30f;
         [Tooltip("D11：接地站沿 Z 離活動欄開口邊緣的最低距離")] public float groundGateMinZ = 0.50f;
         [Tooltip("D11：接地站和 tp.platform.anchor 的最低距離")] public float groundAnchorMinDistance = 0.60f;
-        [Tooltip("D28：駕駛室站點 tp.cab 的 Z 上限（相鄰端車車頭）")] public float cabMaxZ = -27f;
+        [Tooltip("terry 2026-11-13 輕軌：駕駛室站點 tp.cab 的 Z 上限（這列車 −Z 端的頭車駕駛室）")] public float cabMaxZ = -15.5f;
         [Tooltip("車頂站到兩側最遠一支螺栓的上限")] public float roofBoltMaxDistance = 1.00f;
         public float roofEdgeMinDistance = 0.50f;
         [Tooltip("車頂站點自己的螺栓盤距離範圍")] public float boltTrayMin = 0.30f, boltTrayMax = 0.50f;

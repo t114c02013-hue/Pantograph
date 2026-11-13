@@ -25,13 +25,13 @@ namespace PantographSim.Tests
         static int Tris(GameObject prefab) => prefab.GetComponentsInChildren<MeshFilter>(true).Sum(f => f.sharedMesh != null ? (int)f.sharedMesh.triangles.Length / 3 : 0);
 
         [Test]
-        public void CarBody_Width338_Length25_AlongZ()
+        public void CarBody_LrvWidth265_Length3445_AlongZ()   // terry 2026-11-13：車體換成輕軌（gen_lrv）
         {
-            var car = AssetDatabase.LoadAssetAtPath<GameObject>(Generated + "/ENV_CarBody.fbx");
-            Assert.IsNotNull(car, "還沒產生 ENV_CarBody.fbx（跑 gen_700t.py）");
+            var car = AssetDatabase.LoadAssetAtPath<GameObject>(Generated + "/ENV_LRV.fbx");
+            Assert.IsNotNull(car, "還沒產生 ENV_LRV.fbx（跑 Tools/Blender/gen_lrv/gen_lrv.py）");
             var b = WorldBounds(car);
-            Assert.AreEqual(Def.carBodyHalfWidth * 2f, b.size.x, 0.02f, "車寬");
-            Assert.AreEqual(Def.carLength, b.size.z, 0.05f, "車長要在 Z 軸");
+            Assert.AreEqual(Def.carBodyHalfWidth * 2f, b.size.x, 0.05f, "車寬（含窗帶、色帶貼面）");
+            Assert.AreEqual(Def.carLength, b.size.z, 0.1f, "車長要在 Z 軸（含頭燈貼面）");
             Assert.Less(b.size.y, b.size.z);
         }
 
