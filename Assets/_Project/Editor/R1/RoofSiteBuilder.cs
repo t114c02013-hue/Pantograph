@@ -712,8 +712,16 @@ namespace PantographSim.Editor
 
             // R1.5b b3（D26）：車頂工具箱 env.roof_toolbox 移除，兩門課都用隨身工具袋（掛位 5–10、13）；套筒盒在工具袋的 SocketCase（BuildCraneAndRigging）
 
+            // terry 2026-11-13：平台靠車頂側的固定置物架（零件盒、兩個螺栓盤放檯面上；備品架在旁邊自己的立架）
+            var shelfFrame = Child(env, "PlatformShelf");
+            float sx0 = d.platformShelfX, sz0 = d.platformShelfZMin, sz1 = d.platformShelfZMax, sTop = d.platformShelfTop, pfy = d.platformFloorY;
+            Box("Top", shelfFrame, new Vector3(sx0, sTop - 0.02f, (sz0 + sz1) / 2f), new Vector3(0.40f, 0.04f, sz1 - sz0), mats["steel"]);
+            Box("Shelf", shelfFrame, new Vector3(sx0, pfy + 0.3f, (sz0 + sz1) / 2f), new Vector3(0.40f, 0.03f, sz1 - sz0), mats["steel"], collider: false);
+            foreach (float zz in new[] { sz0 + 0.03f, sz1 - 0.03f }) foreach (float xx in new[] { sx0 - 0.17f, sx0 + 0.17f })
+                    Box("Leg", shelfFrame, new Vector3(xx, (pfy + sTop) / 2f, zz), new Vector3(0.04f, sTop - pfy, 0.04f), mats["steel"], collider: false);
+            foreach (var c in shelfFrame.GetComponentsInChildren<Collider>()) c.gameObject.layer = LayerMask.NameToLayer(SceneLayers.Boundary);
+
             // 零件盒（只收舊滑板）
-            Support(d.partsTray, new Vector3(0.4f, 0, 0.3f), "PartsTray");
             var tray = SliceModelBuilder.Prim(PrimitiveType.Cube, "PartsTray", env, Vector3.zero, new Vector3(0.34f, 0.06f, 0.26f), mats["tray"]);
             tray.transform.position = d.partsTray + new Vector3(0, 0.03f, 0);
             var stripIcons = Enumerable.Range(0, 2).Select(i =>
@@ -733,10 +741,7 @@ namespace PantographSim.Editor
             var courseAnchors = Child(env, "CourseAnchors");   // R1.5b b4：課程擺放（CourseDef.placements）用的錨點
             foreach (var (side, sgn) in new[] { ("R", 1f), ("L", -1f) })
             {
-                float x = roofStation.x + sgn * d.boltTrayOffset;
-                if (Mathf.Abs(x) > walkHalf) x = roofStation.x - sgn * d.boltTrayOffset;
-                var top = new Vector3(x, d.boltTrayHeight, roofStation.z);
-                var btSupport = Support(top, new Vector3(0.14f, 0, 0.14f), "BoltTray_" + side);
+                var top = new Vector3(d.platformShelfX, d.platformShelfTop, side == "L" ? d.boltTrayShelfZ.x : d.boltTrayShelfZ.y);   // 置物架檯面上
                 // 0.25 × 0.18 m、4 格（B 段 2.2）
                 var bt = SliceModelBuilder.Prim(PrimitiveType.Cube, "BoltTray_" + side, env, Vector3.zero, new Vector3(0.25f, 0.024f, 0.18f), mats["tray"]);
                 bt.transform.position = top + new Vector3(0, 0.012f, 0);
@@ -752,19 +757,22 @@ namespace PantographSim.Editor
                 comp.Configure(SimIds.BoltTray(side), (side == "L" ? "靠關節" : "外側") + "螺栓盤");
                 comp.Setup(side, icons);
                 bt.AddComponent<Highlightable>();
-                Wrap(res, "ENV_BoltTray_" + side, bt.transform, btSupport);
+                Wrap(res, "ENV_BoltTray_" + side, bt.transform);
                 res.ids[SimIds.BoltTray(side)] = bt.transform;
             }
 
             // 備品架（3 條：型號不符、正確、正確但背面裂紋），在車頂支架上
             var shelf = BuildSpareShelf(env, d.spareShelf, mats);
-            Support(d.spareShelf - new Vector3(0, 0.12f, 0), new Vector3(0.3f, 0, 0.3f), "SpareShelf");
+            shelf.rotation = Quaternion.Euler(0f, 90f, 0f);   // 三條沿 Z，靠平台車側欄杆
+            var uprights = Child(env, "SpareShelf_Uprights");
+            foreach (float zz in new[] { -0.62f, 0.62f })   // 備品架的立架
+                Box("Upright", uprights, d.spareShelf + new Vector3(0f, (d.platformFloorY - d.spareShelf.y) / 2f + 0.05f, zz), new Vector3(0.05f, d.spareShelf.y - d.platformFloorY + 0.1f, 0.05f), mats["steel"], collider: false);
             shelf.gameObject.AddComponent<InteractionPointMarker>().Configure(SimIds.SpareShelf, "備品架");   // CSR_10 a/b/f 的目標（整個架子；三格各有自己的 ID）
             res.ids["env.spare_shelf"] = shelf;
             res.layout.Add(("備品架", shelf));
 
             // R1.5a：車頂安全帶掛點 ip.roof.anchor 改成平台防墜器門架的掛鉤（BuildPoleRackAndAnchorHook）
-            sb.AppendLine($"車頂：零件盒 {d.partsTray:F2}、備品架 {d.spareShelf:F2}、螺栓盤 R/L 在 {roofStation:F2} 的 ±{d.boltTrayOffset} m");
+            sb.AppendLine($"平台置物架（靠車頂側）：零件盒 {d.partsTray:F2}、備品架 {d.spareShelf:F2}、螺栓盤 L/R 在 X {d.platformShelfX} Z {d.boltTrayShelfZ.x}/{d.boltTrayShelfZ.y}");
         }
 
         /// <summary>

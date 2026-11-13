@@ -34,7 +34,7 @@ namespace PantographSim.Data
         [Tooltip("terry 2026-11-13 輕軌：駕駛室站點 tp.cab 的 Z 上限（這列車 −Z 端的頭車駕駛室）")] public float cabMaxZ = -15.5f;
         [Tooltip("車頂站到兩側最遠一支螺栓的上限")] public float roofBoltMaxDistance = 1.00f;
         public float roofEdgeMinDistance = 0.50f;
-        [Tooltip("車頂站點自己的螺栓盤距離範圍")] public float boltTrayMin = 0.30f, boltTrayMax = 0.50f;
+        [Tooltip("terry 2026-11-13：平台站點 tp.platform.parts 到置物架上的螺栓盤、零件盒、備品架的距離範圍")] public float boltTrayMin = 0.30f, boltTrayMax = 1.70f;
         public float toolStorageMaxDistance = 0.80f;
         public float maxFloorStep = 0.15f, maxPlatformGap = 0.30f;
 

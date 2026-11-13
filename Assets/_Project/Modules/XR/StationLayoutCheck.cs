@@ -149,13 +149,14 @@ namespace PantographSim.XR
                 foreach (var id in new[] { "part.pan_head", "ip.pan_head.lower_target" })
                     if (T(id) is Transform t && !Visible(eye, Center(t), t)) r.bad.Add($"tp.platform.lift：看不到 {id}");
             }
-            if (pts.TryGetValue("tp.roof.inner", out var roof))
-                foreach (var side in new[] { "L", "R" })
+            // terry 2026-11-13：螺栓盤、零件盒、備品架在平台靠車頂側的置物架，從平台站點拿（不從車頂跨邊拿）
+            if (pts.TryGetValue("tp.platform.parts", out var shelfStand))
+                foreach (var id in new[] { "env.bolt_tray_L", "env.bolt_tray_R", "env.parts_tray", "env.spare_shelf" })
                 {
-                    var tray = T("env.bolt_tray_" + side);
-                    if (tray == null) { r.bad.Add($"主場景缺螺栓盤 env.bolt_tray_{side}"); continue; }
-                    float dd = Flat(roof.transform.position, Center(tray));
-                    if (dd < set.boltTrayMin - Eps || dd > set.boltTrayMax + Eps) r.bad.Add($"tp.roof.inner：到 env.bolt_tray_{side} {dd:0.00} m（要 {set.boltTrayMin}–{set.boltTrayMax} m）");
+                    var tray = T(id);
+                    if (tray == null) { r.bad.Add($"主場景缺 {id}"); continue; }
+                    float dd = Flat(shelfStand.transform.position, Center(tray));
+                    if (dd < set.boltTrayMin - Eps || dd > set.boltTrayMax + Eps) r.bad.Add($"tp.platform.parts：到 {id} {dd:0.00} m（要 {set.boltTrayMin}–{set.boltTrayMax} m）");
                 }
             if (set.measuredFarBoltL > set.roofBoltMaxDistance) r.warn.Add($"靠關節最遠螺栓 {set.measuredFarBoltL:0.00} m 超過 {set.roofBoltMaxDistance} m：啟用側移提示");
             if (Mathf.Abs(d.platformFloorY - d.roofFloorY) > set.maxFloorStep) r.bad.Add($"平台與車頂高度差 {Mathf.Abs(d.platformFloorY - d.roofFloorY):0.00} m 超過 {set.maxFloorStep} m");

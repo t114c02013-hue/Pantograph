@@ -225,7 +225,7 @@ namespace PantographSim.Editor
                     rw.positionXZ = new Vector2(rw.positionXZ.x, Mathf.Ceil(nz * 1000f) / 1000f); EditorUtility.SetDirty(rw);
                 }
             }
-            foreach (var (id, label, z) in new[] { ("tp.platform.parts", "備品架前（日常）", 1.60f), ("tp.platform.scrap", "待報廢箱前（日常）", 2.85f) })
+            foreach (var (id, label, z) in new[] { ("tp.platform.parts", "備品架前", 1.60f), ("tp.platform.scrap", "待報廢箱前（日常）", 2.85f) })
             {
                 var s = Add(id, label, StationFloor.Platform);
                 s.relativeToPlatformInner = true; s.positionXZ = new Vector2(-2.41f - inner, z); s.facingTargetId = ""; s.facingDirection = Vector3.left; s.zoneId = ZoneDef.Arrival;
