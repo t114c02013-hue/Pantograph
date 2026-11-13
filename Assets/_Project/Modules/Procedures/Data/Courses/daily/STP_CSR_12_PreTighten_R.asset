@@ -17,6 +17,7 @@ MonoBehaviour:
   instruction: "\u5957\u7B52\u6273\u624B\u65B9\u5411\u5207\u5230\u300C\u9396\u300D\uFF0C\u4F9D
     1\u21924 \u9EDE\u7A7A\u5B54\u653E\u56DE\u87BA\u6813\uFF0C\u518D\u4F9D 1\u21922\u21923\u21924
     \u6BCF\u652F\u9396\u5230\u8CBC\u5408\uFF08\u7D04\u4E00\u5708\uFF09\u3002"
+  instructionXR: 
   toolHint: "\u5957\u7B52\u6273\u624B\uFF0C\u65B9\u5411\u300C\u9396\u300D"
   targetHint: "\u9019\u689D\u6ED1\u677F\u7684 4 \u500B\u87BA\u6813\u5B54"
   targetIds:
@@ -26,6 +27,7 @@ MonoBehaviour:
     rid: 1000
   errors:
   - errorId: ERR_CSR12_Overtight
+    tutorialHintOnly: 0
     severity: 1
     what: "\u7B2C\u4E00\u652F\u87BA\u6813\u5C31\u76F4\u63A5\u9396\u6B7B\uFF0C\u5176\u4ED6\u87BA\u6813\u9084\u6C92\u8CBC\u5408\u3002"
     why: "\u55AE\u908A\u5148\u9396\u6B7B\u6703\u628A\u6ED1\u677F\u62C9\u6B6A\uFF0C\u5176\u4ED6\u5B54\u5C0D\u4E0D\u6B63\uFF0C\u6ED1\u677F\u53D7\u529B\u4E0D\u5747\u3002"
@@ -45,6 +47,7 @@ MonoBehaviour:
     oncePerRun: 0
     inputMode: 
   - errorId: ERR_CSR12_Order
+    tutorialHintOnly: 0
     severity: 1
     what: "\u6C92\u6709\u7167 1\u21922\u21923\u21924 \u7684\u9806\u5E8F\u9810\u9396\u3002"
     why: "\u4E0D\u7167\u5C0D\u89D2\u9806\u5E8F\uFF0C\u6ED1\u677F\u6703\u88AB\u62C9\u504F\u3001\u8CBC\u5408\u4E0D\u5E73\u3002"
@@ -70,10 +73,10 @@ MonoBehaviour:
     why: "\u5148\u5168\u90E8\u8CBC\u5408\u518D\u9396\u7DCA\uFF0C\u6ED1\u677F\u624D\u4E0D\u6703\u88AB\u62C9\u6B6A\u3002"
     checklist:
     - "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u5957\u7B52\u6273\u624B|tool.active=tool.socket_wrench"
-    - "\u5F9E\u87BA\u6813\u76E4\u62FF 1 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D|ip.carbon_strip_R.bolt_1.state=Placed"
-    - "\u5F9E\u87BA\u6813\u76E4\u62FF 2 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D|ip.carbon_strip_R.bolt_2.state=Placed"
-    - "\u5F9E\u87BA\u6813\u76E4\u62FF 3 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D|ip.carbon_strip_R.bolt_3.state=Placed"
-    - "\u5F9E\u87BA\u6813\u76E4\u62FF 4 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D|ip.carbon_strip_R.bolt_4.state=Placed"
+    - "\u5F9E\u8170\u9593\u87BA\u6813\u888B\u62FF 1 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D|ip.carbon_strip_R.bolt_1.state=Placed"
+    - "\u5F9E\u8170\u9593\u87BA\u6813\u888B\u62FF 2 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D|ip.carbon_strip_R.bolt_2.state=Placed"
+    - "\u5F9E\u8170\u9593\u87BA\u6813\u888B\u62FF 3 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D|ip.carbon_strip_R.bolt_3.state=Placed"
+    - "\u5F9E\u8170\u9593\u87BA\u6813\u888B\u62FF 4 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D|ip.carbon_strip_R.bolt_4.state=Placed"
     - "\u65B9\u5411\u5207\u5230\u300C\u9396\u300D|tool.socket_wrench.dir=lock"
     - "\u628A 1 \u865F\u87BA\u6813\u9396\u5230\u8CBC\u5408|ip.carbon_strip_R.bolt_1.state=Snug"
     - "\u628A 2 \u865F\u87BA\u6813\u9396\u5230\u8CBC\u5408|ip.carbon_strip_R.bolt_2.state=Snug"
@@ -95,7 +98,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u4EFB\u4E00\u624B\u4F38\u5230\u5DE6\u8170\u7684\u5DE5\u5177\u888B\uFF0C\u6309\u63E1\u628A\u62FF\u51FA\u5957\u7B52\u6273\u624B\uFF0C\u6703\u62FF\u5728\u53F3\u624B\u3002"
     when: 
-  - text: "\u5F9E\u87BA\u6813\u76E4\u62FF 1 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
+  - text: "\u5F9E\u8170\u9593\u87BA\u6813\u888B\u62FF 1 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
     why: 
     targetId: ip.carbon_strip_R.bolt_1
     toolId: 
@@ -105,7 +108,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
-  - text: "\u5F9E\u87BA\u6813\u76E4\u62FF 2 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
+  - text: "\u5F9E\u8170\u9593\u87BA\u6813\u888B\u62FF 2 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
     why: 
     targetId: ip.carbon_strip_R.bolt_2
     toolId: 
@@ -115,7 +118,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
-  - text: "\u5F9E\u87BA\u6813\u76E4\u62FF 3 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
+  - text: "\u5F9E\u8170\u9593\u87BA\u6813\u888B\u62FF 3 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
     why: 
     targetId: ip.carbon_strip_R.bolt_3
     toolId: 
@@ -125,7 +128,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
-  - text: "\u5F9E\u87BA\u6813\u76E4\u62FF 4 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
+  - text: "\u5F9E\u8170\u9593\u87BA\u6813\u888B\u62FF 4 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
     why: 
     targetId: ip.carbon_strip_R.bolt_4
     toolId: 

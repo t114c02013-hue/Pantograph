@@ -4,7 +4,8 @@ using UnityEngine;
 namespace PantographSim.Worksite
 {
     /// <summary>
-    /// 車頂螺栓盤（env.bolt_tray_L／_R，磁性盤，放在共用車頂站點兩側）：收拆下的螺栓（CSR_07 b），裝回時從這裡拿（CSR_12 b）。
+    /// 螺栓盤（env.bolt_tray_L／_R）：拆下的碳滑板螺栓（CSR_07 b）計數在這裡，裝回時從這裡扣（CSR_12 b）。
+    /// terry 2026-11-13（收進隨身袋）：盤子在平台置物架，拆下的螺栓顯示在腰間工具袋的螺栓袋（boltIcons 放在 BoltBag），計數和判定不變。
     /// 每側各自計數 env.bolt_tray_&lt;側&gt;.bolts；同時沿用 PartsTray 的合計（tray.bolts、tray.no_loose_bolts、tray.items），
     /// 所以預鎖「零件盒有螺栓才能放回」與 WC_01「沒有散落螺栓」的判定不變。零件盒（env.parts_tray）只收舊滑板。
     /// </summary>
@@ -25,7 +26,7 @@ namespace PantographSim.Worksite
         protected override bool Watches(string key) => key == CountKey(side);
 
         protected override void OnBareHand(ActionRequested e) =>
-            Toast($"{(side == "L" ? "靠關節" : "外側")}螺栓盤：{State.GetFloat(CountKey(side)):0} 支螺栓");
+            Toast($"{(side == "L" ? "靠關節" : "外側")}螺栓：腰間螺栓袋裡 {State.GetFloat(CountKey(side)):0} 支");
 
         protected override void OnToolAction(ActionPerformed e) => Apply(State, side, e.text, e.pointId);
 

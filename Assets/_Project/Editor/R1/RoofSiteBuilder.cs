@@ -748,11 +748,7 @@ namespace PantographSim.Editor
                 Anchor(courseAnchors, "Anchor_BoltTray_Roof_" + side, bt.transform.position, Vector3.zero);   // 日常更換：車頂
                 for (int k = 1; k < 4; k++)
                     Object.DestroyImmediate(SliceModelBuilder.Prim(PrimitiveType.Cube, "Divider" + k, bt.transform, new Vector3(-0.5f + 0.25f * k, 0.75f, 0), new Vector3(0.02f, 0.5f, 0.95f), mats["steel"]).GetComponent<Collider>());
-                var icons = Enumerable.Range(0, 4).Select(i =>
-                {
-                    var g = SliceModelBuilder.Prim(PrimitiveType.Cylinder, "BoltIcon" + i, bt.transform, new Vector3(-0.375f + 0.25f * i, 1.5f, 0), new Vector3(0.12f, 1.2f, 0.16f), mats["steel"]);
-                    Object.DestroyImmediate(g.GetComponent<Collider>()); g.SetActive(false); return g;
-                }).ToArray();
+                var icons = new GameObject[0];   // terry 2026-11-13：拆下的螺栓顯示在腰間螺栓袋（BuildCraneAndRigging 接上），平台螺栓盤只在收尾清點
                 var comp = bt.AddComponent<BoltTray>();
                 comp.Configure(SimIds.BoltTray(side), (side == "L" ? "靠關節" : "外側") + "螺栓盤");
                 comp.Setup(side, icons);
@@ -1227,6 +1223,20 @@ namespace PantographSim.Editor
             var bolts = pouch.GetComponentsInChildren<Transform>(true).First(x => x.name == "BoltBag");
             bolts.gameObject.AddComponent<PantographSim.Worksite.BoltPouch>().Configure("env.tool_bag.bolt_pouch", "零件袋");   // R1.5b b4：集電弓螺栓收進來、裝回時拿（計數）
             res.ids["env.tool_bag.bolt_pouch"] = bolts;
+            // terry 2026-11-13（收進隨身袋）：碳滑板螺栓拆下後顯示在腰間螺栓袋；計數照舊記在該側螺栓盤（判定不變），袋口露出螺栓頭
+            foreach (var (side, sgn) in new[] { ("L", -1f), ("R", 1f) })
+            {
+                if (!res.ids.TryGetValue(SimIds.BoltTray(side), out var trayT) || trayT == null) continue;
+                var bag = bolts.GetComponentsInChildren<Renderer>().Select(r => r.bounds).Aggregate((a, b) => { a.Encapsulate(b); return a; });
+                var icons = Enumerable.Range(0, 4).Select(i =>
+                {
+                    var g = SliceModelBuilder.Prim(PrimitiveType.Cylinder, $"BoltIcon_{side}{i}", bolts, Vector3.zero, Vector3.one, Mat("boltSteel", new Color(0.55f, 0.57f, 0.6f)));
+                    g.transform.position = new Vector3(bag.center.x + sgn * (0.008f + 0.01f * (i % 2)), bag.max.y + 0.005f, bag.center.z - 0.012f + 0.016f * (i / 2) + (sgn > 0 ? 0f : 0.004f));
+                    g.transform.localScale = Vector3.Scale(new Vector3(0.008f, 0.012f, 0.008f), new Vector3(1f / Mathf.Max(bolts.lossyScale.x, 1e-4f), 1f / Mathf.Max(bolts.lossyScale.y, 1e-4f), 1f / Mathf.Max(bolts.lossyScale.z, 1e-4f)));
+                    Object.DestroyImmediate(g.GetComponent<Collider>()); g.SetActive(false); return g;
+                }).ToArray();
+                trayT.GetComponent<BoltTray>().Setup(side, icons);
+            }
             sb.AppendLine($"天車：軌道 X {d.craneRunwayEastX}／{d.craneRunwayWestX}、Z ±{d.craneRunwayHalfLength}，停在 Z {d.craneParkZ}，吊鉤 Y {hook.position.y:0.00}；遙控器在掛座 {aDock.position:F2}；吊帶 4 條在 ({d.slingRackXZ.x}, {d.slingRackXZ.y})；工具袋在工作檯上");
         }
 
