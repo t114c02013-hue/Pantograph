@@ -116,6 +116,28 @@ namespace PantographSim.Tests
         }
 
 
+        /// <summary>terry 2026-11-13（16A～25B）：R1／日常點螺栓盤＝倒進盤子、再點＝拿回袋子；定期課程沒有；計數、合計（判定用）不變。</summary>
+        [Test]
+        public void BoltPour_ToggleOnlyInR1AndDaily_CountUnchanged()
+        {
+            var r = ToolRulesDef.Load();
+            CollectionAssert.AreEquivalent(new[] { "r1", "daily" }, r.boltPourCourses, "資料：R1 和日常");
+            var s = new SimState(new EventBus());
+            string key = PantographSim.Worksite.BoltTray.PouredKey("L");
+            s.Set(SimIds.CourseId, "periodic");
+            s.SetFloat(PantographSim.Worksite.BoltTray.CountKey("L"), 4);
+            Assert.IsNull(PantographSim.Worksite.BoltTray.Pour(s, "L", r), "定期課程沒有");
+            Assert.IsFalse(s.GetBool(key));
+            s.Set(SimIds.CourseId, "daily");
+            StringAssert.Contains("4", PantographSim.Worksite.BoltTray.Pour(s, "L", r));
+            Assert.IsTrue(s.GetBool(key), "倒進盤子");
+            Assert.AreEqual(4f, s.GetFloat(PantographSim.Worksite.BoltTray.CountKey("L")), "計數不變");
+            StringAssert.Contains("拿回", PantographSim.Worksite.BoltTray.Pour(s, "L", r));
+            Assert.IsFalse(s.GetBool(key), "拿回袋子");
+            s.SetFloat(PantographSim.Worksite.BoltTray.CountKey("L"), 0);
+            Assert.IsNull(PantographSim.Worksite.BoltTray.Pour(s, "L", r), "沒有螺栓不能倒");
+        }
+
         /// <summary>terry 2026-11-13 選 A：驗電器改成直流 750 V 用（機身標示讀資料，判定不變）。</summary>
         [Test]
         public void VoltageDetector_IsDc750_InData()

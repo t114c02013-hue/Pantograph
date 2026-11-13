@@ -752,6 +752,12 @@ namespace PantographSim.Editor
                 var comp = bt.AddComponent<BoltTray>();
                 comp.Configure(SimIds.BoltTray(side), (side == "L" ? "靠關節" : "外側") + "螺栓盤");
                 comp.Setup(side, icons);
+                // terry 2026-11-13（20A）：倒進盤子時每格一支（R1、日常課程；袋口那組在 BuildCraneAndRigging）
+                comp.SetupTray(Enumerable.Range(0, 4).Select(i =>
+                {
+                    var g = SliceModelBuilder.Prim(PrimitiveType.Cylinder, $"TrayBolt_{side}{i}", bt.transform, new Vector3(-0.375f + 0.25f * i, 0.5f + 0.01f / 0.024f, 0), new Vector3(0.01f / 0.25f, 0.01f / 0.024f, 0.01f / 0.18f), mats["steel"]);
+                    Object.DestroyImmediate(g.GetComponent<Collider>()); g.SetActive(false); return g;
+                }).ToArray());
                 bt.AddComponent<Highlightable>();
                 Wrap(res, "ENV_BoltTray_" + side, bt.transform);
                 res.ids[SimIds.BoltTray(side)] = bt.transform;

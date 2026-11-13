@@ -31,6 +31,10 @@ namespace PantographSim.Data
         [Tooltip("後台代做時扭力扳手上升速度的倍數（學員自己操作不變）")] public float autoRunTorqueSpeed = 5f;
 
         /// <summary>代做中用 multiplier 加快，其他時候 1（倍數小於 1 也當 1，不會變慢）。</summary>
+        [Tooltip("terry 2026-11-13（21A）：哪些課程有「螺栓倒進平台螺栓盤清點／拿回螺栓袋」（只提示、不判定）")] public string[] boltPourCourses = { "r1", "daily" };
+        [Tooltip("倒進盤子、拿回袋子的提示（{0}＝支數）")] public string boltPourText = "倒進螺栓盤清點：{0:0} 支", boltTakeBackText = "拿回螺栓袋：{0:0} 支";
+        public bool BoltPourIn(string courseId) => System.Array.IndexOf(boltPourCourses, courseId) >= 0;
+
         public static float AutoRunScale(bool autoRun, float multiplier) => autoRun ? Mathf.Max(1f, multiplier) : 1f;
         [Tooltip("遊戲內錄影的鍵：不要用 F9，驗收用它控制 Unity Recorder")] public KeyCode videoHotkey = KeyCode.F8;
         [Tooltip("VR 第一次拿起工具時的提示")] public string toolDetailHint = "按左手扳機看用法";
