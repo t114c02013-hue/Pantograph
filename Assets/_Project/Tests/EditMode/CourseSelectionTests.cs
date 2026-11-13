@@ -100,6 +100,16 @@ namespace PantographSim.Tests
             Assert.AreEqual("ERR_Ground_RemoveOrder", r1.Check(new ActionRequest(SimIds.ToolGroundingRod, SimIds.GroundTerminal, "click")).errorId, "R1 的 25 步照舊判");
         }
 
+        /// <summary>terry 2026-11-13 選 A：驗電器改成直流 750 V 用（機身標示讀資料，判定不變）。</summary>
+        [Test]
+        public void VoltageDetector_IsDc750_InData()
+        {
+            var td = AssetDatabase.LoadAssetAtPath<ToolDefinition>("Assets/_Project/Modules/Tools/VoltageDetector/Data/TL_voltage_detector.asset");
+            Assert.AreEqual("DC 750 V", td.Param("rating"));
+            Assert.AreEqual("tool.voltage_detector", td.toolId, "ID 不變");
+            StringAssert.Contains("直流 750 V", td.tutorial.pages[0].body);
+        }
+
         /// <summary>terry 2026-11-13 選「加快」：只有後台代做時升降、扭力加快，學員操作不變。</summary>
         [Test]
         public void AutoRunScale_OnlyDuringAutoRun()

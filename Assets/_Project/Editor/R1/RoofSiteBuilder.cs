@@ -1264,6 +1264,15 @@ namespace PantographSim.Editor
                 var click = new GameObject("PoleClick").transform;   // 桿子本身就點得到（算掛位，手上的複製品會刪掉 collider）
                 click.SetParent(model, true); click.SetPositionAndRotation(poleBounds.center, Quaternion.identity);
                 click.gameObject.AddComponent<BoxCollider>().size = poleBounds.size + Vector3.one * 0.02f;
+                if (detector)   // terry 2026-11-13：直流 750 V 用驗電器，機身標示讀工具資料的 rating（carbon_strip_slice.json）
+                {
+                    string rating = tools.FirstOrDefault(t => t.toolId == "tool.voltage_detector")?.Param("rating", "") ?? "";
+                    if (rating.Length > 0)
+                    {
+                        var band = Box("RatingBand", model, new Vector3(poleBounds.center.x, poleBounds.max.y - 0.25f, poleBounds.center.z), new Vector3(0.05f, 0.12f, 0.05f), Mat("signRed", new Color(0.8f, 0.12f, 0.1f)), collider: false);
+                        Label("RatingLabel", model, rating, band.transform.position + Vector3.right * 0.03f, Quaternion.LookRotation(Vector3.left), 0.006f, Color.white);
+                    }
+                }
             }
             Wrap(res, "ENV_PoleRack", rack);
             res.ids["env.pole_rack"] = rack;
