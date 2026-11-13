@@ -34,7 +34,7 @@ namespace PantographSim.UI
             tools = Ui.Text(card, "", 23);
             safety = Ui.Text(card, "", 22);
             controls = Ui.Text(card, DesktopControls, 22, Ui.Muted);
-            Ui.Text(card, "3.0 mm 更換基準為保養表值；其他數值（扭力 25 N·m、新品 12.0 mm 等）為示例值。", 20, Ui.Muted);
+            Ui.Text(card, "6.0 mm 更換基準為保養表值；其他數值（扭力 25 N·m、新品 18.0 mm 等）為示例值。", 20, Ui.Muted);
 
             // 學員名稱：桌面打字（留空＝「學員」＋日期時間）；VR 不打字，沿用上次的名稱或從用過的名稱中選
             nameDesktop = Ui.Rect(card, "TraineeDesktop"); Ui.HStack(nameDesktop.gameObject, 12).childAlignment = TextAnchor.MiddleCenter;
@@ -389,7 +389,7 @@ namespace PantographSim.UI
             Ui.VStack(sc.gameObject, 28, 10, false);
             Ui.Text(sc, "檢視備品滑板", 30, Color.white, TextAnchor.UpperLeft, FontStyle.Bold);
             spareModel = Ui.Text(sc, "", 26);
-            Ui.Text(sc, "作業單要求：型號 CS-1100-74A、新品厚度 12.0 ± 0.2 mm（示例值）", 21, Ui.Muted);
+            Ui.Text(sc, $"作業單要求：型號 CS-1100-74A、新品厚度 {Sim.State?.Get("strip.new_text", "18.0 ± 0.2 mm") ?? "18.0 ± 0.2 mm"}（示例值）", 21, Ui.Muted);
             spareCrack = Ui.Text(sc, "", 25);
             spareThick = Ui.Text(sc, "", 25);
             var srow = Ui.Rect(sc, "Row"); var sh = Ui.HStack(srow.gameObject, 12); sh.childAlignment = TextAnchor.MiddleCenter;

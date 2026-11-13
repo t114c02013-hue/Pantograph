@@ -13,11 +13,13 @@ namespace PantographSim.Worksite
     public class SpareShelf : SiteObject
     {
         public const string CorrectModel = "CS-1100-74A";
-        public const float Nominal = 12.0f, Tolerance = 0.2f;   // 示例值
+        /// <summary>新品厚度與允許誤差（ToolRules.asset：stripNewMm、stripNewTolMm）。</summary>
+        public static float Nominal => ToolRulesDef.Load().stripNewMm;
+        public static float Tolerance => ToolRulesDef.Load().stripNewTolMm;
 
         [SerializeField] string modelCode = CorrectModel;
         [SerializeField] bool cracked;
-        [SerializeField] float thicknessMm = Nominal;
+        [SerializeField] float thicknessMm;   // 建置時寫入（Setup）；0＝用資料檔的新品厚度
         [SerializeField] Transform body;          // 翻面時旋轉
         [SerializeField] GameObject crackDecal;   // 背面裂紋
 
@@ -40,7 +42,7 @@ namespace PantographSim.Worksite
             // 只在載入課程時（CourseApplier 寫 course.id）換排列；R1 的 25 步照舊（第 5 部分換成日常課後一律用排列）
             var e = State.Has(CourseApplier.CourseKey) ? SpareArrangementDef.Load()?.Find(side, SlotNumber(id)) : null;
             if (e != null) { modelCode = e.model; cracked = e.cracked; }
-            Stock(State, id, modelCode, thicknessMm);
+            Stock(State, id, modelCode, thicknessMm > 0f ? thicknessMm : Nominal);
             if (modelCode == CorrectModel && !cracked) State.Set("spare.good_slot", id);   // 教學的箭頭指這一條
             State.SetBool(id + ".cracked", cracked);
         }

@@ -133,7 +133,7 @@ namespace PantographSim.Tests
             Assert.AreEqual("NotAligned", s.Get(Strip + ".install_result"));
             Assert.IsTrue(StripLogic.Install(s, Strip, 0.004f));
             Assert.AreEqual("NewMounted", s.Get(Strip + ".state"));
-            Assert.AreEqual(12f, s.GetFloat(Strip + ".true.mid"), 1e-3);
+            Assert.AreEqual(18f, s.GetFloat(Strip + ".true.mid"), 1e-3);
         }
 
         [Test]

@@ -82,7 +82,8 @@ namespace PantographSim.Tests
             var bundle = ProcedureJsonConverter.Build(System.IO.File.ReadAllText("Assets/_Project/Modules/Procedures/Data/carbon_strip_slice.json"));
             var decide = bundle.procedure.steps.First(x => x.stepId == "STP_CSR_05_Decide");
             var rule = RuleEvaluators.FindDecision(decide.completion);
-            Assert.AreEqual(3.0f, rule.threshold, "保養表值 3.0 mm 不變");
+            Assert.AreEqual(PantographSim.Data.ToolRulesDef.Load().stripLimitMm, rule.threshold, "判定門檻和資料檔一致（淡海輕軌 6.0 mm）");
+            Assert.AreEqual(6.0f, rule.threshold, "terry 2026-11-13 選 A：6.0 mm");
             Assert.IsTrue(reading <= rule.threshold, "學員看到 3.00 ≤ 3.0：該換");
         }
 

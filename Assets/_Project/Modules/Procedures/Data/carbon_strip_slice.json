@@ -5,7 +5,7 @@
   "safetyPoints": [
     "碰弓體前必須：用升降控制器降到降弓位置並親眼確認、上鎖掛牌、斷升弓電源、驗電（先自檢）、接地（端子 → 拉線確認 → 弓頭）。",
     "接地拆除順序相反：先拆弓頭端，再拆平台端子。",
-    "任一條三點最小值 ≤ 3.0 mm（保養表值）就兩條一起換，不能只換一條。",
+    "任一條三點最小值 ≤ 6.0 mm（保養表值）就兩條一起換，不能只換一條。",
     "新滑板斜面朝外，扭力 25 N·m（示例值），依 1→2→3→4 順序。"
   ],
   "repeatBlock": {
@@ -289,10 +289,10 @@
       "stepId": "STP_CSR_05_Decide",
       "refSeconds": [20, 10],
       "subActions": [
-        { "text": "依三點最小值判定要不要換", "textDesktop": "依最小值選擇判定", "hint": "按 X 打開作業單，用射線指著判定選項按扳機；只要有一點 ≤ 3.0 mm 就選「兩條都換」。要看最小值，平均值會把磨薄的地方遮掉。", "target": "env.work_order", "done": "workorder.decision", "why": "任一點 ≤ 3.0 mm 就兩條都換", "tool": "", "stand": "" }
+        { "text": "依三點最小值判定要不要換", "textDesktop": "依最小值選擇判定", "hint": "按 X 打開作業單，用射線指著判定選項按扳機；只要有一點 ≤ 6.0 mm 就選「兩條都換」。要看最小值，平均值會把磨薄的地方遮掉。", "target": "env.work_order", "done": "workorder.decision", "why": "任一點 ≤ 6.0 mm 就兩條都換", "tool": "", "stand": "" }
       ],
       "title": "判定是否更換",
-      "instruction": "看兩條滑板各自三點中的最小值。任一條最小值 ≤ 3.0 mm 就選「兩條都換」；兩條都 > 3.0 mm 選「合格」。",
+      "instruction": "看兩條滑板各自三點中的最小值。任一條最小值 ≤ 6.0 mm 就選「兩條都換」；兩條都 > 6.0 mm 選「合格」。",
       "toolHint": "",
       "targetHint": "作業單 → 判定（四選一）",
       "targetIds": ["env.work_order"],
@@ -300,17 +300,17 @@
                  "why": "磨到極限的滑板會斷裂、刮傷架空線；兩條一起換才不會高低差。",
                  "checklist": ["在作業單選擇判定|workorder.decision"],
                  "highlightIds": ["env.work_order"] },
-      "valueTags": ["更換基準 3.0 mm=保養表值", "兩條一起換=示例政策"],
-      "completion": { "type": "Decision", "choiceKey": "workorder.decision", "threshold": 3.0 },
+      "valueTags": ["更換基準 6.0 mm=保養表值", "兩條一起換=示例政策"],
+      "completion": { "type": "Decision", "choiceKey": "workorder.decision", "threshold": 6.0 },
       "errors": [
         { "errorId": "ERR_CSR05_ShouldReplace", "severity": "Critical", "trigger": "ChoiceEquals", "key": "workorder.decision", "value": "pass", "whenAnswer": "both", "blocks": true,
-          "what": "有滑板最薄處已 ≤ 3.0 mm，卻判定合格（或用平均值判斷）。", "why": "磨耗到極限的碳滑板可能斷裂、刮傷架空線，甚至造成弓網事故。", "fix": "看每條三點中的最小值；任一條 ≤ 3.0 mm（保養表值）就選「兩條都換」。" },
+          "what": "有滑板最薄處已 ≤ 6.0 mm，卻判定合格（或用平均值判斷）。", "why": "磨耗到極限的碳滑板可能斷裂、刮傷架空線，甚至造成弓網事故。", "fix": "看每條三點中的最小值；任一條 ≤ 6.0 mm（保養表值）就選「兩條都換」。" },
         { "errorId": "ERR_CSR05_OnlyOne", "severity": "Major", "trigger": "ChoiceEquals", "key": "workorder.decision", "value": "L", "whenAnswer": "both",
           "what": "只換一條滑板。", "why": "保養表 m1-3 要求兩條滑板沒有高低差；只換一條會造成新舊高低差，接觸壓力不均、加速磨耗。", "fix": "選「兩條都換」。" },
         { "errorId": "ERR_CSR05_OnlyOne", "severity": "Major", "trigger": "ChoiceEquals", "key": "workorder.decision", "value": "R", "whenAnswer": "both",
           "what": "只換一條滑板。", "why": "保養表 m1-3 要求兩條滑板沒有高低差；只換一條會造成新舊高低差，接觸壓力不均、加速磨耗。", "fix": "選「兩條都換」。" },
         { "errorId": "ERR_CSR05_Unneeded", "severity": "Minor", "trigger": "ChoiceEquals", "key": "workorder.decision", "value": "both", "whenAnswer": "pass",
-          "what": "兩條都還在標準內，卻判定要換。", "why": "不必要的更換浪費備品與工時。", "fix": "兩條三點最小值都 > 3.0 mm 時選「合格」。" }
+          "what": "兩條都還在標準內，卻判定要換。", "why": "不必要的更換浪費備品與工時。", "fix": "兩條三點最小值都 > 6.0 mm 時選「合格」。" }
       ]
     },
     {
@@ -441,7 +441,7 @@
         { "text": "看備品架上三條滑板的標籤", "textDesktop": "查看備品架三條標籤", "hint": "備品架在平台工作台上，三條裡只有一條型號正確，三條都要看過。裝錯型號的滑板不能用。", "target": "env.spare_shelf.slot_*", "done": "spare.{side}.viewed_count>=3", "why": "型號要 CS-1100-74A", "tool": "", "stand": "tp.platform.parts" },
         { "text": "翻面檢查有無裂紋", "textDesktop": "翻面檢查有無裂紋", "hint": "用射線指著選定的滑板按扳機打開檢視面板，按「翻面」看背面。有裂紋的滑板裝上去會斷。", "target": "env.spare_shelf.slot_2", "done": "env.spare_shelf.slot_2.flipped", "why": "裂紋在背面", "tool": "", "stand": "tp.platform.parts" },
         { "text": "從工具袋拿出游標卡尺", "textDesktop": "到工具袋拿起游標卡尺", "hint": "任一手伸到左腰的工具袋，按握把拿出游標卡尺，會拿在右手。", "target": "env.tool_rack.slot_5", "done": "tool.active=tool.caliper", "why": "工具袋", "tool": "tool.caliper", "stand": "tp.roof.inner" },
-        { "text": "量選定新滑板的中點", "textDesktop": "量選定新滑板的中點", "hint": "用射線指著新滑板中點的藍色量測點按扳機，讀數會自動帶入。新品厚度不對就不能裝。", "target": "env.spare_shelf.slot_2", "done": "env.spare_shelf.slot_2.measured", "why": "要 12.0 ± 0.2 mm", "tool": "tool.caliper", "stand": "tp.platform.parts" },
+        { "text": "量選定新滑板的中點", "textDesktop": "量選定新滑板的中點", "hint": "用射線指著新滑板中點的藍色量測點按扳機，讀數會自動帶入。新品厚度不對就不能裝。", "target": "env.spare_shelf.slot_2", "done": "env.spare_shelf.slot_2.measured", "why": "要 18.0 ± 0.2 mm", "tool": "tool.caliper", "stand": "tp.platform.parts" },
         { "text": "把游標卡尺收回工具袋", "textDesktop": "把卡尺放回工具袋", "hint": "右手把游標卡尺移到左腰工具袋的格子，按一下握把就收回。", "target": "env.tool_rack.slot_5", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.inner" },
         { "text": "拿起型號正確、無裂紋的那條", "textDesktop": "拿起選定的新滑板", "hint": "就是你剛才看過標籤、翻面檢查過的那一條，按握把拿起。", "target": "env.spare_shelf.slot_2", "done": "spare.{side}.picked", "why": "在檢視視窗按「選用此備品」", "tool": "", "stand": "tp.platform.parts" }
       ],
@@ -453,9 +453,9 @@
       "targetIds": ["env.spare_shelf.slot_*"],
       "hints": { "text": "徒手點備品看標籤、翻面；到工具袋拿卡尺點備品量厚度；確認後按「選用此備品」。",
                  "why": "型號錯或有裂紋的滑板裝上去，行駛中可能斷裂。",
-                 "checklist": ["找到型號 CS-1100-74A 的備品並翻面檢查", "用卡尺量那條的中點（12.0 ± 0.2 mm）", "選用合格備品|spare.{side}.picked", "厚度在範圍內|spare.{side}.measured_ok"],
+                 "checklist": ["找到型號 CS-1100-74A 的備品並翻面檢查", "用卡尺量那條的中點（18.0 ± 0.2 mm）", "選用合格備品|spare.{side}.picked", "厚度在範圍內|spare.{side}.measured_ok"],
                  "highlightIds": ["env.spare_shelf.slot_*"] },
-      "valueTags": ["型號 CS-1100-74A=示例值", "新品 12.0±0.2 mm=示例值"],
+      "valueTags": ["型號 CS-1100-74A=示例值", "新品 18.0±0.2 mm=示例值"],
       "completion": { "type": "AllOf", "all": [
         { "type": "StateEquals", "key": "spare.{side}.picked", "value": "true" },
         { "type": "StateEquals", "key": "spare.{side}.measured_ok", "value": "true" }
@@ -466,7 +466,7 @@
         { "errorId": "ERR_CSR10_Cracked", "severity": "Critical", "trigger": "ChoiceEquals", "key": "spare.{side}.pick_result", "value": "cracked", "blocks": true,
           "what": "選了有裂紋的備品。", "why": "有裂紋的碳滑板在行駛中可能斷裂，造成弓網事故。", "fix": "選用前一定翻面檢查，有裂紋的不能使用。" },
         { "errorId": "ERR_CSR10_NotMeasured", "severity": "Minor", "trigger": "ChoiceEquals", "key": "spare.{side}.pick_result", "value": "not_measured",
-          "what": "沒有先量新滑板厚度就要選用。", "why": "新品厚度不對（不良品或拿錯）會造成兩條高低差。", "fix": "先用卡尺量這條備品的中點，確認 12.0 ± 0.2 mm 再選用。" }
+          "what": "沒有先量新滑板厚度就要選用。", "why": "新品厚度不對（不良品或拿錯）會造成兩條高低差。", "fix": "先用卡尺量這條備品的中點，確認 18.0 ± 0.2 mm 再選用。" }
       ]
     },
     {
@@ -749,18 +749,18 @@
       "fix": "用完就收回工具袋：把工具放進袋子範圍內再放開握把。" }
   ],
   "scenarios": [
-    { "scenarioId": "SCN_Default", "title": "正常（兩條都要換）", "description": "開場弓是升起的，先用升降控制器降弓；靠關節最小 2.8 mm，需兩條一起更換。",
-      "initialStates": ["part.carbon_strip_L.true.left=3.4", "part.carbon_strip_L.true.mid=2.8", "part.carbon_strip_L.true.right=3.1",
-                        "part.carbon_strip_R.true.left=4.2", "part.carbon_strip_R.true.mid=3.8", "part.carbon_strip_R.true.right=4.0",
-                        "spare.L.true_mid=12.0", "spare.R.true_mid=12.0"], "randomSeed": 1, "startRaised": true },
+    { "scenarioId": "SCN_Default", "title": "正常（兩條都要換）", "description": "開場弓是升起的，先用升降控制器降弓；靠關節最小 5.7 mm，需兩條一起更換。",
+      "initialStates": ["part.carbon_strip_L.true.left=6.5", "part.carbon_strip_L.true.mid=5.7", "part.carbon_strip_L.true.right=6.1",
+                        "part.carbon_strip_R.true.left=7.6", "part.carbon_strip_R.true.mid=7.1", "part.carbon_strip_R.true.right=7.3",
+                        "spare.L.true_mid=18.0", "spare.R.true_mid=18.0"], "randomSeed": 1, "startRaised": true },
     { "scenarioId": "SCN_NotGrounded", "title": "未接地直接拆（E2）", "description": "試著在掛接地前碰滑板或螺栓，系統會擋下並說明。",
-      "initialStates": ["part.carbon_strip_L.true.left=3.4", "part.carbon_strip_L.true.mid=2.8", "part.carbon_strip_L.true.right=3.1",
-                        "part.carbon_strip_R.true.left=4.2", "part.carbon_strip_R.true.mid=3.8", "part.carbon_strip_R.true.right=4.0",
-                        "spare.L.true_mid=12.0", "spare.R.true_mid=12.0"], "randomSeed": 3, "startRaised": true, "practiceOnly": true },
+      "initialStates": ["part.carbon_strip_L.true.left=6.5", "part.carbon_strip_L.true.mid=5.7", "part.carbon_strip_L.true.right=6.1",
+                        "part.carbon_strip_R.true.left=7.6", "part.carbon_strip_R.true.mid=7.1", "part.carbon_strip_R.true.right=7.3",
+                        "spare.L.true_mid=18.0", "spare.R.true_mid=18.0"], "randomSeed": 3, "startRaised": true, "practiceOnly": true },
     { "scenarioId": "SCN_BothOK", "title": "兩條都合格（E6c）", "description": "兩條都還在標準內，應判定合格、不需更換。",
-      "initialStates": ["part.carbon_strip_L.true.left=4.5", "part.carbon_strip_L.true.mid=4.1", "part.carbon_strip_L.true.right=4.3",
-                        "part.carbon_strip_R.true.left=4.2", "part.carbon_strip_R.true.mid=3.8", "part.carbon_strip_R.true.right=4.0",
-                        "spare.L.true_mid=12.0", "spare.R.true_mid=12.0"], "randomSeed": 4, "startRaised": true, "practiceOnly": true }
+      "initialStates": ["part.carbon_strip_L.true.left=8.0", "part.carbon_strip_L.true.mid=7.5", "part.carbon_strip_L.true.right=7.7",
+                        "part.carbon_strip_R.true.left=7.6", "part.carbon_strip_R.true.mid=7.1", "part.carbon_strip_R.true.right=7.3",
+                        "spare.L.true_mid=18.0", "spare.R.true_mid=18.0"], "randomSeed": 4, "startRaised": true, "practiceOnly": true }
   ],
   "tools": [
     { "toolId": "tool.voltage_detector", "displayName": "驗電器", "hotkey": 2, "parameters": ["display=無電/有電", "rating=DC 750 V"],

@@ -15,7 +15,7 @@ namespace PantographSim.Data
         public string[] keys = Array.Empty<string>();
         public string[] recordKeys = Array.Empty<string>();
         public string[] readingKeys = Array.Empty<string>();
-        public float min, max, threshold = 3.0f, tolerance = 0.05f;
+        public float min, max, threshold = 6.0f, tolerance = 0.05f;
         public int count;
     }
 

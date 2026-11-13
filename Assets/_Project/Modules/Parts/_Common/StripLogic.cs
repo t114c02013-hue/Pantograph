@@ -109,7 +109,7 @@ namespace PantographSim.Parts.Common
             s.Set(stripId + ".install_result", "OK");
             s.Set(stripId + ".state", NewMounted);
             if (s.Get("hand.item") == stripId) s.Set("hand.item", "");
-            float t = s.GetFloat("spare." + Side(stripId) + ".true_mid", 12.0f);
+            float t = s.GetFloat("spare." + Side(stripId) + ".true_mid", PantographSim.Data.ToolRulesDef.Load().stripNewMm);
             foreach (var p in new[] { "left", "mid", "right" }) s.SetFloat(stripId + ".true." + p, t);
             return true;
         }

@@ -161,7 +161,7 @@ namespace PantographSim.UI
                 saved["reading." + side] = Ui.Text(card, "", 17, Ui.Muted);
             }
 
-            Ui.Text(card, "判定（任一點 ≤ 3.0 mm〔保養表值〕兩條都換）", 19, Ui.Accent, TextAnchor.UpperLeft, FontStyle.Bold);
+            Ui.Text(card, $"判定（任一點 ≤ {Sim.State?.Get("strip.limit_text", "6.0 mm") ?? "6.0 mm"}〔保養表值〕兩條都換）", 19, Ui.Accent, TextAnchor.UpperLeft, FontStyle.Bold);
             var d1 = Ui.Rect(card, "D1"); Ui.HStack(d1.gameObject, 6);
             var d2 = Ui.Rect(card, "D2"); Ui.HStack(d2.gameObject, 6);
             AddDecision(d1, "both", "兩條都換"); AddDecision(d1, "L", "只換靠關節");

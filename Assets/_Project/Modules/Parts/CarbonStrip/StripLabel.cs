@@ -7,6 +7,6 @@ namespace PantographSim.Parts.CarbonStrip
     {
         public string modelCode = "CS-1100-74A";
         public bool cracked;
-        [Tooltip("示例值")] public float nominalThicknessMm = 12.0f;
+        [Tooltip("示例值（淡海輕軌約 18；判定讀 ToolRules.asset 的 stripNewMm）")] public float nominalThicknessMm = 18.0f;
     }
 }

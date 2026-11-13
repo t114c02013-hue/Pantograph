@@ -108,6 +108,9 @@ namespace PantographSim.App
             // 代做腳本目前只有 R1；預設完成的步驟不會停，不列
             state.Set(SimIds.StepsList, course != null ? "" : string.Join(";", runner.Steps.Where(s => !s.def.presetDone).Select(s =>
                 s.RunId + "|" + s.defIndex + " " + s.def.title + (s.sideLabel.Length == 0 || s.def.title.Contains(s.sideLabel) ? "" : "（" + s.sideLabel + "）"))));
+            var stripRules = ToolRulesDef.Load();   // terry 2026-11-13：碳滑板厚度基準給介面顯示（UI 不引用 Data）
+            state.Set("strip.limit_text", $"{stripRules.stripLimitMm:0.0} mm");
+            state.Set("strip.new_text", $"{stripRules.stripNewMm:0.0} ± {stripRules.stripNewTolMm:0.0} mm");
             state.Set(SimIds.CourseId, course != null ? course.courseId : SimIds.CourseR1);   // 錄影、成績都記 courseId
             state.Set("app.courses.list", string.Join(";", new[] { SimIds.CourseR1 + "|" + r1Title + "|" }.Concat(courses.Where(c => c != null).Select(c => c.courseId + "|" + c.title + "|" + NoteOf(c.courseId)))));
             if (course != null) PantographSim.Worksite.CourseApplier.Apply(course, state);   // 課程覆寫（擺放、天車停駐、升弓上限）

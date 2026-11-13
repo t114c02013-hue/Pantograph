@@ -83,7 +83,7 @@ namespace PantographSim.Tests
             Assert.IsFalse(SpareShelf.Pick(s, "env.spare_shelf.slot_2", "L", SpareShelf.CorrectModel, false));
             Assert.AreEqual("not_measured", s.Get("spare.L.pick_result"));
             s.SetBool("env.spare_shelf.slot_2.measured", true);
-            s.SetFloat("env.spare_shelf.slot_2.reading", 12.01f);
+            s.SetFloat("env.spare_shelf.slot_2.reading", SpareShelf.Nominal + 0.01f);   // 新品 18.0（資料檔）
             Assert.IsTrue(SpareShelf.Pick(s, "env.spare_shelf.slot_2", "L", SpareShelf.CorrectModel, false));
             Assert.IsTrue(s.GetBool("spare.L.picked"));
             Assert.IsTrue(s.GetBool("spare.L.measured_ok"));

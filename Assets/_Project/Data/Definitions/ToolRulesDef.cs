@@ -25,6 +25,8 @@ namespace PantographSim.Data
         [Tooltip("後台面板進度條：卡住（{0}＝目前這一步、{1}＝秒數、{2}＝原因）")] public string autoRunStuckText = "⚠ 停在{0}已 {1:0} 秒：{2}";
         [Tooltip("後台面板進度條：卡住但流程沒有寫原因時")] public string autoRunStuckUnknown = "原因不明，看 Console 的 [代做] 紀錄";
         [Tooltip("後台面板：按了停止代做（{0}＝停在哪一步）")] public string autoRunStoppedText = "■ 已停止代做，停在{0}";
+        [Tooltip("terry 2026-11-13 選 A：碳滑板新品厚度（mm，淡海輕軌約 18）與允許誤差")] public float stripNewMm = 18f, stripNewTolMm = 0.2f;
+        [Tooltip("terry 2026-11-13 選 A：碳滑板換新門檻（mm，三點最小值 ≤ 這個值就換；淡海輕軌約 6）")] public float stripLimitMm = 6f;
         [Tooltip("後台代做時升降速度的倍數（學員自己操作不變；放開那一刻的位置判定不變）")] public float autoRunLiftSpeed = 5f;
         [Tooltip("後台代做時扭力扳手上升速度的倍數（學員自己操作不變）")] public float autoRunTorqueSpeed = 5f;
 

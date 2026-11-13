@@ -124,13 +124,13 @@ namespace PantographSim.Tests
             s.Set("training.mode", "tutorial");
             s.Set("spare.required_model", "CS-1100-74A");
             s.Set("env.spare_shelf.slot_3.model", "CS-1100-74A");
-            s.SetFloat("env.spare_shelf.slot_3.true", 12.0f);
+            s.SetFloat("env.spare_shelf.slot_3.true", 18.0f);
             var text = InfoCardText.Build(s, null, "env.spare_shelf.slot_3");
             StringAssert.Contains("碳滑板（備品）", text);
             StringAssert.Contains("還沒量", text);
             StringAssert.Contains("作業單要求型號", text);
             StringAssert.DoesNotContain("裂", text);
-            StringAssert.DoesNotContain("12.0", text, "沒量過不能顯示真實厚度");
+            StringAssert.DoesNotContain("18.0", text, "沒量過不能顯示真實厚度");
             s.Set("training.mode", "practice");
             StringAssert.DoesNotContain("作業單要求型號", InfoCardText.Build(s, null, "env.spare_shelf.slot_3"), "考核（練習）模式不顯示要求型號");
             s.SetFloat("env.spare_shelf.slot_3.reading", 12.03f); s.SetBool("env.spare_shelf.slot_3.measured", true);

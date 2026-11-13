@@ -28,7 +28,7 @@ namespace PantographSim.Data
         public string[] sides = { "L", "R" };
         [Tooltip("真實厚度鍵，{side} 與 {point} 展開")] public string trueKeyPattern = "part.carbon_strip_{side}.true.{point}";
         public string[] points = { "left", "mid", "right" };
-        [Tooltip("更換基準（mm）")] public float threshold = 3.0f;
+        [Tooltip("更換基準（mm）；淡海輕軌 6.0（ToolRules.asset stripLimitMm）")] public float threshold = 6.0f;
         public string replaceChoice = "both";
         public string passChoice = "pass";
     }
