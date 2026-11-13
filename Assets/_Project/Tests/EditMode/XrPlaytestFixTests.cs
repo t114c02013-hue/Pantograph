@@ -187,7 +187,7 @@ namespace PantographSim.Tests
             Assert.AreEqual(1.09f, p.standElbow, 1e-4f); Assert.AreEqual(1.43f, p.standShoulder, 1e-4f);
             Assert.AreEqual(p.kneelEye, p.Eye(Posture.Kneel)); Assert.AreEqual(p.crouchEye, p.Eye(Posture.Crouch));
             // 這些檔案的 1.6 不是眼高（車頂圓弧、桿長、傳送吸附、相機與模型擺位）
-            var notEye = new[] { "PostureDef.cs", "RoofSceneDef.cs", "PantographRigBuilder.cs", "RoofSiteBuilder.cs", "SliceSceneBuilder.cs", "XrHeldPole.cs", "XrPlayer.cs", "XrTeleport.cs" };
+            var notEye = new[] { "PostureDef.cs", "RoofSceneDef.cs", "PantographRigBuilder.cs", "RoofSiteBuilder.cs", "RoofSiteBuilder.Depot.cs", "SliceSceneBuilder.cs", "XrHeldPole.cs", "XrPlayer.cs", "XrTeleport.cs" };
             var found = System.IO.Directory.GetFiles("Assets/_Project", "*.cs", System.IO.SearchOption.AllDirectories)
                 .Where(f => !f.Replace('\\', '/').Contains("/Tests/") && !notEye.Contains(System.IO.Path.GetFileName(f)))
                 .Where(f => System.Text.RegularExpressions.Regex.IsMatch(System.IO.File.ReadAllText(f), @"(?<![\d.])1\.63?f")).ToList();

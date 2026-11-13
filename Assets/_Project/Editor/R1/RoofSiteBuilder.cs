@@ -19,7 +19,7 @@ namespace PantographSim.Editor
     /// 每個場景件存成獨立 prefab（Assets/_Project/Modules/Worksite/Prefabs/ENV_*），底下有 Visual／Walkable／Collision／Anchors；
     /// 之後換正式模型只換 Visual。所有尺寸與位置讀 RoofSceneDef／StationSet，不寫死座標。
     /// </summary>
-    public static class RoofSiteBuilder
+    public static partial class RoofSiteBuilder
     {
         const string ToolSlotTablePath = "Assets/_Project/Modules/Worksite/Data/ToolSlotTable.asset";
 
@@ -226,6 +226,7 @@ namespace PantographSim.Editor
             var mWarn = Mat("warning", new Color(1f, 0.82f, 0.05f));
             var mRail = Mat("rail", new Color(0.95f, 0.65f, 0.1f));
             var mGrating = Mat("grating", new Color(0.42f, 0.44f, 0.46f));
+            mGrating.mainTexture = GratingTexture(); mGrating.mainTextureScale = new Vector2(6f, 6f);   // 鋼格板貼圖
             var mInsul = Mat("insulator", new Color(0.55f, 0.32f, 0.2f));
             var mWall = Mat("cabWall", new Color(0.7f, 0.72f, 0.68f));
             var mBack = Mat("backdrop", new Color(0.6f, 0.62f, 0.64f));
@@ -508,7 +509,7 @@ namespace PantographSim.Editor
             {
                 float y = py - (i + 1) * (py - d.groundY) / steps;
                 var c = new Vector3(sx0, y, pz1 + 0.25f * (i + 0.5f));
-                Box("Step", stair.visual, c, new Vector3(0.9f, 0.04f, 0.26f), mGrating, collider: false);
+                Box("Step", stair.visual, c, new Vector3(0.9f, 0.04f, 0.26f), i == 0 || i == steps - 1 ? mWarn : mGrating, collider: false);   // 首末階漆黃
                 Col("StepCollision", stair.col, c - new Vector3(0.45f, 0.02f, 0.13f), c + new Vector3(0.45f, 0.02f, 0.13f), SceneLayers.Boundary);
             }
             float stairLen = 0.25f * steps;
@@ -537,6 +538,7 @@ namespace PantographSim.Editor
                 Box(n, cab.visual, c, s, mWall, collider: false);
                 Col(n + "_Boundary", cab.col, c - s / 2f, c + s / 2f, SceneLayers.Boundary);
             }
+            DressCab(cab.visual, d);
             var cabLight = new GameObject("CabLight").AddComponent<Light>();
             cabLight.transform.SetParent(cab.visual, false);
             cabLight.transform.position = new Vector3(cc.x, cy + d.cabWallHeight - 0.2f, cc.z);
@@ -548,7 +550,7 @@ namespace PantographSim.Editor
             res.backdrop = back.root;
             float shedTop = d.shedTrussY, gy = d.groundY;
             float bx0 = -18f, bx1 = 8f, bz0 = -50f, bz1 = 60f;   // 廠房範圍（EX）：涵蓋三節車、平台、地面維修區、天車軌道
-            Box("Ground", back.visual, new Vector3((bx0 + bx1) / 2f, gy - 0.05f, (bz0 + bz1) / 2f), new Vector3(bx1 - bx0, 0.1f, bz1 - bz0), mBack, collider: false);
+            GroundWithPit(back.visual, bx0, bx1, bz0, bz1, gy, mBack);   // terry 2026-11-13：軌道下方是柱式檢查機坑（RoofSiteBuilder.Depot）
             Box("TrussChord", back.visual, new Vector3((bx0 + bx1) / 2f, shedTop + 0.1f, (bz0 + bz1) / 2f), new Vector3(bx1 - bx0, 0.2f, bz1 - bz0), mBack, collider: false);
             for (float z = bz0; z <= bz1 + 0.01f; z += 6f)
                 Box("Truss", back.visual, new Vector3((bx0 + bx1) / 2f, shedTop + 0.6f, z), new Vector3(bx1 - bx0, 1.0f, 0.15f), mTrack, collider: false);
@@ -563,9 +565,9 @@ namespace PantographSim.Editor
             foreach (float z in new[] { bz0, bz1 })
             {
                 const float doorW = 5f, doorH = 6f;
-                float wallH = shedTop - gy, side = (bx1 - bx0 - doorW) / 2f;
-                Box("EndWall", back.visual, new Vector3(bx0 + side / 2f, (gy + shedTop) / 2f, z), new Vector3(side, wallH, 0.2f), mBack, collider: false);
-                Box("EndWall", back.visual, new Vector3(bx1 - side / 2f, (gy + shedTop) / 2f, z), new Vector3(side, wallH, 0.2f), mBack, collider: false);
+                float wallH = shedTop - gy, dl = -doorW / 2f, dr = doorW / 2f;   // 門在股道上（X 0）
+                Box("EndWall", back.visual, new Vector3((bx0 + dl) / 2f, (gy + shedTop) / 2f, z), new Vector3(dl - bx0, wallH, 0.2f), mBack, collider: false);
+                Box("EndWall", back.visual, new Vector3((dr + bx1) / 2f, (gy + shedTop) / 2f, z), new Vector3(bx1 - dr, wallH, 0.2f), mBack, collider: false);
                 Box("EndWall_Lintel", back.visual, new Vector3(0f, gy + doorH + (wallH - doorH) / 2f, z), new Vector3(doorW, wallH - doorH, 0.2f), mBack, collider: false);
                 Box("ShedDoor", back.visual, new Vector3(0f, gy + doorH / 2f, z), new Vector3(doorW, doorH, 0.1f), mDoor, collider: false);
                 for (float y = gy + 0.3f; y < gy + doorH; y += 0.3f)   // 捲門的橫條紋
@@ -614,6 +616,7 @@ namespace PantographSim.Editor
             BuildMaintenanceArea(res, d, mats, mWarn, sb);   // R1.5a a4：地面維修區（台架、工作檯）
             BuildCraneAndRigging(res, d, aDock, sb);            // R1.5a a5：天車、遙控器、吊具、工具袋（靜態）
             WireRigging(res, d, sb);                            // R1.5b b2：吊運（集電弓狀態機、對位燈、台架夾具、吊物探測 collider）
+            BuildDepot(res, d, mats, mWarn, sb);                // terry 2026-11-13：捷運／輕軌機廠擺設（只有外觀）
             var pieces = new[] { roof.root, plat.root, stair.root, cab.root, back.root }.Concat(res.equipment).ToList();
             foreach (var p in pieces) SavePrefab(p);
             sb.AppendLine("場景件 prefab：ENV_Insulators、" + string.Join("、", pieces.Select(t => t.name)) + $"（{PrefabFolder}）");
