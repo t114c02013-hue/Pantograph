@@ -91,6 +91,9 @@ namespace PantographSim.Data
         [Tooltip("控制線接頭 Car_Roof_Work/CtrlCable_End")] public Vector3 ctrlCableEnd = new Vector3(-0.35f, 0.05f, 2.10f);
         [Tooltip("三節車之間的間隙")] public float carGap = 0.6f;
         [Tooltip("廠房屋頂桁架下緣高度")] public float shedTrussY = 8.0f;
+        [Tooltip("terry 2026-11-13 室內日光燈感：主光（由上往下）強度、俯角（度）、顏色")] public float lightIntensity = 0.75f, lightPitchDeg = 75f;
+        public Color lightColor = new Color(0.96f, 0.98f, 1f);
+        [Tooltip("環境光（整體亮而平均）")] public Color ambientColor = new Color(0.68f, 0.70f, 0.72f);
 
         [Header("R1.5a 地面維修區（a4）")]
         public Vector2 maintMinXZ = new Vector2(-13.5f, -5f), maintMaxXZ = new Vector2(-5.5f, 5f);

@@ -28,6 +28,19 @@ namespace PantographSim.Tests
             Assert.AreEqual("ip.pan_head.lower_target", d.TargetMarkerId);
         }
 
+        /// <summary>terry 2026-11-13：綠色目標框、檢查點只在教學模式、按 ▼ 那一個小動作出現（判定照常算）。</summary>
+        [Test]
+        public void LowerMarkers_OnlyInTutorialLiftSubAction()
+        {
+            const string when = "ip.pan_head.lower_check,ui.lift_controller";
+            Assert.IsTrue(PositionCheckLogic.MarkerVisible("tutorial", "ui.lift_controller", when));
+            Assert.IsTrue(PositionCheckLogic.MarkerVisible("tutorial", "ip.pan_head.lower_check", when), "R1 第 1 步");
+            Assert.IsFalse(PositionCheckLogic.MarkerVisible("practice", "ui.lift_controller", when), "練習模式不畫");
+            Assert.IsFalse(PositionCheckLogic.MarkerVisible("tutorial", "part.pan_head", when), "別的小動作不畫");
+            Assert.IsTrue(PositionCheckLogic.MarkerVisible("practice", "", ""), "沒設定＝照舊一律畫");
+            Assert.AreEqual(when, UnityEditor.AssetDatabase.LoadAssetAtPath<PositionCheckDefinition>("Assets/_Project/Modules/Parts/_Common/Data/PC_PanHeadLower.asset").showWhenSubTarget, "資料有設定");
+        }
+
         static void Hold(ref float v, ref float vel, int input, float seconds, LiftSettingsValues s, float distanceCm = 999f)
         {
             const float dt = 0.02f;

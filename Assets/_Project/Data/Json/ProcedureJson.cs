@@ -87,7 +87,7 @@ namespace PantographSim.Data
 
     [Serializable] public class PositionCheckJson
     {
-        public string checkId, part = "pan_head", purpose = "lower", targetName;
+        public string checkId, part = "pan_head", purpose = "lower", targetName, showWhenSubTarget = "";
         public float toleranceCm = 1f;
     }
 
@@ -167,7 +167,7 @@ namespace PantographSim.Data
             {
                 var pc = ScriptableObject.CreateInstance<PositionCheckDefinition>();
                 pc.name = p.checkId; pc.checkId = p.checkId; pc.part = p.part; pc.purpose = p.purpose;
-                pc.targetName = p.targetName; pc.toleranceCm = p.toleranceCm;
+                pc.targetName = p.targetName; pc.toleranceCm = p.toleranceCm; pc.showWhenSubTarget = p.showWhenSubTarget ?? "";
                 bundle.positionChecks.Add(pc);
             }
             bundle.lift = ScriptableObject.CreateInstance<LiftSettings>();

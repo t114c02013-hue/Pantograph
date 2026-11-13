@@ -62,6 +62,9 @@ namespace PantographSim.Parts.Common
                 Write(s, definition.DeltaKey, delta);
             }
             bool ok = PositionCheckLogic.InPosition(d, Tolerance(s));
+            bool show = s == null || PositionCheckLogic.MarkerVisible(s.Get("training.mode"), s.Get("hint.sub_target"), definition.showWhenSubTarget);
+            if (checkRenderer != null && checkRenderer.enabled != show) checkRenderer.enabled = show;
+            if (targetVisual != null && targetVisual.gameObject.activeSelf != show) targetVisual.gameObject.SetActive(show);
             Tint(checkRenderer, ok ? new Color(0.2f, 1f, 0.3f) : new Color(1f, 0.2f, 0.15f), ok ? 0.8f : 0.6f);
             float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 4f);
             Tint(targetRenderer, new Color(0.2f, 1f, 0.35f, ok ? 0.65f : 0.3f + 0.2f * pulse), ok ? 0.9f : 0.4f);

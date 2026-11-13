@@ -18,7 +18,7 @@
     { "stepId": "STP_CSR_05_Decide", "key": "workorder.decision", "value": "pass", "jumpTo": "STP_WC_01_ToolCount" }
   ],
   "positionChecks": [
-    { "checkId": "PC_PanHeadLower", "part": "pan_head", "purpose": "lower", "targetName": "降弓位置", "toleranceCm": 1.0 },
+    { "checkId": "PC_PanHeadLower", "part": "pan_head", "purpose": "lower", "targetName": "降弓位置", "toleranceCm": 1.0, "showWhenSubTarget": "ip.pan_head.lower_check,ui.lift_controller" },
     { "checkId": "PC_StripInstall_L", "part": "carbon_strip_L", "purpose": "install", "targetName": "靠關節滑板安裝位置", "toleranceCm": 0.5 },
     { "checkId": "PC_StripInstall_R", "part": "carbon_strip_R", "purpose": "install", "targetName": "外側滑板安裝位置", "toleranceCm": 0.5 }
   ],

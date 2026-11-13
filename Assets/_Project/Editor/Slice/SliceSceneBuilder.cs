@@ -60,10 +60,11 @@ namespace PantographSim.Editor
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var lightGo = new GameObject("Directional Light");
             var light = lightGo.AddComponent<Light>();
-            light.type = LightType.Directional; light.intensity = 1.1f; light.shadows = LightShadows.Soft;
-            lightGo.transform.rotation = Quaternion.Euler(50, -30, 0);
+            var lightDef = R1Data.RoofScene;   // terry 2026-11-13：室內日光燈感（由上往下、亮而平均），數值在 RoofSceneDef
+            light.type = LightType.Directional; light.intensity = lightDef.lightIntensity; light.color = lightDef.lightColor; light.shadows = LightShadows.Soft; light.shadowStrength = 0.6f;
+            lightGo.transform.rotation = Quaternion.Euler(lightDef.lightPitchDeg, -30, 0);
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
-            RenderSettings.ambientLight = new Color(0.55f, 0.57f, 0.6f);
+            RenderSettings.ambientLight = lightDef.ambientColor;
             sb.AppendLine(R1Layers.Ensure());
             int heldPole = LayerMask.NameToLayer("HeldPole"), contact = LayerMask.NameToLayer("ContactTarget");
             if (heldPole >= 0) for (int i = 0; i < 32; i++) Physics.IgnoreLayerCollision(heldPole, i, i != contact);   // R1.5b b3（P2）：手上的長桿不和場景碰撞，只碰互動點的觸發器

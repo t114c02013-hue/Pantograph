@@ -126,6 +126,40 @@ namespace PantographSim.Editor
             return g;
         }
 
+        /// <summary>地上的黃黑相間警戒線（從 a 到 b，寬 width，每段 0.3 m 交替）。</summary>
+        static void HazardStripe(string name, Transform parent, Vector3 a, Vector3 b, float y, float width, Material yellow, Material black)
+        {
+            var root = Child(parent, name);
+            var dir = b - a; dir.y = 0f;
+            float len = dir.magnitude; dir /= Mathf.Max(len, 1e-4f);
+            int n = Mathf.Max(1, Mathf.RoundToInt(len / 0.3f));
+            bool alongZ = Mathf.Abs(dir.z) > Mathf.Abs(dir.x);
+            for (int i = 0; i < n; i++)
+            {
+                var c = a + dir * (len * (i + 0.5f) / n); c.y = y;
+                float seg = len / n;
+                Box("Seg", root, c, alongZ ? new Vector3(width, 0.004f, seg) : new Vector3(seg, 0.004f, width), i % 2 == 0 ? yellow : black, collider: false);
+            }
+        }
+
+        /// <summary>鋼管欄杆（看得穿）：center／size 是整段欄杆的外框，沿長邊放立柱（間距 ≤ 1 m）、橫桿（高 ≥ 0.7 m 三支，矮欄兩支）、踢腳板。</summary>
+        static Transform GuardRail(string name, Transform parent, Vector3 center, Vector3 size, Material m)
+        {
+            var root = Child(parent, name);
+            bool alongZ = size.z >= size.x;
+            float len = alongZ ? size.z : size.x, h = size.y;
+            const float t = 0.04f;
+            var axis = alongZ ? Vector3.forward : Vector3.right;
+            var bottom = center - Vector3.up * h / 2f;
+            Vector3 Long(float hh, float th) => alongZ ? new Vector3(th, hh, len) : new Vector3(len, hh, th);
+            int rails = h > 0.7f ? 3 : 2;
+            for (int i = 1; i <= rails; i++) Box("Rail", root, bottom + Vector3.up * (h * i / rails - t / 2f), Long(t, t), m, collider: false);
+            Box("KickBoard", root, bottom + Vector3.up * 0.05f, Long(0.1f, 0.01f), m, collider: false);
+            int posts = Mathf.Max(2, Mathf.CeilToInt(len / 1.0f) + 1);
+            for (int i = 0; i < posts; i++) Box("Post", root, bottom + axis * (-len / 2f + len * i / (posts - 1)) + Vector3.up * h / 2f, new Vector3(t, h, t), m, collider: false);
+            return root;
+        }
+
         /// <summary>只有 BoxCollider 的不可見方塊（Walkable 地板、Boundary／LocomotionBlocker 牆）。</summary>
         static BoxCollider Col(string name, Transform parent, Vector3 min, Vector3 max, string layer)
         {
@@ -355,13 +389,14 @@ namespace PantographSim.Editor
             Col("EndWall_-Z", roof.col, new Vector3(-walkHalf, roofY, z0 - 0.05f), new Vector3(walkHalf, wh, z0), SceneLayers.WalkLimit);
             Col("EndWall_+Z", roof.col, new Vector3(-walkHalf, roofY, z1), new Vector3(walkHalf, wh, z1 + 0.05f), SceneLayers.WalkLimit);
             // 試玩修正 第 1 點（規格 v5）：不能有隱形牆，collider 和看得見的護欄一樣高。底架跪著作業的段落用 A 矮欄，其他用 B 一般護欄
-            // shortcut: 暫時用黃色方塊，黃黑斜條、中橫桿、踢腳板和端擋板等建模 A 定段 ID 後換掉
+            // terry 2026-11-13：平台那一側（−X）是鋼管欄杆（看得穿，三橫桿＋踢腳板），另一側和兩端只在車頂邊緣畫黃色警示線；碰撞牆高度照舊
             foreach (var w in roof.col.GetComponentsInChildren<BoxCollider>(true).Where(c => c.gameObject.layer == L(SceneLayers.WalkLimit) && !c.name.Contains("GateSlice")).ToList())
             {
                 float railH = w.name.Contains("_Base") || w.name.Contains("_Step") ? d.roofEdgeRailHeight : d.gapRailHeight;
                 var at = w.transform.position; at.y = roofY + railH / 2f;
                 w.transform.position = at; w.size = new Vector3(w.size.x, railH, w.size.z);
-                Box(w.name + "_Rail", roof.visual, at, w.size, Mat("warning", new Color(1f, 0.82f, 0.05f)), collider: false);
+                if (w.name.Contains("-X")) GuardRail(w.name + "_Rail", roof.visual, at, w.size, mRail);
+                else Box(w.name + "_Line", roof.visual, new Vector3(at.x, roofY + 0.0025f, at.z), new Vector3(Mathf.Max(w.size.x, 0.08f), 0.004f, Mathf.Max(w.size.z, 0.08f)), mWarn, collider: false);
             }
             sb.AppendLine($"車頂：可走區 {walk.Count} 塊（|X|≤{walkHalf:0.00}，底架兩側 Z {zb0:0.000}…{zb1:0.000} 放寬到 |X|≤{wide:0.00}、紅線 {d.roofBaseWarningX:0.00}；挖掉會動的段升降全程頂點範圍外擴 {d.movingCarveInflate} m、母線與避雷器外擴 {m} m、底架與絕緣子頂點範圍外擴 {d.staticCarveInflate} m）；降弓後滑板頂面在車頂上 {res.stripTop:0.000} m");
             foreach (var (o, i) in obstacles.Select((o, i) => (o, i))) sb.AppendLine($"  挖除 {i}：X {o.min.x:0.000}…{o.max.x:0.000}、Z {o.min.z:0.000}…{o.max.z:0.000}");
@@ -508,6 +543,19 @@ namespace PantographSim.Editor
                 for (float z = bz0; z <= bz1 + 0.01f; z += 6f)
                     Box("Column", back.visual, new Vector3(x + (x < 0 ? 0.3f : -0.3f), (gy + shedTop) / 2f, z), new Vector3(0.4f, shedTop - gy, 0.4f), mTrack, collider: false);
             }
+            // terry 2026-11-13：兩端加端牆和大門（捲門關著），不再直接看到天空
+            var mDoor = Mat("shedDoor", new Color(0.55f, 0.58f, 0.6f));
+            foreach (float z in new[] { bz0, bz1 })
+            {
+                const float doorW = 5f, doorH = 6f;
+                float wallH = shedTop - gy, side = (bx1 - bx0 - doorW) / 2f;
+                Box("EndWall", back.visual, new Vector3(bx0 + side / 2f, (gy + shedTop) / 2f, z), new Vector3(side, wallH, 0.2f), mBack, collider: false);
+                Box("EndWall", back.visual, new Vector3(bx1 - side / 2f, (gy + shedTop) / 2f, z), new Vector3(side, wallH, 0.2f), mBack, collider: false);
+                Box("EndWall_Lintel", back.visual, new Vector3(0f, gy + doorH + (wallH - doorH) / 2f, z), new Vector3(doorW, wallH - doorH, 0.2f), mBack, collider: false);
+                Box("ShedDoor", back.visual, new Vector3(0f, gy + doorH / 2f, z), new Vector3(doorW, doorH, 0.1f), mDoor, collider: false);
+                for (float y = gy + 0.3f; y < gy + doorH; y += 0.3f)   // 捲門的橫條紋
+                    Box("ShedDoor_Slat", back.visual, new Vector3(0f, y, z + (z < 0 ? 0.06f : -0.06f)), new Vector3(doorW, 0.02f, 0.02f), mTrack, collider: false);
+            }
             foreach (float x in new[] { -0.7175f, 0.7175f })   // 標準軌距 1.435
                 Box("Rail", back.visual, new Vector3(x, gy + 0.085f, (bz0 + bz1) / 2f), new Vector3(0.07f, 0.17f, bz1 - bz0), mTrack, collider: false);
             NoShadow(back.root);
@@ -568,8 +616,14 @@ namespace PantographSim.Editor
             mount.transform.SetParent(box.transform, true);
             mount.transform.SetPositionAndRotation(aLift.position + new Vector3(-0.09f, 0.05f, 0), Quaternion.LookRotation(Vector3.right, Vector3.up));
             mount.AddComponent<RegisteredPoint>().Configure("xr.mount.lift_panel");
+            // terry 2026-11-13：指示燈不再浮在空中，裝在操作盒頂上（燈座＋燈罩），位置和原來差 5 cm 內
+            var lampBase = SliceModelBuilder.Prim(PrimitiveType.Cylinder, "PanIndicator_Base", box.transform, Vector3.zero, Vector3.one, mats["panel"]);
+            lampBase.transform.SetParent(env, true);
+            lampBase.transform.position = aLift.position + new Vector3(-0.04f, 0.16f + 0.015f, -0.12f);
+            lampBase.transform.localScale = new Vector3(0.075f, 0.015f, 0.075f);
+            Object.DestroyImmediate(lampBase.GetComponent<Collider>());
             var lamp = SliceModelBuilder.Prim(PrimitiveType.Sphere, "PanIndicator", env, Vector3.zero, Vector3.one * 0.06f, mats["checkPoint"]);
-            lamp.transform.position = aLift.position + new Vector3(-0.09f, 0.21f, -0.12f);
+            lamp.transform.position = aLift.position + new Vector3(-0.04f, 0.16f + 0.03f + 0.025f, -0.12f);
             lamp.AddComponent<ControlPanelLamp>().Configure("ip.cab.pan_indicator", "弓位指示燈");
             lamp.GetComponent<ControlPanelLamp>().Setup(lamp.GetComponent<Renderer>());
             lamp.AddComponent<Highlightable>();
@@ -740,7 +794,7 @@ namespace PantographSim.Editor
             Col("Edge_S", area.col, new Vector3(a.x, gy, a.y - t), new Vector3(b.x, gy + wallH, a.y), SceneLayers.WalkLimit);
             Col("Edge_N", area.col, new Vector3(a.x, gy, b.y), new Vector3(b.x, gy + wallH, b.y + t), SceneLayers.WalkLimit);
             foreach (var (c0, c1) in new[] { (new Vector3(a.x, gy, a.y), new Vector3(a.x, gy, b.y)), (new Vector3(b.x, gy, a.y), new Vector3(b.x, gy, b.y)), (new Vector3(a.x, gy, a.y), new Vector3(b.x, gy, a.y)), (new Vector3(a.x, gy, b.y), new Vector3(b.x, gy, b.y)) })
-                Box("EdgeRail", area.visual, (c0 + c1) / 2f + Vector3.up * wallH / 2f, new Vector3(Mathf.Abs(c1.x - c0.x) + 2f * t, wallH, Mathf.Abs(c1.z - c0.z) + 2f * t), mWarn, collider: false);   // 試玩修正 第 1 點：看得見的邊界
+                HazardStripe("EdgeStripe", area.visual, c0, c1, gy + 0.006f, 0.12f, mWarn, Mat("hazardBlack", new Color(0.08f, 0.08f, 0.08f)));   // terry 2026-11-13：地上的黃黑斜紋警戒線
             // 平台和維修區之間的地面通道：只做視覺（兩區用傳送移動）
             Box("Aisle", area.visual, new Vector3((d.PlatformOuterX + b.x) / 2f, gy + 0.004f, (a.y + b.y) / 2f), new Vector3(b.x - d.PlatformOuterX, 0.008f, b.y - a.y), Mat("aisle", new Color(0.46f, 0.48f, 0.50f)), collider: false);
             // 台架外 standClearance 的黃色走道線

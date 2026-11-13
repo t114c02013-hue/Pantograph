@@ -18,6 +18,7 @@ namespace PantographSim.Data
         [Tooltip("容許誤差（cm），示例值")] public float toleranceCm = 1f;
         [Tooltip("檢測點：相對零件（例 PanHead）的位置")] public Vector3 checkPointLocal;
         [Tooltip("目標點：相對整組機構根節點的位置")] public Vector3 targetLocal;
+        [Tooltip("terry 2026-11-13：檢查點和目標框只在教學模式、目前小動作的目標含其中一個 ID（逗號分隔）時顯示（空＝一律顯示）")] public string showWhenSubTarget = "";
 
         public string DistanceKey => $"part.{part}.{purpose}_distance_cm";
         /// <summary>帶正負號的垂直差（cm）：檢測點比目標高為正（要往下）。</summary>
@@ -34,5 +35,8 @@ namespace PantographSim.Data
         public static float DistanceCm(Vector3 point, Vector3 target) => Vector3.Distance(point, target) * 100f;
         public static bool InPosition(float distanceCm, float toleranceCm) => distanceCm <= toleranceCm + 1e-4f;
         public static float VerticalDeltaCm(Vector3 point, Vector3 target) => (point.y - target.y) * 100f;
+        /// <summary>檢查點、目標框要不要畫（判定照常算，只是不畫）。</summary>
+        public static bool MarkerVisible(string trainingMode, string subTarget, string showWhenSubTarget) =>
+            string.IsNullOrEmpty(showWhenSubTarget) || (trainingMode == "tutorial" && !string.IsNullOrEmpty(subTarget) && System.Array.Exists(showWhenSubTarget.Split(','), id => id.Length > 0 && subTarget.Contains(id.Trim())));
     }
 }

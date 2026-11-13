@@ -84,7 +84,8 @@ namespace PantographSim.Tests
             Assert.AreEqual(Vector3.zero, HeadBoundaryPusher.Push(Def.closed, new Vector3(edge + 0.2f, 1.6f, 0f)), "範圍內不推");
         }
 
-        /// <summary>規格 v5 測試 3：不能有隱形牆：每個邊界 collider 都在看得見的 Renderer 裡（容差 0.01）。</summary>
+        /// <summary>規格 v5 測試 3：不能有隱形牆：每個邊界 collider 都在看得見的 Renderer 裡（容差 0.01），
+        /// 或（terry 2026-11-13：車頂非平台側、地面維修區改成地上畫線）正下方的地上有畫線標出整段邊界。</summary>
         [Test]
         public void NoInvisibleWalls()
         {
@@ -98,6 +99,7 @@ namespace PantographSim.Tests
                 foreach (var c in roots.SelectMany(g => g.GetComponentsInChildren<Collider>(true)).Where(c => (mask & (1 << c.gameObject.layer)) != 0))
                 {
                     var b = BoundsOf(c);
+                    if (FloorMarked(b, renderers)) continue;
                     var seen = renderers.Where(r => r.bounds.Intersects(b)).Select(r => r.bounds).ToList();
                     if (seen.Count == 0) { bad.Add(c.name + "：沒有看得見的模型"); continue; }
                     var all = seen[0]; foreach (var r in seen) all.Encapsulate(r);
@@ -106,6 +108,16 @@ namespace PantographSim.Tests
                 }
                 Assert.IsEmpty(bad, string.Join("\n", bad));
             });
+        }
+
+        /// <summary>邊界正下方地上的畫線（扁平 Renderer，厚度 &lt; 2 cm，貼在 collider 底部 ±5 cm）把 collider 的水平範圍整段蓋住（容差 6 cm）。</summary>
+        static bool FloorMarked(Bounds b, List<MeshRenderer> renderers)
+        {
+            var lines = renderers.Select(r => r.bounds).Where(r => r.size.y < 0.02f && Mathf.Abs(r.center.y - b.min.y) < 0.05f && r.Intersects(new Bounds(new Vector3(b.center.x, r.center.y, b.center.z), new Vector3(b.size.x + 0.12f, 0.1f, b.size.z + 0.12f)))).ToList();
+            if (lines.Count == 0) return false;
+            var all = lines[0]; foreach (var r in lines) all.Encapsulate(r);
+            all.Expand(new Vector3(0.12f, 1f, 0.12f));
+            return all.Contains(new Vector3(b.min.x, all.center.y, b.min.z)) && all.Contains(new Vector3(b.max.x, all.center.y, b.max.z));
         }
 
         /// <summary>collider 停用或物件沒啟用時 bounds 是空的。</summary>
