@@ -104,9 +104,13 @@ namespace PantographSim.XR
             var ctx = Context();
             if (ctx.BindingContext != helpContext) { helpContext = ctx.BindingContext; S.Set("xr.help.keys", XRInputMapper.HelpText(mapper.Bindings, helpContext)); S.Set("xr.keys.card", XRInputMapper.KeyCard(mapper.Bindings, helpContext)); }   // Y 說明卡的按鍵表
             foreach (var cmd in mapper.Map(frame, ctx, Time.unscaledTime)) Execute(cmd);
-            if (!Simulated && !XrControllerInput.RightHandTracked() && (S.Get(SimIds.LiftCmd) == "Up" || S.Get(SimIds.LiftCmd) == "Down"))
-                LiftControl.Release(S);   // 失去追蹤：升降一律停
+            if (ReleaseLiftOnTrackingLoss(Simulated, S.GetBool(SimIds.AutoRunActive), XrControllerInput.RightHandTracked(), S.Get(SimIds.LiftCmd)))
+                LiftControl.Release(S);
         }
+
+        /// <summary>右手失去追蹤：升降一律停。後台代做時不算：控制器放在桌上沒追蹤，會每幀把代做按的 ▼ 放開（2026-11-13 跳第 13 步卡在第 1 步）。</summary>
+        public static bool ReleaseLiftOnTrackingLoss(bool simulated, bool autoRun, bool rightTracked, string liftCmd) =>
+            !simulated && !autoRun && !rightTracked && (liftCmd == "Up" || liftCmd == "Down");
 
         XrContext Context() => new XrContext
         {

@@ -116,6 +116,16 @@ namespace PantographSim.Tests
             Object.DestroyImmediate(p);
         }
 
+        /// <summary>2026-11-13：VR 後台代做時控制器放在桌上沒追蹤，失去追蹤的保護每幀放開代做按的 ▼，跳第 13 步卡在第 1 步。</summary>
+        [Test]
+        public void TrackingLoss_ReleasesLift_ButNotDuringAutoRun()
+        {
+            Assert.IsTrue(PantographSim.XR.XrPlayer.ReleaseLiftOnTrackingLoss(false, false, false, "Down"), "學員失去追蹤：升降停");
+            Assert.IsFalse(PantographSim.XR.XrPlayer.ReleaseLiftOnTrackingLoss(false, true, false, "Down"), "後台代做：不放開");
+            Assert.IsFalse(PantographSim.XR.XrPlayer.ReleaseLiftOnTrackingLoss(false, false, true, "Down"), "有追蹤：不放開");
+            Assert.IsFalse(PantographSim.XR.XrPlayer.ReleaseLiftOnTrackingLoss(false, false, false, "Stop"), "已經停了：不重複放開");
+        }
+
         [Test]
         public void GripTap_IsNotARelease()
         {
