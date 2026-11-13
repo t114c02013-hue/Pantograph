@@ -35,7 +35,7 @@ namespace PantographSim.Tests
             Assert.AreEqual(5f, Rules.dischargeSeconds, "D43：放電 5 秒");
             Assert.AreEqual(100f, Rules.irPassMinMOhm, "D43：合格下限 100 MΩ");
             Assert.AreEqual(20f, Rules.meggerFaultReadingMOhm);
-            StringAssert.Contains("待高鐵 SOP 確認", Rules.irPassNote);
+            StringAssert.Contains("待營運單位 SOP 確認", Rules.irPassNote);
         }
 
         [Test]

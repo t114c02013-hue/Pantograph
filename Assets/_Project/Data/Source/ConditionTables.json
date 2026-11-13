@@ -170,7 +170,7 @@
     { "text": "檢查員 NPC 核對扭力標記、量測值、高低差後判「可出車」（日常沒有升弓試驗）", "rule": "npc.inspector.verdict=pass", "owner": "b4c:holdpoint" },
     { "text": "已加壓量測且讀值穩定（正常 EX 500 MΩ；故障開啟時 EX 20 MΩ）。讀值 0 MΩ：三種模式都只提示「接地還掛著，請確認 #1、#2 都已拆除並銷號後再量」，不記分，要求重量", "step": "STP_RT_02_InsulationTest", "rule": "tool.megger.measured" },
     { "text": "作業單讀值和高阻計讀值一致（不一致：教學只提示，練習／考核記 Major）", "step": "STP_RT_02_InsulationTest", "rule": "workorder.ir_reading>=0" },
-    { "text": "勾選和讀值相符：≥ EX 100 MΩ 勾合格，< 100 MΩ 勾不合格（100 MΩ 下限待高鐵 SOP 確認）。教學勾錯就擋下並提示「低於 100 MΩ，不能申請復電，請回報作業負責人」", "step": "STP_RT_02_InsulationTest", "rule": "workorder.ir_judged" },
+    { "text": "勾選和讀值相符：≥ EX 100 MΩ 勾合格，< 100 MΩ 勾不合格（100 MΩ 下限待營運單位 SOP 確認）。教學勾錯就擋下並提示「低於 100 MΩ，不能申請復電，請回報作業負責人」", "step": "STP_RT_02_InsulationTest", "rule": "workorder.ir_judged" },
     { "text": "桿頭接觸弓頭接地掛點累計 ≥ EX 5 s（D43；教學顯示 5 秒倒數，練習／考核不顯示）", "step": "STP_RT_02_InsulationTest", "rule": "tool.megger.discharged" },
     { "text": "兩端測試線都已拆下；放電未滿 5 s 就伸手拆：教學擋下並顯示倒數不記錯，練習／考核記 Major", "step": "STP_RT_02_InsulationTest", "rule": "tool.megger.connected_count<=0" },
     { "text": "已回報（放電、拆線之後）；作業負責人指示「掛回接地 #1，清潔絕緣子再重量」", "step": "STP_RT_02_InsulationTest", "rule": "workorder.ir_reported", "owner": "b4c:holdpoint" },
