@@ -117,7 +117,7 @@ def build(ctx, p):
         if i < len(mods) - 1:
             # 鉸接（風擋）：比車身窄一點的深色段
             hw = p["carBodyHalfWidth"]
-            extrude_profile(ctx, f"Articulation_{i + 1}", profile(hw - 0.12, rail + SKIRT + 0.1), gap, mat="Dark", color="dark", parent=root, loc=(0, y + L + gap / 2.0, -0.12))
+            extrude_profile(ctx, f"Articulation_{i + 1}", profile(hw - 0.02, rail + SKIRT + 0.1), gap, mat="Dark", color="dark", parent=root, loc=(0, y + L + gap / 2.0, -0.04))   # 鉸接頂蓋幾乎和車身同寬：車頂可走範圍離邊 ≥ 0.5 m（資深鐵道 2026-11-13）
         y += L + gap
     # 轉向架：兩個頭車各一（靠車頭）、中間模組一個
     bogie(ctx, "Bogie_A1", starts[0] + 2.6, rail, root)

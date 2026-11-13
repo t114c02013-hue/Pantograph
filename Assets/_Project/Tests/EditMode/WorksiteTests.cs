@@ -64,6 +64,15 @@ namespace PantographSim.Tests
             Assert.AreEqual(("CS-1100-64B", false), SpareShelf.Current(new SimState(bus), slot1, "CS-1100-64B", false), "黑板沒寫就用場景設定");
         }
 
+        /// <summary>資深鐵道 2026-11-13：隔離管制點燈號只讀車頂開放鍵；開放＝綠燈准許登車頂，否則紅燈禁止。</summary>
+        [Test]
+        public void IsolationStatusLight_FollowsRoofOpen()
+        {
+            Assert.AreEqual("隔離完成　准許登車頂", IsolationStatusLight.Text(true, "隔離完成　准許登車頂", "隔離未完成　禁止登車頂"));
+            Assert.AreEqual("隔離未完成　禁止登車頂", IsolationStatusLight.Text(false, "隔離完成　准許登車頂", "隔離未完成　禁止登車頂"));
+            Assert.AreEqual("roof.open", LiftControl.RoofOpenKey, "讀的是車頂開放的既有鍵");
+        }
+
         [Test]
         public void SpareShelf_PickRules()
         {

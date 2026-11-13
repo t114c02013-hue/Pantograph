@@ -141,7 +141,7 @@ namespace PantographSim.Editor
             Box("Post", iso, new Vector3(sx, py + 1.0f, sz), new Vector3(0.08f, 2.0f, 0.08f), mSteel, collider: false);
             var n = Vector3.right;
             var tagBoard = Sign("IsolationTagBoard", iso, "隔離確認", new Vector3(sx + 0.06f, py + 1.75f, sz), n, new Vector2(0.55f, 0.16f), mBlue, Color.white, 0.010f);
-            string[] tags = { "降弓", "外接電源切離", "儲能隔離", "驗電" };
+            string[] tags = { "降弓確認", "外接電源切離・上鎖", "儲能隔離・上鎖", "驗電・接地完成" };   // 資深鐵道工程師 2026-11-13
             for (int i = 0; i < 4; i++)
             {
                 var c = new Vector3(sx + 0.06f, py + 1.52f - 0.13f * i, sz);
@@ -150,9 +150,13 @@ namespace PantographSim.Editor
             }
             Sign("RoofWorkerCount", iso, "車頂作業人數　1", new Vector3(sx + 0.06f, py + 0.92f, sz), n, new Vector2(0.5f, 0.14f), mWhite, Color.black, 0.009f);
             Box("StatusLightBox", iso, new Vector3(sx + 0.08f, py + 2.15f, sz), new Vector3(0.12f, 0.16f, 0.4f), mSteel, collider: false);
-            Box("StatusLamp_Green", iso, new Vector3(sx + 0.15f, py + 2.15f, sz - 0.1f), new Vector3(0.02f, 0.1f, 0.1f), mGlow, collider: false);
-            Box("StatusLamp_Red", iso, new Vector3(sx + 0.15f, py + 2.15f, sz + 0.1f), new Vector3(0.02f, 0.1f, 0.1f), mBlack, collider: false);
-            Sign("StatusText", iso, "外接電源已切離　可登車頂", new Vector3(sx + 0.06f, py + 1.95f, sz), n, new Vector2(0.62f, 0.12f), mGreen, Color.white, 0.008f);
+            // 燈號只讀車頂開放鍵 roof.open（隔離四格都完成＝SI_04、SI_05、SI_06 d 完成；WC_02 b 之後關閉），預設紅燈
+            var mRedGlow = Mat("statusRed", new Color(1f, 0.25f, 0.2f), unlit: true);
+            var lampG = Box("StatusLamp_Green", iso, new Vector3(sx + 0.15f, py + 2.15f, sz - 0.1f), new Vector3(0.02f, 0.1f, 0.1f), mBlack, collider: false);
+            var lampR = Box("StatusLamp_Red", iso, new Vector3(sx + 0.15f, py + 2.15f, sz + 0.1f), new Vector3(0.02f, 0.1f, 0.1f), mRedGlow, collider: false);
+            var status = Sign("StatusText", iso, "隔離未完成　禁止登車頂", new Vector3(sx + 0.06f, py + 1.95f, sz), n, new Vector2(0.62f, 0.12f), mRed, Color.white, 0.008f);
+            iso.gameObject.AddComponent<PantographSim.Worksite.IsolationStatusLight>().Setup(lampG.GetComponent<Renderer>(), lampR.GetComponent<Renderer>(),
+                status.GetComponentInChildren<TextMesh>(), status.Find("Board").GetComponent<Renderer>(), mGlow, mBlack, mGreen, mRed);
             // 自動回關矮門（樓梯口）與驗電棒架
             var gateC = new Vector3((d.PlatformOuterX + d.PlatformInnerX) / 2f, py, d.platformZMax + 0.08f);
             Box("SelfClosingGate_Bar", iso, gateC + new Vector3(0, 0.85f, 0), new Vector3(0.85f, 0.05f, 0.04f), mWarn, collider: false);
