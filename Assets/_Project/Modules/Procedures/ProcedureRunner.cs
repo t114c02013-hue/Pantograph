@@ -44,7 +44,7 @@ namespace PantographSim.Procedures
             if (i >= subs.Length) return;
             // 選做：連同後面第一個必做的一起啟用（學員直接做必做的＝選做略過）
             int j = NextRequired(subs, i);
-            string cond = subs[i].optional && j < subs.Length ? "(" + subs[i].condition + ")&&(" + subs[j].condition + ")" : subs[i].condition;
+            string cond = subs[i].optional && j < subs.Length ? subs[i].condition + "&&" + subs[j].condition : subs[i].condition;   // 只用來記下兩邊條件鍵的 version
             fresh.Arm(state, SimIds.SpareCondition(state, cond));
         }
 
@@ -346,11 +346,22 @@ namespace PantographSim.Procedures
             holdReason = null;
             while (idx < subs.Length && CanPass(s, subs, idx, out bool skippedOpt))
             {
-                if (subs[idx].optional) state.Set(OptionalKey(s.RunId, idx), skippedOpt ? "skipped" : "done");
+                int next = idx + 1;
+                if (skippedOpt)
+                {
+                    // 略過：中間的選做都記 skipped，讓它略過的那個必做也已經完成，一起推過去
+                    int j = NextRequired(subs, idx);
+                    for (int k = idx; k < j; k++) state.Set(OptionalKey(s.RunId, k), "skipped");
+                    next = Math.Min(j + 1, subs.Length);
+                }
+                else if (subs[idx].optional) state.Set(OptionalKey(s.RunId, idx), "done");
                 state.SetBool("procedure.sub_last_skipped", skippedOpt);   // 介面：剛過去的是略過的選做（顯示「略過」，不打勾）
-                idx++;
+                while (idx < next)
+                {
+                    idx++;
+                    if (subSnaps.Count <= idx) subSnaps.Add(state.Snapshot());   // 第 idx 個小動作從現在開始
+                }
                 ArmSub(s, idx);
-                if (subSnaps.Count <= idx) subSnaps.Add(state.Snapshot());   // 第 idx 個小動作從現在開始
             }
             if (idx != start) state.SetFloat("procedure.sub_index", idx);
             if (holdReason != shownHold) { state.Set("procedure.gate_reason", holdReason ?? ""); shownHold = holdReason; }   // 擋下的提示（例：扭力不足，請鎖到扳手響）

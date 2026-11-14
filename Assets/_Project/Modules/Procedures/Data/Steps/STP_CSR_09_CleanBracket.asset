@@ -56,6 +56,18 @@ MonoBehaviour:
     showBoltNumbers: 0
     showOutwardArrow: 0
   subActions:
+  - text: "\u628A\u87BA\u6813\u5012\u9032\u87BA\u6813\u76E4\u6E05\u9EDE"
+    why: 
+    targetId: env.bolt_tray_{side}
+    toolId: 
+    condition: env.bolt_tray_{side}.poured
+    standPointId: tp.platform.parts
+    subId: 
+    textDesktop: 
+    hint: "\u9EDE\u4E00\u4E0B\u5E73\u53F0\u7F6E\u7269\u67B6\u4E0A\u7684\u87BA\u6813\u76E4\uFF0C4
+      \u652F\u4E00\u8D77\u5012\u9032\u76E4\u5B50\u6E05\u9EDE\uFF1B\u4E0D\u505A\u4E5F\u53EF\u4EE5\u7E7C\u7E8C\u3002"
+    when: 
+    optional: 1
   - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u6E05\u6F54\u5E03"
     why: "\u5DE5\u5177\u888B"
     targetId: env.tool_rack.slot_8
@@ -66,6 +78,7 @@ MonoBehaviour:
     textDesktop: "\u5230\u5DE5\u5177\u888B\u62FF\u8D77\u6E05\u6F54\u5E03"
     hint: "\u4EFB\u4E00\u624B\u4F38\u5230\u5DE6\u8170\u7684\u5DE5\u5177\u888B\uFF0C\u6309\u63E1\u628A\u62FF\u51FA\u6E05\u6F54\u5E03\uFF0C\u6703\u62FF\u5728\u53F3\u624B\u3002"
     when: 
+    optional: 0
   - text: "\u4F86\u56DE\u64E6\u62ED\u6258\u67B6\u63A5\u89F8\u9762"
     why: "\u6E05\u9664\u7387\u8981 \u2265 95%"
     targetId: ip.carbon_strip_{side}.bracket
@@ -76,6 +89,7 @@ MonoBehaviour:
     textDesktop: "\u4F86\u56DE\u64E6\u62ED\u6258\u67B6\u63A5\u89F8\u9762"
     hint: "\u7528\u5C04\u7DDA\u6307\u8457\u6258\u67B6\uFF0C\u6309\u4F4F\u6273\u6A5F\u4F86\u56DE\u6383\u904E\u63A5\u89F8\u9762\u3002\u63A5\u89F8\u9762\u6709\u9AD2\u6C59\uFF0C\u65B0\u6ED1\u677F\u6703\u63A5\u89F8\u4E0D\u826F\u3002"
     when: 
+    optional: 0
   - text: "\u628A\u6E05\u6F54\u5E03\u6536\u56DE\u5DE5\u5177\u888B"
     why: "\u7528\u5B8C\u5C31\u6B78\u4F4D\uFF0C\u6536\u5C3E\u6E05\u9EDE\u624D\u5C0D\u5F97\u4E0A"
     targetId: env.tool_rack.slot_8
@@ -86,6 +100,7 @@ MonoBehaviour:
     textDesktop: "\u628A\u6E05\u6F54\u5E03\u653E\u56DE\u5DE5\u5177\u888B"
     hint: "\u53F3\u624B\u628A\u6E05\u6F54\u5E03\u79FB\u5230\u5DE6\u8170\u5DE5\u5177\u888B\u7684\u683C\u5B50\uFF0C\u6309\u4E00\u4E0B\u63E1\u628A\u5C31\u6536\u56DE\u3002"
     when: 
+    optional: 0
   presetDone: 0
   side: 
   presetStates: []

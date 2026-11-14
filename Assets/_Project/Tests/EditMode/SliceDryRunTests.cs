@@ -235,6 +235,7 @@ namespace PantographSim.Tests
                 {
                     var subs = ProcedureRunner.SubActions(runner.Current);
                     int idx = (int)s.GetFloat("procedure.sub_index");
+                    while (idx < subs.Length && subs[idx].optional) idx++;   // terry 2026-11-14：選做不做，直接做下一個必做的（＝略過）
                     if (idx < subs.Length && IsSetup(subs[idx].condition)) { DoSetup(subs[idx].condition); continue; }
                     if (acted) break;
                     acted = true;

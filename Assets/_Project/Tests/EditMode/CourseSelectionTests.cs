@@ -202,6 +202,9 @@ namespace PantographSim.Tests
             Assert.IsFalse(s.GetBool(key), "拿回袋子");
             s.SetFloat(PantographSim.Worksite.BoltTray.CountKey("L"), 0);
             Assert.IsNull(PantographSim.Worksite.BoltTray.Pour(s, "L", r), "沒有螺栓不能倒");
+            s.SetFloat(PantographSim.Worksite.BoltTray.CountKey("L"), 4);
+            s.SetBool(PantographSim.Worksite.BoltTray.StowedKey("L"), true);
+            Assert.IsNull(PantographSim.Worksite.BoltTray.Pour(s, "L", r), "55A：收進工具袋之後不能再倒");
         }
 
         /// <summary>terry 2026-11-13 選 A：驗電器改成直流 750 V 用（機身標示讀資料，判定不變）。</summary>

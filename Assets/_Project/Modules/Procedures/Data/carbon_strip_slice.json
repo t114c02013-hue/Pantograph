@@ -413,6 +413,7 @@
       "stepId": "STP_CSR_09_CleanBracket",
       "refSeconds": [45, 30],
       "subActions": [
+        { "text": "把螺栓倒進螺栓盤清點", "target": "env.bolt_tray_{side}", "done": "env.bolt_tray_{side}.poured", "stand": "tp.platform.parts", "optional": true, "hint": "點一下平台置物架上的螺栓盤，4 支一起倒進盤子清點；不做也可以繼續。" },
         { "text": "從工具袋拿出清潔布", "textDesktop": "到工具袋拿起清潔布", "hint": "任一手伸到左腰的工具袋，按握把拿出清潔布，會拿在右手。", "target": "env.tool_rack.slot_8", "done": "tool.active=tool.cleaning_cloth", "why": "工具袋", "tool": "tool.cleaning_cloth", "stand": "tp.roof.inner" },
         { "text": "來回擦拭托架接觸面", "textDesktop": "來回擦拭托架接觸面", "hint": "用射線指著托架，按住扳機來回掃過接觸面。接觸面有髒汙，新滑板會接觸不良。", "target": "ip.carbon_strip_{side}.bracket", "done": "ip.carbon_strip_{side}.bracket.clean_ratio>=0.95", "why": "清除率要 ≥ 95%", "tool": "tool.cleaning_cloth", "stand": "tp.roof.{side}" },
         { "text": "把清潔布收回工具袋", "textDesktop": "把清潔布放回工具袋", "hint": "右手把清潔布移到左腰工具袋的格子，按一下握把就收回。", "target": "env.tool_rack.slot_8", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.inner" }

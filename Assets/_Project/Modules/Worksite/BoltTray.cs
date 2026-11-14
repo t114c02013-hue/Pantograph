@@ -26,6 +26,11 @@ namespace PantographSim.Worksite
         public static string PouredKey(string side) => SimIds.BoltTray(side) + ".poured";
         /// <summary>true＝倒過之後又拿回螺栓袋（選做小動作「拿回」的完成條件）。</summary>
         public static string TakenBackKey(string side) => SimIds.BoltTray(side) + ".taken_back";
+        /// <summary>terry 2026-11-14（47B、53A、55A）：日常課程的車頂螺栓盤已收進工具袋（收走後不能再倒；工具袋側邊顯示小圓盤）。</summary>
+        public static string StowedKey(string side) => SimIds.BoltTray(side) + ".stowed";
+
+        [SerializeField] GameObject bagDish;
+        public void SetupBagDish(GameObject g) => bagDish = g;
 
         /// <summary>這門課有沒有「倒進盤子／拿回袋子」（ToolRulesDef.boltPourCourses）。</summary>
         public static bool PourEnabled(ISimState s, ToolRulesDef r) =>
@@ -34,7 +39,7 @@ namespace PantographSim.Worksite
         /// <summary>點一下：沒倒且有螺栓＝倒進盤子；倒了＝拿回袋子；回傳提示文字（課程沒有這個動作時回傳 null）。</summary>
         public static string Pour(ISimState s, string side, ToolRulesDef r)
         {
-            if (!PourEnabled(s, r)) return null;
+            if (!PourEnabled(s, r) || s.GetBool(StowedKey(side))) return null;
             float n = s.GetFloat(CountKey(side));
             bool poured = s.GetBool(PouredKey(side));
             if (!poured && n <= 0) return null;
@@ -47,10 +52,11 @@ namespace PantographSim.Worksite
             if (!State.Has(CountKey(side))) State.SetFloat(CountKey(side), 0);
         }
 
-        protected override bool Watches(string key) => key == CountKey(side) || key == PouredKey(side);
+        protected override bool Watches(string key) => key == CountKey(side) || key == PouredKey(side) || key == StowedKey(side);
 
         protected override void OnBareHand(ActionRequested e)
         {
+            if (State.GetBool(StowedKey(side))) return;   // 55A：收走之後點了沒反應
             var msg = Pour(State, side, ToolRulesDef.Load());
             Toast(msg ?? $"{(side == "L" ? "靠關節" : "外側")}螺栓：{(State.GetBool(PouredKey(side)) ? "螺栓盤上" : "腰間螺栓袋裡")} {State.GetFloat(CountKey(side)):0} 支");
         }
@@ -71,6 +77,7 @@ namespace PantographSim.Worksite
         {
             int n = (int)State.GetFloat(CountKey(side));
             bool poured = State.GetBool(PouredKey(side));
+            if (bagDish != null) bagDish.SetActive(State.GetBool(StowedKey(side)));
             for (int i = 0; i < boltIcons.Length; i++) if (boltIcons[i] != null) boltIcons[i].SetActive(!poured && i < n);
             for (int i = 0; i < trayIcons.Length; i++) if (trayIcons[i] != null) trayIcons[i].SetActive(poured && i % 4 < n);   // 每組 4 支（方盤、車頂小零件盤各一組）
         }

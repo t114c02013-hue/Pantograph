@@ -271,8 +271,8 @@ namespace PantographSim.Training
             Send("part.carbon_strip_" + side, "remove:vertical");
             yield return 15;
             Click(SimIds.PartsTray);
-            if (ToolRulesDef.Load().BoltPourIn(S.Get(SimIds.CourseId, SimIds.CourseR1))) { yield return 10; Click(SimIds.BoltTray(side)); }   // terry 2026-11-13（23A）：倒進盤子清點
             foreach (var x in WaitStep("STP_CSR_09")) yield return x;
+            if (ToolRulesDef.Load().BoltPourIn(S.Get(SimIds.CourseId, SimIds.CourseR1))) { Click(SimIds.BoltTray(side)); yield return 10; }   // terry 2026-11-14（50A）：第 15 步一開始倒進盤子（選做）
             Pick(SimIds.ToolCloth);
             yield return 10;
             for (float u = 0; u <= 1.001f; u += 0.05f)

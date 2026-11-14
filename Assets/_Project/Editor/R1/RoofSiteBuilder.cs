@@ -1282,6 +1282,17 @@ namespace PantographSim.Editor
                     Object.DestroyImmediate(g.GetComponent<Collider>()); g.SetActive(false); return g;
                 }).ToArray();
                 trayT.GetComponent<BoltTray>().Setup(side, icons);
+                // terry 2026-11-14（53A）：車頂螺栓盤收進工具袋後，掛在工具袋側邊（L、R 上下錯開）
+                var pb = pouch.GetComponentsInChildren<Renderer>().Select(r => r.bounds).Aggregate((a, b) => { a.Encapsulate(b); return a; });
+                var hang = new GameObject("BagDish_" + side).transform;
+                hang.SetParent(pouch.transform, false);
+                hang.position = new Vector3(pb.min.x - 0.01f, pb.center.y + (side == "L" ? 0.03f : -0.03f), pb.center.z);
+                hang.rotation = Quaternion.Euler(0f, 0f, 90f);
+                var disc = SliceModelBuilder.Prim(PrimitiveType.Cylinder, "BagDishDisc", hang, Vector3.zero, Vector3.one, Mat("bagDish", new Color(0.35f, 0.38f, 0.42f)));
+                disc.transform.localScale = Vector3.Scale(new Vector3(0.09f, 0.004f, 0.09f), new Vector3(1f / Mathf.Max(hang.lossyScale.x, 1e-4f), 1f / Mathf.Max(hang.lossyScale.y, 1e-4f), 1f / Mathf.Max(hang.lossyScale.z, 1e-4f)));
+                Object.DestroyImmediate(disc.GetComponent<Collider>());
+                hang.gameObject.SetActive(false);
+                trayT.GetComponent<BoltTray>().SetupBagDish(hang.gameObject);
             }
             sb.AppendLine($"天車：軌道 X {d.craneRunwayEastX}／{d.craneRunwayWestX}、Z ±{d.craneRunwayHalfLength}，停在 Z {d.craneParkZ}，吊鉤 Y {hook.position.y:0.00}；遙控器在掛座 {aDock.position:F2}；吊帶 4 條在 ({d.slingRackXZ.x}, {d.slingRackXZ.y})；工具袋在工作檯上");
         }
