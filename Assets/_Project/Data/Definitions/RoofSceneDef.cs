@@ -54,6 +54,9 @@ namespace PantographSim.Data
         [Tooltip("備品架中心；三條沿 Z 擺（置物架靠車側欄杆）")] public Vector3 spareShelf = new Vector3(-2.03f, 0.90f, 3.15f);
         [Tooltip("置物架（平台靠車頂側）：中心 X、Z 範圍、檯面高")] public float platformShelfX = -2.03f, platformShelfZMin = 1.25f, platformShelfZMax = 2.65f, platformShelfTop = 0.85f;
         [Tooltip("螺栓盤在置物架上的 Z（L、R）")] public Vector2 boltTrayShelfZ = new Vector2(1.50f, 1.90f);
+        [Tooltip("terry 2026-11-14（42B～44B）：日常課程的車頂螺栓盤＝有邊小零件盤，放在車頂暫放墊上、短繫繩扣住。直徑、邊高（m）")] public float boltDishDiameter = 0.15f, boltDishRimHeight = 0.025f;
+        [Tooltip("車頂螺栓盤中心相對暫放墊中心的偏移（X：R 在 +X、L 在 −X；Z）")] public Vector2 boltDishOffset = new Vector2(0.45f, 0.07f);
+        [Tooltip("繫繩長度（m，從盤邊往暫放墊中心）")] public float boltDishTetherLength = 0.15f;
         [Tooltip("螺栓盤：相對共用車頂站點的 X 偏移（R 在 +X、L 在 −X）與高度")] public float boltTrayOffset = 0.40f, boltTrayHeight = 0.90f;
         [Tooltip("車頂安全帶掛點")] public Vector3 roofAnchor = new Vector3(-0.60f, 0.10f, -1.60f);
 

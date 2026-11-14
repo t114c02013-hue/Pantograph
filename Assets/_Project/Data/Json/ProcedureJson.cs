@@ -49,6 +49,8 @@ namespace PantographSim.Data
         public string text, why, target, tool, done;
         /// <summary>這個小動作的站點 ID（R1）；tp.roof.{side} 依側別展開成 tp.roof.inner／tp.roof.outer。</summary>
         public string stand;
+        /// <summary>terry 2026-11-14：選做小動作（不擋後面、不算完成度與分數）。</summary>
+        public bool optional;
     }
 
     [Serializable] public class StepJson
@@ -191,7 +193,7 @@ namespace PantographSim.Data
             st.refSecondsExam = s.refSeconds != null && s.refSeconds.Length > 1 ? s.refSeconds[1] : 0f;
             st.hints = new HintSet { text = s.hints?.text, why = s.hints?.why, checklist = s.hints?.checklist ?? Array.Empty<string>(), highlightIds = s.hints?.highlightIds ?? Array.Empty<string>(), showBoltNumbers = s.hints?.showBoltNumbers ?? false, showOutwardArrow = s.hints?.showOutwardArrow ?? false };
             st.subActions = (s.subActions ?? Array.Empty<SubActionJson>())
-                .Select(a => new SubAction { text = a.text, textDesktop = a.textDesktop ?? "", hint = a.hint ?? "", why = a.why ?? "", targetId = a.target ?? "", toolId = a.tool ?? "", condition = a.done ?? "", standPointId = a.stand ?? "" }).ToArray();
+                .Select(a => new SubAction { text = a.text, textDesktop = a.textDesktop ?? "", hint = a.hint ?? "", why = a.why ?? "", targetId = a.target ?? "", toolId = a.tool ?? "", condition = a.done ?? "", standPointId = a.stand ?? "", optional = a.optional }).ToArray();
             st.completion = BuildRule(s.completion);
             st.errors = s.errors.Select(BuildError).ToArray();
             return st;

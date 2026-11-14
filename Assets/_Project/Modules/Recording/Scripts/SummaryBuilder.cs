@@ -204,6 +204,9 @@ namespace PantographSim.Recording
                         list.Add(Row(cat, l, JudgementName(l.S("key")), l.S("key"), l.S("value"), "", l.S("key") == "workorder.decision" ? "保養表值" : "示例值",
                             l.S("key") == "workorder.decision" ? $"任一點 ≤ {PantographSim.Data.ToolRulesDef.Load().stripLimitMm:0.0} mm 兩條都換" : l.S("key") == "workorder.height_diff" ? "≤ 1.0 mm" : "", ""));
                         break;
+                    case "OptionalSubAction":   // 38A：只列出、不算分
+                        list.Add(Row(cat, l, "選做：" + l.S("text"), "optional", l.S("result") == "done" ? "做了" : "略過", "", "選做", "不算分", ""));
+                        break;
                     case "LiftReleased":
                         list.Add(Row(cat, l, "放開升降鈕時檢測點距離", SimIds.PanHeadLowerDistance, SimIds.CmText((float)l.N("distanceCm")), "cm", "示例值", $"≤ {l.N("toleranceCm", 1):0.#} cm", ""));
                         break;

@@ -184,7 +184,8 @@ namespace PantographSim.Tests
                 }
             // 兩側展開後的小動作總數（CSR_06–14 各兩次）；改了步驟資料要同步更新這個數字
             var runner = new ProcedureRunner(bundle.procedure, new EventBus(), new SimState(new EventBus()));
-            Assert.AreEqual(144, runner.Steps.Sum(st => ProcedureRunner.SubActions(st).Length), "展開後的小動作總數");
+            Assert.AreEqual(144, runner.Steps.Sum(st => ProcedureRunner.SubActions(st).Count(a => !a.optional)), "展開後的必做小動作總數");
+            Assert.AreEqual(2, runner.Steps.Sum(st => ProcedureRunner.SubActions(st).Count(a => a.optional)), "terry 2026-11-14：第 16 步「拿回螺栓袋」選做，兩側各 1");
             var slots = bundle.tools.ToDictionary(t => t.toolId, t => t.hotkey);
             Assert.AreEqual(1, slots["tool.lockout_tag"]); Assert.AreEqual(2, slots["tool.voltage_detector"]); Assert.AreEqual(3, slots["tool.grounding_rod"]);
             Assert.AreEqual(4, slots["tool.safety_harness"]); Assert.AreEqual(5, slots["tool.caliper"]); Assert.AreEqual(6, slots["tool.socket_wrench"]);

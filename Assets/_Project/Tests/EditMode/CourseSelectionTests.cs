@@ -77,6 +77,51 @@ namespace PantographSim.Tests
             finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
         }
 
+        /// <summary>terry 2026-11-14（35A、37A）：選做小動作不擋後面——做了記 done；直接做下一個必做的記 skipped；兩種步驟都照樣完成。</summary>
+        [TestCase(true, "done")]
+        [TestCase(false, "skipped")]
+        public void OptionalSubAction_DoneOrSkipped_NeverBlocks(bool doOptional, string expected)
+        {
+            var bus = new EventBus(); var s = new SimState(bus);
+            var st = ScriptableObject.CreateInstance<StepDefinition>();
+            st.stepId = "STP_OPT"; st.completion = new ChecklistAll(); st.hints = new HintSet();
+            st.subActions = new[]
+            {
+                new SubAction { text = "必做 a", condition = "opt.a" },
+                new SubAction { text = "選做 o", condition = "opt.o", optional = true },
+                new SubAction { text = "必做 b", condition = "opt.b" },
+            };
+            var prc = ScriptableObject.CreateInstance<ProcedureDefinition>();
+            prc.procedureId = "PRC_Opt"; prc.steps = new List<StepDefinition> { st };
+            var runner = new ProcedureRunner(prc, bus, s);
+            try
+            {
+                runner.Start();
+                s.SetBool("opt.a", true);
+                Assert.AreEqual(1f, s.GetFloat("procedure.sub_index"), "輪到選做");
+                if (doOptional) { s.SetBool("opt.o", true); Assert.AreEqual(2f, s.GetFloat("procedure.sub_index")); }
+                s.SetBool("opt.b", true);
+                Assert.IsTrue(runner.Finished, "選做不擋完成");
+                Assert.AreEqual(expected, s.Get(ProcedureRunner.OptionalKey("STP_OPT", 1)));
+            }
+            finally { runner.Dispose(); Object.DestroyImmediate(prc); Object.DestroyImmediate(st); }
+        }
+
+        /// <summary>選做欄：Y／選做＝選做；小動作表的四列選做只在日常課程，R1 的「拿回」在第 16 步拿新滑板之前。</summary>
+        [Test]
+        public void OptionalColumn_ParsedAndPlaced()
+        {
+            Assert.IsTrue(StepsCsvImporter.IsOptional("Y")); Assert.IsTrue(StepsCsvImporter.IsOptional("選做")); Assert.IsFalse(StepsCsvImporter.IsOptional(""));
+            var daily = AssetDatabase.LoadAssetAtPath<ProcedureDefinition>(StepsCsvImporter.ProcedurePath("daily"));
+            var periodic = AssetDatabase.LoadAssetAtPath<ProcedureDefinition>(StepsCsvImporter.ProcedurePath("periodic"));
+            var d07 = daily.steps.First(x => x.stepId == "STP_CSR_07_RemoveBolts_L").subActions;
+            Assert.IsTrue(d07[d07.Length - 2].optional, "日常：拆完 4 支、收扳手前倒進盤子");
+            Assert.IsFalse(d07[d07.Length - 1].optional);
+            Assert.IsTrue(daily.steps.First(x => x.stepId == "STP_CSR_11_Install_R").subActions[0].optional, "日常：裝新滑板前拿回");
+            Assert.IsFalse(periodic.steps.SelectMany(x => x.subActions).Any(a => a.optional), "定期沒有");
+            Assert.IsFalse(daily.steps.SelectMany(x => x.hints.checklist).Any(c => c.Contains("螺栓盤清點") || c.Contains("拿回腰間")), "選做不算完成");
+        }
+
         static SafetyRuleDefinition[] SafetyAssets() => StepJsonImporter.LoadAll<SafetyRuleDefinition>(StepJsonImporter.SafetyFolder).ToArray();
 
         [Test]

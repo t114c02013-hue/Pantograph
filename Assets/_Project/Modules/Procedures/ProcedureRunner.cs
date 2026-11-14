@@ -41,7 +41,33 @@ namespace PantographSim.Procedures
         void ArmSub(RuntimeStep s, int i)
         {
             var subs = SubActions(s);
-            if (i < subs.Length) fresh.Arm(state, SimIds.SpareCondition(state, subs[i].condition));
+            if (i >= subs.Length) return;
+            // 選做：連同後面第一個必做的一起啟用（學員直接做必做的＝選做略過）
+            int j = NextRequired(subs, i);
+            string cond = subs[i].optional && j < subs.Length ? "(" + subs[i].condition + ")&&(" + subs[j].condition + ")" : subs[i].condition;
+            fresh.Arm(state, SimIds.SpareCondition(state, cond));
+        }
+
+        /// <summary>i 之後（含 i）第一個必做小動作的位置（沒有＝subs.Length）。</summary>
+        static int NextRequired(SubAction[] subs, int i)
+        {
+            while (i < subs.Length && subs[i].optional) i++;
+            return i;
+        }
+
+        /// <summary>terry 2026-11-14（35A、37A）：選做小動作的結果（done／skipped），給介面、紀錄、報表用。</summary>
+        public static string OptionalKey(string runId, int index) => $"procedure.optional.{runId}.{index}";
+
+        /// <summary>目前這個小動作能不能往下推：做完了；或它是選做、而後面第一個必做的已經做完（或沒有必做的了）＝略過。</summary>
+        bool CanPass(RuntimeStep s, SubAction[] subs, int idx, out bool skippedOptional)
+        {
+            skippedOptional = false;
+            if (SubDone(s, subs[idx])) return true;
+            if (!subs[idx].optional) return false;
+            int j = NextRequired(subs, idx);
+            if (j < subs.Length && !SubDone(s, subs[j])) return false;
+            skippedOptional = true;
+            return true;
         }
 
         /// <summary>小動作完成：條件成立；requireFreshWrite 時還要啟用後有條件鍵被寫過（或列在 autoCompleteAllowed）。</summary>
@@ -291,7 +317,7 @@ namespace PantographSim.Procedures
                 valueTags = string.Join(";", s.def.valueTags ?? Array.Empty<string>()),
                 highlightIds = string.Join(",", (s.def.hints?.highlightIds ?? Array.Empty<string>()).Select(id => StateKeys.Expand(id, s.side))),
                 why = s.def.hints?.why ?? "",
-                subActions = string.Join("\n", SubActions(s).Select(a => $"{a.text}\u001f{a.targetId}\u001f{a.toolId}\u001f{a.condition}\u001f{a.why}\u001f{a.standPointId}")),
+                subActions = string.Join("\n", SubActions(s).Select(a => $"{a.text}\u001f{a.targetId}\u001f{a.toolId}\u001f{a.condition}\u001f{a.why}\u001f{a.standPointId}\u001f{(a.optional ? "1" : "")}")),
                 checklist = string.Join("\n", (s.def.hints?.checklist ?? Array.Empty<string>()).Select(c => StateKeys.Expand(c, s.side)))
             });
             Evaluate();
@@ -305,7 +331,7 @@ namespace PantographSim.Procedures
             (s.def.subActions ?? Array.Empty<SubAction>()).Select(a => new SubAction
             {
                 text = StateKeys.Expand(TextFor(a), s.side).Replace(SimIds.ToolCountToken, SimIds.ToolCountLabel), why = StateKeys.Expand(InputMode.XrActive && !string.IsNullOrEmpty(a.hint) ? a.hint : a.why, s.side), targetId = StateKeys.Expand(a.targetId, s.side), textDesktop = StateKeys.Expand(a.textDesktop ?? "", s.side),
-                toolId = a.toolId, condition = StateKeys.Expand(a.condition, s.side), standPointId = SubAction.ExpandStand(a.standPointId, s.side), subId = a.subId ?? "", when = a.when ?? ""
+                toolId = a.toolId, condition = StateKeys.Expand(a.condition, s.side), standPointId = SubAction.ExpandStand(a.standPointId, s.side), subId = a.subId ?? "", when = a.when ?? "", optional = a.optional
             }).ToArray();
 
         /// <summary>
@@ -318,8 +344,10 @@ namespace PantographSim.Procedures
             int idx = (int)state.GetFloat("procedure.sub_index");
             int start = idx;
             holdReason = null;
-            while (idx < subs.Length && SubDone(s, subs[idx]))
+            while (idx < subs.Length && CanPass(s, subs, idx, out bool skippedOpt))
             {
+                if (subs[idx].optional) state.Set(OptionalKey(s.RunId, idx), skippedOpt ? "skipped" : "done");
+                state.SetBool("procedure.sub_last_skipped", skippedOpt);   // 介面：剛過去的是略過的選做（顯示「略過」，不打勾）
                 idx++;
                 ArmSub(s, idx);
                 if (subSnaps.Count <= idx) subSnaps.Add(state.Snapshot());   // 第 idx 個小動作從現在開始
@@ -434,7 +462,7 @@ namespace PantographSim.Procedures
             var subs = SubActions(s);
             int idx = (int)state.GetFloat("procedure.sub_index");
             int would = idx;
-            while (would < subs.Length && SubDone(s, subs[would])) { would++; if (FreshMode) break; }   // 只有目前這個有啟用時的 version
+            while (would < subs.Length && CanPass(s, subs, would, out _)) { would++; if (FreshMode) break; }   // 只有目前這個有啟用時的 version
             var ctx = ContextFor(s);
             bool rule = RuleEvaluators.Evaluate(s.def.completion, ctx);
             string gateReason = "";

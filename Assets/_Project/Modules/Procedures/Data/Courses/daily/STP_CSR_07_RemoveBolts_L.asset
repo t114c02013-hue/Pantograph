@@ -73,6 +73,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u628A 1 \u865F\u87BA\u6813\u6536\u9032\u8170\u9593\u87BA\u6813\u888B"
     why: 
     targetId: env.bolt_tray_L
@@ -83,6 +84,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u6536\u9032\u8170\u9593\u5DE5\u5177\u888B\u7684\u87BA\u6813\u888B\uFF0C\u5169\u5074\u5206\u958B\u8A08\u3002\u87BA\u6813\u5206\u958B\u653E\uFF0C\u88DD\u56DE\u6642\u624D\u4E0D\u6703\u5C11\u6216\u6DF7\u7528\u3002"
     when: 
+    optional: 0
   - text: "\u628A 2 \u865F\u87BA\u6813\u8F49\u5230\u812B\u51FA"
     why: 
     targetId: ip.carbon_strip_L.bolt_2
@@ -93,6 +95,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u628A 2 \u865F\u87BA\u6813\u6536\u9032\u8170\u9593\u87BA\u6813\u888B"
     why: 
     targetId: env.bolt_tray_L
@@ -103,6 +106,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u6536\u9032\u8170\u9593\u5DE5\u5177\u888B\u7684\u87BA\u6813\u888B\uFF0C\u5169\u5074\u5206\u958B\u8A08\u3002\u87BA\u6813\u5206\u958B\u653E\uFF0C\u88DD\u56DE\u6642\u624D\u4E0D\u6703\u5C11\u6216\u6DF7\u7528\u3002"
     when: 
+    optional: 0
   - text: "\u628A 3 \u865F\u87BA\u6813\u8F49\u5230\u812B\u51FA"
     why: 
     targetId: ip.carbon_strip_L.bolt_3
@@ -113,6 +117,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u628A 3 \u865F\u87BA\u6813\u6536\u9032\u8170\u9593\u87BA\u6813\u888B"
     why: 
     targetId: env.bolt_tray_L
@@ -123,6 +128,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u6536\u9032\u8170\u9593\u5DE5\u5177\u888B\u7684\u87BA\u6813\u888B\uFF0C\u5169\u5074\u5206\u958B\u8A08\u3002\u87BA\u6813\u5206\u958B\u653E\uFF0C\u88DD\u56DE\u6642\u624D\u4E0D\u6703\u5C11\u6216\u6DF7\u7528\u3002"
     when: 
+    optional: 0
   - text: "\u628A 4 \u865F\u87BA\u6813\u8F49\u5230\u812B\u51FA"
     why: 
     targetId: ip.carbon_strip_L.bolt_4
@@ -133,6 +139,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u628A 4 \u865F\u87BA\u6813\u6536\u9032\u8170\u9593\u87BA\u6813\u888B"
     why: 
     targetId: env.bolt_tray_L
@@ -143,6 +150,19 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u6536\u9032\u8170\u9593\u5DE5\u5177\u888B\u7684\u87BA\u6813\u888B\uFF0C\u5169\u5074\u5206\u958B\u8A08\u3002\u87BA\u6813\u5206\u958B\u653E\uFF0C\u88DD\u56DE\u6642\u624D\u4E0D\u6703\u5C11\u6216\u6DF7\u7528\u3002"
     when: 
+    optional: 0
+  - text: "\u628A\u87BA\u6813\u5012\u9032\u87BA\u6813\u76E4\u6E05\u9EDE"
+    why: 
+    targetId: env.bolt_tray_L
+    toolId: 
+    condition: env.bolt_tray_L.poured
+    standPointId: tp.roof.inner
+    subId: p
+    textDesktop: 
+    hint: "\u5C04\u7DDA\u6307\u8457\u66AB\u653E\u588A\u4E0A\u7684\u87BA\u6813\u76E4\u6309\u6273\u6A5F\uFF0C4
+      \u652F\u4E00\u8D77\u5012\u9032\u76E4\u5B50\u6E05\u9EDE\uFF1B\u4E0D\u505A\u4E5F\u53EF\u4EE5\u7E7C\u7E8C\u3002"
+    when: 
+    optional: 1
   - text: "\u628A\u5957\u7B52\u6273\u624B\u6536\u56DE\u5DE5\u5177\u888B"
     why: 
     targetId: env.tool_rack.slot_6
@@ -153,6 +173,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u53F3\u624B\u628A\u5957\u7B52\u6273\u624B\u79FB\u56DE\u5DE6\u8170\u7684\u5DE5\u5177\u888B\uFF0C\u653E\u958B\u63E1\u628A\u5C31\u6536\u56DE\u3002"
     when: 
+    optional: 0
   presetDone: 0
   side: L
   presetStates: []

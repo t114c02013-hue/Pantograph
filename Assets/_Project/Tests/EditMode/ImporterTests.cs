@@ -212,8 +212,8 @@ namespace PantographSim.Tests
                     var src = r1[id];
                     var mine = resolved.Where(r => r.e.course == "daily" && r.e.stepId == id + "_" + side).OrderBy(r => r.e.order).ToList();
                     int rOnly = side == "R" && id == "STP_CSR_06_Loosen" ? 1 : 0;   // 步驟計畫 v3.0：CSR_06 b 只在 L 側
-                    Assert.AreEqual(src.subActions.Length - rOnly, mine.Count, $"{id}_{side}：小動作數和 R1 相同（R 側少了只在 L 做的列）");
-                    foreach (var m in mine)
+                    Assert.AreEqual(src.subActions.Count(a => !a.optional) - rOnly, mine.Count(r => !r.e.optional), $"{id}_{side}：小動作數和 R1 相同（R 側少了只在 L 做的列）");
+                    foreach (var m in mine.Where(r => !r.e.optional))   // terry 2026-11-14：日常的選做列（拿回螺栓袋）是新增的，不沿用 R1
                     {
                         Assert.AreEqual(1, m.layer, $"{id}_{side} {m.e.subId} 沿用 R1");
                         Assert.AreEqual(src.subActions[m.e.fullOrder - 1].done.Replace("{side}", side), m.rule, $"{id}_{side} {m.e.subId}：條件和 R1 同一個位置的相同（不因 R 側少一列而錯位）");

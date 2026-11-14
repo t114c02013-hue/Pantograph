@@ -108,12 +108,12 @@ namespace PantographSim.UI
                 for (int i = 0; i < count; i++) d.Append(i < idx ? "● " : i == idx ? Ui.Tint("◉ ", Color.white) : "○ ");
                 dots.text = d.ToString() + $"<size=18>{Mathf.Min(idx + 1, count)}/{count}</size>";
 
-                if (lastSub >= 0 && idx > lastSub) { checkUntil = Time.unscaledTime + 0.6f; checkedText = "✔ " + prevText; }
+                if (lastSub >= 0 && idx > lastSub) { checkUntil = Time.unscaledTime + 0.6f; checkedText = (s.GetBool("procedure.sub_last_skipped") ? "略過　" : "✔ ") + prevText; }   // 37A：略過的選做不打勾
                 lastSub = idx;
                 bool flash = Time.unscaledTime < checkUntil;
                 Ui.SetActive(check, flash);
                 check.text = checkedText;
-                subText.text = s.Get("hint.sub_text");
+                subText.text = s.GetBool("hint.sub_optional") ? Ui.Tint("（選做）" + s.Get("hint.sub_text"), new Color(0.62f, 0.65f, 0.7f)) : s.Get("hint.sub_text");   // 36A：選做前加「（選做）」、灰字
                 prevText = subText.text;
                 var why = s.Get("hint.sub_why");
                 subWhy.text = why; Ui.SetActive(subWhy, why.Length > 0);

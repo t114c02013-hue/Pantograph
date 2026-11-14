@@ -109,6 +109,7 @@ namespace PantographSim.Data
         [Tooltip("R1.5b K4：桌面版指令（空白＝和 text 相同；text 是 VR 版）")] public string textDesktop = "";
         [Tooltip("VR 的提示列：位置、按鍵、為什麼要做（SubActions.csv hint 欄；空白就顯示 why）")] public string hint = "";
         [Tooltip("R1.5b b4（D43）：分支小動作——輪到它時這個條件不成立就跳過（例 fault.insulator_dirty）；空白＝一定要做")] public string when = "";
+        [Tooltip("terry 2026-11-14（35A～39A）：選做——不擋後面，學員做了下一個必做的就算「略過」；不算完成度、不算分數、不記錯（SubActions.csv optional 欄填 Y）")] public bool optional;
 
         /// <summary>tp.roof.L → tp.roof.inner、tp.roof.R → tp.roof.outer（肘側／外側）。</summary>
         public static string ExpandStand(string stand, string side)

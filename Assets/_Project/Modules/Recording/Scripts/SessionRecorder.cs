@@ -353,6 +353,13 @@ namespace PantographSim.Recording
                 lastSub = idx;
                 return;
             }
+            // terry 2026-11-14（38A）：選做小動作做了／略過（ProcedureRunner 寫 procedure.optional.<步驟>.<第幾個>）
+            if (key.StartsWith("procedure.optional."))
+            {
+                int.TryParse(key.Substring(key.LastIndexOf('.') + 1), out int k);
+                Write("OptionalSubAction", currentStep, new Dictionary<string, object> { { "index", k + 1 }, { "text", k < currentSubs.Length ? currentSubs[k] : "" }, { "result", text ?? "" } });
+                return;
+            }
             // 工具架掛位（rack.slot_k）：拿起／歸還／使用中，附工具與掛位位置
             if (key.StartsWith("rack.slot_"))
             {

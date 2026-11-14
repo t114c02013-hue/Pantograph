@@ -443,6 +443,7 @@
         { "text": "從工具袋拿出游標卡尺", "textDesktop": "到工具袋拿起游標卡尺", "hint": "任一手伸到左腰的工具袋，按握把拿出游標卡尺，會拿在右手。", "target": "env.tool_rack.slot_5", "done": "tool.active=tool.caliper", "why": "工具袋", "tool": "tool.caliper", "stand": "tp.roof.inner" },
         { "text": "量選定新滑板的中點", "textDesktop": "量選定新滑板的中點", "hint": "用射線指著新滑板中點的藍色量測點按扳機，讀數會自動帶入。新品厚度不對就不能裝。", "target": "env.spare_shelf.slot_2", "done": "env.spare_shelf.slot_2.measured", "why": "要 18.0 ± 0.2 mm", "tool": "tool.caliper", "stand": "tp.platform.parts" },
         { "text": "把游標卡尺收回工具袋", "textDesktop": "把卡尺放回工具袋", "hint": "右手把游標卡尺移到左腰工具袋的格子，按一下握把就收回。", "target": "env.tool_rack.slot_5", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.inner" },
+        { "text": "把螺栓拿回腰間螺栓袋", "target": "env.bolt_tray_{side}", "done": "env.bolt_tray_{side}.taken_back", "stand": "tp.platform.parts", "optional": true, "hint": "點一下螺栓盤，倒在盤子裡的螺栓拿回腰間螺栓袋；不做也可以繼續。" },
         { "text": "拿起型號正確、無裂紋的那條", "textDesktop": "拿起選定的新滑板", "hint": "就是你剛才看過標籤、翻面檢查過的那一條，按握把拿起。", "target": "env.spare_shelf.slot_2", "done": "spare.{side}.picked", "why": "在檢視視窗按「選用此備品」", "tool": "", "stand": "tp.platform.parts" }
       ],
       "title": "檢查新滑板",

@@ -102,9 +102,10 @@ namespace PantographSim.Editor
             {
                 var res = new Resolved { e = e };
                 var r1s = R1Step(r1, e.stepId);
-                if (e.course == "daily" && r1s != null && e.fullOrder <= r1s.subActions.Length && !excluded.Contains(e.stepId + "|" + e.subId))
+                var r1subs = r1s?.subActions.Where(a => !a.optional).ToArray();   // R1 的選做小動作不佔位置
+                if (e.course == "daily" && r1s != null && e.fullOrder <= r1subs.Length && !excluded.Contains(e.stepId + "|" + e.subId))
                 {
-                    var src = r1s.subActions[e.fullOrder - 1];
+                    var src = r1subs[e.fullOrder - 1];
                     res.layer = 1; res.rule = (src.done ?? "").Replace("{side}", e.side ?? "");
                     string r1t = Regex.Replace((src.target ?? "").Replace("{side}", e.side ?? ""), @"\.slot_(\*|\d+)$", ""), v6t = Targets(e.targetId).FirstOrDefault() ?? "";
                     bool same = r1t.Length == 0 || r1t == v6t || v6t.StartsWith(r1t + ".") || r1t.StartsWith(v6t + ".");
@@ -166,9 +167,9 @@ namespace PantographSim.Editor
                 st.presetDone = false; st.presetStates = Array.Empty<string>();
                 st.refSecondsTutorial = course == "periodic" ? m.teachP : m.teachD;
                 st.refSecondsExam = course == "periodic" ? m.examP : m.examD;
-                st.subActions = subs.Select(x => new SubAction { text = x.e.text, why = "", hint = x.e.hint, targetId = x.e.targetId, toolId = x.e.toolId, condition = x.rule, standPointId = x.e.standPointId, subId = x.e.subId, textDesktop = x.e.textDesktop == x.e.text ? "" : x.e.textDesktop, when = x.e.when }).ToArray();
+                st.subActions = subs.Select(x => new SubAction { text = x.e.text, why = "", hint = x.e.hint, targetId = x.e.targetId, toolId = x.e.toolId, condition = x.rule, standPointId = x.e.standPointId, subId = x.e.subId, textDesktop = x.e.textDesktop == x.e.text ? "" : x.e.textDesktop, when = x.e.when, optional = x.e.optional }).ToArray();
                 st.hints = st.hints ?? new HintSet();
-                st.hints.checklist = subs.Select(x => x.e.text + "|" + x.rule).ToArray();   // 清單跟 v6 小動作（R1 的清單少了新增的列，文字也還是車頂工具箱）
+                st.hints.checklist = subs.Where(x => !x.e.optional).Select(x => x.e.text + "|" + x.rule).ToArray();   // 選做不算完成   // 清單跟 v6 小動作（R1 的清單少了新增的列，文字也還是車頂工具箱）
                 var ov = LoadTables().completionOverrides.FirstOrDefault(o => m.stepId.StartsWith(o.step) && InCourse(o.courses, course));
                 if (ov != null) st.completion = ProcedureJsonConverter.BuildRule(ov.completion);
                 if (r1s == null)

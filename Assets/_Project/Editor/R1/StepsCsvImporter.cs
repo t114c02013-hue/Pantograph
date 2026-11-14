@@ -93,6 +93,7 @@ namespace PantographSim.Editor
         {
             public Row row;
             public string course, stepId, side, subId, text, textDesktop, hint, targetId, toolId, condition, standPointId, errorIds, when = "";
+            public bool optional;   // terry 2026-11-14：optional 欄＝Y
             public int n, order;
             /// <summary>把只在某一側展開的列（side=L）也算進去的順序：第 1 層用它對 R1 的位置（R 側少了 CSR_06 b 也不會錯位）。</summary>
             public int fullOrder;
@@ -150,6 +151,9 @@ namespace PantographSim.Editor
         /// <summary>CSV 的 when 用「&」連接（v3.10），條件判斷用「&&」。</summary>
         public static string NormalizeWhen(string w) => string.Join("&&", (w ?? "").Split('&').Select(x => x.Trim()).Where(x => x.Length > 0));
 
+        /// <summary>SubActions.csv 的 optional 欄：Y（或「選做」）＝選做小動作。</summary>
+        public static bool IsOptional(string v) => (v ?? "").Trim() is "Y" or "y" or "選做";
+
         public static bool InCourse(string courses, string course) => courses == "both" || courses == course;
 
         /// <summary>
@@ -172,7 +176,7 @@ namespace PantographSim.Editor
                     foreach (var side in sides)
                     {
                         string stepId = g.Key.Replace("{side}", side);
-                        int order = 0, skipped = 0;
+                        int order = 0, skipped = 0, optionals = 0;   // 選做列不佔「沿用 R1 第幾個」的位置
                         var consumed = new HashSet<Row>();
                         foreach (var r in rs)
                         {
@@ -195,9 +199,11 @@ namespace PantographSim.Editor
                                         string Idx(string x) => idx > 0 ? x.Replace("{" + indexKey + "}", idx.ToString()) : x;
                                         var stand = Sub(ResolveStand(standField, tmpl[src], side, n, idx, out var se), side, n);
                                         if (se != null) errors.Add($"{src}（{course}）：{se}");
+                                        bool optional = IsOptional(src["optional"]);
+                                        if (optional) optionals++;
                                         var e = new Expanded
                                         {
-                                            row = src, course = course, stepId = stepId, side = side, n = n, order = ++order, fullOrder = order + skipped,
+                                            row = src, course = course, stepId = stepId, side = side, n = n, order = ++order, fullOrder = optional ? int.MaxValue : order + skipped - optionals, optional = optional,
                                             subId = src["subId"] + (n > 0 ? n.ToString() : "") + (idx > 0 ? "i" + idx : ""),
                                             text = Idx(Sub(Pick("instruction"), side, n)), textDesktop = Idx(Sub(src["instructionDesktop"], side, n)), hint = Idx(Sub(src["hint"], side, n)),
                                             targetId = Idx(Sub(Pick("targetId"), side, n)), toolId = Sub(src["toolId"], side, n), condition = Idx(Sub(Pick("condition"), side, n)),

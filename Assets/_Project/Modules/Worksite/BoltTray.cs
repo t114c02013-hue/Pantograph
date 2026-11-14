@@ -24,6 +24,8 @@ namespace PantographSim.Worksite
         public static string CountKey(string side) => SimIds.BoltTray(side) + ".bolts";
         /// <summary>true＝這側的螺栓倒在平台螺栓盤上（顯示用，不參與判定）。</summary>
         public static string PouredKey(string side) => SimIds.BoltTray(side) + ".poured";
+        /// <summary>true＝倒過之後又拿回螺栓袋（選做小動作「拿回」的完成條件）。</summary>
+        public static string TakenBackKey(string side) => SimIds.BoltTray(side) + ".taken_back";
 
         /// <summary>這門課有沒有「倒進盤子／拿回袋子」（ToolRulesDef.boltPourCourses）。</summary>
         public static bool PourEnabled(ISimState s, ToolRulesDef r) =>
@@ -36,7 +38,7 @@ namespace PantographSim.Worksite
             float n = s.GetFloat(CountKey(side));
             bool poured = s.GetBool(PouredKey(side));
             if (!poured && n <= 0) return null;
-            s.SetBool(PouredKey(side), !poured);
+            s.Batch(() => { s.SetBool(PouredKey(side), !poured); s.SetBool(TakenBackKey(side), poured); });
             return string.Format(poured ? r.boltTakeBackText : r.boltPourText, n);
         }
 
@@ -70,7 +72,7 @@ namespace PantographSim.Worksite
             int n = (int)State.GetFloat(CountKey(side));
             bool poured = State.GetBool(PouredKey(side));
             for (int i = 0; i < boltIcons.Length; i++) if (boltIcons[i] != null) boltIcons[i].SetActive(!poured && i < n);
-            for (int i = 0; i < trayIcons.Length; i++) if (trayIcons[i] != null) trayIcons[i].SetActive(poured && i < n);
+            for (int i = 0; i < trayIcons.Length; i++) if (trayIcons[i] != null) trayIcons[i].SetActive(poured && i % 4 < n);   // 每組 4 支（方盤、車頂小零件盤各一組）
         }
     }
 }

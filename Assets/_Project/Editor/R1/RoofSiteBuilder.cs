@@ -742,12 +742,19 @@ namespace PantographSim.Editor
             foreach (var (side, sgn) in new[] { ("R", 1f), ("L", -1f) })
             {
                 var top = new Vector3(d.platformShelfX, d.platformShelfTop, side == "L" ? d.boltTrayShelfZ.x : d.boltTrayShelfZ.y);   // 置物架檯面上
-                // 0.25 × 0.18 m、4 格（B 段 2.2）
-                var bt = SliceModelBuilder.Prim(PrimitiveType.Cube, "BoltTray_" + side, env, Vector3.zero, new Vector3(0.25f, 0.024f, 0.18f), mats["tray"]);
+                // 0.25 × 0.18 m、4 格（B 段 2.2）。terry 2026-11-14：根物件只放碰撞體和元件，外觀分「方盤」（R1、定期）和「車頂小零件盤」（日常，Courses.json 切換）
+                var bt = new GameObject("BoltTray_" + side);
+                bt.transform.SetParent(env, false);
                 bt.transform.position = top + new Vector3(0, 0.012f, 0);
-                Anchor(courseAnchors, "Anchor_BoltTray_Roof_" + side, bt.transform.position, Vector3.zero);   // 日常更換：車頂
+                bt.AddComponent<BoxCollider>().size = new Vector3(0.25f, 0.024f, 0.18f);
+                var box = SliceModelBuilder.Prim(PrimitiveType.Cube, "BoltTray_Box_" + side, bt.transform, Vector3.zero, new Vector3(0.25f, 0.024f, 0.18f), mats["tray"]);
+                Object.DestroyImmediate(box.GetComponent<Collider>());
+                // 日常更換：車頂暫放墊上（42B、43A：每側一個，離車頂邊警示帶遠）
+                var matTop = d.roofStripMatCenter + Vector3.up * (d.roofFloorY + d.roofStripMatThickness);
+                Anchor(courseAnchors, "Anchor_BoltTray_Roof_" + side, matTop + new Vector3(sgn * d.boltDishOffset.x, 0.012f, d.boltDishOffset.y), Vector3.zero);
+                var dishIcons = BuildBoltDish(bt.transform, side, sgn, d, mats);
                 for (int k = 1; k < 4; k++)
-                    Object.DestroyImmediate(SliceModelBuilder.Prim(PrimitiveType.Cube, "Divider" + k, bt.transform, new Vector3(-0.5f + 0.25f * k, 0.75f, 0), new Vector3(0.02f, 0.5f, 0.95f), mats["steel"]).GetComponent<Collider>());
+                    Object.DestroyImmediate(SliceModelBuilder.Prim(PrimitiveType.Cube, "Divider" + k, box.transform, new Vector3(-0.5f + 0.25f * k, 0.75f, 0), new Vector3(0.02f, 0.5f, 0.95f), mats["steel"]).GetComponent<Collider>());
                 var icons = new GameObject[0];   // terry 2026-11-13：拆下的螺栓顯示在腰間螺栓袋（BuildCraneAndRigging 接上），平台螺栓盤只在收尾清點
                 var comp = bt.AddComponent<BoltTray>();
                 comp.Configure(SimIds.BoltTray(side), (side == "L" ? "靠關節" : "外側") + "螺栓盤");
@@ -755,9 +762,9 @@ namespace PantographSim.Editor
                 // terry 2026-11-13（20A）：倒進盤子時每格一支（R1、日常課程；袋口那組在 BuildCraneAndRigging）
                 comp.SetupTray(Enumerable.Range(0, 4).Select(i =>
                 {
-                    var g = SliceModelBuilder.Prim(PrimitiveType.Cylinder, $"TrayBolt_{side}{i}", bt.transform, new Vector3(-0.375f + 0.25f * i, 0.5f + 0.01f / 0.024f, 0), new Vector3(0.01f / 0.25f, 0.01f / 0.024f, 0.01f / 0.18f), mats["steel"]);
+                    var g = SliceModelBuilder.Prim(PrimitiveType.Cylinder, $"TrayBolt_{side}{i}", box.transform, new Vector3(-0.375f + 0.25f * i, 0.5f + 0.01f / 0.024f, 0), new Vector3(0.01f / 0.25f, 0.01f / 0.024f, 0.01f / 0.18f), mats["steel"]);
                     Object.DestroyImmediate(g.GetComponent<Collider>()); g.SetActive(false); return g;
-                }).ToArray());
+                }).Concat(dishIcons).ToArray());   // 方盤 4 支＋小零件盤 4 支（只有顯示中的那組看得到）
                 bt.AddComponent<Highlightable>();
                 Wrap(res, "ENV_BoltTray_" + side, bt.transform);
                 res.ids[SimIds.BoltTray(side)] = bt.transform;
@@ -782,6 +789,39 @@ namespace PantographSim.Editor
         /// 上方 trigger（墊子範圍、高 roofStripMatTriggerHeight）給 R1.5b 判定滑板在不在墊上。不挖 Walkable、不加 Boundary。存檔時 inactive（日常課程由課程覆寫打開）。
         /// shortcut: 課程覆寫（和 ENV_Catenary 同一列）還沒有，ENV_Catenary 也還沒建, R1.5b b4 做課程覆寫時把這個物件加進日常課程那一列
         /// </summary>
+        /// <summary>
+        /// terry 2026-11-14（44B）：日常課程的車頂螺栓盤外觀——有邊的小圓盤（底＋12 段邊）、短繫繩扣在暫放墊上，不加支撐柱。
+        /// 存檔 inactive（R1、定期用方盤），日常課程由 Courses.json 打開並關掉方盤。回傳盤裡 4 支螺栓的圖示。
+        /// </summary>
+        static GameObject[] BuildBoltDish(Transform root, string side, float sgn, RoofSceneDef d, Dictionary<string, Material> mats)
+        {
+            var dish = new GameObject("BoltTray_Dish_" + side).transform;
+            dish.SetParent(root, false);
+            float r = d.boltDishDiameter / 2f, y0 = -0.012f, h = d.boltDishRimHeight;
+            var parts = new List<GameObject>();
+            parts.Add(SliceModelBuilder.Prim(PrimitiveType.Cylinder, "DishBase", dish, new Vector3(0, y0 + 0.002f, 0), new Vector3(d.boltDishDiameter, 0.002f, d.boltDishDiameter), mats["tray"]));
+            const int segs = 12;
+            for (int k = 0; k < segs; k++)
+            {
+                float a = k * Mathf.PI * 2f / segs;
+                var seg = SliceModelBuilder.Prim(PrimitiveType.Cube, "DishRim" + k, dish, new Vector3(Mathf.Cos(a) * r, y0 + h / 2f, Mathf.Sin(a) * r), new Vector3(0.004f, h, 2f * Mathf.PI * r / segs * 1.05f), mats["tray"]);
+                seg.transform.localRotation = Quaternion.Euler(0f, -a * Mathf.Rad2Deg, 0f);
+                parts.Add(seg);
+            }
+            // 繫繩：從盤邊往暫放墊中心，末端扣環
+            var tether = SliceModelBuilder.Prim(PrimitiveType.Cube, "DishTether", dish, new Vector3(-sgn * (r + d.boltDishTetherLength / 2f), y0 + 0.003f, 0), new Vector3(d.boltDishTetherLength, 0.004f, 0.012f), Mat("dishTether", new Color(0.95f, 0.55f, 0.1f)));
+            var clip = SliceModelBuilder.Prim(PrimitiveType.Cube, "DishTetherClip", dish, new Vector3(-sgn * (r + d.boltDishTetherLength), y0 + 0.008f, 0), new Vector3(0.02f, 0.016f, 0.02f), mats["steel"]);
+            parts.Add(tether); parts.Add(clip);
+            foreach (var p in parts) Object.DestroyImmediate(p.GetComponent<Collider>());
+            var icons = Enumerable.Range(0, 4).Select(i =>
+            {
+                var g = SliceModelBuilder.Prim(PrimitiveType.Cylinder, $"DishBolt_{side}{i}", dish, new Vector3((i % 2 == 0 ? -1f : 1f) * r * 0.35f, y0 + 0.004f + 0.01f, (i < 2 ? -1f : 1f) * r * 0.35f), new Vector3(0.01f, 0.01f, 0.01f), mats["steel"]);
+                Object.DestroyImmediate(g.GetComponent<Collider>()); g.SetActive(false); return g;
+            }).ToArray();
+            dish.gameObject.SetActive(false);
+            return icons;
+        }
+
         static void BuildRoofStripMat(Result res, RoofSceneDef d, StringBuilder sb)
         {
             var p = Piece(res.env, "ENV_RoofStripMat");

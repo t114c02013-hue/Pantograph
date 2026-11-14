@@ -106,6 +106,7 @@ namespace PantographSim.Training
                     state.Set("hint.sub_tool", a.Length > 2 ? a[2] : "");
                     state.Set("hint.sub_why", a.Length > 4 ? a[4].Replace("{吸附}", state.GetFloat("strip.snap_cm").ToString("0.#")) : "");
                     state.Set("hint.sub_stand", a.Length > 5 ? a[5] : "");   // 這個小動作的站點（B 鍵傳到這裡）
+                    state.SetBool("hint.sub_optional", a.Length > 6 && a[6] == "1");   // terry 2026-11-14（36A）：選做
                     if (a.Length > 1 && a[1].Length > 0) highlight = a[1];
                 }
                 else
@@ -113,7 +114,7 @@ namespace PantographSim.Training
                     // 小動作都做完不等於步驟完成：完成了會直接換步，還留在這裡就是在等完成條件
                     string target = stalled ? state.Get("procedure.stall_target") : "";
                     state.Set("hint.sub_text", subs.Length == 0 ? "" : stalled ? "還差：" + state.Get("procedure.stall_text") : "確認這一步的結果…");
-                    state.Set("hint.sub_target", target); state.Set("hint.sub_why", "");
+                    state.Set("hint.sub_target", target); state.Set("hint.sub_why", ""); state.SetBool("hint.sub_optional", false);
                     state.Set("hint.sub_tool", stalled ? state.Get("procedure.stall_tool") : "");
                     state.Set("hint.sub_stand", stalled ? state.Get("procedure.stall_stand") : "");
                     if (subs.Length > 0) highlight = !stalled ? "" : target.Length > 0 ? target : stepHighlight;
