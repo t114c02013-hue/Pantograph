@@ -332,6 +332,7 @@ namespace PantographSim.XR
             {
                 Send(hoveredId, "grab");
                 grabPickedThisPress = S.Get("hand.item") == hoveredId;
+                if (grabPickedThisPress && rig != null) PointerState.HoldHand = leftHandActing && rig.LeftHand != null ? rig.LeftHand : rig.RightHand;   // 69B：哪隻手抓就跟哪隻手
                 return;
             }
             if (string.IsNullOrEmpty(active) && hoveredId.StartsWith("part.carbon_strip_")) Click();
@@ -359,6 +360,7 @@ namespace PantographSim.XR
             if (heldDish.StartsWith(BoltDishPrefix))   // 61A、62A：靠近工具袋放開＝收進去；別處＝回暫放墊
             {
                 Send(heldDish, Near("env.tool_bag", Data.ToolRulesDef.Load().boltDishBagRadius) ? "release:bag" : "release:other");
+                PointerState.HoldHand = null;
                 return;
             }
             if (!string.IsNullOrEmpty(S.Get("hand.item")) && (hoveredId == SimIds.PartsTray || Near(SimIds.PartsTray, trayRadius)))

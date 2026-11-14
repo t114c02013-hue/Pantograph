@@ -253,6 +253,11 @@ namespace PantographSim.Tests
             s.SetFloat(PantographSim.Worksite.BoltTray.CountKey("L"), 4);
             s.SetBool(PantographSim.Worksite.BoltTray.StowedKey("L"), true);
             Assert.IsNull(PantographSim.Worksite.BoltTray.Pour(s, "L", r), "55A：收進工具袋之後不能再倒");
+            var h = new SimState(new EventBus());
+            Assert.IsFalse(PantographSim.Worksite.BoltTray.HandsFull(h));
+            h.Set("hand.item", "part.carbon_strip_L");
+            Assert.IsTrue(PantographSim.Worksite.BoltTray.HandsFull(h), "76A：拿著滑板不能點螺栓盤");
+            StringAssert.Contains("先把滑板放下", r.boltHandsFullText);
         }
 
         /// <summary>terry 2026-11-13 選 A：驗電器改成直流 750 V 用（機身標示讀資料，判定不變）。</summary>

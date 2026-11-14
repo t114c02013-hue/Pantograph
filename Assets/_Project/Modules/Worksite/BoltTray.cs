@@ -100,10 +100,14 @@ namespace PantographSim.Worksite
                 case "stow": ToastIf(Stow(State, side, r)); return;
             }
             if (State.GetBool(StowedKey(side))) return;   // 55A：收走之後點了沒反應
+            if (HandsFull(State)) { Toast(r.boltHandsFullText); return; }   // 76A：拿著滑板不能倒、拿螺栓
             var msg = Pour(State, side, r);
             if (msg == null && DishCourse(State, r) && !InputMode.XrActive && State.GetFloat(CountKey(side)) <= 0) msg = Stow(State, side, r);   // 66A：桌機點空盤子＝收進工具袋
             Toast(msg ?? $"{(side == "L" ? "靠關節" : "外側")}螺栓：{(State.GetBool(PouredKey(side)) ? "螺栓盤上" : "腰間螺栓袋裡")} {State.GetFloat(CountKey(side)):0} 支");
         }
+
+        /// <summary>76A：手上拿著滑板（舊滑板或新滑板）。</summary>
+        public static bool HandsFull(ISimState s) => s.Get("hand.item").StartsWith("part.carbon_strip_");
 
         static void ToastIf(string msg) { if (!string.IsNullOrEmpty(msg)) Toast(msg); }
 
@@ -139,8 +143,11 @@ namespace PantographSim.Worksite
         /// <summary>拿在手上：盤身跟著射線（XR＝右手控制器；桌機＝滑鼠）前方一小段。</summary>
         void LateUpdate()
         {
-            if (!bound || dishBody == null || State.Get("hand.item") != Id || !PointerState.HasRay) return;
-            var target = PointerState.Ray.origin + PointerState.Ray.direction * ToolRulesDef.Load().boltDishHoldDistance;
+            if (!bound || dishBody == null || State.Get("hand.item") != Id) return;
+            var r = ToolRulesDef.Load();
+            var hand = PointerState.HoldHand;   // 69B：VR 跟著抓的那隻手；桌機跟著射線
+            if (hand == null && !PointerState.HasRay) return;
+            var target = hand != null ? hand.position + hand.forward * r.boltDishHandForward : PointerState.Ray.origin + PointerState.Ray.direction * r.boltDishHoldDistance;
             dishBody.position = Vector3.Lerp(dishBody.position, target, 1f - Mathf.Exp(-18f * Time.deltaTime));
         }
     }

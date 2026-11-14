@@ -64,6 +64,8 @@ namespace PantographSim.Core
         public static bool HasRay;
         /// <summary>自動測試用：有值時取代滑鼠射線（Editor 截圖腳本沒有真的滑鼠）。</summary>
         public static UnityEngine.Ray? ScriptedRay;
+        /// <summary>terry 2026-11-14（69B）：VR 用握把抓起東西（車頂螺栓盤）的那隻手；null＝跟著射線（桌機）。由 XR 模組寫入。</summary>
+        public static UnityEngine.Transform HoldHand;
         /// <summary>VR：右手扳機按住中（工具的「按住施力／轉動／擦拭」用；桌面永遠是 false）。由 XR 模組每幀寫入。</summary>
         public static bool XrTriggerHeld;
         /// <summary>VR 右搖桿推的格數，工具當成滾輪讀（讀一次就歸零）。</summary>

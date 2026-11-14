@@ -36,7 +36,9 @@ namespace PantographSim.Data
         public bool BoltPourIn(string courseId) => System.Array.IndexOf(boltPourCourses, courseId) >= 0;
         [Tooltip("terry 2026-11-14（42B、52B）：哪些課程的螺栓盤是車頂小零件盤（要用握把收進工具袋，收尾清點前兩個都要收）")] public string[] boltDishCourses = { "daily" };
         [Tooltip("拿著車頂螺栓盤時，手離工具袋多近（m）放開算收進去（58A～61A：和收工具差不多）")] public float boltDishBagRadius = 0.3f;
-        [Tooltip("車頂螺栓盤拿在手上時，離控制器（桌機：鏡頭）沿射線多遠（m）")] public float boltDishHoldDistance = 0.35f;
+        [Tooltip("桌機：車頂螺栓盤拿在手上時，離鏡頭沿射線多遠（m）")] public float boltDishHoldDistance = 0.35f;
+        [Tooltip("VR（69B）：車頂螺栓盤在抓的那隻手控制器前方多遠（m）")] public float boltDishHandForward = 0.08f;
+        [Tooltip("76A：手上拿著滑板時點螺栓盤的提示")] public string boltHandsFullText = "手上拿著滑板：先把滑板放下，才能拿螺栓";
         public string boltDishGrabText = "拿著螺栓盤：手靠近工具袋放開就收進去", boltDishStowText = "螺栓盤收進工具袋", boltDishBackText = "螺栓盤回到暫放墊：要收進工具袋", boltDishNotEmptyText = "盤子裡還有螺栓：先把螺栓拿回螺栓袋";
         public bool BoltDishIn(string courseId) => System.Array.IndexOf(boltDishCourses, courseId) >= 0;
 
