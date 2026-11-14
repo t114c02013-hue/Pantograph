@@ -56,6 +56,27 @@ namespace PantographSim.Tests
             finally { Directory.Delete(dir, true); }
         }
 
+        /// <summary>terry 2026-11-14（32A、33A）：meta.json 沒有 flowVersion 的是舊版流程，紀錄清單標出來（只顯示）。</summary>
+        [Test]
+        public void OldFlow_NoFlowVersionInMeta_LabelledInList()
+        {
+            var root = Path.Combine(Path.GetTempPath(), "flow_" + System.Guid.NewGuid().ToString("N"));
+            try
+            {
+                foreach (var (name, meta) in new[] { ("old", "{\"schemaVersion\":3,\"trainee\":\"a\"}"), ("new", "{\"schemaVersion\":3,\"trainee\":\"b\",\"flowVersion\":1}") })
+                {
+                    Directory.CreateDirectory(Path.Combine(root, name));
+                    File.WriteAllText(Path.Combine(root, name, RecordFiles.Meta), meta);
+                }
+                var list = RecordingIndex.List(root);
+                Assert.IsTrue(list.Single(e => e.name == "old").oldFlow, "沒有 flowVersion：舊版流程");
+                Assert.IsFalse(list.Single(e => e.name == "new").oldFlow);
+                Assert.IsTrue(RecordFiles.IsOldFlow(null));
+                Assert.AreEqual("舊版流程", RecordFiles.OldFlowLabel);
+            }
+            finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+        }
+
         static SafetyRuleDefinition[] SafetyAssets() => StepJsonImporter.LoadAll<SafetyRuleDefinition>(StepJsonImporter.SafetyFolder).ToArray();
 
         [Test]

@@ -18,6 +18,11 @@ namespace PantographSim.Recording
         public const int SchemaVersion = 3;   // 3：新增 PanelMoved（R1 T3）；2 以前的檔照舊能讀、能重播
         public const string Meta = "meta.json";
 
+        /// <summary>terry 2026-11-14（32A）：流程版本（meta.json 的 flowVersion）。1＝有「螺栓倒進盤子／拿回袋子」的流程；沒有這欄的是舊版流程。</summary>
+        public const int FlowVersion = 1;
+        public const string OldFlowLabel = "舊版流程";
+        public static bool IsOldFlow(Dictionary<string, object> meta) => meta == null || !meta.ContainsKey("flowVersion");
+
         /// <summary>R1.5b b4：錄影的課程（meta.json 的 courseId；舊錄影沒有＝r1）。</summary>
         public static string CourseOf(string folder)
         {

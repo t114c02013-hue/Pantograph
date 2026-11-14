@@ -229,7 +229,7 @@ namespace PantographSim.UI
                 var h = Ui.HStack(line.gameObject, 8, 4);
                 var check = Ui.Button(line.transform, "□", 24, () => { if (!selected.Remove(folder)) selected.Add(folder); RefreshChecks(); }); Ui.Size(check, 50, 46);
                 checkLabels[folder] = Ui.LabelOf(check);
-                Cell(line.transform, f[1], 200, Color.white, FontStyle.Bold);
+                Cell(line.transform, f[1] + (f.Length > 13 && f[13].Length > 0 ? "\n<size=14>" + Ui.Tint(f[13], Ui.Accent) + "</size>" : ""), 200, Color.white, FontStyle.Bold);   // terry 2026-11-14（33A）
                 Cell(line.transform, f[2], 190, Ui.Muted);
                 Cell(line.transform, f[3] + "／" + f[4], 130, Ui.Muted);
                 string score = f[5].Length > 0 ? f[5] + " 分" + (f[6] == "1" ? " " + Ui.Tint("通過", Ui.Ok) : f[6] == "0" ? " " + Ui.Tint("未通過", Ui.Bad) : "") : "—";

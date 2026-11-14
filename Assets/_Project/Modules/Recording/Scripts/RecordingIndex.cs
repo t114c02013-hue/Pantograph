@@ -39,7 +39,7 @@ namespace PantographSim.Recording
     public class RecordEntry
     {
         public string folder = "", name = "", trainee = "", mode = "", input = "", startedAt = "", status = "";
-        public bool interrupted, finished, passed, hiddenUntilFinished;
+        public bool interrupted, finished, passed, hiddenUntilFinished, oldFlow;
         public double score = double.NaN, totalSeconds, critical, errorTotal;
         public DateTime sortKey;
         public List<string> videos = new List<string>();
@@ -99,7 +99,7 @@ namespace PantographSim.Recording
                 var e = new RecordEntry
                 {
                     folder = Path.GetFullPath(dir), name = Path.GetFileName(dir), trainee = meta.Str("trainee"), mode = meta.Str("mode"), input = meta.Str("input"),
-                    startedAt = meta.Str("startedAt"), hiddenUntilFinished = meta.Str("mode") == "考核"
+                    startedAt = meta.Str("startedAt"), hiddenUntilFinished = meta.Str("mode") == "考核", oldFlow = RecordFiles.IsOldFlow(meta)
                 };
                 DateTime.TryParse(e.startedAt, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out e.sortKey);
                 if (e.sortKey == default) e.sortKey = Directory.GetCreationTime(dir);

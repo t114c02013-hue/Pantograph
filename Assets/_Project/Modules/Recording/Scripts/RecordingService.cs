@@ -125,7 +125,7 @@ namespace PantographSim.Recording
                 { "input", Labels.Input(InputMode.XrActive) }, { "scenarioId", s.Get("training.scenario") }, { "scenarioTitle", s.Get("training.scenario_title") },
                 { "appVersion", Application.version }, { "unityVersion", Application.unityVersion }, { "startedAt", now.ToString("o", CultureInfo.InvariantCulture) },
                 { "folder", Path.GetFileName(folder) }, { "tools", s.Get("tools.list") }, { "trackedObjects", tracked.Count },
-                { "courseId", s.Get(SimIds.CourseId, SimIds.CourseR1) }
+                { "courseId", s.Get(SimIds.CourseId, SimIds.CourseR1) }, { "flowVersion", RecordFiles.FlowVersion }
             });
             s.Set("rec.trainee", trainee);
             s.Set("rec.folder", folder);
@@ -250,7 +250,7 @@ namespace PantographSim.Recording
                 x.folder, x.trainee, DateTime.TryParse(x.startedAt, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var d) ? d.ToString("yyyy-MM-dd HH:mm") : x.name,
                 x.mode, x.input, double.IsNaN(x.score) ? "" : x.score.ToString("0", CultureInfo.InvariantCulture), x.finished ? (x.passed ? "1" : "0") : "",
                 x.status, x.interrupted ? "1" : "0", x.finished ? x.critical.ToString("0") : "", x.finished ? x.errorTotal.ToString("0") : "",
-                x.totalSeconds.ToString("0", CultureInfo.InvariantCulture), x.videos.Count.ToString()
+                x.totalSeconds.ToString("0", CultureInfo.InvariantCulture), x.videos.Count.ToString(), x.oldFlow ? RecordFiles.OldFlowLabel : ""
             }));
             Sim.State.Set("rec.list", string.Join("\n", rows));
             Sim.State.SetFloat("rec.list_count", list.Count);

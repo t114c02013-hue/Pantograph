@@ -66,7 +66,7 @@ namespace PantographSim.Recording
             var m = timeline.meta;
             s.SetBool("replay.active", true);
             s.Set("replay.folder", folder);
-            s.Set("replay.title", $"{m.Str("trainee")}　{FormatDate(m.Str("startedAt"))}　{m.Str("mode")}／{m.Str("input")}");
+            s.Set("replay.title", $"{m.Str("trainee")}　{FormatDate(m.Str("startedAt"))}　{m.Str("mode")}／{m.Str("input")}" + (RecordFiles.IsOldFlow(m) ? "　〔" + RecordFiles.OldFlowLabel + "〕" : ""));
             s.SetFloat("replay.duration", (float)timeline.Duration);
             s.Set("replay.markers", string.Join("\n", errors.Select(e => string.Join("|", e.t.ToString("0.###", CultureInfo.InvariantCulture), e.S("severity"),
                 Clean(e.S("name")), Clean(timeline.catalog.NameOf(e.step))))));
