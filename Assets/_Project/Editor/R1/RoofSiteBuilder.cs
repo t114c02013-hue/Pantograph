@@ -759,6 +759,7 @@ namespace PantographSim.Editor
                 var comp = bt.AddComponent<BoltTray>();
                 comp.Configure(SimIds.BoltTray(side), (side == "L" ? "靠關節" : "外側") + "螺栓盤");
                 comp.Setup(side, icons);
+                comp.SetupDishBody(bt.transform.Find("BoltTray_Dish_" + side + "/DishBody"));   // 52B
                 // terry 2026-11-13（20A）：倒進盤子時每格一支（R1、日常課程；袋口那組在 BuildCraneAndRigging）
                 comp.SetupTray(Enumerable.Range(0, 4).Select(i =>
                 {
@@ -795,8 +796,10 @@ namespace PantographSim.Editor
         /// </summary>
         static GameObject[] BuildBoltDish(Transform root, string side, float sgn, RoofSceneDef d, Dictionary<string, Material> mats)
         {
-            var dish = new GameObject("BoltTray_Dish_" + side).transform;
-            dish.SetParent(root, false);
+            var dishRoot = new GameObject("BoltTray_Dish_" + side).transform;
+            dishRoot.SetParent(root, false);
+            var dish = new GameObject("DishBody").transform;   // 52B：抓起來時只有盤身跟手（繫繩、扣環留在墊子上）
+            dish.SetParent(dishRoot, false);
             float r = d.boltDishDiameter / 2f, y0 = -0.012f, h = d.boltDishRimHeight;
             var parts = new List<GameObject>();
             parts.Add(SliceModelBuilder.Prim(PrimitiveType.Cylinder, "DishBase", dish, new Vector3(0, y0 + 0.002f, 0), new Vector3(d.boltDishDiameter, 0.002f, d.boltDishDiameter), mats["tray"]));
@@ -809,8 +812,8 @@ namespace PantographSim.Editor
                 parts.Add(seg);
             }
             // 繫繩：從盤邊往暫放墊中心，末端扣環
-            var tether = SliceModelBuilder.Prim(PrimitiveType.Cube, "DishTether", dish, new Vector3(-sgn * (r + d.boltDishTetherLength / 2f), y0 + 0.003f, 0), new Vector3(d.boltDishTetherLength, 0.004f, 0.012f), Mat("dishTether", new Color(0.95f, 0.55f, 0.1f)));
-            var clip = SliceModelBuilder.Prim(PrimitiveType.Cube, "DishTetherClip", dish, new Vector3(-sgn * (r + d.boltDishTetherLength), y0 + 0.008f, 0), new Vector3(0.02f, 0.016f, 0.02f), mats["steel"]);
+            var tether = SliceModelBuilder.Prim(PrimitiveType.Cube, "DishTether", dishRoot, new Vector3(-sgn * (r + d.boltDishTetherLength / 2f), y0 + 0.003f, 0), new Vector3(d.boltDishTetherLength, 0.004f, 0.012f), Mat("dishTether", new Color(0.95f, 0.55f, 0.1f)));
+            var clip = SliceModelBuilder.Prim(PrimitiveType.Cube, "DishTetherClip", dishRoot, new Vector3(-sgn * (r + d.boltDishTetherLength), y0 + 0.008f, 0), new Vector3(0.02f, 0.016f, 0.02f), mats["steel"]);
             parts.Add(tether); parts.Add(clip);
             foreach (var p in parts) Object.DestroyImmediate(p.GetComponent<Collider>());
             var icons = Enumerable.Range(0, 4).Select(i =>
@@ -818,7 +821,7 @@ namespace PantographSim.Editor
                 var g = SliceModelBuilder.Prim(PrimitiveType.Cylinder, $"DishBolt_{side}{i}", dish, new Vector3((i % 2 == 0 ? -1f : 1f) * r * 0.35f, y0 + 0.004f + 0.01f, (i < 2 ? -1f : 1f) * r * 0.35f), new Vector3(0.01f, 0.01f, 0.01f), mats["steel"]);
                 Object.DestroyImmediate(g.GetComponent<Collider>()); g.SetActive(false); return g;
             }).ToArray();
-            dish.gameObject.SetActive(false);
+            dishRoot.gameObject.SetActive(false);
             return icons;
         }
 

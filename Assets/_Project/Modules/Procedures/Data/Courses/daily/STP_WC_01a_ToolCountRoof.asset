@@ -15,6 +15,7 @@ MonoBehaviour:
   stepId: STP_WC_01a_ToolCountRoof
   title: "\u8ECA\u9802\u6E05\u9EDE"
   instruction: "\u8ECA\u9802\u6E05\u9EDE"
+  instructionXR: 
   toolHint: 
   targetHint: 
   targetIds:
@@ -27,13 +28,35 @@ MonoBehaviour:
   requiredToolId: 
   completion:
     rid: 1000
-  errors: []
+  errors:
+  - errorId: ERR_WC01_Leftover
+    tutorialHintOnly: 0
+    severity: 2
+    what: "\u8ECA\u9802\u87BA\u6813\u76E4\u9084\u6C92\u6536\u9032\u5DE5\u5177\u888B\u5C31\u78BA\u8A8D\u8ECA\u9802\u6E05\u9EDE\u3002"
+    why: "\u6771\u897F\u7559\u5728\u8ECA\u9802\uFF0C\u9001\u96FB\u5F8C\u53EF\u80FD\u88AB\u6253\u98DB\u6216\u6389\u843D\u3002"
+    fix: "\u7528\u63E1\u628A\u628A\u66AB\u653E\u588A\u4E0A\u7684\u5169\u500B\u87BA\u6813\u76E4\u6536\u9032\u5DE5\u5177\u888B\uFF0C\u518D\u6309\u300C\u8ECA\u9802\u6E05\u9EDE\u5B8C\u6210\u300D\u3002"
+    trigger: 5
+    key: workorder.toolcount_confirmed
+    key2: 
+    keys:
+    - roof.bolt_dishes_stowed
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 1
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: 
     why: 
     checklist:
     - "\u9010\u683C\u770B\u904E\u5DE5\u5177\u888B\u4E26\u6E05\u9EDE|env.tool_bag.slot_5.viewed&&env.tool_bag.slot_6.viewed&&env.tool_bag.slot_7.viewed&&env.tool_bag.slot_8.viewed&&env.tool_bag.slot_9.viewed&&rack.slot_5=on_rack&&rack.slot_6=on_rack&&rack.slot_7=on_rack&&rack.slot_8=on_rack&&rack.slot_9=on_rack"
     - "\u78BA\u8A8D\u87BA\u6813\u76E4\u3001\u96F6\u4EF6\u888B\u548C\u66AB\u653E\u588A\u90FD\u6E05\u7A7A|env.bolt_tray_L.bolts<=0&&env.bolt_tray_R.bolts<=0&&env.tool_bag.bolt_pouch.count<=0&&env.roof_strip_mat.count<=0&&roof.leftover_count<=0"
+    - "\u628A\u5169\u500B\u87BA\u6813\u76E4\u6536\u9032\u5DE5\u5177\u888B|env.bolt_tray_L.stowed&&env.bolt_tray_R.stowed"
     - "\u6309\u300C\u8ECA\u9802\u6E05\u9EDE\u5B8C\u6210\u300D|workorder.toolcount_confirmed"
     highlightIds: []
     showBoltNumbers: 0
@@ -49,6 +72,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u78BA\u8A8D\u87BA\u6813\u76E4\u3001\u96F6\u4EF6\u888B\u548C\u66AB\u653E\u588A\u90FD\u6E05\u7A7A"
     why: 
     targetId: env.bolt_tray_L;env.bolt_tray_R;env.tool_bag.bolt_pouch;env.roof_strip_mat
@@ -59,6 +83,18 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u87BA\u6813\u76E4\u3001\u96F6\u4EF6\u888B\u548C\u66AB\u653E\u588A\u90FD\u8981\u662F\u7A7A\u7684\u3002\u8ECA\u9802\u7559\u4E0B\u6771\u897F\uFF0C\u9001\u96FB\u5F8C\u53EF\u80FD\u88AB\u6253\u98DB\u3002"
     when: 
+    optional: 0
+  - text: "\u628A\u5169\u500B\u87BA\u6813\u76E4\u6536\u9032\u5DE5\u5177\u888B"
+    why: 
+    targetId: env.bolt_tray_L;env.bolt_tray_R
+    toolId: 
+    condition: env.bolt_tray_L.stowed&&env.bolt_tray_R.stowed
+    standPointId: tp.roof.inner
+    subId: s
+    textDesktop: "\u9EDE\u4E00\u4E0B\u87BA\u6813\u76E4\u6536\u9032\u5DE5\u5177\u888B"
+    hint: "\u7528\u63E1\u628A\u6293\u8D77\u66AB\u653E\u588A\u4E0A\u7684\u87BA\u6813\u76E4\uFF0C\u624B\u9760\u8FD1\u5DE5\u5177\u888B\u653E\u958B\u5C31\u6536\u9032\u53BB\uFF1B\u5169\u500B\u90FD\u8981\u6536\u3002\u76E4\u5B50\u88E1\u6709\u87BA\u6813\u8981\u5148\u62FF\u56DE\u87BA\u6813\u888B\u3002"
+    when: 
+    optional: 0
   - text: "\u6309\u300C\u8ECA\u9802\u6E05\u9EDE\u5B8C\u6210\u300D"
     why: 
     targetId: env.work_order.toolcount_confirm
@@ -69,6 +105,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   presetDone: 0
   side: 
   presetStates: []

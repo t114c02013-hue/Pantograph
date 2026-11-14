@@ -1730,7 +1730,16 @@
       "status": "Defined",
       "owner": "",
       "source": "CSV",
-      "trigger": "還有工具沒收回或零件盒裡還有螺栓，就確認清點。"
+      "trigger": "還有工具沒收回或零件盒裡還有螺栓，就確認清點。terry 2026-11-14（54A）：課程裡先只判「車頂螺栓盤（日常）還沒收進工具袋就按車頂清點完成」，擋下並記這個錯。",
+      "rule": {
+        "trigger": "Incomplete",
+        "key": "workorder.toolcount_confirmed",
+        "keys": [ "roof.bolt_dishes_stowed" ],
+        "blocks": true,
+        "what": "車頂螺栓盤還沒收進工具袋就確認車頂清點。",
+        "why": "東西留在車頂，送電後可能被打飛或掉落。",
+        "fix": "用握把把暫放墊上的兩個螺栓盤收進工具袋，再按「車頂清點完成」。"
+      }
     },
     {
       "errorId": "ERR_WC01a_StripOnMat",

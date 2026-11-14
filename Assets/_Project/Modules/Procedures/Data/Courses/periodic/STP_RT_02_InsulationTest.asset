@@ -15,6 +15,7 @@ MonoBehaviour:
   stepId: STP_RT_02_InsulationTest
   title: "\u7D55\u7DE3\u96FB\u963B\u6E2C\u8A66"
   instruction: "\u7D55\u7DE3\u96FB\u963B\u6E2C\u8A66"
+  instructionXR: 
   toolHint: 
   targetHint: 
   targetIds:
@@ -43,7 +44,28 @@ MonoBehaviour:
   requiredToolId: 
   completion:
     rid: 1000
-  errors: []
+  errors:
+  - errorId: ERR_WC01_Leftover
+    tutorialHintOnly: 0
+    severity: 2
+    what: "\u8ECA\u9802\u87BA\u6813\u76E4\u9084\u6C92\u6536\u9032\u5DE5\u5177\u888B\u5C31\u78BA\u8A8D\u8ECA\u9802\u6E05\u9EDE\u3002"
+    why: "\u6771\u897F\u7559\u5728\u8ECA\u9802\uFF0C\u9001\u96FB\u5F8C\u53EF\u80FD\u88AB\u6253\u98DB\u6216\u6389\u843D\u3002"
+    fix: "\u7528\u63E1\u628A\u628A\u66AB\u653E\u588A\u4E0A\u7684\u5169\u500B\u87BA\u6813\u76E4\u6536\u9032\u5DE5\u5177\u888B\uFF0C\u518D\u6309\u300C\u8ECA\u9802\u6E05\u9EDE\u5B8C\u6210\u300D\u3002"
+    trigger: 5
+    key: workorder.toolcount_confirmed
+    key2: 
+    keys:
+    - roof.bolt_dishes_stowed
+    value: 
+    whenAnswer: 
+    min: 0
+    max: 0
+    expected: 
+    count: 0
+    blocks: 1
+    severityBeforeK3: 
+    oncePerRun: 0
+    inputMode: 
   hints:
     text: 
     why: 
@@ -106,6 +128,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u8D70\u5230\u5DE5\u5177\u67B6\u524D\uFF0C\u53F3\u624B\u9760\u8FD1\u6216\u7528\u5C04\u7DDA\u6307\u8457\u9AD8\u963B\u8A08\uFF0C\u6309\u53F3\u63E1\u628A\u62FF\u8D77\u3002"
     when: 
+    optional: 0
   - text: "\u7528\u7D55\u7DE3\u6E2C\u8A66\u7DDA\u63A5\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u548C\u8ECA\u9AD4\u63A5\u5730\u9EDE"
     why: 
     targetId: ip.pan_head.ground_clamp;ip.roof.carbody_ground
@@ -116,6 +139,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u6309\u6E2C\u8A66\u9375\uFF08DC 1000 V\uFF09\uFF0C\u770B\u9AD8\u963B\u8A08\u8B80\u503C"
     why: 
     targetId: "tool.megger\uFF08\u6E2C\u8A66\u9375\uFF09"
@@ -126,6 +150,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u628A\u8B80\u503C\u586B\u9032\u4F5C\u696D\u55AE\u7684\u7D55\u7DE3\u96FB\u963B\u6B04"
     why: 
     targetId: env.work_order.ir_reading
@@ -136,6 +161,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u5728\u4F5C\u696D\u55AE\u52FE\u300C\u5408\u683C\u300D\u6216\u300C\u4E0D\u5408\u683C\u300D"
     why: 
     targetId: env.work_order.ir_judgement
@@ -146,6 +172,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u628A\u9AD8\u963B\u8A08\u653E\u56DE\u5DE5\u5177\u67B6\uFF0C\u5230\u687F\u67B6\u62FF\u8D77\u63A5\u5730\u687F"
     why: 
     targetId: "env.tool_rack.slot_11;env.tool_rack.slot_3\uFF08env.pole_rack\uFF09"
@@ -156,6 +183,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u687F\u982D\u78B0\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u653E\u96FB"
     why: 
     targetId: ip.pan_head.ground_clamp
@@ -166,6 +194,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u7528\u5C04\u7DDA\u6307\u8457\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u6309\u6273\u6A5F\u3002"
     when: 
+    optional: 0
   - text: "\u62C6\u4E0B\u7D55\u7DE3\u6E2C\u8A66\u7DDA"
     why: 
     targetId: ip.pan_head.ground_clamp;ip.roof.carbody_ground
@@ -176,6 +205,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u628A\u63A5\u5730\u687F\u653E\u56DE\u687F\u67B6"
     why: 
     targetId: "env.tool_rack.slot_3\uFF08env.pole_rack\uFF09"
@@ -186,6 +216,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u56DE\u5831\u4F5C\u696D\u8CA0\u8CAC\u4EBA\uFF1A\u7D55\u7DE3\u96FB\u963B\u4E0D\u5408\u683C"
     why: 
     targetId: npc.work_leader
@@ -196,6 +227,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u5230\u687F\u67B6\u62FF\u8D77\u9A57\u96FB\u687F"
     why: 
     targetId: "env.tool_rack.slot_2\uFF08env.pole_rack\uFF09"
@@ -206,6 +238,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u8D70\u5230\u687F\u67B6\u524D\uFF0C\u53F3\u624B\u9760\u8FD1\u9A57\u96FB\u687F\uFF0C\u6309\u53F3\u63E1\u628A\u62FF\u8D77\u3002"
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u9EDE\u81EA\u6AA2\u5668\u78BA\u8A8D\u4EAE\u7DA0\u71C8"
     why: 
     targetId: ip.depot.detector_tester
@@ -216,6 +249,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u7528\u5C04\u7DDA\u6307\u8457\u687F\u67B6\u65C1\u7684\u81EA\u6AA2\u5668\u6309\u6273\u6A5F\uFF0C\u8981\u4EAE\u7DA0\u71C8\u3002"
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u5F9E\u5E73\u53F0\u9EDE\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u9A57\u96FB"
     why: 
     targetId: ip.pan_head.ground_clamp
@@ -226,6 +260,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u7528\u5C04\u7DDA\u6307\u8457\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u6309\u6273\u6A5F\u3002"
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u628A\u9A57\u96FB\u687F\u653E\u56DE\u687F\u67B6"
     why: 
     targetId: "env.tool_rack.slot_2\uFF08env.pole_rack\uFF09"
@@ -236,6 +271,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u5230\u687F\u67B6\u62FF\u8D77\u63A5\u5730\u687F"
     why: 
     targetId: "env.tool_rack.slot_3\uFF08env.pole_rack\uFF09"
@@ -246,6 +282,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u8D70\u5230\u687F\u67B6\u524D\uFF0C\u53F3\u624B\u9760\u8FD1\u63A5\u5730\u687F\uFF0C\u6309\u53F3\u63E1\u628A\u62FF\u8D77\u3002"
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u628A\u63A5\u5730\u593E\u593E\u4E0A\u63A5\u5730\u7AEF\u5B50"
     why: 
     targetId: ip.depot.ground_terminal
@@ -256,6 +293,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u7528\u5C04\u7DDA\u6307\u8457\u5E73\u53F0\u65C1\u7684\u63A5\u5730\u7AEF\u5B50\u6309\u6273\u6A5F\u3002"
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u62C9\u4E00\u4E0B\u63A5\u5730\u7DDA\u78BA\u8A8D"
     why: 
     targetId: ip.depot.ground_terminal
@@ -266,6 +304,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u7528\u5C04\u7DDA\u6307\u8457\u5E73\u53F0\u65C1\u7684\u63A5\u5730\u7AEF\u5B50\u6309\u6273\u6A5F\u3002"
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u628A\u639B\u9264\u639B\u4E0A\u5F13\u982D\u63A5\u5730\u9EDE"
     why: 
     targetId: ip.pan_head.ground_clamp
@@ -276,6 +315,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u7528\u5C04\u7DDA\u6307\u8457\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u6309\u6273\u6A5F\u3002"
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u518D\u767B\u8A18 #1"
     why: 
     targetId: env.work_order.ground_register
@@ -286,6 +326,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u628A\u5B89\u5168\u5E36\u6263\u4E0A\u5E73\u53F0\u639B\u9EDE"
     why: 
     targetId: ip.depot.platform_anchor
@@ -296,6 +337,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u8ACB\u4F5C\u696D\u8CA0\u8CAC\u4EBA\u548C\u76E3\u8B77\u4EBA\u653E\u884C\u4E0A\u8ECA\u9802\uFF08\u505C\u7559\u9EDE
       1\uFF09"
     why: 
@@ -307,6 +349,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u628A\u5B89\u5168\u5E36\u6263\u4E0A\u8ECA\u9802\u639B\u9EDE"
     why: 
     targetId: ip.roof.anchor
@@ -317,6 +360,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u89E3\u958B\u5E73\u53F0\u639B\u9EDE"
     why: 
     targetId: ip.depot.platform_anchor
@@ -327,6 +371,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u6E05\u6F54\u5E03"
     why: 
     targetId: env.tool_rack.slot_8
@@ -337,6 +382,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u4EFB\u4E00\u624B\u4F38\u5230\u5DE6\u8170\u7684\u5DE5\u5177\u888B\uFF0C\u6309\u63E1\u628A\u62FF\u51FA\u6E05\u6F54\u5E03\uFF0C\u6703\u62FF\u5728\u53F3\u624B\u3002"
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u64E6\u62ED\u7D55\u7DE3\u5B50 1\uFF0C\u540C\u6642\u76EE\u8996\u6709\u7121\u88C2\u75D5"
     why: 
     targetId: ip.roof.insulator_1
@@ -347,6 +393,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u64E6\u62ED\u7D55\u7DE3\u5B50 4\uFF0C\u540C\u6642\u76EE\u8996\u6709\u7121\u88C2\u75D5"
     why: 
     targetId: ip.roof.insulator_4
@@ -357,6 +404,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u64E6\u62ED\u7D55\u7DE3\u5B50 3\uFF0C\u540C\u6642\u76EE\u8996\u6709\u7121\u88C2\u75D5"
     why: 
     targetId: ip.roof.insulator_3
@@ -367,6 +415,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u64E6\u62ED\u7D55\u7DE3\u5B50 2\uFF0C\u540C\u6642\u76EE\u8996\u6709\u7121\u88C2\u75D5"
     why: 
     targetId: ip.roof.insulator_2
@@ -377,6 +426,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u628A\u6E05\u6F54\u5E03\u6536\u56DE\u5DE5\u5177\u888B\u4E26\u518D\u6E05\u9EDE\u4E00\u6B21"
     why: 
     targetId: env.tool_rack.slot_8;env.tool_bag
@@ -387,6 +437,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u53F3\u624B\u628A\u6E05\u6F54\u5E03\u79FB\u56DE\u5DE6\u8170\u7684\u5DE5\u5177\u888B\uFF0C\u653E\u958B\u63E1\u628A\u5C31\u6536\u56DE\u3002"
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u6263\u56DE\u5E73\u53F0\u639B\u9EDE\u3001\u89E3\u958B\u8ECA\u9802\u639B\u9EDE\uFF0C\u4E0B\u8ECA\u9802"
     why: 
     targetId: "ip.depot.platform_anchor;ip.roof.anchor;tool.safety_harness\uFF08\u80F8\u524D\u6263\u74B0\uFF09"
@@ -397,6 +448,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u53D6\u4E0B\u5F13\u982D\u7AEF\u639B\u9264"
     why: 
     targetId: ip.pan_head.ground_clamp
@@ -407,6 +459,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u7528\u5C04\u7DDA\u6307\u8457\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u6309\u6273\u6A5F\u3002"
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u9B06\u958B\u63A5\u5730\u7AEF\u5B50\u7684\u593E\u5B50"
     why: 
     targetId: ip.depot.ground_terminal
@@ -417,6 +470,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u7528\u5C04\u7DDA\u6307\u8457\u5E73\u53F0\u65C1\u7684\u63A5\u5730\u7AEF\u5B50\u6309\u6273\u6A5F\u3002"
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u628A\u63A5\u5730\u687F\u653E\u56DE\u687F\u67B6"
     why: 
     targetId: "env.tool_rack.slot_3\uFF08env.pole_rack\uFF09"
@@ -427,6 +481,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u5728\u63A5\u5730\u767B\u8A18\u6B04\u92B7\u865F #1"
     why: 
     targetId: env.work_order.ground_register
@@ -437,6 +492,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u5F9E\u5DE5\u5177\u67B6\u62FF\u9AD8\u963B\u8A08"
     why: 
     targetId: env.tool_rack.slot_11
@@ -447,6 +503,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u8D70\u5230\u5DE5\u5177\u67B6\u524D\uFF0C\u53F3\u624B\u9760\u8FD1\u6216\u7528\u5C04\u7DDA\u6307\u8457\u9AD8\u963B\u8A08\uFF0C\u6309\u53F3\u63E1\u628A\u62FF\u8D77\u3002"
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u91CD\u63A5\u7D55\u7DE3\u6E2C\u8A66\u7DDA"
     why: 
     targetId: ip.pan_head.ground_clamp;ip.roof.carbody_ground
@@ -457,6 +514,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u6309\u6E2C\u8A66\u9375\u91CD\u91CF\uFF08DC 1000 V\uFF09"
     why: 
     targetId: "tool.megger\uFF08\u6E2C\u8A66\u9375\uFF09"
@@ -467,6 +525,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u628A\u91CD\u91CF\u8B80\u503C\u586B\u9032\u4F5C\u696D\u55AE"
     why: 
     targetId: env.work_order.ir_reading
@@ -477,6 +536,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u5728\u4F5C\u696D\u55AE\u52FE\u300C\u5408\u683C\u300D"
     why: 
     targetId: env.work_order.ir_judgement
@@ -487,6 +547,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u628A\u9AD8\u963B\u8A08\u653E\u56DE\u5DE5\u5177\u67B6\uFF0C\u5230\u687F\u67B6\u62FF\u8D77\u63A5\u5730\u687F"
     why: 
     targetId: "env.tool_rack.slot_11;env.tool_rack.slot_3\uFF08env.pole_rack\uFF09"
@@ -497,6 +558,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u687F\u982D\u78B0\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u653E\u96FB"
     why: 
     targetId: ip.pan_head.ground_clamp
@@ -507,6 +569,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u7528\u5C04\u7DDA\u6307\u8457\u5F13\u982D\u63A5\u5730\u639B\u9EDE\u6309\u6273\u6A5F\u3002"
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u62C6\u4E0B\u7D55\u7DE3\u6E2C\u8A66\u7DDA"
     why: 
     targetId: ip.pan_head.ground_clamp;ip.roof.carbody_ground
@@ -517,6 +580,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   - text: "\u628A\u63A5\u5730\u687F\u653E\u56DE\u687F\u67B6"
     why: 
     targetId: "env.tool_rack.slot_3\uFF08env.pole_rack\uFF09"
@@ -527,6 +591,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: fault.insulator_dirty
+    optional: 0
   presetDone: 0
   side: 
   presetStates: []

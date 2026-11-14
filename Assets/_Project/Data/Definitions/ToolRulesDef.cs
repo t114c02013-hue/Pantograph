@@ -34,6 +34,11 @@ namespace PantographSim.Data
         [Tooltip("terry 2026-11-13（21A）：哪些課程有「螺栓倒進平台螺栓盤清點／拿回螺栓袋」（只提示、不判定）")] public string[] boltPourCourses = { "r1", "daily" };
         [Tooltip("倒進盤子、拿回袋子的提示（{0}＝支數）")] public string boltPourText = "倒進螺栓盤清點：{0:0} 支", boltTakeBackText = "拿回螺栓袋：{0:0} 支";
         public bool BoltPourIn(string courseId) => System.Array.IndexOf(boltPourCourses, courseId) >= 0;
+        [Tooltip("terry 2026-11-14（42B、52B）：哪些課程的螺栓盤是車頂小零件盤（要用握把收進工具袋，收尾清點前兩個都要收）")] public string[] boltDishCourses = { "daily" };
+        [Tooltip("拿著車頂螺栓盤時，手離工具袋多近（m）放開算收進去（58A～61A：和收工具差不多）")] public float boltDishBagRadius = 0.3f;
+        [Tooltip("車頂螺栓盤拿在手上時，離控制器（桌機：鏡頭）沿射線多遠（m）")] public float boltDishHoldDistance = 0.35f;
+        public string boltDishGrabText = "拿著螺栓盤：手靠近工具袋放開就收進去", boltDishStowText = "螺栓盤收進工具袋", boltDishBackText = "螺栓盤回到暫放墊：要收進工具袋", boltDishNotEmptyText = "盤子裡還有螺栓：先把螺栓拿回螺栓袋";
+        public bool BoltDishIn(string courseId) => System.Array.IndexOf(boltDishCourses, courseId) >= 0;
 
         public static float AutoRunScale(bool autoRun, float multiplier) => autoRun ? Mathf.Max(1f, multiplier) : 1f;
         [Tooltip("遊戲內錄影的鍵：不要用 F9，驗收用它控制 Unity Recorder")] public KeyCode videoHotkey = KeyCode.F8;

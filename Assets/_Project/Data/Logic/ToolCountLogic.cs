@@ -14,6 +14,7 @@ namespace PantographSim.Data
     public static class ToolCountLogic
     {
         public const string ToolBag = ToolSlotTable.ToolBag, ToolTray = "env.panto_stand.tool_tray", TrayCount = ToolTray + ".count";
+        public const string DishesStowed = "roof.bolt_dishes_stowed";
         public const string Leftover = "roof.leftover_count", StripCountOk = "env.parts_tray.strip_count_ok", HoverKey = "ui.hover_id";
         public static string ViewedKey(int slot) => $"{ToolBag}.slot_{slot}.viewed";
 
@@ -35,6 +36,10 @@ namespace PantographSim.Data
             string d = s.Get("workorder.decision");   // CSR_05：兩條都換＝2、只換一條＝1、合格＝0
             bool ok = s.GetFloat("tray.old_strips") == (d == "both" ? 2 : d == "L" || d == "R" ? 1 : 0);
             if (!s.Has(StripCountOk) || s.GetBool(StripCountOk) != ok) s.SetBool(StripCountOk, ok);
+            // terry 2026-11-14（54A）：車頂螺栓盤（日常課程）兩個都收進工具袋了；別的課程沒有車頂螺栓盤＝true
+            var rules = ToolRulesDef.Load();
+            bool dishes = rules == null || !rules.BoltDishIn(s.Get(SimIds.CourseId, SimIds.CourseR1)) || (s.GetBool(SimIds.BoltTray("L") + ".stowed") && s.GetBool(SimIds.BoltTray("R") + ".stowed"));
+            if (!s.Has(DishesStowed) || s.GetBool(DishesStowed) != dishes) s.SetBool(DishesStowed, dishes);
         });
 
         static void Write(ISimState s, string key, int n) { if (!s.Has(key) || (int)s.GetFloat(key) != n) s.SetFloat(key, n); }

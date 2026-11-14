@@ -122,6 +122,54 @@ namespace PantographSim.Tests
             Assert.IsFalse(daily.steps.SelectMany(x => x.hints.checklist).Any(c => c.Contains("螺栓盤清點") || c.Contains("拿回腰間")), "選做不算完成");
         }
 
+        /// <summary>terry 2026-11-14（52B、58A～68A）：日常課程的車頂螺栓盤——空的才能抓；靠近工具袋放開＝收進去，別處放開＝回原位；桌機／代做直接收；R1 不能抓。</summary>
+        [Test]
+        public void BoltDish_GrabReleaseStow_OnlyDailyAndEmpty()
+        {
+            var r = ToolRulesDef.Load();
+            CollectionAssert.AreEqual(new[] { "daily" }, r.boltDishCourses, "資料：只有日常");
+            var s = new SimState(new EventBus());
+            string id = SimIds.BoltTray("L"), stowed = PantographSim.Worksite.BoltTray.StowedKey("L");
+            Assert.IsNull(PantographSim.Worksite.BoltTray.Grab(s, "L", r), "R1 不能抓");
+            s.Set(SimIds.CourseId, "daily");
+            s.SetFloat(PantographSim.Worksite.BoltTray.CountKey("L"), 4); s.SetBool(PantographSim.Worksite.BoltTray.PouredKey("L"), true);
+            Assert.AreEqual(r.boltDishNotEmptyText, PantographSim.Worksite.BoltTray.Grab(s, "L", r), "63A：盤子裡有螺栓抓不起來");
+            Assert.AreEqual("", s.Get("hand.item"));
+            Assert.AreEqual(r.boltDishNotEmptyText, PantographSim.Worksite.BoltTray.Stow(s, "L", r));
+            s.SetBool(PantographSim.Worksite.BoltTray.PouredKey("L"), false);
+            Assert.AreEqual(r.boltDishGrabText, PantographSim.Worksite.BoltTray.Grab(s, "L", r));
+            Assert.AreEqual(id, s.Get("hand.item"));
+            Assert.AreEqual(r.boltDishBackText, PantographSim.Worksite.BoltTray.Release(s, "L", r, false), "62A：別處放開回原位");
+            Assert.IsFalse(s.GetBool(stowed)); Assert.AreEqual("", s.Get("hand.item"));
+            PantographSim.Worksite.BoltTray.Grab(s, "L", r);
+            Assert.AreEqual(r.boltDishStowText, PantographSim.Worksite.BoltTray.Release(s, "L", r, true), "61A：靠近工具袋放開＝收進去");
+            Assert.IsTrue(s.GetBool(stowed));
+            Assert.IsNull(PantographSim.Worksite.BoltTray.Grab(s, "L", r), "收走後不能再抓");
+            ToolCountLogic.Update(s, null);
+            Assert.IsFalse(s.GetBool(ToolCountLogic.DishesStowed), "54A：還有一個沒收");
+            Assert.AreEqual(r.boltDishStowText, PantographSim.Worksite.BoltTray.Stow(s, "R", r), "66A、67A：桌機／代做直接收");
+            ToolCountLogic.Update(s, null);
+            Assert.IsTrue(s.GetBool(ToolCountLogic.DishesStowed));
+            var p = new SimState(new EventBus()); p.Set(SimIds.CourseId, "periodic");
+            ToolCountLogic.Update(p, null);
+            Assert.IsTrue(p.GetBool(ToolCountLogic.DishesStowed), "定期沒有車頂螺栓盤");
+        }
+
+        /// <summary>54A：日常按「車頂清點完成」時車頂螺栓盤還沒收＝記現有的 ERR_WC01_Leftover 並擋下（不新增錯誤代號）；WC_01a 多一個必做「把兩個螺栓盤收進工具袋」。</summary>
+        [Test]
+        public void WC01a_DishesNotStowed_Leftover_Blocks()
+        {
+            var daily = AssetDatabase.LoadAssetAtPath<ProcedureDefinition>(StepsCsvImporter.ProcedurePath("daily"));
+            var st = daily.steps.First(x => x.stepId == "STP_WC_01a_ToolCountRoof");
+            var subs = st.subActions;
+            Assert.AreEqual("env.bolt_tray_L.stowed&&env.bolt_tray_R.stowed", subs[subs.Length - 2].condition, "65A：按清點完成之前收兩個盤子");
+            Assert.IsFalse(subs[subs.Length - 2].optional, "必做");
+            var e = st.errors.Single(x => x.errorId == "ERR_WC01_Leftover");
+            Assert.AreEqual(ErrorTrigger.Incomplete, e.trigger);
+            CollectionAssert.AreEqual(new[] { ToolCountLogic.DishesStowed }, e.keys);
+            Assert.IsTrue(e.blocks);
+        }
+
         static SafetyRuleDefinition[] SafetyAssets() => StepJsonImporter.LoadAll<SafetyRuleDefinition>(StepJsonImporter.SafetyFolder).ToArray();
 
         [Test]

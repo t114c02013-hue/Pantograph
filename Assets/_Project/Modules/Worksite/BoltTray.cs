@@ -31,6 +31,40 @@ namespace PantographSim.Worksite
 
         [SerializeField] GameObject bagDish;
         public void SetupBagDish(GameObject g) => bagDish = g;
+        [SerializeField] Transform dishBody;   // 車頂小零件盤的盤身（繫繩、扣環不在裡面：抓起來＝解開，留在墊子上）
+        public void SetupDishBody(Transform t) => dishBody = t;
+        Vector3 dishHome;
+
+        /// <summary>這門課的螺栓盤是不是車頂小零件盤（ToolRulesDef.boltDishCourses）。</summary>
+        public static bool DishCourse(ISimState s, ToolRulesDef r) => r != null && r.BoltDishIn(s.Get(SimIds.CourseId, SimIds.CourseR1));
+        static bool HasBolts(ISimState s, string side) => s.GetBool(PouredKey(side)) && s.GetFloat(CountKey(side)) > 0;
+
+        /// <summary>52B、63A：握把抓起車頂螺栓盤（手要空著、盤子要空）。回傳提示（null＝這門課不能抓）。</summary>
+        public static string Grab(ISimState s, string side, ToolRulesDef r)
+        {
+            if (!DishCourse(s, r) || s.GetBool(StowedKey(side))) return null;
+            if (!string.IsNullOrEmpty(s.Get(SimIds.ActiveTool)) || !string.IsNullOrEmpty(s.Get("hand.item"))) return "手上已經拿著東西";
+            if (HasBolts(s, side)) return r.boltDishNotEmptyText;
+            s.Batch(() => { s.SetBool(PouredKey(side), false); s.Set("hand.item", SimIds.BoltTray(side)); });
+            return r.boltDishGrabText;
+        }
+
+        /// <summary>61A、62A：放開——靠近工具袋＝收進去；別處＝回到暫放墊原位並提示。</summary>
+        public static string Release(ISimState s, string side, ToolRulesDef r, bool nearBag)
+        {
+            if (s.Get("hand.item") != SimIds.BoltTray(side)) return null;
+            s.Batch(() => { s.Set("hand.item", ""); if (nearBag) s.SetBool(StowedKey(side), true); });
+            return nearBag ? r.boltDishStowText : r.boltDishBackText;
+        }
+
+        /// <summary>66A、67A：桌機點一下／後台代做直接收進工具袋（盤子要空）。</summary>
+        public static string Stow(ISimState s, string side, ToolRulesDef r)
+        {
+            if (!DishCourse(s, r) || s.GetBool(StowedKey(side))) return null;
+            if (HasBolts(s, side)) return r.boltDishNotEmptyText;
+            s.Batch(() => { s.SetBool(PouredKey(side), false); s.SetBool(StowedKey(side), true); });
+            return r.boltDishStowText;
+        }
 
         /// <summary>這門課有沒有「倒進盤子／拿回袋子」（ToolRulesDef.boltPourCourses）。</summary>
         public static bool PourEnabled(ISimState s, ToolRulesDef r) =>
@@ -49,17 +83,29 @@ namespace PantographSim.Worksite
 
         protected override void OnBound()
         {
+            if (dishBody != null) dishHome = dishBody.localPosition;
             if (!State.Has(CountKey(side))) State.SetFloat(CountKey(side), 0);
         }
 
-        protected override bool Watches(string key) => key == CountKey(side) || key == PouredKey(side) || key == StowedKey(side);
+        protected override bool Watches(string key) => key == CountKey(side) || key == PouredKey(side) || key == StowedKey(side) || key == "hand.item";
 
         protected override void OnBareHand(ActionRequested e)
         {
+            var r = ToolRulesDef.Load();
+            switch (e.text)
+            {
+                case "grab": ToastIf(Grab(State, side, r)); return;
+                case "release:bag": ToastIf(Release(State, side, r, true)); return;
+                case "release:other": ToastIf(Release(State, side, r, false)); return;
+                case "stow": ToastIf(Stow(State, side, r)); return;
+            }
             if (State.GetBool(StowedKey(side))) return;   // 55A：收走之後點了沒反應
-            var msg = Pour(State, side, ToolRulesDef.Load());
+            var msg = Pour(State, side, r);
+            if (msg == null && DishCourse(State, r) && !InputMode.XrActive && State.GetFloat(CountKey(side)) <= 0) msg = Stow(State, side, r);   // 66A：桌機點空盤子＝收進工具袋
             Toast(msg ?? $"{(side == "L" ? "靠關節" : "外側")}螺栓：{(State.GetBool(PouredKey(side)) ? "螺栓盤上" : "腰間螺栓袋裡")} {State.GetFloat(CountKey(side)):0} 支");
         }
+
+        static void ToastIf(string msg) { if (!string.IsNullOrEmpty(msg)) Toast(msg); }
 
         protected override void OnToolAction(ActionPerformed e) => Apply(State, side, e.text, e.pointId);
 
@@ -77,9 +123,25 @@ namespace PantographSim.Worksite
         {
             int n = (int)State.GetFloat(CountKey(side));
             bool poured = State.GetBool(PouredKey(side));
-            if (bagDish != null) bagDish.SetActive(State.GetBool(StowedKey(side)));
+            bool stowed = State.GetBool(StowedKey(side)), held = State.Get("hand.item") == Id;
+            if (bagDish != null) bagDish.SetActive(stowed);
+            if (dishBody != null)
+            {
+                dishBody.gameObject.SetActive(!stowed);
+                if (!held) dishBody.localPosition = dishHome;   // 62A：沒收進工具袋就回到原位
+            }
+            var col = GetComponent<Collider>();
+            if (col != null) col.enabled = !stowed && !held;   // 收走、拿在手上時射線不會打到它
             for (int i = 0; i < boltIcons.Length; i++) if (boltIcons[i] != null) boltIcons[i].SetActive(!poured && i < n);
             for (int i = 0; i < trayIcons.Length; i++) if (trayIcons[i] != null) trayIcons[i].SetActive(poured && i % 4 < n);   // 每組 4 支（方盤、車頂小零件盤各一組）
+        }
+
+        /// <summary>拿在手上：盤身跟著射線（XR＝右手控制器；桌機＝滑鼠）前方一小段。</summary>
+        void LateUpdate()
+        {
+            if (!bound || dishBody == null || State.Get("hand.item") != Id || !PointerState.HasRay) return;
+            var target = PointerState.Ray.origin + PointerState.Ray.direction * ToolRulesDef.Load().boltDishHoldDistance;
+            dishBody.position = Vector3.Lerp(dishBody.position, target, 1f - Mathf.Exp(-18f * Time.deltaTime));
         }
     }
 }

@@ -193,10 +193,11 @@ namespace PantographSim.XR
                     break;
                 case "PanelGrab":   // 左握把：抓面板把手由 XRI 處理；手在工具袋前就拿、放工具
                     leftHandActing = true;
-                    if (c.pressed) { bagThisPress = XrCarryContainer.BagHovered; if (!bagThisPress && BodyItemNear()) GrabStart(); }   // 碰到袋子上緣＝抓袋子（XRI 處理）
+                    if (c.pressed) { bagThisPress = XrCarryContainer.BagHovered; if (!bagThisPress && (BodyItemNear() || hoveredId.StartsWith(BoltDishPrefix))) GrabStart(); }   // 碰到袋子上緣＝抓袋子（XRI 處理）；58A：左手也能抓車頂螺栓盤
                     else if (bagThisPress) bagThisPress = false;   // 放下袋子不是放回工具
                     else if (grabPickedThisPress) grabPickedThisPress = false;
                     else if (!string.IsNullOrEmpty(S.Get(SimIds.ActiveTool)) && BodyItemNear()) GrabEnd();
+                    else if (S.Get("hand.item").StartsWith(BoltDishPrefix)) GrabEnd();   // 放開車頂螺栓盤
                     leftHandActing = false;
                     break;
                 case "ResetTool":
@@ -302,6 +303,8 @@ namespace PantographSim.XR
             return best;
         }
 
+        const string BoltDishPrefix = "env.bolt_tray_";
+
         void GrabStart()
         {
             grabPickedThisPress = false;
@@ -324,6 +327,13 @@ namespace PantographSim.XR
                 return;
             }
             if (string.IsNullOrEmpty(active) && hoveredId.StartsWith("env.spare_shelf.slot_")) { Send(hoveredId, "pick"); return; }
+            // terry 2026-11-14（52B）：握把抓起車頂螺栓盤（日常課程；盤子裡還有螺栓時抓不起來，由 BoltTray 提示）
+            if (string.IsNullOrEmpty(active) && string.IsNullOrEmpty(S.Get("hand.item")) && hoveredId.StartsWith(BoltDishPrefix))
+            {
+                Send(hoveredId, "grab");
+                grabPickedThisPress = S.Get("hand.item") == hoveredId;
+                return;
+            }
             if (string.IsNullOrEmpty(active) && hoveredId.StartsWith("part.carbon_strip_")) Click();
         }
 
@@ -343,6 +353,12 @@ namespace PantographSim.XR
                 else if (active == BodyRings.ToolGroundingLead && Near(BodyRings.ToolRing, bodyRingRadius)) { var (t, x) = BodyRings.ToolRingRequest(S); Send(t, x); }   // D31：短接地線掛回安全帶工具環
                 else if (Near("env.waist_pouch", SlotRadius)) Send("env.waist_pouch", "click");   // D30：上鎖掛牌組收進腰包（不是腰包的工具由 ToolBelt 提示）
                 else if (IsDeliberateRelease(Time.unscaledTime - grabStartedAt, Data.ToolRulesDef.Load())) Send("tool.belt", "release:" + (S.Get(XrViewHeight.FloorKey) == "Roof" ? "roof" : "ground"));   // 防墜繫繩：車頂垂掛並記 Major、地面放下（crane-procedure 6.3）
+                return;
+            }
+            string heldDish = S.Get("hand.item");
+            if (heldDish.StartsWith(BoltDishPrefix))   // 61A、62A：靠近工具袋放開＝收進去；別處＝回暫放墊
+            {
+                Send(heldDish, Near("env.tool_bag", Data.ToolRulesDef.Load().boltDishBagRadius) ? "release:bag" : "release:other");
                 return;
             }
             if (!string.IsNullOrEmpty(S.Get("hand.item")) && (hoveredId == SimIds.PartsTray || Near(SimIds.PartsTray, trayRadius)))

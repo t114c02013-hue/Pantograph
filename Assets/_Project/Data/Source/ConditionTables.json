@@ -43,6 +43,7 @@
   "exact": [
     { "text": "螺栓倒進螺栓盤", "rule": "env.bolt_tray_{side}.poured" },
     { "text": "螺栓拿回螺栓袋", "rule": "env.bolt_tray_{side}.taken_back" },
+    { "text": "兩個螺栓盤都收進工具袋", "rule": "env.bolt_tray_L.stowed&&env.bolt_tray_R.stowed" },
     { "text": "吊梁停在 Crane_InspectPose_Platform：中心 (−2.56, −3.55)，底面離平台面 EX 0.90 m ± 0.1 m；頭和身體不在吊鉤組正下方", "rule": "part.crane.inspect_pose=platform&&part.crane.under_hook_clear" },
     { "text": "吊梁停在 Crane_InspectPose_Ground：中心 (−9.50, −3.20)，底面離地面 EX 0.9 m ± 0.1 m，不在弓上方；頭和身體不在吊鉤組正下方", "rule": "part.crane.inspect_pose=ground&&part.crane.under_hook_clear" },
     { "text": "estop = true（碰吊具前）", "rule": "ctrl.crane.estop" },
