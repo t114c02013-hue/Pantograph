@@ -87,6 +87,39 @@ namespace PantographSim.Editor
         public const string GeneratedFolder = "Assets/_Project/Worksite/Models/Generated";
 
         /// <summary>從 Blender 產生的 FBX 複製一個部件（child＝null 時整個模型；名稱找最深一層都可以）到 parent 底下，擺到世界位置 pos。找不到 FBX 就丟例外（先跑 gen_700t.py）。</summary>
+        static List<(GameObject go, float y)> fbxPlaced;   // RA-27：這次建置用 Fbx() 擺的物件和擺放高度（地面／平台地板那些要檢查沒沉下去）
+
+        static Bounds? RenderBounds(GameObject g)
+        {
+            var rs = g.GetComponentsInChildren<Renderer>(true);
+            if (rs.Length == 0) return null;
+            var b = rs[0].bounds; foreach (var x in rs) b.Encapsulate(x.bounds); return b;
+        }
+
+        /// <summary>RA-27：FBX 原點不在最低點時（工作檯原點在檯面），整台往上抬到最低點貼地。</summary>
+        static float LiftToFloor(GameObject g, float floorY)
+        {
+            var b = RenderBounds(g); if (!b.HasValue) return 0f;
+            float lift = floorY - b.Value.min.y;
+            g.transform.position += Vector3.up * lift;
+            return lift;
+        }
+
+        /// <summary>RA-27 通用檢查：用 Fbx() 擺在地面或平台地板高度的設備，外框最低點 ≥ 地板 −0.02 m（沒有沉進地板）。</summary>
+        static void FloorSinkCheck(RoofSceneDef d, StringBuilder sb)
+        {
+            int n = 0;
+            foreach (var (g, y) in fbxPlaced ?? new List<(GameObject, float)>())
+            {
+                if (g == null || (Mathf.Abs(y - d.groundY) > 1e-3f && Mathf.Abs(y - d.platformFloorY) > 1e-3f)) continue;
+                var b = RenderBounds(g); if (!b.HasValue) continue;
+                n++;
+                float sink = y - b.Value.min.y;
+                if (sink > 0.02f) sb.AppendLine($"{((d.floorSinkKnown ?? new string[0]).Contains(g.name) ? "◇ 已知（floorSinkKnown，待裁定）" : "✘")} 沉進地板：{g.name} 最低點 {b.Value.min.y:0.000}，比地板 {y:0.00} 低 {sink:0.000} m");
+            }
+            sb.AppendLine($"地板檢查：用 Fbx() 擺在地面／平台地板的設備 {n} 個，最低點都要 ≥ 地板 −0.02 m");
+        }
+
         internal static GameObject Fbx(string fbx, string child, Transform parent, Vector3 pos, Vector3? scale = null, string rename = null, float yaw = 0f, string folder = GeneratedFolder)
         {
             var model = AssetDatabase.LoadAssetAtPath<GameObject>($"{folder}/{fbx}.fbx");
@@ -98,6 +131,7 @@ namespace PantographSim.Editor
             go.transform.position = pos;
             go.transform.rotation = Quaternion.Euler(0f, yaw, 0f) * src.rotation;   // 保留 FBX 節點本身的旋轉（Blender → Unity 的軸向轉換在這裡）
             if (scale.HasValue) go.transform.localScale = scale.Value;
+            fbxPlaced?.Add((go, pos.y));
             return go;
         }
 
@@ -219,6 +253,7 @@ namespace PantographSim.Editor
             List<ToolDefinition> tools, StringBuilder sb)
         {
             var res = new Result();
+            fbxPlaced = new List<(GameObject, float)>();
             var env = new GameObject("Worksite").transform;
             res.env = env;
             var mBody = Mat("carBody", new Color(0.78f, 0.80f, 0.82f));
@@ -620,6 +655,7 @@ namespace PantographSim.Editor
             BuildShoreBox(res, d, sb);                          // terry 175B：日常課程外接電源箱（方塊暫代）
             BuildTeachingExtras(res, d, sb);                    // terry 2026-11-15：指示燈點光源、實體按鈕、地面教學箱開蓋
             BuildHeadSolids(res.env, sb);                       // terry 186：頭穿透判定碰撞框（HeadSolid 層）
+            FloorSinkCheck(d, sb); fbxPlaced = null;            // RA-27：Fbx() 擺在地板上的設備沒有沉下去
             var pieces = new[] { roof.root, plat.root, stair.root, cab.root, back.root }.Concat(res.equipment).ToList();
             foreach (var p in pieces) SavePrefab(p);
             sb.AppendLine("場景件 prefab：ENV_Insulators、" + string.Join("、", pieces.Select(t => t.name)) + $"（{PrefabFolder}）");
@@ -918,11 +954,16 @@ namespace PantographSim.Editor
             var benchP = Piece(env, "ENV_WorkBench");
             var wc = new Vector3(d.workbenchCenterXZ.x, gy, d.workbenchCenterXZ.y);
             benchP.root.position = wc;
-            Fbx("ENV_WorkBench", null, benchP.visual, wc, yaw: 90f);
+            var benchVis = Fbx("ENV_WorkBench", null, benchP.visual, wc, yaw: 90f);
+            float benchLift = LiftToFloor(benchVis, gy);   // RA-27：FBX 原點在檯面，不抬會整台沉進地板
+            var benchTop = benchVis.GetComponent<Renderer>().bounds.max.y;   // FBX 根節點的網格就是檯面板
             Col("BenchBody", benchP.col, wc - new Vector3(0.3f, 0f, 0.75f), wc + new Vector3(0.3f, 0.9f, 0.75f), "Default");
             for (int i = 0; i < 3; i++)
                 Box("NewStrip_" + (i + 1), benchP.visual, wc + new Vector3(-0.18f + 0.18f * i, 0.91f, 0.1f), new Vector3(0.074f, 0.016f, 1.1f), mats["shelf"], collider: false);
             Anchor(benchP.anchors, "Anchor_BenchTop", wc + Vector3.up * 0.9f, Vector3.right);
+            float stripGap = wc.y + 0.91f - 0.008f - benchTop;   // 滑板底面（中心 gy+0.91、厚 0.016）－檯面頂
+            bool benchOk = Mathf.Abs(benchTop - (wc.y + 0.9f)) <= 0.02f && stripGap >= -1e-3f && stripGap <= 0.01f + 1e-3f;
+            sb.AppendLine($"{(benchOk ? "✔" : "✘")} 工作檯：模型抬高 {benchLift:0.000} m 貼地；檯面頂 {benchTop:0.000}（Anchor_BenchTop {wc.y + 0.9f:0.000}，±0.02）；新滑板底面離檯面 {stripGap:0.000} m（0～0.01）");
             res.equipment.Add(benchP.root);
             sb.AppendLine($"地面維修區：X {a.x}…{b.x}、Z {a.y}…{b.y}、地面 {gy}；台架中心 ({sc.x}, {sc.z})、頂面 Y {d.StandTopY:0.00}；工作檯 ({wc.x}, {wc.z})；零件盒位置 Anchor_PartsTray_Maint ({d.partsTrayMaintXZ.x}, {d.partsTrayMaintXZ.y})");
         }

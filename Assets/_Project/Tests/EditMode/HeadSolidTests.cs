@@ -121,6 +121,28 @@ namespace PantographSim.Tests
         }
 
         [Test]
+        public void Scene_StationItem24_CoversLeanKneelAndBowSkip()   // 站點檢查第 24 項真的有查：前傾拔插頭、車頂底架四個子站點跪姿、bowSkips
+        {
+            StationTests.WithScene(scene =>
+            {
+                Physics.SyncTransforms();
+                var set = AssetDatabase.LoadAssetAtPath<StationSet>("Assets/_Project/Modules/Worksite/Data/StationSet.asset");
+                var rdef = AssetDatabase.LoadAssetAtPath<RoofSceneDef>("Assets/_Project/Modules/Worksite/Data/RoofSceneDef.asset");
+                var ids = StationTests.SceneIds(scene);
+                var pts = Object.FindObjectsOfType<XrTeleportPoint>(true).Where(p => p.gameObject.scene == scene);
+                var r = StationLayoutCheck.CheckScene(set, rdef, pts, id => ids.TryGetValue(id ?? "", out var t) ? t : null, null, A6Tests.Wrench);
+                var item24 = r.passed.Concat(r.bad).Where(x => x.Contains("沒有穿進實心物體")).ToList();
+                Assert.IsTrue(item24.Any(x => x.Contains("tp.cab.shore 前傾頭 (-1.900")), "tp.cab.shore 前傾頭到 X −1.9");
+                foreach (var id in new[] { "tp.roof.base_w.s", "tp.roof.base_e.s", "tp.roof.base_w.n", "tp.roof.base_e.n" })
+                    Assert.IsTrue(item24.Any(x => x.Contains(id + " 跪姿頭")), id + " 跪姿頭");
+                Assert.IsFalse(item24.Any(x => x.Contains("tp.platform.lift 彎腰頭")), "bowSkips 的站點不做彎腰頭");
+                Assert.IsTrue(item24.Any(x => x.Contains("tp.platform.lift 站姿頭")), "bowSkips 的站點仍做站姿頭");
+                Assert.IsTrue(item24.Any(x => x.Contains("檯面上方")), "檯面上方的頭有查");
+                Assert.IsEmpty(r.bad.Where(x => x.Contains("沒有穿進實心物體")), "第 24 項全過");
+            });
+        }
+
+        [Test]
         public void Scene_HeadChecks_TopsCabShellFakeStation()   // 7＋駕駛室（RA-26 第 5 點）
         {
             StationTests.WithScene(scene =>

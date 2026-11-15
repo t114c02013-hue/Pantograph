@@ -15,6 +15,43 @@ namespace PantographSim.Tests
         static RoofSceneDef Def => AssetDatabase.LoadAssetAtPath<RoofSceneDef>(Folder + "/RoofSceneDef.asset");
         static StationSet Set => AssetDatabase.LoadAssetAtPath<StationSet>(Folder + "/StationSet.asset");
 
+        static Bounds RB(Transform t) { var rs = t.GetComponentsInChildren<Renderer>(true); var b = rs[0].bounds; foreach (var r in rs) b.Encapsulate(r.bounds); return b; }
+
+        [Test]
+        public void WorkBench_OnFloor_TopAtAnchor_StripsOnTop()   // RA-27：工作檯 FBX 原點在檯面，建置時抬到最低點貼地
+        {
+            StationTests.WithScene(scene =>
+            {
+                var all = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<Transform>(true)).ToList();
+                var model = all.First(t => t.name == "ENV_WorkBench" && t.parent != null && t.parent.name == "Visual");
+                var b = RB(model);
+                Assert.AreEqual(Def.groundY, b.min.y, 0.02f, "工作檯最低點貼地");
+                var anchor = all.First(t => t.name == "Anchor_BenchTop").position.y;
+                float top = model.GetComponent<Renderer>().bounds.max.y;   // FBX 根節點的網格＝檯面板
+                Assert.AreEqual(anchor, top, 0.02f, "檯面頂 ≈ Anchor_BenchTop");
+                foreach (var s in all.Where(t => t.name.StartsWith("NewStrip_")))
+                {
+                    float gap = s.GetComponent<Renderer>().bounds.min.y - top;
+                    Assert.That(gap, Is.InRange(-0.001f, 0.011f), s.name + " 底面在檯面頂上 0～0.01 m");
+                }
+            });
+        }
+
+        [Test]
+        public void FloorEquipment_NotSunkIntoFloor()   // RA-27 通用：用 Fbx() 擺在地面／平台地板的設備，外框最低點 ≥ 地板 −0.02 m
+        {
+            StationTests.WithScene(scene =>
+            {
+                var all = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<Transform>(true)).ToList();
+                foreach (var (name, floor) in new[] { ("ENV_WorkBench", Def.groundY), ("ENV_PantographStand", Def.groundY), ("ENV_SlingRack", Def.groundY), ("ENV_PoleRack", Def.platformFloorY) })
+                {
+                    if (Def.floorSinkKnown.Contains(name)) continue;   // 已知清單（待裁定），修好後從清單拿掉就會檢查
+                    var t = all.Where(x => x.name == name && x.GetComponentInChildren<Renderer>(true) != null).OrderBy(x => x.GetComponentsInParent<Transform>(true).Length).First();
+                    Assert.GreaterOrEqual(RB(t).min.y, floor - 0.02f, name + " 沒有沉進地板");
+                }
+            });
+        }
+
         [Test]
         public void Zones_ExistWithBounds_EveryStationHasZone()
         {
