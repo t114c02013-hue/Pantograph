@@ -73,10 +73,10 @@ MonoBehaviour:
     why: "\u5148\u5168\u90E8\u8CBC\u5408\u518D\u9396\u7DCA\uFF0C\u6ED1\u677F\u624D\u4E0D\u6703\u88AB\u62C9\u6B6A\u3002"
     checklist:
     - "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u5957\u7B52\u6273\u624B|tool.active=tool.socket_wrench"
-    - "\u5F9E\u8170\u9593\u87BA\u6813\u888B\u62FF 1 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D|ip.carbon_strip_L.bolt_1.state=Placed"
-    - "\u5F9E\u8170\u9593\u87BA\u6813\u888B\u62FF 2 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D|ip.carbon_strip_L.bolt_2.state=Placed"
-    - "\u5F9E\u8170\u9593\u87BA\u6813\u888B\u62FF 3 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D|ip.carbon_strip_L.bolt_3.state=Placed"
-    - "\u5F9E\u8170\u9593\u87BA\u6813\u888B\u62FF 4 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D|ip.carbon_strip_L.bolt_4.state=Placed"
+    - "\u5F9E\u87BA\u6813\u888B\u62FF 1 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D|ip.carbon_strip_L.bolt_1.state=Placed"
+    - "\u5F9E\u87BA\u6813\u888B\u62FF 2 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D|ip.carbon_strip_L.bolt_2.state=Placed"
+    - "\u5F9E\u87BA\u6813\u888B\u62FF 3 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D|ip.carbon_strip_L.bolt_3.state=Placed"
+    - "\u5F9E\u87BA\u6813\u888B\u62FF 4 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D|ip.carbon_strip_L.bolt_4.state=Placed"
     - "\u65B9\u5411\u5207\u5230\u300C\u9396\u300D|tool.socket_wrench.dir=lock"
     - "\u628A 1 \u865F\u87BA\u6813\u9396\u5230\u8CBC\u5408|ip.carbon_strip_L.bolt_1.state=Snug"
     - "\u628A 2 \u865F\u87BA\u6813\u9396\u5230\u8CBC\u5408|ip.carbon_strip_L.bolt_2.state=Snug"
@@ -88,7 +88,7 @@ MonoBehaviour:
     showBoltNumbers: 1
     showOutwardArrow: 0
   subActions:
-  - text: "\u628A\u87BA\u6813\u62FF\u56DE\u8170\u9593\u87BA\u6813\u888B"
+  - text: "\u628A\u87BA\u6813\u62FF\u56DE\u87BA\u6813\u888B"
     why: 
     targetId: env.bolt_tray_L
     toolId: 
@@ -96,7 +96,7 @@ MonoBehaviour:
     standPointId: tp.roof.inner
     subId: t
     textDesktop: 
-    hint: "\u65B0\u6ED1\u677F\u88DD\u4E0A\u5F8C\uFF0C\u628A\u76E4\u5B50\u88E1\u7684\u87BA\u6813\u62FF\u56DE\u8170\u9593\u87BA\u6813\u888B\uFF1B\u4E0D\u505A\u4E5F\u53EF\u4EE5\u7E7C\u7E8C\u3002"
+    hint: "\u65B0\u6ED1\u677F\u88DD\u4E0A\u5F8C\uFF0C\u628A\u76E4\u5B50\u88E1\u7684\u87BA\u6813\u62FF\u56DE\u87BA\u6813\u888B\uFF1B\u4E0D\u505A\u4E5F\u53EF\u4EE5\u7E7C\u7E8C\u3002"
     when: 
     optional: 1
   - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u5957\u7B52\u6273\u624B"
@@ -110,7 +110,7 @@ MonoBehaviour:
     hint: "\u4EFB\u4E00\u624B\u4F38\u5230\u5DE5\u5177\u888B\uFF0C\u6309\u63E1\u628A\u62FF\u51FA\u5957\u7B52\u6273\u624B\uFF0C\u6703\u62FF\u5728\u53F3\u624B\u3002"
     when: 
     optional: 0
-  - text: "\u5F9E\u8170\u9593\u87BA\u6813\u888B\u62FF 1 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
+  - text: "\u5F9E\u87BA\u6813\u888B\u62FF 1 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
     why: 
     targetId: ip.carbon_strip_L.bolt_1
     toolId: 
@@ -121,7 +121,7 @@ MonoBehaviour:
     hint: 
     when: 
     optional: 0
-  - text: "\u5F9E\u8170\u9593\u87BA\u6813\u888B\u62FF 2 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
+  - text: "\u5F9E\u87BA\u6813\u888B\u62FF 2 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
     why: 
     targetId: ip.carbon_strip_L.bolt_2
     toolId: 
@@ -132,7 +132,7 @@ MonoBehaviour:
     hint: 
     when: 
     optional: 0
-  - text: "\u5F9E\u8170\u9593\u87BA\u6813\u888B\u62FF 3 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
+  - text: "\u5F9E\u87BA\u6813\u888B\u62FF 3 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
     why: 
     targetId: ip.carbon_strip_L.bolt_3
     toolId: 
@@ -143,7 +143,7 @@ MonoBehaviour:
     hint: 
     when: 
     optional: 0
-  - text: "\u5F9E\u8170\u9593\u87BA\u6813\u888B\u62FF 4 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
+  - text: "\u5F9E\u87BA\u6813\u888B\u62FF 4 \u865F\u87BA\u6813\u653E\u56DE\u5B54\u4F4D"
     why: 
     targetId: ip.carbon_strip_L.bolt_4
     toolId: 

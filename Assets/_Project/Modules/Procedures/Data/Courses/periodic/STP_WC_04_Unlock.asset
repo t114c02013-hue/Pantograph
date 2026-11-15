@@ -15,6 +15,7 @@ MonoBehaviour:
   stepId: STP_WC_04_Unlock
   title: "\u89E3\u9396\u4E26\u8A18\u9304"
   instruction: "\u7531\u4E0A\u9396\u8005\u672C\u4EBA\u89E3\u9396\u3001\u6062\u5FA9\u96FB\u6E90\uFF0C\u4E26\u5728\u4F5C\u696D\u55AE\u7C3D\u540D\u3002\u672C\u5207\u7247\u5DF2\u9810\u5148\u5B8C\u6210\u3002"
+  instructionXR: 
   toolHint: "\u4E0A\u9396\u639B\u724C\u7D44"
   targetHint: "\u4E3B\u65B7\u8DEF\u5668\u3001\u5347\u5F13\u958B\u95DC"
   targetIds:
@@ -25,6 +26,7 @@ MonoBehaviour:
     rid: 1000
   errors:
   - errorId: ERR_WC04_NotSigned
+    tutorialHintOnly: 0
     severity: 0
     what: "\u89E3\u9396\u5F8C\u6C92\u6709\u5728\u4F5C\u696D\u55AE\u7C3D\u540D\u3002"
     why: "\u6C92\u6709\u7D00\u9304\u5C31\u7121\u6CD5\u8FFD\u8E64\u8AB0\u5728\u4EC0\u9EBC\u6642\u5019\u6062\u5FA9\u9001\u96FB\u3002"
@@ -66,6 +68,7 @@ MonoBehaviour:
     textDesktop: 
     hint: "\u4F5C\u696D\u8CA0\u8CAC\u4EBA\u6703\u548C\u6A5F\u5EE0\u8ABF\u5EA6\uFF08\u7BA1\u5168\u5EE0\u9001\u96FB\u7684\u4EBA\uFF09\u78BA\u8A8D\u3002\u63A5\u5730\u3001\u4EBA\u54E1\u3001\u5DE5\u5177\u90FD\u78BA\u8A8D\u904E\uFF0C\u624D\u80FD\u9001\u96FB\u3002"
     when: 
+    optional: 0
   - text: "\u5F9E\u8170\u5305\u62FF\u51FA\u4E0A\u9396\u639B\u724C\u7D44"
     why: 
     targetId: env.waist_pouch
@@ -74,8 +77,9 @@ MonoBehaviour:
     standPointId: tp.cab
     subId: a
     textDesktop: 
-    hint: "\u4EFB\u4E00\u624B\u4F38\u5230\u53F3\u8170\u7684\u8170\u5305\uFF0C\u6309\u63E1\u628A\u62FF\u51FA\u4E0A\u9396\u639B\u724C\u7D44\uFF0C\u6703\u62FF\u5728\u53F3\u624B\u3002"
+    hint: "\u4EFB\u4E00\u624B\u4F38\u5230\u8170\u5305\uFF0C\u6309\u63E1\u628A\u62FF\u51FA\u4E0A\u9396\u639B\u724C\u7D44\uFF0C\u6703\u62FF\u5728\u53F3\u624B\u3002"
     when: 
+    optional: 0
   - text: "\u89E3\u9664\u5347\u5F13\u958B\u95DC\u7684\u9396"
     why: 
     targetId: ip.cab.raise_switch
@@ -86,6 +90,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u89E3\u9664\u4E3B\u65B7\u8DEF\u5668\u7684\u9396"
     why: 
     targetId: ip.cab.breaker
@@ -96,6 +101,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u6062\u5FA9\u96FB\u52D5\u7F38\u96FB\u6E90"
     why: 
     targetId: ip.cab.cylinder_power
@@ -106,6 +112,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   presetDone: 0
   side: 
   presetStates: []

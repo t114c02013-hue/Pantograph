@@ -13,7 +13,7 @@ namespace PantographSim.Data
         [Tooltip("轉身超過這個角度（度）工具袋才跟過來，平常不晃；跟過來的速度（度／秒）")] public float followAngleDeg = 60f, followSpeedDeg = 240f;
         [Tooltip("教學模式：這一步要拿的工具在手離它這個距離內就算拿到（格子只隔 6 cm，低頭也不好對準）")] public float targetRadius = 0.30f;
         public string notStartedHint = "請先在任務卡選擇課程並開始";
-        [Tooltip("教學模式：這一步要拿工具袋裡的工具時的提示，{0}＝工具名稱")] public string takeHint = "手伸到左腰工具袋，按握把拿「{0}」";
+        [Tooltip("教學模式：這一步要拿工具袋裡的工具時的提示，{0}＝工具名稱")] public string takeHint = "手伸到工具袋，按握把拿「{0}」";
 
         public static ToolPouchDef Load()
         {
