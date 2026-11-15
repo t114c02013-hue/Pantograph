@@ -15,6 +15,7 @@ MonoBehaviour:
   stepId: STP_IN_09_HVReconnect
   title: "\u63A5\u56DE\u9AD8\u58D3\u7AEF\u5B50"
   instruction: "\u63A5\u56DE\u9AD8\u58D3\u7AEF\u5B50"
+  instructionXR: 
   toolHint: 
   targetHint: 
   targetIds:
@@ -29,6 +30,7 @@ MonoBehaviour:
     rid: 1000
   errors:
   - errorId: ERR_IN09_Setting
+    tutorialHintOnly: 0
     severity: 1
     what: "\u5927\u626D\u529B\u6273\u624B\u7684\u8A2D\u5B9A\u503C\u4E0D\u662F 50
       N\xB7m\u3002"
@@ -49,6 +51,7 @@ MonoBehaviour:
     oncePerRun: 0
     inputMode: 
   - errorId: ERR_IN09_Under
+    tutorialHintOnly: 0
     severity: 2
     what: "\u9AD8\u58D3\u7AEF\u5B50\u87BA\u6813\u626D\u529B\u4E0D\u8DB3\uFF08\u4F4E\u65BC
       46 N\xB7m\uFF09\u3002"
@@ -69,6 +72,7 @@ MonoBehaviour:
     oncePerRun: 0
     inputMode: 
   - errorId: ERR_IN09_Over
+    tutorialHintOnly: 0
     severity: 1
     what: "\u9AD8\u58D3\u7AEF\u5B50\u87BA\u6813\u626D\u529B\u904E\u5927\uFF08\u8D85\u904E
       54 N\xB7m\uFF09\u3002"
@@ -89,6 +93,7 @@ MonoBehaviour:
     oncePerRun: 0
     inputMode: 
   - errorId: ERR_IN09_WrenchRange
+    tutorialHintOnly: 0
     severity: 0
     what: "\u8A2D\u5B9A\u7684\u626D\u529B\u8D85\u51FA\u9019\u652F\u6273\u624B\u7684\u91CF\u7A0B\u3002"
     why: "\u91CF\u7A0B\u5916\u7684\u6273\u624B\u8B80\u4E0D\u6E96\uFF0C\u4E5F\u53EF\u80FD\u640D\u58DE\u3002"
@@ -135,6 +140,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u5F9E\u96F6\u4EF6\u888B\u62FF\u7AEF\u5B50\u87BA\u6813 1 \u653E\u56DE"
     why: 
     targetId: part.pan_assy.hv_bolt_1
@@ -145,6 +151,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u5F9E\u96F6\u4EF6\u888B\u62FF\u7AEF\u5B50\u87BA\u6813 2 \u653E\u56DE"
     why: 
     targetId: part.pan_assy.hv_bolt_2
@@ -155,6 +162,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u5F9E\u5957\u7B52\u76D2\u62FF 19 mm \u5957\u7B52\u88DD\u4E0A\u5927\u626D\u529B\u6273\u624B\uFF0C\u4E26\u628A\u626D\u529B\u8A2D\u70BA
       50 N\xB7m"
     why: 
@@ -167,6 +175,7 @@ MonoBehaviour:
     hint: "\u62FF\u8457\u5927\u626D\u529B\u6273\u624B\uFF0C\u628A\u6273\u624B\u982D\u78B0\u5230\u5957\u7B52\u76D2\u88E1\u7684
       19 mm \u5957\u7B52\u5EA7\uFF0C\u505C\u4E00\u4E0B\u5C31\u63DB\u597D\u3002"
     when: 
+    optional: 0
   - text: "\u628A\u7AEF\u5B50\u87BA\u6813 1 \u9396\u5230\u5580\u8072\uFF0F\u9707\u52D5\u9583\u8272"
     why: 
     targetId: part.pan_assy.hv_bolt_1
@@ -177,6 +186,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u628A\u7AEF\u5B50\u87BA\u6813 2 \u9396\u5230\u5580\u8072\uFF0F\u9707\u52D5\u9583\u8272"
     why: 
     targetId: part.pan_assy.hv_bolt_2
@@ -187,6 +197,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u628A\u5927\u626D\u529B\u6273\u624B\u6536\u56DE\u5DE5\u5177\u888B"
     why: 
     targetId: env.tool_rack.slot_13
@@ -195,8 +206,9 @@ MonoBehaviour:
     standPointId: tp.roof.base_e.n
     subId: e
     textDesktop: 
-    hint: "\u53F3\u624B\u628A\u5927\u626D\u529B\u6273\u624B\u79FB\u56DE\u5DE6\u8170\u7684\u5DE5\u5177\u888B\uFF0C\u653E\u958B\u63E1\u628A\u5C31\u6536\u56DE\u3002"
+    hint: "\u53F3\u624B\u628A\u5927\u626D\u529B\u6273\u624B\u79FB\u56DE\u5DE5\u5177\u888B\uFF0C\u653E\u958B\u63E1\u628A\u5C31\u6536\u56DE\u3002"
     when: 
+    optional: 0
   presetDone: 0
   side: 
   presetStates: []

@@ -15,6 +15,7 @@ MonoBehaviour:
   stepId: STP_RM_03_HVDisconnect
   title: "\u62C6\u9AD8\u58D3\u96FB\u7E9C\u7AEF\u5B50"
   instruction: "\u62C6\u9AD8\u58D3\u96FB\u7E9C\u7AEF\u5B50"
+  instructionXR: 
   toolHint: 
   targetHint: 
   targetIds:
@@ -33,6 +34,7 @@ MonoBehaviour:
     rid: 1000
   errors:
   - errorId: ERR_RM03_WrongSocket
+    tutorialHintOnly: 0
     severity: 0
     what: "\u5957\u7B52\u5C3A\u5BF8\u4E0D\u5C0D\uFF0C\u5957\u4E0D\u4E0A\u9019\u652F\u87BA\u6813\u3002"
     why: "\u5957\u932F\u5C3A\u5BF8\u6703\u6ED1\u7259\u3001\u50B7\u87BA\u6813\u982D\u3002"
@@ -82,6 +84,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u6A19\u8A18\u7B46"
     why: 
     targetId: env.tool_rack.slot_9
@@ -90,8 +93,9 @@ MonoBehaviour:
     standPointId: tp.roof.base_e.n
     subId: b
     textDesktop: 
-    hint: "\u4EFB\u4E00\u624B\u4F38\u5230\u5DE6\u8170\u7684\u5DE5\u5177\u888B\uFF0C\u6309\u63E1\u628A\u62FF\u51FA\u6A19\u8A18\u7B46\uFF0C\u6703\u62FF\u5728\u53F3\u624B\u3002"
+    hint: "\u4EFB\u4E00\u624B\u4F38\u5230\u5DE5\u5177\u888B\uFF0C\u6309\u63E1\u628A\u62FF\u51FA\u6A19\u8A18\u7B46\uFF0C\u6703\u62FF\u5728\u53F3\u624B\u3002"
     when: 
+    optional: 0
   - text: "\u5728\u7AEF\u5B50\u8207\u7AEF\u5B50\u5EA7\u756B\u5C0D\u4F4D\u8A18\u865F"
     why: 
     targetId: ip.pan_assy.hv_terminal
@@ -102,6 +106,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u628A\u6A19\u8A18\u7B46\u6536\u56DE\u5DE5\u5177\u888B"
     why: 
     targetId: env.tool_rack.slot_9
@@ -110,8 +115,9 @@ MonoBehaviour:
     standPointId: tp.roof.base_e.n
     subId: d
     textDesktop: 
-    hint: "\u53F3\u624B\u628A\u6A19\u8A18\u7B46\u79FB\u56DE\u5DE6\u8170\u7684\u5DE5\u5177\u888B\uFF0C\u653E\u958B\u63E1\u628A\u5C31\u6536\u56DE\u3002"
+    hint: "\u53F3\u624B\u628A\u6A19\u8A18\u7B46\u79FB\u56DE\u5DE5\u5177\u888B\uFF0C\u653E\u958B\u63E1\u628A\u5C31\u6536\u56DE\u3002"
     when: 
+    optional: 0
   - text: "\u5F9E\u5DE5\u5177\u888B\u62FF\u51FA\u5957\u7B52\u6273\u624B"
     why: 
     targetId: env.tool_rack.slot_6
@@ -120,8 +126,9 @@ MonoBehaviour:
     standPointId: tp.roof.base_e.n
     subId: e
     textDesktop: 
-    hint: "\u4EFB\u4E00\u624B\u4F38\u5230\u5DE6\u8170\u7684\u5DE5\u5177\u888B\uFF0C\u6309\u63E1\u628A\u62FF\u51FA\u5957\u7B52\u6273\u624B\uFF0C\u6703\u62FF\u5728\u53F3\u624B\u3002"
+    hint: "\u4EFB\u4E00\u624B\u4F38\u5230\u5DE5\u5177\u888B\uFF0C\u6309\u63E1\u628A\u62FF\u51FA\u5957\u7B52\u6273\u624B\uFF0C\u6703\u62FF\u5728\u53F3\u624B\u3002"
     when: 
+    optional: 0
   - text: "\u63DB\u4E0A 19 mm \u5957\u7B52"
     why: 
     targetId: "env.tool_bag.socket_case;tool.socket_wrench\uFF08\u5957\u7B52\uFF09"
@@ -132,6 +139,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u628A\u7AEF\u5B50\u87BA\u6813 1 \u8F49\u5230\u812B\u51FA"
     why: 
     targetId: part.pan_assy.hv_bolt_1
@@ -142,6 +150,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u628A\u87BA\u6813 1 \u6536\u9032\u96F6\u4EF6\u888B"
     why: 
     targetId: env.tool_bag.bolt_pouch
@@ -152,6 +161,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u628A\u7AEF\u5B50\u87BA\u6813 2 \u8F49\u5230\u812B\u51FA"
     why: 
     targetId: part.pan_assy.hv_bolt_2
@@ -162,6 +172,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u628A\u87BA\u6813 2 \u6536\u9032\u96F6\u4EF6\u888B"
     why: 
     targetId: env.tool_bag.bolt_pouch
@@ -172,6 +183,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   - text: "\u53D6\u4E0B\u7AEF\u5B50\uFF0C\u653E\u5230\u505C\u653E\u4F4D"
     why: 
     targetId: ip.pan_assy.hv_terminal
@@ -182,6 +194,7 @@ MonoBehaviour:
     textDesktop: 
     hint: 
     when: 
+    optional: 0
   presetDone: 0
   side: 
   presetStates: []

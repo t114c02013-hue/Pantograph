@@ -188,7 +188,7 @@
       "stepId": "STP_CSR_02_ZeroCaliper",
       "refSeconds": [30, 15],
       "subActions": [
-        { "text": "從工具袋拿出游標卡尺", "textDesktop": "到工具袋拿起游標卡尺", "hint": "任一手伸到左腰工具袋按握把，卡尺會拿在右手。量之前要先歸零。", "target": "env.tool_rack.slot_5", "done": "tool.active=tool.caliper", "why": "工具袋", "tool": "tool.caliper", "stand": "tp.roof.inner" },
+        { "text": "從工具袋拿出游標卡尺", "textDesktop": "到工具袋拿起游標卡尺", "hint": "工具袋在你左前方，可以用左手握把移到順手的位置。按握把拿出卡尺。", "target": "env.tool_rack.slot_5", "done": "tool.active=tool.caliper", "why": "工具袋", "tool": "tool.caliper", "stand": "tp.roof.inner" },
         { "text": "把量爪完全合攏", "textDesktop": "把量爪完全合攏", "hint": "看左手打開工具面板點「合攏量爪」，或左手指尖碰量爪。沒合攏，歸零就不準。", "target": "", "done": "tool.caliper.jaw=0", "why": "按下方「合攏量爪」", "tool": "tool.caliper", "stand": "tp.roof.inner" },
         { "text": "按 ZERO 歸零", "textDesktop": "按 ZERO 鍵歸零", "hint": "在左手的工具面板點「ZERO」。沒歸零就量，讀數會多出 0.30 mm。", "target": "", "done": "tool.caliper.zeroed", "why": "要顯示 0.00", "tool": "tool.caliper", "stand": "tp.roof.inner" }
       ],
@@ -254,7 +254,7 @@
         { "text": "量外側滑板的中點", "textDesktop": "量外側滑板中點", "hint": "射線指著中間的藍色量測點按扳機，讀數自動帶入。", "target": "ip.carbon_strip_R.measure_mid", "done": "ip.carbon_strip_R.measure_mid.measured", "why": "", "tool": "tool.caliper", "stand": "tp.roof.outer" },
         { "text": "量外側滑板的右端點", "textDesktop": "量外側滑板右側點", "hint": "射線指著右端的藍色量測點按扳機，讀數自動帶入。", "target": "ip.carbon_strip_R.measure_right", "done": "ip.carbon_strip_R.measure_right.measured", "why": "距端 15 cm", "tool": "tool.caliper", "stand": "tp.roof.outer" },
         { "text": "三點量完自動填入作業單", "textDesktop": "三個讀數填入作業單", "hint": "三點量完會自動填進作業單並送出，不用另外按。", "target": "env.work_order", "done": "workorder.reading.R.submitted", "why": "照卡尺讀數抄，誤差 ≤ 0.05", "tool": "", "stand": "tp.roof.outer" },
-        { "text": "把游標卡尺收回工具袋", "textDesktop": "把卡尺放回工具袋", "hint": "右手把卡尺移回左腰的工具袋，放開握把就收回。用完就收，才不會留在車頂。", "target": "env.tool_rack.slot_5", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.inner" }
+        { "text": "把游標卡尺收回工具袋", "textDesktop": "把卡尺放回工具袋", "hint": "右手把卡尺移回工具袋，放開握把就收回。用完就收，才不會留在車頂。", "target": "env.tool_rack.slot_5", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.inner" }
       ],
       "side": "R",
       "title": "量測外側滑板",
@@ -317,7 +317,7 @@
       "stepId": "STP_CSR_06_Loosen",
       "refSeconds": [60, 35],
       "subActions": [
-        { "text": "從工具袋拿出套筒扳手", "textDesktop": "到工具袋拿起套筒扳手", "hint": "任一手伸到左腰工具袋按握把，扳手會拿在右手。先換套筒、切方向，再套螺栓。", "target": "env.tool_rack.slot_6", "done": "tool.active=tool.socket_wrench", "why": "工具袋", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "從工具袋拿出套筒扳手", "textDesktop": "到工具袋拿起套筒扳手", "hint": "任一手伸到工具袋按握把，扳手會拿在右手。先換套筒、切方向，再套螺栓。", "target": "env.tool_rack.slot_6", "done": "tool.active=tool.socket_wrench", "why": "工具袋", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
         { "text": "換上 13 mm 套筒", "textDesktop": "換上 13 mm 套筒", "hint": "把扳手頭碰到套筒盒的 13 mm 套筒座，停一下就換好。尺寸不對會滑牙傷螺栓。", "target": "", "done": "tool.socket_wrench.size=13", "why": "M8 螺栓用 13 mm", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
         { "text": "方向切到「鬆」", "textDesktop": "方向切到「鬆」", "hint": "看左手開工具面板，右手射線點「鬆」，或左手碰橘色撥桿。方向錯會越鎖越緊。", "target": "", "done": "tool.socket_wrench.dir=loosen", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
         { "text": "把 1 號螺栓鬆半圈", "textDesktop": "把 1 號螺栓鬆半圈", "hint": "射線點{側名}滑板 1 號螺栓，按住扳機約 2 秒轉半圈。四支先各鬆半圈才不歪。", "target": "ip.carbon_strip_{side}.bolt_1", "done": "ip.carbon_strip_{side}.bolt_1.angle_deg>=150", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
@@ -361,7 +361,7 @@
         { "text": "把 3 號螺栓收進腰間螺栓袋", "textDesktop": "把 3 號螺栓收進腰間螺栓袋", "hint": "螺栓脫出後，射線指著它再按一下扳機，就收進腰間螺栓袋。", "target": "env.bolt_tray_{side}", "done": "ip.carbon_strip_{side}.bolt_3.state=InTray", "why": "拆下的螺栓立刻收好", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
         { "text": "把 4 號螺栓轉到脫出", "textDesktop": "把 4 號螺栓轉到脫出", "hint": "射線指著 4 號螺栓按扳機套上，按住轉到螺栓脫出再放開。", "target": "ip.carbon_strip_{side}.bolt_4", "done": "ip.carbon_strip_{side}.bolt_4.angle_deg>=720", "why": "滾輪繼續轉約兩圈", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
         { "text": "把 4 號螺栓收進腰間螺栓袋", "textDesktop": "把 4 號螺栓收進腰間螺栓袋", "hint": "螺栓脫出後，射線指著它再按一下扳機，就收進腰間螺栓袋。", "target": "env.bolt_tray_{side}", "done": "ip.carbon_strip_{side}.bolt_4.state=InTray", "why": "拆下的螺栓立刻收好", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
-        { "text": "把套筒扳手收回工具袋", "textDesktop": "把套筒扳手放回工具袋", "hint": "右手把套筒扳手移回左腰的工具袋，放開握把就收回。", "target": "env.tool_rack.slot_6", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.{side}" }
+        { "text": "把套筒扳手收回工具袋", "textDesktop": "把套筒扳手放回工具袋", "hint": "右手把套筒扳手移回工具袋，放開握把就收回。", "target": "env.tool_rack.slot_6", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.{side}" }
       ],
       "title": "取出螺栓",
       "instruction": "繼續用套筒扳手把每支螺栓轉到脫出（約兩圈），再點螺栓把它放進零件盒。",
@@ -414,9 +414,9 @@
       "refSeconds": [45, 30],
       "subActions": [
         { "text": "把螺栓倒進螺栓盤清點", "target": "env.bolt_tray_{side}", "done": "env.bolt_tray_{side}.poured", "stand": "tp.platform.parts", "optional": true, "hint": "點一下平台置物架上的螺栓盤，4 支倒進去數一遍。不做也可以繼續。" },
-        { "text": "從工具袋拿出清潔布", "textDesktop": "到工具袋拿起清潔布", "hint": "任一手伸到左腰工具袋按握把，清潔布會拿在右手。", "target": "env.tool_rack.slot_8", "done": "tool.active=tool.cleaning_cloth", "why": "工具袋", "tool": "tool.cleaning_cloth", "stand": "tp.roof.{side}" },
+        { "text": "從工具袋拿出清潔布", "textDesktop": "到工具袋拿起清潔布", "hint": "任一手伸到工具袋按握把，清潔布會拿在右手。", "target": "env.tool_rack.slot_8", "done": "tool.active=tool.cleaning_cloth", "why": "工具袋", "tool": "tool.cleaning_cloth", "stand": "tp.roof.{side}" },
         { "text": "來回擦拭托架接觸面", "textDesktop": "來回擦拭托架接觸面", "hint": "射線指著{側名}托架，按住扳機來回掃過接觸面。有髒汙，新滑板會接觸不良。", "target": "ip.carbon_strip_{side}.bracket", "done": "ip.carbon_strip_{side}.bracket.clean_ratio>=0.95", "why": "清除率要 ≥ 95%", "tool": "tool.cleaning_cloth", "stand": "tp.roof.{side}" },
-        { "text": "把清潔布收回工具袋", "textDesktop": "把清潔布放回工具袋", "hint": "右手把清潔布移回左腰的工具袋，放開握把就收回。", "target": "env.tool_rack.slot_8", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.{side}" }
+        { "text": "把清潔布收回工具袋", "textDesktop": "把清潔布放回工具袋", "hint": "右手把清潔布移回工具袋，放開握把就收回。", "target": "env.tool_rack.slot_8", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.{side}" }
       ],
       "title": "清潔托架",
       "instruction": "拿清潔布，按住左鍵在露出的托架接觸面上來回擦，直到清除率 ≥ 95%。",
@@ -441,9 +441,9 @@
       "subActions": [
         { "text": "看備品架上三條滑板的標籤", "textDesktop": "查看備品架三條標籤", "hint": "備品架在平台工作台上，三條只有一條型號對，三條都要看。型號不對的不能裝。", "target": "env.spare_shelf.slot_*", "done": "spare.{side}.viewed_count>=3", "why": "型號要 CS-1100-74A", "tool": "", "stand": "tp.platform.parts" },
         { "text": "翻面檢查有無裂紋", "textDesktop": "翻面檢查有無裂紋", "hint": "射線指著選定的滑板按扳機打開檢視面板，按「翻面」看背面。有裂紋裝上去會斷。", "target": "env.spare_shelf.slot_2", "done": "env.spare_shelf.slot_2.flipped", "why": "裂紋在背面", "tool": "", "stand": "tp.platform.parts" },
-        { "text": "從工具袋拿出游標卡尺", "textDesktop": "到工具袋拿起游標卡尺", "hint": "任一手伸到左腰工具袋按握把，卡尺會拿在右手。", "target": "env.tool_rack.slot_5", "done": "tool.active=tool.caliper", "why": "工具袋", "tool": "tool.caliper", "stand": "tp.roof.{side}" },
+        { "text": "從工具袋拿出游標卡尺", "textDesktop": "到工具袋拿起游標卡尺", "hint": "任一手伸到工具袋按握把，卡尺會拿在右手。", "target": "env.tool_rack.slot_5", "done": "tool.active=tool.caliper", "why": "工具袋", "tool": "tool.caliper", "stand": "tp.roof.{side}" },
         { "text": "量選定新滑板的中點", "textDesktop": "量選定新滑板的中點", "hint": "射線指著新滑板中點的藍色量測點按扳機。新品是 18.0 mm，不對就不能裝。", "target": "env.spare_shelf.slot_2", "done": "env.spare_shelf.slot_2.measured", "why": "要 18.0 ± 0.2 mm", "tool": "tool.caliper", "stand": "tp.platform.parts" },
-        { "text": "把游標卡尺收回工具袋", "textDesktop": "把卡尺放回工具袋", "hint": "右手把卡尺移回左腰的工具袋，放開握把就收回。", "target": "env.tool_rack.slot_5", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.{side}" },
+        { "text": "把游標卡尺收回工具袋", "textDesktop": "把卡尺放回工具袋", "hint": "右手把卡尺移回工具袋，放開握把就收回。", "target": "env.tool_rack.slot_5", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.{side}" },
         { "text": "把螺栓拿回腰間螺栓袋", "target": "env.bolt_tray_{side}", "done": "env.bolt_tray_{side}.taken_back", "stand": "tp.platform.parts", "optional": true, "hint": "點一下螺栓盤，螺栓就拿回腰間螺栓袋。不做也可以繼續，裝回時一樣拿得到。" },
         { "text": "拿起型號正確、無裂紋的那條", "textDesktop": "拿起選定的新滑板", "hint": "就是剛才看過標籤、翻面檢查過的那條，按握把拿起。拿錯型號或有裂紋是重大錯誤。", "target": "env.spare_shelf.slot_2", "done": "spare.{side}.picked", "why": "在檢視視窗按「選用此備品」", "tool": "", "stand": "tp.platform.parts" }
       ],
@@ -498,7 +498,7 @@
       "stepId": "STP_CSR_12_PreTighten",
       "refSeconds": [90, 50],
       "subActions": [
-        { "text": "從工具袋拿出套筒扳手", "textDesktop": "到工具袋拿起套筒扳手", "hint": "任一手伸到左腰工具袋按握把，扳手會拿在右手。", "target": "env.tool_rack.slot_6", "done": "tool.active=tool.socket_wrench", "why": "工具袋", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
+        { "text": "從工具袋拿出套筒扳手", "textDesktop": "到工具袋拿起套筒扳手", "hint": "任一手伸到工具袋按握把，扳手會拿在右手。", "target": "env.tool_rack.slot_6", "done": "tool.active=tool.socket_wrench", "why": "工具袋", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
         { "text": "從腰間螺栓袋拿 1 號螺栓放回孔位", "textDesktop": "從腰間螺栓袋拿 1 號螺栓放回孔位", "hint": "拿著扳手射線點空的 1 號孔，螺栓會從腰間螺栓袋放回。倒在盤裡沒拿回也沒關係。", "target": "ip.carbon_strip_{side}.bolt_1", "done": "ip.carbon_strip_{side}.bolt_1.state=Placed", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
         { "text": "從腰間螺栓袋拿 2 號螺栓放回孔位", "textDesktop": "從腰間螺栓袋拿 2 號螺栓放回孔位", "hint": "拿著扳手，射線點空的 2 號螺栓孔，螺栓會從腰間螺栓袋放回去。", "target": "ip.carbon_strip_{side}.bolt_2", "done": "ip.carbon_strip_{side}.bolt_2.state=Placed", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
         { "text": "從腰間螺栓袋拿 3 號螺栓放回孔位", "textDesktop": "從腰間螺栓袋拿 3 號螺栓放回孔位", "hint": "拿著扳手，射線點空的 3 號螺栓孔，螺栓會從腰間螺栓袋放回去。", "target": "ip.carbon_strip_{side}.bolt_3", "done": "ip.carbon_strip_{side}.bolt_3.state=Placed", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
@@ -508,7 +508,7 @@
         { "text": "把 2 號螺栓鎖到貼合", "textDesktop": "把 2 號螺栓鎖到貼合", "hint": "射線指著 2 號螺栓按扳機套上，按住轉到螺栓頭貼平再放開。", "target": "ip.carbon_strip_{side}.bolt_2", "done": "ip.carbon_strip_{side}.bolt_2.state=Snug", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
         { "text": "把 3 號螺栓鎖到貼合", "textDesktop": "把 3 號螺栓鎖到貼合", "hint": "射線指著 3 號螺栓按扳機套上，按住轉到螺栓頭貼平再放開。", "target": "ip.carbon_strip_{side}.bolt_3", "done": "ip.carbon_strip_{side}.bolt_3.state=Snug", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
         { "text": "把 4 號螺栓鎖到貼合", "textDesktop": "把 4 號螺栓鎖到貼合", "hint": "射線指著 4 號螺栓按扳機套上，按住轉到螺栓頭貼平再放開。", "target": "ip.carbon_strip_{side}.bolt_4", "done": "ip.carbon_strip_{side}.bolt_4.state=Snug", "why": "", "tool": "tool.socket_wrench", "stand": "tp.roof.{side}" },
-        { "text": "把套筒扳手收回工具袋", "textDesktop": "把套筒扳手放回工具袋", "hint": "右手把套筒扳手移回左腰的工具袋，放開握把就收回。", "target": "env.tool_rack.slot_6", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.{side}" }
+        { "text": "把套筒扳手收回工具袋", "textDesktop": "把套筒扳手放回工具袋", "hint": "右手把套筒扳手移回工具袋，放開握把就收回。", "target": "env.tool_rack.slot_6", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.{side}" }
       ],
       "title": "裝回螺栓並預鎖",
       "instruction": "套筒扳手方向切到「鎖」，依 1→4 點空孔放回螺栓，再依 1→2→3→4 每支鎖到貼合（約一圈）。",
@@ -538,13 +538,13 @@
       "stepId": "STP_CSR_13_Torque",
       "refSeconds": [70, 40],
       "subActions": [
-        { "text": "從工具袋拿出扭力扳手", "textDesktop": "到工具袋拿起扭力扳手", "hint": "任一手伸到左腰工具袋按握把，扭力扳手會拿在右手。", "target": "env.tool_rack.slot_7", "done": "tool.active=tool.torque_wrench", "why": "工具袋", "tool": "tool.torque_wrench", "stand": "tp.roof.{side}" },
+        { "text": "從工具袋拿出扭力扳手", "textDesktop": "到工具袋拿起扭力扳手", "hint": "任一手伸到工具袋按握把，扭力扳手會拿在右手。", "target": "env.tool_rack.slot_7", "done": "tool.active=tool.torque_wrench", "why": "工具袋", "tool": "tool.torque_wrench", "stand": "tp.roof.{side}" },
         { "text": "把扭力設定為 25 N·m", "textDesktop": "把扭力設定為 25 N·m", "hint": "看左手開工具面板，點「+0.5」「−0.5」調到 25。太鬆會脫，太緊壓壞滑板。", "target": "", "done": "tool.torque_wrench.setting=25", "why": "示例值", "tool": "tool.torque_wrench", "stand": "tp.roof.{side}" },
         { "text": "把 1 號螺栓鎖到喀一聲", "textDesktop": "鎖 1 號螺栓到喀聲", "hint": "射線指著 1 號螺栓按扳機套上，按住轉到「喀」一聲、手把震動就放開。再轉會過頭。", "target": "ip.carbon_strip_{side}.bolt_1", "done": "ip.carbon_strip_{side}.bolt_1.state=Torqued", "why": "", "tool": "tool.torque_wrench", "stand": "tp.roof.{side}" },
         { "text": "把 2 號螺栓鎖到喀一聲", "textDesktop": "鎖 2 號螺栓到喀聲", "hint": "射線指著 2 號螺栓按扳機套上，按住轉到「喀」一聲就放開。", "target": "ip.carbon_strip_{side}.bolt_2", "done": "ip.carbon_strip_{side}.bolt_2.state=Torqued", "why": "", "tool": "tool.torque_wrench", "stand": "tp.roof.{side}" },
         { "text": "把 3 號螺栓鎖到喀一聲", "textDesktop": "鎖 3 號螺栓到喀聲", "hint": "射線指著 3 號螺栓按扳機套上，按住轉到「喀」一聲就放開。", "target": "ip.carbon_strip_{side}.bolt_3", "done": "ip.carbon_strip_{side}.bolt_3.state=Torqued", "why": "", "tool": "tool.torque_wrench", "stand": "tp.roof.{side}" },
         { "text": "把 4 號螺栓鎖到喀一聲", "textDesktop": "鎖 4 號螺栓到喀聲", "hint": "射線指著 4 號螺栓按扳機套上，按住轉到「喀」一聲就放開。", "target": "ip.carbon_strip_{side}.bolt_4", "done": "ip.carbon_strip_{side}.bolt_4.state=Torqued", "why": "", "tool": "tool.torque_wrench", "stand": "tp.roof.{side}" },
-        { "text": "把扭力扳手收回工具袋", "textDesktop": "把扭力扳手放回工具袋", "hint": "右手把扭力扳手移回左腰的工具袋，放開握把就收回。", "target": "env.tool_rack.slot_7", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.{side}" }
+        { "text": "把扭力扳手收回工具袋", "textDesktop": "把扭力扳手放回工具袋", "hint": "右手把扭力扳手移回工具袋，放開握把就收回。", "target": "env.tool_rack.slot_7", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.{side}" }
       ],
       "title": "鎖到規定扭力",
       "instruction": "扭力扳手設定 25 N·m，依 1→2→3→4 在螺栓上按住左鍵，聽到喀聲或看到「到達設定值」就放開。",
@@ -576,12 +576,12 @@
       "stepId": "STP_CSR_14_Mark",
       "refSeconds": [40, 25],
       "subActions": [
-        { "text": "從工具袋拿出標記筆", "textDesktop": "到工具袋拿起標記筆", "hint": "任一手伸到左腰工具袋按握把，標記筆會拿在右手。", "target": "env.tool_rack.slot_9", "done": "tool.active=tool.marker", "why": "工具袋", "tool": "tool.marker", "stand": "tp.roof.{side}" },
+        { "text": "從工具袋拿出標記筆", "textDesktop": "到工具袋拿起標記筆", "hint": "任一手伸到工具袋按握把，標記筆會拿在右手。", "target": "env.tool_rack.slot_9", "done": "tool.active=tool.marker", "why": "工具袋", "tool": "tool.marker", "stand": "tp.roof.{side}" },
         { "text": "在 1 號螺栓畫標記", "textDesktop": "在 1 號螺栓畫標記", "hint": "射線指著 1 號螺栓按扳機，畫一條直線。之後看線有沒有錯開，就知道螺栓鬆了沒。", "target": "ip.carbon_strip_{side}.bolt_1", "done": "ip.carbon_strip_{side}.bolt_1.marked", "why": "", "tool": "tool.marker", "stand": "tp.roof.{side}" },
         { "text": "在 2 號螺栓畫標記", "textDesktop": "在 2 號螺栓畫標記", "hint": "射線指著 2 號螺栓按扳機畫線。要先鎖到規定扭力才畫得上。", "target": "ip.carbon_strip_{side}.bolt_2", "done": "ip.carbon_strip_{side}.bolt_2.marked", "why": "", "tool": "tool.marker", "stand": "tp.roof.{side}" },
         { "text": "在 3 號螺栓畫標記", "textDesktop": "在 3 號螺栓畫標記", "hint": "射線指著 3 號螺栓按扳機畫線。", "target": "ip.carbon_strip_{side}.bolt_3", "done": "ip.carbon_strip_{side}.bolt_3.marked", "why": "", "tool": "tool.marker", "stand": "tp.roof.{side}" },
         { "text": "在 4 號螺栓畫標記", "textDesktop": "在 4 號螺栓畫標記", "hint": "射線指著 4 號螺栓按扳機畫線。", "target": "ip.carbon_strip_{side}.bolt_4", "done": "ip.carbon_strip_{side}.bolt_4.marked", "why": "", "tool": "tool.marker", "stand": "tp.roof.{side}" },
-        { "text": "把標記筆收回工具袋", "textDesktop": "把標記筆放回工具袋", "hint": "右手把標記筆移回左腰的工具袋，放開握把就收回。", "target": "env.tool_rack.slot_9", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.{side}" }
+        { "text": "把標記筆收回工具袋", "textDesktop": "把標記筆放回工具袋", "hint": "右手把標記筆移回工具袋，放開握把就收回。", "target": "env.tool_rack.slot_9", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.{side}" }
       ],
       "title": "畫防鬆標記",
       "instruction": "拿標記筆，依 1→2→3→4 點每支螺栓，畫上跨螺栓頭與托架的標記線。",
@@ -603,11 +603,11 @@
       "stepId": "STP_CSR_15_HeightCheck",
       "refSeconds": [50, 30],
       "subActions": [
-        { "text": "從工具袋拿出游標卡尺", "textDesktop": "到工具袋拿起游標卡尺", "hint": "任一手伸到左腰工具袋按握把，卡尺會拿在右手。兩條新滑板要一樣高。", "target": "env.tool_rack.slot_5", "done": "tool.active=tool.caliper", "why": "工具袋", "tool": "tool.caliper", "stand": "tp.roof.inner" },
+        { "text": "從工具袋拿出游標卡尺", "textDesktop": "到工具袋拿起游標卡尺", "hint": "任一手伸到工具袋按握把，卡尺會拿在右手。兩條新滑板要一樣高。", "target": "env.tool_rack.slot_5", "done": "tool.active=tool.caliper", "why": "工具袋", "tool": "tool.caliper", "stand": "tp.roof.inner" },
         { "text": "量靠關節新滑板的中點", "textDesktop": "量靠關節新滑板中點", "hint": "射線指著靠關節新滑板中點的藍色量測點按扳機，讀數自動帶入。", "target": "ip.carbon_strip_L.measure_mid", "done": "ip.carbon_strip_L.measure_mid.new_measured", "why": "", "tool": "tool.caliper", "stand": "tp.roof.inner" },
         { "text": "量外側新滑板的中點", "textDesktop": "量外側新滑板中點", "hint": "射線指著外側新滑板中點的藍色量測點按扳機。兩條差要在 1.0 mm 以內。", "target": "ip.carbon_strip_R.measure_mid", "done": "ip.carbon_strip_R.measure_mid.new_measured", "why": "", "tool": "tool.caliper", "stand": "tp.roof.outer" },
         { "text": "兩點量完自動填入作業單", "textDesktop": "兩個讀數填入作業單", "hint": "兩點量完會自動填進作業單，不用另外按。讀數會留著，交車時要核對。", "target": "env.work_order", "done": "workorder.height_diff", "why": "差值 ≤ 1.0 mm", "tool": "", "stand": "" },
-        { "text": "把游標卡尺收回工具袋", "textDesktop": "把卡尺放回工具袋", "hint": "右手把卡尺移回左腰的工具袋，放開握把就收回。", "target": "env.tool_rack.slot_5", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.inner" }
+        { "text": "把游標卡尺收回工具袋", "textDesktop": "把卡尺放回工具袋", "hint": "右手把卡尺移回工具袋，放開握把就收回。", "target": "env.tool_rack.slot_5", "done": "tool.active=", "why": "用完就歸位，收尾清點才對得上", "tool": "", "stand": "tp.roof.inner" }
       ],
       "title": "確認兩條高低差",
       "instruction": "兩條都裝好後，用卡尺量兩條新滑板的中點，把讀數抄到作業單「新滑板中點」並送出。兩條差要 ≤ 1.0 mm。",
