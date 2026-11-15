@@ -248,7 +248,7 @@ namespace PantographSim.Tests
             StringAssert.Contains($"<b class=\"bad\">{r.critical}</b>", html, "第一頁 Critical 次數");
             foreach (var name in new[] { "未降弓就碰弓體", "接地順序錯誤（先掛弓頭）", "靠關節滑板沒有三點都量", "扭力不足", "工具遺留" }) StringAssert.Contains(name, html);
             StringAssert.Contains("鎖到規定扭力（靠關節）", html, "中文步驟名");
-            StringAssert.Contains("接地棒先掛弓頭", html, "順序對照");
+            StringAssert.Contains("接地桿先掛弓頭", html, "順序對照");
 
             // errors.csv：UTF-8 BOM、每個錯誤都在、Critical（同步同錯只算一次）數量正確
             foreach (var csv in RecordFiles.Csvs)

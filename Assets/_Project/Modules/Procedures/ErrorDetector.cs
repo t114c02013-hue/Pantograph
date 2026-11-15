@@ -164,7 +164,7 @@ namespace PantographSim.Procedures
             {
                 case "": return "徒手";
                 case "tool.voltage_detector": return "驗電器";
-                case "tool.grounding_rod": return "接地棒";
+                case "tool.grounding_rod": return "接地桿";
                 case "tool.caliper": return "游標卡尺";
                 case "tool.socket_wrench": return "套筒扳手";
                 case "tool.torque_wrench": return "扭力扳手";

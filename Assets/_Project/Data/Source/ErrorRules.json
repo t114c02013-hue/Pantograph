@@ -694,7 +694,7 @@
           "ip.roof.hv_cable_ground|!ip.roof.carbody_ground.clamped&&!ip.roof.hv_cable_ground.clamped"
         ],
         "what": "掛接地的順序反了：接地端還沒接就先掛設備端（弓頭、電纜端子）。",
-        "why": "設備端如果還帶電，接地棒另一端沒接地，電流會經過你。",
+        "why": "設備端如果還帶電，接地桿另一端沒接地，電流會經過你。",
         "fix": "先夾接地端（平台端子、車體接地座），再掛設備端。"
       },
       "scope": "global",
@@ -776,7 +776,7 @@
       "status": "Defined",
       "owner": "",
       "source": "CSV",
-      "trigger": "掛著**：弓頭的接地棒，以及車頂電纜端點的短接地線（RM_00）。沒有第二支就拆，記 Critical，錯誤 ID 為 ERR_Global_HVDisconnectWithoutSecondGround（**新 ID**，鐵道 Q1「先掛後拆」）。",
+      "trigger": "掛著**：弓頭的接地桿，以及車頂電纜端點的短接地線（RM_00）。沒有第二支就拆，記 Critical，錯誤 ID 為 ERR_Global_HVDisconnectWithoutSecondGround（**新 ID**，鐵道 Q1「先掛後拆」）。",
       "rule": {
         "trigger": "BlockWhen",
         "keys": [
@@ -785,7 +785,7 @@
         ],
         "what": "第二支接地（車頂短接地線）沒有掛著就拆高壓電纜。",
         "why": "拆下電纜後弓體和電纜分開，兩邊都要各自接地（先掛後拆）。",
-        "fix": "先用短接地線接好電纜端子（RM_00），弓頭的接地棒也要掛著，再拆電纜。"
+        "fix": "先用短接地線接好電纜端子（RM_00），弓頭的接地桿也要掛著，再拆電纜。"
       },
       "scope": "global"
     },
@@ -1033,7 +1033,7 @@
       "status": "Defined",
       "owner": "",
       "source": "R1",
-      "trigger": "還沒夾平台接地端子，就先把接地棒掛上弓頭。"
+      "trigger": "還沒夾平台接地端子，就先把接地桿掛上弓頭。"
     },
     {
       "errorId": "ERR_Ground_RemoveOrder",
@@ -1697,7 +1697,7 @@
       "status": "Defined",
       "owner": "",
       "source": "CSV",
-      "trigger": "沒有拉線確認就把接地棒掛到弓頭。"
+      "trigger": "沒有拉線確認就把接地桿掛到弓頭。"
     },
     {
       "errorId": "ERR_SI06_Unhooked",

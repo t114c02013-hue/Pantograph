@@ -294,7 +294,7 @@ namespace PantographSim.Recording
             var firstHead = ground.FirstOrDefault(l => l.S("target") == SimIds.GroundClamp);
             var firstTerm = ground.FirstOrDefault(l => l.S("target") == SimIds.GroundTerminal && l.type == "ActionRequested");
             if (firstHead != null && (firstTerm == null || firstHead.seq < firstTerm.seq))
-                Add(firstHead.t, firstHead.step, "接地棒先掛弓頭", "先夾平台接地端子 → 拉線確認 → 掛弓頭", "先掛弓頭");
+                Add(firstHead.t, firstHead.step, "接地桿先掛弓頭", "先夾平台接地端子 → 拉線確認 → 掛弓頭", "先掛弓頭");
             foreach (var l in lines.Where(l => l.type == "ActionBlocked" && l.S("rule") == "ERR_Ground_RemoveOrder"))
                 Add(l.t, l.step, "拆接地順序", "先拆弓頭端 → 再拆平台端子", "先拆平台端子");
             return diffs.OrderBy(x => ((Dictionary<string, object>)x).Num("t")).ToList();

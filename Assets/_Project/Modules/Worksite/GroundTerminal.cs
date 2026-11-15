@@ -30,7 +30,7 @@ namespace PantographSim.Worksite
             bool clamped = State.GetBool(FlagKey);
             if (!clamped || !deployed)
             {
-                Toast(clamped ? "接地棒在使用中" : "要掛接地，先到桿架拿接地桿（第 3 格）");
+                Toast(clamped ? "接地桿在使用中" : "要掛接地，先到桿架拿接地桿（第 3 格）");
                 return;
             }
             if (!Sim.Ask(SimIds.ToolGroundingRod, id, "ground")) return;

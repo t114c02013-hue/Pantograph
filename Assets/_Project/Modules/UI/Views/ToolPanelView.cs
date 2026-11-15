@@ -91,7 +91,7 @@ namespace PantographSim.UI
 
         void BuildGrounding()
         {
-            var p = Panel(SimIds.ToolGroundingRod, "接地棒");
+            var p = Panel(SimIds.ToolGroundingRod, "接地桿");
             var status = Ui.Text(p, "", 23);
             var row = Row(p);
             var pull = Btn(row, "拉線確認", () => Ui.Send(SimIds.ToolGroundingRod, "pulltest"), 160);

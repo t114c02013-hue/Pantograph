@@ -13,7 +13,7 @@ namespace PantographSim.UI
         static readonly Dictionary<string, string> Purpose = new Dictionary<string, string>
         {
             { SimIds.PanHead, "扳機點一下＝親眼確認弓頭已降下" },
-            { SimIds.GroundTerminal, "接地棒先夾在這裡（平台側）" },
+            { SimIds.GroundTerminal, "接地桿先夾在這裡（平台側）" },
             { SimIds.GroundClamp, "驗電、掛接地桿的弓頭端" },
             { SimIds.VoltageTester, "驗電器先在這裡自檢" },
             { SimIds.WorkOrder, "記錄讀數、判定與清點" },
