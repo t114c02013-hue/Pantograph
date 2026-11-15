@@ -38,6 +38,17 @@ namespace PantographSim.Tests
         }
 
         [Test]
+        public void SlingRack_OnFloor_TopBarAtSlingHangHeight()   // RA-27：地面吊具架 FBX 原點在頂橫桿，建置時抬到最低點貼地
+        {
+            StationTests.WithScene(scene =>
+            {
+                var rack = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<Transform>(true)).First(t => t.name == "ENV_SlingRack");
+                Assert.AreEqual(Def.groundY, RB(rack).min.y, 0.02f, "吊具架最低點貼地");
+                Assert.AreEqual(Def.groundY + 1.2f, rack.GetComponent<Renderer>().bounds.max.y, 0.03f, "頂橫桿＝建置時吊帶掛高 g+1.2（架子站在地上）");
+            });
+        }
+
+        [Test]
         public void FloorEquipment_NotSunkIntoFloor()   // RA-27 通用：用 Fbx() 擺在地面／平台地板的設備，外框最低點 ≥ 地板 −0.02 m
         {
             StationTests.WithScene(scene =>
@@ -45,7 +56,7 @@ namespace PantographSim.Tests
                 var all = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<Transform>(true)).ToList();
                 foreach (var (name, floor) in new[] { ("ENV_WorkBench", Def.groundY), ("ENV_PantographStand", Def.groundY), ("ENV_SlingRack", Def.groundY), ("ENV_PoleRack", Def.platformFloorY) })
                 {
-                    if (Def.floorSinkKnown.Contains(name)) continue;   // 已知清單（待裁定），修好後從清單拿掉就會檢查
+                    if (Def.floorSinkKnown.Contains(name)) continue;   // 已知清單（裁定後略過的）
                     var t = all.Where(x => x.name == name && x.GetComponentInChildren<Renderer>(true) != null).OrderBy(x => x.GetComponentsInParent<Transform>(true).Length).First();
                     Assert.GreaterOrEqual(RB(t).min.y, floor - 0.02f, name + " 沒有沉進地板");
                 }

@@ -29,8 +29,8 @@ namespace PantographSim.Data
         public float platformWidth = 1.50f;
         public float platformZMin = -4.0f, platformZMax = 4.0f;
         public float platformFloorY = 0f;
-        [Tooltip("RA-27 地板檢查的已知清單（建置不失敗、報告列「◇ 已知」，待裁定）：LRV＝車體擺在車頂高度，剛好和平台地板同為 0，不是地板設備；ENV_SlingRack 沉 1.20 m、ENV_PoleRack 沉 0.03 m（原點不在最低點，待修）")]
-        public string[] floorSinkKnown = { "LRV", "ENV_SlingRack", "ENV_PoleRack" };
+        [Tooltip("RA-27 地板檢查的已知清單（建置不失敗、報告列「◇ 已知」）：LRV＝車體不是地板設備（擺在車頂高度 0，剛好和平台地板同高），永久略過；ENV_PoleRack＝只有 6 cm 底板以地板為中心嵌進 3 cm，立柱從地板起，看不出問題，不改")]
+        public string[] floorSinkKnown = { "LRV", "ENV_PoleRack" };
         public float guardrailHeight = 1.10f;
         [Tooltip("試玩修正 第 1 點（規格 v5）：A 車頂矮欄（跪著作業的地方）、B 一般護欄的高度（m）；collider 和看得見的網格一樣高")] public float roofEdgeRailHeight = 0.45f, gapRailHeight = 1.0f;
         public float gateCenterZ = -1.00f, gateWidth = 0.80f;

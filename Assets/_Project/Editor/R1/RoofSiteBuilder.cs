@@ -115,7 +115,7 @@ namespace PantographSim.Editor
                 var b = RenderBounds(g); if (!b.HasValue) continue;
                 n++;
                 float sink = y - b.Value.min.y;
-                if (sink > 0.02f) sb.AppendLine($"{((d.floorSinkKnown ?? new string[0]).Contains(g.name) ? "◇ 已知（floorSinkKnown，待裁定）" : "✘")} 沉進地板：{g.name} 最低點 {b.Value.min.y:0.000}，比地板 {y:0.00} 低 {sink:0.000} m");
+                if (sink > 0.02f) sb.AppendLine($"{((d.floorSinkKnown ?? new string[0]).Contains(g.name) ? "◇ 已知（floorSinkKnown）" : "✘")} 沉進地板：{g.name} 最低點 {b.Value.min.y:0.000}，比地板 {y:0.00} 低 {sink:0.000} m");
             }
             sb.AppendLine($"地板檢查：用 Fbx() 擺在地面／平台地板的設備 {n} 個，最低點都要 ≥ 地板 −0.02 m");
         }
@@ -1306,6 +1306,8 @@ namespace PantographSim.Editor
 
             var g = d.groundY;
             var rack = Fbx("ENV_SlingRack", null, env, new Vector3(d.slingRackXZ.x, g, d.slingRackXZ.y));
+            float rackLift = LiftToFloor(rack, g);   // RA-27：FBX 原點在頂橫桿，不抬會整架沉進地板 1.2 m；吊帶照「架子站在地上」的 g+1.2 擺（之後再移到吊梁吊耳下），不用跟著動
+            sb.AppendLine($"地面吊具架 ENV_SlingRack：模型抬高 {rackLift:0.000} m 貼地；頂橫桿 {rack.GetComponent<Renderer>().bounds.max.y:0.000}（吊帶掛高 g+1.2 = {g + 1.2f:0.000}）");
             for (int i = 1; i <= 4; i++)
             {
                 var s = Fbx("ENV_Sling", null, rack.transform, new Vector3(d.slingRackXZ.x - 0.24f + 0.16f * (i - 1), g + 1.2f, d.slingRackXZ.y), rename: "env.sling_" + i);
