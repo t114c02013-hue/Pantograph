@@ -158,7 +158,7 @@ namespace PantographSim.Tests
                     var slab = o.GetComponentsInChildren<Collider>(true).Where(c => c.gameObject.layer == LayerMask.NameToLayer(SceneLayers.HeadSolid)).OrderByDescending(c => c.bounds.size.x * c.bounds.size.z).First().bounds;
                     Assert.IsTrue(StationLayoutCheck.HeadInSolid(new Vector3(slab.center.x, slab.max.y + def.headSolidRadius - 0.05f, slab.center.z), def), name + "：頭（含半徑）穿進頂面 0.05 m 要觸發");
                 }
-                var box = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<Renderer>(true)).First(r => r.name == "ShoreBox_Body");
+                var box = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<Renderer>(true)).First(r => r.name == "Body" && r.transform.parent != null && r.transform.parent.name == "ShorePowerBox");   // gen_depot_props v1.0 的箱體
                 bool wasActive = box.gameObject.activeInHierarchy;
                 foreach (var t in box.GetComponentsInParent<Transform>(true)) t.gameObject.SetActive(true);
                 Physics.SyncTransforms();

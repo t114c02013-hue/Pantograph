@@ -44,8 +44,10 @@ namespace PantographSim.Data
             new Solid { pattern = "ENV_PoleRack", kind = Kind.Box },
             new Solid { pattern = "LiftControlBox", kind = Kind.Box },
             new Solid { pattern = "DetectorTester", kind = Kind.Box },
-            new Solid { pattern = "Visual/ShoreBox_Body", kind = Kind.Box },
-            new Solid { pattern = "Visual/Post", kind = Kind.Box },
+            new Solid { pattern = "ShorePowerBox", kind = Kind.BoxPerPart },   // gen_depot_props v1.0（立柱、箱體、雨蓋…各一框）
+            new Solid { pattern = "IsolationStatusLight", kind = Kind.BoxPerPart },
+            new Solid { pattern = "LotoBoard", kind = Kind.Box },
+            new Solid { pattern = "PlatformShelf", kind = Kind.BoxPerPart },
             new Solid { pattern = "Visual/Column", kind = Kind.Box },
             new Solid { pattern = "Visual/Wall", kind = Kind.Box },
             new Solid { pattern = "Visual/EndWall", kind = Kind.Box },
@@ -58,7 +60,7 @@ namespace PantographSim.Data
             new Solid { pattern = "WallEquipment/SocketBox", kind = Kind.Box },
             new Solid { pattern = "WallEquipment/AirHoseReel", kind = Kind.Box },
         };
-        [Tooltip("solids 範圍內要排除的子節點樣式（燈、標牌、文字、夾板、可以拿的東西、內部）")] public string[] excludes = { "AlignLight_*", "Clipboard", "Inside_*", "*Label*", "Text", "LampLight", "HeadSolid_*", "NewStrip_*" };
+        [Tooltip("solids 範圍內要排除的子節點樣式（燈、標牌、文字、夾板、可以拿的東西、內部）")] public string[] excludes = { "AlignLight_*", "Clipboard", "Inside_*", "*Label*", "Text", "LampLight", "HeadSolid_*", "NewStrip_*", "BoltTray_Square_*" };
         [Tooltip("頭在裡面時不判（建置時由駕駛室房間推導寫入）")] public Bounds[] excludeZones = new Bounds[0];
 
         [Tooltip("站點檢查：彎腰時頭往前、往下（m）")] public float bowForward = 0.3f, bowDown = 0.3f;

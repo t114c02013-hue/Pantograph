@@ -668,21 +668,18 @@ namespace PantographSim.Editor
         {
             var env = res.env;
             // 升降操作盒：只有外觀（不擋站點），面朝 −X；▲▼ 是世界空間介面（XrPanelLayout 掛在 xr.mount.lift_panel）
-            var box = Box("LiftControlBox", env, aLift.position + new Vector3(-0.04f, 0, 0), new Vector3(0.08f, 0.32f, 0.36f), mats["panel"], collider: false);
+            // 建模師 A gen_depot_props v1.0：原點在盒底中心、正面是局部 −Z（匯入後；腳本說明寫 +Z）；盒子中心維持原方塊的位置（aLift −X 0.04），Btn_Up／Btn_Down 由 BuildTeachingExtras 掛 PressFollow
+            var box = Fbx("ENV_LiftControlBox", null, env, aLift.position + new Vector3(-0.04f, -0.18f, 0), yaw: 90f, rename: "LiftControlBox");
             var mount = new GameObject("LiftPanelMount");
             mount.transform.SetParent(box.transform, true);
             mount.transform.SetPositionAndRotation(aLift.position + new Vector3(-0.09f, 0.05f, 0), Quaternion.LookRotation(Vector3.right, Vector3.up));
             mount.AddComponent<RegisteredPoint>().Configure("xr.mount.lift_panel");
-            // terry 2026-11-13：指示燈不再浮在空中，裝在操作盒頂上（燈座＋燈罩），位置和原來差 5 cm 內
-            var lampBase = SliceModelBuilder.Prim(PrimitiveType.Cylinder, "PanIndicator_Base", box.transform, Vector3.zero, Vector3.one, mats["panel"]);
-            lampBase.transform.SetParent(env, true);
-            lampBase.transform.position = aLift.position + new Vector3(-0.04f, 0.16f + 0.015f, -0.12f);
-            lampBase.transform.localScale = new Vector3(0.075f, 0.015f, 0.075f);
-            Object.DestroyImmediate(lampBase.GetComponent<Collider>());
-            var lamp = SliceModelBuilder.Prim(PrimitiveType.Sphere, "PanIndicator", env, Vector3.zero, Vector3.one * 0.06f, mats["checkPoint"]);
-            lamp.transform.position = aLift.position + new Vector3(-0.04f, 0.16f + 0.03f + 0.025f, -0.12f);
+            // 弓位指示燈＝FBX 的 PanIndicator（燈罩 PanIndicator_Lens 交給 ControlPanelLamp；桌面點選用一顆和原本一樣大的球形碰撞體）
+            var lamp = box.GetComponentsInChildren<Transform>(true).First(t => t.name == "PanIndicator").gameObject;
+            var lens = lamp.GetComponentsInChildren<Renderer>(true).First(r => r.name == "PanIndicator_Lens");
+            var lampCol = lamp.AddComponent<SphereCollider>(); lampCol.radius = 0.03f; lampCol.center = lamp.transform.InverseTransformPoint(lens.bounds.center);
             lamp.AddComponent<ControlPanelLamp>().Configure("ip.cab.pan_indicator", "弓位指示燈");
-            lamp.GetComponent<ControlPanelLamp>().Setup(lamp.GetComponent<Renderer>());
+            lamp.GetComponent<ControlPanelLamp>().Setup(lens);
             lamp.AddComponent<Highlightable>();
             res.ids["ip.cab.pan_indicator"] = lamp.transform;
 
@@ -752,13 +749,12 @@ namespace PantographSim.Editor
             // R1.5b b3（D26）：車頂工具箱 env.roof_toolbox 移除，兩門課都用隨身工具袋（掛位 5–10、13）；套筒盒在工具袋的 SocketCase（BuildCraneAndRigging）
 
             // terry 2026-11-13：平台靠車頂側的固定置物架（零件盒、兩個螺栓盤放檯面上；備品架在旁邊自己的立架）
-            var shelfFrame = Child(env, "PlatformShelf");
+            // RA-29 問 2 A：架子用建模師 A 的 FBX（原點在架腳底面中心、正面局部 −Z 轉成朝 −X 走道）；尺寸和資料相同（0.40 × 1.40、頂面 0.85）
             float sx0 = d.platformShelfX, sz0 = d.platformShelfZMin, sz1 = d.platformShelfZMax, sTop = d.platformShelfTop, pfy = d.platformFloorY;
-            Box("Top", shelfFrame, new Vector3(sx0, sTop - 0.02f, (sz0 + sz1) / 2f), new Vector3(0.40f, 0.04f, sz1 - sz0), mats["steel"]);
-            Box("Shelf", shelfFrame, new Vector3(sx0, pfy + 0.3f, (sz0 + sz1) / 2f), new Vector3(0.40f, 0.03f, sz1 - sz0), mats["steel"], collider: false);
-            foreach (float zz in new[] { sz0 + 0.03f, sz1 - 0.03f }) foreach (float xx in new[] { sx0 - 0.17f, sx0 + 0.17f })
-                    Box("Leg", shelfFrame, new Vector3(xx, (pfy + sTop) / 2f, zz), new Vector3(0.04f, sTop - pfy, 0.04f), mats["steel"], collider: false);
-            foreach (var c in shelfFrame.GetComponentsInChildren<Collider>()) c.gameObject.layer = LayerMask.NameToLayer(SceneLayers.Boundary);
+            var shelfVis = Fbx("ENV_PlatformShelf", null, env, new Vector3(sx0, pfy, (sz0 + sz1) / 2f), yaw: 90f, rename: "PlatformShelf");
+            foreach (var t in shelfVis.GetComponentsInChildren<Transform>(true).Where(t => t.name.StartsWith("BoltTray_Square_")).ToList()) t.gameObject.SetActive(false);   // 方盤沿用現有外觀（0.25 × 0.18、4 格）
+            Col("PlatformShelf_Top", env, new Vector3(sx0 - 0.20f, sTop - 0.04f, sz0), new Vector3(sx0 + 0.20f, sTop, sz1), SceneLayers.Boundary);   // 原本檯面方塊的擋手碰撞體（Col 用世界軸，掛在不轉的 env 下）
+            var shelfTopY = shelfVis.GetComponentsInChildren<Renderer>(true).First(r => r.name == "Shelf_Top").bounds.max.y;
 
             // 零件盒（只收舊滑板）
             var tray = SliceModelBuilder.Prim(PrimitiveType.Cube, "PartsTray", env, Vector3.zero, new Vector3(0.34f, 0.06f, 0.26f), mats["tray"]);
@@ -768,6 +764,12 @@ namespace PantographSim.Editor
                 var g = SliceModelBuilder.Prim(PrimitiveType.Cube, "StripIcon" + i, tray.transform, new Vector3(0, 0.6f, -0.15f + 0.3f * i), new Vector3(0.9f, 0.3f, 0.15f), mats["crack"]);
                 Object.DestroyImmediate(g.GetComponent<Collider>()); g.SetActive(false); return g;
             }).ToArray();
+            // 零件盒外觀：FBX 的 PartsTray（尺寸相同 0.34 × 0.06 × 0.26）搬到資料位置、放在檯面上；原方塊只留碰撞體和元件
+            tray.GetComponent<Renderer>().enabled = false;
+            var trayVis = shelfVis.GetComponentsInChildren<Transform>(true).First(t => t.name == "PartsTray");
+            trayVis.name = "PartsTray_Model";   // 和互動物件 PartsTray 分開名字
+            trayVis.SetParent(tray.transform, true);
+            trayVis.SetPositionAndRotation(new Vector3(d.partsTray.x, shelfTopY, d.partsTray.z), Quaternion.identity);   // 長邊 0.34 沿 X，和原方塊同向
             var trayComp = tray.AddComponent<PartsTray>();
             trayComp.Configure(SimIds.PartsTray, "零件盒（舊滑板）");
             trayComp.Setup(new GameObject[0], stripIcons);

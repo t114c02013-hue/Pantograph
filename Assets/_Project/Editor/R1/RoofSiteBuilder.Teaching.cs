@@ -18,7 +18,7 @@ namespace PantographSim.Editor
     {
         public const string RoofBoxFolder = "Assets/_Project/Worksite/Models/RoofBoxes";
         /// <summary>要加點光源的燈罩：升降盒、複本燈、自檢器 LED、隔離燈號綠／紅。</summary>
-        public static readonly string[] LampNodes = { "PanIndicator", "PanIndicator_Repeat", "DetectorTester/LED", "StatusLamp_Green", "StatusLamp_Red" };
+        public static readonly string[] LampNodes = { "PanIndicator/PanIndicator_Lens", "PanIndicator_Repeat", "DetectorTester/LED", "StatusLamp_Green/StatusLamp_Green_Lens", "StatusLamp_Red/StatusLamp_Red_Lens" };
 
         public const string MaintWalkName = "Walkable_Maintenance";
 

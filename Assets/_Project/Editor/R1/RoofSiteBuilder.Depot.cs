@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using PantographSim.Core;
 using PantographSim.Data;
@@ -140,25 +141,31 @@ namespace PantographSim.Editor
             // ---- 隔離管制點（上平台樓梯頂；牌面用語推估） ----
             var iso = Child(depot, "IsolationControlPoint");
             float sx = d.PlatformOuterX + 0.12f, sz = d.platformZMax - 0.35f;
-            Box("Post", iso, new Vector3(sx, py + 1.0f, sz), new Vector3(0.08f, 2.0f, 0.08f), mSteel, collider: false);
             var n = Vector3.right;
-            var tagBoard = Sign("IsolationTagBoard", iso, "隔離確認", new Vector3(sx + 0.06f, py + 1.75f, sz), n, new Vector2(0.55f, 0.16f), mBlue, Color.white, 0.010f);
-            string[] tags = { "降弓確認", "外接電源切離・上鎖", "儲能隔離・上鎖", "驗電・接地完成" };   // 資深鐵道工程師 2026-11-13
-            for (int i = 0; i < 4; i++)
+            var rotText = Quaternion.LookRotation(-n, Vector3.up);   // TextMesh 正面朝 −Z
+            Transform N(GameObject root, string name) => root.GetComponentsInChildren<Transform>(true).First(t => t.name == name);
+            Renderer R(GameObject root, string name) => root.GetComponentsInChildren<Renderer>(true).First(r => r.name == name);
+            // RA-29 A：建模師 A 的燈號 IsolationStatusLight 站在原柱子位置（取代柱子、燈箱、燈、文字牌；原點在立柱底板底面中心，正面局部 −Z 朝 +X 平台）
+            var light = Fbx("ENV_IsolationStatusLight", null, iso, new Vector3(sx, py, sz), yaw: -90f, rename: "IsolationStatusLight");
+            var statusBoard = R(light, "StatusText_Board");
+            var statusText = Label("Text", N(light, "StatusText"), "隔離未完成　禁止登車頂", N(light, "StatusText").position + n * 0.003f, rotText, 0.005f, Color.white);
+            // 掛牌板 LotoBoard：掛在旁邊平台護欄外側（往 −Z 0.7 m，板底離地 1.0 m），4 張掛牌用 Hook_Tag_1～4，5、6 留空（備用位）
+            var board = Fbx("ENV_LotoBoard", null, iso, new Vector3(d.PlatformOuterX - 0.03f, py + 1.0f, sz - 0.7f), yaw: -90f, rename: "LotoBoard");
+            Label("Text", N(board, "Label_Title"), "隔離確認", N(board, "Label_Title").position + n * 0.003f, rotText, 0.006f, Color.white);
+            string[] tags = { "降弓\n確認", "外接電源\n切離・上鎖", "儲能隔離\n上鎖", "驗電・接地\n完成" };   // 資深鐵道工程師 2026-11-13（掛牌窄，分兩行）
+            for (int i = 0; i < 6; i++)
             {
-                var c = new Vector3(sx + 0.06f, py + 1.52f - 0.13f * i, sz);
-                Box("TagHook", tagBoard, c - new Vector3(0, 0, 0.2f), new Vector3(0.03f, 0.03f, 0.03f), mSteel, collider: false);
-                Sign("Tag_" + (i + 1), tagBoard, "■ " + tags[i], c, n, new Vector2(0.48f, 0.11f), i % 2 == 0 ? mWarn : mWhite, Color.black, 0.008f);
+                var sil = R(board, "TagSilhouette_" + (i + 1));
+                if (i >= tags.Length) { sil.enabled = false; continue; }   // 5、6 號掛勾留空
+                if (i % 2 == 0) sil.sharedMaterial = mWarn;
+                Label("Tag_" + (i + 1), sil.transform, "■ " + tags[i], sil.bounds.center + n * 0.003f, rotText, 0.0016f, Color.black);
             }
-            Sign("RoofWorkerCount", iso, "車頂作業人數　1", new Vector3(sx + 0.06f, py + 0.92f, sz), n, new Vector2(0.5f, 0.14f), mWhite, Color.black, 0.009f);
-            Box("StatusLightBox", iso, new Vector3(sx + 0.08f, py + 2.15f, sz), new Vector3(0.12f, 0.16f, 0.4f), mSteel, collider: false);
-            // 燈號只讀車頂開放鍵 roof.open（隔離四格都完成＝SI_04、SI_05、SI_06 d 完成；WC_02 b 之後關閉），預設紅燈
+            Sign("RoofWorkerCount", iso, "車頂作業人數　1", new Vector3(sx + 0.06f, py + 0.92f, sz), n, new Vector2(0.5f, 0.14f), mWhite, Color.black, 0.009f);   // 燈號立柱 0.9 m
+            // 燈號只讀車頂開放鍵 roof.open（隔離四格都完成＝SI_04、SI_05、SI_06 d 完成；WC_02 b 之後關閉），預設紅燈；燈罩換材質，點光源（LampLight）掛在燈罩上
             var mRedGlow = Mat("statusRed", new Color(1f, 0.25f, 0.2f), unlit: true);
-            var lampG = Box("StatusLamp_Green", iso, new Vector3(sx + 0.15f, py + 2.15f, sz - 0.1f), new Vector3(0.02f, 0.1f, 0.1f), mBlack, collider: false);
-            var lampR = Box("StatusLamp_Red", iso, new Vector3(sx + 0.15f, py + 2.15f, sz + 0.1f), new Vector3(0.02f, 0.1f, 0.1f), mRedGlow, collider: false);
-            var status = Sign("StatusText", iso, "隔離未完成　禁止登車頂", new Vector3(sx + 0.06f, py + 1.95f, sz), n, new Vector2(0.62f, 0.12f), mRed, Color.white, 0.008f);
-            iso.gameObject.AddComponent<PantographSim.Worksite.IsolationStatusLight>().Setup(lampG.GetComponent<Renderer>(), lampR.GetComponent<Renderer>(),
-                status.GetComponentInChildren<TextMesh>(), status.Find("Board").GetComponent<Renderer>(), mGlow, mBlack, mGreen, mRed, mRedGlow);
+            var lampG = R(light, "StatusLamp_Green_Lens"); var lampR = R(light, "StatusLamp_Red_Lens");
+            lampG.sharedMaterial = mBlack; lampR.sharedMaterial = mRedGlow; statusBoard.sharedMaterial = mRed;
+            iso.gameObject.AddComponent<PantographSim.Worksite.IsolationStatusLight>().Setup(lampG, lampR, statusText, statusBoard, mGlow, mBlack, mGreen, mRed, mRedGlow);
             // 自動回關矮門（樓梯口）與驗電棒架
             var gateC = new Vector3((d.PlatformOuterX + d.PlatformInnerX) / 2f, py, d.platformZMax + 0.08f);
             Box("SelfClosingGate_Bar", iso, gateC + new Vector3(0, 0.85f, 0), new Vector3(0.85f, 0.05f, 0.04f), mWarn, collider: false);

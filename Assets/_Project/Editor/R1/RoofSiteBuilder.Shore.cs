@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text;
 using PantographSim.Core;
 using PantographSim.Data;
@@ -7,7 +8,7 @@ using UnityEngine;
 namespace PantographSim.Editor
 {
     /// <summary>
-    /// terry 175B（2026-11-15）：日常課程外接電源箱 ENV_ShoreBox（Courses.json 只在日常顯示）。FBX 交付前用方塊，節點名照建模師：
+    /// terry 175B（2026-11-15）：日常課程外接電源箱 ENV_ShoreBox（Courses.json 只在日常顯示）。外觀用建模師 A 的 FBX（gen_depot_props v1.0），節點：
     /// Lamp_SupplyOn／Lamp_SupplyOff、Switch_Supply、Hook_Lock_Supply、PlugHolster/PlugSeat、ShorePlug（GrabPoint、CableAnchor）、ShoreSocket/PlugSeat。
     /// 箱前地面加一塊 Walkable（shoreWalkMin／Max，X 停在檢修坑外）。數值都在 RoofSceneDef／ToolRulesDef。
     /// </summary>
@@ -17,32 +18,34 @@ namespace PantographSim.Editor
         {
             var p = Piece(res.env, "ENV_ShoreBox");
             var o = d.shoreBoxPos;   // 正面朝 +X（車）
-            var mBox = Mat("shoreBox", new Color(0.55f, 0.58f, 0.6f)); var mDark = Mat("shoreDark", new Color(0.12f, 0.12f, 0.13f));
-            Box("Post", p.visual, o + new Vector3(0f, 0.7f, 0f), new Vector3(0.08f, 1.4f, 0.08f), mDark, collider: false);
-            var body = Box("ShoreBox_Body", p.visual, o + new Vector3(0.06f, 1.1f, 0f), new Vector3(0.12f, 0.45f, 0.35f), mBox, collider: false);
-            float fx = o.x + 0.125f;   // 箱子正面
-            var lampOn = SliceModelBuilder.Prim(PrimitiveType.Sphere, "Lamp_SupplyOn", p.visual, Vector3.zero, Vector3.one * 0.04f, mBox);
-            lampOn.transform.position = new Vector3(fx, o.y + 1.27f, o.z - 0.08f);
-            var lampOff = SliceModelBuilder.Prim(PrimitiveType.Sphere, "Lamp_SupplyOff", p.visual, Vector3.zero, Vector3.one * 0.04f, mBox);
-            lampOff.transform.position = new Vector3(fx, o.y + 1.27f, o.z + 0.08f);
-            Object.DestroyImmediate(lampOff.GetComponent<Collider>());
-            var sw = Box("Switch_Supply", p.visual, new Vector3(fx + 0.01f, o.y + 1.12f, o.z), new Vector3(0.03f, 0.08f, 0.03f), mDark);
-            Box("Hook_Lock_Supply", p.visual, new Vector3(fx + 0.01f, o.y + 1.12f, o.z + 0.05f), new Vector3(0.02f, 0.03f, 0.01f), mDark, collider: false);
-            var holster = Box("PlugHolster", p.visual, new Vector3(fx + 0.02f, o.y + 0.95f, o.z), new Vector3(0.04f, 0.06f, 0.08f), mDark, collider: false);
-            var holderSeat = Child(holster.transform, "PlugSeat"); holderSeat.position = new Vector3(fx + 0.07f, o.y + 0.95f, o.z);
-            var outlet = Child(body.transform, "CableOut"); outlet.position = new Vector3(o.x + 0.06f, o.y + 0.86f, o.z);
+            var mDark = Mat("shoreDark", new Color(0.12f, 0.12f, 0.13f));
+            // 建模師 A gen_depot_props v1.0：電源箱原點在立柱底板底面中心、正面局部 −Z（匯入後；轉成朝 +X 車）；插座原點在面板中心、正面局部 −Z（轉成朝 −X 車外）；插頭原點在前端、插入方向 −Z
+            var boxVis = Fbx("ENV_ShorePowerBox", null, p.visual, o, yaw: -90f, rename: "ShorePowerBox");
+            Transform N(GameObject root, string n) => root.GetComponentsInChildren<Transform>(true).First(t => t.name == n);
+            Renderer Lens(Transform lamp) => lamp.GetComponentsInChildren<Renderer>(true).First(r => r.name.EndsWith("_Lens"));
+            var lampOn = N(boxVis, "Lamp_SupplyOn").gameObject; var lampOff = N(boxVis, "Lamp_SupplyOff");
+            var onCol = lampOn.AddComponent<SphereCollider>(); onCol.radius = 0.025f; onCol.center = lampOn.transform.InverseTransformPoint(Lens(lampOn.transform).bounds.center);   // 點紅燈確認
+            var sw = N(boxVis, "Switch_Supply").gameObject;
+            var handle = sw.GetComponentsInChildren<Renderer>(true).First(r => r.name == "Switch_Supply_Handle");
+            var swCol = sw.AddComponent<BoxCollider>(); swCol.center = sw.transform.InverseTransformPoint(handle.bounds.center); swCol.size = new Vector3(0.05f, 0.14f, 0.05f);   // 把手（ON 直立）
+            var holderSeat = N(boxVis, "PlugSeat");
+            holderSeat.rotation = Quaternion.LookRotation(Vector3.up, Vector3.right);   // 掛在杯座：插入方向（插頭 −Z）朝下
+            var outlet = N(boxVis, "CableAnchor");
             var s = d.carShoreSocketPos;
-            var socket = Box("ShoreSocket", p.visual, s + new Vector3(-0.015f, 0f, 0f), new Vector3(0.03f, 0.1f, 0.1f), mDark, collider: false);
-            var carSeat = Child(socket.transform, "PlugSeat"); carSeat.position = s + new Vector3(-0.07f, 0f, 0f);
-            var plug = Box("ShorePlug", p.visual, carSeat.position, new Vector3(0.1f, 0.06f, 0.06f), Mat("shorePlug", new Color(0.95f, 0.75f, 0.1f)));
-            Child(plug.transform, "GrabPoint");
-            var anchor = Child(plug.transform, "CableAnchor"); anchor.localPosition = new Vector3(-0.5f, 0f, 0f);
+            var socket = Fbx("ENV_ShoreSocket", null, p.visual, s + new Vector3(-0.012f, 0f, 0f), yaw: 90f, rename: "ShoreSocket");   // 凸緣背面貼車側
+            var carSeat = N(socket, "PlugSeat");
+            carSeat.rotation = Quaternion.LookRotation(Vector3.left, Vector3.up);   // 插好：插頭 −Z（插入方向）朝 +X 插進車側、握柄朝車外
+            var plug = Fbx("ENV_ShorePlug", null, p.visual, carSeat.position, rename: "ShorePlug");
+            plug.transform.SetPositionAndRotation(carSeat.position, carSeat.rotation);
+            var pb = plug.GetComponentsInChildren<Renderer>(true).Select(r => r.bounds).Aggregate((x, y) => { x.Encapsulate(y); return x; });
+            var plugCol = plug.AddComponent<BoxCollider>(); plugCol.center = plug.transform.InverseTransformPoint(pb.center); plugCol.size = new Vector3(0.09f, 0.09f, 0.22f);
+            var anchor = N(plug, "CableAnchor");
             var line = Child(p.visual, "Cable").gameObject.AddComponent<LineRenderer>();
             line.positionCount = 2; line.widthMultiplier = 0.02f; line.sharedMaterial = mDark; line.useWorldSpace = true;
 
             var box = lampOn.AddComponent<ShoreBox>();
             box.Configure("ip.shore_box.lamp", "供電中紅燈");
-            box.Setup(lampOn.GetComponent<Renderer>(), lampOff.GetComponent<Renderer>(), sw.transform, outlet, anchor, line);
+            box.Setup(Lens(lampOn.transform), Lens(lampOff), sw.transform, outlet, anchor, line);
             lampOn.AddComponent<Highlightable>();
             sw.AddComponent<CabSwitch>().Configure(CabControlLogic.ShoreSwitchId, "外接電源供電開關");
             sw.AddComponent<Highlightable>();
