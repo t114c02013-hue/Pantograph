@@ -158,7 +158,7 @@ namespace PantographSim.Editor
             var lampR = Box("StatusLamp_Red", iso, new Vector3(sx + 0.15f, py + 2.15f, sz + 0.1f), new Vector3(0.02f, 0.1f, 0.1f), mRedGlow, collider: false);
             var status = Sign("StatusText", iso, "隔離未完成　禁止登車頂", new Vector3(sx + 0.06f, py + 1.95f, sz), n, new Vector2(0.62f, 0.12f), mRed, Color.white, 0.008f);
             iso.gameObject.AddComponent<PantographSim.Worksite.IsolationStatusLight>().Setup(lampG.GetComponent<Renderer>(), lampR.GetComponent<Renderer>(),
-                status.GetComponentInChildren<TextMesh>(), status.Find("Board").GetComponent<Renderer>(), mGlow, mBlack, mGreen, mRed);
+                status.GetComponentInChildren<TextMesh>(), status.Find("Board").GetComponent<Renderer>(), mGlow, mBlack, mGreen, mRed, mRedGlow);
             // 自動回關矮門（樓梯口）與驗電棒架
             var gateC = new Vector3((d.PlatformOuterX + d.PlatformInnerX) / 2f, py, d.platformZMax + 0.08f);
             Box("SelfClosingGate_Bar", iso, gateC + new Vector3(0, 0.85f, 0), new Vector3(0.85f, 0.05f, 0.04f), mWarn, collider: false);

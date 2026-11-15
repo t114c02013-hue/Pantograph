@@ -117,7 +117,8 @@ namespace PantographSim.Tests
             var d07 = daily.steps.First(x => x.stepId == "STP_CSR_07_RemoveBolts_L").subActions;
             Assert.IsTrue(d07[d07.Length - 2].optional, "日常：拆完 4 支、收扳手前倒進盤子");
             Assert.IsFalse(d07[d07.Length - 1].optional);
-            Assert.IsTrue(daily.steps.First(x => x.stepId == "STP_CSR_11_Install_R").subActions[0].optional, "日常：裝新滑板前拿回");
+            Assert.IsTrue(daily.steps.First(x => x.stepId == "STP_CSR_12_PreTighten_R").subActions[0].optional, "77A：日常改到預鎖一開始拿回（新滑板已裝上、手是空的）");
+            Assert.IsFalse(daily.steps.First(x => x.stepId == "STP_CSR_11_Install_R").subActions.Any(a => a.optional), "78A：安裝新滑板那一步不再有拿回");
             Assert.IsFalse(periodic.steps.SelectMany(x => x.subActions).Any(a => a.optional), "定期沒有");
             Assert.IsFalse(daily.steps.SelectMany(x => x.hints.checklist).Any(c => c.Contains("螺栓盤清點") || c.Contains("拿回腰間")), "選做不算完成");
         }
@@ -168,6 +169,15 @@ namespace PantographSim.Tests
             Assert.AreEqual(ErrorTrigger.Incomplete, e.trigger);
             CollectionAssert.AreEqual(new[] { ToolCountLogic.DishesStowed }, e.keys);
             Assert.IsTrue(e.blocks);
+        }
+
+        /// <summary>terry 2026-11-15（104B）：提示文字的 {側名}：L＝靠關節、R＝外側；{side} 照舊是 L／R。</summary>
+        [Test]
+        public void SideNameToken_InTextAndHint()
+        {
+            Assert.AreEqual("靠關節滑板 bolt_tray_L", StateKeys.Expand("{側名}滑板 bolt_tray_{side}", "L"));
+            Assert.AreEqual("外側滑板", StateKeys.Expand("{側名}滑板", "R"));
+            Assert.AreEqual("滑板", StateKeys.Expand("{側名}滑板", ""));
         }
 
         static SafetyRuleDefinition[] SafetyAssets() => StepJsonImporter.LoadAll<SafetyRuleDefinition>(StepJsonImporter.SafetyFolder).ToArray();

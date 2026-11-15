@@ -143,10 +143,15 @@ namespace PantographSim.Data
     /// <summary>黑板鍵展開工具。</summary>
     public static class StateKeys
     {
+        /// <summary>terry 2026-11-15（104B）：提示、指令裡的 {側名}，L＝靠關節、R＝外側（ID 用的 {side} 照舊是 L／R）。</summary>
+        public const string SideNameToken = "{側名}";
+        public static string SideName(string side) => side == "L" ? "靠關節" : side == "R" ? "外側" : "";
+
         public static string Expand(string pattern, string side, int n = 0, string point = null)
         {
             if (string.IsNullOrEmpty(pattern)) return pattern;
             var s = pattern.Replace("{side}", side ?? "");
+            if (s.Contains(SideNameToken)) s = s.Replace(SideNameToken, SideName(side));   // terry 2026-11-15（104B）：提示文字裡的側別名稱
             if (n > 0) s = s.Replace("bolt_{n}", "bolt_" + n).Replace("{n}", n.ToString());
             if (point != null) s = s.Replace("{point}", point);
             return s;

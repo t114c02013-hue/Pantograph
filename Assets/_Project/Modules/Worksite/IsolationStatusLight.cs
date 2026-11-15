@@ -16,10 +16,12 @@ namespace PantographSim.Worksite
         [SerializeField] string openText = "隔離完成　准許登車頂", closedText = "隔離未完成　禁止登車頂";
         bool? shown;
 
-        public void Setup(Renderer g, Renderer r, TextMesh t, Renderer b, Material lit, Material dark, Material bg, Material br)
+        public void Setup(Renderer g, Renderer r, TextMesh t, Renderer b, Material lit, Material dark, Material bg, Material br, Material litRed = null)
         {
-            green = g; red = r; label = t; board = b; on = lit; off = dark; boardGreen = bg; boardRed = br;
+            green = g; red = r; label = t; board = b; on = lit; off = dark; boardGreen = bg; boardRed = br; onRed = litRed != null ? litRed : lit;
         }
+
+        [SerializeField] Material onRed;   // terry 2026-11-15（84A）：紅燈亮的材質（之前和綠燈共用，關閉後紅燈會發綠光）
 
         /// <summary>燈號文字（純函式）。</summary>
         public static string Text(bool roofOpen, string open, string closed) => roofOpen ? open : closed;
@@ -31,7 +33,7 @@ namespace PantographSim.Worksite
             if (shown == open) return;
             shown = open;
             if (green != null) green.sharedMaterial = open ? on : off;
-            if (red != null) red.sharedMaterial = open ? off : on;
+            if (red != null) red.sharedMaterial = open ? off : (onRed != null ? onRed : on);
             if (board != null) board.sharedMaterial = open ? boardGreen : boardRed;
             if (label != null) label.text = Text(open, openText, closedText);
         }

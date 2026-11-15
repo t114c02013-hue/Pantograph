@@ -67,6 +67,7 @@ namespace PantographSim.Editor
                 sb.AppendLine($"PF_CarbonStrip_{side} ← {source}：尺寸 {b.size.x:F3} × {b.size.y:F3} × {b.size.z:F3} m");
                 sb.AppendLine("  截面：" + Profile(mesh));
                 BuildStripPrefab(side, mesh, src.GetComponent<MeshRenderer>().sharedMaterials, mats, b);
+                sb.AppendLine($"  場景顯示厚度：{(PantographSim.Data.ToolRulesDef.Load()?.stripNewMm ?? 18f):0.0} mm（82A：原模型加厚，底面不動）");
             }
 
             // ---- 螺栓 ----
@@ -108,6 +109,13 @@ namespace PantographSim.Editor
                 meshGo.transform.SetParent(visual, false);
                 meshGo.AddComponent<MeshFilter>().sharedMesh = mesh;
                 meshGo.AddComponent<MeshRenderer>().sharedMaterials = materials;
+                // terry 2026-11-15（82A）：原模型厚 16 mm，加厚到新品厚度（ToolRules stripNewMm，18 mm）；底面不動、只往上長，量測讀數照資料不變
+                float thick = (PantographSim.Data.ToolRulesDef.Load()?.stripNewMm ?? 18f) / 1000f;
+                float sy = b.size.y > 1e-5f ? thick / b.size.y : 1f;
+                meshGo.transform.localScale = new Vector3(1f, sy, 1f);
+                meshGo.transform.localPosition = new Vector3(0f, b.min.y * (1f - sy), 0f);
+                b = new Bounds(new Vector3(b.center.x, b.min.y + thick / 2f, b.center.z), new Vector3(b.size.x, thick, b.size.z));
+                top = b.max.y;
 
                 // 螺栓孔放在外觀底下：拿在手上轉向時孔位跟著轉，吸附判定用的就是當下的孔位
                 var holesRoot = new GameObject("Holes").transform;

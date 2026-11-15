@@ -243,11 +243,11 @@ namespace PantographSim.Editor
                 var cp = new GameObject("InstallCheck");
                 cp.transform.SetParent(strip, false);
                 cp.transform.position = new Vector3(sb2.center.x, sb2.max.y, sb2.center.z);
-                cp.AddComponent<InteractionPointMarker>().Configure(def.CheckMarkerId, (side == "L" ? "肘側" : "外側") + "新滑板");
+                cp.AddComponent<InteractionPointMarker>().Configure(def.CheckMarkerId, (side == "L" ? "靠關節" : "外側") + "新滑板");
                 var tgt = new GameObject("InstallTarget_" + side);
                 tgt.transform.SetParent(panHead, false);
                 tgt.transform.position = cp.transform.position;
-                tgt.AddComponent<InteractionPointMarker>().Configure(def.TargetMarkerId, (side == "L" ? "肘側" : "外側") + "滑板安裝位置");
+                tgt.AddComponent<InteractionPointMarker>().Configure(def.TargetMarkerId, (side == "L" ? "靠關節" : "外側") + "滑板安裝位置");
                 def.checkPointLocal = strip.InverseTransformPoint(cp.transform.position);
                 def.targetLocal = panHead.InverseTransformPoint(cp.transform.position);
                 EditorUtility.SetDirty(def);

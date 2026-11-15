@@ -330,7 +330,7 @@ namespace PantographSim.Procedures
         public static SubAction[] SubActions(RuntimeStep s) =>
             (s.def.subActions ?? Array.Empty<SubAction>()).Select(a => new SubAction
             {
-                text = StateKeys.Expand(TextFor(a), s.side).Replace(SimIds.ToolCountToken, SimIds.ToolCountLabel), why = StateKeys.Expand(InputMode.XrActive && !string.IsNullOrEmpty(a.hint) ? a.hint : a.why, s.side), targetId = StateKeys.Expand(a.targetId, s.side), textDesktop = StateKeys.Expand(a.textDesktop ?? "", s.side),
+                text = StateKeys.Expand(TextFor(a), s.side).Replace(SimIds.ToolCountToken, SimIds.ToolCountLabel), why = StateKeys.Expand(InputMode.XrActive && !string.IsNullOrEmpty(a.hint) ? a.hint : a.why, s.side)?.Replace(SimIds.ToolCountToken, SimIds.ToolCountLabel), targetId = StateKeys.Expand(a.targetId, s.side), textDesktop = StateKeys.Expand(a.textDesktop ?? "", s.side),
                 toolId = a.toolId, condition = StateKeys.Expand(a.condition, s.side), standPointId = SubAction.ExpandStand(a.standPointId, s.side), subId = a.subId ?? "", when = a.when ?? "", optional = a.optional
             }).ToArray();
 

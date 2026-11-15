@@ -15,7 +15,7 @@ namespace PantographSim.Procedures
     /// </summary>
     public static class StepTableExport
     {
-        public const string Header = "course,stepId,subActionId,textXR,textDesktop,completionRule,errorIds,refTimeTeach,refTimeExam,standPointId,zoneId";
+        public const string Header = "course,stepId,subActionId,textXR,textDesktop,completionRule,errorIds,refTimeTeach,refTimeExam,standPointId,zoneId,optional";   // terry 2026-11-15（88A）：optional＝Y 是選做
 
         /// <summary>小動作總數（和 CSV 資料列數相同）。</summary>
         public static int SubActionCount(ProcedureDefinition procedure) =>
@@ -45,7 +45,7 @@ namespace PantographSim.Procedures
                         sb.Append(string.Join(",", new[]
                         {
                             course, st.RunId, st.RunId + "_" + (string.IsNullOrEmpty(a.subId) ? Letter(i) : a.subId), xr, desk, Describe(a.condition), errors,
-                            st.def.refSecondsTutorial.ToString(ci), st.def.refSecondsExam.ToString(ci), a.standPointId ?? "", zoneOf?.Invoke(a.standPointId ?? "") ?? "",
+                            st.def.refSecondsTutorial.ToString(ci), st.def.refSecondsExam.ToString(ci), a.standPointId ?? "", zoneOf?.Invoke(a.standPointId ?? "") ?? "", a.optional ? "Y" : "",
                         }.Select(Csv))).Append("\r\n");
                     }
                 }

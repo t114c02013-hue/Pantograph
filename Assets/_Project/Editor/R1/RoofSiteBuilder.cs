@@ -604,7 +604,7 @@ namespace PantographSim.Editor
                 var xz = s.floor == StationFloor.Roof && (s.id == inner.id || s.sharedWith == inner.id) ? new Vector2(rs.x, rs.z) : s.WorldXZ(d);
                 Child(anchorRoot, "StationAnchor_" + s.id).position = new Vector3(xz.x, 0f, xz.y);
             }
-            sb.AppendLine($"共用車頂站點：({rs.x:0.00}, {rs.z:0.00})；肘側最遠螺栓 {stations.measuredFarBoltL:0.000} m、外側 {stations.measuredFarBoltR:0.000} m；側移提示 {(stations.sideStepHintEnabled ? "啟用" : "不啟用")}；stripTopAboveRoof={res.stripTop:0.000}");
+            sb.AppendLine($"共用車頂站點：({rs.x:0.00}, {rs.z:0.00})；靠關節最遠螺栓 {stations.measuredFarBoltL:0.000} m、外側 {stations.measuredFarBoltR:0.000} m；側移提示 {(stations.sideStepHintEnabled ? "啟用" : "不啟用")}；stripTopAboveRoof={res.stripTop:0.000}");
 
             // ---------- 設備 ----------
             BuildPlatformEquipment(res, d, mats, aLift, aBus, aTester, aHarness, aRack, headClamp, tools, sb);
@@ -1286,13 +1286,13 @@ namespace PantographSim.Editor
                 }).ToArray();
                 trayT.GetComponent<BoltTray>().Setup(side, icons);
                 // terry 2026-11-14（53A）：車頂螺栓盤收進工具袋後，掛在工具袋側邊（L、R 上下錯開）
-                var pb = pouch.GetComponentsInChildren<Renderer>().Select(r => r.bounds).Aggregate((a, b) => { a.Encapsulate(b); return a; });
+                // 83A：用工具袋根節點的本地座標（RoofSceneDef，建模師 B），不再用含工具的世界包圍盒推算
                 var hang = new GameObject("BagDish_" + side).transform;
                 hang.SetParent(pouch.transform, false);
-                hang.position = new Vector3(pb.min.x - 0.01f, pb.center.y + (side == "L" ? 0.03f : -0.03f), pb.center.z);
-                hang.rotation = Quaternion.Euler(0f, 0f, 90f);
+                hang.localPosition = side == "L" ? d.bagDishLocalL : d.bagDishLocalR;
+                hang.localRotation = Quaternion.Euler(d.bagDishLocalEuler);
                 var disc = SliceModelBuilder.Prim(PrimitiveType.Cylinder, "BagDishDisc", hang, Vector3.zero, Vector3.one, Mat("bagDish", new Color(0.35f, 0.38f, 0.42f)));
-                disc.transform.localScale = Vector3.Scale(new Vector3(0.09f, 0.004f, 0.09f), new Vector3(1f / Mathf.Max(hang.lossyScale.x, 1e-4f), 1f / Mathf.Max(hang.lossyScale.y, 1e-4f), 1f / Mathf.Max(hang.lossyScale.z, 1e-4f)));
+                disc.transform.localScale = Vector3.Scale(new Vector3(d.bagDishDiameter, 0.004f, d.bagDishDiameter), new Vector3(1f / Mathf.Max(hang.lossyScale.x, 1e-4f), 1f / Mathf.Max(hang.lossyScale.y, 1e-4f), 1f / Mathf.Max(hang.lossyScale.z, 1e-4f)));
                 Object.DestroyImmediate(disc.GetComponent<Collider>());
                 hang.gameObject.SetActive(false);
                 trayT.GetComponent<BoltTray>().SetupBagDish(hang.gameObject);
