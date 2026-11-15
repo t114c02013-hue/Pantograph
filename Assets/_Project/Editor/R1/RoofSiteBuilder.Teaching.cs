@@ -1,0 +1,110 @@
+using System.Linq;
+using System.Text;
+using PantographSim.Core;
+using PantographSim.Data;
+using PantographSim.Worksite;
+using UnityEditor;
+using UnityEngine;
+using Object = UnityEngine.Object;
+
+namespace PantographSim.Editor
+{
+    /// <summary>
+    /// terry 2026-11-15（150A、151A、181C、182A、183A、154–166）：指示燈點光源（LampLight）、實體按鈕（PressFollow）、地面教學箱開蓋（LidToggle）、
+    /// 地面維修區第二出口。數值都在 RoofSceneDef；節點依名稱找，找不到就略過並寫進建置報告。
+    /// </summary>
+    public static partial class RoofSiteBuilder
+    {
+        public const string RoofBoxFolder = "Assets/_Project/Worksite/Models/RoofBoxes";
+        /// <summary>要加點光源的燈罩：升降盒、複本燈、自檢器 LED、隔離燈號綠／紅。</summary>
+        public static readonly string[] LampNodes = { "PanIndicator", "PanIndicator_Repeat", "DetectorTester/LED", "StatusLamp_Green", "StatusLamp_Red" };
+
+        static Transform FindPath(Transform root, string path)
+        {
+            var parts = path.Split('/');
+            return root.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == parts[parts.Length - 1] && (parts.Length == 1 || (t.parent != null && t.parent.name == parts[0])));
+        }
+
+        static void BuildTeachingExtras(Result res, RoofSceneDef d, StringBuilder sb)
+        {
+            // 指示燈點光源（暗時留弱光；亮暗由各燈的元件呼叫 LampLight.Set）
+            int lamps = 0;
+            foreach (var path in LampNodes)
+            {
+                var lamp = FindPath(res.env, path);
+                if (lamp == null) { sb.AppendLine($"✘ 指示燈 {path} 找不到，沒有加點光源"); continue; }
+                var go = new GameObject("LampLight");
+                go.transform.SetParent(lamp, false);
+                var l = go.AddComponent<Light>();
+                l.type = LightType.Point; l.shadows = LightShadows.None; l.range = d.lampLightRange;
+                l.renderMode = d.lampLightImportant ? LightRenderMode.ForcePixel : LightRenderMode.Auto;
+                l.intensity = d.lampLightIntensity * d.lampDimRatio;
+                lamp.gameObject.AddComponent<LampLight>().Setup(l, d.lampLightIntensity, d.lampDimRatio);
+                lamps++;
+            }
+            sb.AppendLine($"{(lamps == LampNodes.Length ? "✔" : "✘")} 指示燈點光源 {lamps}／{LampNodes.Length} 個（範圍 {d.lampLightRange} m、亮 {d.lampLightIntensity}、暗 ×{d.lampDimRatio}、{(d.lampLightImportant ? "Important" : "Auto")}）");
+
+            // 實體按鈕（新升降盒、自檢器 FBX 到了才有 Btn_* 節點）
+            foreach (var b in d.btnBindings ?? new RoofSceneDef.BtnBinding[0])
+            {
+                var btn = FindPath(res.env, b.node);
+                if (btn == null) { sb.AppendLine($"・按鈕 {b.node}：場景裡還沒有這個節點（等新模型），略過"); continue; }
+                btn.gameObject.AddComponent<PressFollow>().Setup(b.key, b.value, b.hold, d.btnPressMm / 1000f, d.btnPressSeconds);
+                sb.AppendLine($"✔ 按鈕 {b.node} 跟 {b.key}{(b.hold ? "＝" + b.value + "（按住陷著）" : "（每變一次陷一下）")}");
+            }
+
+            // 地面教學箱（車頂與地面共用 FBX；只有地面這組掛 LidToggle）
+            foreach (var tb in d.trainingBoxes ?? new RoofSceneDef.TrainingBox[0])
+            {
+                var model = AssetDatabase.LoadAssetAtPath<GameObject>($"{RoofBoxFolder}/{tb.fbx}.fbx");
+                if (model == null) { sb.AppendLine($"・教學箱 {tb.kind}：{RoofBoxFolder}/{tb.fbx}.fbx 還沒交付，略過"); continue; }
+                var box = (GameObject)Object.Instantiate(model, res.env);
+                box.name = "TrainingBox_" + tb.kind;
+                box.transform.position = new Vector3(tb.centerXZ.x, d.groundY + tb.standHeight, tb.centerXZ.y);
+                box.transform.rotation = Quaternion.Euler(0f, tb.facingNorth ? 0f : 180f, 0f) * model.transform.rotation;
+                var bounds = box.GetComponentsInChildren<Renderer>().Select(r => r.bounds).Aggregate((x, y) => { x.Encapsulate(y); return x; });
+                Box("Stand", box.transform, new Vector3(bounds.center.x, d.groundY + tb.standHeight / 2f, bounds.center.z), new Vector3(bounds.size.x, tb.standHeight, bounds.size.z), Mat("boxStand", new Color(0.35f, 0.38f, 0.42f)), collider: false);
+                var insides = box.GetComponentsInChildren<Transform>(true).Where(t => t.name.StartsWith("Inside_")).Select(t => t.gameObject).ToArray();
+                foreach (var c in insides.SelectMany(g => g.GetComponentsInChildren<Collider>(true))) c.enabled = false;   // 內部不擋射線
+                var lids = box.GetComponentsInChildren<Transform>(true).Where(t => System.Text.RegularExpressions.Regex.IsMatch(t.name, @"^Lid_\d+$")).ToList();
+                var toggles = lids.Select(t => t.gameObject.AddComponent<LidToggle>()).ToArray();
+                for (int i = 0; i < lids.Count; i++)
+                {
+                    var lid = lids[i];
+                    if (lid.GetComponent<Collider>() == null && lid.GetComponent<MeshFilter>() != null) lid.gameObject.AddComponent<BoxCollider>();
+                    toggles[i].Configure($"env.roof_box.{tb.kind}.lid_{lid.name.Substring(4)}", $"教學箱蓋子（{tb.kind} {lid.name.Substring(4)}）");
+                    toggles[i].Setup(tb.lidOpenDegOverride > 0f ? tb.lidOpenDegOverride : d.lidOpenDeg, d.lidOpenSeconds, toggles, insides);
+                    lid.gameObject.AddComponent<Highlightable>();
+                    res.ids[toggles[i].Id] = lid;
+                }
+                foreach (var g in insides) g.SetActive(false);
+                sb.AppendLine($"✔ 教學箱 {tb.kind}：({tb.centerXZ.x}, {tb.centerXZ.y})、鋼架 {tb.standHeight} m、朝{(tb.facingNorth ? "北" : "南")}、蓋子 {lids.Count} 片、內部 {insides.Length} 組");
+            }
+            int roofLids = res.env.GetComponentsInChildren<LidToggle>(true).Count(l => !l.transform.GetComponentsInParent<Transform>(true).Any(p => p.name.StartsWith("TrainingBox_")));
+            sb.AppendLine($"{(roofLids == 0 ? "✔" : "✘")} 車頂箱子沒有掛開蓋元件（{roofLids} 個）");
+        }
+
+        /// <summary>第二出口：Edge_S 在 maintExitXRange 斷開，放黃色半高逃生小門（門本身就是 BoxCollider，不能點）、兩側警示柱、「緊急出口」牌、地上箭頭。</summary>
+        static void BuildMaintExit(Transform parent, RoofSceneDef d, Material mWarn, StringBuilder sb)
+        {
+            float gy = d.groundY, z = d.maintMinXZ.y, x0 = d.maintExitXRange.x, x1 = d.maintExitXRange.y, h = d.maintExitDoorHeight, th = d.maintExitDoorThickness;
+            var root = Child(parent, "MaintExit");
+            Box("ExitDoor", root, new Vector3((x0 + x1) / 2f, gy + h / 2f, z - th / 2f), new Vector3(x1 - x0, h, th), mWarn);
+            var mBlack = Mat("hazardBlack", new Color(0.08f, 0.08f, 0.08f));
+            foreach (float x in new[] { x0, x1 })
+                for (int i = 0; i < 5; i++)   // 柱子黃黑相間
+                    Box("ExitPost", root, new Vector3(x, gy + h * (i + 0.5f) / 5f, z - th / 2f), new Vector3(0.06f, h / 5f, 0.06f), i % 2 == 0 ? mWarn : mBlack, collider: false);
+            Sign("ExitSign", root, "緊急出口", new Vector3((x0 + x1) / 2f, gy + d.maintExitSignHeight, z + 0.005f), Vector3.forward, new Vector2(0.4f, 0.14f), Mat("exitGreen", new Color(0.05f, 0.55f, 0.25f)), Color.white, 0.012f);
+            var arrow = Child(root, "ExitArrow");   // 地上黃色箭頭朝門（−Z）
+            Box("Shaft", arrow, new Vector3((x0 + x1) / 2f, gy + 0.006f, d.maintExitArrowZ + 0.15f), new Vector3(0.12f, 0.004f, 0.5f), mWarn, collider: false);
+            foreach (float s in new[] { -1f, 1f })
+            {
+                var head = Box("Head", arrow, new Vector3((x0 + x1) / 2f + s * 0.09f, gy + 0.006f, d.maintExitArrowZ - 0.15f), new Vector3(0.08f, 0.004f, 0.3f), mWarn, collider: false);
+                head.transform.rotation = Quaternion.Euler(0f, -s * 35f, 0f);
+            }
+            float gapW = d.maintExitXRange.x - d.maintMinXZ.x, gapE = d.maintMaxXZ.x - d.maintExitXRange.y;
+            bool ok = gapW > 0f && gapE > 0f;   // 擋牆兩段＋門的 X 範圍首尾相接（門寬＝斷開的寬度）
+            sb.AppendLine($"{(ok ? "✔" : "✘")} 第二出口：Edge_S X {d.maintMinXZ.x}…{x0}｜門 {x0}…{x1}｜{x1}…{d.maintMaxXZ.x}，連起來沒有縫；門高 {h} m、厚 {th} m");
+        }
+    }
+}

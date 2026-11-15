@@ -35,6 +35,8 @@ namespace PantographSim.Worksite
             if (green != null) green.sharedMaterial = open ? on : off;
             if (red != null) red.sharedMaterial = open ? off : (onRed != null ? onRed : on);
             if (board != null) board.sharedMaterial = open ? boardGreen : boardRed;
+            LampLight.SetOn(green, open, new Color(0.1f, 1f, 0.25f));
+            LampLight.SetOn(red, !open, new Color(1f, 0.15f, 0.1f));
             if (label != null) label.text = Text(open, openText, closedText);
         }
     }

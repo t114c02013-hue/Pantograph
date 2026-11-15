@@ -106,6 +106,44 @@ namespace PantographSim.Data
         public float[] lrvDotDiameters = { 0.20f, 0.14f }, lrvDotRowCenterY = { -3.15f, -2.98f };
         [Tooltip("同排中心距、正弦起伏振幅與波長、浮出外表面距離、碰車門時的邊距（m）；多邊形邊數")] public float lrvDotPitchZ = 0.40f, lrvDotWaveAmplitude = 0.05f, lrvDotWaveLength = 4.0f, lrvDotOffsetFromWall = 0.002f, lrvDotSkipDoorMargin = 0.10f;
         public int lrvDotSegments = 8;
+
+        // ---------- terry 2026-11-15（150A、151A、181C、182A、183A、154–166）：地面教學箱、開蓋、按鈕、指示燈點光源、第二出口 ----------
+        [System.Serializable] public class TrainingBox
+        {
+            [Tooltip("種類：hvac／resistor／battery／converter（互動 ID env.roof_box.<種類>.lid_<n>）")] public string kind;
+            [Tooltip("FBX 名（Worksite/Models/RoofBoxes，不含副檔名）；檔案不在就略過並在建置報告註明")] public string fbx;
+            [Tooltip("外框中心 X／Z（暫填，FBX 交付時更新）")] public Vector2 centerXZ;
+            [Tooltip("鋼架高（m）")] public float standHeight = 0.6f;
+            [Tooltip("正面朝北（+Z）；否則朝南")] public bool facingNorth = true;
+            [Tooltip("這個箱子的蓋子最大開啟角度（0＝用 lidOpenDeg）")] public float lidOpenDegOverride;
+        }
+        [System.Serializable] public class BoxStation { public string id, label; public Vector2 xz; }
+        [System.Serializable] public class BtnBinding { public string node, key, value; public bool hold; }
+        public TrainingBox[] trainingBoxes =
+        {
+            new TrainingBox { kind = "hvac", fbx = "ENV_RoofBox_HVAC", centerXZ = new Vector2(-12.2f, 6.2f), standHeight = 0.6f, facingNorth = true },
+            new TrainingBox { kind = "battery", fbx = "ENV_RoofBox_Battery", centerXZ = new Vector2(-10.3f, 6.2f), standHeight = 0.4f, facingNorth = true, lidOpenDegOverride = 90f },
+            new TrainingBox { kind = "converter", fbx = "ENV_RoofBox_Converter", centerXZ = new Vector2(-9.1f, 6.2f), standHeight = 0.6f, facingNorth = false },
+            new TrainingBox { kind = "resistor", fbx = "ENV_RoofBox_Resistor", centerXZ = new Vector2(-8.0f, 6.2f), standHeight = 0.6f, facingNorth = true, lidOpenDegOverride = 90f },
+        };
+        [Tooltip("教學箱站點（地面、朝南、zone maintenance）")] public BoxStation[] trainingBoxStations =
+        {
+            new BoxStation { id = "tp.maint.box_w", label = "教學箱前（西）", xz = new Vector2(-12.2f, 4.9f) },
+            new BoxStation { id = "tp.maint.box_c", label = "教學箱前（中）", xz = new Vector2(-9.7f, 4.7f) },
+            new BoxStation { id = "tp.maint.box_e", label = "教學箱前（東）", xz = new Vector2(-8.0f, 5.0f) },
+        };
+        [Tooltip("蓋子打開角度（度）與動畫秒數")] public float lidOpenDeg = 100f, lidOpenSeconds = 0.6f;
+        [Tooltip("實體按鈕行程（mm）與點一下的回彈秒數")] public float btnPressMm = 5f, btnPressSeconds = 0.15f;
+        [Tooltip("實體按鈕對照：節點名｜黑板鍵｜值（空白＝任何值）｜hold（值相等期間一直陷著）")] public BtnBinding[] btnBindings =
+        {
+            new BtnBinding { node = "LiftControlBox/Btn_Up", key = "ctrl.lift.cmd", value = "Up", hold = true },
+            new BtnBinding { node = "LiftControlBox/Btn_Down", key = "ctrl.lift.cmd", value = "Down", hold = true },
+            new BtnBinding { node = "DetectorTester/Btn_SelfTest", key = "tool.voltage_detector.selftest_time", value = "", hold = false },
+        };
+        [Tooltip("指示燈點光源：範圍（m）、亮時強度、暗時比例、是否 Important（ForcePixel）")] public float lampLightRange = 0.4f, lampLightIntensity = 0.8f, lampDimRatio = 0.1f;
+        public bool lampLightImportant = true;
+        [Tooltip("地面維修區南邊第二出口（Edge_S 斷開的 X 範圍）與逃生小門尺寸（寬由 X 範圍決定；高、厚）")] public Vector2 maintExitXRange = new Vector2(-13.0f, -12.0f);
+        public float maintExitDoorHeight = 1.0f, maintExitDoorThickness = 0.05f, maintExitSignHeight = 0.70f, maintExitArrowZ = -4.45f;
         [Tooltip("輕軌車身的水藍色帶")] public Color liveryAqua = new Color32(0x2E, 0xB0, 0xC8, 0xFF);
         [Tooltip("廠房屋頂桁架下緣高度")] public float shedTrussY = 8.0f;
         [Tooltip("terry 2026-11-13 室內日光燈感：主光（由上往下）強度、俯角（度）、顏色")] public float lightIntensity = 0.75f, lightPitchDeg = 75f;
@@ -113,7 +151,7 @@ namespace PantographSim.Data
         [Tooltip("環境光（整體亮而平均）")] public Color ambientColor = new Color(0.68f, 0.70f, 0.72f);
 
         [Header("R1.5a 地面維修區（a4）")]
-        public Vector2 maintMinXZ = new Vector2(-13.5f, -5f), maintMaxXZ = new Vector2(-5.5f, 5f);
+        public Vector2 maintMinXZ = new Vector2(-13.5f, -5f), maintMaxXZ = new Vector2(-5.5f, 7f);
         [Tooltip("台架 env.panto_stand 中心（XZ）")] public Vector2 standCenterXZ = new Vector2(-9.5f, 0f);
         [Tooltip("台架外形：X、Z")] public Vector2 standSizeXZ = new Vector2(2.0f, 2.6f);
         [Tooltip("R1.5b b4：定期檢修的螺栓盤在台架外框頂面：離中心的 X、從靠 tp.stand.s 的邊往內的 Z")] public float boltTrayStandOffsetX = 0.40f, boltTrayStandInsetZ = 0.15f;

@@ -14,8 +14,10 @@ namespace PantographSim.Worksite
         {
             if (led == null) return;
             var block = new MaterialPropertyBlock();
-            block.SetColor("_Color", State.Get("tool.voltage_detector.led") == "green" ? new Color(0.1f, 1f, 0.2f) : new Color(0.25f, 0.05f, 0.05f));
+            bool green = State.Get("tool.voltage_detector.led") == "green";
+            block.SetColor("_Color", green ? new Color(0.1f, 1f, 0.2f) : new Color(0.25f, 0.05f, 0.05f));
             led.SetPropertyBlock(block);
+            LampLight.SetOn(led, green, new Color(0.1f, 1f, 0.2f));   // 沒亮時留弱光
         }
     }
 }

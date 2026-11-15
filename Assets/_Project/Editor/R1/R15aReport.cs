@@ -186,7 +186,7 @@ namespace PantographSim.Editor
             ok &= Exists(sb, "ENV_MaintenanceArea");
             ok &= Exists(sb, "env.panto_stand");
             var area = Find("ENV_MaintenanceArea");
-            foreach (var n in new[] { "Edge_W", "Edge_E", "Edge_S", "Edge_N" })
+            foreach (var n in new[] { "Edge_W", "Edge_E", "Edge_S_W", "Edge_S_E", "Edge_N" })
             {
                 var e = area != null ? area.GetComponentsInChildren<Transform>(true).FirstOrDefault(x => x.name == n) : null;
                 var c = e != null ? e.GetComponent<Collider>() : null;

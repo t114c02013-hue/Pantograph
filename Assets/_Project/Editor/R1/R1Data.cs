@@ -170,6 +170,14 @@ namespace PantographSim.Editor
                 s.floor = StationFloor.Ground; s.positionXZ = xz; s.facingTargetId = "env.panto_stand"; s.maxTargetDistance = 2.5f; s.zoneId = ZoneDef.Maintenance;
                 EditorUtility.SetDirty(s);
             }
+            // terry 2026-11-15（181C）：地面教學箱站點，朝南（箱子在北側），zone maintenance
+            foreach (var bs in d.trainingBoxStations ?? new RoofSceneDef.BoxStation[0])
+            {
+                if (set.Find(bs.id) == null) set.stations = set.stations.Concat(new[] { Station(bs.id, bs.label, StationFloor.Ground, bs.xz, "", 2.5f) }).ToArray();
+                var s = set.Find(bs.id);
+                s.label = bs.label; s.floor = StationFloor.Ground; s.positionXZ = bs.xz; s.facingTargetId = ""; s.facingDirection = Vector3.back; s.maxTargetDistance = 2.5f; s.zoneId = ZoneDef.Maintenance;
+                EditorUtility.SetDirty(s);
+            }
             EditorUtility.SetDirty(set);
         }
 

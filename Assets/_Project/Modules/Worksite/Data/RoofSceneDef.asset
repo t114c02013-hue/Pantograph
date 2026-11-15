@@ -124,6 +124,67 @@ MonoBehaviour:
   lrvDotOffsetFromWall: 0.002
   lrvDotSkipDoorMargin: 0.1
   lrvDotSegments: 8
+  trainingBoxes:
+  - kind: hvac
+    fbx: ENV_RoofBox_HVAC
+    centerXZ: {x: -12.2, y: 6.2}
+    standHeight: 0.6
+    facingNorth: 1
+    lidOpenDegOverride: 0
+  - kind: battery
+    fbx: ENV_RoofBox_Battery
+    centerXZ: {x: -10.3, y: 6.2}
+    standHeight: 0.4
+    facingNorth: 1
+    lidOpenDegOverride: 90
+  - kind: converter
+    fbx: ENV_RoofBox_Converter
+    centerXZ: {x: -9.1, y: 6.2}
+    standHeight: 0.6
+    facingNorth: 0
+    lidOpenDegOverride: 0
+  - kind: resistor
+    fbx: ENV_RoofBox_Resistor
+    centerXZ: {x: -8, y: 6.2}
+    standHeight: 0.6
+    facingNorth: 1
+    lidOpenDegOverride: 90
+  trainingBoxStations:
+  - id: tp.maint.box_w
+    label: "\u6559\u5B78\u7BB1\u524D\uFF08\u897F\uFF09"
+    xz: {x: -12.2, y: 4.9}
+  - id: tp.maint.box_c
+    label: "\u6559\u5B78\u7BB1\u524D\uFF08\u4E2D\uFF09"
+    xz: {x: -9.7, y: 4.7}
+  - id: tp.maint.box_e
+    label: "\u6559\u5B78\u7BB1\u524D\uFF08\u6771\uFF09"
+    xz: {x: -8, y: 5}
+  lidOpenDeg: 100
+  lidOpenSeconds: 0.6
+  btnPressMm: 5
+  btnPressSeconds: 0.15
+  btnBindings:
+  - node: LiftControlBox/Btn_Up
+    key: ctrl.lift.cmd
+    value: Up
+    hold: 1
+  - node: LiftControlBox/Btn_Down
+    key: ctrl.lift.cmd
+    value: Down
+    hold: 1
+  - node: DetectorTester/Btn_SelfTest
+    key: tool.voltage_detector.selftest_time
+    value: 
+    hold: 0
+  lampLightRange: 0.4
+  lampLightIntensity: 0.8
+  lampDimRatio: 0.1
+  lampLightImportant: 1
+  maintExitXRange: {x: -13, y: -12}
+  maintExitDoorHeight: 1
+  maintExitDoorThickness: 0.05
+  maintExitSignHeight: 0.7
+  maintExitArrowZ: -4.45
   liveryAqua: {r: 0.18039216, g: 0.6901961, b: 0.78431374, a: 1}
   shedTrussY: 8
   lightIntensity: 0.75
@@ -131,7 +192,7 @@ MonoBehaviour:
   lightColor: {r: 0.96, g: 0.98, b: 1, a: 1}
   ambientColor: {r: 0.68, g: 0.7, b: 0.72, a: 1}
   maintMinXZ: {x: -13.5, y: -5}
-  maintMaxXZ: {x: -5.5, y: 5}
+  maintMaxXZ: {x: -5.5, y: 7}
   standCenterXZ: {x: -9.5, y: 0}
   standSizeXZ: {x: 1.967, y: 2.565}
   boltTrayStandOffsetX: 0.4

@@ -27,6 +27,7 @@ namespace PantographSim.Worksite
             block.SetColor("_Color", ok ? new Color(0.1f, 1f, 0.25f) : new Color(1f, 0.15f, 0.1f));
             block.SetColor("_EmissionColor", ok ? new Color(0.1f, 0.8f, 0.2f) : new Color(0.8f, 0.1f, 0.05f));
             lamp.SetPropertyBlock(block);
+            LampLight.SetOn(lamp, true, ok ? new Color(0.1f, 1f, 0.25f) : new Color(1f, 0.15f, 0.1f));   // 點光源跟燈色（一直亮）
         }
     }
 }

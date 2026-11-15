@@ -617,6 +617,7 @@ namespace PantographSim.Editor
             BuildCraneAndRigging(res, d, aDock, sb);            // R1.5a a5：天車、遙控器、吊具、工具袋（靜態）
             WireRigging(res, d, sb);                            // R1.5b b2：吊運（集電弓狀態機、對位燈、台架夾具、吊物探測 collider）
             BuildDepot(res, d, mats, mWarn, sb);                // terry 2026-11-13：捷運／輕軌機廠擺設（只有外觀）
+            BuildTeachingExtras(res, d, sb);                    // terry 2026-11-15：指示燈點光源、實體按鈕、地面教學箱開蓋
             var pieces = new[] { roof.root, plat.root, stair.root, cab.root, back.root }.Concat(res.equipment).ToList();
             foreach (var p in pieces) SavePrefab(p);
             sb.AppendLine("場景件 prefab：ENV_Insulators、" + string.Join("、", pieces.Select(t => t.name)) + $"（{PrefabFolder}）");
@@ -862,9 +863,13 @@ namespace PantographSim.Editor
             float wallH = d.gapRailHeight; const float t = 0.05f;
             Col("Edge_W", area.col, new Vector3(a.x - t, gy, a.y), new Vector3(a.x, gy + wallH, b.y), SceneLayers.WalkLimit);
             Col("Edge_E", area.col, new Vector3(b.x, gy, a.y), new Vector3(b.x + t, gy + wallH, b.y), SceneLayers.WalkLimit);
-            Col("Edge_S", area.col, new Vector3(a.x, gy, a.y - t), new Vector3(b.x, gy + wallH, a.y), SceneLayers.WalkLimit);
+            // 第二出口（terry 2026-11-15）：Edge_S 在 maintExitXRange 斷成東西兩段，中間是逃生小門
+            Vector2 ex = d.maintExitXRange;
+            Col("Edge_S_W", area.col, new Vector3(a.x, gy, a.y - t), new Vector3(ex.x, gy + wallH, a.y), SceneLayers.WalkLimit);
+            Col("Edge_S_E", area.col, new Vector3(ex.y, gy, a.y - t), new Vector3(b.x, gy + wallH, a.y), SceneLayers.WalkLimit);
             Col("Edge_N", area.col, new Vector3(a.x, gy, b.y), new Vector3(b.x, gy + wallH, b.y + t), SceneLayers.WalkLimit);
-            foreach (var (c0, c1) in new[] { (new Vector3(a.x, gy, a.y), new Vector3(a.x, gy, b.y)), (new Vector3(b.x, gy, a.y), new Vector3(b.x, gy, b.y)), (new Vector3(a.x, gy, a.y), new Vector3(b.x, gy, a.y)), (new Vector3(a.x, gy, b.y), new Vector3(b.x, gy, b.y)) })
+            BuildMaintExit(area.visual, d, mWarn, sb);
+            foreach (var (c0, c1) in new[] { (new Vector3(a.x, gy, a.y), new Vector3(a.x, gy, b.y)), (new Vector3(b.x, gy, a.y), new Vector3(b.x, gy, b.y)), (new Vector3(a.x, gy, a.y), new Vector3(ex.x, gy, a.y)), (new Vector3(ex.y, gy, a.y), new Vector3(b.x, gy, a.y)), (new Vector3(a.x, gy, b.y), new Vector3(b.x, gy, b.y)) })
                 HazardStripe("EdgeStripe", area.visual, c0, c1, gy + 0.006f, 0.12f, mWarn, Mat("hazardBlack", new Color(0.08f, 0.08f, 0.08f)));   // terry 2026-11-13：地上的黃黑斜紋警戒線
             // 平台和維修區之間的地面通道：只做視覺（兩區用傳送移動）
             Box("Aisle", area.visual, new Vector3((d.PlatformOuterX + b.x) / 2f, gy + 0.004f, (a.y + b.y) / 2f), new Vector3(b.x - d.PlatformOuterX, 0.008f, b.y - a.y), Mat("aisle", new Color(0.46f, 0.48f, 0.50f)), collider: false);

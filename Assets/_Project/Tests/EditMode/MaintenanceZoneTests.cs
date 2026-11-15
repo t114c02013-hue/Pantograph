@@ -22,7 +22,7 @@ namespace PantographSim.Tests
             var maint = AssetDatabase.LoadAssetAtPath<ZoneDef>(Folder + "/Zones/zone.maintenance.asset");
             Assert.IsNotNull(arrival); Assert.IsNotNull(maint);
             Assert.AreEqual(Def.groundY, maint.floorY, 1e-4f);
-            Assert.AreEqual(new Vector2(-13.5f, -5f), maint.minXZ); Assert.AreEqual(new Vector2(-5.5f, 5f), maint.maxXZ);
+            Assert.AreEqual(new Vector2(-13.5f, -5f), maint.minXZ); Assert.AreEqual(new Vector2(-5.5f, 7f), maint.maxXZ);   // terry 181C：往北擴大 2 m
             foreach (var s in Set.stations) Assert.IsTrue(s.zoneId == ZoneDef.Arrival || s.zoneId == ZoneDef.Maintenance, s.id);
             foreach (var id in new[] { "tp.stand.n", "tp.stand.e", "tp.stand.s", "tp.stand.w" })
             {
