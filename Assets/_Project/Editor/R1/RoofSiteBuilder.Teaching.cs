@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using PantographSim.Core;
@@ -18,6 +19,56 @@ namespace PantographSim.Editor
         public const string RoofBoxFolder = "Assets/_Project/Worksite/Models/RoofBoxes";
         /// <summary>要加點光源的燈罩：升降盒、複本燈、自檢器 LED、隔離燈號綠／紅。</summary>
         public static readonly string[] LampNodes = { "PanIndicator", "PanIndicator_Repeat", "DetectorTester/LED", "StatusLamp_Green", "StatusLamp_Red" };
+
+        public const string MaintWalkName = "Walkable_Maintenance";
+
+        /// <summary>教學箱外框（XZ，由 FBX 推導；FBX 不在就不算）。</summary>
+        static Rect BoxFootprint(RoofSceneDef d, RoofSceneDef.TrainingBox tb)
+        {
+            var model = AssetDatabase.LoadAssetAtPath<GameObject>($"{RoofBoxFolder}/{tb.fbx}.fbx");
+            if (model == null) return Rect.zero;
+            var g = (GameObject)Object.Instantiate(model);
+            try
+            {
+                g.transform.SetPositionAndRotation(new Vector3(tb.centerXZ.x, d.groundY + tb.standHeight, tb.centerXZ.y), Quaternion.Euler(0f, tb.facingNorth ? 0f : 180f, 0f) * model.transform.rotation);
+                var rs = g.GetComponentsInChildren<Renderer>();
+                if (rs.Length == 0) return Rect.zero;
+                var b = rs.Select(r => r.bounds).Aggregate((x, y) => { x.Encapsulate(y); return x; });
+                return Rect.MinMaxRect(b.min.x, b.min.z, b.max.x, b.max.z);
+            }
+            finally { Object.DestroyImmediate(g); }
+        }
+
+        /// <summary>要從 Walkable 挖掉的範圍：各箱外框，加上 X 間距 ≤ walkGapFillMax 且 Z 重疊的相鄰兩箱之間的縫（只挖 Z 重疊那段）。</summary>
+        public static List<Rect> CarveRects(IList<Rect> boxes, float gapMax)
+        {
+            var list = boxes.Where(r => r.width > 0f).ToList();
+            var gaps = new List<Rect>();
+            foreach (var p in list) foreach (var q in list)
+            {
+                if (q.xMin < p.xMax) continue;   // 只看 q 在 p 東邊
+                float gap = q.xMin - p.xMax, z0 = Mathf.Max(p.yMin, q.yMin), z1 = Mathf.Min(p.yMax, q.yMax);
+                if (gap > 0f && gap <= gapMax && z1 > z0) gaps.Add(Rect.MinMaxRect(p.xMax, z0, q.xMin, z1));
+            }
+            return list.Concat(gaps).ToList();
+        }
+
+        static List<Rect> TrainingBoxCarve(RoofSceneDef d) => CarveRects((d.trainingBoxes ?? new RoofSceneDef.TrainingBox[0]).Select(tb => BoxFootprint(d, tb)).ToList(), d.walkGapFillMax);
+
+        static bool Inside(Rect r, Vector2 p) => p.x > r.xMin && p.x < r.xMax && p.y > r.yMin && p.y < r.yMax;
+
+        static void CarveCheck(RoofSceneDef d, List<Rect> carved, List<Rect> walk, StringBuilder sb)
+        {
+            if (carved.Count == 0) { sb.AppendLine("・地面維修區 Walkable：沒有教學箱 FBX，不挖，一整塊"); return; }
+            float area = (d.maintMaxXZ.x - d.maintMinXZ.x) * (d.maintMaxXZ.y - d.maintMinXZ.y);
+            bool overlap = walk.Any(w => carved.Any(c => w.Overlaps(c)));
+            float walkArea = walk.Sum(w => w.width * w.height), carvedArea = carved.Sum(c => c.width * c.height);
+            bool sums = Mathf.Abs(walkArea + carvedArea - area) < 0.01f;
+            sb.AppendLine($"{(!overlap && sums ? "✔" : "✘")} 地面維修區 Walkable {walk.Count} 塊，和挖掉的 {carved.Count} 塊（箱子＋縫）不重疊；Walkable {walkArea:0.00} ＋ 挖掉 {carvedArea:0.00} ＝ {area:0.00} m²");
+            var ground = R1Data.Stations.stations.Where(s => s != null && s.floor == StationFloor.Ground).ToList();
+            var bad = ground.Where(s => carved.Any(c => Inside(c, s.WorldXZ(d)))).Select(s => s.id).ToList();
+            sb.AppendLine($"{(bad.Count == 0 ? "✔" : "✘")} 地面站點 {ground.Count} 個都不在挖掉的範圍內{(bad.Count > 0 ? "：" + string.Join("、", bad) : "")}");
+        }
 
         static Transform FindPath(Transform root, string path)
         {
@@ -73,7 +124,7 @@ namespace PantographSim.Editor
                     var lid = lids[i];
                     if (lid.GetComponent<Collider>() == null && lid.GetComponent<MeshFilter>() != null) lid.gameObject.AddComponent<BoxCollider>();
                     toggles[i].Configure($"env.roof_box.{tb.kind}.lid_{lid.name.Substring(4)}", $"教學箱蓋子（{tb.kind} {lid.name.Substring(4)}）");
-                    toggles[i].Setup(tb.lidOpenDegOverride > 0f ? tb.lidOpenDegOverride : d.lidOpenDeg, d.lidOpenSeconds, toggles, insides);
+                    toggles[i].Setup(tb.overrideLid > 0 && lid.name == "Lid_" + tb.overrideLid && tb.lidOpenDegOverride > 0f ? tb.lidOpenDegOverride : d.lidOpenDeg, d.lidOpenSeconds, toggles, insides);
                     lid.gameObject.AddComponent<Highlightable>();
                     res.ids[toggles[i].Id] = lid;
                 }

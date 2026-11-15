@@ -115,16 +115,17 @@ namespace PantographSim.Data
             [Tooltip("外框中心 X／Z（暫填，FBX 交付時更新）")] public Vector2 centerXZ;
             [Tooltip("鋼架高（m）")] public float standHeight = 0.6f;
             [Tooltip("正面朝北（+Z）；否則朝南")] public bool facingNorth = true;
-            [Tooltip("這個箱子的蓋子最大開啟角度（0＝用 lidOpenDeg）")] public float lidOpenDegOverride;
+            [Tooltip("覆寫最大開啟角度的那一片 Lid_n 編號（0＝還沒指定，模型交付時補）與角度")] public int overrideLid;
+            public float lidOpenDegOverride;
         }
         [System.Serializable] public class BoxStation { public string id, label; public Vector2 xz; }
         [System.Serializable] public class BtnBinding { public string node, key, value; public bool hold; }
-        public TrainingBox[] trainingBoxes =
+        public TrainingBox[] trainingBoxes =   // 負責人 2026-11-15 正式值（+Z＝北）；電池箱東側、電阻箱西側那片最大 90°，Lid 編號等模型
         {
-            new TrainingBox { kind = "hvac", fbx = "ENV_RoofBox_HVAC", centerXZ = new Vector2(-12.2f, 6.2f), standHeight = 0.6f, facingNorth = true },
-            new TrainingBox { kind = "battery", fbx = "ENV_RoofBox_Battery", centerXZ = new Vector2(-10.3f, 6.2f), standHeight = 0.4f, facingNorth = true, lidOpenDegOverride = 90f },
-            new TrainingBox { kind = "converter", fbx = "ENV_RoofBox_Converter", centerXZ = new Vector2(-9.1f, 6.2f), standHeight = 0.6f, facingNorth = false },
-            new TrainingBox { kind = "resistor", fbx = "ENV_RoofBox_Resistor", centerXZ = new Vector2(-8.0f, 6.2f), standHeight = 0.6f, facingNorth = true, lidOpenDegOverride = 90f },
+            new TrainingBox { kind = "hvac", fbx = "ENV_RoofBox_HVAC", centerXZ = new Vector2(-12.20f, 3.65f), standHeight = 0.6f, facingNorth = true },
+            new TrainingBox { kind = "battery", fbx = "ENV_RoofBox_Battery", centerXZ = new Vector2(-9.70f, 3.20f), standHeight = 0.4f, facingNorth = true, lidOpenDegOverride = 90f },
+            new TrainingBox { kind = "converter", fbx = "ENV_RoofBox_Converter", centerXZ = new Vector2(-9.70f, 6.10f), standHeight = 0.6f, facingNorth = false },
+            new TrainingBox { kind = "resistor", fbx = "ENV_RoofBox_Resistor", centerXZ = new Vector2(-8.00f, 3.50f), standHeight = 0.6f, facingNorth = true, lidOpenDegOverride = 90f },
         };
         [Tooltip("教學箱站點（地面、朝南、zone maintenance）")] public BoxStation[] trainingBoxStations =
         {
@@ -132,6 +133,7 @@ namespace PantographSim.Data
             new BoxStation { id = "tp.maint.box_c", label = "教學箱前（中）", xz = new Vector2(-9.7f, 4.7f) },
             new BoxStation { id = "tp.maint.box_e", label = "教學箱前（東）", xz = new Vector2(-8.0f, 5.0f) },
         };
+        [Tooltip("教學箱規格 4.4：相鄰兩箱 X 間距 ≤ 這個值、Z 範圍重疊時，縫也從 Walkable 挖掉（m）")] public float walkGapFillMax = 0.6f;
         [Tooltip("蓋子打開角度（度）與動畫秒數")] public float lidOpenDeg = 100f, lidOpenSeconds = 0.6f;
         [Tooltip("實體按鈕行程（mm）與點一下的回彈秒數")] public float btnPressMm = 5f, btnPressSeconds = 0.15f;
         [Tooltip("實體按鈕對照：節點名｜黑板鍵｜值（空白＝任何值）｜hold（值相等期間一直陷著）")] public BtnBinding[] btnBindings =

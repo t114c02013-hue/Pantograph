@@ -253,8 +253,14 @@ namespace PantographSim.Editor.XR
         {
             var def = R1Data.Boundary;
             var walk = Object.FindObjectsOfType<BoxCollider>(true).Where(c => c.gameObject.layer == LayerMask.NameToLayer(SceneLayers.Walkable)).ToList();
-            def.open = BoundaryLogic.Erode(walk.Select(BoundaryLogic.WalkRect).ToList(), def.inset);
-            def.closed = BoundaryLogic.Erode(walk.Where(c => c.name != "Walkable_Bridge").Select(BoundaryLogic.WalkRect).ToList(), def.inset);
+            // 教學箱規格 4.4：地面維修區的 Walkable 會避開教學箱分成幾塊，頭的邊界仍用外框一整塊（頭伸進箱子不推回）
+            var rd = R1Data.RoofScene;
+            var maint = Rect.MinMaxRect(rd.maintMinXZ.x, rd.maintMinXZ.y, rd.maintMaxXZ.x, rd.maintMaxXZ.y);
+            List<Rect> Rects(IEnumerable<BoxCollider> cs) => cs.Any(c => c.name.StartsWith(RoofSiteBuilder.MaintWalkName))
+                ? cs.Where(c => !c.name.StartsWith(RoofSiteBuilder.MaintWalkName)).Select(BoundaryLogic.WalkRect).Append(maint).ToList()
+                : cs.Select(BoundaryLogic.WalkRect).ToList();
+            def.open = BoundaryLogic.Erode(Rects(walk), def.inset);
+            def.closed = BoundaryLogic.Erode(Rects(walk.Where(c => c.name != "Walkable_Bridge")), def.inset);
             EditorUtility.SetDirty(def);
             sb.AppendLine($"VR：頭的活動範圍 {walk.Count} 塊 Walkable → 內縮 {def.inset} m：閘門開 {def.open.Length} 塊、關 {def.closed.Length} 塊");
         }

@@ -111,6 +111,17 @@ namespace PantographSim.Tests
         }
 
         [Test]
+        public void Carve_BoxesPlusNarrowGapsOnly()   // 教學箱規格 4.4：縫 ≤ 0.6 m 且 Z 重疊才挖；1.6 m 走道不挖
+        {
+            var a = Rect.MinMaxRect(0f, 0f, 1f, 1f);
+            var b = Rect.MinMaxRect(1.5f, 0.5f, 2.5f, 2f);    // 縫 0.5，Z 重疊 0.5…1
+            var c = Rect.MinMaxRect(4.1f, 0f, 5f, 1f);        // 和 b 縫 1.6 → 不挖
+            var list = PantographSim.Editor.RoofSiteBuilder.CarveRects(new[] { a, b, c }, 0.6f);
+            Assert.AreEqual(4, list.Count);
+            Assert.Contains(Rect.MinMaxRect(1f, 0.5f, 1.5f, 1f), list);
+        }
+
+        [Test]
         public void LampLight_Off_IsDimmedNotDark()
         {
             var g = new GameObject("Lamp"); made.Add(g);

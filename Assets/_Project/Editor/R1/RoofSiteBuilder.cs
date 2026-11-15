@@ -859,7 +859,13 @@ namespace PantographSim.Editor
             Vector2 a = d.maintMinXZ, b = d.maintMaxXZ;
             var area = Piece(env, "ENV_MaintenanceArea");
             Box("Floor", area.visual, new Vector3((a.x + b.x) / 2f, gy + 0.005f, (a.y + b.y) / 2f), new Vector3(b.x - a.x, 0.01f, b.y - a.y), Mat("maintFloor", new Color(0.36f, 0.38f, 0.40f)), collider: false);
-            Col("Walkable_Maintenance", area.walk, new Vector3(a.x, gy - 0.1f, a.y), new Vector3(b.x, gy + 0.01f, b.y), SceneLayers.Walkable);
+            // 教學箱規格 4.4：Walkable 避開教學箱外框與箱間的窄縫（≤ walkGapFillMax）；看得見的地板照舊一整塊
+            var carved = TrainingBoxCarve(d);
+            var walkRects = new List<Rect> { Rect.MinMaxRect(a.x, a.y, b.x, b.y) };
+            foreach (var c in carved) walkRects = walkRects.SelectMany(r => Subtract(r, c)).ToList();
+            for (int k = 0; k < walkRects.Count; k++)
+                Col(walkRects.Count == 1 ? MaintWalkName : $"{MaintWalkName}_{k + 1}", area.walk, new Vector3(walkRects[k].xMin, gy - 0.1f, walkRects[k].yMin), new Vector3(walkRects[k].xMax, gy + 0.01f, walkRects[k].yMax), SceneLayers.Walkable);
+            CarveCheck(d, carved, walkRects, sb);
             float wallH = d.gapRailHeight; const float t = 0.05f;
             Col("Edge_W", area.col, new Vector3(a.x - t, gy, a.y), new Vector3(a.x, gy + wallH, b.y), SceneLayers.WalkLimit);
             Col("Edge_E", area.col, new Vector3(b.x, gy, a.y), new Vector3(b.x + t, gy + wallH, b.y), SceneLayers.WalkLimit);
