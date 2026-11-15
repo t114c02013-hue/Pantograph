@@ -66,6 +66,9 @@ MonoBehaviour:
   - id: env.catenary
     anchor: 
     active: 1
+  - id: name:ENV_ShoreBox
+    anchor: 
+    active: 1
   onPass:
   - stepId: STP_CSR_05_Decide
     key: workorder.decision
@@ -76,4 +79,6 @@ MonoBehaviour:
   initialStates:
   - cab.breaker=on
   - cab.cylinder_power=on
+  - shore.switch=on
+  - shore.plug=car
   craneParked: 1

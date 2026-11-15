@@ -1519,7 +1519,8 @@
         "key2": "",
         "keys": [
           "lockout.breaker.tag_without_lock",
-          "lockout.raise_switch.tag_without_lock"
+          "lockout.raise_switch.tag_without_lock",
+          "lockout.shore_switch.tag_without_lock"
         ],
         "why": "沒上鎖只掛牌，別人還是合得上閘、升得了弓，牌子擋不住。",
         "fix": "先上鎖，再在同一個開關掛牌。",
@@ -1652,6 +1653,29 @@
         "why": "空吊梁太低就水平移動，吊帶下端會勾到防墜門架或碰到人。",
         "fix": "先把空吊梁升到上限（吊鉤 pivot ≥ 4.92 m），再水平移動。",
         "what": "空吊具沒升到上限就水平移動。"
+      }
+    },
+    {
+      "errorId": "ERR_SI02b_UnplugLive",
+      "severity": "Critical",
+      "severityBeforeK3": "",
+      "courses": "daily",
+      "inputMode": "",
+      "status": "Defined",
+      "owner": "",
+      "source": "CSV",
+      "trigger": "供電開關還是 ON 就去拔外接電源插頭。",
+      "note": "terry 175B（2026-11-15）：開關 ON 時抓插頭，所有模式都擋下（插頭不離開插座）並寫 shore.unplug_live；教學只提示不記錯（tutorialHintOnly），練習／考核記 Critical。比照 SI_02 c2 沒上鎖就掛牌。",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "shore.unplug_live"
+        ],
+        "tutorialHintOnly": true,
+        "what": "供電開關還沒切到 OFF 就去拔插頭。",
+        "why": "帶電拔插頭會拉出電弧，可能燒傷手和眼睛。",
+        "fix": "先把供電開關切到 OFF、看到綠燈亮，再拔插頭。"
       }
     },
     {

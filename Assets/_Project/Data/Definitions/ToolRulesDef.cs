@@ -36,6 +36,7 @@ namespace PantographSim.Data
         public bool BoltPourIn(string courseId) => System.Array.IndexOf(boltPourCourses, courseId) >= 0;
         [Tooltip("terry 2026-11-14（42B、52B）：哪些課程的螺栓盤是車頂小零件盤（要用握把收進工具袋，收尾清點前兩個都要收）")] public string[] boltDishCourses = { "daily" };
         [Tooltip("拿著車頂螺栓盤時，手離工具袋多近（m）放開算收進去（58A～61A：和收工具差不多）")] public float boltDishBagRadius = 0.3f;
+        [Tooltip("terry 175B：外接電源插頭放開時離插頭座多近（m）算掛好；手離插頭多近（m）按握把就算抓到（射線沒指到也行）")] public float shorePlugSnapDist = 0.15f, shorePlugReach = 0.15f;
         [Tooltip("桌機：車頂螺栓盤拿在手上時，離鏡頭沿射線多遠（m）")] public float boltDishHoldDistance = 0.35f;
         [Tooltip("VR（69B）：車頂螺栓盤在抓的那隻手控制器前方多遠（m）")] public float boltDishHandForward = 0.08f;
         [Tooltip("76A：手上拿著滑板時點螺栓盤的提示")] public string boltHandsFullText = "手上拿著滑板：先把滑板放下，才能拿螺栓";

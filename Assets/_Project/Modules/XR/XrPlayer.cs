@@ -328,10 +328,12 @@ namespace PantographSim.XR
             }
             if (string.IsNullOrEmpty(active) && hoveredId.StartsWith("env.spare_shelf.slot_")) { Send(hoveredId, "pick"); return; }
             // terry 2026-11-14（52B）：握把抓起車頂螺栓盤（日常課程；盤子裡還有螺栓時抓不起來，由 BoltTray 提示）
-            if (string.IsNullOrEmpty(active) && string.IsNullOrEmpty(S.Get("hand.item")) && hoveredId.StartsWith(BoltDishPrefix))
+            // terry 175B：外接電源插頭也走這條；手在插頭 shorePlugReach 內就算抓到（射線沒指到也行）
+            string grabId = hoveredId.StartsWith(BoltDishPrefix) || hoveredId == ShorePlugLogic.Id ? hoveredId : Near(ShorePlugLogic.Id, Data.ToolRulesDef.Load().shorePlugReach) ? ShorePlugLogic.Id : "";
+            if ((string.IsNullOrEmpty(active) || grabId == ShorePlugLogic.Id) && string.IsNullOrEmpty(S.Get("hand.item")) && grabId != "")   // 插頭：上鎖掛牌組拿在手上也能抓（另一隻手）
             {
-                Send(hoveredId, "grab");
-                grabPickedThisPress = S.Get("hand.item") == hoveredId;
+                Send(grabId, "grab");
+                grabPickedThisPress = S.Get("hand.item") == grabId;
                 if (grabPickedThisPress && rig != null) PointerState.HoldHand = leftHandActing && rig.LeftHand != null ? rig.LeftHand : rig.RightHand;   // 69B：哪隻手抓就跟哪隻手
                 return;
             }
@@ -345,6 +347,7 @@ namespace PantographSim.XR
         {
             if (grabPickedThisPress) { grabPickedThisPress = false; return; }   // 剛拿起的這一下不算放下
             if (!S.GetBool("training.running")) return;
+            if (S.Get("hand.item") == ShorePlugLogic.Id) { Send(ShorePlugLogic.Id, "release"); PointerState.HoldHand = null; return; }   // terry 175B：先放插頭（上鎖掛牌組還拿在另一手）；離插頭座多近由插頭判斷
             string active = S.Get(SimIds.ActiveTool);
             if (!string.IsNullOrEmpty(active))
             {

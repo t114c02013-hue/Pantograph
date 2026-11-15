@@ -14,6 +14,11 @@ STP_SI_02_LockOut,c,3,主斷路器上鎖,,ip.cab.breaker,tool.lockout_tag,主斷
 STP_SI_02_LockOut,c2,4,主斷路器掛牌,,ip.cab.breaker,tool.lockout_tag,主斷路器 = 已上鎖＋掛牌（沒上鎖就掛牌：教學擋下並提示「先上鎖再掛牌」，練習／考核記 Critical）,,,,tp.cab,tp.cab,both,,ERR_SI02_TagWithoutLock:Critical,B §2.5 SI_02; 步驟計畫審查：補錯誤 ID; v3.9 拆成上鎖、掛牌兩步（組長）,yes,
 STP_SI_02_LockOut,d,5,升弓開關上鎖,,ip.cab.raise_switch,tool.lockout_tag,升弓開關 = 已上鎖，鑰匙帶在身上,,,,tp.cab,tp.cab,both,,ERR_Global_KeyLeftUnattended:Minor,B §2.5 SI_02; 步驟計畫審查：補錯誤 ID; b4 2b：SI_03 c 刪除，掛牌組在 SI_02 掛完即收回腰包; v3.9 拆成上鎖、掛牌兩步（組長）,yes,升弓開關在控制盤上，上鎖後鑰匙帶在身上。防止有人在你作業時把弓升起來。
 STP_SI_02_LockOut,d2,6,升弓開關掛牌,,ip.cab.raise_switch,tool.lockout_tag,升弓開關 = 已上鎖＋掛牌（沒上鎖就掛牌：教學擋下並提示「先上鎖再掛牌」，練習／考核記 Critical）,,,,tp.cab,tp.cab,both,,ERR_SI02_TagWithoutLock:Critical,B §2.5 SI_02; 步驟計畫審查：補錯誤 ID; b4 2b：SI_03 c 刪除，掛牌組在 SI_02 掛完即收回腰包; v3.9 拆成上鎖、掛牌兩步（組長）,yes,
+STP_SI_02b_ShorePower,a,1,指著「供電中」紅燈確認,,ip.shore_box.lamp,,供電中紅燈 = 已確認,,,,,tp.cab.shore,daily,,,外接電源 terry 175B（步驟計畫＋資深鐵道 2026-11-15）,,用射線指著電源箱的紅燈按扳機。紅燈亮代表還在供電，車上還有電。,
+STP_SI_02b_ShorePower,b,2,把供電開關切到 OFF,,ip.shore_box.switch,,供電開關 = OFF（「已切離」綠燈亮）,,,,,tp.cab.shore,daily,,,外接電源 terry 175B（步驟計畫＋資深鐵道 2026-11-15）,,射線指著開關按扳機，等綠燈亮。先切電，拔插頭才不會拉出電弧。,
+STP_SI_02b_ShorePower,c,3,拔下插頭，掛回插頭座,,ip.shore_box.plug,,插頭 = 在插頭座（開關 ON 時不能拔：擋下並提示「先把開關切到 OFF」，練習／考核記 Critical）,,,,,tp.cab.shore,daily,,ERR_SI02b_UnplugLive:Critical,外接電源 terry 175B（步驟計畫＋資深鐵道 2026-11-15）,,握把抓住車側的插頭拔下，移到箱上的插頭座放開。掛好才不會絆倒。,
+STP_SI_02b_ShorePower,d,4,把供電開關上鎖,,ip.shore_box.switch,tool.lockout_tag,供電開關 = 已上鎖，鑰匙帶在身上,,,,,tp.cab.shore,daily,,,外接電源 terry 175B（步驟計畫＋資深鐵道 2026-11-15）,,射線指著開關按扳機鎖上，鑰匙帶在身上。上鎖別人就不能送電。,
+STP_SI_02b_ShorePower,d2,5,供電開關掛牌,,ip.shore_box.switch,tool.lockout_tag,供電開關 = 已上鎖＋掛牌（沒上鎖就掛牌：教學擋下並提示「先上鎖再掛牌」，練習／考核記 Critical）,,,,,tp.cab.shore,daily,,ERR_SI02_TagWithoutLock:Critical,外接電源 terry 175B（步驟計畫＋資深鐵道 2026-11-15）,,射線指著開關按扳機掛上牌。讓別人知道有人在車上作業。,
 STP_SI_03_CylinderPowerOff,a,1,把升弓電動缸電源切到 OFF,,ip.cab.cylinder_power,,電動缸電源 = OFF,,,,tp.cab,tp.cab,both,,ERR_SI03_CylinderPowerOn:Critical,B §2.5 SI_03; 步驟計畫審查：補錯誤 ID,yes,電動缸是推動弓升起的裝置，電源開關在控制盤上。切掉它，弓就不會被意外升起。
 STP_SI_03_CylinderPowerOff,b,2,按升弓鈕確認弓頭不動,,ip.cab.raise_button,,已按下且弓頭位置不變,,,,tp.cab,tp.cab,both,,ERR_SI03_CylinderPowerOn:Critical,B §2.5 SI_03; 步驟計畫審查：補錯誤 ID,yes,按一下升弓鈕，弓頭應該完全不動。用來確認電源真的切斷了。
 STP_SI_04_VoltageTest,a,1,到桿架拿起驗電桿,,env.tool_rack.slot_2（env.pole_rack）,tool.voltage_detector,手持驗電桿（單手）,,,,tp.platform.ground,tp.platform.ground,both,,ERR_SI04_NoSelfTest:Critical,B §2.5 SI_04 (v5.6); StepTable; D25,yes,走到桿架前，右手靠近驗電桿，按右握把拿起。
@@ -262,10 +267,11 @@ STP_RT_02_InsulationTest,r6c,39,拆下絕緣測試線,,ip.pan_head.ground_clamp;
 STP_RT_02_InsulationTest,r6d,40,把接地桿放回桿架,,env.tool_rack.slot_3（env.pole_rack）,tool.grounding_rod,掛位 3 = 在架,,,,tp.platform.ground,,periodic,when=fault.insulator_dirty,,D43 補充（鐵道）; 組長裁定 b4 5g,yes,
 STP_WC_04_Unlock,a0,1,請作業負責人同意恢復送電,,npc.work_leader,,停留點 4 清單全部點過，hold.4.released = true（接地登記欄 2 列都已銷號，且桿架 slot_3、工具架 slot_12 實物在架；人員已離開車頂；工具清點完成；絕緣電阻合格且已放電）,,,停留點 4 清單 3 項全部點過（#1 已銷號且桿架 slot_3 在架；人員已離開車頂；工具清點完成），hold.4.released = true,tp.platform.rack,tp.platform.rack,both,,ERR_Global_HoldPointRejected:Major,A §7 WC_04 a0; A §1.5; B §2.6,yes,作業負責人會和機廠調度（管全廠送電的人）確認。接地、人員、工具都確認過，才能送電。
 STP_WC_04_Unlock,a,2,從腰包拿出上鎖掛牌組,,env.waist_pouch,tool.lockout_tag,手持上鎖掛牌組,,,,tp.cab,tp.cab,both,,,B §2.5 WC_04 (v5.6); D30,yes,任一手伸到腰包，按握把拿出上鎖掛牌組，會拿在右手。
-STP_WC_04_Unlock,b,3,解除升弓開關的鎖,,ip.cab.raise_switch,tool.lockout_tag,升弓開關 = 未上鎖,,,,tp.cab,tp.cab,both,,ERR_Global_HoldPointSkipped:Critical;ERR_Global_GroundNotCleared:Critical,B §2.5 WC_04 (v5.6),yes,
-STP_WC_04_Unlock,c,4,解除主斷路器的鎖,,ip.cab.breaker,tool.lockout_tag,主斷路器 = 未上鎖；放開後掛牌組自動收回腰包（WC_06 c 才歸還工具架）,,,,tp.cab,tp.cab,both,,ERR_Global_HoldPointSkipped:Critical;ERR_Global_GroundNotCleared:Critical,B §2.5 WC_04 (v5.6); b4 2b：WC_04 e 併入,yes,
-STP_WC_04_Unlock,d,5,恢復電動缸電源,,ip.cab.cylinder_power,,電動缸電源 = ON,,,,tp.cab,tp.cab,both,,,B §2.5 WC_04 (v5.6),yes,
-STP_WC_04_Unlock,f,6,在作業單簽名完工,,env.work_order.sign_end,,已簽名,,,,,tp.platform.rack,daily,,,B §2.5 WC_04 (v5.6); B §2.6,yes,
+STP_WC_04_Unlock,c3,3,解除供電開關的鎖,,ip.shore_box.switch,tool.lockout_tag,供電開關 = 未上鎖，牌一起收回（先解最後上的鎖）；插頭不插回去,,,,,tp.cab.shore,daily,,ERR_Global_HoldPointSkipped:Critical,外接電源 terry 175B（步驟計畫＋資深鐵道 2026-11-15）,,射線指著外接電源箱的開關按扳機解鎖，牌一起收回。插頭先不插，等調度安排送電。,
+STP_WC_04_Unlock,b,4,解除升弓開關的鎖,,ip.cab.raise_switch,tool.lockout_tag,升弓開關 = 未上鎖,,,,tp.cab,tp.cab,both,,ERR_Global_HoldPointSkipped:Critical;ERR_Global_GroundNotCleared:Critical,B §2.5 WC_04 (v5.6),yes,
+STP_WC_04_Unlock,c,5,解除主斷路器的鎖,,ip.cab.breaker,tool.lockout_tag,主斷路器 = 未上鎖；放開後掛牌組自動收回腰包（WC_06 c 才歸還工具架）,,,,tp.cab,tp.cab,both,,ERR_Global_HoldPointSkipped:Critical;ERR_Global_GroundNotCleared:Critical,B §2.5 WC_04 (v5.6); b4 2b：WC_04 e 併入,yes,
+STP_WC_04_Unlock,d,6,恢復電動缸電源,,ip.cab.cylinder_power,,電動缸電源 = ON,,,,tp.cab,tp.cab,both,,,B §2.5 WC_04 (v5.6),yes,
+STP_WC_04_Unlock,f,7,在作業單簽名完工,,env.work_order.sign_end,,已簽名,,,,,tp.platform.rack,daily,,,B §2.5 WC_04 (v5.6); B §2.6,yes,
 STP_WC_05_RaiseTest,a,1,查看車頂淨空、吊鉤已移開,,part.crane.hook;part.pan_assy,,已查看,,,,tp.platform.lift,,periodic,,,A §7 WC_05 (prose); 步驟計畫審查：補目標 ID,yes,
 STP_WC_05_RaiseTest,b,2,按住 ▲ 升到頂（約 15 s）,,ui.lift_controller,,弓頭升到頂,,,,tp.platform.lift,,periodic,,ERR_Global_RaiseUnderHook:Critical;ERR_IN11_StrapLeft:Major,A §7 WC_05 (prose); v3.9 RaiseWithHoldDown 併入 IN11_StrapLeft,yes,
 STP_WC_05_RaiseTest,c,3,確認弓位指示燈 = 升弓,,ip.cab.pan_indicator,,指示燈 = 升弓且已確認,,,,tp.platform.lift,,periodic,,,A §7 WC_05 (prose),yes,

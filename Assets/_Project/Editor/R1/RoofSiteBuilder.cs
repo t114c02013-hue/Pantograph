@@ -617,6 +617,7 @@ namespace PantographSim.Editor
             BuildCraneAndRigging(res, d, aDock, sb);            // R1.5a a5：天車、遙控器、吊具、工具袋（靜態）
             WireRigging(res, d, sb);                            // R1.5b b2：吊運（集電弓狀態機、對位燈、台架夾具、吊物探測 collider）
             BuildDepot(res, d, mats, mWarn, sb);                // terry 2026-11-13：捷運／輕軌機廠擺設（只有外觀）
+            BuildShoreBox(res, d, sb);                          // terry 175B：日常課程外接電源箱（方塊暫代）
             BuildTeachingExtras(res, d, sb);                    // terry 2026-11-15：指示燈點光源、實體按鈕、地面教學箱開蓋
             var pieces = new[] { roof.root, plat.root, stair.root, cab.root, back.root }.Concat(res.equipment).ToList();
             foreach (var p in pieces) SavePrefab(p);

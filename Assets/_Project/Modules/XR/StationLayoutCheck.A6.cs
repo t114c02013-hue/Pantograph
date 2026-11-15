@@ -43,6 +43,7 @@ namespace PantographSim.XR
             var standOrigin = new Vector3(d.standCenterXZ.x, d.StandTopY, d.standCenterXZ.y);   // PAN_Root 原點放在台架中心的支撐座頂面
 
             A6PlatformSpacing(set, stations, Pos, r);
+            A6GroundNotOverPit(d, stations, Pos, r);
             A6GateFront(set, d, stations, Pos, r);
             A6PoleRack(set, pts, F("env.pole_rack"), r);
             A6LiftCorridor(set, d, stations, Pos, r);
@@ -185,6 +186,16 @@ namespace PantographSim.XR
         // ---------- 規則 ----------
 
         /// <summary>第1項：平台站點兩兩水平距離 ≥ platformStationMinSpacing（sharedWith 互連的不算）。</summary>
+        /// <summary>terry 175B：地面站點不能在檢修坑範圍內（|X| ≤ pitHalfWidth）。</summary>
+        static void A6GroundNotOverPit(RoofSceneDef d, List<StationDef> st, System.Func<StationDef, Vector3> pos, SceneResult r)
+        {
+            foreach (var s in st.Where(x => x.floor == StationFloor.Ground))
+            {
+                var p = pos(s);
+                Pend(r, "23", $"{s.id} X {p.x:0.00} 不在檢修坑上（|X| > {d.pitHalfWidth}）", Mathf.Abs(p.x) > d.pitHalfWidth + Eps);
+            }
+        }
+
         static void A6PlatformSpacing(StationSet set, List<StationDef> st, System.Func<StationDef, Vector3> pos, SceneResult r)
         {
             var plat = st.Where(s => s.floor == StationFloor.Platform).ToList();

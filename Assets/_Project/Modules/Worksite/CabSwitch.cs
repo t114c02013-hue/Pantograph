@@ -12,6 +12,7 @@ namespace PantographSim.Worksite
             if (id == CabControlLogic.BreakerId) msg = CabControlLogic.ToggleBreaker(State);
             else if (id == CabControlLogic.CylinderPowerId) msg = CabControlLogic.ToggleCylinderPower(State);
             else if (id == CabControlLogic.RaiseButtonId) CabControlLogic.PressRaise(State);
+            else if (id == CabControlLogic.ShoreSwitchId) msg = CabControlLogic.ToggleShore(State);   // terry 175B：外接電源箱供電開關
             if (msg != null) Toast(msg); else Sim.Perform("", id, "click");
         }
     }

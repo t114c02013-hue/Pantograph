@@ -239,6 +239,11 @@ namespace PantographSim.Editor
                 s.relativeToPlatformInner = true; s.positionXZ = new Vector2(-2.41f - inner, z); s.facingTargetId = ""; s.facingDirection = Vector3.left; s.zoneId = ZoneDef.Arrival;
                 EditorUtility.SetDirty(s);
             }
+            {   // terry 175B（2026-11-15）：日常課程外接電源箱前（地面，面向 +X＝電源箱與車）
+                var s = Add("tp.cab.shore", "外接電源箱前", StationFloor.Ground);
+                s.relativeToPlatformInner = false; s.positionXZ = d.shoreStationXZ; s.facingTargetId = ""; s.facingDirection = Vector3.right; s.zoneId = ZoneDef.Arrival;
+                EditorUtility.SetDirty(s);
+            }
             // D33／D36：base_w／base_e（面向 ±X；接地座、吊梁類／控制線接頭、固定帶扣座）＋四個子站點（面向自己那支底座螺栓；.n 的 Z 建置時取螺栓實測 Z，.s 固定 roofBaseSouthZ）
             // 子站點的螺栓距離上限寫在 maxTargetDistance（.s 斜向 0.70、.n 0.60）；扳手起始方向 wrenchStartDir（D36 補充三）
             foreach (var (id, label, sgn, bolt, maxD, wrench) in new[] {

@@ -19,6 +19,8 @@
     { "pattern": "lockout.*", "kind": "LiveState", "note": "上鎖掛牌、鑰匙在誰身上", "resetBy": "LockoutTagTool.OnClick 解鎖寫 open、key_holder 寫 \"\"" },
     { "pattern": "cab.breaker", "kind": "LiveState", "note": "主斷路器開關位置", "resetBy": "CabControlLogic.ToggleBreaker（on／off）" },
     { "pattern": "cab.cylinder_power", "kind": "LiveState", "note": "電動缸電源開關位置", "resetBy": "CabControlLogic.ToggleCylinderPower（on／off）" },
+    { "pattern": "shore.switch", "kind": "LiveState", "note": "外接電源供電開關 on／off，開場 on", "resetBy": "CabControlLogic.ToggleShore（on／off）" },
+    { "pattern": "shore.plug", "kind": "LiveState", "note": "外接電源插頭在 car（插在車上）或 holder（插頭座），開場 car", "resetBy": "ShorePlugLogic.Release（放到插頭座寫 holder）" },
     { "pattern": "ctrl.crane.power", "kind": "LiveState", "note": "天車遙控器電源鑰匙", "resetBy": "CraneControl.TurnKey 切換；CraneMechanism.Park 寫 false" },
     { "pattern": "ctrl.crane.estop", "kind": "LiveState", "note": "緊急停止鈕有沒有按下", "resetBy": "CraneControl.PressEStop 再按＝復歸寫 false" },
     { "pattern": "env.crane_pendant.state", "kind": "LiveState", "note": "遙控器在掛座或拿在手上", "resetBy": "CraneControl.SetPendant 掛回掛座" },

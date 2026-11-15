@@ -70,7 +70,7 @@ namespace PantographSim.Tests
             int SlotOf(string toolId) => BeltRig.Table.FindTool(toolId).slot;
             string SlotState(int n) => s.Get(RackLogic.SlotKey(n), RackLogic.OnRack);
 
-            void Hold(string toolId)
+            public void Hold(string toolId)
             {
                 string active = s.Get(SimIds.ActiveTool);
                 if (active == toolId) return;
@@ -132,7 +132,7 @@ namespace PantographSim.Tests
 
             static IEnumerable<string> Parts(string condition) => condition.Split(new[] { "&&" }, System.StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim());
             static bool IsLeadPart(string part) => part.StartsWith(GroundingLeadLogic.Carried) || part.StartsWith(GroundingLeadLogic.CarBody + ".") || part.StartsWith(GroundingLeadLogic.Cable + ".");
-            static void Command(string target, string text, string toolId = "") => Sim.Bus.Publish(new ActionRequested { targetId = target, text = text, toolId = toolId });
+            public static void Command(string target, string text, string toolId = "") => Sim.Bus.Publish(new ActionRequested { targetId = target, text = text, toolId = toolId });
             int LeadSlot => SlotOf(GroundingLeadLogic.ToolId);
 
             const string CtrlConnector = "ip.pan_assy.ctrl_connector";
@@ -191,6 +191,9 @@ namespace PantographSim.Tests
                 Command(MeggerLogic.PanPoint, "click", SimIds.ToolGroundingRod);
             }
 
+            /// <summary>lockout.&lt;名&gt; 的名 → 要點的開關（LockoutTagTool 的對照表反查；terry 175B 加外接電源供電開關）。</summary>
+            static string LockTarget(string name) => PantographSim.Tools.LockoutTagTool.LockNames.First(kv => kv.Value == name).Key;
+
             /// <summary>上鎖掛牌：手上拿著上鎖掛牌組（從腰包拿出）點主斷路器／升弓開關（LockoutTagTool）。</summary>
             void Lockout(string part)
             {
@@ -199,12 +202,12 @@ namespace PantographSim.Tests
                     if (s.GetBool(part)) return;
                     Hold(SimIds.ToolLockout);
                     Command(SimIds.ToolLockout, "part:tag");
-                    Command("ip.cab." + part.Substring("lockout.".Length, part.Length - "lockout.".Length - ".tagged".Length), "click", SimIds.ToolLockout);
+                    Command(LockTarget(part.Substring("lockout.".Length, part.Length - "lockout.".Length - ".tagged".Length)), "click", SimIds.ToolLockout);
                     Command(SimIds.ToolLockout, "part:lock");
                     return;
                 }
                 int eq = part.IndexOf('=');
-                string target = "ip.cab." + part.Substring("lockout.".Length, eq - "lockout.".Length), want = part.Substring(eq + 1);
+                string target = LockTarget(part.Substring("lockout.".Length, eq - "lockout.".Length)), want = part.Substring(eq + 1);
                 if (s.Get(part.Substring(0, eq), "open") == want) return;
                 Hold(SimIds.ToolLockout);
                 Command(target, "click", SimIds.ToolLockout);
@@ -331,7 +334,7 @@ namespace PantographSim.Tests
             public readonly SimState s;
             public readonly ProcedureRunner runner;
             public readonly ProcedureDefinition prc;
-            readonly Mechanisms mech;
+            public readonly Mechanisms mech;
             public readonly List<string> autoCompleted = new List<string>();   // 啟用同一個 tick 就完成（違規）
             public readonly List<string> wouldAuto = new List<string>();       // 啟用時條件已成立（沒有 version 規則就會自動完成）
             public readonly HashSet<string> driven = new HashSet<string>();     // 走真的機制的小動作（步驟 小動作）
@@ -433,6 +436,61 @@ namespace PantographSim.Tests
                     }
                     break;
             }
+        }
+
+        /// <summary>terry 175B：開關 ON 時抓插頭——所有模式插頭都不動、寫 shore.unplug_live；教學不記錯、練習記 1 次 Critical。</summary>
+        [TestCase("tutorial", 0)]
+        [TestCase("practice", 1)]
+        public void Daily_UnplugLive_Blocked_LoggedOutsideTutorial(string mode, int expected)
+        {
+            var f = new Flow("daily");
+            var det = new ErrorDetector(f.runner, f.bus, f.s);
+            var errs = new List<ErrorDetected>(); f.bus.Subscribe<ErrorDetected>(e => { if (e.errorId == "ERR_SI02b_UnplugLive") errs.Add(e); });
+            try
+            {
+                f.s.Set("training.mode", mode);
+                Assert.IsTrue(f.Run((st, sub) => st == "STP_SI_02b_ShorePower" && sub == "b"));
+                Assert.AreEqual(ShorePlugLogic.LiveText, ShorePlugLogic.Grab(f.s));
+                Assert.AreEqual(ShorePlugLogic.Car, f.s.Get(ShorePlugLogic.Plug, ShorePlugLogic.Car), "插頭不離開插座");
+                Assert.AreEqual("", f.s.Get(ShorePlugLogic.HandItem));
+                Assert.IsTrue(f.s.GetBool(ShorePlugLogic.UnplugLive));
+                Assert.AreEqual(expected, errs.Count, mode);
+                if (expected > 0) Assert.AreEqual(Severity.Critical, errs[0].severity);
+            }
+            finally { det.Dispose(); f.Dispose(); }
+        }
+
+        /// <summary>terry 175B：沒上鎖就在供電開關掛牌——練習記 ERR_SI02_TagWithoutLock。</summary>
+        [Test]
+        public void Daily_ShoreSwitch_TagWithoutLock_Logged()
+        {
+            var f = new Flow("daily");
+            var det = new ErrorDetector(f.runner, f.bus, f.s);
+            var errs = new List<ErrorDetected>(); f.bus.Subscribe<ErrorDetected>(e => { if (e.errorId == "ERR_SI02_TagWithoutLock") errs.Add(e); });
+            try
+            {
+                f.s.Set("training.mode", "practice");
+                Assert.IsTrue(f.Run((st, sub) => st == "STP_SI_02b_ShorePower" && sub == "d"));
+                f.mech.Hold(SimIds.ToolLockout);
+                Mechanisms.Command(SimIds.ToolLockout, "part:tag");
+                Mechanisms.Command(CabControlLogic.ShoreSwitchId, "click", SimIds.ToolLockout);
+                Assert.IsTrue(f.s.GetBool("lockout.shore_switch.tag_without_lock"));
+                Assert.AreEqual(1, errs.Count);
+            }
+            finally { det.Dispose(); f.Dispose(); }
+        }
+
+        /// <summary>terry 175B：匯入後日常 38 步、194 個小動作（選做 4 個）；WC_04 順序 a0 → a → c3 → b → c → d → f。</summary>
+        [Test]
+        public void Daily_ImportedShorePowerStep_CountsAndOrder()
+        {
+            var prc = AssetDatabase.LoadAssetAtPath<ProcedureDefinition>(StepsCsvImporter.ProcedurePath("daily"));
+            Assert.AreEqual(38, prc.steps.Count);
+            Assert.AreEqual(194, prc.steps.Sum(x => x.subActions.Length));
+            Assert.AreEqual(4, prc.steps.Sum(x => x.subActions.Count(a => a.optional)));
+            Assert.AreEqual("STP_SI_02b_ShorePower", prc.steps[3].stepId);
+            CollectionAssert.AreEqual(new[] { "a", "b", "c", "d", "d2" }, prc.steps[3].subActions.Select(a => a.subId).ToArray());
+            CollectionAssert.AreEqual(new[] { "a0", "a", "c3", "b", "c", "d", "f" }, prc.steps.First(x => x.stepId == "STP_WC_04_Unlock").subActions.Select(a => a.subId).ToArray());
         }
 
         /// <summary>D43：定期課打開可選故障「絕緣子髒汙」也能跑完：讀值 20 MΩ 勾不合格、走分支（放電拆線、回報、驗電後掛回 #1、上車頂擦 4 支、下車頂拆 #1、重量 500 MΩ 勾合格）。</summary>

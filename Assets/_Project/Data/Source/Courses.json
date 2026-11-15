@@ -17,7 +17,8 @@
         { "id": "name:SpareShelf", "anchor": "Anchor_BenchTop", "active": true },
         { "id": "name:SpareShelf_Uprights", "anchor": "", "active": false },
         { "id": "env.roof_strip_mat", "anchor": "", "active": false },
-        { "id": "env.catenary", "anchor": "", "active": false }
+        { "id": "env.catenary", "anchor": "", "active": false },
+        { "id": "name:ENV_ShoreBox", "anchor": "", "active": false }
       ],
       "onPass": [ { "stepId": "STP_CSR_05_Decide", "key": "workorder.decision", "value": "pass", "jumpTo": "STP_IN_01_RigOnStand" } ],
       "liftCapAboveO": 0, "contactGapM": 0, "craneParked": false,
@@ -45,11 +46,12 @@
         { "id": "name:SpareShelf", "anchor": "Anchor_SpareShelf_Daily", "active": true },
         { "id": "name:SpareShelf_Uprights", "anchor": "", "active": false },
         { "id": "env.roof_strip_mat", "anchor": "", "active": true },
-        { "id": "env.catenary", "anchor": "", "active": true }
+        { "id": "env.catenary", "anchor": "", "active": true },
+        { "id": "name:ENV_ShoreBox", "anchor": "", "active": true }
       ],
       "onPass": [ { "stepId": "STP_CSR_05_Decide", "key": "workorder.decision", "value": "pass", "jumpTo": "STP_WC_01a_ToolCountRoof" } ],
       "liftCapAboveO": 1.35, "contactGapM": 0.005, "craneParked": true,
-      "initialStates": ["cab.breaker=on", "cab.cylinder_power=on"]
+      "initialStates": ["cab.breaker=on", "cab.cylinder_power=on", "shore.switch=on", "shore.plug=car"]
     }
   ],
   "spareArrangement": [

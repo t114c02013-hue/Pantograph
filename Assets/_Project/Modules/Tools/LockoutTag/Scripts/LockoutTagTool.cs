@@ -14,6 +14,12 @@ namespace PantographSim.Tools
     {
         public const string PartKey = "tool.lockout_tag.part", Lock = "lock", Tag = "tag";
 
+        /// <summary>目標 → lockout.&lt;名&gt; 的名（terry 175B 加外接電源箱供電開關；既有兩筆的鍵名不變）。</summary>
+        public static readonly System.Collections.Generic.Dictionary<string, string> LockNames = new System.Collections.Generic.Dictionary<string, string>
+        {
+            { CabControlLogic.BreakerId, "breaker" }, { "ip.cab.raise_switch", "raise_switch" }, { CabControlLogic.ShoreSwitchId, "shore_switch" },
+        };
+
         public override void OnCommand(string command)
         {
             if (command == "part:" + Lock || command == "part:" + Tag) State.Set(PartKey, command.Substring(5));
@@ -24,12 +30,12 @@ namespace PantographSim.Tools
 
         public override void OnClick(ActionRequested e)
         {
-            if (e.targetId != "ip.cab.breaker" && e.targetId != "ip.cab.raise_switch") return;
+            if (!LockNames.TryGetValue(e.targetId, out var name)) return;
             if (!Ask(e.targetId, "lockout")) return;
-            string key = "lockout." + e.targetId.Substring(7);
+            string key = "lockout." + name;
             bool locked = State.Get(key) == "locked";
-            if (State.Get(PartKey, Lock) == Tag) { HangTag(key, locked); return; }
-            var block = !locked && e.targetId == CabControlLogic.BreakerId ? CabControlLogic.CanLockBreaker(State) : null;
+            if (State.Get(PartKey, Lock) == Tag) { HangTag(key, locked, e.targetId); return; }
+            var block = locked ? null : e.targetId == CabControlLogic.BreakerId ? CabControlLogic.CanLockBreaker(State) : e.targetId == CabControlLogic.ShoreSwitchId ? CabControlLogic.CanLockShore(State) : null;
             if (block != null) { State.Set("ui.toast", block); return; }
             State.Batch(() =>   // 一批：上鎖狀態、牌、鑰匙持有者同時生效
             {
@@ -41,14 +47,14 @@ namespace PantographSim.Tools
             });
         }
 
-        void HangTag(string key, bool locked)
+        void HangTag(string key, bool locked, string target)
         {
             if (!locked && State.Get("training.mode") == "tutorial") { State.Set("ui.toast", "先上鎖再掛牌"); return; }
             State.Batch(() =>
             {
                 State.SetBool(key + ".tagged", true);
                 if (!locked) State.SetBool(key + ".tag_without_lock", true);
-                Perform("ip.cab." + key.Substring(8), "tag");
+                Perform(target, "tag");
             });
         }
     }

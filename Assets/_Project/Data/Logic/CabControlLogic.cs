@@ -34,6 +34,20 @@ namespace PantographSim.Data
         /// <summary>主斷路器上鎖前要先切到 OFF（課程才有 cab.breaker；R1 沒有這個鍵，照舊可以鎖）。</summary>
         public static string CanLockBreaker(ISimState s) => s.Get(Breaker) == On ? "先把主斷路器切到 OFF 再上鎖" : null;
 
+        // terry 175B（2026-11-15）：日常課程外接電源箱的供電開關 shore.switch（開場 on），上鎖掛牌鍵 lockout.shore_switch
+        public const string ShoreSwitch = "shore.switch", ShoreSwitchId = "ip.shore_box.switch";
+
+        /// <summary>供電開關切換（比照主斷路器）：上鎖掛牌時不能切。</summary>
+        public static string ToggleShore(ISimState s)
+        {
+            if (Locked(s, "shore_switch")) return "供電開關已上鎖掛牌，不能切換";
+            s.Set(ShoreSwitch, s.Get(ShoreSwitch, On) == On ? Off : On);
+            return null;
+        }
+
+        /// <summary>供電開關上鎖前要先切到 OFF。</summary>
+        public static string CanLockShore(ISimState s) => s.Get(ShoreSwitch, On) == On ? "先把供電開關切到 OFF 再上鎖" : null;
+
         /// <summary>按升弓鈕（SI_03 b）：電動缸電源已關＝弓不動，記確認完成；電源還開著＝送升弓指令（弓會升起來）。</summary>
         public static void PressRaise(ISimState s)
         {

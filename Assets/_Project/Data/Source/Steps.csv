@@ -2,10 +2,11 @@ stepId,title,phase,courses,orderPeriodic,orderDaily,refTeachS_periodic,refExamS_
 STP_SI_00_PreWork,開工準備,SI,both,1,1,98,58,98,58,ERR_Global_StartWithoutPermit:Critical,A §9.2; B §2 + §2.6; D30 +1 小動作
 STP_SI_01_ConfirmLowered,降弓並確認,SI,both,2,2,45,30,45,30,ERR_SI01_NotInPosition:Major;ERR_SI01_LightOnly:Major,A §9.2; B §2 + §2.6
 STP_SI_02_LockOut,主斷路器與升弓開關上鎖掛牌,SI,both,3,3,58,37,53,32,ERR_SI02_TagWithoutLock:Critical;ERR_Global_KeyLeftUnattended:Minor,A §9.2; B §2 + §2.6; v3.9 上鎖、掛牌拆開 +3／+2 s
-STP_SI_03_CylinderPowerOff,斷開電動缸控制電源,SI,both,4,4,40,25,35,20,ERR_SI03_CylinderPowerOn:Critical,A §9.2; B §2 + §2.6
-STP_SI_04_VoltageTest,驗電,SI,both,5,5,50,30,45,25,ERR_SI04_NoSelfTest:Critical;ERR_Global_NoInsulatingGloves:Critical,A §9.2; B §2 + §2.6
-STP_SI_05_Grounding,掛接地桿,SI,both,6,6,62,40,57,35,ERR_SI05_NoPullTest:Major;ERR_Global_NoInsulatingGloves:Critical;ERR_Global_GroundHangOrder:Critical;ERR_Global_GroundNotRegistered:Major,A §9.2; B §2 + §2.6
-STP_SI_06_RoofEntry,上車頂前確認,SI,both,7,7,181,113,85,52,ERR_Global_HoldPointRejected:Major;ERR_Global_HoldPointSkipped:Critical;ERR_Global_HarnessUnclipped:Critical;ERR_Crane_UnderMovingHook:Major;ERR_Crane_FastLowerEmptyHook:Minor;ERR_Sling_CutJudgedUsable:Critical;ERR_Sling_FalseReject:Minor;ERR_Sling_NoReport:Major;ERR_Sling_CutReturnedToRack:Major;ERR_Sling_TouchWithoutEStop:Major;ERR_Crane_EmptyRigLowTravel:Major,A §9.2; B §2 + §2.6; D44 吊帶平台查看移入（RM_05 轉入 70／42 s，新增 a6、a7、a10、a11 +24／+15 s，教學／考核同比）；故障處理時間（s1 啟用 → s4 完成）不計入 1.5 倍時間判定，報表另列; v3.10 P7 例外：吊帶查看換位 1 × 2 s（組長）
+STP_SI_02b_ShorePower,外接電源切離上鎖,SI,daily,,4,,,45,30,ERR_SI02b_UnplugLive:Critical;ERR_SI02_TagWithoutLock:Critical,外接電源 terry 175B（步驟計畫＋資深鐵道 2026-11-15）
+STP_SI_03_CylinderPowerOff,斷開電動缸控制電源,SI,both,4,5,40,25,35,20,ERR_SI03_CylinderPowerOn:Critical,A §9.2; B §2 + §2.6
+STP_SI_04_VoltageTest,驗電,SI,both,5,6,50,30,45,25,ERR_SI04_NoSelfTest:Critical;ERR_Global_NoInsulatingGloves:Critical,A §9.2; B §2 + §2.6
+STP_SI_05_Grounding,掛接地桿,SI,both,6,7,62,40,57,35,ERR_SI05_NoPullTest:Major;ERR_Global_NoInsulatingGloves:Critical;ERR_Global_GroundHangOrder:Critical;ERR_Global_GroundNotRegistered:Major,A §9.2; B §2 + §2.6
+STP_SI_06_RoofEntry,上車頂前確認,SI,both,7,8,181,113,85,52,ERR_Global_HoldPointRejected:Major;ERR_Global_HoldPointSkipped:Critical;ERR_Global_HarnessUnclipped:Critical;ERR_Crane_UnderMovingHook:Major;ERR_Crane_FastLowerEmptyHook:Minor;ERR_Sling_CutJudgedUsable:Critical;ERR_Sling_FalseReject:Minor;ERR_Sling_NoReport:Major;ERR_Sling_CutReturnedToRack:Major;ERR_Sling_TouchWithoutEStop:Major;ERR_Crane_EmptyRigLowTravel:Major,A §9.2; B §2 + §2.6; D44 吊帶平台查看移入（RM_05 轉入 70／42 s，新增 a6、a7、a10、a11 +24／+15 s，教學／考核同比）；故障處理時間（s1 啟用 → s4 完成）不計入 1.5 倍時間判定，報表另列; v3.10 P7 例外：吊帶查看換位 1 × 2 s（組長）
 STP_RM_00_SecondGround,掛短接地線,RM,periodic,8,,50,34,,,ERR_Global_NoInsulatingGloves:Critical;ERR_Global_GroundHangOrder:Critical;ERR_Global_GroundNotRegistered:Major,A §9.2
 STP_RM_01_HoldDown,裝降弓固定帶,RM,periodic,9,,40,25,,,,A §9.2
 STP_RM_02_CtrlDisconnect,拆升弓控制線,RM,periodic,10,,25,15,,,,A §9.2
@@ -20,30 +21,30 @@ STP_LF_03_Clearance,升到越障高度,LF,periodic,18,,40,30,,,ERR_Crane_NoTrial
 STP_LF_04_Traverse,橫移到台架上方,LF,periodic,19,,50,40,,,ERR_Crane_NoTrialLift:Major;ERR_Crane_LowClearance:Major;ERR_Crane_PersonUnderLoad:Critical;ERR_Crane_OperatorTooClose:Major;ERR_Crane_Collision:Critical,A §9.2
 STP_LF_05_LowerToStand,降到台架,LF,periodic,20,,40,28,,,ERR_Crane_PersonUnderLoad:Critical;ERR_Crane_OperatorTooClose:Major;ERR_Crane_Collision:Critical,A §9.2
 STP_LF_06_SecureOnStand,台架固定並卸吊帶,LF,periodic,21,,65,38,,,ERR_Crane_UnrigBeforeClamp:Major;ERR_Crane_UnderMovingHook:Major,A §9.2
-STP_CSR_01_CheckIsolation,確認隔離完成,CSR,both,22,8,17,8,25,12,ERR_CSR01_IsolationIncomplete:Major,A §9.2; B §2 + §2.6
-STP_CSR_02_ZeroCaliper,卡尺歸零,CSR,both,23,9,30,15,30,15,ERR_CSR02_MeasureBeforeZero:Major,A §9.2; B §2 + §2.6
-STP_CSR_03_Measure_L,量靠關節滑板三點,CSR,both,24,10,60,35,60,35,ERR_CSR03_OnlyMid:Major;ERR_CSR03_CopyError:Minor,A §9.2; B §2 + §2.6
-STP_CSR_04_Measure_R,量外側滑板三點,CSR,both,25,11,55,32,60,35,ERR_CSR04_OnlyMid:Major;ERR_CSR04_CopyError:Minor,A §9.2; B §2 + §2.6
-STP_CSR_05_Decide,判定是否更換,CSR,both,26,12,20,10,20,10,ERR_CSR05_ShouldReplace:Critical;ERR_CSR05_OnlyOne:Major;ERR_CSR05_Unneeded:Minor,A §9.2; B §2 + §2.6
-STP_CSR_06_Loosen_L,依序鬆螺栓（靠關節）,CSR,both,27,13,75,45,60,35,ERR_CSR06_WrongSocket:Minor;ERR_CSR06_Order:Minor;ERR_CSR06_FullTurn:Major,A §9.2; B §2 + §2.6
-STP_CSR_07_RemoveBolts_L,取下螺栓（靠關節）,CSR,both,28,14,80,47,70,40,ERR_CSR07_NotCollected:Major,A §9.2; B §2 + §2.6
-STP_CSR_08_RemoveStrip_L,取下舊滑板（靠關節）,CSR,both,29,15,25,15,25,15,ERR_CSR08_Pry:Major;ERR_Global_StripReleasedOnRoof:Major,A §9.2; B §2 + §2.6; b4 3a 補錯誤 ID
-STP_CSR_09_CleanBracket_L,清潔托架接觸面（靠關節）,CSR,both,30,16,40,27,50,33,ERR_CSR09_Dirty:Major;ERR_Global_StripReleasedOnRoof:Major,A §9.2; B §2 + §2.6; B v5.9 CSR_09 d; b4 3a 補錯誤 ID
-STP_CSR_10_CheckNew_L,檢查新滑板（靠關節）,CSR,both,31,17,80,49,85,52,ERR_CSR10_WrongType:Critical;ERR_CSR10_Cracked:Critical;ERR_CSR10_NotMeasured:Minor,A §9.2; B §2 + §2.6
-STP_CSR_11_Install_L,安裝新滑板（靠關節）,CSR,both,32,18,35,20,35,20,ERR_CSR11_Reversed:Critical;ERR_Global_StripReleasedOnRoof:Major,A §9.2; B §2 + §2.6; b4 3a 補錯誤 ID
-STP_CSR_12_PreTighten_L,螺栓預鎖（靠關節）,CSR,both,33,19,95,55,90,50,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,A §9.2; B §2 + §2.6
-STP_CSR_13_Torque_L,扭力鎖緊（靠關節）,CSR,both,34,20,83,50,73,43,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Critical;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major;ERR_CSR13_WrongSocket:Minor;ERR_CSR13_WrenchRange:Minor,A §9.2; B §2 + §2.6; D38 選套筒 +3 s
-STP_CSR_14_Mark_L,畫防鬆標記（靠關節）,CSR,both,35,21,40,25,40,25,ERR_CSR14_Order:Minor,A §9.2; B §2 + §2.6
-STP_CSR_06_Loosen_R,依序鬆螺栓（外側）,CSR,both,36,22,52,45,46,35,ERR_CSR06_WrongSocket:Minor;ERR_CSR06_Order:Minor;ERR_CSR06_FullTurn:Major,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）
-STP_CSR_07_RemoveBolts_R,取下螺栓（外側）,CSR,both,37,23,55,47,54,40,ERR_CSR07_NotCollected:Major,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）
-STP_CSR_08_RemoveStrip_R,取下舊滑板（外側）,CSR,both,38,24,17,15,19,15,ERR_CSR08_Pry:Major;ERR_Global_StripReleasedOnRoof:Major,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）; b4 3a 補錯誤 ID
-STP_CSR_09_CleanBracket_R,清潔托架接觸面（外側）,CSR,both,39,25,28,27,40,33,ERR_CSR09_Dirty:Major;ERR_Global_StripReleasedOnRoof:Major,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）; B v5.9 CSR_09 d; b4 3a 補錯誤 ID
-STP_CSR_10_CheckNew_R,檢查新滑板（外側）,CSR,both,40,26,55,49,65,52,ERR_CSR10_WrongType:Critical;ERR_CSR10_Cracked:Critical;ERR_CSR10_NotMeasured:Minor,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）
-STP_CSR_11_Install_R,安裝新滑板（外側）,CSR,both,41,27,24,20,27,20,ERR_CSR11_Reversed:Critical;ERR_Global_StripReleasedOnRoof:Major,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）; b4 3a 補錯誤 ID
-STP_CSR_12_PreTighten_R,螺栓預鎖（外側）,CSR,both,42,28,66,55,69,50,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）
-STP_CSR_13_Torque_R,扭力鎖緊（外側）,CSR,both,43,29,58,50,57,43,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Critical;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major;ERR_CSR13_WrongSocket:Minor;ERR_CSR13_WrenchRange:Minor,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）; D38 選套筒 +3 s
-STP_CSR_14_Mark_R,畫防鬆標記（外側）,CSR,both,44,30,28,25,31,25,ERR_CSR14_Order:Minor,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）
-STP_CSR_15_HeightCheck,量兩條高低差,CSR,both,45,31,60,37,50,30,ERR_CSR15_Exceeds:Major;ERR_CSR15_NotCompared:Major,A §9.2; B §2 + §2.6
+STP_CSR_01_CheckIsolation,確認隔離完成,CSR,both,22,9,17,8,25,12,ERR_CSR01_IsolationIncomplete:Major,A §9.2; B §2 + §2.6
+STP_CSR_02_ZeroCaliper,卡尺歸零,CSR,both,23,10,30,15,30,15,ERR_CSR02_MeasureBeforeZero:Major,A §9.2; B §2 + §2.6
+STP_CSR_03_Measure_L,量靠關節滑板三點,CSR,both,24,11,60,35,60,35,ERR_CSR03_OnlyMid:Major;ERR_CSR03_CopyError:Minor,A §9.2; B §2 + §2.6
+STP_CSR_04_Measure_R,量外側滑板三點,CSR,both,25,12,55,32,60,35,ERR_CSR04_OnlyMid:Major;ERR_CSR04_CopyError:Minor,A §9.2; B §2 + §2.6
+STP_CSR_05_Decide,判定是否更換,CSR,both,26,13,20,10,20,10,ERR_CSR05_ShouldReplace:Critical;ERR_CSR05_OnlyOne:Major;ERR_CSR05_Unneeded:Minor,A §9.2; B §2 + §2.6
+STP_CSR_06_Loosen_L,依序鬆螺栓（靠關節）,CSR,both,27,14,75,45,60,35,ERR_CSR06_WrongSocket:Minor;ERR_CSR06_Order:Minor;ERR_CSR06_FullTurn:Major,A §9.2; B §2 + §2.6
+STP_CSR_07_RemoveBolts_L,取下螺栓（靠關節）,CSR,both,28,15,80,47,70,40,ERR_CSR07_NotCollected:Major,A §9.2; B §2 + §2.6
+STP_CSR_08_RemoveStrip_L,取下舊滑板（靠關節）,CSR,both,29,16,25,15,25,15,ERR_CSR08_Pry:Major;ERR_Global_StripReleasedOnRoof:Major,A §9.2; B §2 + §2.6; b4 3a 補錯誤 ID
+STP_CSR_09_CleanBracket_L,清潔托架接觸面（靠關節）,CSR,both,30,17,40,27,50,33,ERR_CSR09_Dirty:Major;ERR_Global_StripReleasedOnRoof:Major,A §9.2; B §2 + §2.6; B v5.9 CSR_09 d; b4 3a 補錯誤 ID
+STP_CSR_10_CheckNew_L,檢查新滑板（靠關節）,CSR,both,31,18,80,49,85,52,ERR_CSR10_WrongType:Critical;ERR_CSR10_Cracked:Critical;ERR_CSR10_NotMeasured:Minor,A §9.2; B §2 + §2.6
+STP_CSR_11_Install_L,安裝新滑板（靠關節）,CSR,both,32,19,35,20,35,20,ERR_CSR11_Reversed:Critical;ERR_Global_StripReleasedOnRoof:Major,A §9.2; B §2 + §2.6; b4 3a 補錯誤 ID
+STP_CSR_12_PreTighten_L,螺栓預鎖（靠關節）,CSR,both,33,20,95,55,90,50,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,A §9.2; B §2 + §2.6
+STP_CSR_13_Torque_L,扭力鎖緊（靠關節）,CSR,both,34,21,83,50,73,43,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Critical;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major;ERR_CSR13_WrongSocket:Minor;ERR_CSR13_WrenchRange:Minor,A §9.2; B §2 + §2.6; D38 選套筒 +3 s
+STP_CSR_14_Mark_L,畫防鬆標記（靠關節）,CSR,both,35,22,40,25,40,25,ERR_CSR14_Order:Minor,A §9.2; B §2 + §2.6
+STP_CSR_06_Loosen_R,依序鬆螺栓（外側）,CSR,both,36,23,52,45,46,35,ERR_CSR06_WrongSocket:Minor;ERR_CSR06_Order:Minor;ERR_CSR06_FullTurn:Major,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）
+STP_CSR_07_RemoveBolts_R,取下螺栓（外側）,CSR,both,37,24,55,47,54,40,ERR_CSR07_NotCollected:Major,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）
+STP_CSR_08_RemoveStrip_R,取下舊滑板（外側）,CSR,both,38,25,17,15,19,15,ERR_CSR08_Pry:Major;ERR_Global_StripReleasedOnRoof:Major,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）; b4 3a 補錯誤 ID
+STP_CSR_09_CleanBracket_R,清潔托架接觸面（外側）,CSR,both,39,26,28,27,40,33,ERR_CSR09_Dirty:Major;ERR_Global_StripReleasedOnRoof:Major,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）; B v5.9 CSR_09 d; b4 3a 補錯誤 ID
+STP_CSR_10_CheckNew_R,檢查新滑板（外側）,CSR,both,40,27,55,49,65,52,ERR_CSR10_WrongType:Critical;ERR_CSR10_Cracked:Critical;ERR_CSR10_NotMeasured:Minor,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）
+STP_CSR_11_Install_R,安裝新滑板（外側）,CSR,both,41,28,24,20,27,20,ERR_CSR11_Reversed:Critical;ERR_Global_StripReleasedOnRoof:Major,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）; b4 3a 補錯誤 ID
+STP_CSR_12_PreTighten_R,螺栓預鎖（外側）,CSR,both,42,29,66,55,69,50,ERR_CSR12_Overtight:Major;ERR_CSR12_Order:Major,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）
+STP_CSR_13_Torque_R,扭力鎖緊（外側）,CSR,both,43,30,58,50,57,43,ERR_CSR13_Setting:Major;ERR_CSR13_Under:Critical;ERR_CSR13_Over:Major;ERR_CSR13_Order:Major;ERR_CSR13_WrongSocket:Minor;ERR_CSR13_WrenchRange:Minor,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）; D38 選套筒 +3 s
+STP_CSR_14_Mark_R,畫防鬆標記（外側）,CSR,both,44,31,28,25,31,25,ERR_CSR14_Order:Minor,A §9.2; B §2 + §2.6; periodic R teach = A 380 s (O2) allocated pro rata；D29 v1.1 O2 日常第二側教學按比例降（520→400，軟體工程）
+STP_CSR_15_HeightCheck,量兩條高低差,CSR,both,45,32,60,37,50,30,ERR_CSR15_Exceeds:Major;ERR_CSR15_NotCompared:Major,A §9.2; B §2 + §2.6
 STP_IN_01_RigOnStand,台架上掛吊帶,IN,periodic,46,,132,80,,,ERR_Crane_UnderMovingHook:Major;ERR_Crane_FastLowerEmptyHook:Minor;ERR_Global_HoldPointRejected:Major;ERR_Sling_CutJudgedUsable:Critical;ERR_Sling_FalseReject:Minor;ERR_Sling_NoReport:Major;ERR_Sling_CutReturnedToRack:Major;ERR_Sling_TouchWithoutEStop:Major;ERR_Crane_EmptyRigLowTravel:Major,A §9.2; v3.7 加 a2 查看吊帶 4 條 +16／+10 s；故障分支另加 EX 50／35 s（不計入參考時間）; D44 加 a0、a1、a3 +24／+15 s；故障處理時間（s1 啟用 → s4 完成）不計入 1.5 倍時間判定，報表另列; v3.8 加 a4 升到上限 +8／+5 s; v3.10 P7 例外：吊帶查看換位 1 × 2 s（組長）
 STP_IN_02_TrialLift,試吊,IN,periodic,47,,25,18,,,ERR_Global_HoldPointSkipped:Critical;ERR_Crane_PersonOnRoofDuringLift:Critical;ERR_Crane_SideLoad:Major;ERR_Crane_PersonUnderLoad:Critical;ERR_Crane_OperatorTooClose:Major;ERR_Crane_Collision:Critical,A §9.2
 STP_IN_03_Transfer,吊運到車頂上方,IN,periodic,48,,80,55,,,ERR_Crane_NoTrialLift:Major;ERR_Crane_PersonUnderLoad:Critical;ERR_Crane_OperatorTooClose:Major;ERR_Crane_Collision:Critical;ERR_Crane_LowClearance:Major,A §9.2
@@ -57,13 +58,13 @@ STP_IN_09_HVReconnect,接回高壓端子,IN,periodic,55,,78,48,,,ERR_IN09_Settin
 STP_IN_10_CtrlReconnect,接回升弓控制線,IN,periodic,56,,25,15,,,ERR_IN10_NotConnected:Major,A §9.2
 STP_IN_11_RemoveHoldDown,拆降弓固定帶,IN,periodic,57,,25,15,,,ERR_IN11_StrapLeft:Major,A §9.2
 STP_WC_03a_RemoveGroundRoof,車頂拆 #2 短接地線,WC,periodic,58,,35,23,,,ERR_WC03_RemoveOrder:Critical;ERR_Global_NoInsulatingGloves:Critical;ERR_Global_GroundNotRegistered:Major,A §9.2; D25
-STP_WC_01a_ToolCountRoof,車頂清點,WC,both,59,32,30,18,30,18,ERR_WC01_Leftover:Critical;ERR_WC01a_StripOnMat:Major,A §9.2; B §2 + §2.6; D25; b4 3a 補錯誤 ID
-STP_WC_02_LeaveRoof,下車頂,WC,both,60,33,35,23,30,20,ERR_Global_HarnessUnclipped:Critical,A §9.2; B §2 + §2.6
+STP_WC_01a_ToolCountRoof,車頂清點,WC,both,59,33,30,18,30,18,ERR_WC01_Leftover:Critical;ERR_WC01a_StripOnMat:Major,A §9.2; B §2 + §2.6; D25; b4 3a 補錯誤 ID
+STP_WC_02_LeaveRoof,下車頂,WC,both,60,34,35,23,30,20,ERR_Global_HarnessUnclipped:Critical,A §9.2; B §2 + §2.6
 STP_RT_01_CraneStow,天車歸位,WC,periodic,61,,35,25,,,ERR_Crane_UnderMovingHook:Major,A §9.2
-STP_WC_03_RemoveGround,拆接地桿,WC,daily,,34,,,35,23,ERR_WC03_RemoveOrder:Critical;ERR_Global_GroundRemovedWhileOnRoof:Critical;ERR_Global_NoInsulatingGloves:Critical;ERR_Global_GroundNotRegistered:Major,B §2 + §2.6
+STP_WC_03_RemoveGround,拆接地桿,WC,daily,,35,,,35,23,ERR_WC03_RemoveOrder:Critical;ERR_Global_GroundRemovedWhileOnRoof:Critical;ERR_Global_NoInsulatingGloves:Critical;ERR_Global_GroundNotRegistered:Major,B §2 + §2.6
 STP_WC_03b_RemoveGroundPlatform,平台拆 #1 接地桿,WC,periodic,62,,35,22,,,ERR_WC03_RemoveOrder:Critical;ERR_Global_GroundRemovedWhileOnRoof:Critical;ERR_Global_NoInsulatingGloves:Critical;ERR_Global_GroundNotRegistered:Major,A §9.2; D25
-STP_WC_01b_ToolCountPlatform,平台清點,WC,both,63,35,25,15,25,15,ERR_Global_GroundNotCleared:Critical,A §9.2; B §2 + §2.6; D25
+STP_WC_01b_ToolCountPlatform,平台清點,WC,both,63,36,25,15,25,15,ERR_Global_GroundNotCleared:Critical,A §9.2; B §2 + §2.6; D25
 STP_RT_02_InsulationTest,絕緣電阻測試,WC,periodic,64,,96,59,,,ERR_Global_NoInsulatingGloves:Critical;ERR_RT02_IRFail:Critical;ERR_Global_NoDischargeAfterIR:Major;ERR_RT02_WrongJudgement:Critical;ERR_RT02_ReadingMismatch:Major;ERR_RT02_LeadRemovedBeforeDischarge:Major;ERR_RT02_NoReport:Major;ERR_Global_HarnessUnclipped:Critical;ERR_Global_GroundRemovedWhileOnRoof:Critical;ERR_Global_GroundNotRegistered:Major;ERR_SI04_NoSelfTest:Critical;ERR_Global_GroundWithoutVoltageTest:Critical;ERR_Global_GroundHangOrder:Critical;ERR_SI05_NoPullTest:Major;ERR_Global_HoldPointRejected:Major;ERR_Global_HoldPointSkipped:Critical;ERR_WC03_RemoveOrder:Critical;ERR_WC01_Leftover:Critical,A §9.2; D43 加 c2、c3、e2 共 +26／+17 s（故障分支不計入參考時間）; v3.5 故障分支開啟時另加 EX 340／215 s（不計入參考時間）; 故障處理時間（r1 啟用 → r6d 完成）不計入 1.5 倍時間判定，報表另列
-STP_WC_04_Unlock,解鎖並記錄,WC,both,65,36,70,42,75,45,ERR_Global_HoldPointRejected:Major;ERR_Global_HoldPointSkipped:Critical;ERR_Global_GroundNotCleared:Critical,A §9.2; B §2 + §2.6
+STP_WC_04_Unlock,解鎖並記錄,WC,both,65,37,70,42,75,45,ERR_Global_HoldPointRejected:Major;ERR_Global_HoldPointSkipped:Critical;ERR_Global_GroundNotCleared:Critical,A §9.2; B §2 + §2.6
 STP_WC_05_RaiseTest,升弓試驗,WC,periodic,66,,60,40,,,ERR_Global_RaiseUnderHook:Critical;ERR_IN11_StrapLeft:Major,A §9.2
-STP_WC_06_Handover,完工交接,WC,both,67,37,43,27,43,27,,A §9.2; B §2 + §2.6; D30 +1 小動作
+STP_WC_06_Handover,完工交接,WC,both,67,38,43,27,43,27,,A §9.2; B §2 + §2.6; D30 +1 小動作
