@@ -150,6 +150,7 @@ namespace PantographSim.Editor.XR
             fadeQuad.transform.localPosition = new Vector3(0, 0, 0.08f);
             fadeQuad.transform.localScale = Vector3.one * 0.5f;
             fadeQuad.GetComponent<Renderer>().sharedMaterial = lineMat;
+            fadeQuad.layer = PantographSim.UI.XrPanelLayout.HmdOnlyLayer;   // terry 186：暗幕只給頭盔看
             var fader = camGo.AddComponent<XrFader>();
             fader.Setup(fadeQuad.GetComponent<Renderer>(), R1Data.Height.floorChangeFadeSeconds);
 
@@ -189,7 +190,14 @@ namespace PantographSim.Editor.XR
             var coach = rigGo.AddComponent<XrCoach>();
             coach.Setup(rig);
             var player = rigGo.AddComponent<XrPlayer>();
-            rigGo.AddComponent<RoofFallZoneMonitor>().Setup(origin, player, fader, teleport);   // terry 134B／185：車頂墜落區
+            var fallMon = rigGo.AddComponent<RoofFallZoneMonitor>(); fallMon.Setup(origin, player, fader, teleport);   // terry 134B／185：車頂墜落區
+            // terry 186：頭穿進實心物體變暗＋「請退後」（提示在眼前、HmdOnly 層，旁觀鏡頭看不到）
+            var hint = new GameObject("HeadSolidHint").AddComponent<TextMesh>();
+            hint.transform.SetParent(camGo.transform, false); hint.transform.localPosition = new Vector3(0f, -0.04f, 0.5f);
+            var hintFont = AssetDatabase.LoadAssetAtPath<Font>(RoofSiteBuilder.FontPath); if (hintFont != null) { hint.font = hintFont; hint.GetComponent<MeshRenderer>().sharedMaterial = hintFont.material; }
+            hint.anchor = TextAnchor.MiddleCenter; hint.alignment = TextAlignment.Center; hint.characterSize = 0.01f; hint.fontSize = 60; hint.color = Color.white;
+            hint.gameObject.layer = PantographSim.UI.XrPanelLayout.HmdOnlyLayer; hint.gameObject.SetActive(false);
+            rigGo.AddComponent<HeadSolidFade>().Setup(origin, fader, teleport, fallMon, hint);
             player.Setup(rig, origin, ray, rightCtrl, teleport, coach);
             var sw = xrRoot.AddComponent<XrModeSwitch>();
             sw.Setup(rigGo, rig, teleport, coach);

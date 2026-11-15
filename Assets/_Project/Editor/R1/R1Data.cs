@@ -44,6 +44,7 @@ namespace PantographSim.Editor
 
         public static ToolPouchDef ToolPouch => Ensure<ToolPouchDef>("Assets/_Project/Modules/XR/Resources/ToolPouchDef.asset");
         public static BoundaryDef Boundary => Ensure<BoundaryDef>("Assets/_Project/Modules/XR/Resources/BoundaryDef.asset");
+        public static HeadSolidDef HeadSolid => Ensure<HeadSolidDef>("Assets/_Project/Modules/XR/Resources/HeadSolidDef.asset");
         public static TeleportRule Teleport => Ensure<TeleportRule>(Folder + "/TeleportRule.asset");
         public static ToolSlotTable ToolSlots => Ensure<ToolSlotTable>(Folder + "/ToolSlotTable.asset");
 

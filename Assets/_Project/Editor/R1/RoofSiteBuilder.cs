@@ -619,6 +619,7 @@ namespace PantographSim.Editor
             BuildDepot(res, d, mats, mWarn, sb);                // terry 2026-11-13：捷運／輕軌機廠擺設（只有外觀）
             BuildShoreBox(res, d, sb);                          // terry 175B：日常課程外接電源箱（方塊暫代）
             BuildTeachingExtras(res, d, sb);                    // terry 2026-11-15：指示燈點光源、實體按鈕、地面教學箱開蓋
+            BuildHeadSolids(res.env, sb);                       // terry 186：頭穿透判定碰撞框（HeadSolid 層）
             var pieces = new[] { roof.root, plat.root, stair.root, cab.root, back.root }.Concat(res.equipment).ToList();
             foreach (var p in pieces) SavePrefab(p);
             sb.AppendLine("場景件 prefab：ENV_Insulators、" + string.Join("、", pieces.Select(t => t.name)) + $"（{PrefabFolder}）");

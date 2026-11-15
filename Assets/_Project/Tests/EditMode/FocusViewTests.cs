@@ -135,7 +135,7 @@ namespace PantographSim.Tests
                 {
                     s.Set("hint.sub_target", v.id);
                     var dir = v.p - v.eye; float dist = dir.magnitude;
-                    foreach (var h in Physics.RaycastAll(new Ray(v.eye, dir.normalized), dist - 0.03f, ~LayerMask.GetMask(SceneLayers.LocomotionBlocker, SceneLayers.Boundary, SceneLayers.WalkLimit), QueryTriggerInteraction.Ignore))
+                    foreach (var h in Physics.RaycastAll(new Ray(v.eye, dir.normalized), dist - 0.03f, ~LayerMask.GetMask(SceneLayers.LocomotionBlocker, SceneLayers.Boundary, SceneLayers.WalkLimit, SceneLayers.HeadSolid), QueryTriggerInteraction.Ignore))
                     {
                         string got = Id(h.collider);
                         if (h.collider.transform.IsChildOf(v.t) || v.t.IsChildOf(h.collider.transform) || got.StartsWith(v.id) || SimIds.RayIgnores(s, got)) continue;

@@ -14,7 +14,7 @@ namespace PantographSim.Editor
     /// </summary>
     public static partial class RoofSiteBuilder
     {
-        const string FontPath = "Assets/_Project/Content/Fonts/Resources/NotoSansTC.ttf";
+        public const string FontPath = "Assets/_Project/Content/Fonts/Resources/NotoSansTC.ttf";
 
         /// <summary>柱式檢查機坑的範圍（推估）：|X| ≤ PitHalfWidth、Z 在 ±PitHalfLength；軌內深 1.6 m、軌外深 1.05 m。</summary>
         const float PitHalfWidth = 1.75f, PitHalfLength = 21f, PitDeep = 1.6f, PitSide = 1.05f, PitInner = 0.62f;

@@ -8,11 +8,15 @@ namespace PantographSim.XR
     {
         [SerializeField] Renderer quad;
         [SerializeField] float seconds = 0.2f;
-        float alpha;
+        float alpha, overlay;
         MaterialPropertyBlock block;
         static readonly int ColorId = Shader.PropertyToID("_Color");
 
         public float Alpha => alpha;
+        /// <summary>terry 186：頭穿進實心物體的淡黑（HeadSolidFade 寫）。畫面顯示 max(轉場, overlay)：轉場淡到全黑不會被拉回。</summary>
+        public float Overlay { get => overlay; set { float v = Mathf.Clamp01(value); if (v == overlay) return; overlay = v; Apply(alpha); } }
+        /// <summary>實際顯示的透明度。</summary>
+        public float Shown => Mathf.Max(alpha, overlay);
         public float Seconds { get => seconds; set => seconds = value; }
 
         public void Setup(Renderer r, float s) { quad = r; seconds = s; Apply(0f); }
@@ -33,9 +37,10 @@ namespace PantographSim.XR
         {
             alpha = Mathf.Clamp01(a);
             if (quad == null) return;
-            quad.enabled = alpha > 0.001f;
+            float shown = Shown;
+            quad.enabled = shown > 0.001f;
             if (block == null) block = new MaterialPropertyBlock();
-            block.SetColor(ColorId, new Color(0, 0, 0, alpha));
+            block.SetColor(ColorId, new Color(0, 0, 0, shown));
             quad.SetPropertyBlock(block);
         }
     }

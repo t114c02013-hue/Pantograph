@@ -72,6 +72,12 @@ namespace PantographSim.XR
         /// 場景擺放檢查（B 段 3.5）。points＝場景裡的站點；find＝互動點 ID → 物件；panFootprints＝會動的關節在升降全程的頂點範圍（a6，取代整組 AABB 聯集；null＝不查）。
         /// 「0.4 m 內沒有實體碰撞體」只算障礙物：站點要操作的互動物件（ISimObject）不算，螺栓盤另有 0.30–0.50 m 的規則。
         /// </summary>
+        /// <summary>站點淨空的障礙物遮罩、看得到目標的視線遮罩：terry 186 的 HeadSolid 都排除（只給頭穿透判定用）。</summary>
+        public static int SolidMask => ~(SceneLayers.WalkableMask | LayerMask.GetMask(SceneLayers.Boundary, SceneLayers.LocomotionBlocker, SceneLayers.WalkLimit, "UI", "Ignore Raycast", SceneLayers.HeadSolid));
+        public static int SightMask => SolidMask;
+        /// <summary>第 20 項防墜繩路徑的遮罩（全部層扣掉 HeadSolid）。</summary>
+        public static int LanyardMask => ~SceneLayers.HeadSolidMask;
+
         public static SceneResult CheckScene(StationSet set, RoofSceneDef d, IEnumerable<XrTeleportPoint> points, System.Func<string, Transform> find, IDictionary<string, Bounds> panFootprints, WrenchSweepInput wrench = null)
             => CheckScene(set, d, points, find, panFootprints, wrench, null);
 
@@ -84,7 +90,7 @@ namespace PantographSim.XR
             Physics.SyncTransforms();
             int walk = SceneLayers.WalkableMask;
             int invisible = LayerMask.GetMask(SceneLayers.Boundary, SceneLayers.LocomotionBlocker, SceneLayers.WalkLimit);
-            int solid = ~(walk | invisible | LayerMask.GetMask("UI", "Ignore Raycast"));
+            int solid = SolidMask;
             var pts = points.ToDictionary(p => p.PointId);
             foreach (var s in set.stations.Where(x => x != null))
             {
@@ -275,7 +281,7 @@ namespace PantographSim.XR
 
         static bool Visible(Vector3 eye, Vector3 to, Transform target)
         {
-            int mask = ~(SceneLayers.WalkableMask | LayerMask.GetMask(SceneLayers.Boundary, SceneLayers.LocomotionBlocker, SceneLayers.WalkLimit, "UI", "Ignore Raycast"));
+            int mask = SightMask;
             foreach (var h in Physics.RaycastAll(eye, (to - eye).normalized, Vector3.Distance(eye, to) - 0.02f, mask, QueryTriggerInteraction.Ignore))
                 if (!h.transform.IsChildOf(target) && !target.IsChildOf(h.transform) && !IsTarget(h.collider)) return false;   // 互動物件（例：工具箱的掛位）不算遮擋
             return true;

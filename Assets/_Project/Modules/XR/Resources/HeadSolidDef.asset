@@ -1,0 +1,131 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5333f68e25b70344a81404527c805a7, type: 3}
+  m_Name: HeadSolidDef
+  m_EditorClassIdentifier: 
+  headSolidRadius: 0.1
+  fadeInSec: 0.25
+  fadeOutSec: 0.2
+  maxAlpha: 0.85
+  graceSec: 0.5
+  hintText: "\u8ACB\u9000\u5F8C"
+  solids:
+  - pattern: LRV/Module_*
+    kind: 1
+    optional: 0
+  - pattern: LRV/Articulation_*
+    kind: 1
+    optional: 0
+  - pattern: LRV/Roof_*
+    kind: 0
+    optional: 0
+  - pattern: LRV/Bogie_*
+    kind: 0
+    optional: 0
+  - pattern: TrainingBox_*
+    kind: 2
+    optional: 1
+  - pattern: ENV_PantographStand
+    kind: 2
+    optional: 0
+  - pattern: ENV_WorkBench
+    kind: 2
+    optional: 0
+  - pattern: SpareShelf
+    kind: 2
+    optional: 0
+  - pattern: ENV_SlingRack
+    kind: 0
+    optional: 0
+  - pattern: ENV_RiggingRack
+    kind: 0
+    optional: 0
+  - pattern: ToolRack_Platform
+    kind: 0
+    optional: 0
+  - pattern: ENV_PoleRack
+    kind: 0
+    optional: 0
+  - pattern: LiftControlBox
+    kind: 0
+    optional: 0
+  - pattern: DetectorTester
+    kind: 0
+    optional: 0
+  - pattern: Visual/ShoreBox_Body
+    kind: 0
+    optional: 0
+  - pattern: Visual/Post
+    kind: 0
+    optional: 0
+  - pattern: Visual/Column
+    kind: 0
+    optional: 0
+  - pattern: Visual/Wall
+    kind: 0
+    optional: 0
+  - pattern: Visual/EndWall
+    kind: 0
+    optional: 0
+  - pattern: WallEquipment/SafetyBoard
+    kind: 0
+    optional: 0
+  - pattern: WallEquipment/HelmetHarnessRack
+    kind: 0
+    optional: 0
+  - pattern: WallEquipment/ToolCart_*
+    kind: 0
+    optional: 0
+  - pattern: WallEquipment/CarbonStripRack
+    kind: 0
+    optional: 0
+  - pattern: WallEquipment/WasteBin
+    kind: 0
+    optional: 0
+  - pattern: WallEquipment/FireExtinguisher
+    kind: 0
+    optional: 0
+  - pattern: WallEquipment/SocketBox
+    kind: 0
+    optional: 0
+  - pattern: WallEquipment/AirHoseReel
+    kind: 0
+    optional: 0
+  excludes:
+  - AlignLight_*
+  - Clipboard
+  - Inside_*
+  - '*Label*'
+  - Text
+  - LampLight
+  - HeadSolid_*
+  - NewStrip_*
+  excludeZones:
+  - m_Center: {x: 0, y: -2.2175, z: -16.35}
+    m_Extent: {x: 0.8, y: 1.1424999, z: 0.79999924}
+  bowForward: 0.3
+  bowDown: 0.3
+  aboveTopCheck: 0.2
+  topChecks:
+  - stationPrefix: tp.stand.
+    objectName: ENV_PantographStand
+  - stationPrefix: tp.platform.parts
+    objectName: SpareShelf
+  - stationPrefix: tp.maint.box_
+    objectName: TrainingBox_*
+  leanChecks:
+  - stationId: tp.cab.shore
+    headX: -1.9
+  bowSkips:
+  - stationId: tp.platform.lift
+    reason: "\u5347\u964D\u76D2\u5728\u9762\u524D 0.2 m\u3001\u9802\u9762\u6BD4\u773C\u775B\u4F4E\u7D04
+      0.4 m\uFF1A\u5F4E\u8170\u982D\u6703\u78B0\u5230\u76D2\u9802\u908A\uFF08\u982D\u771F\u7684\u58D3\u9032\u76D2\u5B50\u6642\u982D\u76D4\u7167\u6A23\u8B8A\u6697\uFF09"

@@ -17,6 +17,8 @@ namespace PantographSim.XR
     /// </summary>
     public class XrCranePendant : MonoBehaviour
     {
+        /// <summary>扳機按遙控器按鈕的射線遮罩：terry 186 的 HeadSolid 排除。</summary>
+        public static int PressMask => ~SceneLayers.HeadSolidMask;
         public static readonly string[] Buttons = { "Btn_Up", "Btn_Down", "Btn_East", "Btn_West", "Btn_North", "Btn_South", "Btn_Speed2", "Btn_EStop", "Key_Power" };
 
         [SerializeField] XrRig rig;
@@ -149,7 +151,7 @@ namespace PantographSim.XR
         {
             var set = new HashSet<string>();
             var origin = rig.RightRayOrigin;
-            if (PointerState.XrTriggerHeld && origin != null && Physics.Raycast(origin.position, origin.forward, out var hit, 2f, ~0, QueryTriggerInteraction.Collide))
+            if (PointerState.XrTriggerHeld && origin != null && Physics.Raycast(origin.position, origin.forward, out var hit, 2f, PressMask, QueryTriggerInteraction.Collide))
                 foreach (var kv in buttonColliders) if (hit.collider == kv.Value) set.Add(kv.Key);
             if (rightPoke != null)
                 foreach (var kv in buttonColliders) if (kv.Value != null && (kv.Value.ClosestPoint(rightPoke.position) - rightPoke.position).sqrMagnitude < 0.008f * 0.008f) set.Add(kv.Key);

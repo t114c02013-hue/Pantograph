@@ -18,6 +18,9 @@ namespace PantographSim.Parts.Mechanism
     {
         public enum CraneState { Idle, Moving, EStop, Collision, LimitUp, RedZoneStop }
 
+        /// <summary>吊物碰撞檢查的遮罩：學員移動用的地板與不可見牆不是實體障礙（用 layer 排除）；terry 186 的 HeadSolid 只給頭穿透判定用，也排除。</summary>
+        public static int ObstacleMask => ~LayerMask.GetMask(SceneLayers.Walkable, SceneLayers.LocomotionBlocker, SceneLayers.WalkLimit, SceneLayers.LoadProbe, SceneLayers.Crane, SceneLayers.HeadSolid);
+
         [SerializeField] CraneProfile profile;
         [SerializeField] Transform bridge, trolley, hookBlock, ropeAnchor, rope, swayPivot;
         [SerializeField] SafetyRuleDefinition[] rules = Array.Empty<SafetyRuleDefinition>();
@@ -280,7 +283,7 @@ namespace PantographSim.Parts.Mechanism
             bool ignoreSeats = rigging != null && float.TryParse(s.Get("part.crane.drop_distance"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var drop) && drop <= rigging.ignoreDistance;
             Physics.SyncTransforms();   // 這一幀剛移動過 Transform
             var (c, half, rot) = LoadBox();
-            int mask = ~LayerMask.GetMask(SceneLayers.Walkable, SceneLayers.LocomotionBlocker, SceneLayers.WalkLimit, SceneLayers.LoadProbe, SceneLayers.Crane);   // 學員移動用的地板與不可見牆不是實體障礙（用 layer 排除）
+            int mask = ObstacleMask;
             foreach (var col in Physics.OverlapBox(c, half, rot, mask, QueryTriggerInteraction.Ignore))
             {
                 if (col.transform.IsChildOf(load) || col.transform.IsChildOf(transform)) continue;   // 吊物自己、天車自己

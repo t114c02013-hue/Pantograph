@@ -15,12 +15,15 @@ namespace PantographSim.Core
         public const string LoadProbe = "LoadProbe";
         /// <summary>R1.5b D40：天車本體（橋架、台車、捲揚機、軌道）的 collider，只給吊鉤正上方的 BoxCast 用。</summary>
         public const string Crane = "Crane";
+        /// <summary>terry 186：頭穿透判定用的碰撞框（只拿來查詢，和任何層都不互撞；所有射線都要排除它）。</summary>
+        public const string HeadSolid = "HeadSolid";
+        public static int HeadSolidMask => LayerMask.GetMask(HeadSolid);
 
         /// <summary>VR 試玩修正 第 1 點：擋手、工具和傳送指向線的實體邊界：護欄、圍牆、車頂邊（頭由 HeadBoundaryPusher 的水平範圍擋）。</summary>
         public static int BoundaryMask => LayerMask.GetMask(Boundary, WalkLimit);
 
         /// <summary>點選、指物件用：排除 Boundary 與 LocomotionBlocker。</summary>
-        public static int InteractMask => ~LayerMask.GetMask(Boundary, LocomotionBlocker);
+        public static int InteractMask => ~LayerMask.GetMask(Boundary, LocomotionBlocker, HeadSolid);
 
         /// <summary>傳送拋物線：Walkable＋Boundary（沒有這些圖層時打全部）。</summary>
         public static int TeleportMask { get { int m = LayerMask.GetMask(Walkable, Boundary, WalkLimit); return m == 0 ? ~0 : m; } }

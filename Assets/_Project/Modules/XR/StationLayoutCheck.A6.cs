@@ -44,6 +44,7 @@ namespace PantographSim.XR
 
             A6PlatformSpacing(set, stations, Pos, r);
             A6GroundNotOverPit(d, stations, Pos, r);
+            A6HeadSolid(stations, s => pts[s.id].transform, r);
             A6GateFront(set, d, stations, Pos, r);
             A6PoleRack(set, pts, F("env.pole_rack"), r);
             A6LiftCorridor(set, d, stations, Pos, r);
@@ -185,7 +186,41 @@ namespace PantographSim.XR
 
         // ---------- 規則 ----------
 
-        /// <summary>第1項：平台站點兩兩水平距離 ≥ platformStationMinSpacing（sharedWith 互連的不算）。</summary>
+        /// <summary>terry 186（RA-25、RA-26）：每個站點的站姿頭（跪姿站點用跪姿眼高）、彎腰頭（往朝向前 bowForward、下 bowDown）、
+        /// 前傾拔插頭（leanChecks）、頭伸到檯面（箱頂）上方 aboveTopCheck（topChecks）都不能碰到 HeadSolid（含 headSolidRadius）；駕駛室不判範圍內的不算。</summary>
+        static void A6HeadSolid(List<StationDef> st, System.Func<StationDef, Transform> tf, SceneResult r)
+        {
+            var def = HeadSolidDef.Load(); var posture = PostureDef.Load();
+            if (def == null || posture == null || LayerMask.NameToLayer(SceneLayers.HeadSolid) < 0) return;
+            foreach (var s in st)
+            {
+                var t = tf(s); var p = t.position; var f = Vector3.ProjectOnPlane(t.forward, Vector3.up).normalized;
+                var stand = p + Vector3.up * posture.Eye(s.posture);
+                var heads = new List<(string, Vector3)> { (s.posture == Posture.Kneel ? "跪姿" : s.posture == Posture.Crouch ? "蹲姿" : "站姿", stand) };
+                if (!(def.bowSkips ?? new HeadSolidDef.BowSkip[0]).Any(x => x.stationId == s.id)) heads.Add(("彎腰", stand + f * def.bowForward + Vector3.down * def.bowDown));
+                foreach (var l in (def.leanChecks ?? new HeadSolidDef.LeanCheck[0]).Where(x => x.stationId == s.id)) heads.Add(("前傾", new Vector3(l.headX, stand.y - def.bowDown, p.z)));
+                foreach (var tc in (def.topChecks ?? new HeadSolidDef.TopCheck[0]).Where(x => s.id.StartsWith(x.stationPrefix)))
+                    foreach (var top in TopPoints(tc.objectName, p, def)) heads.Add(("檯面上方", top));
+                foreach (var (label, h) in heads) Pend(r, "24", $"{s.id} {label}頭 {P3(h)} 沒有穿進實心物體", !HeadInSolid(h, def), s.id);
+            }
+        }
+
+        /// <summary>頭（含半徑）碰到 HeadSolid；駕駛室等不判範圍內不算。</summary>
+        public static bool HeadInSolid(Vector3 head, HeadSolidDef def) => !def.Excluded(head) && Physics.CheckSphere(head, def.headSolidRadius, SceneLayers.HeadSolidMask, QueryTriggerInteraction.Collide);
+
+        /// <summary>物件頂面上方 aboveTopCheck 的點：離站點最近的那一點（往內縮 0.05）。物件找不到（教學箱 FBX 未交付）就沒有。</summary>
+        public static IEnumerable<Vector3> TopPoints(string objectName, Vector3 station, HeadSolidDef def)
+        {
+            foreach (var o in Resources.FindObjectsOfTypeAll<Transform>().Where(x => x.gameObject.scene.IsValid() && HeadSolidDef.Wild(x.name, objectName)))
+            {
+                var cols = o.GetComponentsInChildren<Collider>(true).Where(c => c.gameObject.layer == LayerMask.NameToLayer(SceneLayers.HeadSolid)).ToList();
+                if (cols.Count == 0) continue;
+                var b = cols.Select(c => c.bounds).Aggregate((x, y) => { x.Encapsulate(y); return x; });
+                float x0 = Mathf.Clamp(station.x, b.min.x + 0.05f, b.max.x - 0.05f), z0 = Mathf.Clamp(station.z, b.min.z + 0.05f, b.max.z - 0.05f);
+                yield return new Vector3(x0, b.max.y + def.aboveTopCheck, z0);
+            }
+        }
+
         /// <summary>terry 175B：地面站點不能在檢修坑範圍內（|X| ≤ pitHalfWidth）。</summary>
         static void A6GroundNotOverPit(RoofSceneDef d, List<StationDef> st, System.Func<StationDef, Vector3> pos, SceneResult r)
         {
@@ -196,6 +231,7 @@ namespace PantographSim.XR
             }
         }
 
+        /// <summary>第1項：平台站點兩兩水平距離 ≥ platformStationMinSpacing（sharedWith 互連的不算）。</summary>
         static void A6PlatformSpacing(StationSet set, List<StationDef> st, System.Func<StationDef, Vector3> pos, SceneResult r)
         {
             var plat = st.Where(s => s.floor == StationFloor.Platform).ToList();
@@ -836,7 +872,7 @@ namespace PantographSim.XR
                 foreach (var (pose, hgt) in new[] { ("跪姿", d.dRingKneelHeight), ("站姿", d.dRingStandHeight) })
                 {
                     var b = tp.transform.position + Vector3.up * hgt;
-                    var hits = Physics.RaycastAll(a, (b - a).normalized, Vector3.Distance(a, b), ~0, QueryTriggerInteraction.Collide)
+                    var hits = Physics.RaycastAll(a, (b - a).normalized, Vector3.Distance(a, b), LanyardMask, QueryTriggerInteraction.Collide)
                         .Select(h => h.collider).Where(c => (root != null && c.transform.IsChildOf(root)) || c.name == "InsulatorCollision").Select(c => c.name).Distinct().ToList();
                     Pend(r, "20", $"防墜器 → {id} D 環（{pose} {hgt} m）" + (hits.Count == 0 ? "不碰集電弓與絕緣子" : "碰到 " + string.Join("、", hits)), hits.Count == 0, id);
                 }

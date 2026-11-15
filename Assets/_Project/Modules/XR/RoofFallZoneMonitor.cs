@@ -22,6 +22,12 @@ namespace PantographSim.XR
         BoundaryDef def;
         FallZoneLogic logic;
         bool pushing;
+        FallZone zone;
+        /// <summary>terry 186：淡出推回進行中（HeadSolidFade 暫停）；目前區域（墜落區提示優先）。</summary>
+        public bool Pushing => pushing;
+        public FallZone Zone => zone;
+        /// <summary>淡出推回剛結束（HeadSolidFade 用來重設最後在外面的位置）。</summary>
+        public event System.Action PushedBack;
 
         public void Setup(XROrigin o, XrPlayer p, XrFader f, XrTeleport t) { origin = o; player = p; fader = f; teleport = t; }
 
@@ -42,7 +48,9 @@ namespace PantographSim.XR
             if (logic == null || s == null || origin == null || origin.Camera == null || !InputMode.XrActive || pushing) return;
             var h = origin.Camera.transform.position;
             bool suppressed = s.GetBool(SimIds.AutoRunActive) || SimSession.IsReplay;
-            Apply(s, logic.Tick(Time.time, Time.deltaTime, h.x, h.z, OnRoof(s), s.Get("procedure.current"), suppressed));
+            var r = logic.Tick(Time.time, Time.deltaTime, h.x, h.z, OnRoof(s), s.Get("procedure.current"), suppressed);
+            zone = r.zone;
+            Apply(s, r);
         }
 
         void Apply(ISimState s, FallZoneLogic.Result r)
@@ -63,6 +71,7 @@ namespace PantographSim.XR
             if (fader != null) { fader.Seconds = def.fallFadeInSec; yield return fader.FadeTo(0f); fader.Seconds = keep; }
             logic.Teleported(Time.time);   // 推回後 teleportGraceSec 內不判
             pushing = false;
+            PushedBack?.Invoke();
         }
     }
 }
