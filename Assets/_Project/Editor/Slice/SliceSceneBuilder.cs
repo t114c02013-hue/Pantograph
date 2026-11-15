@@ -326,6 +326,7 @@ namespace PantographSim.Editor
             sb.AppendLine($"場景互動物件 {ids.Count} 個：" + string.Join(", ", ids.OrderBy(x => x)));
             DataValidator.Validate(out var validation, ids);
             sb.AppendLine("資料檢查：\n" + validation);
+            sb.AppendLine(SceneTriangleReport.Build(scene.GetRootGameObjects()));
 
             RenderPreviews(sb, panHead, c);
             Directory.CreateDirectory("Logs");
