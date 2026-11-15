@@ -460,6 +460,26 @@ namespace PantographSim.Tests
             finally { det.Dispose(); f.Dispose(); }
         }
 
+        /// <summary>terry 134B／185：ERR_Global_RoofFallZone 匯入成 global 規則（日常、定期）；寫 xr.roof_fall_zone 記 1 筆 Major，再寫一次再記一次。</summary>
+        [TestCase("daily")]
+        [TestCase("periodic")]
+        public void RoofFallZone_Global_WriteLogsMajor(string course)
+        {
+            var f = new Flow(course);
+            var det = new ErrorDetector(f.runner, f.bus, f.s);
+            var errs = new List<ErrorDetected>(); f.bus.Subscribe<ErrorDetected>(e => { if (e.errorId == "ERR_Global_RoofFallZone") errs.Add(e); });
+            try
+            {
+                Assert.IsTrue(f.prc.globalErrors.Any(r => r.errorId == "ERR_Global_RoofFallZone"), "匯入不再被略過");
+                Assert.IsTrue(f.Run((st, sub) => st == "STP_SI_01_ConfirmLowered"));
+                PantographSim.XR.RoofFallZoneMonitor.Write(f.s);
+                Assert.AreEqual(1, errs.Count); Assert.AreEqual(Severity.Major, errs[0].severity);
+                PantographSim.XR.RoofFallZoneMonitor.Write(f.s);
+                StringAssert.EndsWith("ERR_Global_RoofFallZone|2", f.s.Get(ErrorDetector.RepeatKey), "先 false 再 true：寫一次記一次（第二次累計次數）");
+            }
+            finally { det.Dispose(); f.Dispose(); }
+        }
+
         /// <summary>terry 175B：沒上鎖就在供電開關掛牌——練習記 ERR_SI02_TagWithoutLock。</summary>
         [Test]
         public void Daily_ShoreSwitch_TagWithoutLock_Logged()

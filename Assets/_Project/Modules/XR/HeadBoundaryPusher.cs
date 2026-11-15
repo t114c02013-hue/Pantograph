@@ -27,12 +27,23 @@ namespace PantographSim.XR
             return new Vector3(d.x, 0f, d.y);
         }
 
+        /// <summary>推回去的點落在沒有平台的推回線範圍上（純函式）。</summary>
+        public static bool TowardFallLine(Rect[] fall, Vector3 to)
+        {
+            if (fall == null) return false;
+            foreach (var r in fall) if (to.x >= r.xMin - 1e-3f && to.x <= r.xMax + 1e-3f && to.z >= r.yMin - 1e-3f && to.z <= r.yMax + 1e-3f) return true;
+            return false;
+        }
+
         void LateUpdate()
         {
             var s = Sim.State;
             if (def == null || origin == null || origin.Camera == null || s == null || !InputMode.XrActive || !s.GetBool(XrStartupSequencer.ReadyKey)) return;
             bool bridge = s.GetBool(LiftControl.RoofOpenKey) || s.Get(XrViewHeight.FloorKey) == "Roof";
-            origin.transform.position += Push(bridge ? def.open : def.closed, origin.Camera.transform.position);
+            var head = origin.Camera.transform.position;
+            var d = Push(bridge ? def.open : def.closed, head);
+            if (d.sqrMagnitude > 0f && TowardFallLine(def.fallRects, head + d)) return;   // 墜落區推回線：交給 RoofFallZoneMonitor 淡出推回（terry 185）
+            origin.transform.position += d;
         }
     }
 }

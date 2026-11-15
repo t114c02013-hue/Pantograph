@@ -110,7 +110,6 @@ ErrorRuleTests.PendingTriggers_ListedInStubsDoc 檢查兩邊一致。觸發做�
 | ERR_CSR13_WrongSocket | b4c:torque_socket | Minor |
 | ERR_IN07_WrongSocket | b4c:torque_socket | Minor |
 | ERR_IN09_WrongSocket | b4c:torque_socket | Minor |
-| ERR_Global_RoofFallZone | b4d | Major |
 | ERR_Global_TeleportWhileAnchored | b4d | Minor |
 | ERR_SI03_CylinderPowerOn | b4d | Critical |
 | ERR_Global_RaiseWithHoldDown | n/a | Critical |

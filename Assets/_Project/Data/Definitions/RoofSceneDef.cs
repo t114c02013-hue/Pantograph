@@ -138,7 +138,7 @@ namespace PantographSim.Data
         [Tooltip("外接電源箱底部中心（正面朝 +X＝車）")] public Vector3 shoreBoxPos = new Vector3(-2.9f, -3.65f, -14.5f);
         [Tooltip("車側插座中心（裙板上方車身側面，離地 0.9 m）")] public Vector3 carShoreSocketPos = new Vector3(-1.325f, -2.75f, -14.5f);
         [Tooltip("站點 tp.cab.shore（地面，面向 +X）")] public Vector2 shoreStationXZ = new Vector2(-2.25f, -14.5f);
-        [Tooltip("電源箱前的地面 Walkable（X 停在檢修坑邊之外）")] public Vector2 shoreWalkMinXZ = new Vector2(-3.3f, -15.2f), shoreWalkMaxXZ = new Vector2(-1.8f, -13.8f);
+        [Tooltip("電源箱前的地面 Walkable（X 停在檢修坑邊之外）")] public Vector2 shoreWalkMinXZ = new Vector2(-3.3f, -15.2f), shoreWalkMaxXZ = new Vector2(-1.75f, -13.8f);
         [Tooltip("檢修坑半寬（地面站點不能在 |X| 以內；RoofSiteBuilder.Depot 的坑也是這個寬）")] public float pitHalfWidth = 1.75f;
         [Tooltip("蓋子打開角度（度）與動畫秒數")] public float lidOpenDeg = 100f, lidOpenSeconds = 0.6f;
         [Tooltip("實體按鈕行程（mm）與點一下的回彈秒數")] public float btnPressMm = 5f, btnPressSeconds = 0.15f;

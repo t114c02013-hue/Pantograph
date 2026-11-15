@@ -12,6 +12,31 @@ namespace PantographSim.Data
     {
         const float Eps = 1e-4f;
 
+        /// <summary>terry 185：車頂兩側的頭部邊界帶（依 Z 分段）：有平台處寬到車側欄杆（|X| ≤ 車側＋間隙＋踏板 − inset），沒平台處到車頂邊外 fallPushOutsideEdge（另存 fallRects，越線淡出推回）。
+        /// 內緣從車頂可走範圍邊（底架旁放寬段另算）往內 inset，和原本的車頂 Walkable 相接；Z 照車頂可走範圍兩端內縮。平台範圍 −X 真平台、+X 外觀平台都算（含踏板與間隙）。</summary>
+        public static (Rect[] strips, Rect[] fall, Rect[] platforms) RoofFallStrips(RoofSceneDef d, BoundaryDef b)
+        {
+            float e = d.carBodyHalfWidth, rail = e + d.platformGap + d.platformBoard, outer = rail + d.platformWidth, inset = b.inset;
+            var plats = new[] { Rect.MinMaxRect(-outer, d.platformZMin, -e, d.platformZMax), Rect.MinMaxRect(e, d.platformZMin, outer, d.platformZMax) };
+            float z0 = d.roofSectionZMin + inset, z1 = d.roofSectionZMax - inset;
+            var cuts = new[] { z0, z1, d.platformZMin, d.platformZMax, d.roofBaseWalkZMin, d.roofBaseWalkZMax }.Where(z => z >= z0 && z <= z1).Distinct().OrderBy(z => z).ToList();
+            var strips = new List<Rect>(); var fall = new List<Rect>();
+            for (int i = 0; i + 1 < cuts.Count; i++)
+            {
+                float za = cuts[i], zb = cuts[i + 1], zm = (za + zb) / 2f;
+                if (zb - za < 1e-4f) continue;
+                bool plat = zm >= d.platformZMin && zm <= d.platformZMax;
+                float inner = d.RoofWalkLimitAt(zm) - inset, edge = plat ? rail - inset : e + b.fallPushOutsideEdge;
+                foreach (float s in new[] { -1f, 1f })
+                {
+                    var r = Rect.MinMaxRect(s < 0 ? -edge : inner, za, s < 0 ? -inner : edge, zb);
+                    strips.Add(r);
+                    if (!plat) fall.Add(r);
+                }
+            }
+            return (strips.ToArray(), fall.ToArray(), plats);
+        }
+
         /// <summary>Walkable 的 XZ 範圍（collider 停用時 bounds 是空的，用 transform 算）。</summary>
         public static Rect WalkRect(BoxCollider c)
         {

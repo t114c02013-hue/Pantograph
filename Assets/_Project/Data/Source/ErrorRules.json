@@ -976,9 +976,21 @@
       "courses": "both",
       "inputMode": "",
       "status": "Defined",
-      "owner": "b4d",
+      "owner": "",
       "source": "附錄 A",
-      "trigger": "頭盔投影進入墜落區並持續 ≥ 1 s：人在車頂時 |X| > 1.19 m（車頂邊），或從活動欄以外的地方越過平台與車頂的間隙（P6，v1.6）"
+      "trigger": "越過車頂邊，下方沒有平台（停留 1 秒以上）",
+      "note": "terry 134B／185（2026-11-15）：RoofFallZoneMonitor／FallZoneLogic 寫 xr.roof_fall_zone（先 false 再 true，寫一次記一次）：墜落區（車頂邊外、沒有平台、推回線內）連續停留 ≥ 1 s，或越過推回線立刻記；同一步只記一次。只在 VR、只在日常與定期（R1 不判）。",
+      "scope": "global",
+      "rule": {
+        "trigger": "WhenCondition",
+        "key2": "",
+        "keys": [
+          "xr.roof_fall_zone"
+        ],
+        "what": "越過車頂邊，下方沒有平台。",
+        "why": "車頂邊外下方沒有平台，再往外一步就會從車頂掉下去。",
+        "fix": "立刻退回車頂中間，保持在黃色警示線以內作業。"
+      }
     },
     {
       "errorId": "ERR_Global_StartWithoutPermit",

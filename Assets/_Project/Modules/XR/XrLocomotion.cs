@@ -35,6 +35,9 @@ namespace PantographSim.XR
         /// <summary>頭在危險區（純函式）：腳下沒有可走地板，或車頂沒開放卻站在車頂。</summary>
         public static bool IsDanger(bool overWalkable, string floorUnderHead, bool roofOpen) => !overWalkable || (floorUnderHead == "Roof" && !roofOpen);
 
+        /// <summary>terry 185：車頂上的危險區提示由 RoofFallZoneMonitor 統一出，這裡只在不是車頂的地方提示（純函式）。</summary>
+        public static bool ShowDangerToast(bool danger, bool onRoof) => danger && !onRoof;
+
         /// <summary>安全網（純函式）：Origin 比站點地板低超過 limit。</summary>
         public static bool BelowFloor(float originY, float stationY, float limit) => originY < stationY - limit;
 
@@ -58,7 +61,7 @@ namespace PantographSim.XR
             {
                 danger = now;
                 s.SetBool(DangerKey, danger);
-                if (danger) { s.Set("ui.toast", ""); s.Set("ui.toast", DangerMessage); s.SetFloat("ui.toast_time", Time.time); }
+                if (ShowDangerToast(danger, RoofFallZoneMonitor.OnRoof(s))) { s.Set("ui.toast", ""); s.Set("ui.toast", DangerMessage); s.SetFloat("ui.toast_time", Time.time); }
             }
         }
     }

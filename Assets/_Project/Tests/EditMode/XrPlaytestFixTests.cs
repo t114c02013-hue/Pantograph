@@ -60,7 +60,8 @@ namespace PantographSim.Tests
                 var walk = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<BoxCollider>(true)).Where(c => c.gameObject.layer == LayerMask.NameToLayer(SceneLayers.Walkable)).ToList();
                 Assert.Greater(walk.Count, 3);
                 var want = BoundaryLogic.Erode(walk.Select(BoundaryLogic.WalkRect).ToList(), Def.inset);
-                Assert.AreEqual(want.Length, Def.open.Length);
+                var strips = BoundaryLogic.RoofFallStrips(Roof, Def).strips;   // terry 185：車頂兩側邊界帶接在 Walkable 內縮之後
+                Assert.AreEqual(want.Length + strips.Length, Def.open.Length);
                 for (int i = 0; i < want.Length; i++) Assert.Less((want[i].min - Def.open[i].min).magnitude + (want[i].max - Def.open[i].max).magnitude, 1e-3f);
                 Assert.Less(Def.closed.Sum(r => r.width * r.height), Def.open.Sum(r => r.width * r.height), "閘門關時沒有跨板");
             });
@@ -78,7 +79,8 @@ namespace PantographSim.Tests
                 Assert.AreEqual(edge, head.x + push.x, 1e-3f, "推回邊上（頭高 " + y + "）");
                 Assert.AreEqual(0f, push.y);
             }
-            float kz = Roof.roofBaseWalkZMin - 0.3f, roofEdge = Roof.RoofWalkLimitAt(kz) - Def.inset;
+            // terry 185：車頂有平台的 Z 段，頭的邊界外移到車側欄杆（車側＋間隙＋踏板 − inset）
+            float kz = Roof.roofBaseWalkZMin - 0.3f, roofEdge = Roof.carBodyHalfWidth + Roof.platformGap + Roof.platformBoard - Def.inset;
             var kneel = new Vector3(roofEdge + 0.4f, Roof.roofFloorY + 0.95f, kz);
             Assert.AreEqual(roofEdge, kneel.x + HeadBoundaryPusher.Push(Def.closed, kneel).x, 1e-3f, "車頂矮欄旁跪著伸出去也推回");
             Assert.AreEqual(Vector3.zero, HeadBoundaryPusher.Push(Def.closed, new Vector3(edge + 0.2f, 1.6f, 0f)), "範圍內不推");

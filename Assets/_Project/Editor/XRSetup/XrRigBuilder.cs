@@ -189,6 +189,7 @@ namespace PantographSim.Editor.XR
             var coach = rigGo.AddComponent<XrCoach>();
             coach.Setup(rig);
             var player = rigGo.AddComponent<XrPlayer>();
+            rigGo.AddComponent<RoofFallZoneMonitor>().Setup(origin, player, fader, teleport);   // terry 134B／185：車頂墜落區
             player.Setup(rig, origin, ray, rightCtrl, teleport, coach);
             var sw = xrRoot.AddComponent<XrModeSwitch>();
             sw.Setup(rigGo, rig, teleport, coach);
@@ -261,7 +262,12 @@ namespace PantographSim.Editor.XR
                 : cs.Select(BoundaryLogic.WalkRect).ToList();
             def.open = BoundaryLogic.Erode(Rects(walk), def.inset);
             def.closed = BoundaryLogic.Erode(Rects(walk.Where(c => c.name != "Walkable_Bridge")), def.inset);
+            var (strips, fall, plats) = BoundaryLogic.RoofFallStrips(rd, def);
+            def.open = def.open.Concat(strips).ToArray(); def.closed = def.closed.Concat(strips).ToArray();
+            def.fallRects = fall; def.platformRects = plats; def.roofEdge = rd.carBodyHalfWidth;
+            def.roofWalkHalfWidth = rd.roofWalkHalfWidth; def.roofBaseWalkHalfWidth = rd.roofBaseWalkHalfWidth; def.roofBaseWalkZMin = rd.roofBaseWalkZMin; def.roofBaseWalkZMax = rd.roofBaseWalkZMax;
             EditorUtility.SetDirty(def);
+            sb.AppendLine($"VR：車頂兩側頭的邊界外移（terry 185）：有平台的 Z 段到 |X| {rd.carBodyHalfWidth + rd.platformGap + rd.platformBoard - def.inset:0.00}、沒平台的到 {rd.carBodyHalfWidth + def.fallPushOutsideEdge:0.000}（淡出推回）；車頂墜落區可到達的面積 {fall.Sum(r => r.width * r.height):0.00} m²；R1 不判墜落區（global 規則只在日常、定期）；桌機版不判墜落區");
             sb.AppendLine($"VR：頭的活動範圍 {walk.Count} 塊 Walkable → 內縮 {def.inset} m：閘門開 {def.open.Length} 塊、關 {def.closed.Length} 塊");
         }
 
