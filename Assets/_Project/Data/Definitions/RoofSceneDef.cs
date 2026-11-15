@@ -101,6 +101,11 @@ namespace PantographSim.Data
         [Tooltip("三節車之間的間隙")] public float carGap = 0.6f;
         [Tooltip("terry 2026-11-13 輕軌：各模組長（m，頭車在兩端、集電弓在中間那個）。7.875／5.5／4.1 是同車系文件的推估")] public float[] lrvModules = { 7.875f, 5.5f, 4.1f, 5.5f, 7.875f };
         [Tooltip("模組之間的鉸接通道長（推估）")] public float lrvArticulation = 0.9f;
+        [Tooltip("terry 173B（建模師 A v2）：車身白色圓點帶。只做這幾個模組（Module_<名>）")] public string[] lrvDotModules = { "B1", "C", "B2" };
+        [Tooltip("圓點排數；各排直徑（m）與中心高度（車體局部座標，車頂＝0），上下排錯開半格")] public int lrvDotRows = 2;
+        public float[] lrvDotDiameters = { 0.20f, 0.14f }, lrvDotRowCenterY = { -3.15f, -2.98f };
+        [Tooltip("同排中心距、正弦起伏振幅與波長、浮出外表面距離、碰車門時的邊距（m）；多邊形邊數")] public float lrvDotPitchZ = 0.40f, lrvDotWaveAmplitude = 0.05f, lrvDotWaveLength = 4.0f, lrvDotOffsetFromWall = 0.002f, lrvDotSkipDoorMargin = 0.10f;
+        public int lrvDotSegments = 8;
         [Tooltip("輕軌車身的水藍色帶")] public Color liveryAqua = new Color32(0x2E, 0xB0, 0xC8, 0xFF);
         [Tooltip("廠房屋頂桁架下緣高度")] public float shedTrussY = 8.0f;
         [Tooltip("terry 2026-11-13 室內日光燈感：主光（由上往下）強度、俯角（度）、顏色")] public float lightIntensity = 0.75f, lightPitchDeg = 75f;
@@ -234,6 +239,10 @@ namespace PantographSim.Data
                 $"\"liveryWhite\": {C(liveryWhite)}", $"\"liveryOrange\": {C(liveryOrange)}", $"\"liveryDark\": {C(liveryDark)}", $"\"liveryAqua\": {C(liveryAqua)}",
                 $"\"platformBoard\": {F(platformBoard)}", $"\"lrvArticulation\": {F(lrvArticulation)}", $"\"roofSectionZMax\": {F(roofSectionZMax)}",
                 $"\"lrvModules\": [{string.Join(", ", System.Array.ConvertAll(lrvModules ?? new float[0], F))}]",
+                $"\"lrvDots\": {{ \"modules\": [{string.Join(", ", System.Array.ConvertAll(lrvDotModules ?? new string[0], m => "\"" + m + "\""))}], \"rows\": {lrvDotRows}, " +
+                $"\"diameters\": [{string.Join(", ", System.Array.ConvertAll(lrvDotDiameters ?? new float[0], F))}], \"rowCenterY\": [{string.Join(", ", System.Array.ConvertAll(lrvDotRowCenterY ?? new float[0], F))}], " +
+                $"\"pitchZ\": {F(lrvDotPitchZ)}, \"waveAmplitude\": {F(lrvDotWaveAmplitude)}, \"waveLength\": {F(lrvDotWaveLength)}, \"offsetFromWall\": {F(lrvDotOffsetFromWall)}, " +
+                $"\"segments\": {lrvDotSegments}, \"skipDoorMargin\": {F(lrvDotSkipDoorMargin)} }}",
                 $"\"roofStripMat\": {{ \"center\": [{F(roofStripMatCenter.x)}, {F(roofStripMatCenter.y)}, {F(roofStripMatCenter.z)}], \"size\": [{F(roofStripMatSize.x)}, {F(roofStripMatSize.y)}], " +
                 $"\"thickness\": {F(roofStripMatThickness)}, \"rimWidth\": {F(roofStripMatRimWidth)}, \"rimHeight\": {F(roofStripMatRimHeight)} }}",
                 $"\"ctrlConnector\": {{ \"bodySize\": [{F(ctrlConnectorBodySize.x)}, {F(ctrlConnectorBodySize.y)}, {F(ctrlConnectorBodySize.z)}], \"socketDiameter\": {F(ctrlSocketDiameter)}, \"socketLength\": {F(ctrlSocketLength)}, " +

@@ -18,6 +18,7 @@ import tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "gen_700t"))
 
+import bmesh  # noqa: E402
 import bpy  # noqa: E402
 import common  # noqa: E402
 from common import box, cylinder, extrude_profile  # noqa: E402
@@ -25,6 +26,7 @@ from palette import Palette  # noqa: E402
 
 CORNER = 0.30      # 車頂兩側圓角半徑（推估）
 SKIRT = 0.30       # 車體下緣離軌面（低地板，推估）
+SKIRT_H = 0.42     # 水藍裙板高
 WHEEL_R = 0.33     # 低地板車輪（推估）
 GAUGE = 1.435
 
@@ -76,7 +78,7 @@ def module(ctx, root, name, y0, length, p, head=None):
     for sgn, tag in ((1, "R"), (-1, "L")):
         x = sgn * (hw + 0.005)
         box(ctx, f"{name}_Window_{tag}", (0.01, body_len - 0.3, win_hi - win_lo), (x, 0, (win_lo + win_hi) / 2), "Glass", "glass", parent=body)
-        box(ctx, f"{name}_Skirt_{tag}", (0.01, body_len - 0.1, 0.42), (x, 0, bottom + 0.21), "Paint", "aqua", parent=body)
+        box(ctx, f"{name}_Skirt_{tag}", (0.01, body_len - 0.1, SKIRT_H), (x, 0, bottom + SKIRT_H / 2), "Paint", "aqua", parent=body)
         box(ctx, f"{name}_RoofLine_{tag}", (0.01, body_len - 0.1, 0.08), (x, 0, -0.45), "Paint", "aqua", parent=body)
         n_doors = 1 if length < 5 else 2 if length < 7 else 1
         for d in range(n_doors):
@@ -84,6 +86,9 @@ def module(ctx, root, name, y0, length, p, head=None):
             if head:
                 dy = -head * body_len * 0.15
             box(ctx, f"{name}_Door_{tag}_{d + 1}", (0.02, 1.30, win_hi - floor - 0.05), (x, dy, (floor + win_hi) / 2), "Dark", "dark", parent=body)
+    n_doors = 1 if length < 5 else 2 if length < 7 else 1
+    doors = [-head * body_len * 0.15 if head else 0.0 if n_doors == 1 else (-1 + 2 * d) * body_len * 0.22 for d in range(n_doors)]
+    dots(ctx, body, name, cy, body_len, doors, hw, bottom, p)
     if head:
         # 車頭：斜擋風玻璃＋下方水藍車頭板＋頭燈
         fy = cy + head * body_len / 2.0
@@ -92,6 +97,35 @@ def module(ctx, root, name, y0, length, p, head=None):
         for sx in (-1, 1):
             box(ctx, f"{name}_Headlight_{'L' if sx < 0 else 'R'}", (0.25, 0.02, 0.10), (sx * (hw - 0.45), head * (nose / 2.0 + 0.012), bottom + 0.75), "Metal", "white", parent=front)
     return body
+
+
+def dots(ctx, body, name, cy, body_len, doors, hw, bottom, p):
+    """terry 173B：裙板上的白色圓點帶（lrvDots，建模師 A v2）。一個模組一側一個網格，每顆是朝外的平 8 邊形；碰到車門（＋邊距）就不放。
+    波浪相位用整列的車長座標，左右兩側同一個值（對稱、跨模組連續）。"""
+    cfg = p.get("lrvDots")
+    if not cfg or name[len("Module_"):] not in cfg["modules"]:
+        return
+    skirt_top, skirt_face = bottom + SKIRT_H, hw + 0.01          # 裙板方塊厚 0.01、貼在 hw＋0.005
+    pitch, amp, wl, seg = cfg["pitchZ"], cfg["waveAmplitude"], cfg["waveLength"], int(cfg["segments"])
+    for sgn, tag in ((1, "R"), (-1, "L")):
+        bm = bmesh.new()
+        for i in range(int(cfg["rows"])):
+            r, zc, off = cfg["diameters"][i] / 2.0, cfg["rowCenterY"][i], pitch / 2.0 * (i % 2)   # 上下排錯開半格
+            k0, k1 = math.ceil((cy - body_len / 2.0 - off) / pitch), math.floor((cy + body_len / 2.0 - off) / pitch)
+            for k in range(k0, k1 + 1):
+                yw = k * pitch + off
+                yl = yw - cy
+                if abs(yl) + r > body_len / 2.0 - 0.05 or any(abs(yl - dy) < 0.65 + cfg["skipDoorMargin"] + r for dy in doors):
+                    continue
+                z = zc + amp * math.sin(2 * math.pi * yw / wl)
+                x = sgn * ((skirt_face if z - r < skirt_top else hw) + cfg["offsetFromWall"])   # 壓到裙板就以裙板外表面為準
+                vs = [bm.verts.new((x, yl + r * math.cos(2 * math.pi * j / seg), z + r * math.sin(2 * math.pi * j / seg))) for j in range(seg)]
+                f = bm.faces.new(vs if sgn > 0 else vs[::-1])   # 法線朝車外（y→z 逆時針＝+X）
+                f.normal_update()
+        if bm.faces:
+            common._finish(ctx, f"{name}_Dots_{tag}", bm, "Paint", "white", parent=body)
+        else:
+            bm.free()
 
 
 def roof_box(ctx, name, size, y, root, color="metal"):
@@ -141,6 +175,20 @@ def descendants(ob):
         yield from descendants(c)
 
 
+def report_entry(name, tris, n, lo, hi, path="Logs/CarModelReport.json"):
+    """把 ENV_LRV 的面數與範圍寫進 gen_700t 的報告（同名那筆換掉，其餘不動）。"""
+    try:
+        with open(path, encoding="utf-8") as f:
+            rep = json.load(f)
+    except (OSError, ValueError):
+        rep = {"prefabs": []}
+    rep["blender"] = bpy.app.version_string
+    rep["prefabs"] = [x for x in rep.get("prefabs", []) if x.get("name") != name] + [{
+        "name": name, "triangles": tris, "objects": n, "boundsMin": list(lo), "boundsMax": list(hi), "size": [hi[k] - lo[k] for k in range(3)]}]
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(rep, f, ensure_ascii=False, indent=2)
+
+
 def main():
     a = args()
     with open(a["params"], encoding="utf-8") as f:
@@ -163,7 +211,9 @@ def main():
             filepath=os.path.join(tmp, name + ".fbx"), use_selection=True, apply_unit_scale=True, apply_scale_options="FBX_SCALE_UNITS",
             axis_forward="-Z", axis_up="Y", bake_space_transform=False, object_types={"MESH"}, mesh_smooth_type="FACE",
             add_leaf_bones=False, bake_anim=False, use_custom_props=False, path_mode="STRIP")
-        print(f"[gen_lrv] {name}: {sum(common.triangles(o) for o in objs)} tris, size {[round(hi[k] - lo[k], 3) for k in range(3)]}, length param {total:.3f}")
+        tris = sum(common.triangles(o) for o in objs)
+        print(f"[gen_lrv] {name}: {tris} tris, size {[round(hi[k] - lo[k], 3) for k in range(3)]}, length param {total:.3f}")
+        report_entry(name, tris, len(objs), lo, hi)
     os.makedirs(a["out"], exist_ok=True)
     for fn in os.listdir(tmp):
         shutil.copyfile(os.path.join(tmp, fn), os.path.join(a["out"], fn))
