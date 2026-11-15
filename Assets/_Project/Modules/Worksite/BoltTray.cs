@@ -103,7 +103,7 @@ namespace PantographSim.Worksite
             if (HandsFull(State)) { Toast(r.boltHandsFullText); return; }   // 76A：拿著滑板不能倒、拿螺栓
             var msg = Pour(State, side, r);
             if (msg == null && DishCourse(State, r) && !InputMode.XrActive && State.GetFloat(CountKey(side)) <= 0) msg = Stow(State, side, r);   // 66A：桌機點空盤子＝收進工具袋
-            Toast(msg ?? $"{(side == "L" ? "靠關節" : "外側")}螺栓：{(State.GetBool(PouredKey(side)) ? "螺栓盤上" : "腰間螺栓袋裡")} {State.GetFloat(CountKey(side)):0} 支");
+            Toast(msg ?? $"{(side == "L" ? "靠關節" : "外側")}螺栓：{(State.GetBool(PouredKey(side)) ? "螺栓盤上" : "螺栓袋裡")} {State.GetFloat(CountKey(side)):0} 支");
         }
 
         /// <summary>76A：手上拿著滑板（舊滑板或新滑板）。</summary>

@@ -278,7 +278,7 @@ namespace PantographSim.UI
             heightLabel.text = "車頂視點：" + (s.Get("xr.height.mode", "Raised") == "Real" ? "真實高度" : "抬高（平視滑板）") + "　<size=20>（點一下切換）</size>";
             crouchLabel.text = "蹲低視角：" + (s.GetBool("xr.crouch") ? "開" : "關") + "　<size=20>（只在車頂有效，也可按左搖桿）</size>";
             bagLabel.text = "工具袋位置：" + (s.Get("xr.toolbag.mount") == "wrist" ? "左手腕" : "腰間") + "　<size=20>（點一下切換）</size>";
-            swapLabel.text = "工具袋／腰包：" + (s.GetBool("xr.carry.swap") ? "工具袋右腰、腰包左腰" : "工具袋在左、腰包在右");
+            swapLabel.text = "工具袋／腰包：" + (s.GetBool("xr.carry.swap") ? "工具袋在右、腰包在左" : "工具袋在左、腰包在右");
             string rec = Ui.RecText(s);
             videoLabel.text = s.GetBool("rec.video.active") ? $"■ 停止錄影　<size=22>{rec}</size>" : "● 開始錄影";
             camLabel.text = "旁觀鏡頭：" + (s.Get("rec.video.view", "third") == "head" ? "頭盔視角（穩定化）" : "第三人稱") + "　<size=20>（點一下切換）</size>";
