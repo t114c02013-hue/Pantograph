@@ -149,7 +149,7 @@ namespace PantographSim.Tests
             {
                 Physics.SyncTransforms();
                 var def = HeadSolidDef.Load(); var posture = PostureDef.Load();
-                foreach (var name in new[] { "ENV_WorkBench", "ENV_PantographStand", "SpareShelf" })
+                foreach (var name in new[] { "ENV_WorkBench", "ENV_PantographStand", "SpareShelf", "TrainingBox_battery", "TrainingBox_hvac" })   // 教學箱：箱頂上方 0.2 m 不觸發、穿進箱體要觸發
                 {
                     var o = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<Transform>(true)).First(t => t.name == name);
                     var top = StationLayoutCheck.TopPoints(name, o.position, def).First();

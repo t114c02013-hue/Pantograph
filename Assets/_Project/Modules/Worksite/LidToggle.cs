@@ -16,6 +16,7 @@ namespace PantographSim.Worksite
         [SerializeField] float openDeg = 100f, seconds = 0.6f;
         [SerializeField] LidToggle[] siblings = new LidToggle[0];   // 同一個箱子的所有蓋子（含自己）
         [SerializeField] GameObject[] insides = new GameObject[0];
+        [SerializeField] GameObject closedSolid;   // RA-4c：蓋子全關時才有的「箱內實心」頭穿透框（從上面穿過蓋板壓進箱內也會變暗；任一片開著就關掉，探頭看內部不變暗）
         Quaternion closedRot;
         bool hasRest;
         float angle;
@@ -26,9 +27,9 @@ namespace PantographSim.Worksite
         /// <summary>開著或還在轉：箱子內部要顯示。</summary>
         public bool ShowsInside => angle > 0.01f || TargetDeg > 0f;
 
-        public void Setup(float openDegrees, float openSeconds, LidToggle[] boxLids, GameObject[] boxInsides)
+        public void Setup(float openDegrees, float openSeconds, LidToggle[] boxLids, GameObject[] boxInsides, GameObject boxClosedSolid = null)
         {
-            openDeg = openDegrees; seconds = openSeconds; siblings = boxLids; insides = boxInsides;
+            openDeg = openDegrees; seconds = openSeconds; siblings = boxLids; insides = boxInsides; closedSolid = boxClosedSolid;
         }
 
         protected override bool AcceptsAnyTool => true;
@@ -65,6 +66,7 @@ namespace PantographSim.Worksite
             transform.localRotation = closedRot * Quaternion.Euler(angle, 0f, 0f);   // 原點在鉸鏈、繞 +X 正轉＝打開
             bool show = siblings.Any(l => l != null && l.ShowsInside);
             foreach (var g in insides) if (g != null && g.activeSelf != show) g.SetActive(show);
+            if (closedSolid != null && closedSolid.activeSelf == show) closedSolid.SetActive(!show);
         }
     }
 }

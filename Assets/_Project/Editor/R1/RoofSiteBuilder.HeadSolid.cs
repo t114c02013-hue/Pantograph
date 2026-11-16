@@ -81,7 +81,7 @@ namespace PantographSim.Editor
                             var bc = HeadSolidChild(t, layer).AddComponent<BoxCollider>(); bc.center = lb.Value.center; bc.size = lb.Value.size; boxes++;
                             break;
                         case HeadSolidDef.Kind.BoxPerPart:
-                            foreach (var part in Parts(t, def, true).Where(p => p.sharedMesh != null).ToList())
+                            foreach (var part in Parts(t, def, true).Where(p => p.sharedMesh != null && !def.solids.Any(r => r != row && r.kind == HeadSolidDef.Kind.Mesh && HeadSolidDef.Match(p.transform, r.pattern))).ToList())   // 別列已用網格的部分不再包框
                             {
                                 var pc = HeadSolidChild(part.transform, layer).AddComponent<BoxCollider>(); pc.center = part.sharedMesh.bounds.center; pc.size = part.sharedMesh.bounds.size; boxes++;
                             }

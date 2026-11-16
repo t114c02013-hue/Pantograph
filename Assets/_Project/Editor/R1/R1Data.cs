@@ -171,12 +171,18 @@ namespace PantographSim.Editor
                 s.floor = StationFloor.Ground; s.positionXZ = xz; s.facingTargetId = "env.panto_stand"; s.maxTargetDistance = 2.5f; s.zoneId = ZoneDef.Maintenance;
                 EditorUtility.SetDirty(s);
             }
-            // terry 2026-11-15（181C）：地面教學箱站點，朝南（箱子在北側），zone maintenance
+            // terry 2026-11-15（181C）、RA-31：地面教學箱站點在各箱正面、面向箱子，zone maintenance；資料裡沒有的舊教學箱站點（原 box_c）從站點組拿掉
+            var boxIds = (d.trainingBoxStations ?? new RoofSceneDef.BoxStation[0]).Select(b => b.id).ToList();
+            foreach (var old in set.stations.Where(s => s != null && s.id.StartsWith("tp.maint.box_") && !boxIds.Contains(s.id)).ToList())
+            {
+                set.stations = set.stations.Where(s => s != old).ToArray();
+                AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(old));
+            }
             foreach (var bs in d.trainingBoxStations ?? new RoofSceneDef.BoxStation[0])
             {
                 if (set.Find(bs.id) == null) set.stations = set.stations.Concat(new[] { Station(bs.id, bs.label, StationFloor.Ground, bs.xz, "", 2.5f) }).ToArray();
                 var s = set.Find(bs.id);
-                s.label = bs.label; s.floor = StationFloor.Ground; s.positionXZ = bs.xz; s.facingTargetId = ""; s.facingDirection = Vector3.back; s.maxTargetDistance = 2.5f; s.zoneId = ZoneDef.Maintenance;
+                s.label = bs.label; s.floor = StationFloor.Ground; s.positionXZ = bs.xz; s.facingTargetId = ""; s.facingDirection = bs.facingNorth ? Vector3.forward : Vector3.back; s.maxTargetDistance = 2.5f; s.zoneId = ZoneDef.Maintenance;
                 EditorUtility.SetDirty(s);
             }
             EditorUtility.SetDirty(set);

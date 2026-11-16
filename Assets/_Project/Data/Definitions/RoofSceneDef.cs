@@ -119,21 +119,24 @@ namespace PantographSim.Data
             [Tooltip("正面朝北（+Z）；否則朝南")] public bool facingNorth = true;
             [Tooltip("覆寫最大開啟角度的那一片 Lid_n 編號（0＝還沒指定，模型交付時補）與角度")] public int overrideLid;
             public float lidOpenDegOverride;
+            [Tooltip("箱名（Label_Name 字牌）")] public string displayName;
+            [Tooltip("警示牌字（Label_Warn、Lid_2_Label_Warn；空＝這種箱子沒有警示牌）")] public string warnText;
         }
-        [System.Serializable] public class BoxStation { public string id, label; public Vector2 xz; }
+        [System.Serializable] public class BoxStation { public string id, label; public Vector2 xz; [Tooltip("站點面向北（+Z）；否則面向南")] public bool facingNorth; }
         [System.Serializable] public class BtnBinding { public string node, key, value; public bool hold; }
         public TrainingBox[] trainingBoxes =   // 負責人 2026-11-15 正式值（+Z＝北）；電池箱東側、電阻箱西側那片最大 90°，Lid 編號等模型
         {
-            new TrainingBox { kind = "hvac", fbx = "ENV_RoofBox_HVAC", centerXZ = new Vector2(-12.20f, 3.65f), standHeight = 0.6f, facingNorth = true },
-            new TrainingBox { kind = "battery", fbx = "ENV_RoofBox_Battery", centerXZ = new Vector2(-9.70f, 3.20f), standHeight = 0.4f, facingNorth = true, lidOpenDegOverride = 90f },
-            new TrainingBox { kind = "converter", fbx = "ENV_RoofBox_Converter", centerXZ = new Vector2(-9.70f, 6.10f), standHeight = 0.6f, facingNorth = false },
-            new TrainingBox { kind = "resistor", fbx = "ENV_RoofBox_Resistor", centerXZ = new Vector2(-8.00f, 3.50f), standHeight = 0.6f, facingNorth = true, lidOpenDegOverride = 90f },
+            new TrainingBox { kind = "hvac", fbx = "ENV_RoofBox_HVAC", centerXZ = new Vector2(-12.20f, 3.65f), standHeight = 0.6f, facingNorth = true, displayName = "空調", warnText = "" },
+            new TrainingBox { kind = "battery", fbx = "ENV_RoofBox_Battery", centerXZ = new Vector2(-9.70f, 3.20f), standHeight = 0.4f, facingNorth = true, overrideLid = 3, lidOpenDegOverride = 90f, displayName = "電池箱", warnText = "高壓危險" },
+            new TrainingBox { kind = "converter", fbx = "ENV_RoofBox_Converter", centerXZ = new Vector2(-9.70f, 6.10f), standHeight = 0.6f, facingNorth = false, displayName = "變流器", warnText = "高壓危險" },
+            new TrainingBox { kind = "resistor", fbx = "ENV_RoofBox_Resistor", centerXZ = new Vector2(-8.00f, 3.50f), standHeight = 0.6f, facingNorth = true, overrideLid = 1, lidOpenDegOverride = 90f, displayName = "煞車電阻箱", warnText = "高溫注意" },
         };
-        [Tooltip("教學箱站點（地面、朝南、zone maintenance）")] public BoxStation[] trainingBoxStations =
+        [Tooltip("教學箱站點（地面、zone maintenance）：RA-31 移到各箱正面、面向箱子，站著或稍彎腰搆得到每片蓋子的把手（≤ 0.55 m）；原 box_c 拆成電池箱 box_cs、變流器 box_cn")] public BoxStation[] trainingBoxStations =
         {
-            new BoxStation { id = "tp.maint.box_w", label = "教學箱前（西）", xz = new Vector2(-12.2f, 4.9f) },
-            new BoxStation { id = "tp.maint.box_c", label = "教學箱前（中）", xz = new Vector2(-9.7f, 4.7f) },
-            new BoxStation { id = "tp.maint.box_e", label = "教學箱前（東）", xz = new Vector2(-8.0f, 5.0f) },
+            new BoxStation { id = "tp.maint.box_w", label = "教學箱前（空調）", xz = new Vector2(-12.20f, 4.75f) },
+            new BoxStation { id = "tp.maint.box_cs", label = "教學箱前（電池箱）", xz = new Vector2(-9.70f, 3.85f) },
+            new BoxStation { id = "tp.maint.box_cn", label = "教學箱前（變流器）", xz = new Vector2(-9.70f, 5.15f), facingNorth = true },
+            new BoxStation { id = "tp.maint.box_e", label = "教學箱前（電阻箱）", xz = new Vector2(-8.00f, 4.45f) },
         };
         [Tooltip("教學箱規格 4.4：相鄰兩箱 X 間距 ≤ 這個值、Z 範圍重疊時，縫也從 Walkable 挖掉（m）")] public float walkGapFillMax = 0.6f;
         // ---------- terry 175B（2026-11-15）：日常課程外接電源箱（地面、車側、靠駕駛室那一端；FBX 交付前用方塊，節點名照建模師） ----------
@@ -143,6 +146,9 @@ namespace PantographSim.Data
         [Tooltip("電源箱前的地面 Walkable（X 停在檢修坑邊之外）")] public Vector2 shoreWalkMinXZ = new Vector2(-3.3f, -15.2f), shoreWalkMaxXZ = new Vector2(-1.75f, -13.8f);
         [Tooltip("檢修坑半寬（地面站點不能在 |X| 以內；RoofSiteBuilder.Depot 的坑也是這個寬）")] public float pitHalfWidth = 1.75f;
         [Tooltip("蓋子打開角度（度）與動畫秒數")] public float lidOpenDeg = 100f, lidOpenSeconds = 0.6f;
+        [Tooltip("教學箱字牌字大小（TextMesh characterSize，字高約 ×6.4）：箱名、正面警示牌、蓋板警示牌")] public float boxNameCharSize = 0.009f, boxWarnCharSize = 0.006f, boxLidWarnCharSize = 0.008f;
+        [Tooltip("RA-30：掛牌板名牌（0.07 × 0.03）簡稱，對應 Hook_Tag_1～4；字高約 1.5 cm（2.5 cm 放不下）")] public string[] lotoSlotNames = { "降弓確認", "外電上鎖", "儲能上鎖", "驗電接地" };
+        public float lotoSlotCharSize = 0.0023f;
         [Tooltip("實體按鈕行程（mm）與點一下的回彈秒數")] public float btnPressMm = 5f, btnPressSeconds = 0.15f;
         [Tooltip("實體按鈕對照：節點名｜黑板鍵｜值（空白＝任何值）｜hold（值相等期間一直陷著）")] public BtnBinding[] btnBindings =
         {

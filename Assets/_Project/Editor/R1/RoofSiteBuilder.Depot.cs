@@ -160,6 +160,11 @@ namespace PantographSim.Editor
                 if (i % 2 == 0) sil.sharedMaterial = mWarn;
                 Label("Tag_" + (i + 1), sil.transform, "■ " + tags[i], sil.bounds.center + n * 0.003f, rotText, 0.0016f, Color.black);
             }
+            for (int i = 0; i < (d.lotoSlotNames ?? new string[0]).Length && i < 4; i++)   // RA-30 第 2 點：名牌 0.07 × 0.03 寫簡稱（2.5 cm 放不下，約 1.5 cm），5、6 留空
+            {
+                var slot = N(board, "Label_Slot_" + (i + 1));
+                Label("Text", slot, d.lotoSlotNames[i], slot.position + n * 0.003f, rotText, d.lotoSlotCharSize, Color.black);
+            }
             Sign("RoofWorkerCount", iso, "車頂作業人數　1", new Vector3(sx + 0.06f, py + 0.92f, sz), n, new Vector2(0.5f, 0.14f), mWhite, Color.black, 0.009f);   // 燈號立柱 0.9 m
             // 燈號只讀車頂開放鍵 roof.open（隔離四格都完成＝SI_04、SI_05、SI_06 d 完成；WC_02 b 之後關閉），預設紅燈；燈罩換材質，點光源（LampLight）掛在燈罩上
             var mRedGlow = Mat("statusRed", new Color(1f, 0.25f, 0.2f), unlit: true);

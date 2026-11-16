@@ -29,8 +29,42 @@ namespace PantographSim.Tests
                 Assert.IsNotNull(Find(scene, "Switch_Supply", "ShorePowerBox").GetComponent<CabSwitch>(), "供電開關＝FBX 的 Switch_Supply");
                 Assert.IsNotNull(Find(scene, "ShorePlug").GetComponent<ShorePlug>());
                 for (int i = 1; i <= 4; i++) Assert.IsNotNull(Find(scene, "Tag_" + i)?.GetComponent<TextMesh>(), $"掛牌 {i} 有字");
+                for (int i = 1; i <= 6; i++) Assert.AreEqual(i <= 4, Find(scene, "Label_Slot_" + i, "LotoBoard").GetComponentInChildren<TextMesh>() != null, $"名牌 {i}：1～4 有簡稱、5、6 留空");
                 Assert.IsFalse(Find(scene, "BoltTray_Square_L").gameObject.activeSelf, "方盤沿用現有外觀，FBX 的方盤隱藏");
                 Assert.AreEqual("PartsTray", Find(scene, "PartsTray_Model").parent.name, "零件盒外觀搬到互動物件下");
+            });
+        }
+
+        [Test]
+        public void LiftBox_Raised060_LampInBand_DoesNotBlockPanHeadSight()   // RA-30：盒子加高到 0.60 m（按鈕不動、燈 ~1.46）；站在 tp.platform.lift 看降弓／升弓的滑板頂與弓頭近端不被盒子擋
+        {
+            StationTests.WithScene(scene =>
+            {
+                var box = Find(scene, "LiftControlBox");
+                var body = box.GetComponentsInChildren<Renderer>(true).First(r => r.name == "Body").bounds;
+                Assert.AreEqual(0.60f, body.size.y, 0.01f, "盒高 0.60");
+                Assert.AreEqual(1.12f, Find(scene, "Btn_Up", "LiftControlBox").position.y, 0.01f, "▲ 高度不變");
+                Assert.AreEqual(1.04f, Find(scene, "Btn_Down", "LiftControlBox").position.y, 0.01f, "▼ 高度不變");
+                Assert.That(Find(scene, "PanIndicator", "LiftControlBox").position.y, Is.InRange(1.40f, 1.55f), "弓位燈在第 23 項範圍（1.40～1.55）");
+                var eye = Find(scene, "StationAnchor_tp.platform.lift").position + Vector3.up * PantographSim.Data.PostureDef.Load().standEye;
+                var mech = Object.FindObjectsOfType<PantographSim.Parts.Mechanism.PantographMechanism>(true).First(m => m.gameObject.scene == scene);
+                float keep = mech.Lift;
+                try
+                {
+                    foreach (var lift in new[] { 0f, 1f })
+                    {
+                        mech.SetLift(lift);
+                        var head = mech.transform.Find("PAN_Head") ?? mech.transform;
+                        var hb = head.GetComponentsInChildren<Renderer>(true).Select(r => r.bounds).Aggregate((a, b) => { a.Encapsulate(b); return a; });
+                        foreach (var (label, p) in new[] { ("滑板頂", new Vector3(hb.center.x, hb.max.y, hb.center.z)), ("弓頭近端頂", new Vector3(hb.min.x, hb.max.y, hb.center.z)) })
+                        {
+                            var ray = new Ray(eye, (p - eye).normalized);
+                            bool blocked = body.IntersectRay(ray, out float dist) && dist < Vector3.Distance(eye, p);
+                            Assert.IsFalse(blocked, $"{(lift == 0f ? "降弓" : "升弓")} {label} 的視線被升降盒擋住");
+                        }
+                    }
+                }
+                finally { mech.SetLift(keep); }
             });
         }
 

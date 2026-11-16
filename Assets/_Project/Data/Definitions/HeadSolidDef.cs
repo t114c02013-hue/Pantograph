@@ -34,7 +34,9 @@ namespace PantographSim.Data
             new Solid { pattern = "LRV/Articulation_*", kind = Kind.Mesh },
             new Solid { pattern = "LRV/Roof_*", kind = Kind.Box },
             new Solid { pattern = "LRV/Bogie_*", kind = Kind.Box },
-            new Solid { pattern = "TrainingBox_*", kind = Kind.BoxPerPart, optional = true },
+            new Solid { pattern = "TrainingBox_*/Body", kind = Kind.Mesh },          // 4c：箱體、外觀細節用非凸網格（內部是空的，打開蓋子探頭看不變暗；穿過箱壁會變暗）
+            new Solid { pattern = "TrainingBox_*/Detail_Body", kind = Kind.Mesh },
+            new Solid { pattern = "TrainingBox_*", kind = Kind.BoxPerPart },   // gen_roof_boxes v1.1 已交付（含鋼架）；上面兩列用網格的部分不再包框
             new Solid { pattern = "ENV_PantographStand", kind = Kind.BoxPerPart },
             new Solid { pattern = "ENV_WorkBench", kind = Kind.BoxPerPart },
             new Solid { pattern = "SpareShelf", kind = Kind.BoxPerPart },

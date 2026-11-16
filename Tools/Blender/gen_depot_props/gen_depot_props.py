@@ -1,9 +1,9 @@
-"""gen_depot_props.py v1.0（資深建模師 A，2026-11-15 定稿交付版）
+"""gen_depot_props.py v1.1（資深建模師 A，11-16：RA-30 升降操作盒加高到 0.60 m、燈留面板上；更正正面方向說明為 −Z）
 產生平台設備與外接電源的 FBX：LiftControlBox、IsolationStatusLight、LotoBoard、PlatformShelf、
 ShorePowerBox、ShorePlug、ShoreSocket（terry 2026-11-16 預覽 01–07 通過）。
 材質只用 GeneratedModelTests 的固定名稱（Paint／Dark／Metal／Glass），UV 指到 Palette.png 色格；
 色格順序優先讀 ../gen_700t/palette.py，讀不到才用內建表。只需 Blender 內建模組，不輸出預覽圖。
-Blender 軸向：寬 X、深 Y（正面 −Y）、高 Z，單位 m；匯出後 Unity 正面 +Z、原點在底面中心。
+Blender 軸向：寬 X、深 Y（正面 −Y）、高 Z，單位 m；匯出後 Unity 正面 −Z、原點在底面中心。
 用法（實驗室）：blender.exe -b --factory-startup -P Tools/Blender/gen_depot_props/gen_depot_props.py --
           --fbx all --out "Assets/_Project/Worksite/Models/Generated" [--report 報告.json]
 雲端預覽：同資料夾有 preview_render.py 時加 --preview，另出 PNG（實驗室不用）。
@@ -104,19 +104,19 @@ def tris():
             n += sum(len(p.vertices)-2 for p in o.data.polygons)
     return n
 
-# ---------- 1. 升降操作盒（LiftControlBox 0.08 深 × 0.32 寬 × 0.36 高，實驗室電腦回報）----------
+# ---------- 1. 升降操作盒（LiftControlBox 0.08 深 × 0.32 寬 × 0.60 高；RA-30 由 0.36 加高）----------
 def lift_box():
     root = empty('LiftControlBox', (0,0,0))
-    W, D, H = 0.32, 0.08, 0.36
+    W, D, H = 0.32, 0.08, 0.60   # RA-30：加高（原 0.36），按鈕不動，燈往上
     box('Body', (W, D, H), (0, 0, H/2), 'Grey', root, bevel=0.008)
     box('FrontCover', (W-0.02, 0.006, H-0.02), (0, -D/2-0.003, H/2), 'Grey', root, bevel=0.003)
     for i,(x,z) in enumerate([(-1,-1),(1,-1),(1,1),(-1,1)],1):
         cyl(f'CoverScrew_{i}', 0.005, 0.004, (x*(W/2-0.02), -D/2-0.008, H/2+z*(H/2-0.02)), 'Metal', root, axis='Y', seg=8)
     # 燈 PanIndicator（上方）：燈座＋燈罩＋遮光罩
-    lamp = empty('PanIndicator', (0, -D/2-0.006, 0.30), root)
+    lamp = empty('PanIndicator', (0, -D/2-0.006, H-0.06), root)
     cyl('PanIndicator_Base', 0.024, 0.012, (0, -0.006, 0), 'DarkGrey', lamp, axis='Y', seg=20)
     cyl('PanIndicator_Lens', 0.018, 0.016, (0, -0.020, 0), 'LensGreen', lamp, axis='Y', seg=20, r2=0.009)  # 圓頂燈罩，和按鈕區分
-    empty('Label_Lamp', (0.07, -D/2-0.007, 0.30), root)
+    empty('Label_Lamp', (0.07, -D/2-0.007, H-0.06), root)
     # ▲▼ 兩顆按鈕：護圈＋按鈕本體（樞軸在按鈕底面，局部 −Y 是按下）
     for name, z, up in [('Up', 0.20, True), ('Down', 0.12, False)]:
         cyl(f'Guard_{name}', 0.028, 0.008, (0, -D/2-0.010, z), 'DarkGrey', root, axis='Y', seg=20)
@@ -126,7 +126,7 @@ def lift_box():
         cyl(f'Btn_{name}_Base', 0.020, 0.010, (0, 0, 0.009), 'Black', b, axis='Z', seg=20)
         tri_prism(f'Btn_{name}_Cap', 0.026, 0.022, 0.008, (0, 0, 0.014), 'White', b, up=up, local_z=True)   # 凸起的 ▲▼（建模 B 建議）
         empty(f'Label_{name}', (0.07, -D/2-0.007, z), root)
-    empty('Label_Title', (0, -D/2-0.007, 0.345), root)
+    empty('Label_Title', (0, -D/2-0.007, H-0.015), root)
     # 黃色警示長條（字牌位置）
     box('WarnStrip', (W-0.04, 0.003, 0.035), (0, -D/2-0.0075, 0.045), 'Yellow', root)
     empty('Label_Warn', (0, -D/2-0.009, 0.045), root)
@@ -313,8 +313,8 @@ def export_fbx(rt, path):
         bake_space_transform=False, mesh_smooth_type='FACE', add_leaf_bones=False, bake_anim=False)
     _conj(objs, rt, CONV.inverted()); rt.matrix_basis = keep; bpy.context.view_layer.update()
 
-def to_unity(v):   # Blender (x, y, z) → Unity (−x, z, −y)；正面 Blender −Y → Unity +Z
-    return [round(-v.x, 4), round(v.z, 4), round(-v.y, 4)]
+def to_unity(v):   # Blender (x, y, z) → Unity (x, z, y)；正面 Blender −Y → Unity −Z（2026-11-16 實驗室實測更正）
+    return [round(v.x, 4) + 0.0, round(v.z, 4) + 0.0, round(v.y, 4) + 0.0]
 
 def node_table(rt):
     rows = {}
@@ -325,8 +325,8 @@ def node_table(rt):
 if __name__ == '__main__':
     os.makedirs(OUT, exist_ok=True)
     preview = '--preview' in ARGS and os.path.exists(os.path.join(HERE, 'preview_render.py'))
-    rep = {'script': 'gen_depot_props v1.0', 'palette': ORDER_SRC, 'blender': bpy.app.version_string,
-           'coords': 'Unity (m), 原點在底面中心, 正面 +Z', 'files': {}}
+    rep = {'script': 'gen_depot_props v1.1', 'palette': ORDER_SRC, 'blender': bpy.app.version_string,
+           'coords': 'Unity (m), 原點在底面中心, 正面 −Z', 'files': {}}
     for fn in [lift_box, isolation_light, tag_board, shelf, shore_box, shore_plug, shore_socket]:
         clear(); rt, tgt, dist = fn(); n = tris()
         print(f'{rt.name}\t{n} tris')

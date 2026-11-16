@@ -59,7 +59,10 @@ namespace PantographSim.Tests
             {
                 var walk = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<BoxCollider>(true)).Where(c => c.gameObject.layer == LayerMask.NameToLayer(SceneLayers.Walkable)).ToList();
                 Assert.Greater(walk.Count, 3);
-                var want = BoundaryLogic.Erode(walk.Select(BoundaryLogic.WalkRect).ToList(), Def.inset);
+                // b361a6f 已核准：地面維修區 Walkable 避開教學箱分成幾塊，頭部邊界仍用維修區整塊（頭伸進箱子不推回，改由防穿透變暗處理）
+                var rd = AssetDatabase.LoadAssetAtPath<RoofSceneDef>("Assets/_Project/Modules/Worksite/Data/RoofSceneDef.asset");
+                var maint = Rect.MinMaxRect(rd.maintMinXZ.x, rd.maintMinXZ.y, rd.maintMaxXZ.x, rd.maintMaxXZ.y);
+                var want = BoundaryLogic.Erode(walk.Where(c => !c.name.StartsWith(RoofSiteBuilder.MaintWalkName)).Select(BoundaryLogic.WalkRect).Append(maint).ToList(), Def.inset);
                 var strips = BoundaryLogic.RoofFallStrips(Roof, Def).strips;   // terry 185：車頂兩側邊界帶接在 Walkable 內縮之後
                 Assert.AreEqual(want.Length + strips.Length, Def.open.Length);
                 for (int i = 0; i < want.Length; i++) Assert.Less((want[i].min - Def.open[i].min).magnitude + (want[i].max - Def.open[i].max).magnitude, 1e-3f);

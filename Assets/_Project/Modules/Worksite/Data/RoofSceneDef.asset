@@ -135,13 +135,17 @@ MonoBehaviour:
     facingNorth: 1
     overrideLid: 0
     lidOpenDegOverride: 0
+    displayName: "\u7A7A\u8ABF"
+    warnText: 
   - kind: battery
     fbx: ENV_RoofBox_Battery
     centerXZ: {x: -9.7, y: 3.2}
     standHeight: 0.4
     facingNorth: 1
-    overrideLid: 0
+    overrideLid: 3
     lidOpenDegOverride: 90
+    displayName: "\u96FB\u6C60\u7BB1"
+    warnText: "\u9AD8\u58D3\u5371\u96AA"
   - kind: converter
     fbx: ENV_RoofBox_Converter
     centerXZ: {x: -9.7, y: 6.1}
@@ -149,23 +153,34 @@ MonoBehaviour:
     facingNorth: 0
     overrideLid: 0
     lidOpenDegOverride: 0
+    displayName: "\u8B8A\u6D41\u5668"
+    warnText: "\u9AD8\u58D3\u5371\u96AA"
   - kind: resistor
     fbx: ENV_RoofBox_Resistor
     centerXZ: {x: -8, y: 3.5}
     standHeight: 0.6
     facingNorth: 1
-    overrideLid: 0
+    overrideLid: 1
     lidOpenDegOverride: 90
+    displayName: "\u715E\u8ECA\u96FB\u963B\u7BB1"
+    warnText: "\u9AD8\u6EAB\u6CE8\u610F"
   trainingBoxStations:
   - id: tp.maint.box_w
-    label: "\u6559\u5B78\u7BB1\u524D\uFF08\u897F\uFF09"
-    xz: {x: -12.2, y: 4.9}
-  - id: tp.maint.box_c
-    label: "\u6559\u5B78\u7BB1\u524D\uFF08\u4E2D\uFF09"
-    xz: {x: -9.7, y: 4.7}
+    label: "\u6559\u5B78\u7BB1\u524D\uFF08\u7A7A\u8ABF\uFF09"
+    xz: {x: -12.2, y: 4.75}
+    facingNorth: 0
+  - id: tp.maint.box_cs
+    label: "\u6559\u5B78\u7BB1\u524D\uFF08\u96FB\u6C60\u7BB1\uFF09"
+    xz: {x: -9.7, y: 3.85}
+    facingNorth: 0
+  - id: tp.maint.box_cn
+    label: "\u6559\u5B78\u7BB1\u524D\uFF08\u8B8A\u6D41\u5668\uFF09"
+    xz: {x: -9.7, y: 5.15}
+    facingNorth: 1
   - id: tp.maint.box_e
-    label: "\u6559\u5B78\u7BB1\u524D\uFF08\u6771\uFF09"
-    xz: {x: -8, y: 5}
+    label: "\u6559\u5B78\u7BB1\u524D\uFF08\u96FB\u963B\u7BB1\uFF09"
+    xz: {x: -8, y: 4.45}
+    facingNorth: 0
   walkGapFillMax: 0.6
   shoreBoxPos: {x: -2.9, y: -3.65, z: -14.5}
   carShoreSocketPos: {x: -1.325, y: -2.75, z: -14.5}
@@ -175,6 +190,15 @@ MonoBehaviour:
   pitHalfWidth: 1.75
   lidOpenDeg: 100
   lidOpenSeconds: 0.6
+  boxNameCharSize: 0.009
+  boxWarnCharSize: 0.006
+  boxLidWarnCharSize: 0.008
+  lotoSlotNames:
+  - "\u964D\u5F13\u78BA\u8A8D"
+  - "\u5916\u96FB\u4E0A\u9396"
+  - "\u5132\u80FD\u4E0A\u9396"
+  - "\u9A57\u96FB\u63A5\u5730"
+  lotoSlotCharSize: 0.0023
   btnPressMm: 5
   btnPressSeconds: 0.15
   btnBindings:
